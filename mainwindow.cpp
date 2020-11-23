@@ -1,6 +1,5 @@
 
-#include <QMessageBox>
-#include <QScrollBar>
+
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
@@ -313,9 +312,6 @@ void MainWindow::startGraph()
         return;
     serialcon->write("$PLST");
     graphing = true;
-    lineroll.clear();
-    linetilt.clear();
-    linepan.clear();
     xtime = 0;
 }
 

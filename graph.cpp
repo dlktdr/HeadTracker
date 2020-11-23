@@ -23,8 +23,6 @@ void Graph::addDataPoints(int x, int y, int z)
         pointspan.mid(pointcount);
     }
 
-
-
     update();
 }
 

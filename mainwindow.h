@@ -3,7 +3,10 @@
 
 #include <QMainWindow>
 #include <QSerialPort>
-#include <QtCharts>
+#include <QTimer>
+#include <QDebug>
+#include <QMessageBox>
+#include <QScrollBar>
 #include <QSerialPortInfo>
 #include "trackersettings.h"
 
@@ -24,12 +27,9 @@ private:
     QSerialPort *serialcon;
     TrackerSettings trkset;
     QString serialData;
-    QLineSeries lineroll;
-    QLineSeries linetilt;
-    QLineSeries linepan;
     QTimer rxledtimer;
     QTimer txledtimer;
-    QChart chart;
+
     int xtime;
     void parseSerialData();
     bool graphing;
