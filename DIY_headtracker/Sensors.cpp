@@ -161,9 +161,6 @@ void FilterSensorData()
 #endif
     }
 
-    rollStart = 0;
-    panStart = 0;
-    tiltStart = 0;
 
     // Get Orientation from BMO055
     rollAngle = event.orientation.z;
