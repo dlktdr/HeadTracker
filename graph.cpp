@@ -111,6 +111,8 @@ void Graph::paintEvent(QPaintEvent *event)
 
 
     // Legend
+    pen.setColor(Qt::black);
+    painter.setPen(pen);
     QFont legfont = QFont("Times", 10, QFont::Bold);
     const int offset=10;
     int fonth = QFontMetrics(legfont).height();
