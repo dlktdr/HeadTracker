@@ -49,6 +49,7 @@ private slots:
     void uiSettingChanged();
     void storeSettings();
 
+    void requestTimer();
     void rxledtimeout();
     void txledtimeout();
 };

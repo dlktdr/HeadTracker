@@ -179,11 +179,7 @@ void MainWindow::serialConnect()
     ui->statusbar->showMessage(tr("Connected to ") + serialcon->portName());
 
 
-    sendSerialData("$VERS");
-
-
-
-    sendSerialData("$GSET");
+    QTimer::singleShot(3500,this,&MainWindow::requestTimer);
 }
 
 // Disconnect from the serial port
@@ -358,6 +354,14 @@ void MainWindow::storeSettings()
     sendSerialData("$" + data + "HE");
     sendSerialData("$SAVE");
 
+
+}
+
+void MainWindow::requestTimer()
+{
+//    sendSerialData("$VERS");
+     sendSerialData("$GSET\n");
+qDebug() << "Requested settings";
 
 }
 
