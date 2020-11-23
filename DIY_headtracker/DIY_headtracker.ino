@@ -10,7 +10,7 @@
 // - 1.01 - April 2013 - Mark Mansur - code clean-up and refactoring, comments
 //      added. Added pause functionality, added settings retrieval commands.
 //      Minor optimizations.
-// - 2.00 - Nov 2020 - Cliff Blackburn - Wipe a ton for use with a BMO055 IC
+// - 2.00 - Nov 2020 - Cliff Blackburn - Modified for use with the Bosch BNO055 IC
 //-----------------------------------------------------------------------------
 
 #include <Wire.h>

@@ -41,7 +41,7 @@
 #define NUMBER_OF_CHANNELS 8
 
 // Define for extra debug serial info
-#define DEBUG 1
+#define DEBUG 0
 
 // Output serial data to host evern X frames
 #define SERIAL_OUTPUT_FRAME_INTERVAL    10
