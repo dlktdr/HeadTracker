@@ -10,6 +10,8 @@
 #include <QSerialPortInfo>
 #include "trackersettings.h"
 
+const int MAX_LOG_LENGTH=6000;
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -29,12 +31,15 @@ private:
     QString serialData;
     QTimer rxledtimer;
     QTimer txledtimer;
+    QTimer updatesettingstmr;
+    QString logd;
 
     int xtime;
     void parseSerialData();
     bool graphing;
 
     void sendSerialData(QString data);
+    void addToLog(QString log, bool bold=false);
 
 private slots:
     void findSerialPorts();
@@ -47,7 +52,8 @@ private slots:
     void startGraph();
     void stopGraph();
     void uiSettingChanged();
-    void storeSettings();
+    void storeSettings(); // Save to eeprom
+    void updateSettings(); // Update to chip
 
     void requestTimer();
     void rxledtimeout();

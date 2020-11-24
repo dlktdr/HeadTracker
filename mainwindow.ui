@@ -14,12 +14,88 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout_7">
+   <layout class="QVBoxLayout" name="verticalLayout_4">
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_2">
       <item>
-       <layout class="QVBoxLayout" name="verticalLayout_4">
-        <item>
+       <layout class="QGridLayout" name="gridLayout_4">
+        <item row="1" column="0">
+         <widget class="QComboBox" name="cmdPort">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QPushButton" name="cmdRefresh">
+          <property name="toolTip">
+           <string>Refresh Available Serial Ports</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="Resources.qrc">
+            <normaloff>:/Icons/refresh.svg</normaloff>:/Icons/refresh.svg</iconset>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0" colspan="2">
+         <widget class="QPushButton" name="cmdConnect">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>&amp;Connect</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0" colspan="2">
+         <widget class="QPushButton" name="cmdDisconnect">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>&amp;Disconnect</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="0" colspan="2">
+         <widget class="QPushButton" name="cmdCalibrate">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>C&amp;alibrate</string>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="0" colspan="2">
+         <widget class="QPushButton" name="cmdStore">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>&amp;Store Settings</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0" colspan="2">
          <layout class="QGridLayout" name="gridLayout_3">
           <item row="1" column="1">
            <widget class="QLabel" name="label_10">
@@ -81,85 +157,10 @@
           </item>
          </layout>
         </item>
-        <item>
-         <widget class="QComboBox" name="cmdPort">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="cmdConnect">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>&amp;Connect</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="cmdDisconnect">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>&amp;Disconnect</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="cmdCalibrate">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>C&amp;alibrate</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="cmdStore">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>&amp;Store Settings</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <spacer name="verticalSpacer_3">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
        </layout>
       </item>
       <item>
-       <widget class="QTextBrowser" name="serialData">
+       <widget class="QTextEdit" name="serialData">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
           <horstretch>0</horstretch>
@@ -170,6 +171,13 @@
          <font>
           <pointsize>10</pointsize>
          </font>
+        </property>
+        <property name="html">
+         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2';&quot;&gt;asdf&lt;/span&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-weight:600;&quot;&gt;asdf&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
        </widget>
       </item>
@@ -1712,7 +1720,9 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="Resources.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>spnPanMin</sender>
@@ -1721,12 +1731,12 @@
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>519</x>
-     <y>340</y>
+     <x>593</x>
+     <y>341</y>
     </hint>
     <hint type="destinationlabel">
-     <x>116</x>
-     <y>375</y>
+     <x>224</x>
+     <y>409</y>
     </hint>
    </hints>
   </connection>
@@ -1737,12 +1747,12 @@
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>116</x>
-     <y>375</y>
+     <x>224</x>
+     <y>409</y>
     </hint>
     <hint type="destinationlabel">
-     <x>519</x>
-     <y>340</y>
+     <x>593</x>
+     <y>341</y>
     </hint>
    </hints>
   </connection>
@@ -1753,12 +1763,12 @@
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>586</x>
-     <y>340</y>
+     <x>666</x>
+     <y>341</y>
     </hint>
     <hint type="destinationlabel">
-     <x>229</x>
-     <y>375</y>
+     <x>334</x>
+     <y>409</y>
     </hint>
    </hints>
   </connection>
@@ -1769,12 +1779,12 @@
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>653</x>
-     <y>340</y>
+     <x>739</x>
+     <y>341</y>
     </hint>
     <hint type="destinationlabel">
-     <x>342</x>
-     <y>375</y>
+     <x>444</x>
+     <y>409</y>
     </hint>
    </hints>
   </connection>
@@ -1785,12 +1795,12 @@
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>342</x>
-     <y>375</y>
+     <x>444</x>
+     <y>409</y>
     </hint>
     <hint type="destinationlabel">
-     <x>653</x>
-     <y>340</y>
+     <x>739</x>
+     <y>341</y>
     </hint>
    </hints>
   </connection>
@@ -1801,12 +1811,12 @@
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>229</x>
-     <y>375</y>
+     <x>334</x>
+     <y>409</y>
     </hint>
     <hint type="destinationlabel">
-     <x>586</x>
-     <y>340</y>
+     <x>666</x>
+     <y>341</y>
     </hint>
    </hints>
   </connection>
@@ -1817,12 +1827,12 @@
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>519</x>
-     <y>366</y>
+     <x>593</x>
+     <y>367</y>
     </hint>
     <hint type="destinationlabel">
-     <x>116</x>
-     <y>423</y>
+     <x>224</x>
+     <y>457</y>
     </hint>
    </hints>
   </connection>
@@ -1833,12 +1843,12 @@
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>653</x>
-     <y>366</y>
+     <x>739</x>
+     <y>367</y>
     </hint>
     <hint type="destinationlabel">
-     <x>342</x>
-     <y>423</y>
+     <x>444</x>
+     <y>457</y>
     </hint>
    </hints>
   </connection>
@@ -1849,12 +1859,12 @@
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>586</x>
-     <y>366</y>
+     <x>666</x>
+     <y>367</y>
     </hint>
     <hint type="destinationlabel">
-     <x>229</x>
-     <y>423</y>
+     <x>334</x>
+     <y>457</y>
     </hint>
    </hints>
   </connection>
@@ -1865,12 +1875,12 @@
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>116</x>
-     <y>423</y>
+     <x>224</x>
+     <y>457</y>
     </hint>
     <hint type="destinationlabel">
-     <x>519</x>
-     <y>366</y>
+     <x>593</x>
+     <y>367</y>
     </hint>
    </hints>
   </connection>
@@ -1881,12 +1891,12 @@
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>342</x>
-     <y>423</y>
+     <x>444</x>
+     <y>457</y>
     </hint>
     <hint type="destinationlabel">
-     <x>653</x>
-     <y>366</y>
+     <x>739</x>
+     <y>367</y>
     </hint>
    </hints>
   </connection>
@@ -1897,12 +1907,12 @@
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>229</x>
-     <y>423</y>
+     <x>334</x>
+     <y>457</y>
     </hint>
     <hint type="destinationlabel">
-     <x>229</x>
-     <y>423</y>
+     <x>334</x>
+     <y>457</y>
     </hint>
    </hints>
   </connection>
@@ -1913,12 +1923,12 @@
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>100</x>
-     <y>326</y>
+     <x>224</x>
+     <y>361</y>
     </hint>
     <hint type="destinationlabel">
-     <x>519</x>
-     <y>390</y>
+     <x>593</x>
+     <y>393</y>
     </hint>
    </hints>
   </connection>
@@ -1929,12 +1939,12 @@
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>519</x>
-     <y>387</y>
+     <x>593</x>
+     <y>393</y>
     </hint>
     <hint type="destinationlabel">
-     <x>116</x>
-     <y>324</y>
+     <x>224</x>
+     <y>361</y>
     </hint>
    </hints>
   </connection>
@@ -1945,12 +1955,12 @@
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>229</x>
-     <y>323</y>
+     <x>334</x>
+     <y>361</y>
     </hint>
     <hint type="destinationlabel">
-     <x>586</x>
-     <y>388</y>
+     <x>666</x>
+     <y>393</y>
     </hint>
    </hints>
   </connection>
@@ -1961,12 +1971,12 @@
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>586</x>
-     <y>391</y>
+     <x>666</x>
+     <y>393</y>
     </hint>
     <hint type="destinationlabel">
-     <x>229</x>
-     <y>321</y>
+     <x>334</x>
+     <y>361</y>
     </hint>
    </hints>
   </connection>
@@ -1977,12 +1987,12 @@
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>342</x>
-     <y>327</y>
+     <x>444</x>
+     <y>361</y>
     </hint>
     <hint type="destinationlabel">
-     <x>653</x>
-     <y>385</y>
+     <x>739</x>
+     <y>393</y>
     </hint>
    </hints>
   </connection>
@@ -1993,12 +2003,12 @@
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>653</x>
-     <y>391</y>
+     <x>739</x>
+     <y>393</y>
     </hint>
     <hint type="destinationlabel">
-     <x>342</x>
-     <y>327</y>
+     <x>444</x>
+     <y>361</y>
     </hint>
    </hints>
   </connection>
@@ -2009,12 +2019,12 @@
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>519</x>
-     <y>413</y>
+     <x>593</x>
+     <y>419</y>
     </hint>
     <hint type="destinationlabel">
-     <x>116</x>
-     <y>465</y>
+     <x>224</x>
+     <y>505</y>
     </hint>
    </hints>
   </connection>
@@ -2025,12 +2035,12 @@
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>586</x>
-     <y>415</y>
+     <x>666</x>
+     <y>419</y>
     </hint>
     <hint type="destinationlabel">
-     <x>229</x>
-     <y>469</y>
+     <x>334</x>
+     <y>505</y>
     </hint>
    </hints>
   </connection>
@@ -2041,12 +2051,12 @@
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>653</x>
-     <y>417</y>
+     <x>739</x>
+     <y>419</y>
     </hint>
     <hint type="destinationlabel">
-     <x>342</x>
-     <y>469</y>
+     <x>444</x>
+     <y>505</y>
     </hint>
    </hints>
   </connection>
@@ -2057,12 +2067,12 @@
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>88</x>
-     <y>465</y>
+     <x>224</x>
+     <y>505</y>
     </hint>
     <hint type="destinationlabel">
-     <x>519</x>
-     <y>418</y>
+     <x>593</x>
+     <y>419</y>
     </hint>
    </hints>
   </connection>
@@ -2073,12 +2083,12 @@
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>212</x>
-     <y>462</y>
+     <x>334</x>
+     <y>505</y>
     </hint>
     <hint type="destinationlabel">
-     <x>586</x>
-     <y>417</y>
+     <x>666</x>
+     <y>419</y>
     </hint>
    </hints>
   </connection>
@@ -2089,12 +2099,12 @@
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>342</x>
-     <y>470</y>
+     <x>444</x>
+     <y>505</y>
     </hint>
     <hint type="destinationlabel">
-     <x>653</x>
-     <y>418</y>
+     <x>739</x>
+     <y>419</y>
     </hint>
    </hints>
   </connection>
@@ -2105,12 +2115,12 @@
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>188</x>
-     <y>411</y>
+     <x>334</x>
+     <y>457</y>
     </hint>
     <hint type="destinationlabel">
-     <x>568</x>
-     <y>366</y>
+     <x>666</x>
+     <y>367</y>
     </hint>
    </hints>
   </connection>

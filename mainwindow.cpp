@@ -32,7 +32,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(serialcon,SIGNAL(readyRead()),this,SLOT(serialReadReady()));
 
     // UI Data Changed by user
-    connect(ui->chkpanrev,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
+    connect(ui->chkpanrev,&QCheckBox::clicked,this,&MainWindow::updateFromUI);
     connect(ui->chkrllrev,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
     connect(ui->chktltrev,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
     connect(ui->spnGyroPan,SIGNAL(editingFinished()),this,SLOT(updateFromUI()));
@@ -54,12 +54,15 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->cmbpanchn,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbtiltchn,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbrllchn,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->cmdRefresh,&QPushButton::clicked,this,&MainWindow::findSerialPorts);
 
     // LED Timers
     rxledtimer.setInterval(100);
     txledtimer.setInterval(100);
     connect(&rxledtimer,SIGNAL(timeout()),this,SLOT(rxledtimeout()));
     connect(&txledtimer,SIGNAL(timeout()),this,SLOT(txledtimeout()));
+    connect(&updatesettingstmr,&QTimer::timeout,this,&MainWindow::updateSettings);
+
 }
 
 MainWindow::~MainWindow()
@@ -123,7 +126,6 @@ void MainWindow::parseSerialData()
 
                 }
             }
-
             serialData = serialData.right(serialData.length()-nlindex-2);
     }
 }
@@ -133,9 +135,49 @@ void MainWindow::sendSerialData(QString data)
     if(data.isEmpty() || !serialcon->isOpen())
         return;
 
+    addToLog(data + "\n");
+
     ui->txled->setState(true);
     txledtimer.start();
     serialcon->write(data.toUtf8());
+}
+
+void MainWindow::addToLog(QString log, bool bold)
+{
+    static bool lastbold=false;
+
+    // If requested bold and wasn't before
+    if(bold && !lastbold) {
+        logd += "<b>";
+    }
+
+    // Bold and it was bold, remove the trailing </b>
+    if(bold && lastbold) {
+        logd = logd.left(logd.length()-4);
+    }
+
+    // If requested bold off and bold was on
+    if(!bold && lastbold)
+        logd += "</b>";
+
+    log = log.replace("\r",""); // remove carriage returns
+    logd += log.replace("\n","<br>\n"); // Add data to log, replace line feed with <br>
+
+    // If requested bold make sure to terminate
+    if(bold)
+        logd += "</b>";
+
+    // Limit Max Log Length
+    int loglen = logd.length();
+    if(loglen > MAX_LOG_LENGTH)
+        logd = logd.mid(logd.length() - 5000);
+
+    // Set Gui
+    ui->serialData->setText(logd);
+
+    // Scroll to bottom
+    ui->serialData->verticalScrollBar()->setValue(ui->serialData->verticalScrollBar()->maximum());
+    lastbold = bold;
 }
 
 // Find available serial ports
@@ -178,8 +220,7 @@ void MainWindow::serialConnect()
 
     ui->statusbar->showMessage(tr("Connected to ") + serialcon->portName());
 
-
-    QTimer::singleShot(3500,this,&MainWindow::requestTimer);
+    QTimer::singleShot(2000,this,&MainWindow::requestTimer);
 }
 
 // Disconnect from the serial port
@@ -267,6 +308,8 @@ void MainWindow::updateFromUI()
     trkset.setPanCh(ui->cmbpanchn->currentText().toInt());
     trkset.setRollCh(ui->cmbrllchn->currentText().toInt());
     trkset.setTiltCh(ui->cmbtiltchn->currentText().toInt());
+
+    updatesettingstmr.start(1000);
 }
 
 // Data ready to be read from the serial port
@@ -280,10 +323,8 @@ void MainWindow::serialReadReady()
     if(slider == ui->serialData->verticalScrollBar()->maximum())
         scroll = true;
 
-    if(ui->serialData->toPlainText().length() > 3000)
-        ui->serialData->clear();
 
-    ui->serialData->setPlainText(ui->serialData->toPlainText() + QString(sd));
+    addToLog(sd,true);
 
     // Scroll to bottom
     if(scroll)
@@ -326,6 +367,13 @@ void MainWindow::uiSettingChanged()
 
 void MainWindow::storeSettings()
 {
+
+    sendSerialData("$SAVE");
+}
+
+void MainWindow::updateSettings()
+{
+    updatesettingstmr.stop();
     QStringList lst;
     lst.append(QString::number(trkset.lpTiltRoll()));
     lst.append(QString::number(trkset.lpPan()));
@@ -352,16 +400,14 @@ void MainWindow::storeSettings()
     qDebug() << data;
 
     sendSerialData("$" + data + "HE");
-    sendSerialData("$SAVE");
-
 
 }
 
 void MainWindow::requestTimer()
 {
-//    sendSerialData("$VERS");
-     sendSerialData("$GSET\n");
-qDebug() << "Requested settings";
+    //sendSerialData("$VERS");
+     sendSerialData("$GSET");
+     qDebug() << "Requested settings";
 
 }
 
