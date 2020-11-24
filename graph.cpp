@@ -58,9 +58,9 @@ void Graph::paintEvent(QPaintEvent *event)
         int tval = pointstilt.at(pointstilt.length()-i);
         int pval = pointspan.at(pointspan.length()-i);
         int rval = pointsroll.at(pointsroll.length()-i);
-        qreal ty = height()/2 - (height()*(tval-90)/360);
-        qreal py = height()/2 - (height()*(pval-360)/360);
-        qreal ry = height()/2 - (height()*(rval-90)/360);
+        qreal ty = height()/2 - (height()*(tval)/360);
+        qreal py = height()/2 - (height()*(pval)/360);
+        qreal ry = height()/2 - (height()*(rval)/360);
         if(i==1) {
             tilpath.moveTo(width(),ty);
             rllpath.moveTo(width(),ry);
