@@ -68,11 +68,16 @@
 #define BUTTON_INPUT 11
 
 // Arduino LED
-#define  ARDUINO_LED 13
+#define ARDUINO_LED 13
 
 // Pin definition for LED and buzzer (Fatshark goggles)
 #if FATSHARK_HT_MODULE
-    #define  BUZZER      4
+    #define BUZZER     4
+    #define BEEP_ON()  pinMode(BUZZER,OUTPUT);digitalWrite(BUZZER, HIGH)
+    #define BEEP_OFF() digitalWrite(BUZZER, LOW)
+#else
+    #define BEEP_ON()
+    #define BEEP_OFF() 
 #endif
 
 #define PPM_IN_MIN 1000 // 0.5 ms

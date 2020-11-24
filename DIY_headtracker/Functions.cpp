@@ -24,11 +24,6 @@ char read_sensors = 0;
 extern unsigned long buttonDownTime;
 extern unsigned char htChannels[];
 
-// Sensor_board,   x,y,z
-int acc_raw[3]  = {1,2,3};  
-int gyro_raw[3] = {4,5,6};
-int mag_raw[3]  = {7,8,9};
-
 unsigned char PpmIn_PpmOut[13] = {0,1,2,3,4,5,6,7,8,9,10,11,12};
 long channel_value[13] = {2100,2100,2100,2100,2100,2100,2100,2100,2100,2100,2100,2100,2100};
 

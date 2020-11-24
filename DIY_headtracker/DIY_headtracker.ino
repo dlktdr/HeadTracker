@@ -38,7 +38,9 @@ Channel mapping/config for PPM out:
 Mapping example:
 $123456789111CH
 */
+
 void SaveSettings();
+void DebugOutput();
 
 // Local file variables
 //
@@ -50,7 +52,7 @@ char string_started = 0;        // Only saves data if string starts with right b
 unsigned char channel_mapping[13];
 
 char outputMag = 0;             // Stream magnetometer data to host
-char outputAcc = 0;             // Stream accelerometer data to host
+char outputAcc = 0;             // Stream acelerometer data to host
 char outputMagAcc = 0;          // Stream mag and accell data (for calibration on PC)
 char outputTrack = 0;	        // Stream angle data to host
 
@@ -126,19 +128,18 @@ void setup()
   
     pinMode(ARDUINO_LED,OUTPUT);    // Arduino LED
     digitalWrite(ARDUINO_LED, HIGH);
-    
+
 #if FATSHARK_HT_MODULE
     pinMode(BUZZER,OUTPUT);         // Buzzer
-    digitalWrite(BUZZER, HIGH);
 #endif
+
+    BEEP_ON();
 
     // Give it time to be noticed, then turn it off
     delay(200); // Note: only use delay here. This won't work when Timer0 is repurposed later.
     digitalWrite(ARDUINO_LED, LOW);
 
-#if FATSHARK_HT_MODULE
-    digitalWrite(BUZZER, LOW);
-#endif
+    BEEP_OFF();
 
     InitPWMInterrupt();         // Start PWM interrupt  
     Wire.begin();               // Start I2C
@@ -150,17 +151,13 @@ void setup()
         Serial.println("New board - saving default values!");
     
         InitSensors();
-
         SaveSettings();
-        //SaveMagData();
-        //SaveAccelData();    
         }
  
-    GetSettings();                 // Get settings saved in EEPROM
-    InitSensors();                // Initialize I2C sensors
-    //CalibrateMag();
+    GetSettings();                // Get settings saved in EEPROM
+    InitSensors();                // Initialize I2C sensors    
     ResetCenter();
-    InitTimerInterrupt();        // Start timer interrupt (for sensors)  
+    InitTimerInterrupt();         // Start timer interrupt (for sensors)  
 }
 
 //--------------------------------------------------------------------------------------
@@ -339,7 +336,7 @@ void loop()
                 Serial.println(htChannels[1]);
                 Serial.println(htChannels[2]);                
         
-                SaveSettings();
+                //SaveSettings();
 
                 serial_index = 0;
                 string_started = 0;
@@ -355,6 +352,15 @@ void loop()
                 DebugOutput();
                 serial_index = 0;
                 string_started = 0; 
+            }
+
+            // Reset Button Via Software
+            else if (serial_data[serial_index-3] == 'R' &&
+                     serial_data[serial_index-2] == 'S' &&
+                     serial_data[serial_index-1] == 'T')
+            {
+                Serial.print("Reset Values Complete ");
+                resetValues = 1;
             }
 
             // Firmware version requested
@@ -512,6 +518,9 @@ void loop()
                 serial_index = 0;
                 string_started = 0; */
             }
+
+
+
 
             // Store magnetometer offset
             else if (serial_data[serial_index-3] == 'M' &&
@@ -740,6 +749,7 @@ void SaveSettings()
     EEPROM.write(32, (unsigned char)htChannels[0]);
     EEPROM.write(33, (unsigned char)htChannels[1]);
     EEPROM.write(34, (unsigned char)htChannels[2]);
+
   /*
     // Saving gyro calibration values
     int temp = (int)(gyroOff[0] + 500.5);
@@ -754,9 +764,11 @@ void SaveSettings()
     EEPROM.write(39, (unsigned char)temp);
     EEPROM.write(40, (unsigned char)(temp >> 8));    
   */
+  
     // Mark the memory to indicate that it has been
     // written. Used to determine if board is newly flashed
     // or not.
+  
     EEPROM.write(0,8); 
 
     Serial.println("Settings saved!");

@@ -23,7 +23,8 @@ https://www.loveelectronics.co.uk/Tutorials/13/tilt-compensated-compass-arduino-
 http://www.pololu.com/file/download/LSM303DLH-compass-app-note.pdf?file_id=0J434
 */
 
-#define SAMPLERATE 128       // Samplerate of sensors (in hz, samples per second)
+// BNO055 Can use either 0x28 or 0x29 depending on wiring of the ADR pin.
+#define BNO055_ADDRESS 0x29
 
 // Variables defined elsewhere
 //
@@ -45,7 +46,7 @@ float tiltAngle = 90;       // Tilt angle
 float tiltAngleLP = 90;     // Tilt angle with low pass FilterSensorData
 float lastTiltAngle = 90;   // Used in low pass FilterSensorData.
 
-float rollAngle = 0;        // Roll angle
+float rollAngle = 90;        // Roll angle
 float rollAngleLP = 90;     // Roll angle with low pass FilterSensorData
 float lastRollAngle = 90;   // Used in low pass FilterSensorData
 
@@ -118,11 +119,25 @@ void ReadFromI2C(int device, char address, char bytesToRead)
 
 void trackerOutput()
 {
-  Serial.print(tiltAngleLP - tiltStart + 90);
+  Serial.print(tiltAngleLP );
   Serial.print(",");
-  Serial.print(rollAngleLP - rollStart + 90);
+  Serial.print(rollAngleLP );
   Serial.print(",");    
-  Serial.println(panAngleLP + 180);
+  Serial.println(panAngleLP);
+
+  /* Also send calibration data for each sensor. */
+  uint8_t sys, gyro, accel, mag = 0;
+  bno.getCalibration(&sys, &gyro, &accel, &mag);
+  Serial.print(F("Calibration: "));
+  Serial.print(sys, DEC);
+  Serial.print(F(" "));
+  Serial.print(gyro, DEC);
+  Serial.print(F(" "));
+  Serial.print(accel, DEC);
+  Serial.print(F(" "));
+  Serial.println(mag, DEC);
+
+  
 }
 
 //--------------------------------------------------------------------------------------
@@ -139,34 +154,53 @@ void UpdateSensors()
 // Func: Filter
 // Desc: Filters / merges sensor data. 
 //--------------------------------------------------------------------------------------
+
+// FROM https://stackoverflow.com/questions/1628386/normalise-orientation-between-0-and-360
+// Normalizes any number to an arbitrary range 
+// by assuming the range wraps around when going below min or above max 
+double normalize( const float value, const float start, const float end ) 
+{
+  const float width       = end - start   ;   // 
+  const float offsetValue = value - start ;   // value relative to 0
+
+  return ( offsetValue - ( floor( offsetValue / width ) * width ) ) + start ;
+  // + start to reset back to start of original range
+}
+
 void FilterSensorData()
 {
     int temp = 0;
 
-    // Used to set initial values. 
-    if (resetValues == 1)
-    {
-#if FATSHARK_HT_MODULE
-        digitalWrite(BUZZER, HIGH);
-#endif
-        resetValues = 0; 
-      
-        tiltStart = 0;
-        panStart = 0;
-        rollStart = 0;         
-        panAngle = 0;
-        
-#if FATSHARK_HT_MODULE
-        digitalWrite(BUZZER, LOW);
-#endif
-    }
-
-
-    // Get Orientation from BMO055
+    // Get Orientation from BNO055
     rollAngle = event.orientation.z;
     panAngle = event.orientation.x;
     tiltAngle  = event.orientation.y;
 
+    // Used to set initial values. 
+    if (resetValues == 1)
+    {
+        BEEP_ON();
+        resetValues = 0; 
+      
+        tiltStart = tiltAngle;
+        
+        panStart = panAngle;
+        Serial.print("PANANGLE");  Serial.println(panAngle);
+        
+        rollStart = rollAngle;         
+        
+        BEEP_OFF();
+    }
+
+    // Offset from reset location
+    panAngle -= panStart;
+    tiltAngle -= tiltStart;
+    rollAngle -= rollStart;
+
+    // Normalize Angle ON Pan
+    panAngle = normalize(panAngle,-180,180);
+      
+    // Filter the Data
     if (TrackerStarted)
     {
         // All low-pass filters
@@ -179,21 +213,21 @@ void FilterSensorData()
         panAngleLP = panAngle * panBeta + (1 - panBeta) * lastPanAngle;
         lastPanAngle = panAngleLP;
 
-        float panAngleTemp = panAngleLP * panInverse * panFactor;
+        float panAngleTemp = (panAngleLP) * panInverse * panFactor;
         if ( (panAngleTemp > -panMinPulse) && (panAngleTemp < panMaxPulse) )
         {
             temp = servoPanCenter + panAngleTemp;
             channel_value[htChannels[0]] = (int)temp;
         }    
 
-        float tiltAngleTemp = (tiltAngleLP - tiltStart) * tiltInverse * tiltFactor;
+        float tiltAngleTemp = (tiltAngleLP) * tiltInverse * tiltFactor;
         if ( (tiltAngleTemp > -tiltMinPulse) && (tiltAngleTemp < tiltMaxPulse) )
         {
             temp = servoTiltCenter + tiltAngleTemp;
             channel_value[htChannels[1]] = temp;
         }   
 
-        float rollAngleTemp = (rollAngleLP - rollStart) * rollInverse * rollFactor;
+        float rollAngleTemp = (rollAngleLP) * rollInverse * rollFactor;
         if ( (rollAngleTemp > -rollMinPulse) && (rollAngleTemp < rollMaxPulse) )
         {
             temp = servoRollCenter + rollAngleTemp;
@@ -218,6 +252,20 @@ void InitSensors()
   }
 
   bno.setExtCrystalUse(true);
+
+  sensor_t sensor;
+  bno.getSensor(&sensor);
+  // Display some infor on the Sensor, from BNO055 Example
+  Serial.println("------------------------------------");
+  Serial.print("Sensor:       "); Serial.println(sensor.name);
+  Serial.print("Driver Ver:   "); Serial.println(sensor.version);
+  Serial.print("Unique ID:    "); Serial.println(sensor.sensor_id);
+  Serial.print("Max Value:    "); Serial.print(sensor.max_value); Serial.println(" xxx");
+  Serial.print("Min Value:    "); Serial.print(sensor.min_value); Serial.println(" xxx");
+  Serial.print("Resolution:   "); Serial.print(sensor.resolution); Serial.println(" xxx");
+  Serial.println("------------------------------------");
+
+  
 }
 
 //--------------------------------------------------------------------------------------
@@ -227,12 +275,6 @@ void InitSensors()
 //--------------------------------------------------------------------------------------
 void ResetCenter()
 {
-    resetValues = 0; 
-       
-  /*  tiltStart = accAngle[0];
-    panStart = magAngle[2];
-    rollStart = accAngle[1];  */
-  
-    
+    resetValues = 1; 
     TrackerStarted = 1;
 }
