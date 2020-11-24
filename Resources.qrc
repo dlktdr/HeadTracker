@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/Icons">
+        <file>refresh.svg</file>
+    </qresource>
+</RCC>
