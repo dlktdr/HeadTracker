@@ -51,9 +51,9 @@ private slots:
     void manualSend();
     void startGraph();
     void stopGraph();
-    void uiSettingChanged();
     void storeSettings(); // Save to eeprom
     void updateSettings(); // Update to chip
+    void resetCenter();
 
     void requestTimer();
     void rxledtimeout();

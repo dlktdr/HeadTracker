@@ -2,6 +2,7 @@
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "servominmax.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -27,6 +28,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->cmdSend,SIGNAL(clicked()),this,SLOT(manualSend()));
     connect(ui->cmdStartGraph,SIGNAL(clicked()),this,SLOT(startGraph()));
     connect(ui->cmdStopGraph,SIGNAL(clicked()),this,SLOT(stopGraph()));
+    connect(ui->cmdResetCenter,SIGNAL(clicked()),this, SLOT(resetCenter()));
 
     // Serial data ready
     connect(serialcon,SIGNAL(readyRead()),this,SLOT(serialReadReady()));
@@ -35,22 +37,25 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->chkpanrev,&QCheckBox::clicked,this,&MainWindow::updateFromUI);
     connect(ui->chkrllrev,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
     connect(ui->chktltrev,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
-    connect(ui->spnGyroPan,SIGNAL(editingFinished()),this,SLOT(updateFromUI()));
-    connect(ui->spnGyroTilt,SIGNAL(editingFinished()),this,SLOT(updateFromUI()));
+    //connect(ui->spnGyroPan,SIGNAL(editingFinished()),this,SLOT(updateFromUI()));
+    //connect(ui->spnGyroTilt,SIGNAL(editingFinished()),this,SLOT(updateFromUI()));
     connect(ui->spnLPPan,SIGNAL(editingFinished()),this,SLOT(updateFromUI()));
     connect(ui->spnLPTiltRoll,SIGNAL(editingFinished()),this,SLOT(updateFromUI()));
-    connect(ui->pan_cnt,SIGNAL(sliderMoved(int)),this,SLOT(updateFromUI()));
-    connect(ui->pan_min,SIGNAL(sliderMoved(int)),this,SLOT(updateFromUI()));
-    connect(ui->pan_max,SIGNAL(sliderMoved(int)),this,SLOT(updateFromUI()));
-    connect(ui->pan_gain,SIGNAL(sliderMoved(int)),this,SLOT(updateFromUI()));
-    connect(ui->til_cnt,SIGNAL(sliderMoved(int)),this,SLOT(updateFromUI()));
-    connect(ui->til_min,SIGNAL(sliderMoved(int)),this,SLOT(updateFromUI()));
-    connect(ui->til_max,SIGNAL(sliderMoved(int)),this,SLOT(updateFromUI()));
+
     connect(ui->til_gain,SIGNAL(sliderMoved(int)),this,SLOT(updateFromUI()));
-    connect(ui->rll_cnt,SIGNAL(sliderMoved(int)),this,SLOT(updateFromUI()));
-    connect(ui->rll_min,SIGNAL(sliderMoved(int)),this,SLOT(updateFromUI()));
-    connect(ui->rll_max,SIGNAL(sliderMoved(int)),this,SLOT(updateFromUI()));
     connect(ui->rll_gain,SIGNAL(sliderMoved(int)),this,SLOT(updateFromUI()));
+    connect(ui->pan_gain,SIGNAL(sliderMoved(int)),this,SLOT(updateFromUI()));
+
+    connect(ui->servoPan,&ServoMinMax::minimumChanged,this,&MainWindow::updateFromUI);
+    connect(ui->servoPan,&ServoMinMax::maximumChanged,this,&MainWindow::updateFromUI);
+    connect(ui->servoPan,&ServoMinMax::centerChanged,this,&MainWindow::updateFromUI);
+    connect(ui->servoTilt,&ServoMinMax::minimumChanged,this,&MainWindow::updateFromUI);
+    connect(ui->servoTilt,&ServoMinMax::maximumChanged,this,&MainWindow::updateFromUI);
+    connect(ui->servoTilt,&ServoMinMax::centerChanged,this,&MainWindow::updateFromUI);
+    connect(ui->servoRoll,&ServoMinMax::minimumChanged,this,&MainWindow::updateFromUI);
+    connect(ui->servoRoll,&ServoMinMax::maximumChanged,this,&MainWindow::updateFromUI);
+    connect(ui->servoRoll,&ServoMinMax::centerChanged,this,&MainWindow::updateFromUI);
+
     connect(ui->cmbpanchn,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbtiltchn,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbrllchn,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
@@ -62,7 +67,6 @@ MainWindow::MainWindow(QWidget *parent)
     connect(&rxledtimer,SIGNAL(timeout()),this,SLOT(rxledtimeout()));
     connect(&txledtimer,SIGNAL(timeout()),this,SLOT(txledtimeout()));
     connect(&updatesettingstmr,&QTimer::timeout,this,&MainWindow::updateSettings);
-
 }
 
 MainWindow::~MainWindow()
@@ -81,22 +85,35 @@ void MainWindow::parseSerialData()
             if(nlindex < 0)
                 return;  // No New line found
             QString data = serialData.left(nlindex).simplified();
-            qDebug() << "DATA:" << data;
+           // qDebug() << "DATA:" << data;
             if(graphing) {
-                QStringList xyz = data.split(',');
-                if(xyz.length() == 3) {
-                    double tilt = xyz.at(0).toDouble();
-                    double roll = xyz.at(1).toDouble();
-                    double pan = xyz.at(2).toDouble();
+                QStringList rtd = data.split(',');
+                if(rtd.length() == 10) {
+                    double tilt = rtd.at(0).toDouble();
+                    double roll = rtd.at(1).toDouble();
+                    double pan = rtd.at(2).toDouble();
+                    int panout = rtd.at(3).toInt();
+                    int tiltout = rtd.at(4).toInt();
+                    int rollout = rtd.at(5).toInt();
+                    int syscal = rtd.at(6).toInt();
+                    int gyrocal = rtd.at(7).toInt();
+                    int accelcal = rtd.at(8).toInt();
+                    int magcal = rtd.at(9).toInt();
                     ui->graphView->addDataPoints(tilt,roll,pan);
+                    ui->servoPan->setActualPosition(panout);
+                    ui->servoTilt->setActualPosition(tiltout);
+                    ui->servoRoll->setActualPosition(rollout);
                 }
             } else {
+                addToLog(data);
                 // Receive Settings
                 if(data.left(5) == QString("$SET$")) {
-                    qDebug() << "SETTINGS DATA" << data.right(data.length()-5);
+           //         qDebug() << "SETTINGS DATA" << data.right(data.length()-5);
 
                     QStringList setd = data.right(data.length()-5).split(',',Qt::KeepEmptyParts);
                     //qDebug() << "Leng" << setd.length();
+
+                    ui->statusbar->showMessage(tr("Settings Received"));
 
                     if(setd.length() == 20) {
                         trkset.setLPTiltRoll(setd.at(0).toFloat());
@@ -123,7 +140,6 @@ void MainWindow::parseSerialData()
                     } else {
                         qDebug() << "Wrong number of params";
                     }
-
                 }
             }
             serialData = serialData.right(serialData.length()-nlindex-2);
@@ -144,40 +160,18 @@ void MainWindow::sendSerialData(QString data)
 
 void MainWindow::addToLog(QString log, bool bold)
 {
-    static bool lastbold=false;
-
-    // If requested bold and wasn't before
-    if(bold && !lastbold) {
-        logd += "<b>";
-    }
-
-    // Bold and it was bold, remove the trailing </b>
-    if(bold && lastbold) {
-        logd = logd.left(logd.length()-4);
-    }
-
-    // If requested bold off and bold was on
-    if(!bold && lastbold)
-        logd += "</b>";
-
-    log = log.replace("\r",""); // remove carriage returns
-    logd += log.replace("\n","<br>\n"); // Add data to log, replace line feed with <br>
-
-    // If requested bold make sure to terminate
-    if(bold)
-        logd += "</b>";
+    logd += log;
 
     // Limit Max Log Length
     int loglen = logd.length();
     if(loglen > MAX_LOG_LENGTH)
-        logd = logd.mid(logd.length() - 5000);
+        logd = logd.mid(logd.length() - MAX_LOG_LENGTH);
 
     // Set Gui
-    ui->serialData->setText(logd);
+    ui->serialData->setPlainText(logd);
 
     // Scroll to bottom
     ui->serialData->verticalScrollBar()->setValue(ui->serialData->verticalScrollBar()->maximum());
-    lastbold = bold;
 }
 
 // Find available serial ports
@@ -226,8 +220,12 @@ void MainWindow::serialConnect()
 // Disconnect from the serial port
 void MainWindow::serialDisconnect()
 {
-    if(serialcon->isOpen())
+    if(serialcon->isOpen()) {
+        if(graphing)
+            stopGraph();
+        serialcon->flush();
         serialcon->close();
+    }
     ui->statusbar->showMessage(tr("Disconnected"));
     ui->cmdDisconnect->setEnabled(false);
     ui->cmdConnect->setEnabled(true);
@@ -239,23 +237,22 @@ void MainWindow::serialDisconnect()
 // Update the UI Settings from the settings class
 void MainWindow::updateToUI()
 {
-    ui->til_cnt->setValue(trkset.Tlt_cnt());
-    ui->til_max->setValue(trkset.Tlt_max());
-    ui->til_min->setValue(trkset.Tlt_min());
+    ui->servoTilt->setCenter(trkset.Tlt_cnt());
+    ui->servoTilt->setMaximum(trkset.Tlt_max());
+    ui->servoTilt->setMinimum(trkset.Tlt_min());
+
+    ui->servoPan->setCenter(trkset.Pan_cnt());
+    ui->servoPan->setMaximum(trkset.Pan_max());
+    ui->servoPan->setMinimum(trkset.Pan_min());
+
+    ui->servoRoll->setCenter(trkset.Rll_cnt());
+    ui->servoRoll->setMaximum(trkset.Rll_max());
+    ui->servoRoll->setMinimum(trkset.Rll_min());
+
     ui->til_gain->setValue(trkset.Tlt_gain());
-
-    ui->pan_cnt->setValue(trkset.Pan_cnt());
-    ui->pan_max->setValue(trkset.Pan_max());
-    ui->pan_min->setValue(trkset.Pan_min());
     ui->pan_gain->setValue(trkset.Pan_gain());
-
-    ui->rll_cnt->setValue(trkset.Rll_cnt());
-    ui->rll_max->setValue(trkset.Rll_max());
-    ui->rll_min->setValue(trkset.Rll_min());
     ui->rll_gain->setValue(trkset.Rll_gain());
 
-    ui->spnGyroPan->setValue(trkset.gyroWeightPan());
-    ui->spnGyroTilt->setValue(trkset.gyroWeightTiltRoll());
     ui->spnLPTiltRoll->setValue(trkset.lpTiltRoll());
     ui->spnLPPan->setValue(trkset.lpPan());
 
@@ -263,8 +260,7 @@ void MainWindow::updateToUI()
     ui->chkrllrev->setChecked(trkset.rollReversed());
     ui->chktltrev->setChecked(trkset.tiltReversed());
 
-    // Combo box don't update on code update, only user update
-    ui->cmbpanchn->blockSignals(true); // ?? Better way, couldn't find a signal that isn't only ui changed
+    ui->cmbpanchn->blockSignals(true);
     ui->cmbrllchn->blockSignals(true);
     ui->cmbtiltchn->blockSignals(true);
 
@@ -281,23 +277,21 @@ void MainWindow::updateToUI()
 // Update the Settings Class from the UI Data
 void MainWindow::updateFromUI()
 {
-    trkset.setPan_cnt(ui->pan_cnt->value());
-    trkset.setPan_min(ui->pan_min->value());
-    trkset.setPan_max(ui->pan_max->value());
+    trkset.setPan_cnt(ui->servoPan->centerValue());
+    trkset.setPan_min(ui->servoPan->minimumValue());
+    trkset.setPan_max(ui->servoPan->maximumValue());
     trkset.setPan_gain(ui->pan_gain->value());
 
-    trkset.setTlt_cnt(ui->til_cnt->value());
-    trkset.setTlt_min(ui->til_min->value());
-    trkset.setTlt_max(ui->til_max->value());
+    trkset.setTlt_cnt(ui->servoTilt->centerValue());
+    trkset.setTlt_min(ui->servoTilt->minimumValue());
+    trkset.setTlt_max(ui->servoTilt->maximumValue());
     trkset.setTlt_gain(ui->til_gain->value());
 
-    trkset.setRll_cnt(ui->rll_cnt->value());
-    trkset.setRll_min(ui->rll_min->value());
-    trkset.setRll_max(ui->rll_max->value());
+    trkset.setRll_cnt(ui->servoRoll->centerValue());
+    trkset.setRll_min(ui->servoRoll->minimumValue());
+    trkset.setRll_max(ui->servoRoll->maximumValue());
     trkset.setRll_gain(ui->rll_gain->value());
 
-    trkset.setGyroWeightPan(ui->spnGyroPan->value());
-    trkset.setGyroWeightTiltRoll(ui->spnGyroTilt->value());
     trkset.setLPTiltRoll(ui->spnLPTiltRoll->value());
     trkset.setLPPan(ui->spnLPPan->value());
 
@@ -321,10 +315,7 @@ void MainWindow::serialReadReady()
 
     int slider = ui->serialData->verticalScrollBar()->value();
     if(slider == ui->serialData->verticalScrollBar()->maximum())
-        scroll = true;
-
-
-    addToLog(sd,true);
+        scroll = true; 
 
     // Scroll to bottom
     if(scroll)
@@ -350,6 +341,9 @@ void MainWindow::startGraph()
     serialcon->write("$PLST");
     graphing = true;
     xtime = 0;
+    ui->servoPan->setShowActualPosition(true);
+    ui->servoTilt->setShowActualPosition(true);
+    ui->servoRoll->setShowActualPosition(true);
 }
 
 void MainWindow::stopGraph()
@@ -358,16 +352,14 @@ void MainWindow::stopGraph()
         return;
     serialcon->write("$PLEN");
     graphing = false;
-}
-
-void MainWindow::uiSettingChanged()
-{
-
+    ui->servoPan->setShowActualPosition(false);
+    ui->servoTilt->setShowActualPosition(false);
+    ui->servoRoll->setShowActualPosition(false);
 }
 
 void MainWindow::storeSettings()
 {
-
+    ui->statusbar->showMessage(tr("Settings Stored to EEPROM"));
     sendSerialData("$SAVE");
 }
 
@@ -397,17 +389,22 @@ void MainWindow::updateSettings()
     lst.append(QString::number(trkset.rollCh()));
     QString data = lst.join(',');
 
-    qDebug() << data;
+ //   qDebug() << data;
 
     sendSerialData("$" + data + "HE");
 
+}
+
+void MainWindow::resetCenter()
+{
+    sendSerialData("$RST");
 }
 
 void MainWindow::requestTimer()
 {
     //sendSerialData("$VERS");
      sendSerialData("$GSET");
-     qDebug() << "Requested settings";
+  //   qDebug() << "Requested settings";
 
 }
 
