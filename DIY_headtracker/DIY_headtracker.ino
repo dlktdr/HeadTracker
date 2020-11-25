@@ -77,6 +77,9 @@ extern float tiltRollBeta;
 extern float panBeta;
 extern float gyroWeightTiltRoll;
 extern float GyroWeightPan;
+extern float tiltStart;        
+extern float panStart;                
+extern float rollStart; 
 extern int servoPanCenter;
 extern int servoTiltCenter;
 extern int servoRollCenter;
@@ -362,6 +365,18 @@ void loop()
                 Serial.print("Reset Values Complete ");
                 resetValues = 1;
             }
+
+                        // Reset Button Via Software
+            else if (serial_data[serial_index-3] == 'C' &&
+                     serial_data[serial_index-2] == 'L' &&
+                     serial_data[serial_index-1] == 'R')
+            {
+                Serial.print("Clearing Offsets");
+                    tiltStart = 0;        
+                    panStart = 0;                
+                    rollStart = 0; 
+            }
+
 
             // Firmware version requested
             else if (serial_data[serial_index-4] == 'V' &&
