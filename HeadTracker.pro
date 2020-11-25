@@ -20,12 +20,14 @@ SOURCES += \
     mainwindow.cpp \
     led.cpp \
 graph.cpp \
+    servominmax.cpp \
     trackersettings.cpp
 
 HEADERS += \
     mainwindow.h \
     led.h \
 graph.h \
+    servominmax.h \
     trackersettings.h
 
 FORMS += \
