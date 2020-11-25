@@ -1,5 +1,4 @@
 #include "graph.h"
-#include <QDebug>
 const int pointcount = 100;
 
 Graph::Graph(QWidget *parent) : QWidget(parent)
@@ -115,8 +114,7 @@ void Graph::paintEvent(QPaintEvent *event)
     painter.setPen(pen);
     QFont legfont = QFont("Times", 10, QFont::Bold);
     const int offset=10;
-    int fonth = QFontMetrics(legfont).height();
-    qDebug() << fonth;
+    int fonth = QFontMetrics(legfont).height();    
     painter.setFont(legfont);
     painter.drawText(10,offset+fonth,"+180"); // Top
     painter.drawText(10,(height()/2)+(fonth/2),"0"); // Center
