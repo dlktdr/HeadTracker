@@ -89,7 +89,6 @@ unsigned char htChannels[3] = {8, 7, 6}; // pan, tilt, roll
 //
 // End settings
 
-
 // Function used to write to I2C:
 void WriteToI2C(int device, byte address, byte val)
 {
@@ -119,25 +118,28 @@ void ReadFromI2C(int device, char address, char bytesToRead)
 
 void trackerOutput()
 {
-  Serial.print(tiltAngleLP );
-  Serial.print(",");
-  Serial.print(rollAngleLP );
-  Serial.print(",");    
-  Serial.println(panAngleLP);
-
-  /* Also send calibration data for each sensor. */
   uint8_t sys, gyro, accel, mag = 0;
   bno.getCalibration(&sys, &gyro, &accel, &mag);
-  Serial.print(F("Calibration: "));
-  Serial.print(sys, DEC);
-  Serial.print(F(" "));
-  Serial.print(gyro, DEC);
-  Serial.print(F(" "));
-  Serial.print(accel, DEC);
-  Serial.print(F(" "));
-  Serial.println(mag, DEC);
 
-  
+  Serial.print(tiltAngleLP);
+  Serial.print(",");
+  Serial.print(rollAngleLP);
+  Serial.print(",");    
+  Serial.print(panAngleLP);
+  Serial.print(",");    
+  Serial.print(channel_value[htChannels[0]]);
+  Serial.print(",");    
+  Serial.print(channel_value[htChannels[1]]);
+  Serial.print(",");    
+  Serial.print(channel_value[htChannels[2]]);
+  Serial.print(",");    
+  Serial.print(sys, DEC);
+  Serial.print(",");    
+  Serial.print(gyro, DEC);
+  Serial.print(",");    
+  Serial.print(accel, DEC);
+  Serial.print(",");    
+  Serial.println(mag, DEC);  
 }
 
 //--------------------------------------------------------------------------------------
@@ -182,12 +184,17 @@ void FilterSensorData()
         BEEP_ON();
         resetValues = 0; 
       
-        tiltStart = tiltAngle;
-        
-        panStart = panAngle;
-        Serial.print("PANANGLE");  Serial.println(panAngle);
-        
+        tiltStart = tiltAngle;        
+        panStart = panAngle;                
         rollStart = rollAngle;         
+
+        // Check for errors, clear offset on one
+        if(fabs(tiltStart) > 360)
+          tiltStart = 0;
+        if(fabs(panStart) > 360)
+          panStart = 0;
+        if(fabs(rollStart) > 360)
+          rollStart = 0;
         
         BEEP_OFF();
     }
@@ -197,7 +204,7 @@ void FilterSensorData()
     tiltAngle -= tiltStart;
     rollAngle -= rollStart;
 
-    // Normalize Angle ON Pan
+    // Normalize Angle For Pan
     panAngle = normalize(panAngle,-180,180);
       
     // Filter the Data
@@ -213,26 +220,26 @@ void FilterSensorData()
         panAngleLP = panAngle * panBeta + (1 - panBeta) * lastPanAngle;
         lastPanAngle = panAngleLP;
 
-        float panAngleTemp = (panAngleLP) * panInverse * panFactor;
-        if ( (panAngleTemp > -panMinPulse) && (panAngleTemp < panMaxPulse) )
-        {
-            temp = servoPanCenter + panAngleTemp;
-            channel_value[htChannels[0]] = (int)temp;
-        }    
+        float panAngleTemp = (panAngleLP * panInverse * panFactor) + servoPanCenter;
+        if(panAngleTemp < panMinPulse)
+          panAngleTemp = panMinPulse;
+        if(panAngleTemp > panMaxPulse)
+          panAngleTemp = panMaxPulse;
+        channel_value[htChannels[0]] = panAngleTemp;          
 
-        float tiltAngleTemp = (tiltAngleLP) * tiltInverse * tiltFactor;
-        if ( (tiltAngleTemp > -tiltMinPulse) && (tiltAngleTemp < tiltMaxPulse) )
-        {
-            temp = servoTiltCenter + tiltAngleTemp;
-            channel_value[htChannels[1]] = temp;
-        }   
+        float tiltAngleTemp = (tiltAngleLP * tiltInverse * tiltFactor) + servoTiltCenter;
+        if(tiltAngleTemp < tiltMinPulse)
+          tiltAngleTemp = tiltMinPulse;
+        if(tiltAngleTemp > tiltMaxPulse)
+          tiltAngleTemp = tiltMaxPulse;
+        channel_value[htChannels[1]] = tiltAngleTemp;          
 
-        float rollAngleTemp = (rollAngleLP) * rollInverse * rollFactor;
-        if ( (rollAngleTemp > -rollMinPulse) && (rollAngleTemp < rollMaxPulse) )
-        {
-            temp = servoRollCenter + rollAngleTemp;
-            channel_value[htChannels[2]] = temp;
-        }
+        float rollAngleTemp = (rollAngleLP * rollInverse * rollFactor) + servoRollCenter;
+        if(rollAngleTemp < rollMinPulse)
+          rollAngleTemp = rollMinPulse;
+        if(rollAngleTemp > rollMaxPulse)
+          rollAngleTemp = rollMaxPulse;
+        channel_value[htChannels[2]] = rollAngleTemp;          
     }
 }
 
