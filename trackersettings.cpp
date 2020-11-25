@@ -4,18 +4,20 @@
 TrackerSettings::TrackerSettings()
 {
     // Defaults
-    rll_min = 1000;
-    rll_max = 2000;
-    rll_gain = 50;
-    rll_cnt= 1500;
-    pan_min = 1000;
-    pan_max = 2000;
-    pan_gain = 100;
-    pan_cnt = 1500;
-    tlt_min = 1000;
-    tlt_max = 2000;
-    tlt_gain = 100;
-    tlt_cnt = 1500;
+    rll_min = MIN_PWM;
+    rll_max = MAX_PWM;
+    rll_gain = (MAX_GAIN-MIN_GAIN)/2+MIN_GAIN;
+    rll_cnt= (MAX_PWM-MIN_PWM)/2 + MIN_PWM;
+
+    pan_min = MIN_PWM;
+    pan_max = MAX_PWM;
+    pan_gain = (MAX_GAIN-MIN_GAIN)/2+MIN_GAIN;
+    pan_cnt = (MAX_PWM-MIN_PWM)/2 + MIN_PWM;
+
+    tlt_min = MIN_PWM;
+    tlt_max = MAX_PWM;
+    tlt_gain = (MAX_GAIN-MIN_GAIN)/2+MIN_GAIN;
+    tlt_cnt = (MAX_PWM-MIN_PWM)/2 + MIN_PWM;
 
     panch = 6;
     tiltch = 7;

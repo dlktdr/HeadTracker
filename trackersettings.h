@@ -1,10 +1,10 @@
 #ifndef TRACKERSETTINGS_H
 #define TRACKERSETTINGS_H
 
-#define MIN_PWM 0
-#define MAX_PWM 1150
-#define MIN_CNT 1700
-#define MAX_CNT 2500
+#define MIN_PWM 575
+#define MAX_PWM 1725
+#define MIN_CNT (((MAX_PWM-MIN_PWM)/2)+MIN_PWM-250)
+#define MAX_CNT (((MAX_PWM-MIN_PWM)/2)+MIN_PWM+250)
 #define MIN_GAIN 0
 #define MAX_GAIN 500
 
