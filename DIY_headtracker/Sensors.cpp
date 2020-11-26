@@ -120,7 +120,7 @@ void trackerOutput()
 {
   uint8_t sys, gyro, accel, mag = 0;
   bno.getCalibration(&sys, &gyro, &accel, &mag);
-
+  Serial.print("$G");
   Serial.print(tiltAngleLP);
   Serial.print(",");
   Serial.print(rollAngleLP);
@@ -187,15 +187,7 @@ void FilterSensorData()
         tiltStart = tiltAngle;        
         panStart = panAngle;                
         rollStart = rollAngle;         
-
-        // Check for errors, clear offset on one
-        if(fabs(tiltStart) > 360)
-          tiltStart = 0;
-        if(fabs(panStart) > 360)
-          panStart = 0;
-        if(fabs(rollStart) > 360)
-          rollStart = 0;
-        
+       
         BEEP_OFF();
     }
 
@@ -211,14 +203,17 @@ void FilterSensorData()
     if (TrackerStarted)
     {
         // All low-pass filters
+        
         tiltAngleLP = tiltAngle * tiltRollBeta + (1 - tiltRollBeta) * lastTiltAngle;
         lastTiltAngle = tiltAngleLP;
-  
+         
         rollAngleLP = rollAngle * tiltRollBeta + (1 - tiltRollBeta) * lastRollAngle;
         lastRollAngle = rollAngleLP;
-
+          
         panAngleLP = panAngle * panBeta + (1 - panBeta) * lastPanAngle;
         lastPanAngle = panAngleLP;
+
+        // Limit outputs
 
         float panAngleTemp = (panAngleLP * panInverse * panFactor) + servoPanCenter;
         if(panAngleTemp < panMinPulse)
@@ -271,7 +266,6 @@ void InitSensors()
   Serial.print("Min Value:    "); Serial.print(sensor.min_value); Serial.println(" xxx");
   Serial.print("Resolution:   "); Serial.print(sensor.resolution); Serial.println(" xxx");
   Serial.println("------------------------------------");
-
   
 }
 

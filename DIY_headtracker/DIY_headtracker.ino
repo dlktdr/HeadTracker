@@ -17,7 +17,10 @@
 #include "config.h"
 #include "functions.h"
 #include "sensors.h"
+#include "uCRC16Lib.h"
 #include <EEPROM.h>
+
+#define uCRC16Lib_POLYNOMIAL 0x8408
 
 /*
 Channel mapping/config for PPM out:
@@ -41,12 +44,13 @@ $123456789111CH
 
 void SaveSettings();
 void DebugOutput();
+void GetSettings();
 
 // Local file variables
 //
 int frameNumber = 0;		    // Frame count since last debug serial output
 
-char serial_data[101];          // Array for serial-data 
+char serial_data[SERIAL_BUFFER_SIZE+1];          // Array for serial-data 
 unsigned char serial_index = 0; // How many bytes have been received?
 char string_started = 0;        // Only saves data if string starts with right byte
 unsigned char channel_mapping[13];
@@ -61,6 +65,10 @@ char lastButtonState = 0;           // 0 is not pressed, 1 is pressed
 unsigned long buttonDownTime = 0;   // the system time of the press
 char pauseToggled = 0;              // Used to make sure we toggle pause only once per hold
 char ht_paused = 0;
+
+// CRC Check
+uint16_t crc_calc = 0;
+uint16_t crc_val = 0;
 
 // External variables (defined in other files)
 //
@@ -199,6 +207,10 @@ void loop()
     //
     if (Serial.available())
     {
+        // If no data received, wipe the buffer clean
+        if(serial_index == 0)
+          memset(serial_data,0,SERIAL_BUFFER_SIZE);
+      
         if (string_started == 1)
         {
             // Read incoming byte
@@ -226,6 +238,8 @@ void loop()
                 Serial.println("Channel mapping received");
                
                // Reset serial_index and serial_started
+               
+               // Clear buffer
                serial_index = 0;
                string_started = 0;
             }
@@ -259,16 +273,30 @@ void loop()
              
                 // Parameters from the PC client need to be scaled to match our local
                 // expectations
+               
+                // Do a CRC Check on the data to insure it's valid data
+                if(serial_index > 4)  {
+                  crc_calc = uCRC16Lib::calculate(serial_data, serial_index-4); // Calculate the CRC of the data                  
+                  memcpy(&crc_val,serial_data + serial_index - 4, sizeof(uint16_t));
+                }
+                else {
+                  crc_calc = 0;
+                }
 
-                Serial.println("HT config received:");
+                if(crc_val != crc_calc) {
+                    Serial.println("$CRCERR");
+                    return;
+                } else {                    
+                  Serial.println("$CRCOK:HT Settings Retrieved");
+                }
            
                 int valuesReceived[20] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
                 int comma_index = 0;
 
-                for (unsigned char k = 0; k < serial_index - 2; k++)
+                for (unsigned char k = 0; k < (serial_index - 4); k++)
                 {
                     // Looking for comma
-                    if (serial_data[k] == 44)
+                    if (serial_data[k] == ',')
                     {
                         comma_index++;
                     }
@@ -335,11 +363,9 @@ void loop()
                 htChannels[1] = valuesReceived[18];              
                 htChannels[2] = valuesReceived[19];                       
 
-                Serial.println(htChannels[0]);
+                /*Serial.println(htChannels[0]);
                 Serial.println(htChannels[1]);
-                Serial.println(htChannels[2]);                
-
-                //SaveSettings();
+                Serial.println(htChannels[2]);                */
 
                 serial_index = 0;
                 string_started = 0;
@@ -362,11 +388,11 @@ void loop()
                      serial_data[serial_index-2] == 'S' &&
                      serial_data[serial_index-1] == 'T')
             {
-                Serial.print("Reset Values Complete ");
+                Serial.println("Reset Values Complete ");
                 resetValues = 1;
             }
 
-                        // Reset Button Via Software
+            // Clear Offsets via Software
             else if (serial_data[serial_index-3] == 'C' &&
                      serial_data[serial_index-2] == 'L' &&
                      serial_data[serial_index-1] == 'R')
@@ -384,7 +410,8 @@ void loop()
                      serial_data[serial_index-1] == 'S')
             {
                 Serial.print("FW: ");
-                Serial.println(FIRMWARE_VERSION_FLOAT, 2.0);
+                Serial.print(FIRMWARE_VERSION_FLOAT, 2.0);
+                Serial.println("");
                 serial_index = 0;
                 string_started = 0; 
             }
@@ -484,7 +511,7 @@ void loop()
                 serial_index = 0;
                 string_started = 0;
             }
-            else if (serial_index > 100)
+            else if (serial_index > SERIAL_BUFFER_SIZE)
             {
                 // If more than 100 bytes have been received, the string is not valid.
                 // Reset and "try again" (wait for $ to indicate start of new string). 
