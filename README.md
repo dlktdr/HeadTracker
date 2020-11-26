@@ -24,8 +24,10 @@ I've modified the code for the head tracker and started working on a new GUi for
 4) Solder on the crystal to the back of the board and trim the wires excess wire, I mounted mine flat on the board and used some super glue to hold in place.
 5) Solder the board onto the two headers sticking up from the nano. Making sure SDA connects to A4 and SCL connects to A5
 6) Cut the two wires sticking up to the proper length and attach them to the 3.3 and gnd pins on the BNO055 board.
-7) Cut off one end of your mono 3.5mm cable and strip off the insulation at the end. The outer copper braid connects to the 
-7) Program and Test.
+7) Cut off one end of your mono 3.5mm cable and strip off the insulation at the end. The outer copper braid connects to a gnd pin. The Center wire connects to D9. This is the cable you will plug into your transmitter to transmit your head orientation
+8) Plug the nano into your computer via USB
+9) Program it with the latest code on here plenty of docs on how to do that around.
+10) Open the windows app and give it a try!!
 
 ![alt text](https://github.com/dlktdr/HeadTracker/blob/master/Doc/Hookup.png?raw=true)
 
