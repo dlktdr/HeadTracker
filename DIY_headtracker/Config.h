@@ -49,6 +49,9 @@
 // Serial communication speed. 
 #define SERIAL_BAUD 57600
 
+// Serial Read Buffer 
+#define SERIAL_BUFFER_SIZE 100
+
 // Sensor board update-rate. Not done yet. 
 #define UPDATE_RATE 50
 
