@@ -13,12 +13,43 @@
   <property name="windowTitle">
    <string>Headtracker BNO055</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="Resources.qrc">
+    <normaloff>:/Icons/Icon.png</normaloff>:/Icons/Icon.png</iconset>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_2">
       <item>
        <layout class="QGridLayout" name="gridLayout_4">
+        <item row="1" column="1">
+         <widget class="QPushButton" name="cmdRefresh">
+          <property name="toolTip">
+           <string>Refresh Available Serial Ports</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="Resources.qrc">
+            <normaloff>:/Icons/refresh.svg</normaloff>:/Icons/refresh.svg</iconset>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="0" colspan="2">
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
         <item row="1" column="0">
          <widget class="QComboBox" name="cmdPort">
           <property name="sizePolicy">
@@ -26,19 +57,6 @@
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="0" colspan="2">
-         <widget class="QPushButton" name="cmdCalibrate">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>C&amp;alibrate</string>
           </property>
          </widget>
         </item>
@@ -55,17 +73,16 @@
           </property>
          </widget>
         </item>
-        <item row="1" column="1">
-         <widget class="QPushButton" name="cmdRefresh">
-          <property name="toolTip">
-           <string>Refresh Available Serial Ports</string>
+        <item row="4" column="0" colspan="2">
+         <widget class="QPushButton" name="cmdStore">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
           </property>
           <property name="text">
-           <string/>
-          </property>
-          <property name="icon">
-           <iconset resource="Resources.qrc">
-            <normaloff>:/Icons/refresh.svg</normaloff>:/Icons/refresh.svg</iconset>
+           <string>&amp;Store Settings</string>
           </property>
          </widget>
         </item>
@@ -143,32 +160,6 @@
            <string>&amp;Disconnect</string>
           </property>
          </widget>
-        </item>
-        <item row="5" column="0" colspan="2">
-         <widget class="QPushButton" name="cmdStore">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>&amp;Store Settings</string>
-          </property>
-         </widget>
-        </item>
-        <item row="6" column="0" colspan="2">
-         <spacer name="verticalSpacer">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
         </item>
        </layout>
       </item>
@@ -955,14 +946,7 @@
     <addaction name="separator"/>
     <addaction name="actionE_xit"/>
    </widget>
-   <widget class="QMenu" name="menu_Tools">
-    <property name="title">
-     <string>&amp;Tools</string>
-    </property>
-    <addaction name="action_Calibrate"/>
-   </widget>
    <addaction name="menu_File"/>
-   <addaction name="menu_Tools"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="action_Save_to_File">
@@ -1009,5 +993,22 @@
  <resources>
   <include location="Resources.qrc"/>
  </resources>
- <connections/>
+ <connections>
+  <connection>
+   <sender>actionE_xit</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>337</x>
+     <y>324</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

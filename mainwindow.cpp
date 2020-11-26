@@ -274,7 +274,6 @@ void MainWindow::updateToUI()
     ui->spnLPTiltRoll->setValue(trkset.lpTiltRoll());
     ui->spnLPPan->setValue(trkset.lpPan());
 
-    qDebug() << "SRVREV" << QString::number(trkset.servoReverse());
     ui->chkpanrev->setChecked(trkset.isPanReversed());
     ui->chkrllrev->setChecked(trkset.isRollReversed());
     ui->chktltrev->setChecked(trkset.isTiltReversed());
