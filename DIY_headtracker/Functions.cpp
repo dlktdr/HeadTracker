@@ -247,7 +247,7 @@ void DetectPPM()
         // Reset channel-count
         channel = 0; 
     }
-    else if (channel < 20 && pulseTime > PPM_IN_MIN && pulseTime < PPM_IN_MAX)
+    else if (channel < 20 && pulseTime >= PPM_IN_MIN && pulseTime < PPM_IN_MAX)
     {
         // If the pulse is recognized as servo-pulse
         if ( (channel + 1) != htChannels[0] &&
