@@ -5,7 +5,7 @@
 // PWM Values here are divided by 2 plus 400 = actual uS output
 
 
-#define MIN_PWM 1000 // 1000 % 2 + 400 = 900 uS
+#define MIN_PWM 1001 // 1000 % 2 + 400 = 900 uS
 #define MAX_PWM 3400 // 3400 /2 + 400 = 2100 uS
 #define DEF_MIN_PWM 1200 // 1200 = 1000uS
 #define DEF_MAX_PWM 3200 // 1200 = 1000uS
@@ -75,9 +75,9 @@ public:
     void setRollReversed(bool value);
     void setPanReversed(bool Value);
     void setTiltReversed(bool Value);
-    bool rollReversed() {return (!(servoreverse|HT_ROLL_REVERSE_BIT));}
-    bool tiltReversed() {return (!(servoreverse|HT_TILT_REVERSE_BIT));}
-    bool panReversed() {return (!(servoreverse|HT_PAN_REVERSE_BIT));}
+    bool isRollReversed();
+    bool isTiltReversed();
+    bool isPanReversed();
 
     char panCh() const;
     void setPanCh(char value);

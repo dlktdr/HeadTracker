@@ -273,6 +273,21 @@ void TrackerSettings::setTiltReversed(bool value)
         servoreverse &= HT_TILT_REVERSE_BIT ^ 0xFF;
 }
 
+bool TrackerSettings::isRollReversed()
+{
+    return (servoreverse&HT_ROLL_REVERSE_BIT);
+}
+
+bool TrackerSettings::isTiltReversed()
+{
+    return (servoreverse&HT_TILT_REVERSE_BIT);
+}
+
+bool TrackerSettings::isPanReversed()
+{
+    return (servoreverse&HT_PAN_REVERSE_BIT);
+}
+
 char TrackerSettings::panCh() const
 {
     return panch;
