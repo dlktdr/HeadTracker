@@ -38,8 +38,8 @@ private:
     void parseSerialData();
     bool graphing;
 
-    void sendSerialData(QString data);
-    void addToLog(QString log, bool bold=false);
+    void sendSerialData(QByteArray data);
+    void addToLog(QString log);
 
 private slots:
     void findSerialPorts();

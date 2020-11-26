@@ -3,6 +3,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "servominmax.h"
+#include "ucrc16lib.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -78,15 +79,28 @@ MainWindow::~MainWindow()
 // Parse the data received from the serial port
 void MainWindow::parseSerialData()
 {      
-    //qDebug() << "RX:" << serialData;
     bool done = true;
     while(done) {
+
             int nlindex = serialData.indexOf("\r\n");
             if(nlindex < 0)
                 return;  // No New line found
-            QString data = serialData.left(nlindex).simplified();
-           // qDebug() << "DATA:" << data;
-            if(graphing) {
+            QString data = serialData.left(nlindex);
+
+            // CRC ERROR
+            if(data.left(7) == QString("$CRCERR")) {
+                ui->statusbar->showMessage("CRC Error : Error Setting Values, Retrying",2000);
+                updatesettingstmr.start(1000);
+            }
+
+            // CRC OK
+             else if(data.left(6) == QString("$CRCOK")) {
+                ui->statusbar->showMessage("Values Set On Headtracker",2000);
+            }
+
+            // Graph Data
+            else if(data.left(2) == QString("$G")) {
+                data = data.mid(2).simplified();
                 QStringList rtd = data.split(',');
                 if(rtd.length() == 10) {
                     double tilt = rtd.at(0).toDouble();
@@ -95,70 +109,72 @@ void MainWindow::parseSerialData()
                     int panout = rtd.at(3).toInt();
                     int tiltout = rtd.at(4).toInt();
                     int rollout = rtd.at(5).toInt();
-                    int syscal = rtd.at(6).toInt();
-                    int gyrocal = rtd.at(7).toInt();
-                    int accelcal = rtd.at(8).toInt();
-                    int magcal = rtd.at(9).toInt();
+//                    int syscal = rtd.at(6).toInt();
+//                    int gyrocal = rtd.at(7).toInt();
+//                    int accelcal = rtd.at(8).toInt();
+//                    int magcal = rtd.at(9).toInt();
                     ui->graphView->addDataPoints(tilt,roll,pan);
                     ui->servoPan->setActualPosition(panout);
                     ui->servoTilt->setActualPosition(tiltout);
                     ui->servoRoll->setActualPosition(rollout);
                 }
-            } else {
-                addToLog(data);
-                // Receive Settings
-                if(data.left(5) == QString("$SET$")) {
-           //         qDebug() << "SETTINGS DATA" << data.right(data.length()-5);
+            }
 
-                    QStringList setd = data.right(data.length()-5).split(',',Qt::KeepEmptyParts);
-                    //qDebug() << "Leng" << setd.length();
+            // Data Receieve
+            else if(data.left(5) == QString("$SET$")) {
+                QStringList setd = data.right(data.length()-5).split(',',Qt::KeepEmptyParts);
 
-                    ui->statusbar->showMessage(tr("Settings Received"));
-
-                    if(setd.length() == 20) {
-                        trkset.setLPTiltRoll(setd.at(0).toFloat());
-                        trkset.setLPPan(setd.at(1).toFloat());
-                        trkset.setGyroWeightTiltRoll(setd.at(2).toFloat());
-                        trkset.setGyroWeightPan(setd.at(3).toFloat());
-                        trkset.setTlt_gain(setd.at(4).toFloat());
-                        trkset.setPan_gain(setd.at(5).toFloat());
-                        trkset.setRll_gain(setd.at(6).toFloat());
-                        trkset.setServoreverse(setd.at(7).toInt());
-                        trkset.setPan_cnt(setd.at(8).toInt());
-                        trkset.setPan_min(setd.at(9).toInt());
-                        trkset.setPan_max(setd.at(10).toInt());
-                        trkset.setTlt_cnt(setd.at(11).toInt());
-                        trkset.setTlt_min(setd.at(12).toInt());
-                        trkset.setTlt_max(setd.at(13).toInt());
-                        trkset.setRll_cnt(setd.at(14).toInt());
-                        trkset.setRll_min(setd.at(15).toInt());
-                        trkset.setRll_max(setd.at(16).toInt());
-                        trkset.setPanCh(setd.at(17).toInt());
-                        trkset.setTiltCh(setd.at(18).toInt());
-                        trkset.setRollCh(setd.at(19).toInt());
-                        updateToUI();
-                    } else {
-                        qDebug() << "Wrong number of params";
-                    }
+                if(setd.length() == 20) {
+                    trkset.setLPTiltRoll(setd.at(0).toFloat());
+                    trkset.setLPPan(setd.at(1).toFloat());
+                    trkset.setGyroWeightTiltRoll(setd.at(2).toFloat());
+                    trkset.setGyroWeightPan(setd.at(3).toFloat());
+                    trkset.setTlt_gain(setd.at(4).toFloat());
+                    trkset.setPan_gain(setd.at(5).toFloat());
+                    trkset.setRll_gain(setd.at(6).toFloat());
+                    trkset.setServoreverse(setd.at(7).toInt());
+                    trkset.setPan_cnt(setd.at(8).toInt());
+                    trkset.setPan_min(setd.at(9).toInt());
+                    trkset.setPan_max(setd.at(10).toInt());
+                    trkset.setTlt_cnt(setd.at(11).toInt());
+                    trkset.setTlt_min(setd.at(12).toInt());
+                    trkset.setTlt_max(setd.at(13).toInt());
+                    trkset.setRll_cnt(setd.at(14).toInt());
+                    trkset.setRll_min(setd.at(15).toInt());
+                    trkset.setRll_max(setd.at(16).toInt());
+                    trkset.setPanCh(setd.at(17).toInt());
+                    trkset.setTiltCh(setd.at(18).toInt());
+                    trkset.setRollCh(setd.at(19).toInt());
+                    updateToUI();
+                    ui->statusbar->showMessage(tr("Settings Received"),2000);
+                } else {
+                    ui->statusbar->showMessage(tr("Error wrong # params"),2000);
                 }
             }
+
+            // Other information, Log it
+            else {
+                addToLog(data + "\n");
+            }
+
             serialData = serialData.right(serialData.length()-nlindex-2);
+
     }
 }
 
-void MainWindow::sendSerialData(QString data)
+void MainWindow::sendSerialData(QByteArray data)
 {
     if(data.isEmpty() || !serialcon->isOpen())
         return;
 
-    addToLog(data + "\n");
+    addToLog("TX: " + data + "\n");
 
     ui->txled->setState(true);
     txledtimer.start();
-    serialcon->write(data.toUtf8());
+    serialcon->write(data);
 }
 
-void MainWindow::addToLog(QString log, bool bold)
+void MainWindow::addToLog(QString log)
 {
     logd += log;
 
@@ -202,9 +218,11 @@ void MainWindow::serialConnect()
     serialcon->setFlowControl(QSerialPort::NoFlowControl);
 
     if(!serialcon->open(QIODevice::ReadWrite)) {
-        QMessageBox::critical(this,"Error",tr("Could not open Com Port ") + serialcon->portName());
+        QMessageBox::critical(this,"Error",tr("Could not open Com ") + serialcon->portName());
         return;
     }
+
+    ui->serialData->clear();
 
     ui->cmdDisconnect->setEnabled(true);
     ui->cmdConnect->setEnabled(false);
@@ -256,9 +274,10 @@ void MainWindow::updateToUI()
     ui->spnLPTiltRoll->setValue(trkset.lpTiltRoll());
     ui->spnLPPan->setValue(trkset.lpPan());
 
-    ui->chkpanrev->setChecked(trkset.panReversed());
-    ui->chkrllrev->setChecked(trkset.rollReversed());
-    ui->chktltrev->setChecked(trkset.tiltReversed());
+    qDebug() << "SRVREV" << QString::number(trkset.servoReverse());
+    ui->chkpanrev->setChecked(trkset.isPanReversed());
+    ui->chkrllrev->setChecked(trkset.isRollReversed());
+    ui->chktltrev->setChecked(trkset.isTiltReversed());
 
     ui->cmbpanchn->blockSignals(true);
     ui->cmbrllchn->blockSignals(true);
@@ -331,7 +350,7 @@ void MainWindow::serialReadReady()
 
 void MainWindow::manualSend()
 {
-    sendSerialData(ui->txtCommand->text());
+    sendSerialData(ui->txtCommand->text().toLatin1());
 }
 
 void MainWindow::startGraph()
@@ -359,7 +378,7 @@ void MainWindow::stopGraph()
 
 void MainWindow::storeSettings()
 {
-    ui->statusbar->showMessage(tr("Settings Stored to EEPROM"));
+    ui->statusbar->showMessage(tr("Settings Stored to EEPROM"),2000);
     sendSerialData("$SAVE");
 }
 
@@ -389,23 +408,24 @@ void MainWindow::updateSettings()
     lst.append(QString::number(trkset.rollCh()));
     QString data = lst.join(',');
 
- //   qDebug() << data;
+    // Calculate the CRC Checksum
+    uint16_t CRC = uCRC16Lib::calculate(data.toUtf8().data(),data.length());
 
-    sendSerialData("$" + data + "HE");
+    // Append Data in a Byte Array
+    QByteArray bd = QString("$" + data).toLatin1() + QByteArray::fromRawData((char*)&CRC,2) + "HE";
 
+    sendSerialData(bd);
 }
 
 void MainWindow::resetCenter()
 {
-    sendSerialData("$RST");
+    sendSerialData("$RST  ");
 }
 
 void MainWindow::requestTimer()
 {
-    //sendSerialData("$VERS");
-     sendSerialData("$GSET");
-  //   qDebug() << "Requested settings";
-
+    sendSerialData("$VERS  ");
+    sendSerialData("$GSET  ");
 }
 
 void MainWindow::rxledtimeout()
