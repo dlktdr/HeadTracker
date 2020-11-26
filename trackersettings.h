@@ -1,10 +1,16 @@
 #ifndef TRACKERSETTINGS_H
 #define TRACKERSETTINGS_H
 
-#define MIN_PWM 575
-#define MAX_PWM 1725
-#define MIN_CNT (((MAX_PWM-MIN_PWM)/2)+MIN_PWM-250)
-#define MAX_CNT (((MAX_PWM-MIN_PWM)/2)+MIN_PWM+250)
+
+// PWM Values here are divided by 2 plus 400 = actual uS output
+
+
+#define MIN_PWM 1000 // 1000 % 2 + 400 = 900 uS
+#define MAX_PWM 3400 // 3400 /2 + 400 = 2100 uS
+#define DEF_MIN_PWM 1200 // 1200 = 1000uS
+#define DEF_MAX_PWM 3200 // 1200 = 1000uS
+#define MIN_CNT (((MAX_PWM-MIN_PWM)/2)+MIN_PWM-550)
+#define MAX_CNT (((MAX_PWM-MIN_PWM)/2)+MIN_PWM+550)
 #define MIN_GAIN 0
 #define MAX_GAIN 500
 

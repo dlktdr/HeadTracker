@@ -10,10 +10,10 @@ ServoMinMax::ServoMinMax(QWidget *parent) : QWidget(parent)
     c_min = MIN_CNT;
 
     // Minimum value the maximum slider is allowed
-    min_max = min_travel + 250;
+    min_max = min_travel + 550;
 
     // Maximum value the minimum slider is allowed
-    max_min = max_travel - 250;
+    max_min = max_travel - 550;
 
     padding = 10;
     hpad = padding/2;
@@ -55,8 +55,8 @@ void ServoMinMax::reCenter()
 void ServoMinMax::setDefaults()
 {
     c_value = (MAX_PWM-MIN_PWM)/2 + MIN_PWM;
-    min_val = MIN_PWM;
-    max_val = MAX_PWM;
+    min_val = DEF_MIN_PWM;
+    max_val = DEF_MAX_PWM;
 
     update();
     emit minimumChanged(min_val);
@@ -164,7 +164,6 @@ void ServoMinMax::paintEvent(QPaintEvent *event)
         painter.drawRect(-triheight/2,-triheight/2,triheight,triheight);
         painter.restore();
     }
-
 }
 
 void ServoMinMax::mouseReleaseEvent(QMouseEvent *event)
