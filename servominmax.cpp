@@ -26,7 +26,6 @@ ServoMinMax::ServoMinMax(QWidget *parent) : QWidget(parent)
     actValue = c_value; // Default Centered
     showPos = false;
 
-
     setDefaults();
     setContextMenuPolicy(Qt::CustomContextMenu);
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)),this, SLOT(showContextMenu(const QPoint &)));
@@ -112,10 +111,6 @@ void ServoMinMax::paintEvent(QPaintEvent *event)
     painter.drawLine(hpad,linetop,hpad,linebot);
     // Right Line
     painter.drawLine(width()-hpad,linetop,width()-hpad,linebot);
-    // Min Max Line
-    //painter.drawLine(minmaxp,linetop,minmaxp,linebot);
-    // Max Min Line
-    //painter.drawLine(maxminp,linetop,maxminp,linebot);
 
 
     // Draw MinMaxBar
