@@ -21,14 +21,16 @@ SOURCES += \
     led.cpp \
 graph.cpp \
     servominmax.cpp \
-    trackersettings.cpp
+    trackersettings.cpp \
+    ucrc16lib.cpp
 
 HEADERS += \
     mainwindow.h \
     led.h \
 graph.h \
     servominmax.h \
-    trackersettings.h
+    trackersettings.h \
+    ucrc16lib.h
 
 FORMS += \
     mainwindow.ui
