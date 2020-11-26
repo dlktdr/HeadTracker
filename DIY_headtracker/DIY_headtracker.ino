@@ -338,7 +338,7 @@ void loop()
                 Serial.println(htChannels[0]);
                 Serial.println(htChannels[1]);
                 Serial.println(htChannels[2]);                
-        
+
                 //SaveSettings();
 
                 serial_index = 0;
@@ -372,11 +372,10 @@ void loop()
                      serial_data[serial_index-1] == 'R')
             {
                 Serial.print("Clearing Offsets");
-                    tiltStart = 0;        
-                    panStart = 0;                
-                    rollStart = 0; 
+                tiltStart = 0;        
+                panStart = 0;                
+                rollStart = 0; 
             }
-
 
             // Firmware version requested
             else if (serial_data[serial_index-4] == 'V' &&
@@ -385,96 +384,11 @@ void loop()
                      serial_data[serial_index-1] == 'S')
             {
                 Serial.print("FW: ");
-                Serial.println(FIRMWARE_VERSION_FLOAT, 2);
+                Serial.println(FIRMWARE_VERSION_FLOAT, 2.0);
                 serial_index = 0;
                 string_started = 0; 
             }
           
-            // Start mag and accel data stream
-            else if (serial_data[serial_index-4] == 'C' &&
-                     serial_data[serial_index-3] == 'M' &&
-                     serial_data[serial_index-2] == 'A' &&
-                     serial_data[serial_index-1] == 'S')
-            {  
-                outputMagAcc = 1;
-                outputMag = 0;
-                outputAcc = 0;
-                outputTrack = 0;
-                serial_index = 0;
-                string_started = 0;
-            }        
-
-            // Stop mag and accel data stream
-            else if (serial_data[serial_index-4] == 'C' &&
-                     serial_data[serial_index-3] == 'M' &&
-                     serial_data[serial_index-2] == 'A' &&
-                     serial_data[serial_index-1] == 'E')
-            {  
-                outputMagAcc = 0;
-                outputMag = 0;
-                outputTrack = 0;
-                outputAcc = 0;
-                serial_index = 0;
-                string_started = 0;
-            }        
-
-            // Start magnetometer data stream
-            else if (serial_data[serial_index-4] == 'C' &&
-                     serial_data[serial_index-3] == 'A' &&
-                     serial_data[serial_index-2] == 'S' &&
-                     serial_data[serial_index-1] == 'T')
-            {  
-                outputMag = 1;
-                outputMagAcc = 0;
-                outputAcc = 0;
-                outputTrack = 0;
-                serial_index = 0;
-                string_started = 0; 
-
-            }        
-          
-            // Stop magnetometer data stream
-            else if (serial_data[serial_index-4] == 'C' &&
-                     serial_data[serial_index-3] == 'A' &&
-                     serial_data[serial_index-2] == 'E' &&
-                     serial_data[serial_index-1] == 'N')
-            {  
-                outputMag = 0;
-                outputMagAcc = 0;
-                outputAcc = 0;
-                outputTrack = 0;
-                serial_index = 0;
-                string_started = 0; 
-            }
-
-            // Start accelerometer data stream
-            else if (serial_data[serial_index-4] == 'G' &&
-                     serial_data[serial_index-3] == 'R' &&
-                     serial_data[serial_index-2] == 'A' &&
-                     serial_data[serial_index-1] == 'V')
-            {  
-                outputAcc = 1;     
-                outputMagAcc = 0;
-                outputMag = 0;
-                outputTrack = 0;
-                serial_index = 0;
-                string_started = 0; 
-            }              
-          
-            // Stop accelerometer data stream
-            else if (serial_data[serial_index-4] == 'G' &&
-                     serial_data[serial_index-3] == 'R' &&
-                     serial_data[serial_index-2] == 'E' &&
-                     serial_data[serial_index-1] == 'N')
-            {  
-                outputAcc = 0;
-                outputMag = 0;
-                outputMagAcc = 0;
-                outputTrack = 0;
-                serial_index = 0;
-                string_started = 0; 
-            }
-
             // Start tracking data stream
             else if (serial_data[serial_index-4] == 'P' &&
                      serial_data[serial_index-3] == 'L' &&
@@ -514,93 +428,6 @@ void loop()
                 string_started = 0; 
             }          
           
-            // Calibrate gyro
-            else if (serial_data[serial_index-4] == 'C' &&
-                     serial_data[serial_index-3] == 'A' &&
-                     serial_data[serial_index-2] == 'L' &&
-                     serial_data[serial_index-1] == 'G')
-            { 
-                /*SetGyroOffset();
-                SaveSettings();
-               
-                Serial.print("Gyro offset measured:");
-                Serial.print(gyroOff[0]);
-                Serial.print(",");   
-                Serial.print(gyroOff[1]);
-                Serial.print(",");      
-                Serial.println(gyroOff[2]);    
-               
-                serial_index = 0;
-                string_started = 0; */
-            }
-
-
-
-
-            // Store magnetometer offset
-            else if (serial_data[serial_index-3] == 'M' &&
-                     serial_data[serial_index-2] == 'A' &&
-                     serial_data[serial_index-1] == 'G')
-            {
-                /*Serial.println(serial_data);
-                int valuesReceived[5] = {0,0,0,0,0};
-                int comma_index = 0; 
-              
-                for (unsigned char k = 0; k < serial_index - 3; k++)
-                {
-                    // Looking for comma
-                    if (serial_data[k] == 44)
-                    {
-                        comma_index++;
-                    }
-                    else
-                    {
-                        valuesReceived[comma_index] = valuesReceived[comma_index] * 10 + (serial_data[k] - 48);
-                    }
-                }
-                
-                // Y and Z are swapped on purpose.
-                magOffset[0] = valuesReceived[0] - 2000;
-                magOffset[1] = valuesReceived[2] - 2000;
-                magOffset[2] = valuesReceived[1] - 2000;
-
-                serial_index = 0;
-                string_started = 0; 
-
-//                SaveMagData();                */
-            }
-
-            // Store accelerometer offset
-            else if (serial_data[serial_index-3] == 'A' &&
-                     serial_data[serial_index-2] == 'C' &&
-                     serial_data[serial_index-1] == 'C')
-            {
-/*                Serial.println(serial_data);
-                int valuesReceived[5] = {0,0,0,0,0};
-                int comma_index = 0; 
-                for (unsigned char k = 0; k < serial_index - 3; k++)
-                {
-                    // Looking for comma
-                    if (serial_data[k] == 44)
-                    {
-                        comma_index++;
-                    }
-                    else
-                    {
-                        valuesReceived[comma_index] = valuesReceived[comma_index] * 10 + (serial_data[k] - 48);
-                    }              
-                }
-
-                accOffset[0] = valuesReceived[0] - 2000;
-                accOffset[1] = valuesReceived[1] - 2000;
-                accOffset[2] = valuesReceived[2] - 2000;
-                
-                serial_index = 0;
-                string_started = 0; 
-
-                SaveAccelData();                */
-            }
-
             // Retrieve settings
             else if (serial_data[serial_index-4] == 'G' &&
                      serial_data[serial_index-3] == 'S' &&
@@ -675,9 +502,6 @@ void loop()
     if (read_sensors == 1 && ht_paused == 0)
     {
         UpdateSensors();
-        /*GyroCalc();
-        AccelCalc();
-        MagCalc();*/
         FilterSensorData();    
                
         // Only output this data every X frames.
@@ -686,18 +510,6 @@ void loop()
             if (outputTrack == 1)
             {
                 trackerOutput();
-            }
-            else if (outputMagAcc == 1)
-            {
-                //calMagAccOutput();
-            }
-            else if (outputMag == 1)
-            {
-                //calMagOutput(); 
-            }
-            else if (outputAcc == 1)
-            {
-                //calAccOutput();
             }
             frameNumber = 0; 
         }
@@ -714,10 +526,7 @@ void loop()
 void SaveSettings()
 {  
     EEPROM.write(1, (unsigned char)(tiltRollBeta * 100));
-    EEPROM.write(2, (unsigned char)(panBeta * 100));
-    EEPROM.write(3, (unsigned char)(gyroWeightTiltRoll * 100));
-    EEPROM.write(4, (unsigned char)(GyroWeightPan * 100));
-  
+    EEPROM.write(2, (unsigned char)(panBeta * 100));    
     EEPROM.write(5, (unsigned char)servoReverseMask);
     
     // 6 unused
@@ -765,21 +574,6 @@ void SaveSettings()
     EEPROM.write(33, (unsigned char)htChannels[1]);
     EEPROM.write(34, (unsigned char)htChannels[2]);
 
-  /*
-    // Saving gyro calibration values
-    int temp = (int)(gyroOff[0] + 500.5);
-    EEPROM.write(35, (unsigned char)temp);
-    EEPROM.write(36, (unsigned char)(temp >> 8));   
-  
-    temp = (int)(gyroOff[1] + 500.5);
-    EEPROM.write(37, (unsigned char)temp);
-    EEPROM.write(38, (unsigned char)(temp >> 8));     
-
-    temp = (int)(gyroOff[2] + 500.5);
-    EEPROM.write(39, (unsigned char)temp);
-    EEPROM.write(40, (unsigned char)(temp >> 8));    
-  */
-  
     // Mark the memory to indicate that it has been
     // written. Used to determine if board is newly flashed
     // or not.
@@ -797,8 +591,6 @@ void GetSettings()
 {  
     tiltRollBeta    = (float)EEPROM.read(1) / 100;
     panBeta         = (float)EEPROM.read(2) / 100;
-    gyroWeightTiltRoll = (float)EEPROM.read(3) / 100;
-    GyroWeightPan   = (float)EEPROM.read(4) / 100;  
   
     tiltInverse = 1;
     rollInverse = 1;
@@ -842,77 +634,12 @@ void GetSettings()
     htChannels[0] = EEPROM.read(32);  
     htChannels[1] = EEPROM.read(33);  
     htChannels[2] = EEPROM.read(34);    
-  
-    /*gyroOff[0] = EEPROM.read(35) + (EEPROM.read(36) << 8) - 500; 
-    gyroOff[1] = EEPROM.read(37) + (EEPROM.read(38) << 8) - 500; 
-    gyroOff[2] = EEPROM.read(39) + (EEPROM.read(40) << 8) - 500;   
-  
-    magOffset[0] = EEPROM.read(200) + (EEPROM.read(201) << 8) - 2000;     
-    magOffset[1] = EEPROM.read(202) + (EEPROM.read(203) << 8) - 2000;     
-    magOffset[2] = EEPROM.read(204) + (EEPROM.read(205) << 8) - 2000;       
-  
-    accOffset[0] = EEPROM.read(206) + (EEPROM.read(207) << 8) - 2000;     
-    accOffset[1] = EEPROM.read(208) + (EEPROM.read(209) << 8) - 2000;     
-    accOffset[2] = EEPROM.read(210) + (EEPROM.read(211) << 8) - 2000;       
-  
- */
+
 #if (DEBUG)
     DebugOutput();
 #endif
 }
 
-//--------------------------------------------------------------------------------------
-// Func: SaveMagData
-// Desc: Stores magnetometer calibration info to EEPROM.
-//--------------------------------------------------------------------------------------
-/*void SaveMagData()
-{
-    int temp = (int)(magOffset[0] + 2000);
-    EEPROM.write(200, (unsigned char)temp);
-    EEPROM.write(201, (unsigned char)(temp >> 8));   
-  
-    temp = (int)(magOffset[1] + 2000);
-    EEPROM.write(202, (unsigned char)temp);
-    EEPROM.write(203, (unsigned char)(temp >> 8));   
-  
-    temp = (int)(magOffset[2] + 2000);
-    EEPROM.write(204, (unsigned char)temp);
-    EEPROM.write(205, (unsigned char)(temp >> 8));   
-  
-    Serial.println("Mag offset saved!"); 
-    Serial.print(magOffset[0]);
-    Serial.print(", "); 
-    Serial.print(magOffset[1]);
-    Serial.print(", ");   
-    Serial.println(magOffset[2]); 
-}
-
-//--------------------------------------------------------------------------------------
-// Func: SaveAccelData
-// Desc: Stores accelerometer calibration data to EEPOM.
-//--------------------------------------------------------------------------------------
-void SaveAccelData()
-{
-    int temp = (int)(accOffset[0] + 2000);
-    EEPROM.write(206, (unsigned char)temp);
-    EEPROM.write(207, (unsigned char)(temp >> 8));   
-  
-    temp = (int)(accOffset[1] + 2000);
-    EEPROM.write(208, (unsigned char)temp);
-    EEPROM.write(209, (unsigned char)(temp >> 8));   
-  
-    temp = (int)(accOffset[2] + 2000);
-    EEPROM.write(210, (unsigned char)temp);
-    EEPROM.write(211, (unsigned char)(temp >> 8));   
-  
-    Serial.println("Acc offset saved!"); 
-    Serial.print(accOffset[0]);
-    Serial.print(","); 
-    Serial.print(accOffset[1]);
-    Serial.print(",");   
-    Serial.println(accOffset[2]);  
-}
-*/
 //--------------------------------------------------------------------------------------
 // Func: DebugOutput
 // Desc: Outputs useful device/debug information to the serial port.
@@ -933,12 +660,6 @@ void DebugOutput()
     Serial.print("panBeta: ");
     Serial.println(panBeta); 
  
-    Serial.print("gyroWeightTiltRoll: ");
-    Serial.println(gyroWeightTiltRoll); 
-
-    Serial.print("GyroWeightPan: ");
-    Serial.println(GyroWeightPan); 
-
     Serial.print("servoPanCenter: ");
     Serial.println(servoPanCenter); 
  
