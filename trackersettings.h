@@ -88,7 +88,10 @@ public:
     char rollCh() const;
     void setRollCh(char value);
 
-    int count() const {return 20;}
+    int count() const {return 21;}
+
+    int axisRemap() const {return axisremap;}
+    void setAxisRemap(int value);
 
 private:
     int rll_min,rll_max,rll_gain,rll_cnt;
@@ -105,6 +108,8 @@ private:
     char panch;             // Firmware: htChannels[0]
     char tiltch;            // Firmware: htChannels[1]
     char rollch;            // Firmware: htChannels[2]
+
+    int axisremap;
 };
 
 #endif // TRACKERSETTINGS_H

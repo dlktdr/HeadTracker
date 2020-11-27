@@ -323,6 +323,50 @@
           </spacer>
          </item>
          <item>
+          <widget class="QComboBox" name="cmbRemap">
+           <item>
+            <property name="text">
+             <string>Remap 0</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Remap 1 - Default</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Remap 2</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Remap 3</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Remap 4</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Remap 5</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Remap 6</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Remap 7</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item>
           <widget class="QPushButton" name="cmdResetCenter">
            <property name="text">
             <string>&amp;Reset Center</string>
@@ -920,6 +964,13 @@
             </size>
            </property>
           </spacer>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="chkRawData">
+           <property name="text">
+            <string>Show Raw Data</string>
+           </property>
+          </widget>
          </item>
         </layout>
        </item>

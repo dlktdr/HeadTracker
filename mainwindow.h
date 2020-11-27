@@ -54,7 +54,7 @@ private slots:
     void storeSettings(); // Save to eeprom
     void updateSettings(); // Update to chip
     void resetCenter();
-
+    void setDataMode(bool);
     void requestTimer();
     void rxledtimeout();
     void txledtimeout();

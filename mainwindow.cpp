@@ -18,6 +18,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->cmdStartGraph->setEnabled(false);
     ui->cmdSend->setEnabled(false);
     QFont serifFont("Times", 10, QFont::Bold);
+    // Use system default fixed with font
+    ui->serialData->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
     graphing = false;
     xtime = 0;
     updateToUI();
@@ -38,6 +40,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->chkpanrev,&QCheckBox::clicked,this,&MainWindow::updateFromUI);
     connect(ui->chkrllrev,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
     connect(ui->chktltrev,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
+    connect(ui->chkRawData,SIGNAL(clicked(bool)),this,SLOT(setDataMode(bool)));
     //connect(ui->spnGyroPan,SIGNAL(editingFinished()),this,SLOT(updateFromUI()));
     //connect(ui->spnGyroTilt,SIGNAL(editingFinished()),this,SLOT(updateFromUI()));
     connect(ui->spnLPPan,SIGNAL(editingFinished()),this,SLOT(updateFromUI()));
@@ -60,6 +63,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->cmbpanchn,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbtiltchn,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbrllchn,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->cmbRemap,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
+
     connect(ui->cmdRefresh,&QPushButton::clicked,this,&MainWindow::findSerialPorts);
 
     // LED Timers
@@ -124,7 +129,7 @@ void MainWindow::parseSerialData()
             else if(data.left(5) == QString("$SET$")) {
                 QStringList setd = data.right(data.length()-5).split(',',Qt::KeepEmptyParts);
 
-                if(setd.length() == 20) {
+                if(setd.length() == trkset.count()) {
                     trkset.setLPTiltRoll(setd.at(0).toFloat());
                     trkset.setLPPan(setd.at(1).toFloat());
                     trkset.setGyroWeightTiltRoll(setd.at(2).toFloat());
@@ -145,6 +150,9 @@ void MainWindow::parseSerialData()
                     trkset.setPanCh(setd.at(17).toInt());
                     trkset.setTiltCh(setd.at(18).toInt());
                     trkset.setRollCh(setd.at(19).toInt());
+                    qDebug() << "Axis Remap IN" << setd.at(20).toInt();
+                    trkset.setAxisRemap(setd.at(20).toInt());
+
                     updateToUI();
                     ui->statusbar->showMessage(tr("Settings Received"),2000);
                 } else {
@@ -222,6 +230,7 @@ void MainWindow::serialConnect()
         return;
     }
 
+    logd.clear();
     ui->serialData->clear();
 
     ui->cmdDisconnect->setEnabled(true);
@@ -281,14 +290,18 @@ void MainWindow::updateToUI()
     ui->cmbpanchn->blockSignals(true);
     ui->cmbrllchn->blockSignals(true);
     ui->cmbtiltchn->blockSignals(true);
+    ui->cmbRemap->blockSignals(true);
 
     ui->cmbpanchn->setCurrentIndex(trkset.panCh()-1);
     ui->cmbrllchn->setCurrentIndex(trkset.rollCh()-1);
     ui->cmbtiltchn->setCurrentIndex(trkset.tiltCh()-1);
+    ui->cmbRemap->setCurrentIndex(trkset.axisRemap());
+    qDebug() << "Axis Remap" << trkset.axisRemap();
 
     ui->cmbpanchn->blockSignals(false);
     ui->cmbrllchn->blockSignals(false);
     ui->cmbtiltchn->blockSignals(false);
+    ui->cmbRemap->blockSignals(false);
 
 }
 
@@ -320,6 +333,8 @@ void MainWindow::updateFromUI()
     trkset.setPanCh(ui->cmbpanchn->currentText().toInt());
     trkset.setRollCh(ui->cmbrllchn->currentText().toInt());
     trkset.setTiltCh(ui->cmbtiltchn->currentText().toInt());
+
+    trkset.setAxisRemap(ui->cmbRemap->currentIndex());
 
     updatesettingstmr.start(1000);
 }
@@ -405,6 +420,7 @@ void MainWindow::updateSettings()
     lst.append(QString::number(trkset.panCh()));
     lst.append(QString::number(trkset.tiltCh()));
     lst.append(QString::number(trkset.rollCh()));
+    lst.append(QString::number(trkset.axisRemap()));
     QString data = lst.join(',');
 
     // Calculate the CRC Checksum
@@ -418,13 +434,21 @@ void MainWindow::updateSettings()
 
 void MainWindow::resetCenter()
 {
-    sendSerialData("$RST  ");
+    sendSerialData("$RST ");
+}
+
+void MainWindow::setDataMode(bool rawmode)
+{
+    if(rawmode)
+        sendSerialData("$GRAW ");
+    else
+        sendSerialData("$GOFF ");
 }
 
 void MainWindow::requestTimer()
 {
-    sendSerialData("$VERS  ");
-    sendSerialData("$GSET  ");
+    sendSerialData("$VERS ");
+    sendSerialData("$GSET ");
 }
 
 void MainWindow::rxledtimeout()

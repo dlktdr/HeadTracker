@@ -320,3 +320,9 @@ void TrackerSettings::setRollCh(char value)
     if(value > 0 && value < 17)
         rollch = value;
 }
+
+void TrackerSettings::setAxisRemap(int value)
+{
+    if(value >=0 && value <= 7)
+        axisremap = value;
+}
