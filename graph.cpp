@@ -29,7 +29,7 @@ void Graph::paintEvent(QPaintEvent *event)
 {
     Q_UNUSED(event);
     QPainter painter(this);
-
+    QPen pen;
 
     painter.setRenderHint(QPainter::Antialiasing,true);
 
@@ -42,9 +42,13 @@ void Graph::paintEvent(QPaintEvent *event)
     painter.setBrush(QBrush(lg));
     painter.drawRect(rect().adjusted(0,0,-1,-1));
 
+    // Zero Line
 
-
-
+    painter.setRenderHint(QPainter::Antialiasing,false);
+    pen.setColor(Qt::black);
+    pen.setWidth(2);
+    painter.drawLine(0,height()/2,width(),height()/2);
+    painter.setRenderHint(QPainter::Antialiasing,true);
 
     if(pointstilt.length() < 2)
         return;
@@ -75,52 +79,48 @@ void Graph::paintEvent(QPaintEvent *event)
 
     painter.setBrush(Qt::NoBrush);
 
-    QPen pen;
-
-
+    // Tilt Red on Black
     pen.setColor(Qt::black);
     pen.setWidth(4);
     painter.setPen(pen);
     painter.drawPath(tilpath);
-
     pen.setColor(Qt::red);
     pen.setWidth(2);
     painter.setPen(pen);
     painter.drawPath(tilpath);
 
+
+    // Roll Green on Black
     pen.setColor(Qt::black);
     pen.setWidth(4);
     painter.setPen(pen);
     painter.drawPath(rllpath);
-
     pen.setWidth(2);
     pen.setColor(Qt::green);
     painter.setPen(pen);
     painter.drawPath(rllpath);
 
 
+    // Pan Yellow on Black
     pen.setColor(Qt::black);
     pen.setWidth(4);
     painter.setPen(pen);
     painter.drawPath(panpath);
     pen.setWidth(2);
-    pen.setColor(Qt::white);
+    pen.setColor(Qt::yellow);
     painter.setPen(pen);
     painter.drawPath(panpath);
-
 
     // Legend
     pen.setColor(Qt::black);
     painter.setPen(pen);
     QFont legfont = QFont("Times", 10, QFont::Bold);
-    const int offset=10;
+    const int offset=6;
     int fonth = QFontMetrics(legfont).height();    
     painter.setFont(legfont);
-    painter.drawText(10,offset+fonth,"+180"); // Top
-    painter.drawText(10,(height()/2)+(fonth/2),"0"); // Center
+    painter.drawText(10,offset+fonth/2,"+180"); // Top
+    painter.drawText(10,(height()/2),"0"); // Center
     painter.drawText(10,height()-offset,"-180");
-
-
     painter.setBrush(Qt::black);
     painter.setPen(Qt::white);
     painter.drawRect(width()-47,2,38,50);
@@ -130,7 +130,7 @@ void Graph::paintEvent(QPaintEvent *event)
     pen.setColor(Qt::green);
     painter.setPen(pen);
     painter.drawText( width() - 40,32, "Roll");
-    pen.setColor(Qt::white);
+    pen.setColor(Qt::yellow);
     painter.setPen(pen);
     painter.drawText( width() - 40,47, "Pan");
 
