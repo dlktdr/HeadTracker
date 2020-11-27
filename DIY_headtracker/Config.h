@@ -11,6 +11,9 @@
 // features.
 //
 
+// Set to the Address of the BNO055, Can be either 0x29 or 0x28 depending on level of the BNO's ADR pin
+#define BNO055_ADDRESS 0x29
+
 // Set to 1 to enable PPM input, 0 to disable. 
 #define PPM_IN  0
 

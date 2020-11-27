@@ -42,9 +42,6 @@ Mapping example:
 $123456789111CH
 */
 
-void SaveSettings();
-void DebugOutput();
-void GetSettings();
 
 // Local file variables
 //
@@ -102,6 +99,9 @@ extern float tiltFactor;
 extern float rollFactor;
 extern unsigned char servoReverseMask;
 extern unsigned char htChannels[];
+extern unsigned char axisRemap;
+extern bool graphRaw;
+
 // End settings   
 
 //--------------------------------------------------------------------------------------
@@ -290,7 +290,7 @@ void loop()
                   Serial.println("$CRCOK:HT Settings Retrieved");
                 }
            
-                int valuesReceived[20] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+                int valuesReceived[21] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
                 int comma_index = 0;
 
                 for (unsigned char k = 0; k < (serial_index - 4); k++)
@@ -361,11 +361,13 @@ void loop()
      
                 htChannels[0] = valuesReceived[17];                   
                 htChannels[1] = valuesReceived[18];              
-                htChannels[2] = valuesReceived[19];                       
+                htChannels[2] = valuesReceived[19];            
 
-                /*Serial.println(htChannels[0]);
-                Serial.println(htChannels[1]);
-                Serial.println(htChannels[2]);                */
+                axisRemap = valuesReceived[20];     
+                Serial.print("AXIS REMAP To"); Serial.print(axisRemap); Serial.println("");
+
+                // Update the BNO055 axis mapping
+                RemapAxes();               
 
                 serial_index = 0;
                 string_started = 0;
@@ -397,11 +399,32 @@ void loop()
                      serial_data[serial_index-2] == 'L' &&
                      serial_data[serial_index-1] == 'R')
             {
-                Serial.print("Clearing Offsets");
+                Serial.println("Clearing Offsets");
                 tiltStart = 0;        
                 panStart = 0;                
                 rollStart = 0; 
             }
+
+            // Graph raw sensor data
+            else if (serial_data[serial_index-4] == 'G' &&
+                     serial_data[serial_index-3] == 'R' &&
+                     serial_data[serial_index-2] == 'A' &&
+                     serial_data[serial_index-1] == 'W')
+            {
+                Serial.println("Showing Raw Sensor Data");
+                graphRaw = 1;        
+            }
+
+            // Graph offset sensor data
+            else if (serial_data[serial_index-4] == 'G' &&
+                     serial_data[serial_index-3] == 'O' &&
+                     serial_data[serial_index-2] == 'F' &&
+                     serial_data[serial_index-1] == 'F')
+            {
+                Serial.println("Showing Offset Sensor Data");
+                graphRaw = 0;        
+            }
+
 
             // Firmware version requested
             else if (serial_data[serial_index-4] == 'V' &&
@@ -504,7 +527,9 @@ void loop()
                 Serial.print(",");
                 Serial.print(htChannels[1]);
                 Serial.print(",");
-                Serial.println(htChannels[2]);
+                Serial.print(htChannels[2]);
+                Serial.print(",");
+                Serial.println(axisRemap);
 
                 Serial.println("Settings Retrieved!");
 
@@ -600,7 +625,9 @@ void SaveSettings()
     EEPROM.write(32, (unsigned char)htChannels[0]);
     EEPROM.write(33, (unsigned char)htChannels[1]);
     EEPROM.write(34, (unsigned char)htChannels[2]);
-
+    
+    EEPROM.write(35, (unsigned char)axisRemap);
+    
     // Mark the memory to indicate that it has been
     // written. Used to determine if board is newly flashed
     // or not.
@@ -662,6 +689,8 @@ void GetSettings()
     htChannels[1] = EEPROM.read(33);  
     htChannels[2] = EEPROM.read(34);    
 
+    axisRemap = EEPROM.read(35);
+
 #if (DEBUG)
     DebugOutput();
 #endif
@@ -700,5 +729,9 @@ void DebugOutput()
     Serial.println(tiltFactor); 
 
     Serial.print("panFactor: ");
-    Serial.println(panFactor);     
+    Serial.println(panFactor); 
+
+    Serial.print("axisRemap: ");
+    Serial.println(axisRemap); 
+
 }

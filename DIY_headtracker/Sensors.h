@@ -16,21 +16,11 @@ void AccelCalc();
 void MagCalc();
 
 void SetGyroOffset();
-void testPanOutput();
 void trackerOutput();
-void calMagOutput();
-void calAccOutput(); 
-void calMagAccOutput(); // Output both mag and accel in one pass.
-void CalibrateMag();
 void FilterSensorData();
 void ResetCenter();
 void SensorInfoPrint();
 
-void testAllSensors();
-void testRollOutput();
-void testAllData();
-void testAccOutput();
-void testGyroOutput();
-void testMagOutput();
+void RemapAxes();
 
 #endif // sensors_h

@@ -1,7 +1,6 @@
 /*
- * Cliff Blackburn - Nov 20,2020 - Modified code for use with alternate sensors including BMO055 Sensor + QMC5883L
- *                               - Auto discovery on powerup via address scan.
- *                               - BMO055 uses alternate calibration
+ * Cliff Blackburn - Nov 20,2020 - Modified code for use with BMO055 + new GUI
+ *                               
  */
 //-----------------------------------------------------------------------------
 // File: Sensors.cpp
@@ -10,29 +9,23 @@
 #include "config.h"
 #include "Arduino.h"
 #include "functions.h"
+#include "sensors.h"
 #include <Wire.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BNO055.h>
 #include <utility/imumaths.h>
 
-/*
-Reference for basic sensor/IMU understanding/calculation:
-http://www.starlino.com/imu_guide.html
-http://www.sparkfun.com/datasheets/Sensors/Magneto/Tilt%20Compensated%20Compass.pdf
-https://www.loveelectronics.co.uk/Tutorials/13/tilt-compensated-compass-arduino-tutorial
-http://www.pololu.com/file/download/LSM303DLH-compass-app-note.pdf?file_id=0J434
-*/
-
-// BNO055 Can use either 0x28 or 0x29 depending on wiring of the ADR pin.
-#define BNO055_ADDRESS 0x29
 
 // Variables defined elsewhere
 //
 extern long channel_value[];
 
 /* BNO055 */
-Adafruit_BNO055 bno = Adafruit_BNO055(-1,0x29); // **** DEFAULT BNO055 address, 0x028 also Possible ****
+Adafruit_BNO055 bno = Adafruit_BNO055(-1, BNO055_ADDRESS ); 
 adafruit_bno055_offsets_t calibrationData;
+Adafruit_BNO055::adafruit_bno055_axis_remap_config_t rmc = Adafruit_BNO055::REMAP_CONFIG_P1;
+Adafruit_BNO055::adafruit_bno055_axis_remap_sign_t rms = Adafruit_BNO055::REMAP_SIGN_P1;
+
 sensors_event_t event; 
 
 // Local variables
@@ -43,14 +36,17 @@ char resetValues = 1;        // Used to reset headtracker/re-center.
 
 // Final angles for headtracker:
 float tiltAngle = 90;       // Tilt angle
+float tiltAngleOff = 0;
 float tiltAngleLP = 90;     // Tilt angle with low pass FilterSensorData
 float lastTiltAngle = 90;   // Used in low pass FilterSensorData.
 
 float rollAngle = 90;        // Roll angle
+float rollAngleOff = 0;
 float rollAngleLP = 90;     // Roll angle with low pass FilterSensorData
 float lastRollAngle = 90;   // Used in low pass FilterSensorData
 
 float panAngle = 90;        // Pan angle
+float panAngleOff = 0;
 float panAngleLP = 90;      // Pan angle with low pass FilterSensorData
 float lastPanAngle = 90;    // Used in low pass FilterSensorData
 
@@ -86,6 +82,9 @@ float tiltFactor = 17;
 float rollFactor = 17;
 unsigned char servoReverseMask = 0;
 unsigned char htChannels[3] = {8, 7, 6}; // pan, tilt, roll
+unsigned char axisRemap = 0;
+bool graphRaw = false;
+
 //
 // End settings
 
@@ -121,12 +120,21 @@ void trackerOutput()
   uint8_t sys, gyro, accel, mag = 0;
   bno.getCalibration(&sys, &gyro, &accel, &mag);
   Serial.print("$G");
-  Serial.print(tiltAngleLP);
-  Serial.print(",");
-  Serial.print(rollAngleLP);
-  Serial.print(",");    
-  Serial.print(panAngleLP);
-  Serial.print(",");    
+  if(graphRaw) { // Graph Raw Data
+    Serial.print(tiltAngle);
+    Serial.print(",");
+    Serial.print(rollAngle);
+    Serial.print(",");    
+    Serial.print(panAngle);
+    Serial.print(","); 
+  } else {  // Graph offset and filtered data
+    Serial.print(tiltAngleLP);
+    Serial.print(",");
+    Serial.print(rollAngleLP);
+    Serial.print(",");    
+    Serial.print(panAngleLP);
+    Serial.print(",");  
+  }
   Serial.print(channel_value[htChannels[0]]);
   Serial.print(",");    
   Serial.print(channel_value[htChannels[1]]);
@@ -192,25 +200,26 @@ void FilterSensorData()
     }
 
     // Offset from reset location
-    panAngle -= panStart;
-    tiltAngle -= tiltStart;
-    rollAngle -= rollStart;
+    panAngleOff = panAngle - panStart;
+    tiltAngleOff = tiltAngle - tiltStart;
+    rollAngleOff = rollAngle - rollStart;
 
     // Normalize Angle For Pan
-    panAngle = normalize(panAngle,-180,180);
+    panAngleOff = normalize(panAngleOff,-180,180);
+    panAngle = normalize(panAngle,-180,180); 
       
     // Filter the Data
     if (TrackerStarted)
     {
         // All low-pass filters
         
-        tiltAngleLP = tiltAngle * tiltRollBeta + (1 - tiltRollBeta) * lastTiltAngle;
+        tiltAngleLP = tiltAngleOff * tiltRollBeta + (1 - tiltRollBeta) * lastTiltAngle;
         lastTiltAngle = tiltAngleLP;
          
-        rollAngleLP = rollAngle * tiltRollBeta + (1 - tiltRollBeta) * lastRollAngle;
+        rollAngleLP = rollAngleOff * tiltRollBeta + (1 - tiltRollBeta) * lastRollAngle;
         lastRollAngle = rollAngleLP;
           
-        panAngleLP = panAngle * panBeta + (1 - panBeta) * lastPanAngle;
+        panAngleLP = panAngleOff * panBeta + (1 - panBeta) * lastPanAngle;
         lastPanAngle = panAngleLP;
 
         // Limit outputs
@@ -254,6 +263,7 @@ void InitSensors()
   }
 
   bno.setExtCrystalUse(true);
+  //bno.setMode(0X0C); // 9 Degrees Of Freedom, Fast Mag Cal On
 
   sensor_t sensor;
   bno.getSensor(&sensor);
@@ -262,11 +272,15 @@ void InitSensors()
   Serial.print("Sensor:       "); Serial.println(sensor.name);
   Serial.print("Driver Ver:   "); Serial.println(sensor.version);
   Serial.print("Unique ID:    "); Serial.println(sensor.sensor_id);
-  Serial.print("Max Value:    "); Serial.print(sensor.max_value); Serial.println(" xxx");
-  Serial.print("Min Value:    "); Serial.print(sensor.min_value); Serial.println(" xxx");
-  Serial.print("Resolution:   "); Serial.print(sensor.resolution); Serial.println(" xxx");
-  Serial.println("------------------------------------");
-  
+  Serial.print("Max Value:    "); Serial.print(sensor.max_value); Serial.println("");
+  Serial.print("Min Value:    "); Serial.print(sensor.min_value); Serial.println("");
+  Serial.print("Resolution:   "); Serial.print(sensor.resolution); Serial.println("");
+  Serial.println("------------------------------------");  
+
+  // Set Axes Orientation
+  RemapAxes();  
+  Serial.print("Axis Remap: "); Serial.print(axisRemap); Serial.print(" 0x"); Serial.println((char)rmc,HEX);
+  Serial.print("Axis Sign:    0x"); Serial.println((char)rms,HEX);
 }
 
 //--------------------------------------------------------------------------------------
@@ -278,4 +292,86 @@ void ResetCenter()
 {
     resetValues = 1; 
     TrackerStarted = 1;
+}
+
+//--------------------------------------------------------------------------------------
+// Func: RemapAxes
+// Desc: Allows the tracker board to be re-oriented in multiple positions. 8 Choices allowed here. See BNO055 Datasheet Pg. 25
+//       Called on startup and on config change.
+//       Possible Choices are, Board Flat, Sensor UP (Default) X=X Y=Y Z=Z 0x24 SIGN=0x00
+//--------------------------------------------------------------------------------------
+
+#define AXIS_X 0x00
+#define AXIS_Y 0x01
+#define AXIS_Z 0x02
+
+#define AXES_MAP(XX,YY,ZZ) (ZZ<<4|YY<<2|XX)
+
+#define X_REV 0x04
+#define Y_REV 0x02
+#define Z_REV 0x01
+
+void RemapAxes() 
+{
+  rmc = AXES_MAP(AXIS_X,AXIS_Y,AXIS_Z);
+  rms = 0;
+  char cas = axisRemap;
+  switch(cas) {
+    // Board Up, Tilt towards long edge : Default
+    case 0:     
+        rmc = AXES_MAP(AXIS_X,AXIS_Y,AXIS_Z); // Board Flat, Sensor Facing Up
+        rms = 0;
+        break;          
+    case 1:
+        rmc = AXES_MAP(AXIS_Y,AXIS_X,AXIS_Z); // Board Flat, Sensor Facing up, Rotate 90
+        rms = Y_REV;
+        break;    
+    case 2: 
+        rmc = AXES_MAP(AXIS_X,AXIS_Z,AXIS_Y); // Board Vertical, Usb down, Sensor Facing right
+        rms = Z_REV;
+        break;
+    // Board Facking Down, Tilt towards long edge
+    case 3: 
+        rmc = AXES_MAP(AXIS_Y,AXIS_Z,AXIS_X); // Board Vertical, Usb Left Sesnsor Facing Back 
+        rms = X_REV|Z_REV;
+        break;
+    case 4: 
+        rmc = AXES_MAP(AXIS_X,AXIS_Z,AXIS_Y); // Board Vertical, Usb Down, Sensor Forward
+        rms = Z_REV;
+        break;
+    case 5: 
+        rmc = AXES_MAP(AXIS_Z,AXIS_Y,AXIS_X); // TBD
+        rms = Z_REV;
+        break;
+   case 6: 
+        rmc = AXES_MAP(AXIS_X,AXIS_Y,AXIS_Z); // TBD 
+        rms = Y_REV;
+        break;
+   case 7: 
+        rmc = AXES_MAP(AXIS_X,AXIS_Y,AXIS_Z); // TBD 
+        rms = Y_REV|X_REV;
+        break;        
+  }
+
+
+  bno.setAxisRemap(rmc);
+  bno.setAxisSign(rms);
+  Serial.print("Orient Mapping #"); Serial.print(axisRemap); Serial.print(" Set To: "); Serial.print(rmc, HEX); Serial.print(" Signs: "); Serial.print(rms, HEX); Serial.println("");
+     
+/*  rmc = Adafruit_BNO055::REMAP_CONFIG_P1;
+  rms = Adafruit_BNO055::REMAP_SIGN_P1;
+    
+  if(axisRemap == 0 || // 0x21
+     axisRemap == 3 ||
+     axisRemap == 5 ||
+     axisRemap == 6) 
+      rmc = Adafruit_BNO055::REMAP_CONFIG_P0; // 0x24
+  else
+      rmc = Adafruit_BNO055::REMAP_CONFIG_P1;
+
+  if(axisRemap < 7)
+    rms = (Adafruit_BNO055::adafruit_bno055_axis_remap_sign_t)mapcodes[axisRemap];
+*/
+  //bno.setAxisSign(rms);
+  //bno.setAxisRemap(rmc);
 }
