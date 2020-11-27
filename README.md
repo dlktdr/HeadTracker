@@ -1,5 +1,5 @@
 # HeadTracker
-Re-work of Dennis Frie's  work for use with a BNO055 Sensor
+Re-work of Dennis Frie & Mark Mansur headtracker code for use with a BNO055 Sensor
 
 I've modified the code for the head tracker and wrote a new GUI for it. Based on the BNO055 sensor. This sensor self calibrates once powered up. No need to calibrate connected to the PC.
 
