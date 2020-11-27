@@ -30,7 +30,7 @@ I've modified the code for the head tracker and wrote a new GUI for it. Based on
 ![alt text](https://github.com/dlktdr/HeadTracker/blob/master/Doc/Hookup.png?raw=true)
 
 ## Note
-I was going to make the GUI compatible with the old firmware too but It's currently broken for that. I will work on it later if there is any requests to do so.
+I was going to make the GUI compatible with the old firmware too but i've made quite a few changes and doubt it will work. If there are many requests I can work on it.
 
 ![alt text](https://github.com/dlktdr/HeadTracker/blob/master/ScreenShot.png?raw=true)
 
