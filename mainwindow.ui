@@ -82,7 +82,7 @@
            </sizepolicy>
           </property>
           <property name="text">
-           <string>&amp;Store Settings</string>
+           <string>&amp;Store to EEPROM</string>
           </property>
          </widget>
         </item>
@@ -323,30 +323,37 @@
           </spacer>
          </item>
          <item>
+          <widget class="QLabel" name="label_3">
+           <property name="text">
+            <string>Board Orientation Setting</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QComboBox" name="cmbRemap">
            <item>
             <property name="text">
-             <string>Remap 0</string>
+             <string>Board Flat, Sensor Facing Up</string>
             </property>
            </item>
            <item>
             <property name="text">
-             <string>Remap 1 - Default</string>
+             <string>Board Flat, Sensor Facing Up, Rotate 90</string>
             </property>
            </item>
            <item>
             <property name="text">
-             <string>Remap 2</string>
+             <string>Board Vertical, Usb Down, Sensor Facing Right</string>
             </property>
            </item>
            <item>
             <property name="text">
-             <string>Remap 3</string>
+             <string>Board Vertical, Usb Left, Sensor Facing Back</string>
             </property>
            </item>
            <item>
             <property name="text">
-             <string>Remap 4</string>
+             <string>Board Vertical, Usb Down, Sensor Facing Forward</string>
             </property>
            </item>
            <item>
