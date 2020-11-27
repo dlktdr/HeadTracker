@@ -36,4 +36,4 @@ I was going to make the GUI compatible with the old firmware too but It's curren
 
 ## To Do
 
-I still want to add orientation control so it the board can be mounted in any direction. Right now it only works with the BNO facing up.
+I've added board orientation choices. Needs work tho, haven't added too many choices. I also have to figure out a better way to do this tho. Everyone isn't going to buy the same board or solder it on in the same orientation.
