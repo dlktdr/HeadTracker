@@ -48,6 +48,7 @@ void ServoMinMax::showContextMenu(const QPoint &pos)
 void ServoMinMax::reCenter()
 {
     c_value = (max_val - min_val) /2 + min_val;
+    emit(centerChanged(c_value));
     update();
 }
 
