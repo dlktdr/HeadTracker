@@ -95,7 +95,7 @@ void MainWindow::parseSerialData()
             // CRC ERROR
             if(data.left(7) == QString("$CRCERR")) {
                 ui->statusbar->showMessage("CRC Error : Error Setting Values, Retrying",2000);
-                updatesettingstmr.start(1000);
+                updatesettingstmr.start(500);
             }
 
             // CRC OK
@@ -122,6 +122,10 @@ void MainWindow::parseSerialData()
                     ui->servoPan->setActualPosition(panout);
                     ui->servoTilt->setActualPosition(tiltout);
                     ui->servoRoll->setActualPosition(rollout);
+                    graphing = true;
+                    ui->servoPan->setShowActualPosition(true);
+                    ui->servoTilt->setShowActualPosition(true);
+                    ui->servoRoll->setShowActualPosition(true);
                 }
             }
 
@@ -398,6 +402,10 @@ void MainWindow::storeSettings()
 
 void MainWindow::updateSettings()
 {
+    if(graphing) {
+        serialcon->write("$PLEN");
+    }
+
     updatesettingstmr.stop();
     QStringList lst;
     lst.append(QString::number(trkset.lpTiltRoll()));
@@ -430,6 +438,12 @@ void MainWindow::updateSettings()
     QByteArray bd = QString("$" + data).toLatin1() + QByteArray::fromRawData((char*)&CRC,2) + "HE";
 
     sendSerialData(bd);
+
+    if(graphing) {
+        serialcon->write("$PLST");
+    }
+
+
 }
 
 void MainWindow::resetCenter()
