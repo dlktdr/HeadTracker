@@ -67,9 +67,6 @@
 // TOP (timer rollover) used for PPM pulse time measurement
 #define TOP (5003 + NUMBER_OF_CHANNELS * 5000)
 
-// Set to 0, stored gyro calibration is used. If 1, gyro is calibrated at powerup  
-#define ALWAYS_CAL_GYRO 0
-
 // Center/pause input button pin number
 #define BUTTON_INPUT 11
 
