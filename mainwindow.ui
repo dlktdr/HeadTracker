@@ -1068,11 +1068,17 @@
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="action_Save_to_File">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>&amp;Save</string>
    </property>
   </action>
   <action name="action_Load">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>&amp;Open</string>
    </property>
