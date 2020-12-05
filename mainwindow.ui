@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>675</width>
-    <height>649</height>
+    <width>599</width>
+    <height>651</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,7 +18,7 @@
     <normaloff>:/Icons/Icon.png</normaloff>:/Icons/Icon.png</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout">
+   <layout class="QVBoxLayout" name="verticalLayout_2">
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_2">
       <item>
@@ -189,7 +189,7 @@
         <property name="title">
          <string>Advanced Params</string>
         </property>
-        <layout class="QVBoxLayout" name="verticalLayout_6">
+        <layout class="QVBoxLayout" name="verticalLayout">
          <item>
           <widget class="QLabel" name="label">
            <property name="text">
@@ -323,62 +323,107 @@
           </spacer>
          </item>
          <item>
-          <widget class="QLabel" name="label_3">
-           <property name="text">
-            <string>Board Orientation Setting</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QComboBox" name="cmbRemap">
-           <item>
-            <property name="text">
-             <string>Board Flat, Sensor Facing Up</string>
-            </property>
+          <layout class="QGridLayout" name="gridLayout">
+           <item row="1" column="0">
+            <widget class="QLabel" name="label_5">
+             <property name="text">
+              <string>Axis Signs</string>
+             </property>
+            </widget>
            </item>
-           <item>
-            <property name="text">
-             <string>Board Flat, Sensor Facing Up, Rotate 90</string>
-            </property>
+           <item row="1" column="1">
+            <widget class="QLabel" name="label_3">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>Axis Remapping</string>
+             </property>
+            </widget>
            </item>
-           <item>
-            <property name="text">
-             <string>Board Vertical, Usb Down, Sensor Facing Right</string>
-            </property>
+           <item row="3" column="0" colspan="2">
+            <widget class="QPushButton" name="cmdResetCenter">
+             <property name="text">
+              <string>&amp;Reset Center</string>
+             </property>
+            </widget>
            </item>
-           <item>
-            <property name="text">
-             <string>Board Vertical, Usb Left, Sensor Facing Back</string>
-            </property>
+           <item row="2" column="0">
+            <widget class="QComboBox" name="cmbSigns">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+               <horstretch>1</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>100</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <item>
+              <property name="text">
+               <string>X+,Y+,Z+</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>X+,Y+,Z-</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>X+,Y-,Z+</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>X+,Y-,Z-</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>X-,Y+,Z+</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>X-,Y+,Z-</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>X-,Y-,Z+</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>X-,Y-,Z-</string>
+              </property>
+             </item>
+            </widget>
            </item>
-           <item>
-            <property name="text">
-             <string>Board Vertical, Usb Down, Sensor Facing Forward</string>
-            </property>
+           <item row="2" column="1">
+            <widget class="QComboBox" name="cmbRemap">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>100</width>
+               <height>16777215</height>
+              </size>
+             </property>
+            </widget>
            </item>
-           <item>
-            <property name="text">
-             <string>Remap 5</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Remap 6</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Remap 7</string>
-            </property>
-           </item>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="cmdResetCenter">
-           <property name="text">
-            <string>&amp;Reset Center</string>
-           </property>
-          </widget>
+          </layout>
          </item>
         </layout>
        </widget>
@@ -399,6 +444,21 @@
          <string>PPM Servo Output</string>
         </property>
         <layout class="QGridLayout" name="gridLayout_5">
+         <property name="leftMargin">
+          <number>5</number>
+         </property>
+         <property name="topMargin">
+          <number>5</number>
+         </property>
+         <property name="rightMargin">
+          <number>5</number>
+         </property>
+         <property name="bottomMargin">
+          <number>5</number>
+         </property>
+         <property name="spacing">
+          <number>5</number>
+         </property>
          <item row="4" column="1">
           <widget class="ServoMinMax" name="servoPan" native="true">
            <property name="sizePolicy">
@@ -991,7 +1051,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>675</width>
+     <width>599</width>
      <height>22</height>
     </rect>
    </property>

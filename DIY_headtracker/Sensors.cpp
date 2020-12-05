@@ -15,7 +15,6 @@
 #include <Adafruit_BNO055.h>
 #include <utility/imumaths.h>
 
-
 // Variables defined elsewhere
 //
 extern long channel_value[];
@@ -23,9 +22,6 @@ extern long channel_value[];
 /* BNO055 */
 Adafruit_BNO055 bno = Adafruit_BNO055(-1, BNO055_ADDRESS ); 
 adafruit_bno055_offsets_t calibrationData;
-Adafruit_BNO055::adafruit_bno055_axis_remap_config_t rmc = Adafruit_BNO055::REMAP_CONFIG_P1;
-Adafruit_BNO055::adafruit_bno055_axis_remap_sign_t rms = Adafruit_BNO055::REMAP_SIGN_P1;
-
 sensors_event_t event; 
 
 // Local variables
@@ -82,8 +78,11 @@ float tiltFactor = 17;
 float rollFactor = 17;
 unsigned char servoReverseMask = 0;
 unsigned char htChannels[3] = {8, 7, 6}; // pan, tilt, roll
-unsigned char axisRemap = 0;
+unsigned char axisRemap = Adafruit_BNO055::REMAP_CONFIG_P1;
+unsigned char axisSign = Adafruit_BNO055::REMAP_SIGN_P1;
 bool graphRaw = false;
+
+
 
 //
 // End settings
@@ -279,8 +278,8 @@ void InitSensors()
 
   // Set Axes Orientation
   RemapAxes();  
-  Serial.print("Axis Remap: "); Serial.print(axisRemap); Serial.print(" 0x"); Serial.println((char)rmc,HEX);
-  Serial.print("Axis Sign:    0x"); Serial.println((char)rms,HEX);
+  Serial.print("Axis Remap: "); Serial.print(" 0x"); Serial.println(axisRemap,HEX);
+  Serial.print("Axis Sign:    0x"); Serial.println((char)axisSign,HEX);
 }
 
 //--------------------------------------------------------------------------------------
@@ -296,82 +295,17 @@ void ResetCenter()
 
 //--------------------------------------------------------------------------------------
 // Func: RemapAxes
-// Desc: Allows the tracker board to be re-oriented in multiple positions. 8 Choices allowed here. See BNO055 Datasheet Pg. 25
+// Desc: Allows the tracker board to be re-oriented in multiple positions.
 //       Called on startup and on config change.
-//       Possible Choices are, Board Flat, Sensor UP (Default) X=X Y=Y Z=Z 0x24 SIGN=0x00
+//       
 //--------------------------------------------------------------------------------------
 
-#define AXIS_X 0x00
-#define AXIS_Y 0x01
-#define AXIS_Z 0x02
-
-#define AXES_MAP(XX,YY,ZZ) (ZZ<<4|YY<<2|XX)
-
-#define X_REV 0x04
-#define Y_REV 0x02
-#define Z_REV 0x01
 
 void RemapAxes() 
 {
-  rmc = AXES_MAP(AXIS_X,AXIS_Y,AXIS_Z);
-  rms = 0;
   char cas = axisRemap;
-  switch(cas) {
-    // Board Up, Tilt towards long edge : Default
-    case 0:     
-        rmc = AXES_MAP(AXIS_X,AXIS_Y,AXIS_Z); // Board Flat, Sensor Facing Up
-        rms = 0;
-        break;          
-    case 1:
-        rmc = AXES_MAP(AXIS_Y,AXIS_X,AXIS_Z); // Board Flat, Sensor Facing up, Rotate 90
-        rms = Y_REV;
-        break;    
-    case 2: 
-        rmc = AXES_MAP(AXIS_X,AXIS_Z,AXIS_Y); // Board Vertical, Usb down, Sensor Facing right
-        rms = Z_REV;
-        break;
-    // Board Facking Down, Tilt towards long edge
-    case 3: 
-        rmc = AXES_MAP(AXIS_Y,AXIS_Z,AXIS_X); // Board Vertical, Usb Left Sesnsor Facing Back 
-        rms = X_REV|Z_REV;
-        break;
-    case 4: 
-        rmc = AXES_MAP(AXIS_X,AXIS_Z,AXIS_Y); // Board Vertical, Usb Down, Sensor Forward
-        rms = Z_REV;
-        break;
-    case 5: 
-        rmc = AXES_MAP(AXIS_Z,AXIS_Y,AXIS_X); // TBD
-        rms = Z_REV;
-        break;
-   case 6: 
-        rmc = AXES_MAP(AXIS_X,AXIS_Y,AXIS_Z); // TBD 
-        rms = Y_REV;
-        break;
-   case 7: 
-        rmc = AXES_MAP(AXIS_X,AXIS_Y,AXIS_Z); // TBD 
-        rms = Y_REV|X_REV;
-        break;        
-  }
 
-
-  bno.setAxisRemap(rmc);
-  bno.setAxisSign(rms);
-  Serial.print("Orient Mapping #"); Serial.print(axisRemap); Serial.print(" Set To: "); Serial.print(rmc, HEX); Serial.print(" Signs: "); Serial.print(rms, HEX); Serial.println("");
-     
-/*  rmc = Adafruit_BNO055::REMAP_CONFIG_P1;
-  rms = Adafruit_BNO055::REMAP_SIGN_P1;
-    
-  if(axisRemap == 0 || // 0x21
-     axisRemap == 3 ||
-     axisRemap == 5 ||
-     axisRemap == 6) 
-      rmc = Adafruit_BNO055::REMAP_CONFIG_P0; // 0x24
-  else
-      rmc = Adafruit_BNO055::REMAP_CONFIG_P1;
-
-  if(axisRemap < 7)
-    rms = (Adafruit_BNO055::adafruit_bno055_axis_remap_sign_t)mapcodes[axisRemap];
-*/
-  //bno.setAxisSign(rms);
-  //bno.setAxisRemap(rmc);
+  bno.setAxisRemap(axisRemap);
+  bno.setAxisSign(axisSign);
+  Serial.print("Orient Mapping #"); Serial.print(axisRemap); Serial.print(" Set To: "); Serial.print(axisRemap, HEX); Serial.print(" Signs: "); Serial.print(axisSign, HEX); Serial.println("");
 }

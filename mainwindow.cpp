@@ -24,6 +24,9 @@ MainWindow::MainWindow(QWidget *parent)
     xtime = 0;
     updateToUI();
 
+    // Serial data ready
+    connect(serialcon,SIGNAL(readyRead()),this,SLOT(serialReadReady()));
+
     // Buttons
     connect(ui->cmdConnect,SIGNAL(clicked()),this,SLOT(serialConnect()));
     connect(ui->cmdDisconnect,SIGNAL(clicked()),this,SLOT(serialDisconnect()));    
@@ -32,11 +35,9 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->cmdStartGraph,SIGNAL(clicked()),this,SLOT(startGraph()));
     connect(ui->cmdStopGraph,SIGNAL(clicked()),this,SLOT(stopGraph()));
     connect(ui->cmdResetCenter,SIGNAL(clicked()),this, SLOT(resetCenter()));
+    connect(ui->cmdRefresh,&QPushButton::clicked,this,&MainWindow::findSerialPorts);
 
-    // Serial data ready
-    connect(serialcon,SIGNAL(readyRead()),this,SLOT(serialReadReady()));
-
-    // UI Data Changed by user
+    // Check Boxes
     connect(ui->chkpanrev,&QCheckBox::clicked,this,&MainWindow::updateFromUI);
     connect(ui->chkrllrev,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
     connect(ui->chktltrev,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
@@ -46,10 +47,12 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->spnLPPan,SIGNAL(editingFinished()),this,SLOT(updateFromUI()));
     connect(ui->spnLPTiltRoll,SIGNAL(editingFinished()),this,SLOT(updateFromUI()));
 
+    // Gain Sliders
     connect(ui->til_gain,SIGNAL(sliderMoved(int)),this,SLOT(updateFromUI()));
     connect(ui->rll_gain,SIGNAL(sliderMoved(int)),this,SLOT(updateFromUI()));
     connect(ui->pan_gain,SIGNAL(sliderMoved(int)),this,SLOT(updateFromUI()));
 
+    // Servo Scaling Widgets
     connect(ui->servoPan,&ServoMinMax::minimumChanged,this,&MainWindow::updateFromUI);
     connect(ui->servoPan,&ServoMinMax::maximumChanged,this,&MainWindow::updateFromUI);
     connect(ui->servoPan,&ServoMinMax::centerChanged,this,&MainWindow::updateFromUI);
@@ -60,18 +63,30 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->servoRoll,&ServoMinMax::maximumChanged,this,&MainWindow::updateFromUI);
     connect(ui->servoRoll,&ServoMinMax::centerChanged,this,&MainWindow::updateFromUI);
 
+    // Combo Boxes
+
+    // Add Remap Choices + The corresponding values
+    ui->cmbRemap->addItem("X,Y,Z",AXES_MAP(AXIS_X,AXIS_Y,AXIS_Z));
+    ui->cmbRemap->addItem("X,Z,Y",AXES_MAP(AXIS_X,AXIS_Z,AXIS_Y));
+    ui->cmbRemap->addItem("Y,X,Z",AXES_MAP(AXIS_Y,AXIS_X,AXIS_Z));
+    ui->cmbRemap->addItem("Y,Z,X",AXES_MAP(AXIS_Y,AXIS_Z,AXIS_X));
+    ui->cmbRemap->addItem("Z,X,Y",AXES_MAP(AXIS_Z,AXIS_X,AXIS_Y));
+    ui->cmbRemap->addItem("Z,Y,Z",AXES_MAP(AXIS_Z,AXIS_Y,AXIS_X));
+    ui->cmbRemap->setCurrentIndex(0);
+
     connect(ui->cmbpanchn,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbtiltchn,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbrllchn,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbRemap,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
-
-    connect(ui->cmdRefresh,&QPushButton::clicked,this,&MainWindow::findSerialPorts);
+    connect(ui->cmbSigns,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
 
     // LED Timers
     rxledtimer.setInterval(100);
     txledtimer.setInterval(100);
     connect(&rxledtimer,SIGNAL(timeout()),this,SLOT(rxledtimeout()));
-    connect(&txledtimer,SIGNAL(timeout()),this,SLOT(txledtimeout()));
+    connect(&txledtimer,SIGNAL(timeout()),this,SLOT(txledtimeout()));    
+
+    // Timer to cause an update, prevents too many data writes
     connect(&updatesettingstmr,&QTimer::timeout,this,&MainWindow::updateSettings);
 }
 
@@ -154,8 +169,8 @@ void MainWindow::parseSerialData()
                     trkset.setPanCh(setd.at(17).toInt());
                     trkset.setTiltCh(setd.at(18).toInt());
                     trkset.setRollCh(setd.at(19).toInt());
-                    qDebug() << "Axis Remap IN" << setd.at(20).toInt();
-                    trkset.setAxisRemap(setd.at(20).toInt());
+                    trkset.setAxisRemap(setd.at(20).toUInt());
+                    trkset.setAxisSign(setd.at(21).toUInt());
 
                     updateToUI();
                     ui->statusbar->showMessage(tr("Settings Received"),2000);
@@ -170,7 +185,6 @@ void MainWindow::parseSerialData()
             }
 
             serialData = serialData.right(serialData.length()-nlindex-2);
-
     }
 }
 
@@ -188,6 +202,7 @@ void MainWindow::sendSerialData(QByteArray data)
 
 void MainWindow::addToLog(QString log)
 {
+    // Add information to the Log
     logd += log;
 
     // Limit Max Log Length
@@ -195,14 +210,14 @@ void MainWindow::addToLog(QString log)
     if(loglen > MAX_LOG_LENGTH)
         logd = logd.mid(logd.length() - MAX_LOG_LENGTH);
 
-    // Set Gui
+    // Set Gui text from local string
     ui->serialData->setPlainText(logd);
 
     // Scroll to bottom
     ui->serialData->verticalScrollBar()->setValue(ui->serialData->verticalScrollBar()->maximum());
 }
 
-// Find available serial ports
+// Finds available serial ports
 void MainWindow::findSerialPorts()
 {
     ui->cmdPort->clear();
@@ -212,7 +227,7 @@ void MainWindow::findSerialPorts()
     }
 }
 
-// Connect to the serial port
+// Connects to the serial port
 void MainWindow::serialConnect()
 {
     QString port = ui->cmdPort->currentText();
@@ -299,7 +314,8 @@ void MainWindow::updateToUI()
     ui->cmbpanchn->setCurrentIndex(trkset.panCh()-1);
     ui->cmbrllchn->setCurrentIndex(trkset.rollCh()-1);
     ui->cmbtiltchn->setCurrentIndex(trkset.tiltCh()-1);
-    ui->cmbRemap->setCurrentIndex(trkset.axisRemap());
+    ui->cmbRemap->setCurrentIndex(ui->cmbRemap->findData(trkset.axisRemap()));
+    ui->cmbSigns->setCurrentIndex(trkset.axisSign());
     qDebug() << "Axis Remap" << trkset.axisRemap();
 
     ui->cmbpanchn->blockSignals(false);
@@ -338,7 +354,8 @@ void MainWindow::updateFromUI()
     trkset.setRollCh(ui->cmbrllchn->currentText().toInt());
     trkset.setTiltCh(ui->cmbtiltchn->currentText().toInt());
 
-    trkset.setAxisRemap(ui->cmbRemap->currentIndex());
+    trkset.setAxisRemap(ui->cmbRemap->currentData().toUInt());
+    trkset.setAxisSign(ui->cmbSigns->currentIndex());
 
     updatesettingstmr.start(1000);
 }
@@ -402,6 +419,8 @@ void MainWindow::storeSettings()
 
 void MainWindow::updateSettings()
 {
+    // Disable Graphing output, all the extra data was causing issues
+    // on update
     if(graphing) {
         serialcon->write("$PLEN");
     }
@@ -429,6 +448,7 @@ void MainWindow::updateSettings()
     lst.append(QString::number(trkset.tiltCh()));
     lst.append(QString::number(trkset.rollCh()));
     lst.append(QString::number(trkset.axisRemap()));
+    lst.append(QString::number(trkset.axisSign()));
     QString data = lst.join(',');
 
     // Calculate the CRC Checksum
@@ -439,20 +459,21 @@ void MainWindow::updateSettings()
 
     sendSerialData(bd);
 
+    // Re-Enable Graphing if required
     if(graphing) {
         serialcon->write("$PLST");
     }
-
-
 }
 
 void MainWindow::resetCenter()
 {
+    // Reset Values to Center
     sendSerialData("$RST ");
 }
 
 void MainWindow::setDataMode(bool rawmode)
 {
+    // Change mode to show offset vs raw unfiltered data
     if(rawmode)
         sendSerialData("$GRAW ");
     else

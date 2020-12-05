@@ -100,6 +100,7 @@ extern float rollFactor;
 extern unsigned char servoReverseMask;
 extern unsigned char htChannels[];
 extern unsigned char axisRemap;
+extern unsigned char axisSign;
 extern bool graphRaw;
 
 // End settings   
@@ -290,7 +291,7 @@ void loop()
                   Serial.println("$CRCOK:HT Settings Retrieved");
                 }
            
-                int valuesReceived[21] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+                int valuesReceived[22] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
                 int comma_index = 0;
 
                 for (unsigned char k = 0; k < (serial_index - 4); k++)
@@ -364,7 +365,8 @@ void loop()
                 htChannels[2] = valuesReceived[19];            
 
                 axisRemap = valuesReceived[20];     
-                Serial.print("AXIS REMAP To"); Serial.print(axisRemap); Serial.println("");
+                axisSign = valuesReceived[21];
+                Serial.print("AXIS REMAP To"); Serial.print(axisRemap); Serial.print(" SIGN"); Serial.print(axisSign); Serial.println("");
 
                 // Update the BNO055 axis mapping
                 RemapAxes();               
@@ -529,7 +531,9 @@ void loop()
                 Serial.print(",");
                 Serial.print(htChannels[2]);
                 Serial.print(",");
-                Serial.println(axisRemap);
+                Serial.print(axisRemap);
+                Serial.print(",");
+                Serial.println(axisSign);
 
                 Serial.println("Settings Retrieved!");
 
@@ -627,6 +631,8 @@ void SaveSettings()
     EEPROM.write(34, (unsigned char)htChannels[2]);
     
     EEPROM.write(35, (unsigned char)axisRemap);
+    EEPROM.write(36, (unsigned char)axisSign);
+   
     
     // Mark the memory to indicate that it has been
     // written. Used to determine if board is newly flashed

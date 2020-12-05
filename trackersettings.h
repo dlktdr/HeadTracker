@@ -3,8 +3,6 @@
 
 
 // PWM Values here are divided by 2 plus 400 = actual uS output
-
-
 #define MIN_PWM 1001 // 1000 % 2 + 400 = 900 uS
 #define MAX_PWM 3400 // 3400 /2 + 400 = 2100 uS
 #define DEF_MIN_PWM 1200 // 1200 = 1000uS
@@ -17,6 +15,15 @@
 #define HT_TILT_REVERSE_BIT     0x01
 #define HT_ROLL_REVERSE_BIT     0x02
 #define HT_PAN_REVERSE_BIT      0x04
+
+// Axis Mapping
+#define AXIS_X 0x00
+#define AXIS_Y 0x01
+#define AXIS_Z 0x02
+#define AXES_MAP(XX,YY,ZZ) (ZZ<<4|YY<<2|XX)
+#define X_REV 0x04
+#define Y_REV 0x02
+#define Z_REV 0x01
 
 class TrackerSettings
 {    
@@ -88,10 +95,13 @@ public:
     char rollCh() const;
     void setRollCh(char value);
 
-    int count() const {return 21;}
+    int count() const {return 22;}
 
-    int axisRemap() const {return axisremap;}
+    unsigned int axisRemap() const {return axisremap;}
     void setAxisRemap(int value);
+
+    unsigned int axisSign() const {return axissign;}
+    void setAxisSign(int value);
 
 private:
     int rll_min,rll_max,rll_gain,rll_cnt;
@@ -109,7 +119,8 @@ private:
     char tiltch;            // Firmware: htChannels[1]
     char rollch;            // Firmware: htChannels[2]
 
-    int axisremap;
+    unsigned int axisremap;          // Axis Mapping, Default X,Y,Z = 0x24
+    unsigned int axissign;           // Sign of the Axis
 };
 
 #endif // TRACKERSETTINGS_H

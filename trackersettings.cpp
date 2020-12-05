@@ -323,6 +323,10 @@ void TrackerSettings::setRollCh(char value)
 
 void TrackerSettings::setAxisRemap(int value)
 {
-    if(value >=0 && value <= 7)
-        axisremap = value;
+    axisremap = value & 0x3F;
+}
+
+void TrackerSettings::setAxisSign(int value)
+{        
+    axissign = value & 0x03;
 }
