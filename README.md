@@ -10,6 +10,7 @@ I've modified the code for the head tracker and wrote a new GUI for it. Based on
 3) Soldering Iron
 4) Short pieces of wire
 5) 3.5mm mono stereo cable
+6) Small Push Button Switch, for resetting zero
 
 ![alt text](https://github.com/dlktdr/HeadTracker/blob/master/Doc/BNO055.jpg?raw=true)
 
@@ -23,9 +24,12 @@ I've modified the code for the head tracker and wrote a new GUI for it. Based on
 5) Solder the board onto the two headers sticking up from the nano. Making sure SDA connects to A4 and SCL connects to A5
 6) Cut the two wires sticking up to the proper length and attach them to the 3.3 and gnd pins on the BNO055 board.
 7) Cut off one end of your mono 3.5mm cable and strip off the insulation at the end. The outer copper braid connects to a gnd pin. The Center wire connects to D9. This is the cable you will plug into your transmitter to transmit your head orientation
-8) Plug the nano into your computer via USB
-9) Program it with the latest code on here plenty of docs on how to do that around.
-10) Open the windows app and give it a try!!
+8) Connect the push switch from D11 to GND. This will be used to reset zero when your head is level. I bent one of the pins on the switch and put it into GND, then used a wire to D11 on the other side. 
+9) Plug the nano into your computer via USB
+10) Program it with the latest code on here plenty of docs on how to do that around. There is a HEX file available in the DIY_headtracker folder you can program with Xloader( https://www.hobbytronics.co.uk/arduino-xloader) if you don't want to have to download Arduino IDE, add the libraries and compile it yourself.
+11) Open the windows app and give it a try!!
+
+###Note: after power up and the sensor calibrates as your moving the orientation jumps. Re-zeroing button is required at the moment. I haven't really looked into it yet.
 
 ![alt text](https://github.com/dlktdr/HeadTracker/blob/master/Doc/Hookup.png?raw=true)
 
