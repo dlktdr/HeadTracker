@@ -35,6 +35,8 @@ graph.h \
 FORMS += \
     mainwindow.ui
 
+RC_ICONS = IconFile.ico
+
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
