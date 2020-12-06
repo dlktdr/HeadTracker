@@ -80,6 +80,11 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->cmbRemap,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbSigns,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
 
+    // Menu Actions
+    connect(ui->action_Save_to_File,SIGNAL(triggered()),this,SLOT(saveSettings()));
+    connect(ui->action_Load,SIGNAL(triggered()),this,SLOT(loadSettings()));
+    connect(ui->actionE_xit,SIGNAL(triggered()),QCoreApplication::instance(),SLOT(quit()));
+
     // LED Timers
     rxledtimer.setInterval(100);
     txledtimer.setInterval(100);
@@ -129,10 +134,10 @@ void MainWindow::parseSerialData()
                     int panout = rtd.at(3).toInt();
                     int tiltout = rtd.at(4).toInt();
                     int rollout = rtd.at(5).toInt();
-//                    int syscal = rtd.at(6).toInt();
-//                    int gyrocal = rtd.at(7).toInt();
-//                    int accelcal = rtd.at(8).toInt();
-//                    int magcal = rtd.at(9).toInt();
+                    int syscal = rtd.at(6).toInt();
+                    int gyrocal = rtd.at(7).toInt();
+                    int accelcal = rtd.at(8).toInt();
+                    int magcal = rtd.at(9).toInt();
                     ui->graphView->addDataPoints(tilt,roll,pan);
                     ui->servoPan->setActualPosition(panout);
                     ui->servoTilt->setActualPosition(tiltout);
@@ -496,5 +501,24 @@ void MainWindow::txledtimeout()
     ui->txled->setState(false);
 }
 
+void MainWindow::saveSettings()
+{
+    QString filename = QFileDialog::getSaveFileName(this,tr("Save Settings"),QString(),"Config Files (*.ini)");
+    if(!filename.isEmpty()) {
+        QSettings settings(filename,QSettings::IniFormat);
+        trkset.storeSettings(&settings);
+    }
+}
 
+void MainWindow::loadSettings()
+{
+    QString filename = QFileDialog::getOpenFileName(this,tr("Open File"),QString(),"Config Files (*.ini)");
+    if(!filename.isEmpty()) {
+        QSettings settings(filename,QSettings::IniFormat);
+        trkset.loadSettings(&settings);
+        updateToUI();
+        updateSettings();
+    }
+
+}
 

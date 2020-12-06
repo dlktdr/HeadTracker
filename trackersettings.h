@@ -1,6 +1,7 @@
 #ifndef TRACKERSETTINGS_H
 #define TRACKERSETTINGS_H
 
+#include <QSettings>
 
 // PWM Values here are divided by 2 plus 400 = actual uS output
 #define MIN_PWM 1001 // 1000 % 2 + 400 = 900 uS
@@ -86,41 +87,28 @@ public:
     bool isTiltReversed();
     bool isPanReversed();
 
-    char panCh() const;
-    void setPanCh(char value);
+    uint panCh() const;
+    void setPanCh(uint value);
 
-    char tiltCh() const;
-    void setTiltCh(char value);
+    uint tiltCh() const;
+    void setTiltCh(uint value);
 
-    char rollCh() const;
-    void setRollCh(char value);
+    uint rollCh() const;
+    void setRollCh(uint value);
 
     int count() const {return 22;}
 
-    unsigned int axisRemap() const {return axisremap;}
-    void setAxisRemap(int value);
+    uint axisRemap() const {return _data["axisremap"].toUInt();}
+    void setAxisRemap(uint value);
 
-    unsigned int axisSign() const {return axissign;}
-    void setAxisSign(int value);
+    uint axisSign() const {return _data["axissign"].toUInt();}
+    void setAxisSign(uint value);
+
+    void storeSettings(QSettings *settings);
+    void loadSettings(QSettings *settings);
 
 private:
-    int rll_min,rll_max,rll_gain,rll_cnt;
-    int pan_min,pan_max,pan_gain,pan_cnt;
-    int tlt_min,tlt_max,tlt_gain,tlt_cnt;
-
-    int lptiltroll;         // Firmware: tiltRollBeta
-    int lppan;              // Firmware: panBeta
-    int gyroweighttiltroll; // Firmware: gyroWeightTiltRoll
-    int gyroweightpan;      // Firmware: GyroWeightPan
-
-    char servoreverse;      // Firmware: servoReverseMask
-
-    char panch;             // Firmware: htChannels[0]
-    char tiltch;            // Firmware: htChannels[1]
-    char rollch;            // Firmware: htChannels[2]
-
-    unsigned int axisremap;          // Axis Mapping, Default X,Y,Z = 0x24
-    unsigned int axissign;           // Sign of the Axis
+    QMap<QString,QVariant> _data;
 };
 
 #endif // TRACKERSETTINGS_H

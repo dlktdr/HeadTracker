@@ -1037,6 +1037,9 @@
          </item>
          <item>
           <widget class="QCheckBox" name="chkRawData">
+           <property name="statusTip">
+            <string>Show data without offsets</string>
+           </property>
            <property name="text">
             <string>Show Raw Data</string>
            </property>
@@ -1072,7 +1075,7 @@
   <widget class="QStatusBar" name="statusbar"/>
   <action name="action_Save_to_File">
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="text">
     <string>&amp;Save</string>
@@ -1080,7 +1083,7 @@
   </action>
   <action name="action_Load">
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="text">
     <string>&amp;Open</string>

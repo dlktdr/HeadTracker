@@ -8,6 +8,8 @@
 #include <QMessageBox>
 #include <QScrollBar>
 #include <QSerialPortInfo>
+#include <QFileDialog>
+#include <QSettings>
 #include "trackersettings.h"
 
 const int MAX_LOG_LENGTH=6000;
@@ -58,5 +60,7 @@ private slots:
     void requestTimer();
     void rxledtimeout();
     void txledtimeout();
+    void saveSettings();
+    void loadSettings();
 };
 #endif // MAINWINDOW_H
