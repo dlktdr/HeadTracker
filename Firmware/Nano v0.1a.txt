@@ -1,0 +1,6 @@
+Arduino Nano Hex V0.1
+
+BNO055 Address 0x29
+8channel PPM
+Button Input on D11
+PPM Output on D9
