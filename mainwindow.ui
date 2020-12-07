@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>599</width>
-    <height>651</height>
+    <width>645</width>
+    <height>653</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -324,33 +324,19 @@
          </item>
          <item>
           <layout class="QGridLayout" name="gridLayout">
-           <item row="1" column="0">
-            <widget class="QLabel" name="label_5">
-             <property name="text">
-              <string>Axis Signs</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="1">
-            <widget class="QLabel" name="label_3">
+           <item row="2" column="1">
+            <widget class="QComboBox" name="cmbRemap">
              <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
              </property>
-             <property name="text">
-              <string>Axis Remapping</string>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="0" colspan="2">
-            <widget class="QPushButton" name="cmdResetCenter">
-             <property name="toolTip">
-              <string>Performs same function as Reset Button (D11-&gt;Gnd)</string>
-             </property>
-             <property name="text">
-              <string>&amp;Reset Center</string>
+             <property name="maximumSize">
+              <size>
+               <width>100</width>
+               <height>16777215</height>
+              </size>
              </property>
             </widget>
            </item>
@@ -410,19 +396,33 @@
              </item>
             </widget>
            </item>
-           <item row="2" column="1">
-            <widget class="QComboBox" name="cmbRemap">
+           <item row="3" column="0" colspan="2">
+            <widget class="QPushButton" name="cmdResetCenter">
+             <property name="toolTip">
+              <string>Performs same function as Reset Button (D11-&gt;Gnd)</string>
+             </property>
+             <property name="text">
+              <string>&amp;Reset Center</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QLabel" name="label_3">
              <property name="sizePolicy">
-              <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
              </property>
-             <property name="maximumSize">
-              <size>
-               <width>100</width>
-               <height>16777215</height>
-              </size>
+             <property name="text">
+              <string>Axis Remapping</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="label_5">
+             <property name="text">
+              <string>Axis Signs</string>
              </property>
             </widget>
            </item>
@@ -462,6 +462,13 @@
          <property name="spacing">
           <number>5</number>
          </property>
+         <item row="0" column="3">
+          <widget class="QLabel" name="label_11">
+           <property name="text">
+            <string>Channel</string>
+           </property>
+          </widget>
+         </item>
          <item row="4" column="1">
           <widget class="ServoMinMax" name="servoPan" native="true">
            <property name="sizePolicy">
@@ -475,26 +482,6 @@
              <width>0</width>
              <height>30</height>
             </size>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="0">
-          <widget class="QLabel" name="label_19">
-           <property name="text">
-            <string>Pan</string>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="5">
-          <widget class="QCheckBox" name="chkrllrev">
-           <property name="layoutDirection">
-            <enum>Qt::LeftToRight</enum>
-           </property>
-           <property name="autoFillBackground">
-            <bool>false</bool>
-           </property>
-           <property name="text">
-            <string/>
            </property>
           </widget>
          </item>
@@ -532,140 +519,20 @@
            </property>
           </widget>
          </item>
-         <item row="0" column="1">
-          <widget class="QLabel" name="label_21">
-           <property name="text">
-            <string>Range</string>
+         <item row="3" column="4">
+          <widget class="QCheckBox" name="chkrllrev">
+           <property name="layoutDirection">
+            <enum>Qt::LeftToRight</enum>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="1">
-          <widget class="ServoMinMax" name="servoTilt" native="true">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>30</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="0">
-          <widget class="QLabel" name="label_18">
-           <property name="text">
-            <string>Roll</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="2">
-          <widget class="QLabel" name="label_20">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>Gain</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="1">
-          <widget class="ServoMinMax" name="servoRoll" native="true">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>30</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="2">
-          <widget class="QSlider" name="til_gain">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimum">
-            <number>0</number>
-           </property>
-           <property name="maximum">
-            <number>500</number>
-           </property>
-           <property name="value">
-            <number>250</number>
-           </property>
-           <property name="tracking">
-            <bool>true</bool>
-           </property>
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="invertedAppearance">
+           <property name="autoFillBackground">
             <bool>false</bool>
            </property>
-           <property name="tickPosition">
-            <enum>QSlider::NoTicks</enum>
-           </property>
-           <property name="tickInterval">
-            <number>0</number>
+           <property name="text">
+            <string/>
            </property>
           </widget>
          </item>
-         <item row="3" column="2">
-          <widget class="QSlider" name="rll_gain">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimum">
-            <number>0</number>
-           </property>
-           <property name="maximum">
-            <number>500</number>
-           </property>
-           <property name="value">
-            <number>250</number>
-           </property>
-           <property name="tracking">
-            <bool>true</bool>
-           </property>
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="invertedAppearance">
-            <bool>false</bool>
-           </property>
-           <property name="tickPosition">
-            <enum>QSlider::NoTicks</enum>
-           </property>
-           <property name="tickInterval">
-            <number>0</number>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="4">
+         <item row="2" column="3">
           <widget class="QComboBox" name="cmbtiltchn">
            <item>
             <property name="text">
@@ -749,34 +616,101 @@
            </item>
           </widget>
          </item>
-         <item row="2" column="5">
-          <widget class="QCheckBox" name="chktltrev">
-           <property name="layoutDirection">
-            <enum>Qt::LeftToRight</enum>
+         <item row="2" column="2">
+          <widget class="QSlider" name="til_gain">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
            </property>
-           <property name="autoFillBackground">
+           <property name="minimum">
+            <number>0</number>
+           </property>
+           <property name="maximum">
+            <number>500</number>
+           </property>
+           <property name="value">
+            <number>250</number>
+           </property>
+           <property name="tracking">
+            <bool>true</bool>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="invertedAppearance">
             <bool>false</bool>
            </property>
-           <property name="text">
-            <string/>
+           <property name="tickPosition">
+            <enum>QSlider::NoTicks</enum>
+           </property>
+           <property name="tickInterval">
+            <number>0</number>
            </property>
           </widget>
          </item>
-         <item row="0" column="5">
-          <widget class="QLabel" name="label_12">
+         <item row="0" column="1">
+          <widget class="QLabel" name="label_21">
            <property name="text">
-            <string>Reverse</string>
+            <string>Range</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
-         <item row="0" column="4">
-          <widget class="QLabel" name="label_11">
-           <property name="text">
-            <string>Channel</string>
+         <item row="3" column="2">
+          <widget class="QSlider" name="rll_gain">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimum">
+            <number>0</number>
+           </property>
+           <property name="maximum">
+            <number>500</number>
+           </property>
+           <property name="value">
+            <number>250</number>
+           </property>
+           <property name="tracking">
+            <bool>true</bool>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="invertedAppearance">
+            <bool>false</bool>
+           </property>
+           <property name="tickPosition">
+            <enum>QSlider::NoTicks</enum>
+           </property>
+           <property name="tickInterval">
+            <number>0</number>
            </property>
           </widget>
          </item>
-         <item row="4" column="4">
+         <item row="0" column="2">
+          <widget class="QLabel" name="label_20">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>Gain</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="3">
           <widget class="QComboBox" name="cmbpanchn">
            <item>
             <property name="text">
@@ -860,8 +794,31 @@
            </item>
           </widget>
          </item>
-         <item row="4" column="5">
-          <widget class="QCheckBox" name="chkpanrev">
+         <item row="3" column="0">
+          <widget class="QLabel" name="label_18">
+           <property name="text">
+            <string>Roll</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="1">
+          <widget class="ServoMinMax" name="servoRoll" native="true">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>30</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="4">
+          <widget class="QCheckBox" name="chktltrev">
            <property name="layoutDirection">
             <enum>Qt::LeftToRight</enum>
            </property>
@@ -880,7 +837,21 @@
            </property>
           </widget>
          </item>
-         <item row="3" column="4">
+         <item row="4" column="0">
+          <widget class="QLabel" name="label_19">
+           <property name="text">
+            <string>Pan</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="4">
+          <widget class="QLabel" name="label_12">
+           <property name="text">
+            <string>Reverse</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="3">
           <widget class="QComboBox" name="cmbrllchn">
            <item>
             <property name="text">
@@ -964,6 +935,35 @@
            </item>
           </widget>
          </item>
+         <item row="4" column="4">
+          <widget class="QCheckBox" name="chkpanrev">
+           <property name="layoutDirection">
+            <enum>Qt::LeftToRight</enum>
+           </property>
+           <property name="autoFillBackground">
+            <bool>false</bool>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="ServoMinMax" name="servoTilt" native="true">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>30</height>
+            </size>
+           </property>
+          </widget>
+         </item>
         </layout>
        </widget>
       </item>
@@ -990,6 +990,120 @@
           </sizepolicy>
          </property>
         </widget>
+       </item>
+       <item>
+        <layout class="QFormLayout" name="formLayout">
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_13">
+           <property name="text">
+            <string>Gyro</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="SignalBars" name="sbg" native="true">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>41</width>
+             <height>41</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>41</width>
+             <height>41</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="label_8">
+           <property name="text">
+            <string>Accel</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="SignalBars" name="sba" native="true">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>41</width>
+             <height>41</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>41</width>
+             <height>41</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="label_7">
+           <property name="text">
+            <string>Mag</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="SignalBars" name="sbm" native="true">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>41</width>
+             <height>41</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>41</width>
+             <height>41</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QLabel" name="label_6">
+           <property name="text">
+            <string>System</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="1">
+          <widget class="SignalBars" name="sbs" native="true">
+           <property name="minimumSize">
+            <size>
+             <width>41</width>
+             <height>41</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>41</width>
+             <height>41</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
        <item>
         <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -1037,8 +1151,11 @@
          </item>
          <item>
           <widget class="QCheckBox" name="chkRawData">
-           <property name="statusTip">
+           <property name="toolTip">
             <string>Show data without offsets</string>
+           </property>
+           <property name="statusTip">
+            <string/>
            </property>
            <property name="text">
             <string>Show Raw Data</string>
@@ -1057,7 +1174,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>599</width>
+     <width>645</width>
      <height>22</height>
     </rect>
    </property>
@@ -1070,7 +1187,14 @@
     <addaction name="separator"/>
     <addaction name="actionE_xit"/>
    </widget>
+   <widget class="QMenu" name="menuUpdate_Firmware">
+    <property name="title">
+     <string>Firmware</string>
+    </property>
+    <addaction name="actionUpload_Firmware"/>
+   </widget>
    <addaction name="menu_File"/>
+   <addaction name="menuUpdate_Firmware"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="action_Save_to_File">
@@ -1099,6 +1223,11 @@
     <string>&amp;Calibrate</string>
    </property>
   </action>
+  <action name="actionUpload_Firmware">
+   <property name="text">
+    <string>Upload Firmware</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -1117,6 +1246,12 @@
    <class>ServoMinMax</class>
    <extends>QWidget</extends>
    <header>servominmax.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>SignalBars</class>
+   <extends>QWidget</extends>
+   <header>signalbars.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

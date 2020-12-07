@@ -84,6 +84,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->action_Save_to_File,SIGNAL(triggered()),this,SLOT(saveSettings()));
     connect(ui->action_Load,SIGNAL(triggered()),this,SLOT(loadSettings()));
     connect(ui->actionE_xit,SIGNAL(triggered()),QCoreApplication::instance(),SLOT(quit()));
+    connect(ui->actionUpload_Firmware,SIGNAL(triggered()),&firmwareUploader,SLOT(show()));
 
     // LED Timers
     rxledtimer.setInterval(100);
@@ -142,6 +143,10 @@ void MainWindow::parseSerialData()
                     ui->servoPan->setActualPosition(panout);
                     ui->servoTilt->setActualPosition(tiltout);
                     ui->servoRoll->setActualPosition(rollout);
+                    ui->sbs->setSignal(syscal);
+                    ui->sba->setSignal(accelcal);
+                    ui->sbm->setSignal(magcal);
+                    ui->sbg->setSignal(gyrocal);
                     graphing = true;
                     ui->servoPan->setShowActualPosition(true);
                     ui->servoTilt->setShowActualPosition(true);

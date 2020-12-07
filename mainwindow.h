@@ -11,6 +11,7 @@
 #include <QFileDialog>
 #include <QSettings>
 #include "trackersettings.h"
+#include "firmware.h"
 
 const int MAX_LOG_LENGTH=6000;
 
@@ -35,6 +36,7 @@ private:
     QTimer txledtimer;
     QTimer updatesettingstmr;
     QString logd;
+    Firmware firmwareUploader;
 
     int xtime;
     void parseSerialData();
