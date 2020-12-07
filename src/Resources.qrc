@@ -1,7 +1,0 @@
-<RCC>
-    <qresource prefix="/Icons">
-        <file>refresh.svg</file>
-        <file>Icon256.png</file>
-        <file>IconFile.ico</file>
-    </qresource>
-</RCC>

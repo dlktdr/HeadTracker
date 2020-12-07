@@ -5,7 +5,7 @@ I've modified the code for the head tracker and wrote a new GUI for it. Based on
 
 ## Whats needed
 
-1) Arduino Nano - Amazon/Ebay/Many Places
+1) Arduino Nano - Amazon/Ebay/Many Places.
 2) BNO055 Sensor Board - Ebay/Adafruit, https://www.adafruit.com/product/4646, I got mine on ebay, photo below search for BNO055
 3) Soldering Iron
 4) Short pieces of wire
@@ -26,10 +26,10 @@ I've modified the code for the head tracker and wrote a new GUI for it. Based on
 7) Cut off one end of your mono 3.5mm cable and strip off the insulation at the end. The outer copper braid connects to a gnd pin. The Center wire connects to D9. This is the cable you will plug into your transmitter to transmit your head orientation
 8) Connect the push switch from D11 to GND. This will be used to reset zero when your head is level. I bent one of the pins on the switch and put it into GND, then used a wire to D11 on the other side. 
 9) Plug the nano into your computer via USB
-10) Program it with the latest code on here plenty of docs on how to do that around. There is a HEX file available in the DIY_headtracker folder you can program with Xloader( https://www.hobbytronics.co.uk/arduino-xloader) if you don't want to have to download Arduino IDE, add the libraries and compile it yourself.
+10) Program it with the latest code on here plenty of docs on how to do that around. There is a HEX file available in the firmware/bin folder you can program with Xloader( https://www.hobbytronics.co.uk/arduino-xloader) if you don't want to have to download Arduino IDE, add the libraries and compile it yourself.
 11) Open the windows app and give it a try!!
 
-###Note: after power up and the sensor calibrates as your moving the orientation jumps. Re-zeroing button is required at the moment. I haven't really looked into it yet.
+###Note: after power up and the sensor calibrates as your moving & the orientation jumps. Zeroing button is required at the moment, also good to have. I haven't really looked into why yet.
 
 ![alt text](https://github.com/dlktdr/HeadTracker/blob/master/Doc/Hookup.png?raw=true)
 
