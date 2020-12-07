@@ -326,7 +326,6 @@ void MainWindow::updateToUI()
     ui->cmbtiltchn->setCurrentIndex(trkset.tiltCh()-1);
     ui->cmbRemap->setCurrentIndex(ui->cmbRemap->findData(trkset.axisRemap()));
     ui->cmbSigns->setCurrentIndex(trkset.axisSign());
-    qDebug() << "Axis Remap" << trkset.axisRemap();
 
     ui->cmbpanchn->blockSignals(false);
     ui->cmbrllchn->blockSignals(false);
