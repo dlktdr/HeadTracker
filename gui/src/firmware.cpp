@@ -22,9 +22,8 @@ Firmware::~Firmware()
 
 void Firmware::loadOnlineFirmware()
 {
-    QUrl url = QUrl("https://raw.githubusercontent.com/dlktdr/HeadTracker/master/Firmware/Firmwares.ini");
+    QUrl url = QUrl(baseurl + "firmwares.ini");
     QNetworkRequest request(url);
-
     reply = manager.get(request);
     connect(reply,SIGNAL(finished()),this,SLOT(firmwareVersionsReady()));
     connect(reply,SIGNAL(sslErrors(const QList<QSslError> &)),this, SLOT(ssLerrors(const QList<QSslError> &)));
@@ -42,10 +41,13 @@ void Firmware::firmwareVersionsReady()
     file.close();
     QSettings ini("firmwares.ini",QSettings::IniFormat);
     ini.clear();
-    ini.beginGroup("Arduino Nano.hex");
-    ini.setValue("FileName","nano 0.1.hex");
+
+    ini.beginGroup("Arduino Nano V0.1 - BNOAdr(0x29), Btn(D11) PWM(D9)");
+    ini.setValue("FileName","nano 0.1a.hex");
+    ini.setValue("Version", 0.1);
     ini.setValue("Button","D11");
     ini.setValue("BNO055Addr","41");
+    ini.endGroup();
 
     qDebug() << ini.allKeys();
     QStringList titles = ini.childGroups();

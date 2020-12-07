@@ -5,6 +5,8 @@
 #include <QNetworkRequest>
 #include <QNetworkReply>
 
+const QString baseurl = "https://raw.githubusercontent.com/dlktdr/HeadTracker/master/firmware/bin/";
+
 namespace Ui {
 class Firmware;
 }
@@ -18,6 +20,7 @@ public:
     ~Firmware();
 
 private:
+
     Ui::Firmware *ui;
     QNetworkAccessManager manager;
     QNetworkReply* reply;
