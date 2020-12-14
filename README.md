@@ -60,7 +60,7 @@ You can mount the board in many orientations 48 to be exact. I don't have an eas
 ## Note
 The GUI is not compatible with non-BNO055 firmware's i've made quite a few changes and it currently won't work properly. I just recently made it so you can easily pick a firmware now so the next step is making this work with various boards and IC's.
 
-![alt text](https://github.com/dlktdr/HeadTracker/blob/master/ScreenShot.png?raw=true)
+![alt text](https://github.com/dlktdr/HeadTracker/raw/master/gui/src/ScreenShot.png)
 
 ## To Do
 
