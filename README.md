@@ -35,7 +35,7 @@ I've modified the code for the head tracker and wrote a new GUI for it. Based on
 6) Close the firmware and log windows
 
 ## Usage
-* Choose the correct Com Port from the list and click connect. After a second you should see "Settings Retrieved!" in the log.
+* Choose the correct Com Port from the list and click connect. After a second you should see **Settings Retrieved!** in the log.
 * If you only see "TX: $GSET" and nothing else hit the reset button on the Nano to see if there was an Error on Bootup.
 * Once Connected Click **Start** to show the realtime status.
 * Right click on the range settings and choose default values for all three tilt, pan, roll if needed
