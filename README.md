@@ -47,6 +47,7 @@ I've modified the code for the head tracker and wrote a new GUI for it. Based on
 * The channel options allow you to choose what PPM output each is going to on your radio.
 * The low pass settings allow filtering out rapid motion. Set to 1% for maximum filtering. Set to 100% for very little.
 * **Reset Center** does the same thing as pressing the physical button
+* The four bar graphs show the sensors calibration status. Just for information at the moment. Not really needed.
 
 ## Errors
 If you get,
