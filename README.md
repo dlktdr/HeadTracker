@@ -39,10 +39,14 @@ I've modified the code for the head tracker and wrote a new GUI for it. Based on
 * If you only see "TX: $GSET" and nothing else hit the reset button on the Nano to see if there was an Error on Bootup.
 * Once Connected Click **Start** to show the realtime status.
 * Right click on the range settings and choose default values for all three tilt, pan, roll if needed
-* Adjust these sliders so when you pan your head the servo's move where you want them to.
+* Adjust the range sliders so when you pan your head the servo's move where you want them to.
+  * Setting The blue bars are the min/max ranges. 
+  * Red is where you want center output. (Right click and choose re-center if you want it perfectly the middle of the min/max)
 * Adjust the gain settings to make the outputs more or less sensitive.
 * The yellow triangle on the range sliders show the actual servo output
 * The channel options allow you to choose what PPM output each is going to on your radio.
+* The low pass settings allow filtering out rapid motion. Set to 1% for maximum filtering. Set to 100% for very little.
+* **Reset Center** does the same thing as pressing the physical button
 
 ## Errors
 If you get,
