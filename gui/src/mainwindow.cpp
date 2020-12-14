@@ -375,6 +375,7 @@ void MainWindow::updateFromUI()
 // Data ready to be read from the serial port
 void MainWindow::serialReadReady()
 {
+    // Read all serial data
     bool scroll = false;
     QByteArray sd = serialcon->readAll();
     serialData.append(sd);

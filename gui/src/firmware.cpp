@@ -68,13 +68,13 @@ void Firmware::loadOnlineFirmware()
 void Firmware::firmwareVersionsReady()
 {
     // Store the remote file localy
-    /*QByteArray ba;
+    QByteArray ba;
     QFile file("Firmwares.ini");
     file.open(QIODevice::WriteOnly|QIODevice::Truncate);
     ba = reply->readAll();
     file.write(ba);
     file.flush();
-    file.close();*/
+    file.close();
 
     // Use QSettings to parse the Ini File
     QSettings ini("Firmwares.ini",QSettings::IniFormat);
