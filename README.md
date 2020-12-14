@@ -55,7 +55,7 @@ After you put your headset on hold your head level and straight and hit the rese
 Don't worry about trying to get all the Gyro,Accel,Mag,System Bar graphs to their max levels. We don't need that accuracy for what this is.
 
 ## Alternate orientations
-You can mount the board in many orientations 48 to be exact. If you want to I don't have an easy way to find the correct settings at the moment. You will have to cycle through the Axis Sign and Remapping choices. Be sure to have "Show Raw Data" on when trying to find the correct one. This will remove any offsets from pressing the zero button. Hold your headset in a level orientation. Cycle through the choices until the tilt and roll on the graph are near zero. Ignore the pan until you have both tilt and roll at or near zero. Then check pan, remeber you will have to always manually zero this one.
+You can mount the board in many orientations 48 to be exact. I don't have an easy way to find the correct settings at the moment. You will have to cycle through the Axis Sign and Remapping choices. Be sure to have "Show Raw Data" on when trying to find the correct one. This will remove any offsets from pressing the zero button. Hold your headset in a level orientation. Cycle through the choices until the tilt and roll on the graph are near zero. Ignore the pan until you have both tilt and roll at or near zero. Then check pan, remeber you will have to always manually zero this one.
 
 ## Note
 The GUI is not compatible with non-BNO055 firmware's i've made quite a few changes and it currently won't work properly. I just recently made it so you can easily pick a firmware now so the next step is making this work with various boards and IC's.
