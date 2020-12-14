@@ -10,6 +10,7 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    firmwareUploader = new Firmware;
     serialcon = new QSerialPort;
     ui->statusbar->showMessage("Disconnected");
     findSerialPorts();
@@ -84,7 +85,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->action_Save_to_File,SIGNAL(triggered()),this,SLOT(saveSettings()));
     connect(ui->action_Load,SIGNAL(triggered()),this,SLOT(loadSettings()));
     connect(ui->actionE_xit,SIGNAL(triggered()),QCoreApplication::instance(),SLOT(quit()));
-    connect(ui->actionUpload_Firmware,SIGNAL(triggered()),&firmwareUploader,SLOT(show()));
+    connect(ui->actionUpload_Firmware,SIGNAL(triggered()),this,SLOT(uploadFirmwareClick()));
 
     // LED Timers
     rxledtimer.setInterval(100);
@@ -99,7 +100,9 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow()
 {
     delete serialcon;
+    delete firmwareUploader;
     delete ui;
+
 }
 
 // Parse the data received from the serial port
@@ -523,6 +526,17 @@ void MainWindow::loadSettings()
         updateToUI();
         updateSettings();
     }
+}
 
+void MainWindow::uploadFirmwareClick()
+{
+    firmwareUploader->show();
+    firmwareUploader->setComPort(ui->cmdPort->currentText());
+}
+
+void MainWindow::closeEvent (QCloseEvent *event)
+{
+    QCoreApplication::quit();
+    event->accept();
 }
 

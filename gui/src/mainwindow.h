@@ -10,6 +10,7 @@
 #include <QSerialPortInfo>
 #include <QFileDialog>
 #include <QSettings>
+#include <QCloseEvent>
 #include "trackersettings.h"
 #include "firmware.h"
 
@@ -27,6 +28,9 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+protected:
+    void closeEvent(QCloseEvent *event);
+
 private:
     Ui::MainWindow *ui;
     QSerialPort *serialcon;
@@ -36,7 +40,7 @@ private:
     QTimer txledtimer;
     QTimer updatesettingstmr;
     QString logd;
-    Firmware firmwareUploader;
+    Firmware *firmwareUploader;
 
     int xtime;
     void parseSerialData();
@@ -64,5 +68,6 @@ private slots:
     void txledtimeout();
     void saveSettings();
     void loadSettings();
+    void uploadFirmwareClick();
 };
 #endif // MAINWINDOW_H

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>438</width>
-    <height>417</height>
+    <width>441</width>
+    <height>498</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -21,7 +21,14 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
-       <widget class="QListWidget" name="lstFirmwares"/>
+       <widget class="QListWidget" name="lstFirmwares">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
       </item>
       <item>
        <widget class="QPushButton" name="cmdFetch">
@@ -40,10 +47,28 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
-       <widget class="QPlainTextEdit" name="plainTextEdit">
-        <property name="plainText">
-         <string>Please select a firmware</string>
+       <widget class="QTableWidget" name="infoTable">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
         </property>
+        <property name="alternatingRowColors">
+         <bool>true</bool>
+        </property>
+        <property name="selectionMode">
+         <enum>QAbstractItemView::SingleSelection</enum>
+        </property>
+        <property name="selectionBehavior">
+         <enum>QAbstractItemView::SelectRows</enum>
+        </property>
+        <attribute name="horizontalHeaderVisible">
+         <bool>false</bool>
+        </attribute>
+        <attribute name="verticalHeaderVisible">
+         <bool>false</bool>
+        </attribute>
        </widget>
       </item>
      </layout>
@@ -65,13 +90,6 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="uploadLocal">
-       <property name="text">
-        <string>Upload from Local File</string>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="QPushButton" name="cmdUploadOnline">
        <property name="text">
         <string>&amp;Upload Selected</string>
@@ -79,7 +97,31 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_2">
+      <widget class="QPushButton" name="cmdUploadLocal">
+       <property name="text">
+        <string>Upload from Local File</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <spacer name="horizontalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="cmdClose">
        <property name="text">
         <string>&amp;Close</string>
        </property>
