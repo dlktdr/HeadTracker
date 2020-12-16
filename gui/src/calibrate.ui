@@ -25,7 +25,7 @@
         </sizepolicy>
        </property>
        <property name="title">
-        <string>Gyro</string>
+        <string>Gyrometer</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>
@@ -334,7 +334,7 @@
         </sizepolicy>
        </property>
        <property name="title">
-        <string>System</string>
+        <string>System Staus</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>
