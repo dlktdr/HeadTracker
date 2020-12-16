@@ -1,6 +1,7 @@
 
 #include <QNetworkAccessManager>
 #include <QSettings>
+#include <QTimer>
 #include "firmware.h"
 #include "ui_firmware.h"
 
@@ -228,6 +229,12 @@ void Firmware::avrDudeFinished(int exitCode, QProcess::ExitStatus exitStatus)
 {
     Q_UNUSED(exitStatus);
     Q_UNUSED(exitCode);
-    // Close on finish with timer.
-    //QTimer::r
+
+    if(exitCode == 0) {
+        // If Successfull autoclose window.
+        QTimer::singleShot(1500,avrdudelog,SLOT(close()));
+        QMessageBox::about(this, "Programming Success", "Programming Successful!");
+    } else {
+        QMessageBox::critical(this, "Programming Failure", "Programming Failed, Please check the log for information");
+    }
 }

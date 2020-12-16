@@ -531,10 +531,14 @@ void MainWindow::loadSettings()
 
 void MainWindow::uploadFirmwareClick()
 {
-    firmwareUploader->show();
-    firmwareUploader->activateWindow();
-    firmwareUploader->raise();
-    firmwareUploader->setComPort(ui->cmdPort->currentText());
+    if(serialcon->isOpen()) {
+        QMessageBox::information(this,"Cannot Upload", "Disconnect before uploading a new firmware");
+    } else {
+        firmwareUploader->show();
+        firmwareUploader->activateWindow();
+        firmwareUploader->raise();
+        firmwareUploader->setComPort(ui->cmdPort->currentText());
+    }
 }
 
 void MainWindow::closeEvent (QCloseEvent *event)
