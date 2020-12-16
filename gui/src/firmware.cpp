@@ -19,6 +19,7 @@ Firmware::Firmware(QWidget *parent) :
     // AVR Dude Programmer
     avrdude = new QProcess(this);
     avrdudelog = new QPlainTextEdit;
+    avrdudelog->setWindowTitle("Firmware Programming Output");
     connect(avrdude, SIGNAL(readyReadStandardOutput()), this, SLOT(avrDudeSTDOUTReady()));
     connect(avrdude, SIGNAL(readyReadStandardError()), this, SLOT(avrDudeSTDERRReady()));
     connect(avrdude, SIGNAL(started()), this, SLOT(avrDudeStarted()));
@@ -195,12 +196,14 @@ void Firmware::uploadClicked()
 
 void Firmware::avrDudeSTDOUTReady()
 {
-    avrdudelog->appendPlainText(avrdude->readAllStandardError());
+    QByteArray ba = avrdude->readAllStandardOutput();
+    avrdudelog->setPlainText(avrdudelog->toPlainText() + ba);
 }
 
 void Firmware::avrDudeSTDERRReady()
 {
-    avrdudelog->appendPlainText(avrdude->readAllStandardError());
+    QByteArray ba = avrdude->readAllStandardError();
+    avrdudelog->setPlainText(avrdudelog->toPlainText() + ba);
 }
 
 void Firmware::avrDudeStarted()
