@@ -54,9 +54,9 @@ If you get,
 If still nothing make sure you have the proper voltage going to the board.
 
 ## Calibration
-*Version 0.3* - To calibrate connect to the device and click the calibrate button. This will start the calibration. The goal is to have all bar graphs at a maximum at which time it will save the data. It will guide you through each step as you do them. Once all bars hit go max the data is saved and you're done.
+**Version 0.3** - To calibrate connect to the device and click the calibrate button. This will start the calibration. The goal is to have all bar graphs at a maximum at which time it will save the data. It will guide you through each step as you do them. Once all bars hit go max the data is saved and you're done.
 
-*Versions < 0.3* - The BNO055 calibration data is lost on every reboot. All I've found you need to do is slowly pan your headseat 180. Set it down and not moving for 5seconds. 
+**Versions < 0.3** - The BNO055 calibration data is lost on every reboot. All I've found you need to do is slowly pan your headseat 180. Set it down and not moving for 5seconds. 
 After you put your headset on hold your head level and straight and hit the reset button. Thats it.
 Don't worry about trying to get all the Gyro,Accel,Mag,System Bar graphs to their max levels. We don't need that accuracy for what this is.
 
