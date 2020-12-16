@@ -10,6 +10,7 @@
 #include "Arduino.h"
 #include "functions.h"
 #include "sensors.h"
+#include <EEPROM.h>
 #include <Wire.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BNO055.h>
@@ -66,15 +67,15 @@ float tiltRollBeta = 0.75;
 float panBeta = 0.75;
 float gyroWeightTiltRoll = 0.98;
 float GyroWeightPan = 0.98;
-int servoPanCenter = 2100;
-int servoTiltCenter = 2100;
-int servoRollCenter = 2100;
-int panMaxPulse = 1150;
-int panMinPulse = 1150;
-int tiltMaxPulse = 1150;
-int tiltMinPulse = 1150;
-int rollMaxPulse = 1150;
-int rollMinPulse = 1150;
+int servoPanCenter = 2200;
+int servoTiltCenter = 2200;
+int servoRollCenter = 2200;
+int panMaxPulse = 3200;
+int panMinPulse = 1200;
+int tiltMaxPulse = 3200;
+int tiltMinPulse = 1200;
+int rollMaxPulse = 3200;
+int rollMinPulse = 1200;
 float panFactor = 17;
 float tiltFactor = 17;
 float rollFactor = 17;
@@ -83,8 +84,10 @@ unsigned char htChannels[3] = {8, 7, 6}; // pan, tilt, roll
 unsigned char axisRemap = Adafruit_BNO055::REMAP_CONFIG_P1;
 unsigned char axisSign = Adafruit_BNO055::REMAP_SIGN_P1;
 bool graphRaw = false;
-
-
+long bnoID = 0;
+bool foundCalib = false;
+bool doCalibrate = false;
+sensor_t sensor;
 
 //
 // End settings
@@ -116,9 +119,10 @@ void ReadFromI2C(int device, char address, char bytesToRead)
     Wire.endTransmission();
 }
 
+uint8_t sys=0, gyro=0, accel=0, mag = 0;
+
 void trackerOutput()
-{
-  uint8_t sys, gyro, accel, mag = 0;
+{  
   bno.getCalibration(&sys, &gyro, &accel, &mag);
   Serial.print("$G");
   if(graphRaw) { // Graph Raw Data
@@ -267,6 +271,12 @@ void FilterSensorData()
           rollAngleTemp = rollMaxPulse;
         channel_value[htChannels[2]] = rollAngleTemp;          
     }
+
+    // Calibration
+    if(sys == 3 && gyro == 3 && accel == 3 && mag == 3 && doCalibrate) {
+      StoreBNOCalibration();
+      doCalibrate = false;
+    }
 }
 
 //--------------------------------------------------------------------------------------
@@ -279,30 +289,48 @@ void InitSensors()
   if(!bno.begin())
   {
     /* There was a problem detecting the BNO055 ... check your connections */
-    Serial.println("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
+    Serial.println("No BNO055 detected... Check your wiring!");
     // Infinate Loop
-    while(1);
+    while(1) {
+      delay(1000);
+      Serial.println("No BNO055 detected... Check your wiring!");
+    }
   }
 
   bno.setExtCrystalUse(true);
   bno.setMode(0X0C); // 9 Degrees Of Freedom, Fast Mag Cal On
-
-  sensor_t sensor;
   bno.getSensor(&sensor);
-  // Display some infor on the Sensor, from BNO055 Example
-  Serial.println("------------------------------------");
-  Serial.print("Sensor:       "); Serial.println(sensor.name);
-  Serial.print("Driver Ver:   "); Serial.println(sensor.version);
-  Serial.print("Unique ID:    "); Serial.println(sensor.sensor_id);
-  Serial.print("Max Value:    "); Serial.print(sensor.max_value); Serial.println("");
-  Serial.print("Min Value:    "); Serial.print(sensor.min_value); Serial.println("");
-  Serial.print("Resolution:   "); Serial.print(sensor.resolution); Serial.println("");
-  Serial.println("------------------------------------");  
-
-  // Set Axes Orientation
   RemapAxes();  
-  Serial.print("Axis Remap: "); Serial.print(" 0x"); Serial.println(axisRemap,HEX);
-  Serial.print("Axis Sign:    0x"); Serial.println((char)axisSign,HEX);
+
+  // Retreive BNO calibration data if stored in EEPROM
+  long bnoID; 
+  int eeAddress = BNO_EEPROM_START;
+  
+  EEPROM.get(eeAddress, bnoID);   
+  adafruit_bno055_offsets_t calibrationData;
+  
+  if (bnoID != sensor.sensor_id) {
+      Serial.println("No Calibration Data Stored");
+  } else {
+      eeAddress += sizeof(long);
+      EEPROM.get(eeAddress, calibrationData);
+      bno.setSensorOffsets(calibrationData);
+      Serial.println("\n\nRestored Saved Calibration");
+      foundCalib = true;
+  }
+}
+
+void StoreBNOCalibration() {
+  int eeAddress = BNO_EEPROM_START;
+  bno.getSensor(&sensor);
+  bnoID = sensor.sensor_id; 
+  adafruit_bno055_offsets_t newCalib;
+  bno.getSensorOffsets(newCalib);
+  Serial.println("Storing calibration data to EEPROM");  
+  EEPROM.put(eeAddress, bnoID);
+  eeAddress += sizeof(long);
+  EEPROM.put(eeAddress, newCalib);
+  Serial.println("$CALSAV"); // Notify the GUI
 }
 
 //--------------------------------------------------------------------------------------
@@ -329,7 +357,6 @@ void RemapAxes()
 
   bno.setAxisRemap(axisRemap);
   bno.setAxisSign(axisSign);
-  Serial.print("Orient Mapping #"); Serial.print(axisRemap); Serial.print(" Set To: "); Serial.print(axisRemap, HEX); Serial.print(" Signs: "); Serial.print(axisSign, HEX); Serial.println("");
 }
 
 

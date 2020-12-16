@@ -161,7 +161,7 @@ void setup()
     CheckI2CPresent();
 
     // If the device have just been programmed, write initial config/values to EEPROM:
-    if (EEPROM.read(0) != 8)
+    if (EEPROM.read(0) != EEPROM_MAGIC_NUMBER)
     {
 
         Serial.println("New board - saving default values!");
@@ -372,7 +372,9 @@ void loop()
                 axisSign = valuesReceived[21];
 
                 // Update the BNO055 axis mapping
-                RemapAxes();               
+                RemapAxes();   
+
+                // Auto Save to EEPROM
                 SaveSettings();
 
                 serial_index = 0;
@@ -405,11 +407,8 @@ void loop()
                      serial_data[serial_index-2] == 'T' &&
                      serial_data[serial_index-1] == 'O')
             {
-                if(sys == 3 && gyro == 3 && accel == 3 && mag == 3) {
-                    Serial.println("Good Data, Saving it");  
-                } else {
-                    Serial.println("BNO055, not fully calibrated");  
-                }
+                Serial.println("Calibration saved when all sensors at maximum");
+                doCalibrate = true;
             }
 
             // Clear Offsets via Software
@@ -654,7 +653,7 @@ void SaveSettings()
     // written. Used to determine if board is newly flashed
     // or not.
   
-    EEPROM.write(0,8); 
+    EEPROM.write(0,EEPROM_MAGIC_NUMBER); 
 
     Serial.println("Settings saved!");
 }

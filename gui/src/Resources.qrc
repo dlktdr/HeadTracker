@@ -3,5 +3,7 @@
         <file>refresh.svg</file>
         <file>Icon256.png</file>
         <file>IconFile.ico</file>
+        <file>check.svg</file>
+        <file>x.svg</file>
     </qresource>
 </RCC>

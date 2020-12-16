@@ -29,8 +29,11 @@ void trackerOutput();
 void FilterSensorData();
 void ResetCenter();
 void SensorInfoPrint();
-void CheckI2CPresent();
 
+void CheckI2CPresent();
 void RemapAxes();
+void StoreBNOCalibration();
+
+extern bool doCalibrate;
 
 #endif // sensors_h

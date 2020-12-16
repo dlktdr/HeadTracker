@@ -12,6 +12,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     firmwareUploader = new Firmware;
     serialcon = new QSerialPort;
+    calibratorDialog = new Calibrate;
     ui->statusbar->showMessage("Disconnected");
     findSerialPorts();
     ui->cmdDisconnect->setEnabled(false);
@@ -36,6 +37,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->cmdStartGraph,SIGNAL(clicked()),this,SLOT(startGraph()));
     connect(ui->cmdStopGraph,SIGNAL(clicked()),this,SLOT(stopGraph()));
     connect(ui->cmdResetCenter,SIGNAL(clicked()),this, SLOT(resetCenter()));
+    connect(ui->cmdCalibrate,SIGNAL(clicked()),this, SLOT(startCalibration()));
     connect(ui->cmdRefresh,&QPushButton::clicked,this,&MainWindow::findSerialPorts);
 
     // Check Boxes
@@ -101,6 +103,7 @@ MainWindow::~MainWindow()
 {
     delete serialcon;
     delete firmwareUploader;
+    delete calibratorDialog;
     delete ui;
 
 }
@@ -127,6 +130,11 @@ void MainWindow::parseSerialData()
                 ui->statusbar->showMessage("Values Set On Headtracker",2000);
             }
 
+            // Calibration Saved
+             else if(data.left(7) == QString("$CALSAV")) {
+                ui->statusbar->showMessage("Calibration Saved", 2000);
+            }
+
             // Graph Data
             else if(data.left(2) == QString("$G")) {
                 data = data.mid(2).simplified();
@@ -146,10 +154,14 @@ void MainWindow::parseSerialData()
                     ui->servoPan->setActualPosition(panout);
                     ui->servoTilt->setActualPosition(tiltout);
                     ui->servoRoll->setActualPosition(rollout);
-                    ui->sbs->setSignal(syscal);
+                    /*ui->sbs->setSignal(syscal);
                     ui->sba->setSignal(accelcal);
                     ui->sbm->setSignal(magcal);
-                    ui->sbg->setSignal(gyrocal);
+                    ui->sbg->setSignal(gyrocal);*/
+                    calibratorDialog->setCalibration(syscal,
+                                                     magcal,
+                                                     gyrocal,
+                                                     accelcal);
                     graphing = true;
                     ui->servoPan->setShowActualPosition(true);
                     ui->servoTilt->setShowActualPosition(true);
@@ -539,6 +551,21 @@ void MainWindow::uploadFirmwareClick()
         firmwareUploader->raise();
         firmwareUploader->setComPort(ui->cmdPort->currentText());
     }
+}
+
+void MainWindow::startCalibration()
+{
+    if(!serialcon->isOpen()) {
+        QMessageBox::information(this,"Not Connected", "Connect before trying to calibrate");
+        return;
+    }
+
+    // Start calibration, start graphing.
+    sendSerialData("$STO");
+    startGraph();
+
+    calibratorDialog->startCalibration();
+    calibratorDialog->show();
 }
 
 void MainWindow::closeEvent (QCloseEvent *event)

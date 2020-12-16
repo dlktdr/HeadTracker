@@ -13,6 +13,7 @@
 #include <QCloseEvent>
 #include "trackersettings.h"
 #include "firmware.h"
+#include "calibrate.h"
 
 const int MAX_LOG_LENGTH=6000;
 
@@ -41,6 +42,7 @@ private:
     QTimer updatesettingstmr;
     QString logd;
     Firmware *firmwareUploader;
+    Calibrate *calibratorDialog;
 
     int xtime;
     void parseSerialData();
@@ -69,5 +71,6 @@ private slots:
     void saveSettings();
     void loadSettings();
     void uploadFirmwareClick();
+    void startCalibration();
 };
 #endif // MAINWINDOW_H

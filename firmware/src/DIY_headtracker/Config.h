@@ -73,6 +73,9 @@
 // Arduino LED
 #define ARDUINO_LED 13
 
+// Used to determine if eeprom is programmed
+#define EEPROM_MAGIC_NUMBER 15
+
 // Pin definition for LED and buzzer (Fatshark goggles)
 #if FATSHARK_HT_MODULE
     #define BUZZER     4
@@ -91,5 +94,8 @@
 #define HT_TILT_REVERSE_BIT     0x01
 #define HT_ROLL_REVERSE_BIT     0x02
 #define HT_PAN_REVERSE_BIT      0x04
+
+// Start of EEPROM settings for BNO
+#define BNO_EEPROM_START  100
 
 #endif
