@@ -49,9 +49,9 @@ I've modified the code for the head tracker and wrote a new GUI for it. Based on
 * **Reset Center** does the same thing as pressing the physical button
 
 ## Errors
-If you get,
-"Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!" - Check you have the proper firmware loaded with the correct BNO055 Address, if you use the board listed here you want the 0x29 address. If this is correct check your SCL and SDA wires are correct. Also check that both PS0 and PS1 are tied to ground.
-If still nothing make sure you have the proper voltage going to the board.
+**Version 0.2+** - BNOAddress is autodetected. Only a single firmware file required now for this.
+**Version < 0.2** - If you get "Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!" - Check you have the proper firmware loaded with the correct BNO055 Address, if you use the board listed here you want the 0x29 address. 
+**ALL Versions** - If BNO055 is not detected - Check your SCL and SDA wires are correctly attached. Check that both PS0 and PS1 are tied to ground. Make sure you have the proper voltage going to the board.
 
 ## Calibration
 **Version 0.3** - To calibrate connect to the device and click the calibrate button. This will start the calibration. The goal is to have all bar graphs at a maximum at which time it will save the data. It will guide you through each step as you do them. Once all bars hit go max the data is saved and you're done.
