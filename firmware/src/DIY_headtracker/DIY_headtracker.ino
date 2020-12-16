@@ -102,6 +102,7 @@ extern unsigned char htChannels[];
 extern unsigned char axisRemap;
 extern unsigned char axisSign;
 extern bool graphRaw;
+extern int I2CPresent;
 
 // End settings   
 
@@ -155,6 +156,8 @@ void setup()
 
     InitPWMInterrupt();         // Start PWM interrupt  
     Wire.begin();               // Start I2C
+
+    CheckI2CPresent();
 
     // If the device have just been programmed, write initial config/values to EEPROM:
     if (EEPROM.read(0) != 8)

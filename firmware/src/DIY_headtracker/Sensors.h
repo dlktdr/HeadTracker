@@ -29,6 +29,7 @@ void trackerOutput();
 void FilterSensorData();
 void ResetCenter();
 void SensorInfoPrint();
+void CheckI2CPresent();
 
 void RemapAxes();
 

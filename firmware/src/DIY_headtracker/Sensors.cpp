@@ -20,7 +20,9 @@
 extern long channel_value[];
 
 /* BNO055 */
-Adafruit_BNO055 bno = Adafruit_BNO055(-1, BNO055_ADDRESS ); 
+byte bno055_address = 0x28;
+
+Adafruit_BNO055 bno; 
 adafruit_bno055_offsets_t calibrationData;
 sensors_event_t event; 
 
@@ -149,6 +151,27 @@ void trackerOutput()
   Serial.println(mag, DEC);  
 }
 
+int I2CPresent = 0;
+
+void CheckI2CPresent()
+{
+  Wire.beginTransmission(0x28);  
+  if (Wire.endTransmission() == 0) {
+    I2CPresent = 1;
+    bno055_address = 0x28;
+    bno = Adafruit_BNO055(-1, 0x028 );    
+    return;
+  } 
+  
+  Wire.beginTransmission(0x29);  
+  if (Wire.endTransmission() == 0) {
+    I2CPresent = 1;
+    bno055_address = 0x29;
+    bno = Adafruit_BNO055(-1, 0x029 );
+    return;
+  } 
+}
+
 //--------------------------------------------------------------------------------------
 // Func: UpdateSensors
 // Desc: Retrieves the sensor data from the sensor board via I2C.
@@ -262,7 +285,7 @@ void InitSensors()
   }
 
   bno.setExtCrystalUse(true);
-  //bno.setMode(0X0C); // 9 Degrees Of Freedom, Fast Mag Cal On
+  bno.setMode(0X0C); // 9 Degrees Of Freedom, Fast Mag Cal On
 
   sensor_t sensor;
   bno.getSensor(&sensor);
@@ -300,7 +323,6 @@ void ResetCenter()
 //       
 //--------------------------------------------------------------------------------------
 
-
 void RemapAxes() 
 {
   char cas = axisRemap;
@@ -308,4 +330,35 @@ void RemapAxes()
   bno.setAxisRemap(axisRemap);
   bno.setAxisSign(axisSign);
   Serial.print("Orient Mapping #"); Serial.print(axisRemap); Serial.print(" Set To: "); Serial.print(axisRemap, HEX); Serial.print(" Signs: "); Serial.print(axisSign, HEX); Serial.println("");
+}
+
+
+/**************************************************************************/
+/*
+    Display the raw calibration offset and radius data
+    */
+/**************************************************************************/
+
+void displaySensorOffsets(const adafruit_bno055_offsets_t &calibData)
+{
+    Serial.print("Accelerometer: ");
+    Serial.print(calibData.accel_offset_x); Serial.print(" ");
+    Serial.print(calibData.accel_offset_y); Serial.print(" ");
+    Serial.print(calibData.accel_offset_z); Serial.print(" ");
+
+    Serial.print("\nGyro: ");
+    Serial.print(calibData.gyro_offset_x); Serial.print(" ");
+    Serial.print(calibData.gyro_offset_y); Serial.print(" ");
+    Serial.print(calibData.gyro_offset_z); Serial.print(" ");
+
+    Serial.print("\nMag: ");
+    Serial.print(calibData.mag_offset_x); Serial.print(" ");
+    Serial.print(calibData.mag_offset_y); Serial.print(" ");
+    Serial.print(calibData.mag_offset_z); Serial.print(" ");
+
+    Serial.print("\nAccel Radius: ");
+    Serial.print(calibData.accel_radius);
+
+    Serial.print("\nMag Radius: ");
+    Serial.print(calibData.mag_radius);
 }
