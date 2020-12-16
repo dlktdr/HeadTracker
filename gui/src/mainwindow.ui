@@ -601,26 +601,6 @@
              <string>12</string>
             </property>
            </item>
-           <item>
-            <property name="text">
-             <string>13</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>14</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>15</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>16</string>
-            </property>
-           </item>
           </widget>
          </item>
          <item row="2" column="2">
@@ -779,26 +759,6 @@
              <string>12</string>
             </property>
            </item>
-           <item>
-            <property name="text">
-             <string>13</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>14</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>15</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>16</string>
-            </property>
-           </item>
           </widget>
          </item>
          <item row="3" column="0">
@@ -918,26 +878,6 @@
            <item>
             <property name="text">
              <string>12</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>13</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>14</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>15</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>16</string>
             </property>
            </item>
           </widget>

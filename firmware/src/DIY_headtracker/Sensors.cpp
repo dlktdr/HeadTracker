@@ -315,7 +315,7 @@ void InitSensors()
       eeAddress += sizeof(long);
       EEPROM.get(eeAddress, calibrationData);
       bno.setSensorOffsets(calibrationData);
-      Serial.println("\n\nRestored Saved Calibration");
+      Serial.println("Restored Saved Calibration");
       foundCalib = true;
   }
 }
