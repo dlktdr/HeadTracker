@@ -31,8 +31,8 @@ I've modified the code for the head tracker and wrote a new GUI for it. Based on
 2) Choose the correct Com Port from the list. Hit refresh icon to scan again if neeeded.
 3) Choose **Firmware->Upload Firmware** from the menu.
 4) Click to **Fetch Firmwares Online**, a list of current available firmwares is presented. Highlight the one you want and click **Upload Selected**.
-5) A window will open showing the status of the programming. It should show "avrdude.exe: 15662 bytes of flash verified" near the bottom if successful.
-6) Close the firmware and log windows
+5) A window will open showing the status of the programming. You should get a programming success. If not check your com port and cables
+6) Close the firmware window
 
 ## Usage
 * Choose the correct Com Port from the list and click connect. After a second you should see **Settings Retrieved!** in the log.
@@ -47,7 +47,6 @@ I've modified the code for the head tracker and wrote a new GUI for it. Based on
 * The channel options allow you to choose what PPM output each is going to on your radio.
 * The low pass settings allow filtering out rapid motion. Set to 1% for maximum filtering. Set to 100% for very little.
 * **Reset Center** does the same thing as pressing the physical button
-* The four bar graphs show the sensors calibration status. Just for information at the moment. Not really needed.
 
 ## Errors
 If you get,
@@ -55,7 +54,9 @@ If you get,
 If still nothing make sure you have the proper voltage going to the board.
 
 ## Calibration
-The BNO055 calibration data is lost on every reboot. All I've found you need to do is slowly pan your headseat 180. Set it down and not moving for 5seconds. 
+*Version 0.3* - To calibrate connect to the device and click the calibrate button. This will start the calibration. The goal is to have all bar graphs at a maximum at which time it will save the data. It will guide you through each step as you do them. Once all bars hit go max the data is saved and you're done.
+
+*Versions < 0.3* - The BNO055 calibration data is lost on every reboot. All I've found you need to do is slowly pan your headseat 180. Set it down and not moving for 5seconds. 
 After you put your headset on hold your head level and straight and hit the reset button. Thats it.
 Don't worry about trying to get all the Gyro,Accel,Mag,System Bar graphs to their max levels. We don't need that accuracy for what this is.
 
@@ -69,4 +70,4 @@ The GUI is not compatible with non-BNO055 firmware's i've made quite a few chang
 
 ## To Do
 
-I've added board orientation choices. Needs work tho, haven't added too many choices. I also have to figure out a better way to do this tho. Everyone isn't going to buy the same board or solder it on in the same orientation.
+Make it so you can mount in any position!
