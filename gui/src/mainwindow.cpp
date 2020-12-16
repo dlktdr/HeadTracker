@@ -532,6 +532,8 @@ void MainWindow::loadSettings()
 void MainWindow::uploadFirmwareClick()
 {
     firmwareUploader->show();
+    firmwareUploader->activateWindow();
+    firmwareUploader->raise();
     firmwareUploader->setComPort(ui->cmdPort->currentText());
 }
 
