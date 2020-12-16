@@ -103,6 +103,7 @@ extern unsigned char axisRemap;
 extern unsigned char axisSign;
 extern bool graphRaw;
 extern int I2CPresent;
+extern uint8_t sys, gyro, accel, mag;
 
 // End settings   
 
@@ -291,7 +292,7 @@ void loop()
                     Serial.println("$CRCERR");
                     return;
                 } else {                    
-                  Serial.println("$CRCOK:HT Settings Retrieved");
+                    Serial.println("$CRCOK:HT Settings Retrieved");
                 }
            
                 int valuesReceived[22] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
@@ -369,10 +370,10 @@ void loop()
 
                 axisRemap = valuesReceived[20];     
                 axisSign = valuesReceived[21];
-                Serial.print("AXIS REMAP To"); Serial.print(axisRemap); Serial.print(" SIGN"); Serial.print(axisSign); Serial.println("");
 
                 // Update the BNO055 axis mapping
                 RemapAxes();               
+                SaveSettings();
 
                 serial_index = 0;
                 string_started = 0;
@@ -397,6 +398,18 @@ void loop()
             {
                 Serial.println("Reset Values Complete ");
                 resetValues = 1;
+            }
+            
+            // Clear Offsets via Software
+            else if (serial_data[serial_index-3] == 'S' &&
+                     serial_data[serial_index-2] == 'T' &&
+                     serial_data[serial_index-1] == 'O')
+            {
+                if(sys == 3 && gyro == 3 && accel == 3 && mag == 3) {
+                    Serial.println("Good Data, Saving it");  
+                } else {
+                    Serial.println("BNO055, not fully calibrated");  
+                }
             }
 
             // Clear Offsets via Software
@@ -538,7 +551,7 @@ void loop()
                 Serial.print(",");
                 Serial.println(axisSign);
 
-                Serial.println("Settings Retrieved!");
+                Serial.println("Settings Sent!");
 
                 serial_index = 0;
                 string_started = 0;

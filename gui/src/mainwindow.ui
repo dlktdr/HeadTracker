@@ -82,7 +82,7 @@
            </sizepolicy>
           </property>
           <property name="text">
-           <string>&amp;Store to EEPROM</string>
+           <string>&amp;Send Changes</string>
           </property>
          </widget>
         </item>

@@ -369,7 +369,7 @@ void MainWindow::updateFromUI()
     trkset.setAxisRemap(ui->cmbRemap->currentData().toUInt());
     trkset.setAxisSign(ui->cmbSigns->currentIndex());
 
-    updatesettingstmr.start(1000);
+    //updatesettingstmr.start(1000);
 }
 
 // Data ready to be read from the serial port
@@ -426,8 +426,8 @@ void MainWindow::stopGraph()
 
 void MainWindow::storeSettings()
 {
+    updateSettings();
     ui->statusbar->showMessage(tr("Settings Stored to EEPROM"),2000);
-    sendSerialData("$SAVE");
 }
 
 void MainWindow::updateSettings()
