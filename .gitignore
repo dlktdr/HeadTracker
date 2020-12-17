@@ -70,8 +70,8 @@ Thumbs.db
 # --------
 *.dll
 *.exe
-
 *.cdr
+
 # Compiled Output Folders, But include Zips
 /gui/bin/*
 !/gui/bin/*.zip
