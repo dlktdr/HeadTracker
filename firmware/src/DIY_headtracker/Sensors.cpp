@@ -1,7 +1,10 @@
+
 /*
  * Cliff Blackburn - Nov 20,2020 - Modified code for use with BMO055 + new GUI
  *                               
  */
+
+
 //-----------------------------------------------------------------------------
 // File: Sensors.cpp
 // Desc: Implementations sensor board functionality.
@@ -28,10 +31,8 @@ adafruit_bno055_offsets_t calibrationData;
 sensors_event_t event; 
 
 // Local variables
-//
 byte sensorBuffer[10];       // Buffer for bytes read from sensors
 char resetValues = 1;        // Used to reset headtracker/re-center. 
-
 
 // Final angles for headtracker:
 float tiltAngle = 90;       // Tilt angle
@@ -102,7 +103,7 @@ void WriteToI2C(int device, byte address, byte val)
 }
 
 // Function to read from I2C
-void ReadFromI2C(int device, char address, char bytesToRead)
+void ReadFromI2C(int device, byte address, char bytesToRead)
 {
     Wire.beginTransmission(device);
     Wire.write(address);
@@ -251,25 +252,16 @@ void FilterSensorData()
         // Limit outputs
 
         float panAngleTemp = (panAngleLP * panInverse * panFactor) + servoPanCenter;
-        if(panAngleTemp < panMinPulse)
-          panAngleTemp = panMinPulse;
-        if(panAngleTemp > panMaxPulse)
-          panAngleTemp = panMaxPulse;
-        channel_value[htChannels[0]] = panAngleTemp;          
+		panAngleTemp = min(max(panAngleTemp, panMinPulse), panMaxPulse);
+        channel_value[htChannels[0]] = panAngleTemp;
 
         float tiltAngleTemp = (tiltAngleLP * tiltInverse * tiltFactor) + servoTiltCenter;
-        if(tiltAngleTemp < tiltMinPulse)
-          tiltAngleTemp = tiltMinPulse;
-        if(tiltAngleTemp > tiltMaxPulse)
-          tiltAngleTemp = tiltMaxPulse;
+		tiltAngleTemp = min(max(tiltAngleTemp, tiltMinPulse), tiltMaxPulse);
         channel_value[htChannels[1]] = tiltAngleTemp;          
 
         float rollAngleTemp = (rollAngleLP * rollInverse * rollFactor) + servoRollCenter;
-        if(rollAngleTemp < rollMinPulse)
-          rollAngleTemp = rollMinPulse;
-        if(rollAngleTemp > rollMaxPulse)
-          rollAngleTemp = rollMaxPulse;
-        channel_value[htChannels[2]] = rollAngleTemp;          
+		rollAngleTemp = min(max(rollAngleTemp, rollMinPulse), rollMaxPulse);
+		channel_value[htChannels[2]] = rollAngleTemp;          
     }
 
     // Calibration
@@ -296,7 +288,7 @@ void InitSensors()
   }
 
   bno.setExtCrystalUse(true);
-  bno.setMode(0X0C); // 9 Degrees Of Freedom, Fast Mag Cal On
+  bno.setMode((Adafruit_BNO055::adafruit_bno055_opmode_t)0x0C); // 9 Degrees Of Freedom, Fast Mag Cal On
   bno.getSensor(&sensor);
   RemapAxes();  
 
@@ -353,8 +345,8 @@ void RemapAxes()
 {
   char cas = axisRemap;
 
-  bno.setAxisRemap(axisRemap);
-  bno.setAxisSign(axisSign);
+  bno.setAxisRemap((Adafruit_BNO055::adafruit_bno055_axis_remap_config_t)axisRemap);
+  bno.setAxisSign((Adafruit_BNO055::adafruit_bno055_axis_remap_sign_t)axisSign);
 }
 
 
