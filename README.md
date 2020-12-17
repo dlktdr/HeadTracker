@@ -1,10 +1,9 @@
 # HeadTracker
-Re-work of Dennis Frie & Mark Mansur headtracker code for use with a BNO055 Sensor
+Modified the work of Dennis Frie & Mark Mansur & othersfor use with a BNO055 Sensor. 
 
-I've modified the code for the head tracker and wrote a new GUI for it. Based on the BNO055 sensor. This sensor self calibrates once powered up. No need to calibrate connected to the PC.
+Re-wrote the GUI for it in QT. It should compile on Windows, Mac and Linux. Although only Windows is tested and binaries available.
 
 ## Whats needed
-
 1) Arduino Nano - Amazon/Ebay/Many Places.
 2) BNO055 Sensor Board - Ebay/Adafruit, https://www.adafruit.com/product/4646, I got mine on ebay, photo below search for BNO055
 3) Soldering Iron
