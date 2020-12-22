@@ -1,4 +1,7 @@
 
+#include <QJsonDocument>
+#include <QJsonArray>
+#include <QJsonObject>
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -109,108 +112,45 @@ MainWindow::~MainWindow()
 }
 
 // Parse the data received from the serial port
+
 void MainWindow::parseSerialData()
 {      
     bool done = true;
     while(done) {
-
             int nlindex = serialData.indexOf("\r\n");
             if(nlindex < 0)
                 return;  // No New line found
-            QString data = serialData.left(nlindex);
 
-            // CRC ERROR
-            if(data.left(7) == QString("$CRCERR")) {
-                ui->statusbar->showMessage("CRC Error : Error Setting Values, Retrying",2000);
-                updatesettingstmr.start(500);
-            }
+            // Strip data up the the CR LF \r\n
+            QByteArray data = serialData.left(nlindex);
 
-            // CRC OK
-             else if(data.left(6) == QString("$CRCOK")) {
-                ui->statusbar->showMessage("Values Set On Headtracker",2000);
-            }
+            // Found a SOT & EOT Character, JSON Data Sent
+            if(data.left(1)[0] == (char)0x02 &&
+               data.right(1)[0] == (char)0x03) { // JSON Data
+                QByteArray stripped = data.mid(1,data.length()-2);
+                parseInComingJSON(QJsonDocument::fromJson(stripped).object().toVariantMap());
 
-            // Calibration Saved
-             else if(data.left(7) == QString("$CALSAV")) {
-                ui->statusbar->showMessage("Calibration Saved", 2000);
-            }
-
-            // Graph Data
-            else if(data.left(2) == QString("$G")) {
-                data = data.mid(2).simplified();
-                QStringList rtd = data.split(',');
-                if(rtd.length() == 10) {
-                    double tilt = rtd.at(0).toDouble();
-                    double roll = rtd.at(1).toDouble();
-                    double pan = rtd.at(2).toDouble();
-                    int panout = rtd.at(3).toInt();
-                    int tiltout = rtd.at(4).toInt();
-                    int rollout = rtd.at(5).toInt();
-                    int syscal = rtd.at(6).toInt();
-                    int gyrocal = rtd.at(7).toInt();
-                    int accelcal = rtd.at(8).toInt();
-                    int magcal = rtd.at(9).toInt();
-                    ui->graphView->addDataPoints(tilt,roll,pan);
-                    ui->servoPan->setActualPosition(panout);
-                    ui->servoTilt->setActualPosition(tiltout);
-                    ui->servoRoll->setActualPosition(rollout);
-                    /*ui->sbs->setSignal(syscal);
-                    ui->sba->setSignal(accelcal);
-                    ui->sbm->setSignal(magcal);
-                    ui->sbg->setSignal(gyrocal);*/
-                    calibratorDialog->setCalibration(syscal,
-                                                     magcal,
-                                                     gyrocal,
-                                                     accelcal);
-                    graphing = true;
-                    ui->servoPan->setShowActualPosition(true);
-                    ui->servoTilt->setShowActualPosition(true);
-                    ui->servoRoll->setShowActualPosition(true);
-                }
-            }
-
-            // Data Receieve
-            else if(data.left(5) == QString("$SET$")) {
-                QStringList setd = data.right(data.length()-5).split(',',Qt::KeepEmptyParts);
-
-                if(setd.length() == trkset.count()) {
-                    trkset.setLPTiltRoll(setd.at(0).toFloat());
-                    trkset.setLPPan(setd.at(1).toFloat());
-                    trkset.setGyroWeightTiltRoll(setd.at(2).toFloat());
-                    trkset.setGyroWeightPan(setd.at(3).toFloat());
-                    trkset.setTlt_gain(setd.at(4).toFloat());
-                    trkset.setPan_gain(setd.at(5).toFloat());
-                    trkset.setRll_gain(setd.at(6).toFloat());
-                    trkset.setServoreverse(setd.at(7).toInt());
-                    trkset.setPan_cnt(setd.at(8).toInt());
-                    trkset.setPan_min(setd.at(9).toInt());
-                    trkset.setPan_max(setd.at(10).toInt());
-                    trkset.setTlt_cnt(setd.at(11).toInt());
-                    trkset.setTlt_min(setd.at(12).toInt());
-                    trkset.setTlt_max(setd.at(13).toInt());
-                    trkset.setRll_cnt(setd.at(14).toInt());
-                    trkset.setRll_min(setd.at(15).toInt());
-                    trkset.setRll_max(setd.at(16).toInt());
-                    trkset.setPanCh(setd.at(17).toInt());
-                    trkset.setTiltCh(setd.at(18).toInt());
-                    trkset.setRollCh(setd.at(19).toInt());
-                    trkset.setAxisRemap(setd.at(20).toUInt());
-                    trkset.setAxisSign(setd.at(21).toUInt());
-
-                    updateToUI();
-                    ui->statusbar->showMessage(tr("Settings Received"),2000);
-                } else {
-                    ui->statusbar->showMessage(tr("Error wrong # params"),2000);
-                }
-            }
-
-            // Other information, Log it
-            else {
+            // Other data, Show to the user
+            } else {
                 addToLog(data + "\n");
             }
 
+            // Remove data read from the buffer
             serialData = serialData.right(serialData.length()-nlindex-2);
     }
+}
+
+// Decide what to do with incoming JSON packet
+
+void MainWindow::parseInComingJSON(const QVariantMap &map)
+{
+    if(map["Command"] == "Settings") { // Settings from the Tracker Sent, save them and update the UI
+        trkset.setAllData(map);
+        updateToUI();
+    } else if (map["Command"] == "Data") { // Data from the UI Sent, Update the graph
+
+    }
+
 }
 
 void MainWindow::sendSerialData(QByteArray data)
@@ -223,6 +163,19 @@ void MainWindow::sendSerialData(QByteArray data)
     ui->txled->setState(true);
     txledtimer.start();
     serialcon->write(data);
+}
+
+/* Send a JSON Packet
+ *    Use command so the
+ */
+
+void MainWindow::sendSerialJSON(QString command, QVariantMap map)
+{
+    QJsonObject jobj = QJsonObject::fromVariantMap(map);
+    jobj["Command"] = command;
+    QJsonDocument jdoc(jobj);
+    QString json = QJsonDocument(jdoc).toJson(QJsonDocument::Compact);
+    sendSerialData((char)0x02 + json.toLatin1() + (char)0x03);
 }
 
 void MainWindow::addToLog(QString log)
@@ -261,12 +214,12 @@ void MainWindow::serialConnect()
     if(serialcon->isOpen())
         serialcon->close();
 
-    // Setup serial port 8N1, 57600 BAUD
+    // Setup serial port 8N1, 1M Baud
     serialcon->setPortName(port);
     serialcon->setParity(QSerialPort::NoParity);
     serialcon->setDataBits(QSerialPort::Data8);
     serialcon->setStopBits(QSerialPort::OneStop);
-    serialcon->setBaudRate(QSerialPort::Baud57600);
+    serialcon->setBaudRate(1000000); // 1 Mega Baud
     serialcon->setFlowControl(QSerialPort::NoFlowControl);
 
     if(!serialcon->open(QIODevice::ReadWrite)) {
@@ -284,6 +237,8 @@ void MainWindow::serialConnect()
     ui->cmdSend->setEnabled(true);
 
     ui->statusbar->showMessage(tr("Connected to ") + serialcon->portName());
+
+    serialcon->setDataTerminalReady(true);
 
     QTimer::singleShot(2000,this,&MainWindow::requestTimer);
 }
@@ -381,7 +336,7 @@ void MainWindow::updateFromUI()
     trkset.setAxisRemap(ui->cmbRemap->currentData().toUInt());
     trkset.setAxisSign(ui->cmbSigns->currentIndex());
 
-    //updatesettingstmr.start(1000);
+    updatesettingstmr.start(1000);
 }
 
 // Data ready to be read from the serial port
@@ -438,56 +393,13 @@ void MainWindow::stopGraph()
 
 void MainWindow::storeSettings()
 {
-    updateSettings();
+    sendSerialJSON("SetValues", trkset.getAllData());
     ui->statusbar->showMessage(tr("Settings Stored to EEPROM"),2000);
 }
 
 void MainWindow::updateSettings()
 {
-    // Disable Graphing output, all the extra data was causing issues
-    // on update
-    if(graphing) {
-        serialcon->write("$PLEN");
-    }
 
-    updatesettingstmr.stop();
-    QStringList lst;
-    lst.append(QString::number(trkset.lpTiltRoll()));
-    lst.append(QString::number(trkset.lpPan()));
-    lst.append(QString::number(trkset.gyroWeightTiltRoll()));
-    lst.append(QString::number(trkset.gyroWeightPan()));
-    lst.append(QString::number(trkset.Tlt_gain()));
-    lst.append(QString::number(trkset.Pan_gain()));
-    lst.append(QString::number(trkset.Rll_gain()));
-    lst.append(QString::number(trkset.servoReverse()));
-    lst.append(QString::number(trkset.Pan_cnt()));
-    lst.append(QString::number(trkset.Pan_min()));
-    lst.append(QString::number(trkset.Pan_max()));
-    lst.append(QString::number(trkset.Tlt_cnt()));
-    lst.append(QString::number(trkset.Tlt_min()));
-    lst.append(QString::number(trkset.Tlt_max()));
-    lst.append(QString::number(trkset.Rll_cnt()));
-    lst.append(QString::number(trkset.Rll_min()));
-    lst.append(QString::number(trkset.Rll_max()));
-    lst.append(QString::number(trkset.panCh()));
-    lst.append(QString::number(trkset.tiltCh()));
-    lst.append(QString::number(trkset.rollCh()));
-    lst.append(QString::number(trkset.axisRemap()));
-    lst.append(QString::number(trkset.axisSign()));
-    QString data = lst.join(',');
-
-    // Calculate the CRC Checksum
-    uint16_t CRC = uCRC16Lib::calculate(data.toUtf8().data(),data.length());
-
-    // Append Data in a Byte Array
-    QByteArray bd = QString("$" + data).toLatin1() + QByteArray::fromRawData((char*)&CRC,2) + "HE";
-
-    sendSerialData(bd);
-
-    // Re-Enable Graphing if required
-    if(graphing) {
-        serialcon->write("$PLST");
-    }
 }
 
 void MainWindow::resetCenter()
@@ -507,8 +419,8 @@ void MainWindow::setDataMode(bool rawmode)
 
 void MainWindow::requestTimer()
 {
-    sendSerialData("$VERS ");
-    sendSerialData("$GSET ");
+    //sendSerialData("$VERS ");
+    sendSerialJSON("GetSet"); // Get the Settings
 }
 
 void MainWindow::rxledtimeout()

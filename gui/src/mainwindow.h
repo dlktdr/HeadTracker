@@ -36,7 +36,7 @@ private:
     Ui::MainWindow *ui;
     QSerialPort *serialcon;
     TrackerSettings trkset;
-    QString serialData;
+    QByteArray serialData;
     QTimer rxledtimer;
     QTimer txledtimer;
     QTimer updatesettingstmr;
@@ -45,11 +45,14 @@ private:
     Calibrate *calibratorDialog;
 
     int xtime;
-    void parseSerialData();
     bool graphing;
 
+    void parseSerialData();
     void sendSerialData(QByteArray data);
-    void addToLog(QString log);
+    void sendSerialJSON(QString command, QVariantMap map=QVariantMap());
+    void parseInComingJSON(const QVariantMap &map);
+
+    void addToLog(QString log);    
 
 private slots:
     void findSerialPorts();

@@ -353,3 +353,11 @@ void TrackerSettings::loadSettings(QSettings *settings)
         _data[key] = settings->value(key);
     }
 }
+
+void TrackerSettings::setAllData(const QVariantMap &data)
+{
+    QStringList keys = data.keys();
+    foreach(QString key,keys) {
+        _data[key] = data.value(key);
+    }
+}

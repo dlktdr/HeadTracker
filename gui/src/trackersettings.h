@@ -107,8 +107,11 @@ public:
     void storeSettings(QSettings *settings);
     void loadSettings(QSettings *settings);
 
+    QVariantMap getAllData() {return _data;}
+    void setAllData(const QVariantMap &data);
+
 private:
-    QMap<QString,QVariant> _data;
+    QVariantMap _data;
 };
 
 #endif // TRACKERSETTINGS_H
