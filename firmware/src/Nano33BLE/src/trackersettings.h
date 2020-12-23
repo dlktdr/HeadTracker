@@ -97,13 +97,24 @@ public:
     int ppmPin() const;
     void setPPMPin(int value, PpmOut **ppmout);
 
-    void setFromJSON(DynamicJsonDocument &json);
-    void setToJSON(DynamicJsonDocument &json);
+
+    void loadJSONSettings(DynamicJsonDocument &json);
+    void setJSONSettings(DynamicJsonDocument &json);
 
     void saveToEEPROM();
     void loadFromEEPROM(PpmOut **ppout);
 
+
+// Setting of data to be returned to the PC
+    void setRawGyro(float x, float y, float z);
+    void setRawAccel(float x, float y, float z);
+    void setRawMag(float x, float y, float z);
+    void setRawOrient(float t, float r, float p);
+    void setPPMOut(uint16_t t, uint16_t r, uint16_t p);
+    void setJSONData(DynamicJsonDocument &json);
+
 private:
+// Saved Settings
     int rll_min,rll_max,rll_cnt,rll_gain;
     int tlt_min,tlt_max,tlt_cnt,tlt_gain;
     int pan_min,pan_max,pan_cnt,pan_gain;
@@ -113,6 +124,13 @@ private:
     int gyroweightpan;
     int gyroweighttiltroll;
     int buttonpin,ppmpin;
+
+// Data
+    float gyrox,gyroy,gyroz;
+    float accx,accy,accz;
+    float magx,magy,magz;
+    float tilt,roll,pan;
+    uint16_t panout,tiltout,rollout;
 };
     
 #endif

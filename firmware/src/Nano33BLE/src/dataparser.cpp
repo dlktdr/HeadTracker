@@ -10,11 +10,11 @@ using namespace rtos;
 using namespace mbed;
 
 // Buffers for Serial Sending, Receiving and JSON Data
-const int RT_BUF_SIZE=1000; // Will use 3x this many bytes
-const int DATA_THREAD_PERIOD = 10; // 10ms Period on Data Thread
-const int DATA_SEND_RATE=10; // x10 multipler on send of data to UI
-const int DATA_SEND_TIMEOUT=200; // After xx cycles without PC connection stop TXing data
-char tempdata[RT_BUF_SIZE];
+static const int RT_BUF_SIZE=1000; // Will use 3x this many bytes
+static const int DATA_THREAD_PERIOD = 10; // 10ms Period on Data Thread
+static const int DATA_SEND_TIME=500; // Max Data Update Speed in ms
+static const int UIRESPONSIVE_TIME=10000; // 10Seconds without an ack data will stop;
+static char tempdata[RT_BUF_SIZE];
 
 CircularBuffer<char, RT_BUF_SIZE> serin;
 
@@ -26,6 +26,11 @@ volatile bool BuffToSmall=false;
 
 void parseData(DynamicJsonDocument &json);
 
+// Timers, Initially start timed out
+Kernel::Clock::time_point dataSendTime = Kernel::Clock::now() + (Kernel::Clock::duration)DATA_SEND_TIME;
+Kernel::Clock::time_point uiResponsive = Kernel::Clock::now() + (Kernel::Clock::duration)UIRESPONSIVE_TIME;
+
+bool sendData=false;
 
 // Serial RX Interrupt
 void serialrx_Int()
@@ -74,8 +79,9 @@ void serialrx_Int()
 
 void data_Thread()
 {    
-    int data_rate_cnt=0;
-    DynamicJsonDocument json(RT_BUF_SIZE);
+  int data_rate_cnt=0;
+  DynamicJsonDocument json(RT_BUF_SIZE);
+  
 
     while(1) {
         // Check if data is ready        
@@ -115,11 +121,26 @@ void data_Thread()
         __enable_irq();
         }
 
-        // Automatically send the UI Updates 
-        if(data_rate_cnt++ == DATA_SEND_RATE) {
-            
-            data_rate_cnt = 0;
+
+        // Has it been enough time since last send of the data?
+        // And Data Sending
+        if((dataSendTime + (Kernel::Clock::duration)DATA_SEND_TIME) > Kernel::Clock::now() &&
+            (uiResponsive + (Kernel::Clock::duration)UIRESPONSIVE_TIME) > Kernel::Clock::now()) {
+          Serial.println("Sending Data Packet");
+          json.clear();
+          dataMutex.lock();
+          trkset.setJSONData(json);
+          dataMutex.unlock();
+          json["Command"] = "Data";
+          // SOT char
+          Serial.print((char)0x02);
+          serializeJson(json, Serial);
+          // EOT char
+          Serial.println((char)0x03);  
+          // Reset Sent Timer
+          dataSendTime = Kernel::Clock::now();
         }
+        
 
         ThisThread::sleep_for(std::chrono::milliseconds(50));      
     }
@@ -128,7 +149,14 @@ void data_Thread()
 // New JSON data received from the PC
 void parseData(DynamicJsonDocument &json)
 {    
-    const char *command = json["Command"];
+    JsonVariant v = json["Command"];
+    if(v.isNull()) {
+      Serial.println("Invalid JSON, No Command");
+      return;
+    }
+
+    // For strcmp;
+    const char *command = v;
     
     // Reset Center
     if(strcmp(command,"Reset_Center") == 0) {
@@ -137,19 +165,23 @@ void parseData(DynamicJsonDocument &json)
     // Store Settings
     } else if (strcmp(command, "SetValues") == 0) {
         Serial.println("Saving Settings");           
-        trkset.setFromJSON(json);
+        trkset.loadJSONSettings(json);
     
     } else if (strcmp(command, "GetSet") == 0) {
         Serial.println("Sending Settings");
         json.clear();
-        trkset.setToJSON(json);
+        trkset.setJSONSettings(json);
         json["Command"] = "Settings";
         // SOT char
         Serial.print((char)0x02);
         serializeJson(json, Serial);
         // EOT char
         Serial.println((char)0x03);        
-                
+
+    // Data Requested. Store the current time. Data will continue to send until clock + timeout.
+    } else if (strcmp(command, "Data") == 0) {
+        uiResponsive = Kernel::Clock::now();
+
     // Start Calibration
     } else if (strcmp(command, "CalStart") == 0) {
         Serial.println("Starting Calibration");        
@@ -158,6 +190,5 @@ void parseData(DynamicJsonDocument &json)
     } else {
         Serial.println("Unknown Command");
     
-    } 
-
+    }
 }

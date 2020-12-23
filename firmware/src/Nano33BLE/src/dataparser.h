@@ -6,7 +6,4 @@
 void data_Thread();
 void serialrx_Int();
 
-
-
-
 #endif

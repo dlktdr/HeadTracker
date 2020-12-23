@@ -31,6 +31,13 @@ TrackerSettings::TrackerSettings()
     gyroweightpan = 30;
     gyroweighttiltroll = 40;
 
+    // Output values
+    gyrox=0;gyroy=0;gyroz=0;
+    accx=0;accy=0;accz=0;
+    magx=0,magy=0,magz=0;
+    tilt=0,roll=0,pan=0;
+    panout=0,tiltout=0,rollout=0;
+
     // Setup button input & ppm output pins
     ppmpin = DEF_PPM_OUT; // Set initial val    
     setButtonPin(DEF_BUTTON_IN);
@@ -326,6 +333,9 @@ void TrackerSettings::setRollCh(int value)
         rllch = (int)value;    
 }
 
+//----------------------------------------------------------------------------------------
+// Remappable Buttons + PPM Output Pin
+
 int TrackerSettings::buttonPin() const
 {
     return buttonpin;
@@ -362,7 +372,49 @@ void TrackerSettings::setPPMPin(int value, PpmOut **ppout)
     }
 }
 
-void TrackerSettings::setFromJSON(DynamicJsonDocument &json)
+//----------------------------------------------------------------------------------------
+// Data sent the PC, for calibration and info
+
+
+void TrackerSettings::setRawGyro(float x, float y, float z)
+{
+    gyrox = x;
+    gyroy = y;
+    gyroz = z;
+}
+
+void TrackerSettings::setRawAccel(float x, float y, float z)
+{
+    accx = x;
+    accy = y;
+    accz = z;
+}
+
+void TrackerSettings::setRawMag(float x, float y, float z)
+{
+    magx = x;
+    magy = y;
+    magz = z;
+}
+
+void TrackerSettings::setRawOrient(float t, float r, float p) 
+{
+    tilt=t;
+    roll=r;
+    pan=p;
+}
+
+void TrackerSettings::setPPMOut(uint16_t t, uint16_t r, uint16_t p) 
+{
+    tiltout=t;
+    rollout=r;
+    panout=p;
+}
+
+//--------------------------------------------------------------------------------------
+// Send and receive the data from PC
+
+void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
 {
 // Channels
     JsonVariant v;
@@ -404,7 +456,7 @@ void TrackerSettings::setFromJSON(DynamicJsonDocument &json)
     v = json["ppmpin"]; if(!v.isNull()) setButtonPin(v);
 }
 
-void TrackerSettings::setToJSON(DynamicJsonDocument &json)
+void TrackerSettings::setJSONSettings(DynamicJsonDocument &json)
 {
     json["rll_min"] = rll_min;
     json["rll_max"] = rll_max;
@@ -454,3 +506,26 @@ void TrackerSettings::loadFromEEPROM(PpmOut **ppout)
     setPPMPin(DEF_PPM_OUT, ppout);
 }
 
+// Used to transmit raw data back to the PC
+void TrackerSettings::setJSONData(DynamicJsonDocument &json)
+{
+    json["magx"] = magx;
+    json["magy"] = magy;
+    json["magz"] = magz;
+
+    json["gyrox"] = gyrox;
+    json["gyroy"] = gyroy;
+    json["gyroz"] = gyroz;
+
+    json["accx"] = accx;
+    json["accy"] = accy;
+    json["accz"] = accz;
+
+    json["tilt"] = tilt;
+    json["roll"] = roll;
+    json["pan"] = pan;
+    
+    json["panout"] = panout;
+    json["tiltout"] = tiltout;
+    json["rollout"] = rollout;
+}

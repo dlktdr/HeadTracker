@@ -24,6 +24,7 @@ Ticker ioTick;
 PpmOut *ppmout = nullptr;
 TrackerSettings trkset;
 volatile bool buttonpressed=false;
+Mutex dataMutex;
 
 // Reset Button Pressed Flag on Read
 bool wasButtonPressed() {
@@ -31,7 +32,9 @@ bool wasButtonPressed() {
     __disable_irq();
     buttonpressed = false;
     __enable_irq();
+    return true;
   }
+  return false;
 }
 
 void bt_Thread() {

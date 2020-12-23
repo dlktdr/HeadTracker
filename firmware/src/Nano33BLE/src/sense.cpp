@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include "trackersettings.h"
 #include "sense.h"
 #include "main.h"
 
@@ -16,7 +17,6 @@ void sense_Init()
 
 void sense_Thread()
 {
-  unsigned long microsPerReading, microsPrevious;
   float accx=0,accy=0,accz=0;
   float magx=0,magy=0,magz=0;
   float gyrx=0,gyry=0,gyrz=0;
@@ -90,24 +90,35 @@ void sense_Thread()
         tiltoffset = tilt;
     }
 
+    // Tilt output
+    float tiltout = (tilt - tiltoffset) * trkset.Tlt_gain() * (trkset.isTiltReversed()?-1.0:1.0);
+    uint16_t tiltout_ui = MAX(MIN(tiltout,trkset.Tlt_max()),trkset.Tlt_min());
+    ppmout->setChannel(trkset.tiltCh(),tiltout_ui);
+
     // Roll output
     float rollout = (roll - rolloffset) * trkset.Rll_gain() * (trkset.isRollReversed()? -1.0:1.0);
-    rollout = MAX(MIN(rollout,trkset.Rll_max()),trkset.Rll_min());
-    ppmout->setChannel(trkset.rollCh(),rollout);
+    uint16_t rollout_ui = MAX(MIN(rollout,trkset.Rll_max()),trkset.Rll_min());
+    ppmout->setChannel(trkset.rollCh(),rollout_ui);
     
     // Pan output, Normalize to +/- 180 Degrees
     float panout = normalize((pan-panoffset),-180,180)  * trkset.Pan_gain() * (trkset.isPanReversed()? -1.0:1.0);
-    panout = MAX(MIN(panout,trkset.Pan_max()),trkset.Pan_min());
-    ppmout->setChannel(trkset.panCh(),panout);
+    uint16_t panout_ui = MAX(MIN(panout,trkset.Pan_max()),trkset.Pan_min());
+    ppmout->setChannel(trkset.panCh(),panout_ui);
 
-    // Tilt output
-    float tiltout = (tilt - tiltoffset) * trkset.Tlt_gain() * (trkset.isTiltReversed()?-1.0:1.0);
-    tiltout = MAX(MIN(tiltout,trkset.Tlt_max()),trkset.Tlt_min());
-    ppmout->setChannel(trkset.tiltCh(),tiltout);
+    // Update the settings
+    // Both data and sensor will use this data. If data thread is using it just skip.
+    if(dataMutex.trylock()) {
+        trkset.setRawAccel(accx,accy,accz);
+        trkset.setRawGyro(gyrx,gyry,gyrz);
+        trkset.setRawMag(magx,magy,magz);
+        trkset.setRawOrient(tilt,roll,pan);
+        trkset.setPPMOut(tiltout_ui,rollout_ui,panout_ui);    
+        dataMutex.unlock();
+    }
 
     // Wait for next run
-    ThisThread::sleep_for(std::chrono::milliseconds(20));
-  
+    ThisThread::sleep_for(std::chrono::milliseconds(16)); // ~60Hz  
+
   } // END THREAD LOOP
 }
 
