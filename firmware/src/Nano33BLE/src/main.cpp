@@ -9,113 +9,38 @@
 #include "dataparser.h"
 #include "trackersettings.h"
 #include "Wire.h"
-
+#include "sense.h"
 
 using namespace rtos;
 using namespace mbed;
 
+// Threads and IO
 Thread btThread;
 Thread dataThread;
-Ticker ioTick;
 Thread senseThread;
+Ticker ioTick;
 
-// PPM Output
-PpmOut ppmout(PinName(D11), 8);
+// GLOBALS
+PpmOut *ppmout = nullptr;
+TrackerSettings trkset;
+
+volatile bool buttondown=0;
 
 void bt_Thread() {
   while(true) {
-    
+    /* Add Bluetooth functionality Here */
+
+
+    ThisThread::sleep_for(std::chrono::milliseconds(100));
   }
 };
 
-void sense_Init()
-{
-  
- /* if(!IMU.begin()) {
-    Serial.println("Failed to initalize IMU");    
-  }*/
 
-}
-
-// Read all IMU data and do the calculations
-void sense_Thread()
-{
-  //Madgwick filter;
-  unsigned long microsPerReading, microsPrevious;
-  float accx=0,accy=0,accz=0;
-  float magx=0,magy=0,magz=0;
-  float gyrx=0,gyry=0,gyrz=0;
-  float pitch=0,roll=0,yaw=0;     
-
-  int count=0;
-  while(1) {
-    // Update Sensors
-    /*if(IMU.accelerationAvailable()) {
-      IMU.readAcceleration(accx, accy, accz);
-    }
-    if(IMU.gyroscopeAvailable()) {
-      IMU.readGyroscope(gyrx,gyry,gyrz);
-      gyrx *= DEG_TO_RAD; // ?? CHECK IF REQUIRED
-      gyry *= DEG_TO_RAD;
-      gyrz *= DEG_TO_RAD;
-    }
-    if(IMU.magneticFieldAvailable()) {
-      IMU.readMagneticField(magx,magy,magz);
-    }
-      
-    // Period Between Samples
-    float deltat = fusion.deltatUpdate();  
-
-    // Do the Calculation
-    fusion.MadgwickUpdate(gyrx, gyry, gyrz, accx, accy, accz, magx, magy, magz, deltat);  //else use the magwick, it is slower but more accurate
-
-    pitch = fusion.getPitch();
-    roll = fusion.getRoll();
-    yaw = fusion.getYaw();
-    */
-
-    if(count == 60) {
-      /*Serial.print("Accel X "); 
-      Serial.print(accx);
-      Serial.print(" Y "); 
-      Serial.print(accy);
-      Serial.print(" Z "); 
-      Serial.println(accz);
-      
-      Serial.print("Mag X "); 
-      Serial.print(magx);
-      Serial.print(" Y "); 
-      Serial.print(magy);
-      Serial.print(" Z "); 
-      Serial.println(magz);
-      
-      Serial.print("Gyro X "); 
-      Serial.print(gyrx);
-      Serial.print(" Y "); 
-      Serial.print(gyry);
-      Serial.print(" Z "); 
-      Serial.println(gyrz);
-
-      Serial.print("Pitch ");
-      Serial.print(pitch);
-      Serial.print(" Roll ");
-      Serial.print(roll);
-      Serial.print(" Yaw ");
-      Serial.println(yaw);*/
-
-      count = 0;
-      }
-    count++;
-
-    ThisThread::sleep_for(std::chrono::milliseconds(20));
-  }
-}
-
-// Any IO Related Tasks, buttons, etc.
+// Any IO Related Tasks, buttons, etc.. ISR. Keep it fast
 void io_Task()
 {
   static int i =0;
-  
+  // Blink to know it's running
   if(i==100) {
     digitalWrite(LED_BUILTIN, HIGH);
   } 
@@ -124,6 +49,13 @@ void io_Task()
     i=0;
   }
   i++;
+
+  // Check button inputs, set flag
+  if(digitalRead(trkset.buttonPin()) == 0) 
+    buttondown = true; 
+  else
+    buttondown = false; 
+
 }
 
 void setup() {
@@ -146,7 +78,7 @@ void setup() {
 
   // Start the BT Thread, Higher Prority than data.
   btThread.start(mbed::callback(bt_Thread)); 
-  btThread.set_priority(osPriorityNormal);
+  btThread.set_priority(osPriorityNormal1);
 
   // Start the IO task at 1khz, Realtime priority
   ioTick.attach(mbed::callback(io_Task),std::chrono::milliseconds(1));
@@ -155,6 +87,10 @@ void setup() {
   sense_Init();
   senseThread.start(mbed::callback(sense_Thread));
   senseThread.set_priority(osPriorityRealtime); 
+
+  // Read the Settings from Flash, PPM Output Is created here.
+  trkset.loadFromEEPROM(&ppmout);
 }
 
+// Not Used
 void loop() {}

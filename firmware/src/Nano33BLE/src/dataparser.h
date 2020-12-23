@@ -6,7 +6,7 @@
 void data_Thread();
 void serialrx_Int();
 
-extern TrackerSettings trkset;
+
 
 
 #endif

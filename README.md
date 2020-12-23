@@ -9,7 +9,7 @@ Currently not functional. This is a work in progress. Feel free to contact us an
 5) 3.5mm mono audio cable. I got a right angle one
 6) Small Push Button Switch, for resetting zero
 
-## Top Priority
+## To Do
 * Choose a fusion algorithm
 * Add calibration to the GUI
 * Test PPM output library

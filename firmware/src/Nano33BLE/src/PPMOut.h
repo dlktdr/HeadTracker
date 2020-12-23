@@ -4,9 +4,6 @@
 #include <mbed.h>
 #include <rtos.h>
 
-
-
-
 using namespace mbed;
 using namespace rtos;
 
@@ -23,6 +20,8 @@ class PpmOut{
  
         // Will start the PPM output 
         PpmOut(PinName pin, uint8_t channel_number);
+        ~PpmOut();
+
         // Values go from MIN_CHANNEL_VALUE to MAX_CHANNEL_VALUE 
         void setChannel(int channel_no, uint16_t value);
         void setAllChannels(uint16_t new_channels[MAX_CHANNELS], int channels);

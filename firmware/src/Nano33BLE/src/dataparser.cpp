@@ -4,6 +4,7 @@
 #include <platform/CircularBuffer.h>
 #include <ArduinoJson.h>
 #include "dataparser.h"
+#include "main.h"
 
 using namespace rtos;
 using namespace mbed;
@@ -25,8 +26,6 @@ volatile bool BuffToSmall=false;
 
 void parseData(DynamicJsonDocument &json);
 
-// Tracker wide settings.
-TrackerSettings trkset;
 
 // Serial RX Interrupt
 void serialrx_Int()

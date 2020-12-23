@@ -25,11 +25,15 @@ TrackerSettings::TrackerSettings()
 
     servoreverse = 0x00;
 
-    lppan = 10;
-    lptiltroll = 20;
+    lppan = 75;
+    lptiltroll = 75;
 
     gyroweightpan = 30;
     gyroweighttiltroll = 40;
+
+    // Setup button input & ppm output pins
+    ppmpin = DEF_PPM_OUT; // Set initial val    
+    setButtonPin(DEF_BUTTON_IN);
 }
 
 int TrackerSettings::Rll_min() const
@@ -296,7 +300,7 @@ int TrackerSettings::panCh() const
 
 void TrackerSettings::setPanCh(int value)
 {
-    if(value > 0 && value <= PPM_CHANNELS)
+    if(value > 0 && value <= DEF_PPM_CHANNELS)
         panch = (int)value;
 }
 
@@ -307,7 +311,7 @@ int TrackerSettings::tiltCh() const
 
 void TrackerSettings::setTiltCh(int value)
 {
-    if(value > 0 && value <= PPM_CHANNELS)
+    if(value > 0 && value <= DEF_PPM_CHANNELS)
         tltch = (int)value;
 }
 
@@ -318,9 +322,44 @@ int TrackerSettings::rollCh() const
 
 void TrackerSettings::setRollCh(int value)
 {
-    if(value > 0 && value <= PPM_CHANNELS)
-        rllch = (int)value;
-    Serial.println(rllch);
+    if(value > 0 && value <= DEF_PPM_CHANNELS)
+        rllch = (int)value;    
+}
+
+int TrackerSettings::buttonPin() const
+{
+    return buttonpin;
+}
+
+void TrackerSettings::setButtonPin(int value)
+{    
+    if(value > 1 && value < 14 && value != ppmpin) {
+        pinMode(value,INPUT);    // Button as Input
+        digitalWrite(value,HIGH); // Pull up Nn
+        buttonpin = value; // Save
+    }
+}
+
+int TrackerSettings::ppmPin() const
+{
+    return ppmpin;
+}
+
+void TrackerSettings::setPPMPin(int value, PpmOut **ppout)
+{
+    if(value > 1 && value < 14 && value != buttonpin) {
+        pinMode(ppmpin,INPUT); // Disable old ppmpin
+        digitalWrite(ppmpin,LOW);
+        pinMode(value,OUTPUT);
+        ppmpin = value;
+
+        // If already have a PPM output, delete it.
+        if(*ppout != nullptr)
+            delete *ppout;
+
+        // Create a new object, pass the pointer back.
+        *ppout = new PpmOut(digitalPinToPinName(ppmpin), DEF_PPM_CHANNELS);
+    }
 }
 
 void TrackerSettings::setFromJSON(DynamicJsonDocument &json)
@@ -359,6 +398,10 @@ void TrackerSettings::setFromJSON(DynamicJsonDocument &json)
     v = json["lptiltroll"];         if(!v.isNull()) setLPTiltRoll(v);
     v = json["gyroweightpan"];      if(!v.isNull()) setGyroWeightPan(v);
     v = json["gyroweighttiltroll"]; if(!v.isNull()) setGyroWeightTiltRoll(v);
+
+// Button Input + PPM output pins
+    v = json["buttonpin"]; if(!v.isNull()) setButtonPin(v);
+    v = json["ppmpin"]; if(!v.isNull()) setButtonPin(v);
 }
 
 void TrackerSettings::setToJSON(DynamicJsonDocument &json)
@@ -388,6 +431,9 @@ void TrackerSettings::setToJSON(DynamicJsonDocument &json)
     json["lptiltroll"] = lptiltroll;
     json["gyroweightpan"] = gyroweightpan;
     json["gyroweighttiltroll"] = gyroweighttiltroll;
+
+    json["buttonpin"] = buttonpin;
+    json["ppmpin"] = ppmpin;
 }
 
 
@@ -398,8 +444,13 @@ void TrackerSettings::saveToEEPROM()
 
 }
 
-void TrackerSettings::loadFromEEPROM()
+void TrackerSettings::loadFromEEPROM(PpmOut **ppout)
 {
+    // Load Settings
 
+    // Set PPM Pin, Set Button Pin, Pointer to Pointer passed to create new PPM object
+
+    // Default until actual flash read
+    setPPMPin(DEF_PPM_OUT, ppout);
 }
 

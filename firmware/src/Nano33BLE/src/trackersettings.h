@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include "ArduinoJson.h"
+#include "PPMOut.h"
 
 class TrackerSettings
 {    
@@ -19,7 +20,9 @@ public:
     static const int HT_TILT_REVERSE_BIT    = 0x01;
     static const int HT_ROLL_REVERSE_BIT  =   0x02;
     static const int HT_PAN_REVERSE_BIT    =  0x04;
-    static const int PPM_CHANNELS = 8;
+    static const int DEF_PPM_CHANNELS = 8; 
+    static const int DEF_BUTTON_IN = 2; // Chosen because it's beside ground
+    static const int DEF_PPM_OUT = 10; // Random choice    
 
     TrackerSettings();
     int Rll_min() const;
@@ -88,11 +91,17 @@ public:
     int rollCh() const;
     void setRollCh(int value);
 
+    int buttonPin() const;
+    void setButtonPin(int value);
+
+    int ppmPin() const;
+    void setPPMPin(int value, PpmOut **ppmout);
+
     void setFromJSON(DynamicJsonDocument &json);
     void setToJSON(DynamicJsonDocument &json);
 
     void saveToEEPROM();
-    void loadFromEEPROM();
+    void loadFromEEPROM(PpmOut **ppout);
 
 private:
     int rll_min,rll_max,rll_cnt,rll_gain;
@@ -103,6 +112,7 @@ private:
     int lppan,lptiltroll;
     int gyroweightpan;
     int gyroweighttiltroll;
+    int buttonpin,ppmpin;
 };
     
 #endif

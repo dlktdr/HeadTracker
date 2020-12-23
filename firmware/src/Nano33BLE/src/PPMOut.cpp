@@ -19,7 +19,12 @@ PpmOut::PpmOut(PinName pin, uint8_t channel_number): ppm(pin) {
     pulse_out = 1;
     ppm = pulse_out;
     current_dot = 0;
-    timeout.attach_us(callback(this, &PpmOut::attimeout), (us_timestamp_t)(FRAME_LEN));
+    timeout.attach_us(callback(this, &PpmOut::attimeout), (us_timestamp_t)(FRAME_LEN));    
+}
+
+PpmOut::~PpmOut()
+{
+    timeout.detach();
 }
  
 void PpmOut::setChannel(int channel_no, uint16_t value) {
@@ -29,6 +34,9 @@ void PpmOut::setChannel(int channel_no, uint16_t value) {
     }
     if(value > MAX_CHANNEL_VALUE){
         value = MAX_CHANNEL_VALUE;
+    }
+    if(value < MIN_CHANNEL_VALUE){
+        value = MIN_CHANNEL_VALUE;
     }
     dots[channel_no*2] = CHANNEL_SYNC;
     dots[channel_no*2+1] = CHANNEL_PAD_SYNC + value;
