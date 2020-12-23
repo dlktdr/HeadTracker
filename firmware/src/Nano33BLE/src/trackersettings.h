@@ -2,7 +2,7 @@
 #define TRACKERSETTINGS_H
 
 #include <Arduino.h>
-#include "ArduinoJson.h"
+#include <ArduinoJson.h>
 #include "PPMOut.h"
 
 class TrackerSettings

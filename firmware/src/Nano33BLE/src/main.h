@@ -7,6 +7,7 @@
 // Globals
 extern TrackerSettings trkset;
 extern PpmOut *ppmout;
+bool wasButtonPressed();
 
 #endif
 

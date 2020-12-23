@@ -23,8 +23,16 @@ Ticker ioTick;
 // GLOBALS
 PpmOut *ppmout = nullptr;
 TrackerSettings trkset;
+volatile bool buttonpressed=false;
 
-volatile bool buttondown=0;
+// Reset Button Pressed Flag on Read
+bool wasButtonPressed() {
+  if(buttonpressed) {
+    __disable_irq();
+    buttonpressed = false;
+    __enable_irq();
+  }
+}
 
 void bt_Thread() {
   while(true) {
@@ -35,12 +43,11 @@ void bt_Thread() {
   }
 };
 
-
-// Any IO Related Tasks, buttons, etc.. ISR. Keep it fast
+// Any IO Related Tasks, buttons, etc.. ISR. Run at 1Khz
 void io_Task()
 {
   static int i =0;
-  // Blink to know it's running
+  // Fast Blink to know it's running
   if(i==100) {
     digitalWrite(LED_BUILTIN, HIGH);
   } 
@@ -50,15 +57,13 @@ void io_Task()
   }
   i++;
 
-  // Check button inputs, set flag
+  // Check button inputs, set flag, could make this an ISR but button for sure will be down for at least 1ms, also debounces
   if(digitalRead(trkset.buttonPin()) == 0) 
-    buttondown = true; 
-  else
-    buttondown = false; 
-
+    buttonpressed = true; 
 }
 
 void setup() {
+  // Setup LEDS
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(LEDR, OUTPUT);
   pinMode(LEDG, OUTPUT);
@@ -68,7 +73,10 @@ void setup() {
   digitalWrite(LEDB,HIGH);
 
   Serial.begin(1000000); // 1 Megabaud
-  
+
+  // Read the Settings from Flash, PPM Output Is created here.
+  trkset.loadFromEEPROM(&ppmout);
+
   // Start the Data Thread
   dataThread.start(mbed::callback(data_Thread));
   dataThread.set_priority(osPriorityNormal);
@@ -87,9 +95,6 @@ void setup() {
   sense_Init();
   senseThread.start(mbed::callback(sense_Thread));
   senseThread.set_priority(osPriorityRealtime); 
-
-  // Read the Settings from Flash, PPM Output Is created here.
-  trkset.loadFromEEPROM(&ppmout);
 }
 
 // Not Used
