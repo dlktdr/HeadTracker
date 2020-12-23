@@ -23,10 +23,13 @@ MainWindow::MainWindow(QWidget *parent)
     ui->cmdStartGraph->setEnabled(false);
     ui->cmdSend->setEnabled(false);
     QFont serifFont("Times", 10, QFont::Bold);
-    // Use system default fixed with font
+
+    // Use system default fixed witdh font
     ui->serialData->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
     graphing = false;
     xtime = 0;
+
+    // Update default settings to UI
     updateToUI();
 
     // Serial data ready
@@ -48,6 +51,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->chkrllrev,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
     connect(ui->chktltrev,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
     connect(ui->chkRawData,SIGNAL(clicked(bool)),this,SLOT(setDataMode(bool)));
+
+    // Spin Boxes
     //connect(ui->spnGyroPan,SIGNAL(editingFinished()),this,SLOT(updateFromUI()));
     //connect(ui->spnGyroTilt,SIGNAL(editingFinished()),this,SLOT(updateFromUI()));
     connect(ui->spnLPPan,SIGNAL(editingFinished()),this,SLOT(updateFromUI()));
@@ -144,13 +149,29 @@ void MainWindow::parseSerialData()
 
 void MainWindow::parseInComingJSON(const QVariantMap &map)
 {
-    if(map["Command"] == "Settings") { // Settings from the Tracker Sent, save them and update the UI
+    // Settings from the Tracker Sent, save them and update the UI
+    if(map["Command"] == "Settings") {
         trkset.setAllData(map);
         updateToUI();
-    } else if (map["Command"] == "Data") { // Data from the UI Sent, Update the graph
 
+    // Data sent, Update the graph / servo sliders / calibration
+    } else if (map["Command"] == "Data") {
+
+        // Graph Data - tilt, roll, pan angles
+        QVariant t,r,p;
+        t = map["tilt"]; r = map["roll"];  p = map["pan"];
+        if(!t.isNull() && !r.isNull() && !p.isNull())
+            ui->graphView->addDataPoints(t.toInt(),r.toInt(),p.toInt());
+
+        // Actual Servo Output Values
+        QVariant po,to,ro;
+        po = map["panout"]; ro = map["rollout"];  p = map["panout"];
+        if(!to.isNull() && !ro.isNull() && !po.isNull()) {
+            ui->servoPan->setActualPosition(po.toInt());
+            ui->servoTilt->setActualPosition(to.toInt());
+            ui->servoRoll->setActualPosition(ro.toInt());
+        }
     }
-
 }
 
 void MainWindow::sendSerialData(QByteArray data)
@@ -391,6 +412,7 @@ void MainWindow::stopGraph()
     ui->servoRoll->setShowActualPosition(false);
 }
 
+// Send All Settings to the Controller
 void MainWindow::storeSettings()
 {
     sendSerialJSON("SetValues", trkset.getAllData());
