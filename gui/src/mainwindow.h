@@ -13,7 +13,7 @@
 #include <QCloseEvent>
 #include "trackersettings.h"
 #include "firmware.h"
-#include "calibrate.h"
+#include "calibratebno.h"
 
 const int MAX_LOG_LENGTH=6000;
 
@@ -40,6 +40,7 @@ private:
     QTimer rxledtimer;
     QTimer txledtimer;
     QTimer updatesettingstmr;
+    QTimer acknowledge;
     QString logd;
     Firmware *firmwareUploader;
     Calibrate *calibratorDialog;
@@ -58,8 +59,10 @@ private slots:
     void findSerialPorts();
     void serialConnect();
     void serialDisconnect();
+    void serialError(QSerialPort::SerialPortError);
     void updateFromUI();
     void updateToUI();
+    void liveDataChanged();
     void serialReadReady();
     void manualSend();
     void startGraph();
@@ -75,5 +78,6 @@ private slots:
     void loadSettings();
     void uploadFirmwareClick();
     void startCalibration();
+    void ackTimeout();
 };
 #endif // MAINWINDOW_H

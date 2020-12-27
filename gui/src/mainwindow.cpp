@@ -34,6 +34,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Serial data ready
     connect(serialcon,SIGNAL(readyRead()),this,SLOT(serialReadReady()));
+    connect(serialcon, SIGNAL(errorOccurred(QSerialPort::SerialPortError)),this,SLOT(serialError(QSerialPort::SerialPortError)));
 
     // Buttons
     connect(ui->cmdConnect,SIGNAL(clicked()),this,SLOT(serialConnect()));
@@ -74,6 +75,10 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->servoRoll,&ServoMinMax::maximumChanged,this,&MainWindow::updateFromUI);
     connect(ui->servoRoll,&ServoMinMax::centerChanged,this,&MainWindow::updateFromUI);
 
+    // On Data Change
+    connect(&trkset,&TrackerSettings::ppmOutChanged,this,&MainWindow::liveDataChanged);
+
+
     // Combo Boxes
 
     // Add Remap Choices + The corresponding values
@@ -101,10 +106,15 @@ MainWindow::MainWindow(QWidget *parent)
     rxledtimer.setInterval(100);
     txledtimer.setInterval(100);
     connect(&rxledtimer,SIGNAL(timeout()),this,SLOT(rxledtimeout()));
-    connect(&txledtimer,SIGNAL(timeout()),this,SLOT(txledtimeout()));    
+    connect(&txledtimer,SIGNAL(timeout()),this,SLOT(txledtimeout()));
+    connect(&acknowledge,SIGNAL(timeout()),this,SLOT(ackTimeout()));
 
     // Timer to cause an update, prevents too many data writes
     connect(&updatesettingstmr,&QTimer::timeout,this,&MainWindow::updateSettings);
+
+    // Start a timer to tell the device that we are here
+    // Times out at 10 seconds so send an ack every 8
+    acknowledge.start(8000);
 }
 
 MainWindow::~MainWindow()
@@ -150,27 +160,35 @@ void MainWindow::parseSerialData()
 void MainWindow::parseInComingJSON(const QVariantMap &map)
 {
     // Settings from the Tracker Sent, save them and update the UI
-    if(map["Command"] == "Settings") {
+    if(map["Cmd"] == "Settings") {
+        qDebug() << "GOT THE SETTINGS";
         trkset.setAllData(map);
         updateToUI();
 
     // Data sent, Update the graph / servo sliders / calibration
-    } else if (map["Command"] == "Data") {
+    } else if (map["Cmd"] == "Data") {
+        // Add all the data to the settings class
+        trkset.setLiveDataMap(map);
 
         // Graph Data - tilt, roll, pan angles
         QVariant t,r,p;
-        t = map["tilt"]; r = map["roll"];  p = map["pan"];
+        t = map["tiltoff"]; r = map["rolloff"];  p = map["panoff"];
         if(!t.isNull() && !r.isNull() && !p.isNull())
             ui->graphView->addDataPoints(t.toInt(),r.toInt(),p.toInt());
 
         // Actual Servo Output Values
         QVariant po,to,ro;
-        po = map["panout"]; ro = map["rollout"];  p = map["panout"];
+        po = map["panout"]; ro = map["rollout"];  to = map["tiltout"];
         if(!to.isNull() && !ro.isNull() && !po.isNull()) {
             ui->servoPan->setActualPosition(po.toInt());
             ui->servoTilt->setActualPosition(to.toInt());
             ui->servoRoll->setActualPosition(ro.toInt());
+            ui->servoPan->setShowActualPosition(true);
+            ui->servoTilt->setShowActualPosition(true);
+            ui->servoRoll->setShowActualPosition(true);
         }
+    } else if (map["Cmd"] == "FW") {
+        QMessageBox::information(this,"Ver",QString("Version %1.%2 %3").arg(map["Mag_Ver"].toString()).arg(map["Min_Ver"].toString()).arg(map["Board"].toString()));
     }
 }
 
@@ -193,10 +211,15 @@ void MainWindow::sendSerialData(QByteArray data)
 void MainWindow::sendSerialJSON(QString command, QVariantMap map)
 {
     QJsonObject jobj = QJsonObject::fromVariantMap(map);
-    jobj["Command"] = command;
+    jobj["Cmd"] = command;
     QJsonDocument jdoc(jobj);
     QString json = QJsonDocument(jdoc).toJson(QJsonDocument::Compact);
     sendSerialData((char)0x02 + json.toLatin1() + (char)0x03);
+
+    // Delay this so there is time to process it on the other end
+    QTime dieTime= QTime::currentTime().addMSecs(100);
+        while (QTime::currentTime() < dieTime)
+            QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
 }
 
 void MainWindow::addToLog(QString log)
@@ -253,15 +276,15 @@ void MainWindow::serialConnect()
 
     ui->cmdDisconnect->setEnabled(true);
     ui->cmdConnect->setEnabled(false);
-    ui->cmdStopGraph->setEnabled(true);
-    ui->cmdStartGraph->setEnabled(true);
+    //ui->cmdStopGraph->setEnabled(true);
+    //ui->cmdStartGraph->setEnabled(true);
     ui->cmdSend->setEnabled(true);
 
     ui->statusbar->showMessage(tr("Connected to ") + serialcon->portName());
 
     serialcon->setDataTerminalReady(true);
 
-    QTimer::singleShot(2000,this,&MainWindow::requestTimer);
+    QTimer::singleShot(500,this,&MainWindow::requestTimer);
 }
 
 // Disconnect from the serial port
@@ -279,6 +302,11 @@ void MainWindow::serialDisconnect()
     ui->cmdStopGraph->setEnabled(false);
     ui->cmdStartGraph->setEnabled(false);
     ui->cmdSend->setEnabled(false);
+}
+
+void MainWindow::serialError(QSerialPort::SerialPortError err)
+{
+
 }
 
 // Update the UI Settings from the settings class
@@ -322,6 +350,10 @@ void MainWindow::updateToUI()
     ui->cmbrllchn->blockSignals(false);
     ui->cmbtiltchn->blockSignals(false);
     ui->cmbRemap->blockSignals(false);
+}
+
+void MainWindow::liveDataChanged()
+{
 
 }
 
@@ -391,11 +423,11 @@ void MainWindow::manualSend()
 
 void MainWindow::startGraph()
 {
-    if(!serialcon->isOpen())
+    /*if(!serialcon->isOpen())
         return;
     serialcon->write("$PLST");
     graphing = true;
-    xtime = 0;
+    xtime = 0;*/
     ui->servoPan->setShowActualPosition(true);
     ui->servoTilt->setShowActualPosition(true);
     ui->servoRoll->setShowActualPosition(true);
@@ -426,8 +458,7 @@ void MainWindow::updateSettings()
 
 void MainWindow::resetCenter()
 {
-    // Reset Values to Center
-    sendSerialData("$RST ");
+    sendSerialJSON("RstCnt");
 }
 
 void MainWindow::setDataMode(bool rawmode)
@@ -441,8 +472,13 @@ void MainWindow::setDataMode(bool rawmode)
 
 void MainWindow::requestTimer()
 {
-    //sendSerialData("$VERS ");
-    sendSerialJSON("GetSet"); // Get the Settings
+    sendSerialData("$VERS");
+    sendSerialData("$HARD");
+
+
+    /*sendSerialJSON("GetSet"); // Get the Settings
+    //sendSerialJSON("FW"); // Get the firmware
+    ackTimeout(); // Tell it we are here*/
 }
 
 void MainWindow::rxledtimeout()
@@ -500,6 +536,15 @@ void MainWindow::startCalibration()
 
     calibratorDialog->startCalibration();
     calibratorDialog->show();
+}
+
+// Let the device know where here
+
+void MainWindow::ackTimeout()
+{
+    if(serialcon->isOpen()) {
+        sendSerialJSON("ACK");
+    }
 }
 
 void MainWindow::closeEvent (QCloseEvent *event)
