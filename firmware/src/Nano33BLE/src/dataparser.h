@@ -14,6 +14,8 @@ void serialWrite(int val);
 void serialWrite(arduino::String str);
 void serialWriteJSON(DynamicJsonDocument &json);
 
+extern CircularBuffer<char, TX_BUF_SIZE> serout;
+
 using namespace mbed;
 
 #endif

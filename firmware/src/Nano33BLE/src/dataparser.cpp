@@ -7,6 +7,7 @@
 #include <ArduinoJson.h>
 #include "dataparser.h"
 #include "main.h"
+#include "serial.h"
 
 using namespace rtos;
 using namespace mbed;
@@ -61,61 +62,7 @@ void serialWriteJSON(DynamicJsonDocument &json)
   serWriteMutex.unlock();  
 }
 
-void serialWrite(arduino::String str)
-{
-  serialWrite(str.c_str());
-}
 
-void serialWriteln(char const *data)
-{
-  serWriteMutex.lock();
-  int br = strlen(data);
-  // Append Output to the serial output buffer
-  for(int i =0; i < br; i++) {
-    serout.push(data[i]);
-  }
-  serout.push('\r');
-  serout.push('\n');
-  serWriteMutex.unlock();
-}
-
-void serialWrite(int val) {
-  serWriteMutex.lock();
-  char buf[50];
-  itoa(val,buf,10);
-  int len = strlen(buf);
-  // Append Output to the serial output buffer
-  for(int i =0; i < len; i++) {
-    serout.push(buf[i]);
-  }
-  serWriteMutex.unlock();
-}
-
-void serialWrite(char *data,int len) {
-  serWriteMutex.lock();
-  // Append Output to the serial output buffer
-  for(int i =0; i < len; i++) {
-    serout.push(data[i]);
-  }
-  serWriteMutex.unlock();
-}
-
-
-void serialWrite(char const *data) {
-  serWriteMutex.lock();
-  int br = strlen(data);
-  // Append Output to the serial output buffer
-  for(int i =0; i < br; i++) {
-    serout.push(data[i]);
-  }
-  serWriteMutex.unlock();
-}
-
-void serialWrite(char c) {
-  serWriteMutex.lock();
-  serout.push(c);
-  serWriteMutex.unlock();
-}
 
 // Serial RX Interrupt, Stay Fast Here
 void serialrx_Int()
@@ -131,7 +78,7 @@ void serialrx_Int()
       
     } else if (sc == 0x03) { // End of Text Characher, parse JSON data
       if(JSONready)   // Data already in buffer not yet read
-        JSONfault = true;        
+        JSONfault = true;
       else  {
         // Check how much data is in the buffer
         int bsz = serin.size();
@@ -151,7 +98,11 @@ void serialrx_Int()
       }
       serin.reset();
       
-    } else { // Add data to buffer
+    } else if(sc == '$') {
+
+    }
+    
+    else { // Add data to buffer
       serin.push(sc);
       if(serin.full())
         SerBufOverflow = true;      
@@ -280,20 +231,8 @@ void parseData(DynamicJsonDocument &json)
         serialWrite("HT: Ack Received\r\n");
 #endif
         uiResponsive = Kernel::Clock::now() + std::chrono::milliseconds(UIRESPONSIVE_TIME);
-        dataSendTime = Kernel::Clock::now() + std::chrono::milliseconds(DATA_SEND_TIME);
+        dataSendTime = Kernel::Clock::now() + std::chrono::milliseconds(DATA_SEND_TIME);        
     
-    // Version Requested
-    } else if (strcmp(command, "FW") == 0) {
-#ifdef DEBUG_HT
-        serialWrite("HT: Sending FW Version\r\n");
-#endif
-      json.clear();
-      json["Command"] = "FW";
-      json["Mag_Ver"] = FW_MAJ_VERSION;
-      json["Min_Ver"] = FW_MIN_VERSION;
-      json["Board"] = FW_BOARD;
-      serialWriteJSON(json);
-
     // Unknown Command
     } else {
         serialWrite("HT: Unknown Command\r\n");
