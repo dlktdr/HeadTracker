@@ -1,21 +1,8 @@
 #ifndef TRACKERSETTINGS_H
 #define TRACKERSETTINGS_H
 
+#include <QObject>
 #include <QSettings>
-
-// PWM Values here are divided by 2 plus 400 = actual uS output
-#define MIN_PWM 1001 // 1000 % 2 + 400 = 900 uS
-#define MAX_PWM 3400 // 3400 /2 + 400 = 2100 uS
-#define DEF_MIN_PWM 1200 // 1200 = 1000uS
-#define DEF_MAX_PWM 3200 // 1200 = 1000uS
-#define MIN_CNT (((MAX_PWM-MIN_PWM)/2)+MIN_PWM-550)
-#define MAX_CNT (((MAX_PWM-MIN_PWM)/2)+MIN_PWM+550)
-#define MIN_GAIN 0
-#define MAX_GAIN 500
-
-#define HT_TILT_REVERSE_BIT     0x01
-#define HT_ROLL_REVERSE_BIT     0x02
-#define HT_PAN_REVERSE_BIT      0x04
 
 // Axis Mapping
 #define AXIS_X 0x00
@@ -26,10 +13,28 @@
 #define Y_REV 0x02
 #define Z_REV 0x01
 
-class TrackerSettings
+class TrackerSettings : public QObject
 {    
+    Q_OBJECT
 public:
-    TrackerSettings();
+    // PWM Values here are divided by 2 plus 400 = actual uS output
+    static const int MIN_PWM=1001; // 1000 % 2 + 400 = 900 uS
+    static const int MAX_PWM= 3400; // 3400 /2 + 400 = 2100 uS
+    static const int DEF_MIN_PWM=1200 ;// 1200 = 1000uS
+    static const int DEF_MAX_PWM=3200; // 1200 = 1000uS
+    static const int MIN_CNT=(((MAX_PWM-MIN_PWM)/2)+MIN_PWM-550);
+    static const int MAX_CNT=(((MAX_PWM-MIN_PWM)/2)+MIN_PWM+550);
+    static const int MIN_GAIN= 0;
+    static const int MAX_GAIN =500;
+    static const int DEF_GAIN= 100;
+    static const int HT_TILT_REVERSE_BIT    = 0x01;
+    static const int HT_ROLL_REVERSE_BIT  =   0x02;
+    static const int HT_PAN_REVERSE_BIT    =  0x04;
+    static const int DEF_PPM_CHANNELS = 8;
+    static const int DEF_BUTTON_IN = 2; // Chosen because it's beside ground
+    static const int DEF_PPM_OUT = 10; // Random choice
+
+    TrackerSettings(QObject *parent=nullptr);
     int Rll_min() const;
     void setRll_min(int value);
 
@@ -110,8 +115,42 @@ public:
     QVariantMap getAllData() {return _data;}
     void setAllData(const QVariantMap &data);
 
+    QVariant getLiveData(const QString &name);
+    void setLiveData(const QString &name, const QVariant &live);
+
+    QVariantMap getLiveDataMap();
+    void setLiveDataMap(const QVariantMap &livelist, bool clear=false);
+
+signals:
+    void rawGyroChanged(float x, float y, float z);
+    void rawAccelChanged(float x, float y, float z);
+    void rawMagChanged(float x, float y, float z);
+    void rawOrientChanged(float t, float r, float p);
+    void offOrientChanged(float t, float r, float p);
+    void ppmOutChanged(uint16_t t, uint16_t r, uint16_t p);
+
 private:
-    QVariantMap _data;
+    QVariantMap _data; // Stored Data
+    QVariantMap _live; // Live Data
+
+/*    int rll_min,rll_max,rll_cnt,rll_gain;
+    int tlt_min,tlt_max,tlt_cnt,tlt_gain;
+    int pan_min,pan_max,pan_cnt,pan_gain;
+    int tltch,rllch,panch;
+    int servoreverse;
+    int lppan,lptiltroll;
+    int gyroweightpan;
+    int gyroweighttiltroll;
+    int buttonpin,ppmpin;*/
+
+
+    /*float gyrox,gyroy,gyroz;
+    float accx,accy,accz;
+    float magx,magy,magz;
+    float tilt,roll,pan;
+    float tiltoff,rolloff,panoff;
+    uint16_t panout,tiltout,rollout;*/
+
 };
 
 #endif // TRACKERSETTINGS_H

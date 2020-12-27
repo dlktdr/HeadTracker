@@ -1,22 +1,23 @@
 #include <QDebug>
 #include "trackersettings.h"
 
-TrackerSettings::TrackerSettings()
+TrackerSettings::TrackerSettings(QObject *parent):
+    QObject(parent)
 {
     // Defaults
     _data["rll_min"] = MIN_PWM;
     _data["rll_max"] = MAX_PWM;
-    _data["rll_gain"] =  (MAX_GAIN-MIN_GAIN)/2+MIN_GAIN;
+    _data["rll_gain"] =  DEF_GAIN;
     _data["rll_cnt"] = (MAX_PWM-MIN_PWM)/2 + MIN_PWM;
 
     _data["pan_min"] = MIN_PWM;
     _data["pan_max"] = MAX_PWM;
-    _data["pan_gain"] =  (MAX_GAIN-MIN_GAIN)/2+MIN_GAIN;
+    _data["pan_gain"] =  DEF_GAIN;
     _data["pan_cnt"] = (MAX_PWM-MIN_PWM)/2 + MIN_PWM;
 
     _data["tlt_min"] = MIN_PWM;
     _data["tlt_max"] = MAX_PWM;
-    _data["tlt_gain"] =  (MAX_GAIN-MIN_GAIN)/2+MIN_GAIN;
+    _data["tlt_gain"] =  DEF_GAIN;
     _data["tlt_cnt"] = (MAX_PWM-MIN_PWM)/2 + MIN_PWM;
 
     _data["panch"] = (uint)6;
@@ -359,5 +360,74 @@ void TrackerSettings::setAllData(const QVariantMap &data)
     QStringList keys = data.keys();
     foreach(QString key,keys) {
         _data[key] = data.value(key);
+    }
+}
+
+QVariant TrackerSettings::getLiveData(const QString &name)
+{
+    return _live[name];
+}
+
+void TrackerSettings::setLiveData(const QString &name, const QVariant &live)
+{
+    QVariantMap map;
+    map[name] = live;
+    setLiveDataMap(map);
+}
+
+QVariantMap TrackerSettings::getLiveDataMap()
+{
+    return _live;
+}
+
+void TrackerSettings::setLiveDataMap(const QVariantMap &livelist,bool reset)
+{
+    if(reset)
+        _live.clear();
+
+    // Update List
+    _live.insert(livelist);
+
+    // Emit if a value has been updated
+    QMapIterator<QString, QVariant> i(livelist);
+    while (i.hasNext()) {
+        i.next();
+        bool ge=false,ae=false,me=false,oe=false,ooe=false,ppm=false;
+        if((i.key() == "gyrox" || i.key() == "gyroy" || i.key() == "gyroz") && !ge) {
+            emit(rawGyroChanged(_live["gyrox"].toFloat(),
+                                _live["gyroy"].toFloat(),
+                                _live["gyroz"].toFloat()));
+            ge = true;
+        }
+        if((i.key() == "accx" || i.key() == "accy" || i.key() == "accz") && !ae) {
+            emit(rawAccelChanged(_live["gyrox"].toFloat(),
+                                _live["gyroy"].toFloat(),
+                                _live["gyroz"].toFloat()));
+            ae = true;
+        }
+        if((i.key() == "magx" || i.key() == "magy" || i.key() == "magz") && !me) {
+            emit(rawMagChanged(_live["magx"].toFloat(),
+                                _live["magy"].toFloat(),
+                                _live["magz"].toFloat()));
+            me = true;
+        }
+        if((i.key() == "tilt" || i.key() == "roll" || i.key() == "pan") && !oe) {
+            emit(rawOrientChanged(_live["tilt"].toFloat(),
+                                _live["roll"].toFloat(),
+                                _live["pan"].toFloat()));
+            oe = true;
+        }
+        if((i.key() == "tiltoff" || i.key() == "rolloff" || i.key() == "panoff") && !oe) {
+            emit(rawOrientChanged(_live["tiltoff"].toFloat(),
+                                _live["rolloff"].toFloat(),
+                                _live["panoff"].toFloat()));
+            ooe = true;
+        }
+        if((i.key() == "panout" || i.key() == "tiltout" || i.key() == "rollout") && !oe) {
+            emit(ppmOutChanged(_live["tiltoff"].toUInt(),
+                                _live["rolloff"].toUInt(),
+                                _live["panoff"].toUInt()));
+            ppm = true;
+        }
     }
 }
