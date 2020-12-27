@@ -70,6 +70,7 @@
 // Arduino LED
 #define ARDUINO_LED 13
 
+#define SENSOR_NAME "BNO055"
 
 // Pin definition for LED and buzzer (Fatshark goggles)
 #if FATSHARK_HT_MODULE
