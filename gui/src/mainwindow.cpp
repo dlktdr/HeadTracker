@@ -143,7 +143,15 @@ void MainWindow::parseSerialData()
             if(data.left(1)[0] == (char)0x02 &&
                data.right(1)[0] == (char)0x03) { // JSON Data
                 QByteArray stripped = data.mid(1,data.length()-2);
-                parseInComingJSON(QJsonDocument::fromJson(stripped).object().toVariantMap());
+                parseIncomingJSON(QJsonDocument::fromJson(stripped).object().toVariantMap());
+            }
+
+            // Found an HT value sent
+            else if(data.left(1) == "$") {
+                QRegExp re("$|[A-Z]+");
+                int pos = re.indexIn(data);
+                QStringList args = QString(data).mid(pos).split(',',Qt::KeepEmptyParts);
+                parseIncomingHT(data.left(pos),args);
 
             // Other data, Show to the user
             } else {
@@ -157,7 +165,7 @@ void MainWindow::parseSerialData()
 
 // Decide what to do with incoming JSON packet
 
-void MainWindow::parseInComingJSON(const QVariantMap &map)
+void MainWindow::parseIncomingJSON(const QVariantMap &map)
 {
     // Settings from the Tracker Sent, save them and update the UI
     if(map["Cmd"] == "Settings") {
@@ -202,6 +210,85 @@ void MainWindow::sendSerialData(QByteArray data)
     ui->txled->setState(true);
     txledtimer.start();
     serialcon->write(data);
+}
+
+void MainWindow::parseIncomingHT(QString cmd, QStringList args)
+{
+    // CRC ERROR
+    if(cmd == "$CRCERR") {
+        ui->statusbar->showMessage("CRC Error : Error Setting Values, Retrying",2000);
+        updatesettingstmr.start(500);
+    }
+
+    // CRC OK
+    else if(cmd == "$CRCOK") {
+        ui->statusbar->showMessage("Values Set On Headtracker",2000);
+    }
+
+    // Calibration Saved
+    else if(cmd == "$CALSAV") {
+        ui->statusbar->showMessage("Calibration Saved", 2000);
+    }
+
+    // Graph Data
+    else if(cmd == "$G") {
+        if(args.length() == 10) {
+            double tilt = args.at(0).toDouble();
+            double roll = args.at(1).toDouble();
+            double pan = args.at(2).toDouble();
+            int panout = args.at(3).toInt();
+            int tiltout = args.at(4).toInt();
+            int rollout = args.at(5).toInt();
+            int syscal = args.at(6).toInt();
+            int gyrocal = args.at(7).toInt();
+            int accelcal = args.at(8).toInt();
+            int magcal = args.at(9).toInt();
+            ui->graphView->addDataPoints(tilt,roll,pan);
+            ui->servoPan->setActualPosition(panout);
+            ui->servoTilt->setActualPosition(tiltout);
+            ui->servoRoll->setActualPosition(rollout);
+            calibratorDialog->setCalibration(syscal,
+                                             magcal,
+                                             gyrocal,
+                                             accelcal);
+            graphing = true;
+            ui->servoPan->setShowActualPosition(true);
+            ui->servoTilt->setShowActualPosition(true);
+            ui->servoRoll->setShowActualPosition(true);
+        }
+    }
+    // Setting Data
+    else if(cmd == "$SET$") {
+        if(args.length() == trkset.count()) {
+            trkset.setLPTiltRoll(args.at(0).toFloat());
+            trkset.setLPPan(args.at(1).toFloat());
+            trkset.setGyroWeightTiltRoll(args.at(2).toFloat());
+            trkset.setGyroWeightPan(args.at(3).toFloat());
+            trkset.setTlt_gain(args.at(4).toFloat());
+            trkset.setPan_gain(args.at(5).toFloat());
+            trkset.setRll_gain(args.at(6).toFloat());
+            trkset.setServoreverse(args.at(7).toInt());
+            trkset.setPan_cnt(args.at(8).toInt());
+            trkset.setPan_min(args.at(9).toInt());
+            trkset.setPan_max(args.at(10).toInt());
+            trkset.setTlt_cnt(args.at(11).toInt());
+            trkset.setTlt_min(args.at(12).toInt());
+            trkset.setTlt_max(args.at(13).toInt());
+            trkset.setRll_cnt(args.at(14).toInt());
+            trkset.setRll_min(args.at(15).toInt());
+            trkset.setRll_max(args.at(16).toInt());
+            trkset.setPanCh(args.at(17).toInt());
+            trkset.setTiltCh(args.at(18).toInt());
+            trkset.setRollCh(args.at(19).toInt());
+            trkset.setAxisRemap(args.at(20).toUInt());
+            trkset.setAxisSign(args.at(21).toUInt());
+
+            updateToUI();
+            ui->statusbar->showMessage(tr("Settings Received"),2000);
+        } else {
+            ui->statusbar->showMessage(tr("Error wrong # params"),2000);
+        }
+    }
 }
 
 /* Send a JSON Packet

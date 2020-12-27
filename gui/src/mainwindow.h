@@ -50,10 +50,16 @@ private:
 
     void parseSerialData();
     void sendSerialData(QByteArray data);
-    void sendSerialJSON(QString command, QVariantMap map=QVariantMap());
-    void parseInComingJSON(const QVariantMap &map);
 
-    void addToLog(QString log);    
+    // HT Format
+    void parseIncomingHT(QString cmd, QStringList args);
+
+    // JSON format
+    void sendSerialJSON(QString command, QVariantMap map=QVariantMap());
+    void parseIncomingJSON(const QVariantMap &map);
+
+
+    void addToLog(QString log);
 
 private slots:
     void findSerialPorts();
