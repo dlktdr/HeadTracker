@@ -17,6 +17,7 @@ public:
     static const int MAX_CNT=(((MAX_PWM-MIN_PWM)/2)+MIN_PWM+550);
     static const int MIN_GAIN= 0;
     static const int MAX_GAIN =500;
+    static const int DEF_GAIN= 100;
     static const int HT_TILT_REVERSE_BIT    = 0x01;
     static const int HT_ROLL_REVERSE_BIT  =   0x02;
     static const int HT_PAN_REVERSE_BIT    =  0x04;
@@ -97,7 +98,6 @@ public:
     int ppmPin() const;
     void setPPMPin(int value, PpmOut **ppmout);
 
-
     void loadJSONSettings(DynamicJsonDocument &json);
     void setJSONSettings(DynamicJsonDocument &json);
 
@@ -110,6 +110,7 @@ public:
     void setRawAccel(float x, float y, float z);
     void setRawMag(float x, float y, float z);
     void setRawOrient(float t, float r, float p);
+    void setOffOrient(float t, float r, float p);
     void setPPMOut(uint16_t t, uint16_t r, uint16_t p);
     void setJSONData(DynamicJsonDocument &json);
 
@@ -130,6 +131,7 @@ private:
     float accx,accy,accz;
     float magx,magy,magz;
     float tilt,roll,pan;
+    float tiltoff,rolloff,panoff;
     uint16_t panout,tiltout,rollout;
 };
     

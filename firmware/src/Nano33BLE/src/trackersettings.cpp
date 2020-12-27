@@ -6,17 +6,17 @@ TrackerSettings::TrackerSettings()
     // Defaults
     rll_min = MIN_PWM;
     rll_max = MAX_PWM;
-    rll_gain =  (MAX_GAIN-MIN_GAIN)/2+MIN_GAIN;
+    rll_gain =  DEF_GAIN;
     rll_cnt = (MAX_PWM-MIN_PWM)/2 + MIN_PWM;
 
     pan_min = MIN_PWM;
     pan_max = MAX_PWM;
-    pan_gain =  (MAX_GAIN-MIN_GAIN)/2+MIN_GAIN;
+    pan_gain =  DEF_GAIN;
     pan_cnt = (MAX_PWM-MIN_PWM)/2 + MIN_PWM;
 
     tlt_min = MIN_PWM;
     tlt_max = MAX_PWM;
-    tlt_gain =  (MAX_GAIN-MIN_GAIN)/2+MIN_GAIN;
+    tlt_gain =  DEF_GAIN;
     tlt_cnt = (MAX_PWM-MIN_PWM)/2 + MIN_PWM;
 
     tltch = 6;
@@ -404,6 +404,14 @@ void TrackerSettings::setRawOrient(float t, float r, float p)
     pan=p;
 }
 
+
+void TrackerSettings::setOffOrient(float t, float r, float p) 
+{
+    tiltoff=t;
+    rolloff=r;
+    panoff=p;
+}
+
 void TrackerSettings::setPPMOut(uint16_t t, uint16_t r, uint16_t p) 
 {
     tiltout=t;
@@ -521,11 +529,16 @@ void TrackerSettings::setJSONData(DynamicJsonDocument &json)
     json["accy"] = accy;
     json["accz"] = accz;
 
-    json["tilt"] = tilt;
-    json["roll"] = roll;
-    json["pan"] = pan;
+    json["tiltraw"] = tilt;
+    json["rollraw"] = roll;
+    json["panraw"] = pan;
     
     json["panout"] = panout;
     json["tiltout"] = tiltout;
     json["rollout"] = rollout;
+
+    json["panoff"] = panoff;
+    json["tiltoff"] = tiltoff;
+    json["rolloff"] = rolloff;
+
 }

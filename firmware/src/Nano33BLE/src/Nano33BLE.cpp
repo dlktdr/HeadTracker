@@ -5,11 +5,22 @@
 #include <platform/CircularBuffer.h>
 #include <ArduinoJson.h>
 #include <chrono>
+#include <ArduinoBLE.h>
 #include "PPMOut.h"
 #include "dataparser.h"
 #include "trackersettings.h"
 #include "Wire.h"
 #include "sense.h"
+#include "ble.h"
+#include "io.h"
+
+// Show extra info
+#define DEBUG_HT
+
+// Version 3.0
+const char *FW_MAJ_VERSION = "3";
+const char *FW_MIN_VERSION = "0";
+const char *FW_BOARD = "BLESENSE";
 
 using namespace rtos;
 using namespace mbed;
@@ -23,50 +34,9 @@ Ticker ioTick;
 // GLOBALS
 PpmOut *ppmout = nullptr;
 TrackerSettings trkset;
-volatile bool buttonpressed=false;
 Mutex dataMutex;
 
-// Reset Button Pressed Flag on Read
-bool wasButtonPressed() {
-  if(buttonpressed) {
-    __disable_irq();
-    buttonpressed = false;
-    __enable_irq();
-    return true;
-  }
-  return false;
-}
-
-void bt_Thread() {
-  while(true) {
-    /* Add Bluetooth functionality Here */
-
-
-    ThisThread::sleep_for(std::chrono::milliseconds(100));
-  }
-};
-
-// Any IO Related Tasks, buttons, etc.. ISR. Run at 1Khz
-void io_Task()
-{
-  static int i =0;
-  // Fast Blink to know it's running
-  if(i==100) {
-    digitalWrite(LED_BUILTIN, HIGH);
-  } 
-  if(i==200) {
-    digitalWrite(LED_BUILTIN, LOW);
-    i=0;
-  }
-  i++;
-
-  // Check button inputs, set flag, could make this an ISR but button for sure will be down for at least 1ms, also debounces
-  if(digitalRead(trkset.buttonPin()) == 0) 
-    buttonpressed = true; 
-}
-
-void setup() {
-  // Setup LEDS
+void setup() { 
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(LEDR, OUTPUT);
   pinMode(LEDG, OUTPUT);
@@ -75,7 +45,8 @@ void setup() {
   digitalWrite(LEDG,HIGH);
   digitalWrite(LEDB,HIGH);
 
-  Serial.begin(1000000); // 1 Megabaud
+  // Setup Serial Port
+  Serial.begin(1000000);
 
   // Read the Settings from Flash, PPM Output Is created here.
   trkset.loadFromEEPROM(&ppmout);
@@ -85,15 +56,16 @@ void setup() {
   dataThread.set_priority(osPriorityNormal);
 
   // Serial Read Ready Interrupt
-  Serial.attach(&serialrx_Int);
+  Serial.attach(&serialrx_Int);    
 
   // Start the BT Thread, Higher Prority than data.
+  bt_Init();
   btThread.start(mbed::callback(bt_Thread)); 
   btThread.set_priority(osPriorityNormal1);
 
   // Start the IO task at 1khz, Realtime priority
   ioTick.attach(mbed::callback(io_Task),std::chrono::milliseconds(1));
-  
+
   // Start the sensor thread, Realtime priority
   sense_Init();
   senseThread.start(mbed::callback(sense_Thread));

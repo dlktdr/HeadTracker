@@ -10,6 +10,10 @@ extern TrackerSettings trkset;
 extern PpmOut *ppmout;
 extern Mutex dataMutex;
 bool wasButtonPressed();
+void pressButton();
+extern const char *FW_MAJ_VERSION;
+extern const char *FW_MIN_VERSION ;
+extern const char *FW_BOARD;
 
 #endif
 
