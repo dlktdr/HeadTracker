@@ -6,24 +6,32 @@ void bt_Init()
 {
   if(!BLE.begin()) {
     serialWriteln("Unable to start Bluetooth");    
+  } else {
+    delay(1000);
+    serialWriteln("started BT");
   }
-
   BLE.scan();
 }
 
 void bt_Thread() {
+  BLEDevice peripheral;
+  
   while(1) {
+    digitalWrite(LEDR,LOW); // Green LED
     /* Add Bluetooth functionality Here */
-    BLEDevice peripheral = BLE.available();
+     peripheral = BLE.available();
 
     if(peripheral) {
-      if(strcmp(peripheral.localName().c_str(),"Hello") == 0) {
-        serialWrite("Found a OpenTX Remote at");
-        serialWrite(peripheral.address());
-        serialWrite("\r\n");
-      }
+      serialWrite("Localname ");
+      serialWrite(peripheral.localName()); 
+      serialWrite(" address ");
+      serialWrite(peripheral.address());
+      serialWrite("\r\n");     
+    } else {
+      //serialWriteln("No Devices Found");
     }
-
-    ThisThread::sleep_for(std::chrono::milliseconds(500));
+    
+    digitalWrite(LEDR,HIGH); // Serial RX Blue, Off
+    ThisThread::sleep_for(std::chrono::milliseconds(200));
   }
-};
+}

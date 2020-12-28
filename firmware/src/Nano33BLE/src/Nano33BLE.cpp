@@ -5,7 +5,7 @@
 #include <platform/CircularBuffer.h>
 #include <ArduinoJson.h>
 #include <chrono>
-#include <ArduinoBLE.h>
+
 #include "PPMOut.h"
 #include "dataparser.h"
 #include "trackersettings.h"
@@ -17,10 +17,9 @@
 // Show extra info
 #define DEBUG_HT
 
-// Version 3.0
-const char *FW_MAJ_VERSION = "3";
-const char *FW_MIN_VERSION = "0";
-const char *FW_BOARD = "BLESENSE";
+// Version 1.0 - NANO33BLE
+const char *FW_VERSION = "1.0";
+const char *FW_BOARD = "NANO33BLE";
 
 using namespace rtos;
 using namespace mbed;
@@ -61,7 +60,7 @@ void setup() {
   // Start the BT Thread, Higher Prority than data.
   bt_Init();
   btThread.start(mbed::callback(bt_Thread)); 
-  btThread.set_priority(osPriorityNormal1);
+  btThread.set_priority(osPriorityAboveNormal);
 
   // Start the IO task at 1khz, Realtime priority
   ioTick.attach(mbed::callback(io_Task),std::chrono::milliseconds(1));
