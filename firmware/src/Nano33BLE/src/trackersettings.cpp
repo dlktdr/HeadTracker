@@ -461,7 +461,7 @@ void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
 
 // Button Input + PPM output pins
     v = json["buttonpin"]; if(!v.isNull()) setButtonPin(v);
-    v = json["ppmpin"]; if(!v.isNull()) setButtonPin(v);
+    //v = json["ppmpin"]; if(!v.isNull()) setPPMPin(v,); // *** FIX ME
 }
 
 void TrackerSettings::setJSONSettings(DynamicJsonDocument &json)
