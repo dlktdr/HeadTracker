@@ -7,17 +7,17 @@ TrackerSettings::TrackerSettings(QObject *parent):
     // Defaults
     _data["rll_min"] = MIN_PWM;
     _data["rll_max"] = MAX_PWM;
-    _data["rll_gain"] =  DEF_GAIN;
+    _data["rll_gain"] = DEF_GAIN;
     _data["rll_cnt"] = (MAX_PWM-MIN_PWM)/2 + MIN_PWM;
 
     _data["pan_min"] = MIN_PWM;
     _data["pan_max"] = MAX_PWM;
-    _data["pan_gain"] =  DEF_GAIN;
+    _data["pan_gain"] = DEF_GAIN;
     _data["pan_cnt"] = (MAX_PWM-MIN_PWM)/2 + MIN_PWM;
 
     _data["tlt_min"] = MIN_PWM;
     _data["tlt_max"] = MAX_PWM;
-    _data["tlt_gain"] =  DEF_GAIN;
+    _data["tlt_gain"] = DEF_GAIN;
     _data["tlt_cnt"] = (MAX_PWM-MIN_PWM)/2 + MIN_PWM;
 
     _data["panch"] = (uint)6;
@@ -389,10 +389,10 @@ void TrackerSettings::setLiveDataMap(const QVariantMap &livelist,bool reset)
     _live.insert(livelist);
 
     // Emit if a value has been updated
+    bool ge=false,ae=false,me=false,oe=false,ooe=false,ppm=false;
     QMapIterator<QString, QVariant> i(livelist);
     while (i.hasNext()) {
-        i.next();
-        bool ge=false,ae=false,me=false,oe=false,ooe=false,ppm=false;
+        i.next();        
         if((i.key() == "gyrox" || i.key() == "gyroy" || i.key() == "gyroz") && !ge) {
             emit(rawGyroChanged(_live["gyrox"].toFloat(),
                                 _live["gyroy"].toFloat(),
@@ -417,17 +417,23 @@ void TrackerSettings::setLiveDataMap(const QVariantMap &livelist,bool reset)
                                 _live["pan"].toFloat()));
             oe = true;
         }
-        if((i.key() == "tiltoff" || i.key() == "rolloff" || i.key() == "panoff") && !oe) {
-            emit(rawOrientChanged(_live["tiltoff"].toFloat(),
+        if((i.key() == "tiltoff" || i.key() == "rolloff" || i.key() == "panoff") && !ooe) {
+            emit(offOrientChanged(_live["tiltoff"].toFloat(),
                                 _live["rolloff"].toFloat(),
                                 _live["panoff"].toFloat()));
             ooe = true;
         }
-        if((i.key() == "panout" || i.key() == "tiltout" || i.key() == "rollout") && !oe) {
+        if((i.key() == "panout" || i.key() == "tiltout" || i.key() == "rollout") && !ppm) {
             emit(ppmOutChanged(_live["tiltoff"].toUInt(),
                                 _live["rolloff"].toUInt(),
                                 _live["panoff"].toUInt()));
             ppm = true;
         }
     }
+}
+
+void TrackerSettings::setHardware(QString vers, QString hard)
+{
+    _data["Vers"] = vers;
+    _data["Hard"] = hard;
 }

@@ -15,7 +15,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     firmwareUploader = new Firmware;
     serialcon = new QSerialPort;
-    calibratorDialog = new Calibrate;
+    bnoCalibratorDialog = new CalibrateBNO;
     ui->statusbar->showMessage("Disconnected");
     findSerialPorts();
     ui->cmdDisconnect->setEnabled(false);
@@ -75,9 +75,9 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->servoRoll,&ServoMinMax::maximumChanged,this,&MainWindow::updateFromUI);
     connect(ui->servoRoll,&ServoMinMax::centerChanged,this,&MainWindow::updateFromUI);
 
-    // On Data Change
-    connect(&trkset,&TrackerSettings::ppmOutChanged,this,&MainWindow::liveDataChanged);
-
+    // On Live Data Change
+    connect(&trkset,&TrackerSettings::offOrientChanged,this,&MainWindow::offOrientChanged);
+    connect(&trkset,&TrackerSettings::ppmOutChanged,this,&MainWindow::ppmOutChanged);
 
     // Combo Boxes
 
@@ -121,9 +121,8 @@ MainWindow::~MainWindow()
 {
     delete serialcon;
     delete firmwareUploader;
-    delete calibratorDialog;
+    delete bnoCalibratorDialog;
     delete ui;
-
 }
 
 // Parse the data received from the serial port
@@ -132,73 +131,97 @@ void MainWindow::parseSerialData()
 {      
     bool done = true;
     while(done) {
-            int nlindex = serialData.indexOf("\r\n");
-            if(nlindex < 0)
-                return;  // No New line found
+        int nlindex = serialData.indexOf("\r\n");
+        if(nlindex < 0)
+            return;  // No New line found
 
-            // Strip data up the the CR LF \r\n
-            QByteArray data = serialData.left(nlindex);
+        // Strip data up the the CR LF \r\n
+        QByteArray data = serialData.left(nlindex);
 
-            // Found a SOT & EOT Character, JSON Data Sent
-            if(data.left(1)[0] == (char)0x02 &&
-               data.right(1)[0] == (char)0x03) { // JSON Data
-                QByteArray stripped = data.mid(1,data.length()-2);
-                parseIncomingJSON(QJsonDocument::fromJson(stripped).object().toVariantMap());
-            }
+        // Found a SOT & EOT Character, JSON Data Sent
 
-            // Found an HT value sent
-            else if(data.left(1) == "$") {
-                QRegExp re("$|[A-Z]+");
-                int pos = re.indexIn(data);
-                QStringList args = QString(data).mid(pos).split(',',Qt::KeepEmptyParts);
-                parseIncomingHT(data.left(pos),args);
+        if(data.left(1)[0] == (char)0x02 && data.right(1)[0] == (char)0x03) { // JSON Data
+            QByteArray stripped = data.mid(1,data.length()-2);
+            parseIncomingJSON(QJsonDocument::fromJson(stripped).object().toVariantMap());
+
+        // Found an HT value sent
+        } else if(data.left(1) == "$") {
+            QRegExp re("$|[A-Z]+"); //***** CHECK IF THIS WORKS!!
+            int pos = re.indexIn(data);
+            QStringList args = QString(data).mid(pos).split(',',Qt::KeepEmptyParts);
+            parseIncomingHT(data.left(pos),args);
+
 
             // Other data, Show to the user
-            } else {
-                addToLog(data + "\n");
-            }
+        } else {
+            addToLog(data + "\n");
+        }
 
-            // Remove data read from the buffer
-            serialData = serialData.right(serialData.length()-nlindex-2);
+
+        // Remove data read from the buffer
+        serialData = serialData.right(serialData.length()-nlindex-2);
     }
 }
 
-// Decide what to do with incoming JSON packet
+/* Decide what to do with incoming JSON packet
+ * v1.0 Possible Incoming JSON Commands
+ *      "GetSet"  Tracker Settings Send
+ *      "FW"  Firmware Version
+ *      "Data" Live Data for Info / Calibration
+ */
 
 void MainWindow::parseIncomingJSON(const QVariantMap &map)
 {
     // Settings from the Tracker Sent, save them and update the UI
-    if(map["Cmd"] == "Settings") {
+    if(map["Cmd"].toString() == "Settings") {
         qDebug() << "GOT THE SETTINGS";
         trkset.setAllData(map);
         updateToUI();
 
     // Data sent, Update the graph / servo sliders / calibration
-    } else if (map["Cmd"] == "Data") {
-        // Add all the data to the settings class
+    } else if (map["Cmd"].toString() == "Data") {
+        // Add all the data to the settings
         trkset.setLiveDataMap(map);
 
-        // Graph Data - tilt, roll, pan angles
-        QVariant t,r,p;
-        t = map["tiltoff"]; r = map["rolloff"];  p = map["panoff"];
-        if(!t.isNull() && !r.isNull() && !p.isNull())
-            ui->graphView->addDataPoints(t.toInt(),r.toInt(),p.toInt());
-
-        // Actual Servo Output Values
-        QVariant po,to,ro;
-        po = map["panout"]; ro = map["rollout"];  to = map["tiltout"];
-        if(!to.isNull() && !ro.isNull() && !po.isNull()) {
-            ui->servoPan->setActualPosition(po.toInt());
-            ui->servoTilt->setActualPosition(to.toInt());
-            ui->servoRoll->setActualPosition(ro.toInt());
-            ui->servoPan->setShowActualPosition(true);
-            ui->servoTilt->setShowActualPosition(true);
-            ui->servoRoll->setShowActualPosition(true);
-        }
-    } else if (map["Cmd"] == "FW") {
-        QMessageBox::information(this,"Ver",QString("Version %1.%2 %3").arg(map["Mag_Ver"].toString()).arg(map["Min_Ver"].toString()).arg(map["Board"].toString()));
+    // Firmware Hardware and Version
+    } else if (map["Cmd"].toString() == "FW") {
+        fwDiscovered(map["Vers"].toString(), map["Hard"].toString());
     }
 }
+
+/* fwDiscoverd()
+ *      Enables/Disables sections of the GUI based on the hardware found
+ */
+
+void MainWindow::fwDiscovered(QString vers, QString hard)
+{
+    Q_UNUSED(vers);
+
+    // Store in Tracker Settings
+    trkset.setHardware(vers,hard);
+
+    // **** CHANGE ME TO USE A DIFFERENT WIDGET FOR EACH HARDWARE ****
+    if(hard == "NANO33BLE") {
+        ui->cmdStartGraph->setVisible(false);
+        ui->cmdStopGraph->setVisible(false);
+        ui->cmbRemap->setVisible(false);
+        ui->cmbSigns->setVisible(false);
+
+
+
+    } else if (hard == "BNO055") {
+        ui->cmdStartGraph->setVisible(true);
+        ui->cmdStopGraph->setVisible(true);
+        ui->cmbRemap->setVisible(true);
+        ui->cmbSigns->setVisible(true);
+
+
+    }
+}
+
+/* sendSerialData()
+ *      Send Data To The Serial Port
+ */
 
 void MainWindow::sendSerialData(QByteArray data)
 {
@@ -212,8 +235,15 @@ void MainWindow::sendSerialData(QByteArray data)
     serialcon->write(data);
 }
 
+/* parseIncomingHT()
+ *      Read older head tracker code
+ */
+
 void MainWindow::parseIncomingHT(QString cmd, QStringList args)
 {
+    static QString vers;
+    static QString hard;
+
     // CRC ERROR
     if(cmd == "$CRCERR") {
         ui->statusbar->showMessage("CRC Error : Error Setting Values, Retrying",2000);
@@ -233,28 +263,23 @@ void MainWindow::parseIncomingHT(QString cmd, QStringList args)
     // Graph Data
     else if(cmd == "$G") {
         if(args.length() == 10) {
-            double tilt = args.at(0).toDouble();
-            double roll = args.at(1).toDouble();
-            double pan = args.at(2).toDouble();
-            int panout = args.at(3).toInt();
-            int tiltout = args.at(4).toInt();
-            int rollout = args.at(5).toInt();
-            int syscal = args.at(6).toInt();
-            int gyrocal = args.at(7).toInt();
-            int accelcal = args.at(8).toInt();
-            int magcal = args.at(9).toInt();
-            ui->graphView->addDataPoints(tilt,roll,pan);
-            ui->servoPan->setActualPosition(panout);
-            ui->servoTilt->setActualPosition(tiltout);
-            ui->servoRoll->setActualPosition(rollout);
-            calibratorDialog->setCalibration(syscal,
-                                             magcal,
-                                             gyrocal,
-                                             accelcal);
+            QVariantMap vm;
+            vm["tilt"] = args.at(0);
+            vm["roll"] = args.at(1);
+            vm["pan"] = args.at(2);
+            vm["panout"] = args.at(3);
+            vm["tiltout"] = args.at(4);
+            vm["rollout"] = args.at(5);
+            vm["syscal"] = args.at(6);
+            vm["gyrocal"] = args.at(7);
+            vm["accelcal"] = args.at(8);
+            vm["magcal"] = args.at(9);
+            trkset.setLiveDataMap(vm);
             graphing = true;
-            ui->servoPan->setShowActualPosition(true);
-            ui->servoTilt->setShowActualPosition(true);
-            ui->servoRoll->setShowActualPosition(true);
+            bnoCalibratorDialog->setCalibration(vm["syscal"].toInt(),
+                                             vm["magcal"].toInt(),
+                                             vm["gyrocal"].toInt(),
+                                             vm["accelcal"].toInt());
         }
     }
     // Setting Data
@@ -288,26 +313,43 @@ void MainWindow::parseIncomingHT(QString cmd, QStringList args)
         } else {
             ui->statusbar->showMessage(tr("Error wrong # params"),2000);
         }
+    } else if(cmd == "$VERS") {
+        if(args.length() == 1) {
+            vers = args.at(0);
+            if(!hard.isEmpty())
+                fwDiscovered(vers,hard);
+
+        }
+    } else if(cmd == "$HARD") {
+        if(args.length() == 1) {
+            hard = args.at(0);
+            if(!vers.isEmpty())
+                fwDiscovered(vers,hard);
+        }
     }
 }
 
-/* Send a JSON Packet
- *    Use command so the
+/* sendSerialJSON()
+ *      Sends a JSON Packet
  */
 
 void MainWindow::sendSerialJSON(QString command, QVariantMap map)
-{
+{    
     QJsonObject jobj = QJsonObject::fromVariantMap(map);
     jobj["Cmd"] = command;
     QJsonDocument jdoc(jobj);
     QString json = QJsonDocument(jdoc).toJson(QJsonDocument::Compact);
     sendSerialData((char)0x02 + json.toLatin1() + (char)0x03);
 
-    // Delay this so there is time to process it on the other end
+    // Delay this so there is time to process it on the other side
     QTime dieTime= QTime::currentTime().addMSecs(100);
-        while (QTime::currentTime() < dieTime)
-            QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+    while (QTime::currentTime() < dieTime)
+        QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
 }
+
+/* addToLog()
+ *      Add other information to the LOG
+ */
 
 void MainWindow::addToLog(QString log)
 {
@@ -363,8 +405,8 @@ void MainWindow::serialConnect()
 
     ui->cmdDisconnect->setEnabled(true);
     ui->cmdConnect->setEnabled(false);
-    //ui->cmdStopGraph->setEnabled(true);
-    //ui->cmdStartGraph->setEnabled(true);
+    ui->cmdStopGraph->setEnabled(true);
+    ui->cmdStartGraph->setEnabled(true);
     ui->cmdSend->setEnabled(true);
 
     ui->statusbar->showMessage(tr("Connected to ") + serialcon->portName());
@@ -393,7 +435,14 @@ void MainWindow::serialDisconnect()
 
 void MainWindow::serialError(QSerialPort::SerialPortError err)
 {
-
+    switch(err) {
+    case QSerialPort::NotOpenError: {
+        break;
+    }
+    default: {
+        qDebug() << "SERIAL PORT ERROR" << err;
+    }
+    }
 }
 
 // Update the UI Settings from the settings class
@@ -437,11 +486,31 @@ void MainWindow::updateToUI()
     ui->cmbrllchn->blockSignals(false);
     ui->cmbtiltchn->blockSignals(false);
     ui->cmbRemap->blockSignals(false);
+
+
+
+
 }
 
-void MainWindow::liveDataChanged()
-{
+/* offOrientChanged()
+ *      New data available for the graph
+ */
 
+void MainWindow::offOrientChanged(float t,float r,float p)
+{
+    ui->graphView->addDataPoints(t,r,p);
+}
+
+void MainWindow::ppmOutChanged(int t,int r,int p)
+{
+    ui->servoTilt->setActualPosition(t);
+    ui->servoRoll->setActualPosition(r);
+    ui->servoPan->setActualPosition(p);
+
+    // Add a timer here so if no updates these disable
+    ui->servoPan->setShowActualPosition(true);
+    ui->servoTilt->setShowActualPosition(true);
+    ui->servoRoll->setShowActualPosition(true);
 }
 
 // Update the Settings Class from the UI Data
@@ -534,7 +603,7 @@ void MainWindow::stopGraph()
 // Send All Settings to the Controller
 void MainWindow::storeSettings()
 {
-    sendSerialJSON("SetValues", trkset.getAllData());
+    sendSerialJSON("Setttings", trkset.getAllData());
     ui->statusbar->showMessage(tr("Settings Stored to EEPROM"),2000);
 }
 
@@ -559,12 +628,15 @@ void MainWindow::setDataMode(bool rawmode)
 
 void MainWindow::requestTimer()
 {
+    // Request in HT Mode
     sendSerialData("$VERS");
     sendSerialData("$HARD");
+    sendSerialData("$GSET");
 
+    // Request in JSON Mode
+    sendSerialJSON("FWR"); // Get the firmware
+    sendSerialJSON("GetSet"); // Get the Settings
 
-    /*sendSerialJSON("GetSet"); // Get the Settings
-    //sendSerialJSON("FW"); // Get the firmware
     ackTimeout(); // Tell it we are here*/
 }
 
@@ -610,6 +682,8 @@ void MainWindow::uploadFirmwareClick()
     }
 }
 
+// Start the various calibration dialogs
+
 void MainWindow::startCalibration()
 {
     if(!serialcon->isOpen()) {
@@ -617,19 +691,24 @@ void MainWindow::startCalibration()
         return;
     }
 
-    // Start calibration, start graphing.
-    sendSerialData("$STO");
-    startGraph();
+    if(trkset.getHardware() == "NANO33BLE") {
+        // TODO
 
-    calibratorDialog->startCalibration();
-    calibratorDialog->show();
+    } else if (trkset.getHardware() == "BNO055") {
+        // Start calibration, start graphing.
+        sendSerialData("$STO");
+        startGraph();
+        bnoCalibratorDialog->startCalibration();
+        bnoCalibratorDialog->show();
+
+    }
 }
 
-// Let the device know where here
+// Nano33BLE - Let Hardware know were here
 
 void MainWindow::ackTimeout()
 {
-    if(serialcon->isOpen()) {
+    if(serialcon->isOpen() && trkset.getHardware() == "NANO33BLE") {
         sendSerialJSON("ACK");
     }
 }

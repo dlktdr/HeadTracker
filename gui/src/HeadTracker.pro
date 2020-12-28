@@ -22,6 +22,7 @@ SOURCES += \
     mainwindow.cpp \
     led.cpp \
     graph.cpp \
+    nanoblewidget.cpp \
     servominmax.cpp \
     signalbars.cpp \
     trackersettings.cpp \
@@ -33,6 +34,7 @@ HEADERS += \
     mainwindow.h \
     led.h \
     graph.h \
+    nanoblewidget.h \
     servominmax.h \
     signalbars.h \
     trackersettings.h \
@@ -41,7 +43,8 @@ HEADERS += \
 FORMS += \
     calibratebno.ui \
     firmware.ui \
-    mainwindow.ui
+    mainwindow.ui \
+    nanoblewidget.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

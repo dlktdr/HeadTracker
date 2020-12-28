@@ -43,7 +43,7 @@ private:
     QTimer acknowledge;
     QString logd;
     Firmware *firmwareUploader;
-    Calibrate *calibratorDialog;
+    CalibrateBNO *bnoCalibratorDialog;
 
     int xtime;
     bool graphing;
@@ -53,11 +53,11 @@ private:
 
     // HT Format
     void parseIncomingHT(QString cmd, QStringList args);
-
     // JSON format
     void sendSerialJSON(QString command, QVariantMap map=QVariantMap());
     void parseIncomingJSON(const QVariantMap &map);
 
+    void fwDiscovered(QString vers, QString hard);
 
     void addToLog(QString log);
 
@@ -68,7 +68,8 @@ private slots:
     void serialError(QSerialPort::SerialPortError);
     void updateFromUI();
     void updateToUI();
-    void liveDataChanged();
+    void offOrientChanged(float,float,float);
+    void ppmOutChanged(int,int,int);
     void serialReadReady();
     void manualSend();
     void startGraph();
@@ -85,5 +86,6 @@ private slots:
     void uploadFirmwareClick();
     void startCalibration();
     void ackTimeout();
+
 };
 #endif // MAINWINDOW_H

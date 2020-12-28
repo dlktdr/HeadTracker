@@ -121,13 +121,17 @@ public:
     QVariantMap getLiveDataMap();
     void setLiveDataMap(const QVariantMap &livelist, bool clear=false);
 
+    QString getHardware() {return _data["Hard"].toString();}
+    QString getFWVersion() {return _data["Vers"].toString();}
+    void setHardware(QString vers,QString hard);
+
 signals:
     void rawGyroChanged(float x, float y, float z);
     void rawAccelChanged(float x, float y, float z);
     void rawMagChanged(float x, float y, float z);
     void rawOrientChanged(float t, float r, float p);
     void offOrientChanged(float t, float r, float p);
-    void ppmOutChanged(uint16_t t, uint16_t r, uint16_t p);
+    void ppmOutChanged(int t, int r, int p);
 
 private:
     QVariantMap _data; // Stored Data

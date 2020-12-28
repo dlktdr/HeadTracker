@@ -1,9 +1,8 @@
 #include <Arduino.h>
 #include <mbed.h>
 #include <rtos.h>
-#include <chrono >
+#include <chrono>
 #include <platform/CircularBuffer.h>
-#include "HardwareSerial.h"
 #include <ArduinoJson.h>
 #include "dataparser.h"
 #include "main.h"
@@ -12,12 +11,7 @@
 using namespace rtos;
 using namespace mbed;
 
-// Buffers for Serial Sending, Receiving and JSON Data
-static const int RT_BUF_SIZE=1000; // RX Buffer Size
-static const int TX_BUF_SIZE=1000; // RX Buffer Size
-static const int DATA_THREAD_PERIOD = 10; // 10ms Period, Data Thread, Apx.
-static const int DATA_SEND_TIME=100; // Data Update Speed in ms
-static const int UIRESPONSIVE_TIME=10000; // 10Seconds without an ack data will stop;
+// Buffer
 static char tempdata[RT_BUF_SIZE];
 
 // Serial input / output Buffers
@@ -36,33 +30,12 @@ void parseData(DynamicJsonDocument &json);
 //uint64_t dataSendTime =  Kernel::get_ms_count();
 //uint64_t uiResponsive = Kernel::get_ms_count();
 Kernel::Clock::time_point dataSendTime = Kernel::Clock::now() + std::chrono::milliseconds(DATA_SEND_TIME);
-Kernel::Clock::time_point uiResponsive = Kernel::Clock::now() + std::chrono::milliseconds(UIRESPONSIVE_TIME);
+Kernel::Clock::time_point uiResponsive = Kernel::Clock::now();
 
 bool sendData=false;
 
 // Buffered write to serial
 Mutex serWriteMutex;
-
-void serialWriteJSON(DynamicJsonDocument &json)
-{  
-  serWriteMutex.lock(); 
-  
-  char data[500];
-  int br = serializeJson(json, data, 500); // Serialize, with max 500 char buffer
-
-  serout.push(0x02);
-  // Append Output to the serial output buffer
-  for(int i =0; i < br; i++) {
-    serout.push(data[i]);
-  }
-  serout.push(0x03);
-  serout.push('\r');
-  serout.push('\n');
-  
-  serWriteMutex.unlock();  
-}
-
-
 
 // Serial RX Interrupt, Stay Fast Here
 void serialrx_Int()
@@ -96,12 +69,9 @@ void serialrx_Int()
         // Notify user thread the character string is ready to read
         JSONready = true;
       }
-      serin.reset();
-      
-    } else if(sc == '$') {
-
+      serin.reset();      
     }
-    
+
     else { // Add data to buffer
       serin.push(sc);
       if(serin.full())
@@ -117,8 +87,8 @@ void data_Thread()
 {     
   DynamicJsonDocument json(RT_BUF_SIZE);
 
-  while(1) {
-    digitalWrite(LEDB,LOW); 
+  while(1) {    
+    digitalWrite(LEDB,LOW); // Serial RX Blue, Off      
     // Don't like this but can't get bufferedserial or available bytes to write
     // functions to work, at least shouldn't block this way.
     int bytx = serout.size();
@@ -169,9 +139,7 @@ void data_Thread()
 
     Kernel::Clock::time_point curtime = Kernel::Clock::now();
 
-    if(dataSendTime < curtime) {
-        //} &&    uiResponsive > curtime) {
-      
+    if(dataSendTime < curtime && uiResponsive > curtime) {
       // Build JSON of Data
       json.clear();      
       dataMutex.lock();
@@ -186,6 +154,7 @@ void data_Thread()
       // Reset Sent Timer          
       dataSendTime = Kernel::Clock::now() + std::chrono::milliseconds(DATA_SEND_TIME);
     } 
+
     digitalWrite(LEDB,HIGH); // Serial RX Blue, Off
     ThisThread::sleep_for(std::chrono::milliseconds(DATA_THREAD_PERIOD));
   }
@@ -205,37 +174,39 @@ void parseData(DynamicJsonDocument &json)
     
     // Reset Center
     if(strcmp(command,"RstCnt") == 0) { 
-#ifdef DEBUG_HT
       serialWrite("HT: Resetting Center\r\n");
-#endif
       pressButton();
 
     // Store Settings
-    } else if (strcmp(command, "SetValues") == 0) {
-#ifdef DEBUG_HT      
+    } else if (strcmp(command, "Setttings") == 0) {
         serialWrite("HT: Saving Settings\r\n");           
-#endif
         trkset.loadJSONSettings(json);
-    
+
     // Get settings
     } else if (strcmp(command, "GetSet") == 0) {  
         serialWrite("HT: Sending Settings\r\n");
         json.clear();
         trkset.setJSONSettings(json);
-        json["Command"] = "Settings";
+        json["Cmd"] = "Settings";
         serialWriteJSON(json);
 
     // ACK Received, Means the GUI is running, send it data
     } else if (strcmp(command, "ACK") == 0) {
-#ifdef DEBUG_HT
         serialWrite("HT: Ack Received\r\n");
-#endif
         uiResponsive = Kernel::Clock::now() + std::chrono::milliseconds(UIRESPONSIVE_TIME);
         dataSendTime = Kernel::Clock::now() + std::chrono::milliseconds(DATA_SEND_TIME);        
     
+    // Firmware Reqest
+    } else if (strcmp(command, "FWR") == 0) {
+      serialWrite("HT: FW Requested\r\n");
+      json.clear();
+      json["Cmd"] = "FW";
+      json["Vers"] = FW_VERSION;
+      json["Hard"] = FW_BOARD;
+      serialWriteJSON(json);
+
     // Unknown Command
     } else {
-        serialWrite("HT: Unknown Command\r\n");
-    
+        serialWrite("HT: Unknown Command\r\n");    
     }
 }

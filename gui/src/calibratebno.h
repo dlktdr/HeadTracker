@@ -1,19 +1,19 @@
-#ifndef CALIBRATE_H
-#define CALIBRATE_H
+#ifndef CalibrateBNO_H
+#define CalibrateBNO_H
 
 #include <QDialog>
 
 namespace Ui {
-class Calibrate;
+class CalibrateBNO;
 }
 
-class Calibrate : public QDialog
+class CalibrateBNO : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit Calibrate(QWidget *parent = nullptr);
-    ~Calibrate();
+    explicit CalibrateBNO(QWidget *parent = nullptr);
+    ~CalibrateBNO();
     bool calStatus;
 public slots:
     void setCalibration(int sys, int mag, int gyr, int acc);
@@ -21,10 +21,10 @@ public slots:
 signals:
     void calibrationComplete();
 private:
-    Ui::Calibrate *ui;
+    Ui::CalibrateBNO *ui;
     int sys,mag,gyr,acc;
 
 
 };
 
-#endif // CALIBRATE_H
+#endif // CalibrateBNO_H
