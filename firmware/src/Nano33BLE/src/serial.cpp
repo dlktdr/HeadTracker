@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <mbed.h>
 #include "serial.h"
+#include "dataparser.h"
 
 void serialWrite(arduino::String str)
 {
@@ -9,9 +10,10 @@ void serialWrite(arduino::String str)
 
 void serialWriteln(char const *data)
 {
-  serWriteMutex.lock();
+  
   int br = strlen(data);
   // Append Output to the serial output buffer
+  serWriteMutex.lock();
   for(int i =0; i < br; i++) {
     serout.push(data[i]);
   }
@@ -21,11 +23,12 @@ void serialWriteln(char const *data)
 }
 
 void serialWrite(int val) {
-  serWriteMutex.lock();
+  
   char buf[50];
   itoa(val,buf,10);
   int len = strlen(buf);
   // Append Output to the serial output buffer
+  serWriteMutex.lock();
   for(int i =0; i < len; i++) {
     serout.push(buf[i]);
   }
@@ -42,9 +45,10 @@ void serialWrite(char *data,int len) {
 }
 
 void serialWrite(char const *data) {
-  serWriteMutex.lock();
+  
   int br = strlen(data);
   // Append Output to the serial output buffer
+  serWriteMutex.lock();
   for(int i =0; i < br; i++) {
     serout.push(data[i]);
   }
@@ -55,4 +59,23 @@ void serialWrite(char c) {
   serWriteMutex.lock();
   serout.push(c);
   serWriteMutex.unlock();
+}
+
+void serialWriteJSON(DynamicJsonDocument &json)
+{  
+  serWriteMutex.lock(); 
+  
+  char data[500];
+  int br = serializeJson(json, data, 500); // Serialize, with max 500 char buffer
+
+  serout.push(0x02);
+  // Append Output to the serial output buffer
+  for(int i =0; i < br; i++) {
+    serout.push(data[i]);
+  }
+  serout.push(0x03);
+  serout.push('\r');
+  serout.push('\n');
+  
+  serWriteMutex.unlock();  
 }

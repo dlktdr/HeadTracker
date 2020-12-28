@@ -9,5 +9,6 @@ void serialWrite(int val);
 void serialWrite(char *data, int len);
 void serialWrite(char const *data);
 void serialWrite(char c);
+void serialWriteJSON(DynamicJsonDocument &json);
 
 #endif
