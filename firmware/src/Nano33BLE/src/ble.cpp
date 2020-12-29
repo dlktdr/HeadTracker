@@ -7,13 +7,14 @@
 
 BLEDevice peripheral;
 BLEService bleservice("FFF0");
+BLEService bleservice("180A");
 BLECharacteristic blecar1("FFF1", BLERead | BLEWrite, 60);
 BLECharacteristic blecar2("FFF2", BLERead , 60);
 BLECharacteristic blecar3("FFF3", BLEWriteWithoutResponse, 60);
 BLECharacteristic blecar5("FFF5", BLERead , 60);
-BLECharacteristic blecar6("FFF6", BLENotify | BLEWriteWithoutResponse | BLEWrite, 40);
+BLECharacteristic blecar6("FFF6", BLENotify | BLEWriteWithoutResponse | BLEWrite, 20);
 bool bleconnected = false;
-
+bool oktowrite = true;
 
 //-----------------------------------------------------
 // FROM OPENTX 2.3 - bluetooth.cpp / .h
@@ -45,27 +46,25 @@ void sendTrainer()
 {
   int16_t PPM_range = 512*2;  
   
-  int firstCh = 1;
-  int lastCh = firstCh + trkset.ppmChannels();
+  int firstCh = 0;
+  int lastCh = firstCh + 8;
   
-  // Allocate Channel Mappings
+  // Allocate Channel Mappings, Set Default to all Center
   uint16_t channelOutputs[24];
-  for(int i=0;i < TrackerSettings::DEF_PPM_CHANNELS; i++) {
+  for(int i=0;i < 24; i++) {
     channelOutputs[i] = TrackerSettings::DEF_CENTER;
   }
   
   // Read Shared Data
-  //dataMutex.lock();
+  dataMutex.lock();
   uint16_t to,ro,po;
-  //trkset.getPPMValues(to,ro,po);
-  //dataMutex.unlock();
-
-  // Set Channel Values
-  /*
+  trkset.getPPMValues(to,ro,po);
+    // Set Channel Values
   channelOutputs[trkset.panCh()+firstCh] = po;
   channelOutputs[trkset.tiltCh()+firstCh] = to;
   channelOutputs[trkset.rollCh()+firstCh] = ro;
-  */
+  dataMutex.unlock();
+  
   uint8_t * cur = buffer;
   bufferIndex = 0;
   crc = 0x00;
@@ -73,9 +72,9 @@ void sendTrainer()
   buffer[bufferIndex++] = START_STOP; // start byte
   pushByte(0x80); // trainer frame type?
   for (int channel=0; channel<lastCh; channel+=2, cur+=3) {
-    // ***** FIX CHANNEL VALUES.... CENTER possibly wrong if user changed in app.
-    uint16_t channelValue1 = channelOutputs[channel];
-    uint16_t channelValue2 = channelOutputs[channel+1];
+    
+    uint16_t channelValue1 = ((channelOutputs[channel] - TrackerSettings::DEF_CENTER) /2) + TrackerSettings::DEF_CENTER;
+    uint16_t channelValue2 = ((channelOutputs[channel+1] - TrackerSettings::DEF_CENTER) /2) + TrackerSettings::DEF_CENTER;
     
     //uint16_t channelValue1 = PpmOut::PPM_CENTER + limit((int16_t)-PPM_range, (int16_t)ppmout->getChannel(channel) - PpmOut::PPM_CENTER, (int16_t)PPM_range) / 2;
     //uint16_t channelValue2 = PpmOut::PPM_CENTER + limit((int16_t)-PPM_range, (int16_t)ppmout->getChannel(channel+1) - PpmOut::PPM_CENTER, (int16_t)PPM_range) / 2;
@@ -86,9 +85,11 @@ void sendTrainer()
   
   buffer[bufferIndex++] = crc;
   buffer[bufferIndex++] = START_STOP; // end byte
-
+  
+  
   // Write to characteristic
   blecar6.writeValue(buffer,bufferIndex);
+  
 
   bufferIndex = 0;
 }
@@ -99,38 +100,18 @@ void sendTrainer()
 void blePeripheralConnectHandler(BLEDevice central) {
   // central connected event handler
   serialWrite("Connected event, central: ");
-  serialWriteln(central.address().c_str());
-
-  /*
-
-  int sc = central.serviceCount();
-  serialWrite("Service Count - ");
-  serialWrite(sc);
-  serialWrite("\r\n");
-
-  sc = central.characteristicCount();
-  serialWrite("Characteristic Count - ");
-  serialWrite(sc);
-  serialWrite("\r\n");
-
-  serialWrite("Name - ");
-  serialWrite(central.localName());
-  serialWrite("\r\n");
-  
-  sc = central.advertisedServiceUuidCount();
-  serialWrite("Advertised Service Count - ");
-  serialWrite(sc);
-  serialWrite("\r\n");
-
-  for(int i=0; i < sc; i++) {
-    serialWrite("Service UUID - ");
-    serialWriteln(central.advertisedServiceUuid(i).c_str());
-  }*/
-    
+  serialWriteln(central.address().c_str());   
   bleconnected = true;
 }
+void bleCarWrittenHandler(BLEDevice central, BLECharacteristic characteristic)
+{
+  // central disconnected event handler
+  serialWriteln("S");
+  oktowrite = true;
+}
 
-void blePeripheralDisconnectHandler(BLEDevice central) {
+void blePeripheralDisconnectHandler(BLEDevice central) 
+{
   // central disconnected event handler
   serialWrite("Disconnected event, central: ");
   serialWriteln(central.address().c_str());
@@ -161,43 +142,53 @@ void bt_Init()
   if(!BLE.begin()) {
     serialWriteln("Unable to start Bluetooth");    
   } else {
-    delay(5000);
     serialWriteln("Started BT");
     
-    BLE.setConnectable(true);    
+
+    blecar6.
+
     bleservice.addCharacteristic(blecar1);
     bleservice.addCharacteristic(blecar2);
     bleservice.addCharacteristic(blecar3);
     bleservice.addCharacteristic(blecar5);
     bleservice.addCharacteristic(blecar6);
+    
+
     BLE.setAdvertisedService(bleservice);
     BLE.addService(bleservice);
     BLE.setLocalName("Head Tracker");
-    //BLE.setLocalName("Hello");
-    //BLE.setDeviceName("Hello");
+    
 
     // assign event handlers for connected, disconnected to peripheral
-    BLE.setEventHandler(BLEConnected, blePeripheralConnectHandler);
+    /*BLE.setEventHandler(BLEConnected, blePeripheralConnectHandler);
     BLE.setEventHandler(BLEDisconnected, blePeripheralDisconnectHandler);
-
+    blecar6.setEventHandler(BLEWritten, bleCarWrittenHandler);        */
+    
+    BLE.setConnectable(true);
     BLE.advertise();
   }
 }
 
 void bt_Thread() {
-    
-  while(1) {
+  int counter=0;
+  while(1) {    
     digitalWrite(LEDR,LOW);
-
-    // Poll BT and Handle
-    BLE.poll();
-
-    // Blue tooth connected send the trainer information
-    if(bleconnected) {
-      sendTrainer();
-    }
     
-    digitalWrite(LEDR,HIGH); // Serial RX Blue, Off
-    ThisThread::sleep_for(std::chrono::milliseconds(50));
+    // Blue tooth connected send the trainer information
+    if(BLE.connected()) { 
+      sendTrainer();
+      counter = 0;
+    } else 
+      counter++;
+
+    // Poll BT and Handle    
+    BLE.poll();   
+        
+    digitalWrite(LEDR,HIGH); 
+
+    // Can't Seem to go faster than apx here without crashing the thread???
+    // Caused by the write in sendTrainer to the characteristic.
+    // I assume the last write hasn't been completed but not sure how to check.
+    ThisThread::sleep_for(std::chrono::milliseconds(40)); 
   }
 }
