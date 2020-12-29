@@ -489,9 +489,6 @@ void MainWindow::updateToUI()
     ui->cmbtiltchn->blockSignals(false);
     ui->cmbRemap->blockSignals(false);
 
-
-
-
 }
 
 /* offOrientChanged()
