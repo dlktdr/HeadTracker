@@ -5,6 +5,10 @@
 #include <ArduinoJson.h>
 #include "PPMOut.h"
 
+#define EXAMPLE_KV_VALUE_LENGTH 64
+#define KV_KEY_LENGTH 32
+#define err_code(res) MBED_GET_ERROR_CODE(res)
+
 class TrackerSettings
 {    
 public:
@@ -99,7 +103,7 @@ public:
     void setButtonPin(int value);
 
     int ppmPin() const;
-    void setPPMPin(int value, PpmOut **ppmout);
+    void setPPMPin(int value);
 
     // Future use where channel number adjustable
     int ppmChannels() {return DEF_PPM_CHANNELS;}
@@ -110,6 +114,9 @@ public:
     void saveToEEPROM();
     void loadFromEEPROM(PpmOut **ppout);
 
+    void setInvertedPPM(bool inv);
+    bool isInverted() {return ppminvert;}
+
 // Setting of data to be returned to the PC
     void setRawGyro(float x, float y, float z);
     void setRawAccel(float x, float y, float z);
@@ -119,6 +126,8 @@ public:
     void setPPMOut(uint16_t t, uint16_t r, uint16_t p);
     void setJSONData(DynamicJsonDocument &json);
     void getPPMValues(uint16_t &t, uint16_t &r, uint16_t &p);
+
+    PpmOut *getPpmOut() {return _ppm;}
 
 private:
 // Saved Settings
@@ -131,6 +140,8 @@ private:
     int gyroweightpan;
     int gyroweighttiltroll;
     int buttonpin,ppmpin;
+    bool ppminvert;
+    PpmOut *_ppm; // Local reference to PPM output Class
 
 // Data
     float gyrox,gyroy,gyroz;

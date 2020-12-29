@@ -1,5 +1,14 @@
-
+#include <ArduinoJson.h>
 #include "trackersettings.h"
+#include "mbed.h"
+#include <stdio.h>
+#include <string.h>
+#include "KVStore.h"
+#include "kvstore_global_api.h"
+#include "serial.h"
+
+using namespace mbed;
+
 
 TrackerSettings::TrackerSettings()
 {
@@ -39,8 +48,11 @@ TrackerSettings::TrackerSettings()
     panout=0,tiltout=0,rollout=0;
 
     // Setup button input & ppm output pins
-    ppmpin = DEF_PPM_OUT; // Set initial val    
     setButtonPin(DEF_BUTTON_IN);
+
+    ppmpin = DEF_PPM_OUT; // Set initial val    
+    ppminvert = false;
+    _ppm = nullptr;
 }
 
 int TrackerSettings::Rll_min() const
@@ -344,8 +356,9 @@ int TrackerSettings::buttonPin() const
 void TrackerSettings::setButtonPin(int value)
 {    
     if(value > 1 && value < 14 && value != ppmpin) {
-        pinMode(value,INPUT);    // Button as Input
-        digitalWrite(value,HIGH); // Pull up Nn
+        pinMode(value,INPUT_PULLUP);    // Button as Input
+        digitalWrite(value,LOW); // Pull up 
+        
         buttonpin = value; // Save
     }
 }
@@ -355,7 +368,7 @@ int TrackerSettings::ppmPin() const
     return ppmpin;
 }
 
-void TrackerSettings::setPPMPin(int value, PpmOut **ppout)
+void TrackerSettings::setPPMPin(int value)
 {
     if(value > 1 && value < 14 && value != buttonpin) {
         pinMode(ppmpin,INPUT); // Disable old ppmpin
@@ -364,14 +377,16 @@ void TrackerSettings::setPPMPin(int value, PpmOut **ppout)
         ppmpin = value;
 
         // If already have a PPM output, delete it.
-        if(*ppout != nullptr)
-            delete *ppout;
+        if(_ppm != nullptr)
+            delete _ppm;
 
         // Create a new object, pass the pointer back.
-        *ppout = new PpmOut(digitalPinToPinName(ppmpin), DEF_PPM_CHANNELS);
+        _ppm = new PpmOut(digitalPinToPinName(ppmpin), DEF_PPM_CHANNELS);        
+
+        // Set the inverted flag on it
+        _ppm->setInverted(ppminvert);
     }
 }
-
 
 //----------------------------------------------------------------------------------------
 // Data sent the PC, for calibration and info
@@ -428,6 +443,14 @@ void TrackerSettings::getPPMValues(uint16_t &t, uint16_t &r, uint16_t &p)
     p = panout;
 }
 
+// Set Inverted
+void TrackerSettings::setInvertedPPM(bool inv) 
+{
+    ppminvert = inv;
+    if(_ppm != nullptr) {
+        _ppm->setInverted(inv);
+    }
+}    
 
 //--------------------------------------------------------------------------------------
 // Send and receive the data from PC
@@ -469,9 +492,10 @@ void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
     v = json["gyroweightpan"];      if(!v.isNull()) setGyroWeightPan(v);
     v = json["gyroweighttiltroll"]; if(!v.isNull()) setGyroWeightTiltRoll(v);
 
-// Button Input + PPM output pins
+// Button Input + PPM output pins + Inverted PPM
     v = json["buttonpin"]; if(!v.isNull()) setButtonPin(v);
-    //v = json["ppmpin"]; if(!v.isNull()) setPPMPin(v,); // *** FIX ME
+    v = json["ppmpin"]; if(!v.isNull()) setPPMPin(v); // *** FIX ME
+    v = json["ppminvert"]; if(!v.isNull()) setInvertedPPM(v);
 }
 
 void TrackerSettings::setJSONSettings(DynamicJsonDocument &json)
@@ -504,24 +528,36 @@ void TrackerSettings::setJSONSettings(DynamicJsonDocument &json)
 
     json["buttonpin"] = buttonpin;
     json["ppmpin"] = ppmpin;
+
+    json["ppminvert"] = ppminvert;
 }
 
 
-// TO DO SAVE TO FLASH / LOAD FROM FLASH
-
+// *** TO DO SAVE TO FLASH / LOAD FROM FLASH
 void TrackerSettings::saveToEEPROM()
 {
+  
+
+    
 
 }
 
+// Must be called on startup to create PPM object
 void TrackerSettings::loadFromEEPROM(PpmOut **ppout)
 {
+
+
     // Load Settings
 
     // Set PPM Pin, Set Button Pin, Pointer to Pointer passed to create new PPM object
 
     // Default until actual flash read
-    setPPMPin(DEF_PPM_OUT, ppout);
+
+    // Set the PPM Pin, This will create an instance of the PpmOut on the proper pin
+    setPPMPin(DEF_PPM_OUT); 
+
+    // Return the PPM Object
+    *ppout = _ppm;
 }
 
 // Used to transmit raw data back to the PC
@@ -549,6 +585,5 @@ void TrackerSettings::setJSONData(DynamicJsonDocument &json)
 
     json["panoff"] = panoff;
     json["tiltoff"] = tiltoff;
-    json["rolloff"] = rolloff;
-
+    json["rolloff"] = rolloff;    
 }
