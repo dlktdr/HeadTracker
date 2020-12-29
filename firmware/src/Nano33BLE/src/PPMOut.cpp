@@ -4,6 +4,7 @@
 #include <mbed.h>
 #include "PPMOut.h"
 #include <chrono>
+
  
 using namespace mbed;
 using namespace rtos;
@@ -15,10 +16,12 @@ PpmOut::PpmOut(PinName pin, uint8_t channel_number): ppm(pin) {
         this->channel_number = MAX_CHANNELS;
     }
     this->channel_number = channel_number;
+    invertoutput = false;
     resetChannels();
     pulse_out = 1;
     ppm = pulse_out;
     current_dot = 0;
+
     timeout.attach_us(callback(this, &PpmOut::attimeout), (us_timestamp_t)(FRAME_LEN));    
 }
 
@@ -27,22 +30,21 @@ PpmOut::~PpmOut()
     timeout.detach();
 }
  
-void PpmOut::setChannel(int channel_no, uint16_t value) {
-    //__disable_irq();     // Disable Interrupts
-    if(channel_no > channel_number-1){
+void PpmOut::setChannel(int channel_no, uint16_t value) {   
+    // Channels are set starting at 1, not zero
+    channel_no--;
+    if(channel_no < 0 ||
+        channel_no > channel_number-1){
         return;
     }
-    if(value > MAX_CHANNEL_VALUE){
-        value = MAX_CHANNEL_VALUE;
-    }
-    if(value < MIN_CHANNEL_VALUE){
-        value = MIN_CHANNEL_VALUE;
-    }
+
+    // Limit to min/max
+    value = MIN(MAX(value,MIN_CHANNEL_VALUE),MAX_CHANNEL_VALUE);
+    
     dots[channel_no*2] = CHANNEL_SYNC;
-    dots[channel_no*2+1] = CHANNEL_PAD_SYNC + value;
+    dots[channel_no*2+1] = value - CHANNEL_SYNC;
  
-    setFrameSync();
-    //__enable_irq();     // Enable Interrupts
+    setFrameSync();    
 }
  
 void PpmOut::setFrameSync(){
@@ -55,6 +57,20 @@ void PpmOut::setFrameSync(){
     dots[channel_number*2+1] = FRAME_LEN - CHANNEL_SYNC - sum_channels;
 }
  
+// Added Inverted PPM output
+bool PpmOut::isInverted()
+{
+    return invertoutput;
+}
+
+void PpmOut::setInverted(bool inv)
+{
+    if(inv != invertoutput) {
+        invertoutput = inv;
+        pulse_out = !pulse_out; // Flip the output
+    }
+}
+
 void PpmOut::attimeout() {
     pulse_out = !pulse_out;
     ppm = pulse_out;
@@ -71,7 +87,7 @@ void PpmOut::resetChannels() {
     int8_t channel;
     
     current_dot = 0;
-    memset(dots, 0x00, DOTS * sizeof(dots[0]));
+    //memset(dots, 0x00, DOTS * sizeof(dots[0]));
     for(channel = 0; channel < channel_number; channel++) {
         dots[channel*2] = CHANNEL_SYNC;
         dots[channel*2+1] = CHANNEL_PAD_SYNC;
