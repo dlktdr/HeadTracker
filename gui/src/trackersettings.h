@@ -126,6 +126,9 @@ public:
     QString getFWVersion() {return _data["Vers"].toString();}
     void setHardware(QString vers,QString hard);
 
+    void setInvertedPPM(bool inv) {_data["ppminvert"] = inv;}
+    bool isInverted() {return _data["ppminvert"].toBool();}
+
 signals:
     void rawGyroChanged(float x, float y, float z);
     void rawAccelChanged(float x, float y, float z);

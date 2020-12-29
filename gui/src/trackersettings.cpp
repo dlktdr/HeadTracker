@@ -424,9 +424,9 @@ void TrackerSettings::setLiveDataMap(const QVariantMap &livelist,bool reset)
             ooe = true;
         }
         if((i.key() == "panout" || i.key() == "tiltout" || i.key() == "rollout") && !ppm) {
-            emit(ppmOutChanged(_live["tiltoff"].toUInt(),
-                                _live["rolloff"].toUInt(),
-                                _live["panoff"].toUInt()));
+            emit(ppmOutChanged(_live["tiltout"].toUInt(),
+                                _live["rollout"].toUInt(),
+                                _live["panout"].toUInt()));
             ppm = true;
         }
     }
