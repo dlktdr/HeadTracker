@@ -7,21 +7,21 @@ TrackerSettings::TrackerSettings()
     rll_min = MIN_PWM;
     rll_max = MAX_PWM;
     rll_gain =  DEF_GAIN;
-    rll_cnt = (MAX_PWM-MIN_PWM)/2 + MIN_PWM;
+    rll_cnt = DEF_CENTER;
 
     pan_min = MIN_PWM;
     pan_max = MAX_PWM;
     pan_gain =  DEF_GAIN;
-    pan_cnt = (MAX_PWM-MIN_PWM)/2 + MIN_PWM;
+    pan_cnt = DEF_CENTER;
 
     tlt_min = MIN_PWM;
     tlt_max = MAX_PWM;
     tlt_gain =  DEF_GAIN;
-    tlt_cnt = (MAX_PWM-MIN_PWM)/2 + MIN_PWM;
+    tlt_cnt = DEF_CENTER;
 
-    tltch = 6;
-    rllch = 7;
-    panch = 8;
+    tltch = 1;
+    rllch = 2;
+    panch = 3;
 
     servoreverse = 0x00;
 
@@ -372,6 +372,7 @@ void TrackerSettings::setPPMPin(int value, PpmOut **ppout)
     }
 }
 
+
 //----------------------------------------------------------------------------------------
 // Data sent the PC, for calibration and info
 
@@ -418,6 +419,15 @@ void TrackerSettings::setPPMOut(uint16_t t, uint16_t r, uint16_t p)
     rollout=r;
     panout=p;
 }
+
+// Used for the BlueTooth Thread
+void TrackerSettings::getPPMValues(uint16_t &t, uint16_t &r, uint16_t &p)
+{
+    t = tiltout;
+    r = rollout;
+    p = panout;
+}
+
 
 //--------------------------------------------------------------------------------------
 // Send and receive the data from PC

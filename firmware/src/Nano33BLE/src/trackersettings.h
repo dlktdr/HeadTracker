@@ -9,23 +9,26 @@ class TrackerSettings
 {    
 public:
     // PWM Values here are divided by 2 plus 400 = actual uS output
-    static const int MIN_PWM=1001; // 1000 % 2 + 400 = 900 uS
-    static const int MAX_PWM= 3400; // 3400 /2 + 400 = 2100 uS
-    static const int DEF_MIN_PWM=1200 ;// 1200 = 1000uS
-    static const int DEF_MAX_PWM=3200; // 1200 = 1000uS
-    static const int MIN_CNT=(((MAX_PWM-MIN_PWM)/2)+MIN_PWM-550);
-    static const int MAX_CNT=(((MAX_PWM-MIN_PWM)/2)+MIN_PWM+550);
+    static const int MIN_PWM=1000; // 1000 us
+    static const int MAX_PWM=2000; // 2000 us
+    static const int DEF_MIN_PWM=1050; 
+    static const int DEF_MAX_PWM=1950; 
+    static const int MIN_CNT=(((MAX_PWM-MIN_PWM)/2)+MIN_PWM-250);
+    static const int MAX_CNT=(((MAX_PWM-MIN_PWM)/2)+MIN_PWM+250);
     static const int MIN_GAIN= 0;
     static const int MAX_GAIN =500;
     static const int DEF_GAIN= 100;
-    static const int HT_TILT_REVERSE_BIT    = 0x01;
-    static const int HT_ROLL_REVERSE_BIT  =   0x02;
-    static const int HT_PAN_REVERSE_BIT    =  0x04;
+    static const int HT_TILT_REVERSE_BIT = 0x01;
+    static const int HT_ROLL_REVERSE_BIT = 0x02;
+    static const int HT_PAN_REVERSE_BIT  = 0x04;
     static const int DEF_PPM_CHANNELS = 8; 
     static const int DEF_BUTTON_IN = 2; // Chosen because it's beside ground
-    static const int DEF_PPM_OUT = 10; // Random choice    
+    static const int DEF_PPM_OUT = 10; // Random choice
+    static const int DEF_CENTER = 1500;
+    //static const int DEF_CENTER = (MAX_PWM-MINPWM)/2+MIN_PWM;
 
     TrackerSettings();
+
     int Rll_min() const;
     void setRll_min(int value);
 
@@ -98,12 +101,14 @@ public:
     int ppmPin() const;
     void setPPMPin(int value, PpmOut **ppmout);
 
+    // Future use where channel number adjustable
+    int ppmChannels() {return DEF_PPM_CHANNELS;}
+
     void loadJSONSettings(DynamicJsonDocument &json);
     void setJSONSettings(DynamicJsonDocument &json);
 
     void saveToEEPROM();
     void loadFromEEPROM(PpmOut **ppout);
-
 
 // Setting of data to be returned to the PC
     void setRawGyro(float x, float y, float z);
@@ -113,6 +118,7 @@ public:
     void setOffOrient(float t, float r, float p);
     void setPPMOut(uint16_t t, uint16_t r, uint16_t p);
     void setJSONData(DynamicJsonDocument &json);
+    void getPPMValues(uint16_t &t, uint16_t &r, uint16_t &p);
 
 private:
 // Saved Settings

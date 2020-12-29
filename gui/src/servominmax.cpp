@@ -10,10 +10,10 @@ ServoMinMax::ServoMinMax(QWidget *parent) : QWidget(parent)
     c_min = TrackerSettings::MIN_CNT;
 
     // Minimum value the maximum slider is allowed
-    min_max = min_travel + 550;
+    min_max = min_travel + 250;
 
     // Maximum value the minimum slider is allowed
-    max_min = max_travel - 550;
+    max_min = max_travel - 250;
 
     padding = 10;
     hpad = padding/2;

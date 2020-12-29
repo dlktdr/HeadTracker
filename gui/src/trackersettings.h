@@ -18,12 +18,12 @@ class TrackerSettings : public QObject
     Q_OBJECT
 public:
     // PWM Values here are divided by 2 plus 400 = actual uS output
-    static const int MIN_PWM=1001; // 1000 % 2 + 400 = 900 uS
-    static const int MAX_PWM= 3400; // 3400 /2 + 400 = 2100 uS
-    static const int DEF_MIN_PWM=1200 ;// 1200 = 1000uS
-    static const int DEF_MAX_PWM=3200; // 1200 = 1000uS
-    static const int MIN_CNT=(((MAX_PWM-MIN_PWM)/2)+MIN_PWM-550);
-    static const int MAX_CNT=(((MAX_PWM-MIN_PWM)/2)+MIN_PWM+550);
+    static const int MIN_PWM=1000; // 1000 us
+    static const int MAX_PWM=2000; // 2000 us
+    static const int DEF_MIN_PWM=1050;
+    static const int DEF_MAX_PWM=1950;
+    static const int MIN_CNT=(((MAX_PWM-MIN_PWM)/2)+MIN_PWM-250);
+    static const int MAX_CNT=(((MAX_PWM-MIN_PWM)/2)+MIN_PWM+250);
     static const int MIN_GAIN= 0;
     static const int MAX_GAIN =500;
     static const int DEF_GAIN= 100;
@@ -33,6 +33,7 @@ public:
     static const int DEF_PPM_CHANNELS = 8;
     static const int DEF_BUTTON_IN = 2; // Chosen because it's beside ground
     static const int DEF_PPM_OUT = 10; // Random choice
+    static const int DEF_CENTER = 1500;
 
     TrackerSettings(QObject *parent=nullptr);
     int Rll_min() const;

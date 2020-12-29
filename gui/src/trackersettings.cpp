@@ -8,17 +8,17 @@ TrackerSettings::TrackerSettings(QObject *parent):
     _data["rll_min"] = MIN_PWM;
     _data["rll_max"] = MAX_PWM;
     _data["rll_gain"] = DEF_GAIN;
-    _data["rll_cnt"] = (MAX_PWM-MIN_PWM)/2 + MIN_PWM;
+    _data["rll_cnt"] = DEF_CENTER;
 
     _data["pan_min"] = MIN_PWM;
     _data["pan_max"] = MAX_PWM;
     _data["pan_gain"] = DEF_GAIN;
-    _data["pan_cnt"] = (MAX_PWM-MIN_PWM)/2 + MIN_PWM;
+    _data["pan_cnt"] = DEF_CENTER;
 
     _data["tlt_min"] = MIN_PWM;
     _data["tlt_max"] = MAX_PWM;
     _data["tlt_gain"] = DEF_GAIN;
-    _data["tlt_cnt"] = (MAX_PWM-MIN_PWM)/2 + MIN_PWM;
+    _data["tlt_cnt"] = DEF_CENTER;
 
     _data["panch"] = (uint)6;
     _data["tltch"] = (uint)7;
