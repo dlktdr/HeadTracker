@@ -390,7 +390,7 @@ void loop()
             
             // Firmware version requested
             else if (IsCommand("VERS")) {
-                Serial.print("FW: ");
+                Serial.print("$VERS");
                 Serial.println(FIRMWARE_VERSION_FLOAT, 2);
                 serial_index = 0;
                 string_started = 0;
@@ -398,7 +398,7 @@ void loop()
 
             // Hardmware version requested
             else if (IsCommand("HARD")) {
-                Serial.print("HW: ");
+                Serial.print("$HARD");
                 Serial.println(SENSOR_NAME);
                 serial_index = 0;
                 string_started = 0;
