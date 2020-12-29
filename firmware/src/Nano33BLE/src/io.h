@@ -4,6 +4,7 @@
 bool wasButtonPressed();
 void pressButton();
 void io_Task();
+void io_Init();
 extern volatile bool buttonpressed;
 
 #endif

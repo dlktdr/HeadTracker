@@ -36,19 +36,15 @@ TrackerSettings trkset;
 Mutex dataMutex;
 
 void setup() { 
-  pinMode(LED_BUILTIN, OUTPUT);
-  pinMode(LEDR, OUTPUT);
-  pinMode(LEDG, OUTPUT);
-  pinMode(LEDB, OUTPUT);
-  digitalWrite(LEDR,HIGH);
-  digitalWrite(LEDG,HIGH);
-  digitalWrite(LEDB,HIGH);
+
+  io_Init();
 
   // Setup Serial Port
   Serial.begin(1000000);
 
   // Read the Settings from Flash, PPM Output Is created here.
   trkset.loadFromEEPROM(&ppmout);
+  //ppmout->setInverted(true);
 
   // Start the Data Thread
   dataThread.start(mbed::callback(data_Thread));

@@ -5,6 +5,17 @@
 
 volatile bool buttonpressed=false;
 
+void io_Init()
+{
+  pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(LEDR, OUTPUT);
+  pinMode(LEDG, OUTPUT);
+  pinMode(LEDB, OUTPUT);
+  digitalWrite(LEDR,HIGH);
+  digitalWrite(LEDG,HIGH);
+  digitalWrite(LEDB,HIGH);
+}
+
 // Reset Button Pressed Flag on Read
 bool wasButtonPressed() {
   if(buttonpressed) {
