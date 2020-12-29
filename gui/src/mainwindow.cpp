@@ -436,7 +436,9 @@ void MainWindow::serialDisconnect()
 void MainWindow::serialError(QSerialPort::SerialPortError err)
 {
     switch(err) {
-    case QSerialPort::NotOpenError: {
+    // Issue with connection - device unplugged
+    case QSerialPort::ResourceError: {
+        serialDisconnect();
         break;
     }
     default: {
