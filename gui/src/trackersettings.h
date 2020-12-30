@@ -25,7 +25,7 @@ public:
     static const int MIN_CNT=(((MAX_PWM-MIN_PWM)/2)+MIN_PWM-250);
     static const int MAX_CNT=(((MAX_PWM-MIN_PWM)/2)+MIN_PWM+250);
     static const int MIN_GAIN= 0;
-    static const int MAX_GAIN =500;
+    static const int MAX_GAIN= 500;
     static const int DEF_GAIN= 100;
     static const int HT_TILT_REVERSE_BIT    = 0x01;
     static const int HT_ROLL_REVERSE_BIT  =   0x02;
@@ -101,6 +101,15 @@ public:
 
     uint rollCh() const;
     void setRollCh(uint value);
+
+    void gyroOffset(float &x, float &y, float &z);
+    void setGyroOffset(float x,float y, float z);
+
+    void accOffset(float &x, float &y, float &z);
+    void setAccOffset(float x,float y, float z);
+
+    void magOffset(float &x, float &y, float &z);
+    void setMagOffset(float x,float y, float z);
 
     int count() const {return 22;}
 

@@ -40,6 +40,11 @@ TrackerSettings::TrackerSettings()
     gyroweightpan = 30;
     gyroweighttiltroll = 40;
 
+    // Sensor Offsets    
+    magxoff=0; magyoff=0; magzoff=0; // Testing
+    accxoff=0; accyoff=0; acczoff=0;
+    gyrxoff=0; gyryoff=0; gyrzoff=0;
+    
     // Output values
     gyrox=0;gyroy=0;gyroz=0;
     accx=0;accy=0;accz=0;
@@ -458,7 +463,7 @@ void TrackerSettings::setInvertedPPM(bool inv)
 void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
 {
 // Channels
-    JsonVariant v;
+    JsonVariant v,v1,v2;
 
 // Channels
     v = json["rllch"]; if(!v.isNull()) setRollCh(v);
@@ -496,6 +501,29 @@ void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
     v = json["buttonpin"]; if(!v.isNull()) setButtonPin(v);
     v = json["ppmpin"]; if(!v.isNull()) setPPMPin(v); // *** FIX ME
     v = json["ppminvert"]; if(!v.isNull()) setInvertedPPM(v);
+
+// Calibrarion Values
+    v = json["magxoff"]; 
+    v1 =json["magyoff"]; 
+    v2 =json["magzoff"]; 
+
+    if(!v.isNull() && !v1.isNull() && !v2.isNull())
+    {   
+        setMagOffset(v,v1,v2);
+        serialWriteln("Mag offsets set");
+    }
+
+    // Calibrarion Values
+    v = json["gyrxoff"]; 
+    v1 =json["gyryoff"]; 
+    v2 =json["gyrzoff"]; 
+
+    if(!v.isNull() && !v1.isNull() && !v2.isNull())
+    {   
+        setgyroOffset(v,v1,v2);
+        serialWriteln("Gyr offsets set");
+    }
+
 }
 
 void TrackerSettings::setJSONSettings(DynamicJsonDocument &json)

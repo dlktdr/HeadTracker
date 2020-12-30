@@ -326,6 +326,35 @@ void TrackerSettings::setRollCh(uint value)
         _data["rllch"] = (uint)value;
 }
 
+void TrackerSettings::gyroOffset(float &x, float &y, float &z)
+{
+    x=_data["gyrxoff"].toFloat();y=_data["gyryoff"].toFloat();z=_data["gyrzoff"].toFloat();
+}
+
+void TrackerSettings::setGyroOffset(float x, float y, float z)
+{
+    _data["gyrxoff"]=x;_data["gyryoff"]=y;_data["gyrzoff"]=z;
+}
+
+void TrackerSettings::accOffset(float &x, float &y, float &z)
+{
+    x=_data["accxoff"].toFloat();y=_data["accyoff"].toFloat();z=_data["acczoff"].toFloat();
+}
+
+void TrackerSettings::setAccOffset(float x, float y, float z)
+{
+    _data["accxoff"]=x;_data["accyoff"]=y;_data["acczoff"]=z;}
+
+void TrackerSettings::magOffset(float &x, float &y, float &z)
+{
+    x=_data["magxoff"].toFloat();y=_data["magyoff"].toFloat();z=_data["magzoff"].toFloat();
+}
+
+void TrackerSettings::setMagOffset(float x, float y, float z)
+{
+    _data["magxoff"]=x;_data["magyoff"]=y;_data["magzoff"]=z;
+}
+
 void TrackerSettings::setAxisRemap(uint value)
 {
     _data["axisremap"] = (uint)(value & 0x3F);

@@ -20,8 +20,8 @@ public:
     static const int MIN_CNT=(((MAX_PWM-MIN_PWM)/2)+MIN_PWM-250);
     static const int MAX_CNT=(((MAX_PWM-MIN_PWM)/2)+MIN_PWM+250);
     static const int MIN_GAIN= 0;
-    static const int MAX_GAIN =500;
-    static const int DEF_GAIN= 100;
+    static const int MAX_GAIN= 2000;
+    static const int DEF_GAIN= 200;
     static const int HT_TILT_REVERSE_BIT = 0x01;
     static const int HT_ROLL_REVERSE_BIT = 0x02;
     static const int HT_PAN_REVERSE_BIT  = 0x04;
@@ -99,6 +99,15 @@ public:
     int rollCh() const;
     void setRollCh(int value);
 
+    void gyroOffset(float &x, float &y, float &z) {x=gyrxoff;y=gyryoff;z=gyrzoff;}
+    void setgyroOffset(float x,float y, float z) {gyrxoff=x;gyryoff=y;gyrzoff=z;}
+
+    void accOffset(float &x, float &y, float &z) {x=accxoff;y=accyoff;z=acczoff;}
+    void setAccOffset(float x,float y, float z) {accxoff=x;accyoff=y;acczoff=z;}
+
+    void magOffset(float &x, float &y, float &z) {x=gyrxoff;y=gyryoff;z=gyrzoff;}
+    void setMagOffset(float x,float y, float z) {gyrxoff=x;gyryoff=y;gyrzoff=z;} 
+
     int buttonPin() const;
     void setButtonPin(int value);
 
@@ -135,6 +144,9 @@ private:
     int tlt_min,tlt_max,tlt_cnt,tlt_gain;
     int pan_min,pan_max,pan_cnt,pan_gain;
     int tltch,rllch,panch;
+    float magxoff, magyoff, magzoff;
+    float accxoff, accyoff, acczoff;
+    float gyrxoff, gyryoff, gyrzoff;
     int servoreverse;
     int lppan,lptiltroll;
     int gyroweightpan;
