@@ -16,6 +16,7 @@ MainWindow::MainWindow(QWidget *parent)
     firmwareUploader = new Firmware;
     serialcon = new QSerialPort;
     bnoCalibratorDialog = new CalibrateBNO;
+    bleCalibratorDialog = new CalibrateBLE(&trkset);
     ui->statusbar->showMessage("Disconnected");
     findSerialPorts();
     ui->cmdDisconnect->setEnabled(false);
@@ -109,7 +110,10 @@ MainWindow::MainWindow(QWidget *parent)
     connect(&txledtimer,SIGNAL(timeout()),this,SLOT(txledtimeout()));
     connect(&acknowledge,SIGNAL(timeout()),this,SLOT(ackTimeout()));
 
-    // Timer to cause an update, prevents too many data writes
+    // On BLE Calibration Save update to device
+    connect(bleCalibratorDialog,&CalibrateBLE::calibrationSave,this,&MainWindow::storeSettings);
+
+    // Timer to cause an update, prevents too many data writes -- NOT USED ATM
     connect(&updatesettingstmr,&QTimer::timeout,this,&MainWindow::updateSettings);
 
     // Start a timer to tell the device that we are here
@@ -122,6 +126,7 @@ MainWindow::~MainWindow()
     delete serialcon;
     delete firmwareUploader;
     delete bnoCalibratorDialog;
+    delete bleCalibratorDialog;
     delete ui;
 }
 
@@ -173,8 +178,7 @@ void MainWindow::parseSerialData()
 void MainWindow::parseIncomingJSON(const QVariantMap &map)
 {
     // Settings from the Tracker Sent, save them and update the UI
-    if(map["Cmd"].toString() == "Settings") {
-        qDebug() << "GOT THE SETTINGS";
+    if(map["Cmd"].toString() == "Settings") {        
         trkset.setAllData(map);
         updateToUI();
 
@@ -182,6 +186,18 @@ void MainWindow::parseIncomingJSON(const QVariantMap &map)
     } else if (map["Cmd"].toString() == "Data") {
         // Add all the data to the settings
         trkset.setLiveDataMap(map);
+       /* qDebug() << "GYRO " << trkset.getLiveData("gyrox").toDouble()
+                 << trkset.getLiveData("gyroy").toDouble()
+                 << trkset.getLiveData("gyroz").toDouble();
+
+        qDebug() << "ACC " << trkset.getLiveData("accx").toDouble()
+                 << trkset.getLiveData("accy").toDouble()
+                 << trkset.getLiveData("accz").toDouble();
+
+        qDebug() << "MAG " << trkset.getLiveData("magx").toDouble()
+                 << trkset.getLiveData("magy").toDouble()
+                 << trkset.getLiveData("magz").toDouble();*/
+
 
     // Firmware Hardware and Version
     } else if (map["Cmd"].toString() == "FW") {
@@ -200,22 +216,22 @@ void MainWindow::fwDiscovered(QString vers, QString hard)
     // Store in Tracker Settings
     trkset.setHardware(vers,hard);
 
-    // **** CHANGE ME TO USE A DIFFERENT WIDGET FOR EACH HARDWARE ****
+    // Stack widget changes to hide some info depending on board
     if(hard == "NANO33BLE") {
         ui->cmdStartGraph->setVisible(false);
         ui->cmdStopGraph->setVisible(false);
         ui->cmbRemap->setVisible(false);
         ui->cmbSigns->setVisible(false);
-
-
+        ui->stackedWidget->setCurrentIndex(2);
+        ui->grbSettings->setTitle("Settings Nano 33 BLE");
 
     } else if (hard == "BNO055") {
         ui->cmdStartGraph->setVisible(true);
         ui->cmdStopGraph->setVisible(true);
         ui->cmbRemap->setVisible(true);
         ui->cmbSigns->setVisible(true);
-
-
+        ui->stackedWidget->setCurrentIndex(1);
+        ui->grbSettings->setTitle("Settings BNO055");
     }
 }
 
@@ -430,7 +446,12 @@ void MainWindow::serialDisconnect()
     ui->cmdConnect->setEnabled(true);
     ui->cmdStopGraph->setEnabled(false);
     ui->cmdStartGraph->setEnabled(false);
+    ui->servoPan->setShowActualPosition(true);
+    ui->servoTilt->setShowActualPosition(true);
+    ui->servoRoll->setShowActualPosition(true);
     ui->cmdSend->setEnabled(false);
+    bleCalibratorDialog->hide();
+    bnoCalibratorDialog->hide();
 }
 
 void MainWindow::serialError(QSerialPort::SerialPortError err)
@@ -691,7 +712,7 @@ void MainWindow::startCalibration()
     }
 
     if(trkset.getHardware() == "NANO33BLE") {
-        // TODO
+        bleCalibratorDialog->show();
 
     } else if (trkset.getHardware() == "BNO055") {
         // Start calibration, start graphing.

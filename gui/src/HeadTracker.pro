@@ -16,6 +16,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    calibrateble.cpp \
     calibratebno.cpp \
     firmware.cpp \
     main.cpp \
@@ -28,6 +29,7 @@ SOURCES += \
     ucrc16lib.cpp
 
 HEADERS += \
+    calibrateble.h \
     calibratebno.h \
     firmware.h \
     mainwindow.h \
@@ -39,6 +41,7 @@ HEADERS += \
     ucrc16lib.h
 
 FORMS += \
+    calibrateble.ui \
     calibratebno.ui \
     firmware.ui \
     mainwindow.ui

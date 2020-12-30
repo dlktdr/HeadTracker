@@ -14,6 +14,7 @@
 #include "trackersettings.h"
 #include "firmware.h"
 #include "calibratebno.h"
+#include "calibrateble.h"
 
 const int MAX_LOG_LENGTH=6000;
 
@@ -44,6 +45,7 @@ private:
     QString logd;
     Firmware *firmwareUploader;
     CalibrateBNO *bnoCalibratorDialog;
+    CalibrateBLE *bleCalibratorDialog;
 
     int xtime;
     bool graphing;
@@ -60,6 +62,8 @@ private:
     void fwDiscovered(QString vers, QString hard);
 
     void addToLog(QString log);
+
+
 
 private slots:
     void findSerialPorts();

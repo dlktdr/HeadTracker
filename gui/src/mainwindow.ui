@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>682</width>
+    <width>686</width>
     <height>683</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Headtracker BNO055</string>
+   <string>Headtracker</string>
   </property>
   <property name="windowIcon">
    <iconset resource="Resources.qrc">
@@ -192,7 +192,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QGroupBox" name="groupBox_3">
+       <widget class="QGroupBox" name="grbSettings">
         <property name="title">
          <string>Settings</string>
         </property>
@@ -200,8 +200,135 @@
          <item>
           <widget class="QStackedWidget" name="stackedWidget">
            <property name="currentIndex">
-            <number>0</number>
+            <number>1</number>
            </property>
+           <widget class="QWidget" name="BNO055">
+            <layout class="QGridLayout" name="gridLayout_6">
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_7">
+               <property name="text">
+                <string>Manual Command</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="label_8">
+               <property name="text">
+                <string>Axis Signs</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="2">
+              <widget class="QLabel" name="label_6">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>Axis Remapping</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="0">
+              <widget class="QComboBox" name="cmbSigns">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                 <horstretch>1</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>100</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <item>
+                <property name="text">
+                 <string>X+,Y+,Z+</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>X+,Y+,Z-</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>X+,Y-,Z+</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>X+,Y-,Z-</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>X-,Y+,Z+</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>X-,Y+,Z-</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>X-,Y-,Z+</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>X-,Y-,Z-</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item row="3" column="2">
+              <widget class="QComboBox" name="cmbRemap">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>100</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1" colspan="2">
+              <widget class="QLineEdit" name="txtCommand"/>
+             </item>
+             <item row="1" column="1" colspan="2">
+              <widget class="QPushButton" name="cmdSend">
+               <property name="text">
+                <string>&amp;Send</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+           <widget class="QWidget" name="page">
+            <layout class="QVBoxLayout" name="verticalLayout_3">
+             <item>
+              <widget class="QLabel" name="label_13">
+               <property name="text">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt; font-weight:600;&quot;&gt;Connect to Show All Settings&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
            <widget class="QWidget" name="BLESENSE">
             <layout class="QGridLayout" name="gridLayout">
              <item row="0" column="1">
@@ -386,119 +513,6 @@
              </item>
             </layout>
            </widget>
-           <widget class="QWidget" name="BNO055">
-            <layout class="QGridLayout" name="gridLayout_6">
-             <item row="0" column="0">
-              <widget class="QLabel" name="label_7">
-               <property name="text">
-                <string>Manual Command</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="0">
-              <widget class="QLabel" name="label_8">
-               <property name="text">
-                <string>Axis Signs</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="2">
-              <widget class="QLabel" name="label_6">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text">
-                <string>Axis Remapping</string>
-               </property>
-              </widget>
-             </item>
-             <item row="3" column="0">
-              <widget class="QComboBox" name="cmbSigns">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                 <horstretch>1</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>100</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <item>
-                <property name="text">
-                 <string>X+,Y+,Z+</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>X+,Y+,Z-</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>X+,Y-,Z+</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>X+,Y-,Z-</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>X-,Y+,Z+</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>X-,Y+,Z-</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>X-,Y-,Z+</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>X-,Y-,Z-</string>
-                </property>
-               </item>
-              </widget>
-             </item>
-             <item row="3" column="2">
-              <widget class="QComboBox" name="cmbRemap">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>100</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1" colspan="2">
-              <widget class="QLineEdit" name="txtCommand"/>
-             </item>
-             <item row="1" column="1" colspan="2">
-              <widget class="QPushButton" name="cmdSend">
-               <property name="text">
-                <string>&amp;Send</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
           </widget>
          </item>
          <item>
@@ -655,7 +669,7 @@
          </sizepolicy>
         </property>
         <property name="title">
-         <string>PPM Servo Output</string>
+         <string>Servo Output</string>
         </property>
         <layout class="QGridLayout" name="gridLayout_5">
          <property name="leftMargin">
@@ -1211,7 +1225,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>682</width>
+     <width>686</width>
      <height>21</height>
     </rect>
    </property>
