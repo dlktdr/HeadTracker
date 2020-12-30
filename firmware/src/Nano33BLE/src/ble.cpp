@@ -7,7 +7,9 @@
 
 BLEDevice peripheral;
 BLEService bleservice("FFF0");
-BLEService bleservice("180A");
+BLEService bleservice2("180A");
+BLECharacteristic s2c1("2A50", BLERead,10);
+
 BLECharacteristic blecar1("FFF1", BLERead | BLEWrite, 60);
 BLECharacteristic blecar2("FFF2", BLERead , 60);
 BLECharacteristic blecar3("FFF3", BLEWriteWithoutResponse, 60);
@@ -103,12 +105,6 @@ void blePeripheralConnectHandler(BLEDevice central) {
   serialWriteln(central.address().c_str());   
   bleconnected = true;
 }
-void bleCarWrittenHandler(BLEDevice central, BLECharacteristic characteristic)
-{
-  // central disconnected event handler
-  serialWriteln("S");
-  oktowrite = true;
-}
 
 void blePeripheralDisconnectHandler(BLEDevice central) 
 {
@@ -118,10 +114,9 @@ void blePeripheralDisconnectHandler(BLEDevice central)
   bleconnected = false;
 }
 
-/*void characteristicRead(BLEDevice central, BLECharacteristic characteristic) 
+void characteristicRead(BLEDevice central, BLECharacteristic characteristic) 
 {
-  serialWrite("Characteristic event, read: ");
-    serialWrite("\r\n");
+  serialWrite("CR "); serialWrite(characteristic.uuid()); serialWrite(" Read ");  
 }
 
 void characteristicWritten(BLEDevice central, BLECharacteristic characteristic) 
@@ -130,12 +125,11 @@ void characteristicWritten(BLEDevice central, BLECharacteristic characteristic)
 
   char ffer[200];
   int i= blecar1.valueLength();
-  blecar1.readValue(ffer,i++);
+  characteristic.readValue(ffer,i++);
   ffer[i] = '\0';
-
-  serialWrite(ffer);
-    serialWrite("\r\n");
-}*/
+  serialWrite("CR "); serialWrite(characteristic.uuid()); serialWrite(" ");
+  serialWrite(ffer);    serialWrite("\r\n");
+}
 
 void bt_Init() 
 {
@@ -145,24 +139,36 @@ void bt_Init()
     serialWriteln("Started BT");
     
 
-    blecar6.
-
     bleservice.addCharacteristic(blecar1);
     bleservice.addCharacteristic(blecar2);
     bleservice.addCharacteristic(blecar3);
     bleservice.addCharacteristic(blecar5);
     bleservice.addCharacteristic(blecar6);
-    
+    bleservice2.addCharacteristic(s2c1);
 
     BLE.setAdvertisedService(bleservice);
     BLE.addService(bleservice);
+    BLE.addService(bleservice2);
     BLE.setLocalName("Head Tracker");
     
 
     // assign event handlers for connected, disconnected to peripheral
-    /*BLE.setEventHandler(BLEConnected, blePeripheralConnectHandler);
+    BLE.setEventHandler(BLEConnected, blePeripheralConnectHandler);
     BLE.setEventHandler(BLEDisconnected, blePeripheralDisconnectHandler);
-    blecar6.setEventHandler(BLEWritten, bleCarWrittenHandler);        */
+    blecar1.setEventHandler(BLEWritten, characteristicWritten);
+    blecar1.setEventHandler(BLERead, characteristicRead);
+    
+    blecar2.setEventHandler(BLEWritten, characteristicWritten);
+    blecar2.setEventHandler(BLERead, characteristicRead);
+    
+    blecar3.setEventHandler(BLEWritten, characteristicWritten);
+    blecar3.setEventHandler(BLERead, characteristicRead);
+    
+    blecar5.setEventHandler(BLEWritten, characteristicWritten);
+    blecar5.setEventHandler(BLERead, characteristicRead);
+    
+    blecar6.setEventHandler(BLEWritten, characteristicWritten);
+    blecar6.setEventHandler(BLERead, characteristicRead);
     
     BLE.setConnectable(true);
     BLE.advertise();
@@ -175,7 +181,7 @@ void bt_Thread() {
     digitalWrite(LEDR,LOW);
     
     // Blue tooth connected send the trainer information
-    if(BLE.connected()) { 
+    if(BLE.connected() && counter > 2) { 
       sendTrainer();
       counter = 0;
     } else 
@@ -184,11 +190,11 @@ void bt_Thread() {
     // Poll BT and Handle    
     BLE.poll();   
         
-    digitalWrite(LEDR,HIGH); 
+    digitalWrite(LEDR,HIGH);  
 
     // Can't Seem to go faster than apx here without crashing the thread???
     // Caused by the write in sendTrainer to the characteristic.
     // I assume the last write hasn't been completed but not sure how to check.
-    ThisThread::sleep_for(std::chrono::milliseconds(40)); 
+    ThisThread::sleep_for(std::chrono::milliseconds(50)); 
   }
 }

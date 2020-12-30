@@ -8,9 +8,14 @@ void serialWrite(arduino::String str)
   serialWrite(str.c_str());
 }
 
-void serialWriteln(char const *data)
+void serialWriteF(float f)
 {
-  
+  String str(f);
+  serialWrite(str.c_str());
+}
+
+void serialWriteln(char const *data)
+{  
   int br = strlen(data);
   // Append Output to the serial output buffer
   serWriteMutex.lock();
@@ -22,8 +27,8 @@ void serialWriteln(char const *data)
   serWriteMutex.unlock();
 }
 
-void serialWrite(int val) {
-  
+void serialWrite(int val) 
+{ 
   char buf[50];
   itoa(val,buf,10);
   int len = strlen(buf);

@@ -36,11 +36,11 @@ TrackerSettings trkset;
 Mutex dataMutex;
 
 void setup() { 
-
-  io_Init();
-
   // Setup Serial Port
   Serial.begin(1000000);
+  //Serial.begin(115200);
+  
+  io_Init();
 
   // Read the Settings from Flash, PPM Output Is created here.
   trkset.loadFromEEPROM(&ppmout);
