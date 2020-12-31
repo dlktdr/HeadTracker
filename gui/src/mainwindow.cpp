@@ -64,6 +64,9 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->til_gain,SIGNAL(sliderMoved(int)),this,SLOT(updateFromUI()));
     connect(ui->rll_gain,SIGNAL(sliderMoved(int)),this,SLOT(updateFromUI()));
     connect(ui->pan_gain,SIGNAL(sliderMoved(int)),this,SLOT(updateFromUI()));
+    ui->til_gain->setMaximum(TrackerSettings::MAX_GAIN*10);
+    ui->rll_gain->setMaximum(TrackerSettings::MAX_GAIN*10);
+    ui->pan_gain->setMaximum(TrackerSettings::MAX_GAIN*10);
 
     // Servo Scaling Widgets
     connect(ui->servoPan,&ServoMinMax::minimumChanged,this,&MainWindow::updateFromUI);
@@ -178,7 +181,8 @@ void MainWindow::parseSerialData()
 void MainWindow::parseIncomingJSON(const QVariantMap &map)
 {
     // Settings from the Tracker Sent, save them and update the UI
-    if(map["Cmd"].toString() == "Settings") {        
+    if(map["Cmd"].toString() == "Settings") {
+
         trkset.setAllData(map);
         updateToUI();
 
@@ -483,9 +487,9 @@ void MainWindow::updateToUI()
     ui->servoRoll->setMaximum(trkset.Rll_max());
     ui->servoRoll->setMinimum(trkset.Rll_min());
 
-    ui->til_gain->setValue(trkset.Tlt_gain());
-    ui->pan_gain->setValue(trkset.Pan_gain());
-    ui->rll_gain->setValue(trkset.Rll_gain());
+    ui->til_gain->setValue(trkset.Tlt_gain()*10);
+    ui->pan_gain->setValue(trkset.Pan_gain()*10);
+    ui->rll_gain->setValue(trkset.Rll_gain()*10);
 
     ui->spnLPTiltRoll->setValue(trkset.lpTiltRoll());
     ui->spnLPPan->setValue(trkset.lpPan());
@@ -539,17 +543,17 @@ void MainWindow::updateFromUI()
     trkset.setPan_cnt(ui->servoPan->centerValue());
     trkset.setPan_min(ui->servoPan->minimumValue());
     trkset.setPan_max(ui->servoPan->maximumValue());
-    trkset.setPan_gain(ui->pan_gain->value());
+    trkset.setPan_gain(ui->pan_gain->value()/10);
 
     trkset.setTlt_cnt(ui->servoTilt->centerValue());
     trkset.setTlt_min(ui->servoTilt->minimumValue());
     trkset.setTlt_max(ui->servoTilt->maximumValue());
-    trkset.setTlt_gain(ui->til_gain->value());
+    trkset.setTlt_gain(ui->til_gain->value()/10);
 
     trkset.setRll_cnt(ui->servoRoll->centerValue());
     trkset.setRll_min(ui->servoRoll->minimumValue());
     trkset.setRll_max(ui->servoRoll->maximumValue());
-    trkset.setRll_gain(ui->rll_gain->value());
+    trkset.setRll_gain(ui->rll_gain->value()/10);
 
     trkset.setLPTiltRoll(ui->spnLPTiltRoll->value());
     trkset.setLPPan(ui->spnLPPan->value());

@@ -17,23 +17,22 @@ class TrackerSettings : public QObject
 {    
     Q_OBJECT
 public:
-    // PWM Values here are divided by 2 plus 400 = actual uS output
-    static const int MIN_PWM=1000; // 1000 us
-    static const int MAX_PWM=2000; // 2000 us
-    static const int DEF_MIN_PWM=1050;
-    static const int DEF_MAX_PWM=1950;
-    static const int MIN_CNT=(((MAX_PWM-MIN_PWM)/2)+MIN_PWM-250);
-    static const int MAX_CNT=(((MAX_PWM-MIN_PWM)/2)+MIN_PWM+250);
-    static const int MIN_GAIN= 0;
-    static const int MAX_GAIN= 500;
-    static const int DEF_GAIN= 100;
-    static const int HT_TILT_REVERSE_BIT    = 0x01;
-    static const int HT_ROLL_REVERSE_BIT  =   0x02;
-    static const int HT_PAN_REVERSE_BIT    =  0x04;
-    static const int DEF_PPM_CHANNELS = 8;
-    static const int DEF_BUTTON_IN = 2; // Chosen because it's beside ground
-    static const int DEF_PPM_OUT = 10; // Random choice
-    static const int DEF_CENTER = 1500;
+    static constexpr int MIN_PWM=1000; // 1000 us
+    static constexpr int MAX_PWM=2000; // 2000 us
+    static constexpr int DEF_MIN_PWM=1050;
+    static constexpr int DEF_MAX_PWM=1950;
+    static constexpr int MIN_CNT=(((MAX_PWM-MIN_PWM)/2)+MIN_PWM-250);
+    static constexpr int MAX_CNT=(((MAX_PWM-MIN_PWM)/2)+MIN_PWM+250);
+    static constexpr int HT_TILT_REVERSE_BIT  = 0x01;
+    static constexpr int HT_ROLL_REVERSE_BIT  = 0x02;
+    static constexpr int HT_PAN_REVERSE_BIT   = 0x04;
+    static constexpr int DEF_PPM_CHANNELS = 8;
+    static constexpr int DEF_BUTTON_IN = 2; // Chosen because it's beside ground
+    static constexpr int DEF_PPM_OUT = 10; // Random choice
+    static constexpr int DEF_CENTER = 1500;
+    static constexpr float MIN_GAIN= 0;
+    static constexpr float MAX_GAIN= 50.0;
+    static constexpr float DEF_GAIN= 10.0;
 
     TrackerSettings(QObject *parent=nullptr);
     int Rll_min() const;
@@ -42,8 +41,8 @@ public:
     int Rll_max() const;
     void setRll_max(int value);
 
-    int Rll_gain() const;
-    void setRll_gain(int value);
+    float Rll_gain() const;
+    void setRll_gain(float value);
 
     int Rll_cnt() const;
     void setRll_cnt(int value);
@@ -54,8 +53,8 @@ public:
     int Pan_max() const;
     void setPan_max(int value);
 
-    int Pan_gain() const;
-    void setPan_gain(int value);
+    float Pan_gain() const;
+    void setPan_gain(float value);
 
     int Pan_cnt() const;
     void setPan_cnt(int value);
@@ -66,8 +65,8 @@ public:
     int Tlt_max() const;
     void setTlt_max(int value);
 
-    int Tlt_gain() const;
-    void setTlt_gain(int value);
+    float Tlt_gain() const;
+    void setTlt_gain(float value);
 
     int Tlt_cnt() const;
     void setTlt_cnt(int value);
@@ -111,6 +110,9 @@ public:
     void magOffset(float &x, float &y, float &z);
     void setMagOffset(float x,float y, float z);
 
+    /*void magSiOffset(float v[]) {memcpy(v,_data["magsioff",9*sizeof(float));}
+    void setMagSiOffset(float *v) {memcpy(magsioff,v,9*sizeof(float));}
+    QList<float> magsioff;*/
     int count() const {return 22;}
 
     uint axisRemap() const {return _data["axisremap"].toUInt();}
@@ -149,25 +151,6 @@ signals:
 private:
     QVariantMap _data; // Stored Data
     QVariantMap _live; // Live Data
-
-/*    int rll_min,rll_max,rll_cnt,rll_gain;
-    int tlt_min,tlt_max,tlt_cnt,tlt_gain;
-    int pan_min,pan_max,pan_cnt,pan_gain;
-    int tltch,rllch,panch;
-    int servoreverse;
-    int lppan,lptiltroll;
-    int gyroweightpan;
-    int gyroweighttiltroll;
-    int buttonpin,ppmpin;*/
-
-
-    /*float gyrox,gyroy,gyroz;
-    float accx,accy,accz;
-    float magx,magy,magz;
-    float tilt,roll,pan;
-    float tiltoff,rolloff,panoff;
-    uint16_t panout,tiltout,rollout;*/
-
 };
 
 #endif // TRACKERSETTINGS_H

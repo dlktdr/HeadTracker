@@ -64,12 +64,12 @@ void TrackerSettings::setRll_max(int value)
     _data["rll_max"] = value;
 }
 
-int TrackerSettings::Rll_gain() const
+float TrackerSettings::Rll_gain() const
 {
-    return _data["rll_gain"].toInt();
+    return _data["rll_gain"].toFloat();
 }
 
-void TrackerSettings::setRll_gain(int value)
+void TrackerSettings::setRll_gain(float value)
 {
     if(value < MIN_GAIN)
         value = MIN_GAIN;
@@ -120,12 +120,12 @@ void TrackerSettings::setPan_max(int value)
     _data["pan_max"] = value;
 }
 
-int TrackerSettings::Pan_gain() const
+float TrackerSettings::Pan_gain() const
 {
-    return _data["pan_gain"].toInt();
+    return _data["pan_gain"].toFloat();
 }
 
-void TrackerSettings::setPan_gain(int value)
+void TrackerSettings::setPan_gain(float value)
 {
     if(value < MIN_GAIN)
         value = MIN_GAIN;
@@ -176,12 +176,12 @@ void TrackerSettings::setTlt_max(int value)
     _data["tlt_max"] = value;
 }
 
-int TrackerSettings::Tlt_gain() const
+float TrackerSettings::Tlt_gain() const
 {
-    return _data["tlt_gain"].toInt();
+    return _data["tlt_gain"].toFloat();
 }
 
-void TrackerSettings::setTlt_gain(int value)
+void TrackerSettings::setTlt_gain(float value)
 {
     if(value < MIN_GAIN)
         value = MIN_GAIN;
@@ -328,31 +328,43 @@ void TrackerSettings::setRollCh(uint value)
 
 void TrackerSettings::gyroOffset(float &x, float &y, float &z)
 {
-    x=_data["gyrxoff"].toFloat();y=_data["gyryoff"].toFloat();z=_data["gyrzoff"].toFloat();
+    x=_data["gyrxoff"].toFloat();
+    y=_data["gyryoff"].toFloat();
+    z=_data["gyrzoff"].toFloat();
 }
 
 void TrackerSettings::setGyroOffset(float x, float y, float z)
 {
-    _data["gyrxoff"]=x;_data["gyryoff"]=y;_data["gyrzoff"]=z;
+    _data["gyrxoff"]=x;
+    _data["gyryoff"]=y;
+    _data["gyrzoff"]=z;
 }
 
 void TrackerSettings::accOffset(float &x, float &y, float &z)
 {
-    x=_data["accxoff"].toFloat();y=_data["accyoff"].toFloat();z=_data["acczoff"].toFloat();
+    x=_data["accxoff"].toFloat();
+    y=_data["accyoff"].toFloat();
+    z=_data["acczoff"].toFloat();
 }
 
 void TrackerSettings::setAccOffset(float x, float y, float z)
 {
-    _data["accxoff"]=x;_data["accyoff"]=y;_data["acczoff"]=z;}
+    _data["accxoff"]=x;
+    _data["accyoff"]=y;
+    _data["acczoff"]=z;}
 
 void TrackerSettings::magOffset(float &x, float &y, float &z)
 {
-    x=_data["magxoff"].toFloat();y=_data["magyoff"].toFloat();z=_data["magzoff"].toFloat();
+    x=_data["magxoff"].toFloat();
+    y=_data["magyoff"].toFloat();
+    z=_data["magzoff"].toFloat();
 }
 
 void TrackerSettings::setMagOffset(float x, float y, float z)
 {
-    _data["magxoff"]=x;_data["magyoff"]=y;_data["magzoff"]=z;
+    _data["magxoff"]=x;
+    _data["magyoff"]=y;
+    _data["magzoff"]=z;
 }
 
 void TrackerSettings::setAxisRemap(uint value)
