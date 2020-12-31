@@ -14,9 +14,6 @@
 #include "ble.h"
 #include "io.h"
 
-// Show extra info
-#define DEBUG_HT
-
 // Version 1.0 - NANO33BLE
 const char *FW_VERSION = "1.0";
 const char *FW_BOARD = "NANO33BLE";
@@ -38,7 +35,6 @@ Mutex dataMutex;
 void setup() { 
   // Setup Serial Port
   Serial.begin(1000000);
-  //Serial.begin(115200);
   
   io_Init();
 
@@ -62,9 +58,10 @@ void setup() {
   ioTick.attach(mbed::callback(io_Task),std::chrono::milliseconds(1));
 
   // Start the sensor thread, Realtime priority
-  sense_Init();
-  senseThread.start(mbed::callback(sense_Thread));
-  senseThread.set_priority(osPriorityRealtime); 
+  if(!sense_Init()) {
+    senseThread.start(mbed::callback(sense_Thread));
+    senseThread.set_priority(osPriorityRealtime); 
+  }
 }
 
 // Not Used
