@@ -3,13 +3,15 @@
 
 #include "dataparser.h"
 
+// ONLY use these serial write methods, they are buffered.
 void serialWrite(arduino::String str);
-void serialWriteln(char const *data);
 void serialWrite(int val);
 void serialWrite(char *data, int len);
 void serialWrite(char const *data);
 void serialWrite(char c);
-void serialWriteF(float f); // fix
+void serialWrite(float f);
+void serialWriteln(char const *data);
 void serialWriteJSON(DynamicJsonDocument &json);
+
 
 #endif

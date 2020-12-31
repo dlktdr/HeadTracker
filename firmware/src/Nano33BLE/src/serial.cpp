@@ -3,12 +3,17 @@
 #include "serial.h"
 #include "dataparser.h"
 
+// Really don't like this but for the life of me I couldn't get
+// any ready to go buffered serial methods to work.
+// Could have probably make a #define that overrides Serial.print
+
+
 void serialWrite(arduino::String str)
 {
   serialWrite(str.c_str());
 }
 
-void serialWriteF(float f)
+void serialWrite(float f)
 {
   String str(f);
   serialWrite(str.c_str());
