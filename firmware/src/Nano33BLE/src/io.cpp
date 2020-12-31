@@ -14,6 +14,11 @@ void io_Init()
   digitalWrite(LEDR,HIGH);
   digitalWrite(LEDG,HIGH);
   digitalWrite(LEDB,HIGH);
+
+  // Pins used to check timing
+  pinMode(A0, OUTPUT); // Sensor thread
+  pinMode(A1, OUTPUT); // 
+  pinMode(A2, OUTPUT); // 
 }
 
 // Reset Button Pressed Flag on Read
