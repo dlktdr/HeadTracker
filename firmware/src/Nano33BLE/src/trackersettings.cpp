@@ -41,9 +41,14 @@ TrackerSettings::TrackerSettings()
     gyroweighttiltroll = 40;
 
     // Sensor Offsets    
-    magxoff=0; magyoff=0; magzoff=0; // Testing
+    magxoff=-1.84; magyoff=31.45; magzoff=-1.61;
     accxoff=0; accyoff=0; acczoff=0;
-    gyrxoff=0; gyryoff=0; gyrzoff=0;
+    gyrxoff=4.1; gyryoff=-0.33; gyrzoff=1.5;
+
+    // Soft Iron Mag Offset
+    magsioff[0] = 1; magsioff[1] = 0; magsioff[2] = 0;
+    magsioff[3] = 0; magsioff[4] = 1; magsioff[5] = 0;
+    magsioff[6] = 0; magsioff[7] = 0; magsioff[8] = 1;
     
     // Output values
     gyrox=0;gyroy=0;gyroz=0;
@@ -88,12 +93,12 @@ void TrackerSettings::setRll_max(int value)
     rll_max = value;
 }
 
-int TrackerSettings::Rll_gain() const
+float TrackerSettings::Rll_gain() const
 {
     return rll_gain;
 }
 
-void TrackerSettings::setRll_gain(int value)
+void TrackerSettings::setRll_gain(float value)
 {
     if(value < MIN_GAIN)
         value = MIN_GAIN;
@@ -144,12 +149,12 @@ void TrackerSettings::setPan_max(int value)
     pan_max = value;
 }
 
-int TrackerSettings::Pan_gain() const
+float TrackerSettings::Pan_gain() const
 {
     return pan_gain;
 }
 
-void TrackerSettings::setPan_gain(int value)
+void TrackerSettings::setPan_gain(float value)
 {
     if(value < MIN_GAIN)
         value = MIN_GAIN;
@@ -200,12 +205,12 @@ void TrackerSettings::setTlt_max(int value)
     tlt_max = value;
 }
 
-int TrackerSettings::Tlt_gain() const
+float TrackerSettings::Tlt_gain() const
 {
     return tlt_gain;
 }
 
-void TrackerSettings::setTlt_gain(int value)
+void TrackerSettings::setTlt_gain(float value)
 {
     if(value < MIN_GAIN)
         value = MIN_GAIN;
@@ -502,10 +507,10 @@ void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
     v = json["ppmpin"]; if(!v.isNull()) setPPMPin(v); // *** FIX ME
     v = json["ppminvert"]; if(!v.isNull()) setInvertedPPM(v);
 
-// Calibrarion Values
-    v = json["magxoff"]; 
-    v1 =json["magyoff"]; 
-    v2 =json["magzoff"]; 
+    // Calibrarion Values
+    v = json["magxoff"];
+    v1 =json["magyoff"];
+    v2 =json["magzoff"];
 
     if(!v.isNull() && !v1.isNull() && !v2.isNull())
     {   
@@ -520,7 +525,18 @@ void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
 
     if(!v.isNull() && !v1.isNull() && !v2.isNull())
     {   
-        setgyroOffset(v,v1,v2);
+        setGyroOffset(v,v1,v2);
+        serialWriteln("Gyr offsets set");
+    }
+
+    // Calibrarion Values
+    v = json["accxoff"]; 
+    v1 =json["accyoff"]; 
+    v2 =json["acczoff"]; 
+
+    if(!v.isNull() && !v1.isNull() && !v2.isNull())
+    {   
+        setAccOffset(v,v1,v2);
         serialWriteln("Gyr offsets set");
     }
 
@@ -556,7 +572,6 @@ void TrackerSettings::setJSONSettings(DynamicJsonDocument &json)
 
     json["buttonpin"] = buttonpin;
     json["ppmpin"] = ppmpin;
-
     json["ppminvert"] = ppminvert;
 }
 
@@ -573,8 +588,6 @@ void TrackerSettings::saveToEEPROM()
 // Must be called on startup to create PPM object
 void TrackerSettings::loadFromEEPROM(PpmOut **ppout)
 {
-
-
     // Load Settings
 
     // Set PPM Pin, Set Button Pin, Pointer to Pointer passed to create new PPM object
