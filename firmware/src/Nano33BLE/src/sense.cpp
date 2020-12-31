@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include "trackersettings.h"
 #include "sense.h"
+#include "mbed.h"
 #include "main.h"
 #include "dataparser.h"
 #include "LSM9DS1/Arduino_LSM9DS1.h"
@@ -9,22 +10,32 @@
 #include "Wire.h"
 #include "NXPFusion/Adafruit_AHRS_NXPFusion.h"
 
-Adafruit_NXPSensorFusion nxpfilter;
+// Pick one
+#define NXP_FILTER 
+//#define MADGWICK 
+//#define MAHONY   
 
-void sense_Init()
+#ifdef NXP_FILTER
+Adafruit_NXPSensorFusion nxpfilter;
+#endif
+
+int sense_Init()
 { 
   // I2C High Speed  
   if (!IMU.begin()) {
     serialWriteln("Failed to initalize sensors");
-    return;
+    return -1;
   }  
-  // Increase Clock Speed, save some CPU, pretty sure it's using blocking
+  // Increase Clock Speed, save some CPU, pretty sure it's using blocking in lsmlib
   Wire1.setClock(400000);  
 
-  nxpfilter.begin(96); // Frequency descovered by oscilliscope
-
-  IMU.setGyroFS(1);
-  IMU.setGyroODR(3);
+#ifdef NXP_FILTER
+  nxpfilter.begin(125); // Frequency descovered by oscilliscope
+#else
+  IMU.setGyroFS(3); // 2000dps gyro
+  IMU.setGyroODR(1);
+#endif
+  return 0;
 }
 
 
@@ -35,8 +46,7 @@ void sense_Thread()
 {
   float raccx=0,raccy=0,raccz=0;
   float rmagx=0,rmagy=0,rmagz=0;
-  float rgyrx=0,rgyry=0,rgyrz=0;
-  
+  float rgyrx=0,rgyry=0,rgyrz=0;  
   float accx=0,accy=0,accz=0;
   float magx=0,magy=0,magz=0;
   float gyrx=0,gyry=0,gyrz=0;
@@ -46,67 +56,40 @@ void sense_Thread()
   float accxoff=0, accyoff=0, acczoff=0;
   float gyrxoff=0, gyryoff=0, gyrzoff=0;
   SF fusion;
-
+  Timer runt;
   
   int counter=0;
 
   while(1) {
-    digitalWrite(D8,HIGH);
+    // Used to measure how long this took to adjust sleep timer
+    runt.reset();
+    runt.start();
     
-    // Accelerometer
-    if(IMU.accelerationAvailable()) {
-      IMU.readRawAccel(raccx, raccy, raccz);
-      trkset.accOffset(accxoff,accyoff,acczoff);
-      accx = raccx - accxoff;
-      accy = raccy - accyoff;
-      accz = raccz - acczoff;
-    }
+    digitalWrite(A0,HIGH);
 
-    // Gyrometer
-    if(IMU.gyroscopeAvailable()) {
-      IMU.readRawGyro(rgyrx,rgyry,rgyrz);
-      trkset.gyroOffset(gyrxoff,gyryoff,gyrzoff);
-    //  gyrx *= DEG_TO_RAD;
-    //  gyry *= DEG_TO_RAD;
-   //   gyrz *= DEG_TO_RAD;
-      gyrx = rgyrx - gyrxoff; 
-      gyry = rgyrx - gyryoff; 
-      gyrz = rgyrx - gyrzoff; 
-      gyrx *= -1;
-      gyry *= -1;
-      gyrz *= -1;
-
-    }
-
-    // Magnetometer
-    if(IMU.magneticFieldAvailable()) {
-      IMU.readRawMagnet(rmagx,rmagy,rmagz);
-      // On first read set the min/max values to this reading
-      // Get Offsets and Apply them
-      trkset.magOffset(magxoff,magyoff,magzoff);
-            
-      magx = rmagx-magxoff;//mxr;
-      magy = rmagy-magyoff;//myr;
-      magz = rmagz-magzoff;///mzr;
-    }
-
-    // Period Between Samples
-/*    float deltat = fusion.deltatUpdate();
-
-    // Do the Calculation
-    //fusion.MahonyUpdate(gyrx, gyry, gyrz, accx, accy, accz, magx, magy, magz, deltat);  //else use the magwick, it is slower but more accurate
-    fusion.MadgwickUpdate(gyrx, gyry, gyrz, accx, accy, accz, magx, magy, magz, deltat);  //else use the magwick, it is slower but more accurate
-    
-    roll = fusion.getPitch();
-    tilt = fusion.getRoll();
-    pan = fusion.getYaw();*/
-
+    // Run this first to keep most accurate timing    
+#ifdef NXP_FILTER
     // NXP 
-    nxpfilter.update(gyrx, gyry, gyrz, accx, accy, accz, magx, magy, magz);
+    nxpfilter.update(gyrx, gyry, gyrz, accx*9.807, accy*9.807, accz*9.807, magx, magy, magz);
     roll = nxpfilter.getPitch();
     tilt = nxpfilter.getRoll();
     pan = nxpfilter.getYaw();
+#else 
+    // Period Between Samples
+    float deltat = fusion.deltatUpdate();
+#ifdef MADGWICK 
+    fusion.MadgwickUpdate(gyrx * DEG_TO_RAD, gyry * DEG_TO_RAD, gyrz * DEG_TO_RAD, 
+                          accx*9.807, accy*9.807, accz*9.807, 
+                          magx, magy, magz, 
+    deltat);  
+#elif defined(MAHONY)
+    fusion.MahonyUpdate(gyrx, gyry, gyrz, accx, accy, accz, magx, magy, magz, deltat);  //else use the magwick, it is slower but more accurate
+#endif    
 
+    roll = fusion.getPitch();
+    tilt = fusion.getRoll();
+    pan = fusion.getYaw();
+#endif
     // Zero button was pressed, adjust all values to zero
     if(wasButtonPressed()) {
         rolloffset = roll;
@@ -115,47 +98,88 @@ void sense_Thread()
     }
 
     // Tilt output
-    float tiltout = (tilt - tiltoffset) * trkset.Tlt_gain()/10 * (trkset.isTiltReversed()?-1.0:1.0);
+    float tiltout = (tilt - tiltoffset) * trkset.Tlt_gain() * (trkset.isTiltReversed()?-1.0:1.0);
     uint16_t tiltout_ui = tiltout + trkset.Tlt_cnt();
     tiltout_ui = MAX(MIN(tiltout_ui,trkset.Tlt_max()),trkset.Tlt_min());
     ppmout->setChannel(trkset.tiltCh(),tiltout_ui);
 
     // Roll output
-    float rollout = (roll - rolloffset) * trkset.Rll_gain() /10 * (trkset.isRollReversed()? -1.0:1.0);
+    float rollout = (roll - rolloffset) * trkset.Rll_gain() * (trkset.isRollReversed()? -1.0:1.0);
     uint16_t rollout_ui = rollout + trkset.Rll_cnt();
     rollout_ui = MAX(MIN(rollout_ui,trkset.Rll_max()),trkset.Rll_min()) ;
     ppmout->setChannel(trkset.rollCh(),rollout_ui);
     
     // Pan output, Normalize to +/- 180 Degrees
-    float panout = normalize((pan-panoffset),-180,180)  * trkset.Pan_gain()/10 * (trkset.isPanReversed()? -1.0:1.0);    
+    float panout = normalize((pan-panoffset),-180,180)  * trkset.Pan_gain() * (trkset.isPanReversed()? -1.0:1.0);    
     uint16_t panout_ui = panout + trkset.Pan_cnt();
     panout_ui = MAX(MIN(panout_ui,trkset.Pan_max()),trkset.Pan_min());
     ppmout->setChannel(trkset.panCh(),panout_ui);
 
+    // ---------------------- Get new data
 
-     // 'Raw' values to match expectation of MOtionCal
-    /*serialWrite("Raw:");
-    serialWrite(int(accx*8192/9.8)); serialWrite(",");
-    serialWrite(int(accy*8192/9.8)); serialWrite(",");
-    serialWrite(int(accz*8192/9.8)); serialWrite(",");
-    serialWrite(int(gyrx*16)); serialWrite(",");
-    serialWrite(int(gyry*16)); serialWrite(",");
-    serialWrite(int(gyrz*16)); serialWrite(",");
-    serialWrite(int(magx*10)); serialWrite(",");
-    serialWrite(int(magy*10)); serialWrite(",");
-    serialWrite(int(magz*10)); serialWriteln("");
+    if(++counter == SENSEUPDATE) { // Run Filter 5 more often than measurements
+      counter = 0;
+      // Accelerometer
+      if(IMU.accelerationAvailable()) {
+        IMU.readRawAccel(raccx, raccy, raccz);
+        trkset.accOffset(accxoff,accyoff,acczoff);
+        accx = raccx - accxoff;
+        accy = raccy - accyoff;
+        accz = raccz - acczoff;
+      }
 
-    // unified data
-    serialWrite("Uni:");
-    serialWriteF(accx); serialWrite(",");
-    serialWriteF(accy); serialWrite(",");
-    serialWriteF(accz); serialWrite(",");
-    serialWriteF(gyrx); serialWrite(",");
-    serialWriteF(gyry); serialWrite(",");
-    serialWriteF(gyrz); serialWrite(",");
-    serialWriteF(magx); serialWrite(",");
-    serialWriteF(magy); serialWrite(",");
-    serialWriteF(magz); serialWriteln("");*/
+      // Gyrometer
+      if(IMU.gyroscopeAvailable()) {
+        IMU.readRawGyro(rgyrx,rgyry,rgyrz);
+        trkset.gyroOffset(gyrxoff,gyryoff,gyrzoff);
+        gyrx = rgyrx - gyrxoff; 
+        gyry = rgyry - gyryoff; 
+        gyrz = rgyrz - gyrzoff; 
+        gyrx *= -1;
+        gyry *= -1;
+        //gyrz *= -1;
+      }
+
+      // Magnetometer
+      if(IMU.magneticFieldAvailable()) {
+        IMU.readRawMagnet(rmagx,rmagy,rmagz);
+        // On first read set the min/max values to this reading
+        // Get Offsets and Apply them
+        trkset.magOffset(magxoff,magyoff,magzoff);              
+
+        // Calibrate Hard Iron Offsets
+        magx = rmagx - magxoff; 
+        magy = rmagy - magyoff;
+        magz = rmagz - magzoff;       
+
+        // Calibrate soft iron offsets 
+        float magsioff[9];
+        trkset.magSiOffset(magsioff);
+        magx = magx * magsioff[0] + magy * magsioff[1] + magz *magsioff[2];
+        magy = magx * magsioff[3] + magy * magsioff[4] + magz *magsioff[5];
+        magz = magx * magsioff[6] + magy * magsioff[7] + magz *magsioff[8];
+
+        static int o=0;
+        if(o++ > 50) {
+          o=0;          
+          serialWrite("MagX:");
+          serialWrite(magx);
+          serialWrite(" Y:");
+          serialWrite(magy);
+          serialWrite(" Z:");
+          serialWrite(magz);
+          serialWriteln("");
+
+          serialWrite("CalX:");
+          serialWrite(magxoff);
+          serialWrite(" Y:");
+          serialWrite(magyoff);
+          serialWrite(" Z:");
+          serialWrite(magzoff);
+          serialWriteln("");
+        }
+      }
+    }
 
     // Update the settings
     // Both data and sensor threads will use this data. If data thread has it locked skip this reading.
@@ -168,18 +192,26 @@ void sense_Thread()
         trkset.setPPMOut(tiltout_ui,rollout_ui,panout_ui);
         dataMutex.unlock();
     }
-
     
-    digitalWrite(D8,LOW); // Used to measure actual time to execute this on a scope
+    digitalWrite(A0,LOW); // Pin for timing check
 
-    // Wait for next run
+    // Use this time to determine how long to sleep for
+    runt.stop();
+    using namespace std::chrono;
+    int micros = duration_cast<microseconds>(runt.elapsed_time()).count();
+    int sleepyt = (SLEEPTIME - micros); // Ideally 5ms period
 
-    // Takes apx 2.5ms to execute this. 99% used in I2C reads..
-    // Calculations are using 115us of CPU time.
-    ThisThread::sleep_for(std::chrono::milliseconds(8)); // apx 60hz update rate
+    // Don't sleep for too long it something wrong above
+    if(sleepyt < 5)
+      sleepyt = 5;    
+
+    // **** Not super accurate being only in ms values
+    // Not sure why but +1 works out on time
+    ThisThread::sleep_for(std::chrono::milliseconds(sleepyt/1000+1)); 
 
   } // END THREAD LOOP
 }
+
 
 // FROM https://stackoverflow.com/questions/1628386/normalise-orientation-between-0-and-360
 // Normalizes any number to an arbitrary range 
