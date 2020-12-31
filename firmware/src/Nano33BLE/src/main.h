@@ -3,11 +3,15 @@
 
 #include "mbed.h"
 #include "trackersettings.h"
-#include "PPMOut.h"
+#include "PPM/PPMOut.h"
+#include "PPM/PPMIn.h"
+
+using namespace mbed;
 
 // Globals
 extern TrackerSettings trkset;
 extern PpmOut *ppmout;
+extern PpmIn *ppmin;
 extern Mutex dataMutex;
 extern Mutex eeMutex;
 extern FlashIAP flash;
@@ -17,8 +21,6 @@ extern const char *FW_VERSION;
 extern const char *FW_BOARD;
 
 // Pauses Threads if Set True to allow
-// Flash to write uninterrupted, too slow
-// 
 extern volatile bool pauseForEEPROM;
 
 #endif

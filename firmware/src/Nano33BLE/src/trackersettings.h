@@ -3,7 +3,9 @@
 
 #include <Arduino.h>
 #include <ArduinoJson.h>
-#include "PPMOut.h"
+#include "PPM/PPMOut.h"
+#include "PPM/PPMIn.h"
+#include "config.h"
 
 #define EXAMPLE_KV_VALUE_LENGTH 64
 #define KV_KEY_LENGTH 32
@@ -24,6 +26,7 @@ public:
     static constexpr int DEF_PPM_CHANNELS = 8;
     static constexpr int DEF_BUTTON_IN = 2; // Chosen because it's beside ground
     static constexpr int DEF_PPM_OUT = 10; // Random choice
+    static constexpr int DEF_PPM_IN = 9; // Random choice
     static constexpr int DEF_CENTER = 1500;
     static constexpr float MIN_GAIN= 0;
     static constexpr float MAX_GAIN= 50.0;
@@ -97,6 +100,21 @@ public:
     int rollCh() const;
     void setRollCh(int value);
 
+    int ppmPin() const;
+    void setPPMPin(int value);
+
+    bool invertedPPM() {return ppminvert;}
+    void setInvertedPPM(bool inv);
+    
+    int ppmInPin() const;
+    void setPPMInPin(int value);
+
+    bool invertedPPMIn() {return ppmininvert;}
+    void setInvertedPPMIn(bool inv);
+        
+    int buttonPin() const;
+    void setButtonPin(int value);
+
     void gyroOffset(float &x, float &y, float &z) {x=gyrxoff;y=gyryoff;z=gyrzoff;}
     void setGyroOffset(float x,float y, float z) {gyrxoff=x;gyryoff=y;gyrzoff=z;}
 
@@ -109,24 +127,18 @@ public:
     void magSiOffset(float v[]) {memcpy(v,magsioff,9*sizeof(float));}
     void setMagSiOffset(float v[]) {memcpy(magsioff,v,9*sizeof(float));}
 
-    int buttonPin() const;
-    void setButtonPin(int value);
-
-    int ppmPin() const;
-    void setPPMPin(int value);
-
+    
     // Future use where channel number adjustable
-    int ppmChannels() {return DEF_PPM_CHANNELS;}
+    int ppmChannels() {return ppmchannels;}
+    void setPPMChannels(int num) {}
 
     void loadJSONSettings(DynamicJsonDocument &json);
     void setJSONSettings(DynamicJsonDocument &json);
 
     void saveToEEPROM();
-    void loadFromEEPROM(PpmOut **ppout);
+    void loadFromEEPROM(PpmOut **ppout, PpmIn **ppin);
 
-    void setInvertedPPM(bool inv);
-    bool isInverted() {return ppminvert;}
-
+    
 // Setting of data to be returned to the PC
     void setRawGyro(float x, float y, float z);
     void setRawAccel(float x, float y, float z);
@@ -146,6 +158,7 @@ private:
     int pan_min,pan_max,pan_cnt;
     float rll_gain,tlt_gain,pan_gain;
     int tltch,rllch,panch;
+    int ppmchannels;
     
     // Calibration
     float magxoff, magyoff, magzoff;
@@ -157,9 +170,11 @@ private:
     int lppan,lptiltroll;
     int gyroweightpan;
     int gyroweighttiltroll;
-    int buttonpin,ppmpin;
+    int buttonpin,ppmpin,ppminpin;
     bool ppminvert;
+    bool ppmininvert;
     PpmOut *_ppm; // Local reference to PPM output Class
+    PpmIn *_ppmin; // Local reference to PPM input Class
 
 // Data
     float gyrox,gyroy,gyroz;

@@ -2,9 +2,9 @@
 */
 
 #include <mbed.h>
-#include "PPMOut.h"
 #include <chrono>
 
+#include "PPMOut.h"
  
 using namespace mbed;
 using namespace rtos;
@@ -12,8 +12,8 @@ using namespace std;
 
  
 PpmOut::PpmOut(PinName pin, uint8_t channel_number): ppm(pin) {
-    if(channel_number > MAX_CHANNELS){
-        this->channel_number = MAX_CHANNELS;
+    if(channel_number > MAX_PPM_CHANNELS){
+        this->channel_number = MAX_PPM_CHANNELS;
     }
     this->channel_number = channel_number;
     invertoutput = false;

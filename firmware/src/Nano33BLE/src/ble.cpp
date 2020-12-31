@@ -2,7 +2,7 @@
 #include <ArduinoJson.h>
 #include "dataparser.h"
 #include "ble.h"
-#include "PPMOut.h"
+#include "PPM/PPMOut.h"
 #include "main.h"
 
 BLEDevice peripheral;

@@ -29,6 +29,7 @@ public:
     static constexpr int DEF_PPM_CHANNELS = 8;
     static constexpr int DEF_BUTTON_IN = 2; // Chosen because it's beside ground
     static constexpr int DEF_PPM_OUT = 10; // Random choice
+    static constexpr int DEF_PPM_IN = 9; // Random choice
     static constexpr int DEF_CENTER = 1500;
     static constexpr float MIN_GAIN= 0;
     static constexpr float MAX_GAIN= 50.0;
@@ -100,6 +101,22 @@ public:
 
     uint rollCh() const;
     void setRollCh(uint value);
+
+    uint ppmPin() const {return _data["ppmpin"].toUInt();}
+    void setPPMPin(uint value) {_data["ppmpin"] = value;}
+
+    bool invertedPPM() const {return _data["ppminvert"].toBool();}
+    void setInvertedPPM(bool value) {_data["ppminvert"] = value;}
+
+    bool invertedPPMIn() const {return _data["ppmininvert"].toBool();}
+    void setInvertedPPMIn(bool value) {_data["ppmininvert"] = value;}
+
+    uint ppmInPin() const {return _data["ppminpin"].toUInt();}
+    void setPPMInPin(uint value) {_data["ppminpin"] = value;}
+
+    uint buttonPin() const {return _data["buttonpin"].toUInt();}
+    void setButtonPin(uint value) {_data["buttonpin"] = value;}
+
 
     void gyroOffset(float &x, float &y, float &z);
     void setGyroOffset(float x,float y, float z);

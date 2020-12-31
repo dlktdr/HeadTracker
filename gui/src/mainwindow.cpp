@@ -412,7 +412,7 @@ void MainWindow::serialConnect()
     serialcon->setParity(QSerialPort::NoParity);
     serialcon->setDataBits(QSerialPort::Data8);
     serialcon->setStopBits(QSerialPort::OneStop);
-    serialcon->setBaudRate(1000000); // 1 Mega Baud
+    serialcon->setBaudRate(921600); // 1 Mega Baud
     serialcon->setFlowControl(QSerialPort::NoFlowControl);
 
     if(!serialcon->open(QIODevice::ReadWrite)) {
@@ -497,22 +497,30 @@ void MainWindow::updateToUI()
     ui->chkpanrev->setChecked(trkset.isPanReversed());
     ui->chkrllrev->setChecked(trkset.isRollReversed());
     ui->chktltrev->setChecked(trkset.isTiltReversed());
+    ui->chkInvertedPPM->setChecked(trkset.invertedPPM());
+    ui->chkInvertedPPMIn->setChecked(trkset.invertedPPMIn());
 
     ui->cmbpanchn->blockSignals(true);
     ui->cmbrllchn->blockSignals(true);
     ui->cmbtiltchn->blockSignals(true);
     ui->cmbRemap->blockSignals(true);
+    ui->cmbPPMpin->blockSignals(true);
+    ui->cmbButtonPin->blockSignals(true);
 
     ui->cmbpanchn->setCurrentIndex(trkset.panCh()-1);
     ui->cmbrllchn->setCurrentIndex(trkset.rollCh()-1);
     ui->cmbtiltchn->setCurrentIndex(trkset.tiltCh()-1);
     ui->cmbRemap->setCurrentIndex(ui->cmbRemap->findData(trkset.axisRemap()));
     ui->cmbSigns->setCurrentIndex(trkset.axisSign());
+    ui->cmbPPMpin->setCurrentIndex(trkset.ppmPin()+2); // Starts at D2
+    ui->cmbButtonPin->setCurrentIndex(trkset.buttonPin()+2); // Starts at D2
 
     ui->cmbpanchn->blockSignals(false);
     ui->cmbrllchn->blockSignals(false);
     ui->cmbtiltchn->blockSignals(false);
     ui->cmbRemap->blockSignals(false);
+    ui->cmbPPMpin->blockSignals(false);
+    ui->cmbButtonPin->blockSignals(false);
 
 }
 
@@ -568,6 +576,12 @@ void MainWindow::updateFromUI()
 
     trkset.setAxisRemap(ui->cmbRemap->currentData().toUInt());
     trkset.setAxisSign(ui->cmbSigns->currentIndex());
+
+    trkset.setPPMPin(ui->cmbPPMpin->currentIndex()+2);
+    trkset.setButtonPin(ui->cmbButtonPin->currentIndex()+2);
+
+    trkset.setInvertedPPM(ui->chkInvertPPM->isChecked());
+    trkset.setInvertedPPMIn(ui->chkInvertedPPMIn->isChecked());
 
     updatesettingstmr.start(1000);
 }

@@ -1,15 +1,13 @@
-#include <ArduinoJson.h>
-#include "trackersettings.h"
-#include "mbed.h"
+
 #include <stdio.h>
 #include <string.h>
-#include "KVStore.h"
-#include "kvstore_global_api.h"
+
 #include "serial.h"
 #include "flash.h"
 
-using namespace mbed;
+#include "trackersettings.h"
 
+using namespace mbed;
 
 TrackerSettings::TrackerSettings()
 {
@@ -62,7 +60,9 @@ TrackerSettings::TrackerSettings()
     setButtonPin(DEF_BUTTON_IN);
 
     ppmpin = DEF_PPM_OUT; // Set initial val    
+    ppminpin = DEF_PPM_IN; 
     ppminvert = false;
+    ppmininvert = false;
     _ppm = nullptr;
 }
 
@@ -379,25 +379,96 @@ int TrackerSettings::ppmPin() const
     return ppmpin;
 }
 
+/* I SEE A POTENTIAL RACE ISSUE HERE IF USER TRIES TO SWAP TWO PINS, 
+ * both calls will fail should probably combine all these into a setPins 
+ * method.
+ *  
+ */
+
 void TrackerSettings::setPPMPin(int value)
 {
-    if(value > 1 && value < 14 && value != buttonpin) {
-        pinMode(ppmpin,INPUT); // Disable old ppmpin
-        digitalWrite(ppmpin,LOW);
-        pinMode(value,OUTPUT);
-        ppmpin = value;
-
+    if(value > 1 && value < 14) {
         // If already have a PPM output, delete it.
-        if(_ppm != nullptr)
+        if(_ppm != nullptr) {
             delete _ppm;
+            _ppm = nullptr;
+        }
+
+        pinMode(ppmpin,INPUT); // Disable old ppmpin
+        pinMode(value,OUTPUT); // Assign new as output
+        ppmpin = value;
 
         // Create a new object, pass the pointer back.
         _ppm = new PpmOut(digitalPinToPinName(ppmpin), DEF_PPM_CHANNELS);        
 
         // Set the inverted flag on it
         _ppm->setInverted(ppminvert);
+
+    // If value less than zero disable the pin
+    } else if(value < 0) {
+        if(ppmpin > 0) {
+            pinMode(ppmpin,INPUT); // Disable old ppmpin
+            ppmpin = -1;
+        }
+        // If already have a PPM output, delete it.
+        if(_ppm != nullptr) {
+            delete _ppm;
+            _ppm = nullptr;
+        }
     }
 }
+
+void TrackerSettings::setPPMInPin(int value)
+{
+    if(value > 1 && value < 14)  {
+
+        // If already have a PPM output, delete it.
+        if(_ppmin != nullptr) {
+            delete _ppmin;
+            _ppm = nullptr;
+        }
+
+        pinMode(ppminpin,INPUT); // Disable old ppmpin
+        pinMode(value,INPUT); // Assign new
+        ppminpin = value;
+
+        // Create a new object, pass the pointer back.
+        _ppmin = new PpmIn(digitalPinToPinName(ppminpin), DEF_PPM_CHANNELS);        
+
+        // Set the inverted flag on it
+        _ppmin->setInverted(ppmininvert);
+
+    // Disabled pin, also set before switching pins around
+    } else if(value < 0) {
+        if(ppminpin > 0) {
+            pinMode(ppminpin,INPUT); // Disable old ppmpin
+            ppminpin = -1;
+        }
+        // If already have a PPM output, delete it.
+        if(_ppmin != nullptr) {
+            delete _ppmin;
+            _ppm = nullptr;
+        }
+    }
+}
+
+// Set Inverted
+void TrackerSettings::setInvertedPPM(bool inv) 
+{
+    ppminvert = inv;
+    if(_ppm != nullptr) {
+        _ppm->setInverted(inv);
+    }
+}    
+
+// Set Inverted on PPMin
+void TrackerSettings::setInvertedPPMIn(bool inv) 
+{
+    ppmininvert = inv;
+    if(_ppmin != nullptr) {
+        _ppmin->setInverted(inv);
+    }
+}    
 
 //----------------------------------------------------------------------------------------
 // Data sent the PC, for calibration and info
@@ -454,15 +525,6 @@ void TrackerSettings::getPPMValues(uint16_t &t, uint16_t &r, uint16_t &p)
     p = panout;
 }
 
-// Set Inverted
-void TrackerSettings::setInvertedPPM(bool inv) 
-{
-    ppminvert = inv;
-    if(_ppm != nullptr) {
-        _ppm->setInverted(inv);
-    }
-}    
-
 //--------------------------------------------------------------------------------------
 // Send and receive the data from PC
 // Takes the JSON and loads the settings into the local class
@@ -504,12 +566,20 @@ void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
     v = json["gyroweightpan"];      if(!v.isNull()) setGyroWeightPan(v);
     v = json["gyroweighttiltroll"]; if(!v.isNull()) setGyroWeightTiltRoll(v);
 
+
+// Set all pins to disabled first
+    setButtonPin(-1);
+    setPPMPin(-1);
+    setPPMInPin(-1);
+
 // Button Input + PPM output pins + Inverted PPM
     v = json["buttonpin"]; if(!v.isNull()) setButtonPin(v);
-    v = json["ppmpin"]; if(!v.isNull()) setPPMPin(v); // *** FIX ME
+    v = json["ppmpin"]; if(!v.isNull()) setPPMPin(v);
     v = json["ppminvert"]; if(!v.isNull()) setInvertedPPM(v);
+    v = json["ppmpinin"]; if(!v.isNull()) setPPMInPin(v);
+    v = json["ppmpininvert"]; if(!v.isNull()) setInvertedPPMIn(v);
 
-    // Calibrarion Values
+// Calibrarion Values
     v = json["magxoff"];
     v1 =json["magyoff"];
     v2 =json["magzoff"];
@@ -520,7 +590,7 @@ void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
         serialWriteln("Mag offsets set");
     }
 
-    // Calibrarion Values
+// Calibrarion Values
     v = json["gyrxoff"]; 
     v1 =json["gyryoff"]; 
     v2 =json["gyrzoff"]; 
@@ -531,7 +601,7 @@ void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
         serialWriteln("Gyr offsets set");
     }
 
-    // Calibrarion Values
+// Calibrarion Values
     v = json["accxoff"]; 
     v1 =json["accyoff"]; 
     v2 =json["acczoff"]; 
@@ -593,31 +663,30 @@ void TrackerSettings::saveToEEPROM()
 }
 
 // Must be called on startup to create PPM object
-void TrackerSettings::loadFromEEPROM(PpmOut **ppout)
+void TrackerSettings::loadFromEEPROM(PpmOut **ppout, PpmIn **ppin)
 {
+    // Return the PPM Object
+    setPPMPin(DEF_PPM_OUT); 
+    *ppout = _ppm;
+
+    // Return the PPM Object
+    setPPMPin(DEF_PPM_IN); 
+    *ppin = _ppmin;
+
     // Load Settings
     DynamicJsonDocument json(1000);
     DeserializationError de;
     de = deserializeJson(json, flashSpace);
 
-    if(de == DeserializationError::Ok) {
-        serialWriteln("AWESOME, READ SOME DATA");
-    } else {
-        serialWriteln("Wrong Data Got");
-    }
-
+    if(de != DeserializationError::Ok) 
+        serialWriteln("Invalid JSON Data");
+    
     if(json["UUID"] == 837727) {
         serialWriteln("Device has been freshly programmed");
     } else {
         serialWriteln("Device contains saved code");
         loadJSONSettings(json);
     }
-
-    //ppmout->setInverted(true);
-
-    // Return the PPM Object
-    setPPMPin(DEF_PPM_OUT); 
-    *ppout = _ppm;
 }
 
 // Used to transmit raw data back to the PC
