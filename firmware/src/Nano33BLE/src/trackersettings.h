@@ -106,8 +106,8 @@ public:
     void magOffset(float &x, float &y, float &z) {x=magxoff;y=magyoff;z=magzoff;}
     void setMagOffset(float x,float y, float z) {magxoff=x;magyoff=y;magzoff=z;} 
 
-    void magSiOffset(float v[]) {memcpy(v,magsioff,sizeof(magsioff)*sizeof(float));}
-    void setMagSiOffset(float v[]) {memcpy(magsioff,v,sizeof(magsioff)*sizeof(float));}
+    void magSiOffset(float v[]) {memcpy(v,magsioff,9*sizeof(float));}
+    void setMagSiOffset(float v[]) {memcpy(magsioff,v,9*sizeof(float));}
 
     int buttonPin() const;
     void setButtonPin(int value);

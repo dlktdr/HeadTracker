@@ -6,6 +6,7 @@
 #include "KVStore.h"
 #include "kvstore_global_api.h"
 #include "serial.h"
+#include "flash.h"
 
 using namespace mbed;
 
@@ -464,6 +465,7 @@ void TrackerSettings::setInvertedPPM(bool inv)
 
 //--------------------------------------------------------------------------------------
 // Send and receive the data from PC
+// Takes the JSON and loads the settings into the local class
 
 void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
 {
@@ -575,29 +577,46 @@ void TrackerSettings::setJSONSettings(DynamicJsonDocument &json)
     json["ppminvert"] = ppminvert;
 }
 
-
-// *** TO DO SAVE TO FLASH / LOAD FROM FLASH
 void TrackerSettings::saveToEEPROM()
 {
-  
+    char buffer[1000];
+    DynamicJsonDocument json(1000);
+    setJSONSettings(json);
+    int len = serializeJson(json,buffer,1000);
 
-    
-
+    if(writeFlash(buffer,len)) {
+        serialWriteln("Flash Write Failed");
+    } else {
+        serialWriteln("Saved to EEPROM");
+    }
+     //serialWriteln("Flash Write Failed");
 }
 
 // Must be called on startup to create PPM object
 void TrackerSettings::loadFromEEPROM(PpmOut **ppout)
 {
     // Load Settings
+    DynamicJsonDocument json(1000);
+    DeserializationError de;
+    de = deserializeJson(json, flashSpace);
 
-    // Set PPM Pin, Set Button Pin, Pointer to Pointer passed to create new PPM object
+    if(de == DeserializationError::Ok) {
+        serialWriteln("AWESOME, READ SOME DATA");
+    } else {
+        serialWriteln("Wrong Data Got");
+    }
 
-    // Default until actual flash read
+    if(json["UUID"] == 837727) {
+        serialWriteln("Device has been freshly programmed");
+    } else {
+        serialWriteln("Device contains saved code");
+        loadJSONSettings(json);
+    }
 
-    // Set the PPM Pin, This will create an instance of the PpmOut on the proper pin
-    setPPMPin(DEF_PPM_OUT); 
+    //ppmout->setInverted(true);
 
     // Return the PPM Object
+    setPPMPin(DEF_PPM_OUT); 
     *ppout = _ppm;
 }
 

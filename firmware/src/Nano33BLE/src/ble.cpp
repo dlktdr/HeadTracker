@@ -178,6 +178,12 @@ void bt_Init()
 void bt_Thread() {
   int counter=0;
   while(1) {    
+
+    if(pauseForEEPROM) {
+      ThisThread::sleep_for(std::chrono::milliseconds(100)); 
+      continue;
+    }
+
     digitalWrite(LEDR,LOW);
     
     // Blue tooth connected send the trainer information

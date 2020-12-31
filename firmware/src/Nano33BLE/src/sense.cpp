@@ -61,6 +61,12 @@ void sense_Thread()
   int counter=0;
 
   while(1) {
+
+    if(pauseForEEPROM) {
+      ThisThread::sleep_for(std::chrono::milliseconds(100)); 
+      continue;
+    }
+
     // Used to measure how long this took to adjust sleep timer
     runt.reset();
     runt.start();
@@ -116,6 +122,8 @@ void sense_Thread()
     ppmout->setChannel(trkset.panCh(),panout_ui);
 
     // ---------------------- Get new data
+//********************************
+// THIS CODE NEEDS TO BE FASTER DOWN HERE
 
     if(++counter == SENSEUPDATE) { // Run Filter 5 more often than measurements
       counter = 0;
@@ -159,7 +167,7 @@ void sense_Thread()
         magy = magx * magsioff[3] + magy * magsioff[4] + magz *magsioff[5];
         magz = magx * magsioff[6] + magy * magsioff[7] + magz *magsioff[8];
 
-        static int o=0;
+       /* static int o=0;
         if(o++ > 50) {
           o=0;          
           serialWrite("MagX:");
@@ -177,7 +185,7 @@ void sense_Thread()
           serialWrite(" Z:");
           serialWrite(magzoff);
           serialWriteln("");
-        }
+        }*/
       }
     }
 

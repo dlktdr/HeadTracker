@@ -181,6 +181,7 @@ void parseData(DynamicJsonDocument &json)
     } else if (strcmp(command, "Setttings") == 0) {
         serialWrite("HT: Saving Settings\r\n");           
         trkset.loadJSONSettings(json);
+        trkset.saveToEEPROM();
 
     // Get settings
     } else if (strcmp(command, "GetSet") == 0) {  
@@ -192,7 +193,7 @@ void parseData(DynamicJsonDocument &json)
 
     // ACK Received, Means the GUI is running, send it data
     } else if (strcmp(command, "ACK") == 0) {
-        serialWrite("HT: Ack Received\r\n");
+        //serialWrite("HT: Ack Received\r\n");
         uiResponsive = Kernel::Clock::now() + std::chrono::milliseconds(UIRESPONSIVE_TIME);
         dataSendTime = Kernel::Clock::now() + std::chrono::milliseconds(DATA_SEND_TIME);        
     
