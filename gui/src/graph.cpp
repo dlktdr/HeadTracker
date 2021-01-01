@@ -13,13 +13,13 @@ void Graph::addDataPoints(int x, int y, int z)
     pointspan.append(z);
 
     if(pointstilt.length() > pointcount) {
-        pointstilt.mid(pointcount);
+        pointstilt = pointstilt.mid(pointcount);
     }
     if(pointsroll.length() > pointcount) {
-        pointsroll.mid(pointcount);
+        pointsroll = pointsroll.mid(pointcount);
     }
     if(pointspan.length() > pointcount) {
-        pointspan.mid(pointcount);
+        pointspan = pointspan.mid(pointcount);
     }
 
     update();
