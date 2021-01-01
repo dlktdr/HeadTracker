@@ -3,6 +3,7 @@
 #include "dataparser.h"
 #include "ble.h"
 #include "PPM/PPMOut.h"
+#include "serial.h"
 #include "main.h"
 
 BLEDevice peripheral;
@@ -184,7 +185,7 @@ void bt_Thread() {
       continue;
     }
 
-    digitalWrite(LEDR,LOW);
+    digitalWrite(LEDB,LOW);
     
     // Blue tooth connected send the trainer information
     if(BLE.connected() && counter > 2) { 
@@ -196,7 +197,7 @@ void bt_Thread() {
     // Poll BT and Handle    
     BLE.poll();   
         
-    digitalWrite(LEDR,HIGH);  
+    digitalWrite(LEDB,HIGH);  
 
     // Can't Seem to go faster than apx here without crashing the thread???
     // Caused by the write in sendTrainer to the characteristic.
