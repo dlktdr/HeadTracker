@@ -20,6 +20,13 @@ PpmIn::PpmIn(PinName pin, int channels): ppm(pin), nochannels(channels)
     setInverted(inverted);    
 }
 
+PpmIn::~PpmIn()
+{
+    // Disable interrupts
+    ppm.rise(0);
+    ppm.fall(0);
+}
+
 void PpmIn::setInverted(bool inv)
 {
     // Delete previous interrupt handlers

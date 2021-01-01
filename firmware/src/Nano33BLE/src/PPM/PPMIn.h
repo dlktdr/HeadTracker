@@ -14,6 +14,7 @@ class PpmIn
         bool state;
         
         PpmIn(PinName pin, int channels=8);
+        ~PpmIn();
         
         uint16_t* getPpm();
         void rise();
