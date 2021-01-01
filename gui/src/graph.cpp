@@ -7,19 +7,21 @@ Graph::Graph(QWidget *parent) : QWidget(parent)
 }
 
 void Graph::addDataPoints(int x, int y, int z)
-{
+{    
     pointstilt.append(x);
     pointsroll.append(y);
     pointspan.append(z);
 
-    if(pointstilt.length() > pointcount) {
-        pointstilt = pointstilt.mid(pointcount);
+    int points = pointstilt.length();
+
+    if(points > pointcount*1.5) {
+        pointstilt = pointstilt.mid(points-pointcount);
     }
-    if(pointsroll.length() > pointcount) {
-        pointsroll = pointsroll.mid(pointcount);
+    if(points > pointcount*1.5) {
+        pointsroll = pointsroll.mid(points-pointcount);
     }
-    if(pointspan.length() > pointcount) {
-        pointspan = pointspan.mid(pointcount);
+    if(points > pointcount*1.5) {
+        pointspan = pointspan.mid(points-pointcount);
     }
 
     update();
