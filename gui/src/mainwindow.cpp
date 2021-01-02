@@ -783,7 +783,7 @@ void MainWindow::saveToNVM()
 {
     if(serialcon->isOpen()) {
         if(trkset.getHardware() == "NANO33BLE") {
-            sendSerialJSON("SAVE");
+            sendSerialJSON("Flash");
 
         }
         else if(trkset.getHardware() == "BNO055")
