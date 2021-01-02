@@ -63,6 +63,10 @@ int LSM9DS1Class::begin()
 {
   _wire->begin();
 
+  storedAccelFS = false;
+  storedGyroFS = false;
+  storedMagnetFS = false;    
+  
   // reset
   writeRegister(LSM9DS1_ADDRESS, LSM9DS1_CTRL_REG8, 0x05);
   writeRegister(LSM9DS1_ADDRESS_M, LSM9DS1_CTRL_REG2_M, 0x0c);
@@ -242,13 +246,18 @@ int LSM9DS1Class::setAccelFS(uint8_t range) // 0: ±2g ; 1: ±16g ; 2: ±4g ; 3:
 {	if (range >=4) return 0;
     range = (range & 0b00000011) << 3;
 	uint8_t setting = ((readRegister(LSM9DS1_ADDRESS, LSM9DS1_CTRL_REG6_XL) & 0xE7) | range);
-	return writeRegister(LSM9DS1_ADDRESS, LSM9DS1_CTRL_REG6_XL,setting) ;
+	lastAccelFS = setting;
+  storedAccelFS = true;
+  return writeRegister(LSM9DS1_ADDRESS, LSM9DS1_CTRL_REG6_XL,setting) ;
 }
 
 float LSM9DS1Class::getAccelFS() // Full scale dimensionless, but its value corresponds to g
-{   float ranges[] ={2.0, 24.0, 4.0, 8.0}; //g
-    uint8_t setting = (readRegister(LSM9DS1_ADDRESS, LSM9DS1_CTRL_REG6_XL) & 0x18) >> 3;
-    return ranges[setting] ;
+{ float ranges[] ={2.0, 24.0, 4.0, 8.0}; //g
+  if(!storedAccelFS) {
+    lastAccelFS = (readRegister(LSM9DS1_ADDRESS, LSM9DS1_CTRL_REG6_XL) & 0x18) >> 3;
+    storedAccelFS = true;
+  }     
+  return ranges[lastAccelFS] ;
 }
 
 //************************************      Gyroscope      *****************************************
@@ -369,13 +378,18 @@ int LSM9DS1Class::setGyroFS(uint8_t range) // (0: 245 dps; 1: 500 dps; 2: 1000  
 {  if (range >=4) return 0;
    range = (range & 0b00000011) << 3;	
    uint8_t setting = ((readRegister(LSM9DS1_ADDRESS, LSM9DS1_CTRL_REG1_G) & 0xE7) | range );
+   lastGyroFS = setting;
+   storedGyroFS = true;
    return writeRegister(LSM9DS1_ADDRESS, LSM9DS1_CTRL_REG1_G,setting) ;
 }
 
 float LSM9DS1Class::getGyroFS() //   dimensionless, but its value defaults to deg/s
 { float Ranges[] ={245.0, 500.0, 1000.0, 2000.0}; //dps
-  uint8_t setting = (readRegister(LSM9DS1_ADDRESS, LSM9DS1_CTRL_REG1_G) & 0x18) >> 3;
-  return Ranges[setting] ;
+  if(!storedGyroFS) {
+    lastGyroFS = (readRegister(LSM9DS1_ADDRESS, LSM9DS1_CTRL_REG1_G) & 0x18) >> 3;
+    storedGyroFS = true;
+  }
+  return Ranges[lastGyroFS] ;
 }
 
 //************************************      Magnetic field      *****************************************
@@ -431,13 +445,18 @@ void LSM9DS1Class::setMagnetSlope(float x, float y, float z)
 int LSM9DS1Class::setMagnetFS(uint8_t range) // 0=400.0; 1=800.0; 2=1200.0 , 3=1600.0  (µT)
 {  if (range >=4) return 0;
    range = (range & 0b00000011) << 5;	
+   lastMagnetFS = range;
+   storedMagnetFS = true;
    return writeRegister(LSM9DS1_ADDRESS_M, LSM9DS1_CTRL_REG2_M,range) ;
 }
 
 float LSM9DS1Class::getMagnetFS() //   dimensionless, but its value defaults to µT
 { const float Ranges[] ={400.0, 800.0, 1200.0, 1600.0}; //
-  uint8_t setting = readRegister(LSM9DS1_ADDRESS_M, LSM9DS1_CTRL_REG2_M)  >> 5;
-  return  Ranges[setting] ;
+  if(!storedMagnetFS) {
+    lastMagnetFS = readRegister(LSM9DS1_ADDRESS_M, LSM9DS1_CTRL_REG2_M)  >> 5;
+    storedMagnetFS = true;
+  }
+  return  Ranges[lastMagnetFS] ;
 }
 
 int LSM9DS1Class::setMagnetODR(uint8_t range)  // range (0..8) = {0.625,1.25,2.5,5,10,20,40,80,400}Hz
@@ -447,6 +466,7 @@ int LSM9DS1Class::setMagnetODR(uint8_t range)  // range (0..8) = {0.625,1.25,2.5
           writeRegister(LSM9DS1_ADDRESS_M, LSM9DS1_CTRL_REG1_M,setting) ;	 
   uint16_t duration = 1750 / (range + 1);   // 1750,875,666,500,400,333,285,250,222  calculate measuring time
   magnetODR= measureMagnetODR(duration);    //measure the actual ODR value
+  return 1;
 }
 
 float LSM9DS1Class::getMagnetODR()  // Output {0.625, 1.25, 2.5, 5.0, 10.0, 20.0, 40.0 , 80.0}; //Hz

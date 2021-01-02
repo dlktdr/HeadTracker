@@ -82,6 +82,8 @@ class LSM9DS1Class {
     float accelOffset[3] = {0,0,0}; // zero point offset correction factor for calibration
     float accelSlope[3] = {1,1,1};  // slope correction factor for calibration
     float accelUnit = GRAVITY;      //  GRAVITY   OR  METERPERSECOND2 
+    uint8_t lastAccelFS;
+    bool    storedAccelFS;    
     virtual int   readAccel(float& x, float& y, float& z); // Return calibrated data in unit of choise G or m/s2.
     virtual int   readRawAccel(float& x, float& y, float& z); // Return uncalibrated results  
     virtual int   accelAvailable(); // Number of samples in the FIFO.
@@ -98,6 +100,8 @@ class LSM9DS1Class {
     float gyroOffset[3] = {0,0,0};      // zero point offset correction factor for calibration
     float gyroSlope[3] = {1,1,1};  		// slope correction factor for calibration
     float gyroUnit = DEGREEPERSECOND;   // DEGREEPERSECOND  RADIANSPERSECOND REVSPERMINUTE REVSPERSECOND
+    uint8_t lastGyroFS;
+    bool    storedGyroFS;   
     virtual int   readGyro(float& x, float& y, float& z); // Return calibrated data in in unit of choise °/s or rad/s.
     virtual int   readRawGyro(float& x, float& y, float& z); // Return uncalibrated results 
     virtual int   gyroAvailable(); 		// Number of samples in the FIFO.
@@ -114,6 +118,8 @@ class LSM9DS1Class {
     float magnetOffset[3] = {0,0,0}; // zero point offset correction factor for calibration
     float magnetSlope[3] = {1,1,1};  // slope correction factor for calibration
     float magnetUnit = MICROTESLA;  //  GAUSS,  MICROTESLA NANOTESLA
+    uint8_t lastMagnetFS;
+    bool    storedMagnetFS; 
     virtual int   readMagnet(float& x, float& y, float& z); // Return calibrated data in unit of choise µT , nT or G 
     virtual int   readRawMagnet(float& x, float& y, float& z); // Return uncalibrated results 
     virtual int   magnetAvailable(); // Number of samples in the FIFO.
