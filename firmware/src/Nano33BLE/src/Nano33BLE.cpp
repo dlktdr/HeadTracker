@@ -41,10 +41,8 @@ volatile bool pauseForEEPROM=false;
 FlashIAP flash;
 
 void setup() { 
-  // Setup Serial Port
-  Serial.begin(921600);
-  //Serial.begin(115200);
-  
+  serial_Init();
+
   init_Flash();   
   io_Init();
 
@@ -72,4 +70,6 @@ void setup() {
 }
 
 // Not Used
-void loop() {}
+void loop() {
+    ThisThread::sleep_for(std::chrono::milliseconds(1000));
+}

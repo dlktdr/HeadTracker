@@ -7,38 +7,67 @@
 // any ready to go buffered serial methods to work.
 // Could have probably make a #define that overrides Serial.print
 
-// Buffer
-char jsondatabuf[RT_BUF_SIZE];
+// Buffer, Store up to 3 JSON Messages before loosing data.
+char jsondatabuf[RX_BUFFERS][RX_BUF_SIZE];
 
 // Serial input / output Buffers
-CircularBuffer<char, RT_BUF_SIZE> serin;
+CircularBuffer<char, RX_BUF_SIZE> serin;
 CircularBuffer<char, TX_BUF_SIZE> serout;
+Mutex writingBufffer;
 
 volatile bool JSONready;
 volatile bool JSONfault;
 volatile bool SerBufOverflow;
 volatile bool BuffToSmall;
+volatile int bufIndex=0;
+volatile int bufsUsed=0;
 
 // Buffered write to serial
 Mutex serWriteMutex;
 
+void serial_Init() 
+{
+    Serial.begin(115200); // Baud doesn't actually do anything with serial CDC    
+}
+
 void serial_Thread()
-{ 
-  
+{  
   while(1) {
-    // Don't like this but can't get bufferedserial or available bytes to write
-    // functions to work, at least shouldn't block this way.
+    // Don't like this but can't get bufferedserial to work and the Arduino serial lib has blocking writes after buffer fill.
+    // Also no notify if its full or not...    
     digitalWrite(LEDG,LOW); // Serial RX Green, ON
     int bytx = serout.size();
     char txa[60];
-    bytx = MIN(bytx,60);
+    bytx = MIN(bytx,64); // Apparenlty buffer is 64chars?? More than this causes blocking
     for(int i =0;i<bytx;i++) {
       serout.pop(txa[i]);      
     }
-    Serial.write(txa,bytx); // !!!! ONLY PLACE SERIAL.WRITE SHOULD BE USED !!!
+    Serial.write(txa,bytx); // !!!! ONLY PLACE SERIAL.WRITE SHOULD BE USED !!!!
     digitalWrite(LEDG,HIGH); // Serial RX Green, ON
     ThisThread::sleep_for(std::chrono::milliseconds(SERIAL_THREAD_PERIOD));
 };}
+
+// Pop a JSON item off the buffer
+char *getJSONBuffer() 
+{    
+    __disable_irq();    
+    int bi = bufIndex;
+    int bu = bufsUsed;
+    bufsUsed--;
+    __enable_irq();
+    int i = bi - bu;
+    while (i >= RX_BUFFERS)
+        i = i - RX_BUFFERS;
+    while (i < 0)
+        i = i + RX_BUFFERS;
+    return jsondatabuf[i];
+}
+
+// Buffers Used
+int buffersFilled() 
+{    
+    return bufsUsed;
+}
 
 // Serial RX Interrupt, Stay Fast as possible Here
 void serialrx_Int()
@@ -49,35 +78,43 @@ void serialrx_Int()
   while(Serial.available()) {
     char sc = Serial.read();
     if(sc == 0x02) {  // Start Of Text Character, clear buffer
-      serin.reset();
-      
+        serin.reset();
+        //  New data move to next buffer
+
     } else if (sc == 0x03) { // End of Text Characher, parse JSON data
-      if(JSONready)   // Data already in buffer not yet read
-        JSONfault = true;
-      else  {
-        // Check how much data is in the buffer
-        int bsz = serin.size();
-        if(bsz > RT_BUF_SIZE - 1) {
-            BuffToSmall = true;
+        
+        // All buffers filled? Ditch this message                
+        if(bufsUsed == RX_BUFFERS)   {
+            JSONfault = true;
             serin.reset();
+
+        // Good to store to buffer
+        } else  { 
+            // Move from the circular buffer into character String
+            int bsz = serin.size();
+            char *dataptr = jsondatabuf[bufIndex];
+            for(int i=0; i < bsz; i++) 
+                serin.pop(*(dataptr++));
+            *dataptr = 0;
+
+            bufIndex = (bufIndex+1) % RX_BUFFERS;
+            bufsUsed++;
         }
 
-        // Move from Circular Buffer into Character String
-        char *dataptr = jsondatabuf;
-        for(int i=0; i < bsz; i++) 
-            serin.pop(*(dataptr++));
-        *dataptr = 0; // Null terminate
-
-        // Notify user thread the character string is ready to read
-        JSONready = true;
-      }
       serin.reset();      
     }
 
     else { // Add data to buffer
-      serin.push(sc);
-      if(serin.full())
-        SerBufOverflow = true;      
+        // Check how much data is in the buffer
+
+        if(serin.size() >= RX_BUF_SIZE - 1) {
+            BuffToSmall = true;
+            serin.reset();
+        }
+        // 
+        serin.push(sc);
+        if(serin.full())
+            SerBufOverflow = true;      
     }
   }      
   digitalWrite(LEDG,HIGH);  // Serial RX Green, OFF

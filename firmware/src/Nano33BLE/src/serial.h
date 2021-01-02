@@ -9,13 +9,16 @@
 using namespace mbed;
 using namespace rtos;
 
-static const int RT_BUF_SIZE=1000; // RX Buffer Size
+static const int RX_BUF_SIZE=1000; // RX Buffer Size
+static const int RX_BUFFERS=4; // Number of RX Buffers
 static const int TX_BUF_SIZE=1000; // RX Buffer Size
-static const int SERIAL_THREAD_PERIOD = 15; 
-extern char jsondatabuf[RT_BUF_SIZE];
+static const int SERIAL_THREAD_PERIOD = 13; 
 
-extern void serial_Thread();
-extern void serialrx_Int();
+void serial_Init();
+void serial_Thread();
+void serialrx_Int();
+char* getJSONBuffer();
+int buffersFilled();
 
 // ONLY use these serial write methods, they are buffered.
 void serialWrite(arduino::String str);
@@ -30,7 +33,7 @@ void serialWriteJSON(DynamicJsonDocument &json);
 extern CircularBuffer<char, TX_BUF_SIZE> serout;
 extern CircularBuffer<char, TX_BUF_SIZE> serin;
 extern Mutex serWriteMutex;
-
+extern Mutex writingBufffer;
 extern volatile bool JSONready;
 extern volatile bool JSONfault;
 extern volatile bool SerBufOverflow;

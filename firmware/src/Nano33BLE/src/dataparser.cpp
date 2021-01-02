@@ -12,75 +12,74 @@ using namespace rtos;
 using namespace mbed;
 
 // Timers, Initially start timed out
-//Kernel::Clock::time_point dataSendTime = Kernel::Clock::now() + std::chrono::milliseconds(DATA_SEND_TIME);
 Kernel::Clock::time_point uiResponsive = Kernel::Clock::now();
 
 bool sendData=false;
 
 // Handles all data transmission with the UI via Serial port
-
 void data_Thread()
 {     
-  DynamicJsonDocument json(RT_BUF_SIZE);
+  DynamicJsonDocument json(RX_BUF_SIZE);
 
   while(1) {    
-    digitalWrite(LEDR,LOW); // Serial RX Blue, Off      
+    digitalWrite(LEDR,LOW); // Serial RX Blue, Off
 
-    // Check if data is ready        
-    if(JSONready) {
-      DeserializationError de = deserializeJson(json, jsondatabuf);      
-      if(de) {
-        serialWrite("HT: DeserializeJson() Failed\r\n");
-      }
-
-      // ISR Flags
-      __disable_irq();
-      JSONready = false;
-      __enable_irq();
-
-      // Parse The JSON Data
-      parseData(json);            
-    } 
+    // Check if data is ready
+    while(buffersFilled() > 0) {
+        
+        DeserializationError de = deserializeJson(json, getJSONBuffer());
+        if(de) {
+            if(de == DeserializationError::IncompleteInput)
+                serialWrite("HT: DeserializeJson() Failed - IncompleteInput\r\n");
+            else if(de == DeserializationError::InvalidInput)
+                serialWrite("HT: DeserializeJson() Failed - InvalidInput\r\n");
+            else if(de == DeserializationError::NoMemory)
+                serialWrite("HT: DeserializeJson() Failed - NoMemory\r\n");
+            else if(de == DeserializationError::NotSupported)
+                serialWrite("HT: DeserializeJson() Failed - NotSupported\r\n");
+            else if(de == DeserializationError::TooDeep)
+                serialWrite("HT: DeserializeJson() Failed - TooDeep\r\n");
+            else 
+                serialWrite("HT: DeserializeJson() Failed - Other\r\n");      
+        }
+        // Parse The JSON Data
+        parseData(json);            
+    }
 
     if(JSONfault) {
-      serialWrite("HT: JSON Data Lost\r\n");
+        serialWrite("HT: JSON Data Lost\r\n");
 
-      // ISR flags
-      __disable_irq();
-      JSONready = false;
-      JSONfault = false;
-      __enable_irq();
+        // ISR flags
+        __disable_irq();
+        JSONready = false;
+        JSONfault = false;
+        __enable_irq();
     }
 
     if(SerBufOverflow) {
       serialWrite("HT: Serial Buffer Overflow!\r\n");
-      // ISR Flags
-      __disable_irq();
-      SerBufOverflow = false;
-      JSONready = false;
-      JSONfault = false;
-      __enable_irq();
+        // ISR Flags
+        __disable_irq();
+        SerBufOverflow = false;
+        JSONready = false;
+        JSONfault = false;
+        __enable_irq();
     }
 
     // Has it been enough time since last send of the data? Is the UI Still responsive?
-
     Kernel::Clock::time_point curtime = Kernel::Clock::now();
 
-    //if(dataSendTime < curtime && uiResponsive > curtime) {
     if(uiResponsive > curtime) {
-      // Build JSON of Data
-      json.clear();      
-      dataMutex.lock();
-      trkset.setJSONData(json);
-      dataMutex.unlock();
+        // Build JSON of Data
+        json.clear();      
+        dataMutex.lock();
+        trkset.setJSONData(json);
+        dataMutex.unlock();
 
-      // Add the Command
-      json["Cmd"] = "Data";               
+        // Add the Command
+        json["Cmd"] = "Data";               
 
-      serialWriteJSON(json);
-      
-      // Reset Sent Timer          
-      //dataSendTime = Kernel::Clock::now() + std::chrono::milliseconds(DATA_SEND_TIME);
+        serialWriteJSON(json);
     } 
 
     digitalWrite(LEDR,HIGH); // Serial RX Blue, Off
