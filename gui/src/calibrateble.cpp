@@ -1,3 +1,5 @@
+#include <math.h>
+
 #include "calibrateble.h"
 #include "ui_calibrateble.h"
 
@@ -152,8 +154,12 @@ void CalibrateBLE::nextClicked()
         hide();
         ui->stackedWidget->setCurrentIndex(0);
         ui->cmdNext->setText("Next");
-        trkset->setMagOffset(magoff[0],magoff[1],magoff[2]);
-        trkset->setGyroOffset(gyrsaveoff[0],gyrsaveoff[1],gyrsaveoff[2]);
+        trkset->setMagOffset(roundf(magoff[0]*1000)/1000,
+                             roundf(magoff[1]*1000)/10000,
+                             roundf(magoff[2]*1000)/1000);
+        trkset->setGyroOffset(roundf(gyrsaveoff[0]*1000)/1000,
+                              roundf(gyrsaveoff[1]*1000)/1000,
+                              roundf(gyrsaveoff[2]*1000)/1000);
         emit calibrationSave();
         step = 0;
         break;

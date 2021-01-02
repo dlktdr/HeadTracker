@@ -730,7 +730,7 @@ void TrackerSettings::loadFromEEPROM()
     
     if(json["UUID"] == 837727) {
         serialWriteln("Device has been freshly programmed");
-        
+
     } else {
         serialWriteln("Device contains saved code");
         loadJSONSettings(json);
@@ -740,27 +740,27 @@ void TrackerSettings::loadFromEEPROM()
 // Used to transmit raw data back to the PC
 void TrackerSettings::setJSONData(DynamicJsonDocument &json)
 {
-    json["magx"] = magx;
-    json["magy"] = magy;
-    json["magz"] = magz;
+    json["magx"] = roundf(magx*1000)/1000;
+    json["magy"] = roundf(magy*1000)/1000;
+    json["magz"] = roundf(magz*1000)/1000;
 
-    json["gyrox"] = gyrox;
-    json["gyroy"] = gyroy;
-    json["gyroz"] = gyroz;
+    json["gyrox"] = roundf(gyrox*1000)/1000;
+    json["gyroy"] = roundf(gyroy*1000)/1000;
+    json["gyroz"] = roundf(gyroz*1000)/1000;
 
-    json["accx"] = accx;
-    json["accy"] = accy;
-    json["accz"] = accz;
+    json["accx"] = roundf(accx*1000)/1000;
+    json["accy"] = roundf(accy*1000)/1000;
+    json["accz"] = roundf(accz*1000)/1000;
 
-    json["tiltraw"] = tilt;
-    json["rollraw"] = roll;
-    json["panraw"] = pan;
+    json["tiltraw"] = roundf(tilt*1000)/1000;
+    json["rollraw"] = roundf(roll*1000)/1000;
+    json["panraw"] = roundf(pan*1000)/1000;
     
     json["panout"] = panout;
     json["tiltout"] = tiltout;
     json["rollout"] = rollout;
 
-    json["panoff"] = panoff;
-    json["tiltoff"] = tiltoff;
-    json["rolloff"] = rolloff;    
+    json["panoff"] = roundf(panoff*1000)/1000;
+    json["tiltoff"] = roundf(tiltoff*1000)/1000;
+    json["rolloff"] = roundf(rolloff*1000)/1000;    
 }
