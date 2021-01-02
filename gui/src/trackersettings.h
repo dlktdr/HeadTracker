@@ -118,6 +118,9 @@ public:
     int buttonPin() const;
     void setButtonPin(int value);
 
+    bool resetOnWave() const {return _data["rstonwave"].toBool();}
+    void setResetOnWave(bool value) {_data["rstonwave"] = value;}
+
     void gyroOffset(float &x, float &y, float &z);
     void setGyroOffset(float x,float y, float z);
 
@@ -156,8 +159,6 @@ public:
     QString getHardware() {return _data["Hard"].toString();}
     QString getFWVersion() {return _data["Vers"].toString();}
     void setHardware(QString vers,QString hard);
-
-
 
 signals:
     void rawGyroChanged(float x, float y, float z);

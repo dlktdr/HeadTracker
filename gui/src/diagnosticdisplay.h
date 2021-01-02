@@ -19,7 +19,7 @@ public:
 private:
     Ui::DiagnosticDisplay *ui;
      TrackerSettings *trkset;
-private slots:
+public slots:
      void updated();
 };
 

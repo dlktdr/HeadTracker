@@ -7,7 +7,7 @@
 // any ready to go buffered serial methods to work.
 // Could have probably make a #define that overrides Serial.print
 
-// Buffer, Store up to 3 JSON Messages before loosing data.
+// Buffer, Store up to RX_BUFFERS JSON Messages before loosing data.
 char jsondatabuf[RX_BUFFERS][RX_BUF_SIZE];
 
 // Serial input / output Buffers

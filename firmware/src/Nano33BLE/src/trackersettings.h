@@ -116,6 +116,9 @@ public:
     int buttonPin() const;
     void setButtonPin(int value);
 
+    bool resetOnWave() const {return rstonwave;}
+    void setResetOnWave(bool value) {rstonwave = value;}
+
     void gyroOffset(float &x, float &y, float &z) {x=gyrxoff;y=gyryoff;z=gyrzoff;}
     void setGyroOffset(float x,float y, float z) {gyrxoff=x;gyryoff=y;gyrzoff=z;}
 
@@ -180,6 +183,8 @@ private:
     PpmOut *_ppmout; // Local reference to PPM output Class
     PpmIn *_ppmin; // Local reference to PPM input Class
     int btmode;
+    bool rstonwave;
+    bool freshProgram;
 
 // Data
     float gyrox,gyroy,gyroz;

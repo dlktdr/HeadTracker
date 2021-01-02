@@ -48,6 +48,8 @@ private:
     CalibrateBNO *bnoCalibratorDialog;
     CalibrateBLE *bleCalibratorDialog;
     DiagnosticDisplay *diagnostic;
+    bool savedToNVM;
+    bool sentToHT;
 
     int xtime;
     bool graphing;
@@ -60,13 +62,13 @@ private:
     // JSON format
     void sendSerialJSON(QString command, QVariantMap map=QVariantMap());
     void parseIncomingJSON(const QVariantMap &map);
-
     void fwDiscovered(QString vers, QString hard);
-
     void addToLog(QString log);
+
 
 protected:
     void keyPressEvent(QKeyEvent *event);
+
 
 private slots:
     void findSerialPorts();
@@ -93,6 +95,7 @@ private slots:
     void uploadFirmwareClick();
     void startCalibration();
     void ackTimeout();
+    void saveToNVM();
 
 };
 #endif // MAINWINDOW_H

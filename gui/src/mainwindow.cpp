@@ -18,6 +18,8 @@ MainWindow::MainWindow(QWidget *parent)
     bnoCalibratorDialog = new CalibrateBNO;
     bleCalibratorDialog = new CalibrateBLE(&trkset);
     diagnostic = new DiagnosticDisplay(&trkset);
+    savedToNVM = true;
+    sentToHT = true;
 
     ui->statusbar->showMessage("Disconnected");
     findSerialPorts();
@@ -48,6 +50,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->cmdStopGraph,SIGNAL(clicked()),this,SLOT(stopGraph()));
     connect(ui->cmdResetCenter,SIGNAL(clicked()),this, SLOT(resetCenter()));
     connect(ui->cmdCalibrate,SIGNAL(clicked()),this, SLOT(startCalibration()));
+    connect(ui->cmdSaveNVM,&QPushButton::clicked,this, &MainWindow::saveToNVM);
     connect(ui->cmdRefresh,&QPushButton::clicked,this,&MainWindow::findSerialPorts);
 
     // Check Boxes
@@ -56,6 +59,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->chktltrev,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
     connect(ui->chkInvertedPPM,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
     connect(ui->chkInvertedPPMIn,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
+    connect(ui->chkResetCenterWave,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
     connect(ui->chkRawData,SIGNAL(clicked(bool)),this,SLOT(setDataMode(bool)));
 
     // Spin Boxes
@@ -189,8 +193,7 @@ void MainWindow::parseSerialData()
 void MainWindow::parseIncomingJSON(const QVariantMap &map)
 {
     // Settings from the Tracker Sent, save them and update the UI
-    if(map["Cmd"].toString() == "Settings") {
-
+    if(map["Cmd"].toString() == "Settings") {        
         trkset.setAllData(map);
         updateToUI();
 
@@ -198,19 +201,6 @@ void MainWindow::parseIncomingJSON(const QVariantMap &map)
     } else if (map["Cmd"].toString() == "Data") {
         // Add all the data to the settings
         trkset.setLiveDataMap(map);
-       /* qDebug() << "GYRO " << trkset.getLiveData("gyrox").toDouble()
-                 << trkset.getLiveData("gyroy").toDouble()
-                 << trkset.getLiveData("gyroz").toDouble();
-
-        qDebug() << "ACC " << trkset.getLiveData("accx").toDouble()
-                 << trkset.getLiveData("accy").toDouble()
-                 << trkset.getLiveData("accz").toDouble();
-
-        qDebug() << "MAG " << trkset.getLiveData("magx").toDouble()
-                 << trkset.getLiveData("magy").toDouble()
-                 << trkset.getLiveData("magz").toDouble();*/
-
-
     // Firmware Hardware and Version
     } else if (map["Cmd"].toString() == "FW") {
         fwDiscovered(map["Vers"].toString(), map["Hard"].toString());
@@ -517,6 +507,7 @@ void MainWindow::updateToUI()
     ui->chktltrev->setChecked(trkset.isTiltReversed());
     ui->chkInvertedPPM->setChecked(trkset.invertedPpmOut());
     ui->chkInvertedPPMIn->setChecked(trkset.invertedPpmIn());
+    ui->chkResetCenterWave->setChecked(trkset.resetOnWave());
 
     ui->cmbpanchn->blockSignals(true);
     ui->cmbrllchn->blockSignals(true);
@@ -546,6 +537,9 @@ void MainWindow::updateToUI()
     ui->cmbPpmOutPin->blockSignals(false);
     ui->cmbPpmInPin->blockSignals(false);
     ui->cmbButtonPin->blockSignals(false);
+
+    savedToNVM = true; // Values are the same as the HT
+    sentToHT = true;
 }
 
 /* offOrientChanged()
@@ -611,6 +605,10 @@ void MainWindow::updateFromUI()
 
     trkset.setInvertedPpmOut(ui->chkInvertedPPM->isChecked());
     trkset.setInvertedPpmIn(ui->chkInvertedPPMIn->isChecked());
+    trkset.setResetOnWave(ui->chkResetCenterWave->isChecked());
+
+    savedToNVM = false; // Indicate values have not been save to NVM
+    sentToHT = false; // Indivate changes haven't been sent to HT
 
     updatesettingstmr.start(1000);
 }
@@ -670,8 +668,11 @@ void MainWindow::stopGraph()
 // Send All Settings to the Controller
 void MainWindow::storeSettings()
 {
+
     sendSerialJSON("Setttings", trkset.getAllData());
-    ui->statusbar->showMessage(tr("Settings Stored to EEPROM"),2000);
+    sentToHT = true;
+    diagnostic->update();
+    ui->statusbar->showMessage(tr("Settings Sent"),2000);
 }
 
 void MainWindow::updateSettings()
@@ -695,6 +696,7 @@ void MainWindow::setDataMode(bool rawmode)
 
 void MainWindow::requestTimer()
 {
+    // *** TRY WITH BNO.
     // Request in HT Mode
     sendSerialData("$VERS");
     sendSerialData("$HARD");
@@ -703,8 +705,7 @@ void MainWindow::requestTimer()
     // Request in JSON Mode
     sendSerialJSON("FW"); // Get the firmware
     sendSerialJSON("GetSet"); // Get the Settings
-
-    ackTimeout(); // Tell it we are here*/
+    sendSerialJSON("ACK"); // Start Data Transfer right away
 }
 
 void MainWindow::rxledtimeout()
@@ -767,12 +768,10 @@ void MainWindow::startCalibration()
         startGraph();
         bnoCalibratorDialog->startCalibration();
         bnoCalibratorDialog->show();
-
     }
 }
 
-// Nano33BLE - Let Hardware know were here
-
+// Nano33BLE - Let hardware know were here
 void MainWindow::ackTimeout()
 {
     if(serialcon->isOpen() && trkset.getHardware() == "NANO33BLE") {
@@ -780,9 +779,38 @@ void MainWindow::ackTimeout()
     }
 }
 
+void MainWindow::saveToNVM()
+{
+    if(serialcon->isOpen()) {
+        if(trkset.getHardware() == "NANO33BLE") {
+            sendSerialJSON("SAVE");
+
+        }
+        else if(trkset.getHardware() == "BNO055")
+            sendSerialData("$SAVE");
+    }
+    savedToNVM = true;
+}
+
 void MainWindow::closeEvent (QCloseEvent *event)
 {
-    QCoreApplication::quit();
-    event->accept();
+    bool close=true;
+    if(!sentToHT) {
+        QMessageBox::StandardButton rval = QMessageBox::question(this,"Are you sure?","Are you sure you want to close?\n"\
+                              "Changes haven't been sent to the headtracker\nClick \"Send Changes\" first",QMessageBox::Yes|QMessageBox::No);
+        if(rval != QMessageBox::Yes)
+            close = false;
+    } else if(!savedToNVM) {
+        QMessageBox::StandardButton rval = QMessageBox::question(this,"Are you sure you?","Are you sure you want to close?\n"\
+                              "Changes haven't been permanently stored on headtracker\nClick \"Save to NVM\" first",QMessageBox::Yes|QMessageBox::No);
+        if(rval != QMessageBox::Yes)
+            close = false;
+    }
+
+    if(close) {
+        QCoreApplication::quit();
+        event->accept();
+    } else
+        event->ignore();
 }
 

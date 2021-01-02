@@ -36,6 +36,16 @@
           </property>
          </widget>
         </item>
+        <item row="1" column="0">
+         <widget class="QComboBox" name="cmdPort">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+         </widget>
+        </item>
         <item row="1" column="1">
          <widget class="QPushButton" name="cmdRefresh">
           <property name="toolTip">
@@ -47,6 +57,52 @@
           <property name="icon">
            <iconset resource="Resources.qrc">
             <normaloff>:/Icons/refresh.svg</normaloff>:/Icons/refresh.svg</iconset>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0" colspan="2">
+         <widget class="QPushButton" name="cmdConnect">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>&amp;Connect</string>
+          </property>
+         </widget>
+        </item>
+        <item row="7" column="0" colspan="2">
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="3" column="0" colspan="2">
+         <widget class="QPushButton" name="cmdDisconnect">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>&amp;Disconnect</string>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="0" colspan="2">
+         <widget class="QPushButton" name="cmdCalibrate">
+          <property name="text">
+           <string>Calibrate</string>
           </property>
          </widget>
         </item>
@@ -112,59 +168,13 @@
           </item>
          </layout>
         </item>
-        <item row="2" column="0" colspan="2">
-         <widget class="QPushButton" name="cmdConnect">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>&amp;Connect</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0">
-         <widget class="QComboBox" name="cmdPort">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="0" colspan="2">
-         <widget class="QPushButton" name="cmdDisconnect">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>&amp;Disconnect</string>
-          </property>
-         </widget>
-        </item>
-        <item row="6" column="0" colspan="2">
-         <spacer name="verticalSpacer">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
         <item row="5" column="0" colspan="2">
-         <widget class="QPushButton" name="cmdCalibrate">
+         <widget class="QPushButton" name="cmdSaveNVM">
+          <property name="toolTip">
+           <string>Permanently save the settings on the headtracker</string>
+          </property>
           <property name="text">
-           <string>Calibrate</string>
+           <string>Save to NVM</string>
           </property>
          </widget>
         </item>

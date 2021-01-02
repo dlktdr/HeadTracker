@@ -68,6 +68,7 @@ TrackerSettings::TrackerSettings()
     _ppmin = nullptr;
 
     btmode = 0;
+    rstonwave = false;
 }
 
 int TrackerSettings::Rll_min() const
@@ -599,6 +600,11 @@ void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
 // Bluetooth Mode        
     v = json["btmode"]; if(!v.isNull()) setBlueToothMode(v);
 
+// Reset On Wave    
+    v = json["rstonwave"]; if(!v.isNull()) setResetOnWave(v);
+
+// Button and PIns
+
     setButtonPin(-1);
     setPpmInPin(-1);
     setPpmOutPin(-1);
@@ -694,6 +700,7 @@ void TrackerSettings::setJSONSettings(DynamicJsonDocument &json)
     json["ppmininvert"] = ppmininvert;    
 
     json["btmode"] = btmode;
+    json["rstonwave"] = rstonwave;
 }
 
 void TrackerSettings::saveToEEPROM()
@@ -723,6 +730,7 @@ void TrackerSettings::loadFromEEPROM()
     
     if(json["UUID"] == 837727) {
         serialWriteln("Device has been freshly programmed");
+        
     } else {
         serialWriteln("Device contains saved code");
         loadJSONSettings(json);

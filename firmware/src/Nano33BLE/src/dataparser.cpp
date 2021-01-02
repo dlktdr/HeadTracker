@@ -129,7 +129,7 @@ void parseData(DynamicJsonDocument &json)
         //dataSendTime = Kernel::Clock::now() + std::chrono::milliseconds(DATA_SEND_TIME);        
     
     // Firmware Reqest
-    } else if (strcmp(command, "FWR") == 0) {
+    } else if (strcmp(command, "FW") == 0) {
       serialWrite("HT: FW Requested\r\n");
       json.clear();
       json["Cmd"] = "FW";
