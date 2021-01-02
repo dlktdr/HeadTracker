@@ -37,7 +37,7 @@ void serial_Thread()
     // Also no notify if its full or not...    
     digitalWrite(LEDG,LOW); // Serial RX Green, ON
     int bytx = serout.size();
-    char txa[60];
+    char txa[64];
     bytx = MIN(bytx,64); // Apparenlty buffer is 64chars?? More than this causes blocking
     for(int i =0;i<bytx;i++) {
       serout.pop(txa[i]);      
