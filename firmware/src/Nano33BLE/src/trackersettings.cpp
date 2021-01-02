@@ -4,6 +4,7 @@
 
 #include "serial.h"
 #include "flash.h"
+#include "io.h"
 
 #include "trackersettings.h"
 
@@ -12,18 +13,18 @@ using namespace mbed;
 TrackerSettings::TrackerSettings()
 {
     // Defaults
-    rll_min = MIN_PWM;
-    rll_max = MAX_PWM;
+    rll_min = DEF_MIN_PWM;
+    rll_max = DEF_MAX_PWM;
     rll_gain =  DEF_GAIN;
     rll_cnt = DEF_CENTER;
 
-    pan_min = MIN_PWM;
-    pan_max = MAX_PWM;
+    pan_min = DEF_MIN_PWM;
+    pan_max = DEF_MAX_PWM;
     pan_gain =  DEF_GAIN;
     pan_cnt = DEF_CENTER;
 
-    tlt_min = MIN_PWM;
-    tlt_max = MAX_PWM;
+    tlt_min = DEF_MIN_PWM;
+    tlt_max = DEF_MAX_PWM;
     tlt_gain =  DEF_GAIN;
     tlt_cnt = DEF_CENTER;
 
@@ -59,11 +60,14 @@ TrackerSettings::TrackerSettings()
     // Setup button input & ppm output pins
     setButtonPin(DEF_BUTTON_IN);
 
-    ppmpin = DEF_PPM_OUT; // Set initial val    
+    ppmoutpin = DEF_PPM_OUT;
     ppminpin = DEF_PPM_IN; 
-    ppminvert = false;
+    ppmoutinvert = false;
     ppmininvert = false;
-    _ppm = nullptr;
+    _ppmout = nullptr;
+    _ppmin = nullptr;
+
+    btmode = 0;
 }
 
 int TrackerSettings::Rll_min() const
@@ -357,7 +361,7 @@ void TrackerSettings::setRollCh(int value)
 }
 
 //----------------------------------------------------------------------------------------
-// Remappable Buttons + PPM Output Pin
+// Remappable Buttons + PPM Output Pin + Bluetooth
 
 int TrackerSettings::buttonPin() const
 {
@@ -365,104 +369,113 @@ int TrackerSettings::buttonPin() const
 }
 
 void TrackerSettings::setButtonPin(int value)
-{    
-    if(value > 1 && value < 14 && value != ppmpin) {
-        pinMode(value,INPUT_PULLUP);    // Button as Input
-        digitalWrite(value,LOW); // Pull up 
-        
-        buttonpin = value; // Save
-    }
-}
-
-int TrackerSettings::ppmPin() const
-{
-    return ppmpin;
-}
-
-/* I SEE A POTENTIAL RACE ISSUE HERE IF USER TRIES TO SWAP TWO PINS, 
- * both calls will fail should probably combine all these into a setPins 
- * method.
- *  
- */
-
-void TrackerSettings::setPPMPin(int value)
-{
+{   
     if(value > 1 && value < 14) {
-        // If already have a PPM output, delete it.
-        if(_ppm != nullptr) {
-            delete _ppm;
-            _ppm = nullptr;
-        }
+        if(buttonpin > 0)
+            pinMode(buttonpin,INPUT); // Disable old button pin
+        pinMode(value,INPUT_PULLUP);    // Button as Input        
+        buttonpin = value; // Save
+        io_Init();
 
-        pinMode(ppmpin,INPUT); // Disable old ppmpin
+    // Disable the Button Pin
+    } else if (value < 0) {
+        if(buttonpin > 0)
+            pinMode(buttonpin,INPUT); // Disable old button pin
+        buttonpin = -1;
+        io_Init();
+    }    
+}
+
+int TrackerSettings::ppmOutPin() const
+{
+    return ppmoutpin;
+}
+
+void TrackerSettings::setPpmOutPin(int value)
+{
+    if(value > 1 && value < 14) {       
+        // If already have a PPM output, delete it.
+        if(_ppmout != nullptr) {
+            delete _ppmout;
+            _ppmout = nullptr;
+        }
+                
+        if(ppmoutpin > 0)
+            pinMode(ppmoutpin,INPUT); // Disable old ppmoutpin
+        ppmoutpin = value;
         pinMode(value,OUTPUT); // Assign new as output
-        ppmpin = value;
-
-        // Create a new object, pass the pointer back.
-        _ppm = new PpmOut(digitalPinToPinName(ppmpin), DEF_PPM_CHANNELS);        
-
-        // Set the inverted flag on it
-        _ppm->setInverted(ppminvert);
-
+        
+        // Create a new object, pass the pointer back.       
+        _ppmout = new PpmOut(digitalPinToPinName((uint16_t)ppmoutpin), DEF_PPM_CHANNELS);        
+        
+        // Set the inverted flag on it        
+        _ppmout->setInverted(ppmoutinvert);
+        
     // If value less than zero disable the pin
-    } else if(value < 0) {
-        if(ppmpin > 0) {
-            pinMode(ppmpin,INPUT); // Disable old ppmpin
-            ppmpin = -1;
-        }
+    } else if(value < 0) {        
         // If already have a PPM output, delete it.
-        if(_ppm != nullptr) {
-            delete _ppm;
-            _ppm = nullptr;
+        if(_ppmout != nullptr) {            
+            delete _ppmout;
+            _ppmout = nullptr;            
+        }
+        
+        if(ppmoutpin > 0) {
+            
+            pinMode(ppmoutpin,INPUT); // Disable old ppmoutpin
+            ppmoutpin = -1;
+            
         }
     }
 }
 
-void TrackerSettings::setPPMInPin(int value)
+void TrackerSettings::setPpmInPin(int value)
 {
     if(value > 1 && value < 14)  {
 
         // If already have a PPM output, delete it.
         if(_ppmin != nullptr) {
             delete _ppmin;
-            _ppm = nullptr;
+            _ppmin = nullptr;
         }
 
-        pinMode(ppminpin,INPUT); // Disable old ppmpin
+        if(ppminpin > 0)
+            pinMode(ppminpin,INPUT); // Disable old ppmoutpin
         pinMode(value,INPUT); // Assign new
         ppminpin = value;
 
         // Create a new object, pass the pointer back.
-        _ppmin = new PpmIn(digitalPinToPinName(ppminpin), DEF_PPM_CHANNELS);        
+        _ppmin = new PpmIn(digitalPinToPinName((uint16_t)ppminpin), DEF_PPM_CHANNELS);        
 
         // Set the inverted flag on it
         _ppmin->setInverted(ppmininvert);
 
     // Disabled pin, also set before switching pins around
     } else if(value < 0) {
-        if(ppminpin > 0) {
-            pinMode(ppminpin,INPUT); // Disable old ppmpin
-            ppminpin = -1;
-        }
         // If already have a PPM output, delete it.
         if(_ppmin != nullptr) {
             delete _ppmin;
-            _ppm = nullptr;
+            _ppmin = nullptr;
+        }
+
+        // Disable old ppminpin, set to input
+        if(ppminpin > 0)  {
+            pinMode(ppminpin,INPUT); 
+            ppminpin = -1;
         }
     }
 }
 
 // Set Inverted
-void TrackerSettings::setInvertedPPM(bool inv) 
+void TrackerSettings::setInvertedPpmOut(bool inv) 
 {
-    ppminvert = inv;
-    if(_ppm != nullptr) {
-        _ppm->setInverted(inv);
+    ppmoutinvert = inv;
+    if(_ppmout != nullptr) {
+        _ppmout->setInverted(inv);
     }
 }    
 
 // Set Inverted on PPMin
-void TrackerSettings::setInvertedPPMIn(bool inv) 
+void TrackerSettings::setInvertedPpmIn(bool inv) 
 {
     ppmininvert = inv;
     if(_ppmin != nullptr) {
@@ -470,6 +483,23 @@ void TrackerSettings::setInvertedPPMIn(bool inv)
     }
 }    
 
+int TrackerSettings::blueToothMode() const
+{
+    return btmode;
+}
+
+void TrackerSettings::setBlueToothMode(int mode)
+{
+    if(mode >0 && mode < 2)
+        btmode = mode;
+
+    // Change the Bluetooth Mode Here
+    // Ideas for modes....
+    //  0 = Disabled
+    //  1 = Para Wireless Trainer
+    //  2 = HM10 + Nano Remote
+    //  3 = PC-For Updates?
+}
 //----------------------------------------------------------------------------------------
 // Data sent the PC, for calibration and info
 
@@ -566,18 +596,32 @@ void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
     v = json["gyroweightpan"];      if(!v.isNull()) setGyroWeightPan(v);
     v = json["gyroweighttiltroll"]; if(!v.isNull()) setGyroWeightTiltRoll(v);
 
+// Bluetooth Mode        
+    v = json["btmode"]; if(!v.isNull()) setBlueToothMode(v);
 
-// Set all pins to disabled first
     setButtonPin(-1);
-    setPPMPin(-1);
-    setPPMInPin(-1);
+    setPpmInPin(-1);
+    setPpmOutPin(-1);
 
-// Button Input + PPM output pins + Inverted PPM
-    v = json["buttonpin"]; if(!v.isNull()) setButtonPin(v);
-    v = json["ppmpin"]; if(!v.isNull()) setPPMPin(v);
-    v = json["ppminvert"]; if(!v.isNull()) setInvertedPPM(v);
-    v = json["ppmpinin"]; if(!v.isNull()) setPPMInPin(v);
-    v = json["ppmpininvert"]; if(!v.isNull()) setInvertedPPMIn(v);
+    // Get the pins
+    int bp=-1,ppmi=-1,ppmo=-1;
+    v = json["buttonpin"]; if(!v.isNull()) bp=v;
+    v = json["ppmoutpin"]; if(!v.isNull()) ppmo=v;
+    v = json["ppminpin"]; if(!v.isNull()) ppmi=v;
+
+    // Check and make sure none are the same if they aren't disabled
+    if((bp   > 0 && (bp == ppmi || bp == ppmo)) || 
+       (ppmi > 0 && (ppmi == bp || ppmi == ppmo)) ||
+       (ppmo > 0 && (ppmo == bp || ppmo == ppmi))) {
+        serialWriteln("HT: FAULT! Setting Pins, cannot have duplicates");
+    } else {
+        setButtonPin(bp);
+        setPpmOutPin(ppmo);
+        setPpmInPin(ppmi);
+    }
+
+    v = json["ppmininvert"]; if(!v.isNull()) setInvertedPpmIn(v);    
+    v = json["ppmoutinvert"]; if(!v.isNull()) setInvertedPpmOut(v);
 
 // Calibrarion Values
     v = json["magxoff"];
@@ -587,7 +631,7 @@ void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
     if(!v.isNull() && !v1.isNull() && !v2.isNull())
     {   
         setMagOffset(v,v1,v2);
-        serialWriteln("Mag offsets set");
+        //serialWriteln("Mag offsets set");
     }
 
 // Calibrarion Values
@@ -598,7 +642,7 @@ void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
     if(!v.isNull() && !v1.isNull() && !v2.isNull())
     {   
         setGyroOffset(v,v1,v2);
-        serialWriteln("Gyr offsets set");
+        //serialWriteln("Gyr offsets set");
     }
 
 // Calibrarion Values
@@ -643,8 +687,13 @@ void TrackerSettings::setJSONSettings(DynamicJsonDocument &json)
     json["gyroweighttiltroll"] = gyroweighttiltroll;
 
     json["buttonpin"] = buttonpin;
-    json["ppmpin"] = ppmpin;
-    json["ppminvert"] = ppminvert;
+    json["ppmoutpin"] = ppmoutpin;
+    json["ppmoutinvert"] = ppmoutinvert;
+    
+    json["ppminpin"] = ppminpin;
+    json["ppmininvert"] = ppmininvert;    
+
+    json["btmode"] = btmode;
 }
 
 void TrackerSettings::saveToEEPROM()
@@ -658,21 +707,12 @@ void TrackerSettings::saveToEEPROM()
         serialWriteln("Flash Write Failed");
     } else {
         serialWriteln("Saved to EEPROM");
-    }
-     //serialWriteln("Flash Write Failed");
+    }    
 }
 
 // Must be called on startup to create PPM object
-void TrackerSettings::loadFromEEPROM(PpmOut **ppout, PpmIn **ppin)
+void TrackerSettings::loadFromEEPROM()
 {
-    // Return the PPM Object
-    setPPMPin(DEF_PPM_OUT); 
-    *ppout = _ppm;
-
-    // Return the PPM Object
-    setPPMPin(DEF_PPM_IN); 
-    *ppin = _ppmin;
-
     // Load Settings
     DynamicJsonDocument json(1000);
     DeserializationError de;

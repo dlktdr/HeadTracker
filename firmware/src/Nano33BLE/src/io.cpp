@@ -4,6 +4,7 @@
 #include "io.h"
 
 volatile bool buttonpressed=false;
+volatile int butpin;
 
 void io_Init()
 {
@@ -19,6 +20,13 @@ void io_Init()
   pinMode(A0, OUTPUT); // Sensor thread
   pinMode(A1, OUTPUT); // 
   pinMode(A2, OUTPUT); // 
+  pinMode(A3, OUTPUT); // 
+  pinMode(A4, OUTPUT); // 
+  pinMode(A5, OUTPUT); // 
+  pinMode(A6, OUTPUT); // 
+  pinMode(A7, OUTPUT); // 
+
+  butpin = trkset.buttonPin();
 }
 
 // Reset Button Pressed Flag on Read
@@ -52,7 +60,11 @@ void io_Task()
   }
   i++;
 
+  // Make sure button pin is enabled
+  if(butpin < 1 || butpin > 13 )
+    return;
+  
   // Check button inputs, set flag, could make this an ISR but button for sure will be down for at least 1ms, also debounces
-  if(digitalRead(trkset.buttonPin()) == 0)
-    buttonpressed = true; 
+  if(digitalRead(butpin) == 0)
+    buttonpressed = true;
 }

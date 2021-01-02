@@ -10,8 +10,6 @@ using namespace mbed;
 
 // Globals
 extern TrackerSettings trkset;
-extern PpmOut *ppmout;
-extern PpmIn *ppmin;
 extern Mutex dataMutex;
 extern Mutex eeMutex;
 extern FlashIAP flash;

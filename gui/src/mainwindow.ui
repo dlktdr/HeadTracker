@@ -335,6 +335,11 @@
               <widget class="QComboBox" name="cmbButtonPin">
                <item>
                 <property name="text">
+                 <string>Disabled</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
                  <string>D2</string>
                 </property>
                </item>
@@ -439,10 +444,15 @@
               </widget>
              </item>
              <item row="0" column="1">
-              <widget class="QComboBox" name="cmbPPMpin">
+              <widget class="QComboBox" name="cmbPpmOutPin">
                <property name="currentIndex">
-                <number>8</number>
+                <number>0</number>
                </property>
+               <item>
+                <property name="text">
+                 <string>Disabled</string>
+                </property>
+               </item>
                <item>
                 <property name="text">
                  <string>D2</string>
@@ -515,7 +525,7 @@
              <item row="2" column="0">
               <widget class="QLabel" name="label_3">
                <property name="text">
-                <string>Reset Pin</string>
+                <string>Center Button</string>
                </property>
               </widget>
              </item>
@@ -527,13 +537,21 @@
               </widget>
              </item>
              <item row="1" column="1">
-              <widget class="QComboBox" name="cmbPPMInPin">
+              <widget class="QComboBox" name="cmbPpmInPin">
                <property name="enabled">
-                <bool>false</bool>
+                <bool>true</bool>
                </property>
                <property name="currentText">
-                <string>D2</string>
+                <string>Disabled</string>
                </property>
+               <property name="currentIndex">
+                <number>0</number>
+               </property>
+               <item>
+                <property name="text">
+                 <string>Disabled</string>
+                </property>
+               </item>
                <item>
                 <property name="text">
                  <string>D2</string>
@@ -599,7 +617,7 @@
              <item row="1" column="2">
               <widget class="QCheckBox" name="chkInvertedPPMIn">
                <property name="enabled">
-                <bool>false</bool>
+                <bool>true</bool>
                </property>
                <property name="text">
                 <string>Invert</string>

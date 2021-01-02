@@ -31,6 +31,7 @@ public:
     static constexpr float MIN_GAIN= 0;
     static constexpr float MAX_GAIN= 50.0;
     static constexpr float DEF_GAIN= 10.0;
+    static constexpr int DEF_BT_MODE= 0; // Bluetooth Disabled
 
     TrackerSettings();
 
@@ -100,17 +101,17 @@ public:
     int rollCh() const;
     void setRollCh(int value);
 
-    int ppmPin() const;
-    void setPPMPin(int value);
+    int ppmOutPin() const;
+    void setPpmOutPin(int value);
 
-    bool invertedPPM() {return ppminvert;}
-    void setInvertedPPM(bool inv);
+    bool invertedPpmOut() {return ppmoutinvert;}
+    void setInvertedPpmOut(bool inv);
     
     int ppmInPin() const;
-    void setPPMInPin(int value);
+    void setPpmInPin(int value);
 
-    bool invertedPPMIn() {return ppmininvert;}
-    void setInvertedPPMIn(bool inv);
+    bool invertedPppmIn() {return ppmininvert;}
+    void setInvertedPpmIn(bool inv);
         
     int buttonPin() const;
     void setButtonPin(int value);
@@ -122,11 +123,13 @@ public:
     void setAccOffset(float x,float y, float z) {accxoff=x;accyoff=y;acczoff=z;}
 
     void magOffset(float &x, float &y, float &z) {x=magxoff;y=magyoff;z=magzoff;}
-    void setMagOffset(float x,float y, float z) {magxoff=x;magyoff=y;magzoff=z;} 
+    void setMagOffset(float x,float y, float z) {magxoff=x;magyoff=y;magzoff=z;}
+
+    int blueToothMode() const;
+    void setBlueToothMode(int mode);
 
     void magSiOffset(float v[]) {memcpy(v,magsioff,9*sizeof(float));}
     void setMagSiOffset(float v[]) {memcpy(magsioff,v,9*sizeof(float));}
-
     
     // Future use where channel number adjustable
     int ppmChannels() {return ppmchannels;}
@@ -136,7 +139,7 @@ public:
     void setJSONSettings(DynamicJsonDocument &json);
 
     void saveToEEPROM();
-    void loadFromEEPROM(PpmOut **ppout, PpmIn **ppin);
+    void loadFromEEPROM();
 
     
 // Setting of data to be returned to the PC
@@ -149,7 +152,8 @@ public:
     void setJSONData(DynamicJsonDocument &json);
     void getPPMValues(uint16_t &t, uint16_t &r, uint16_t &p);
 
-    PpmOut *getPpmOut() {return _ppm;}
+    PpmOut *getPpmOut() {return _ppmout;}
+    PpmIn *getPpmIn() {return _ppmin;}
 
 private:
 // Saved Settings
@@ -170,11 +174,12 @@ private:
     int lppan,lptiltroll;
     int gyroweightpan;
     int gyroweighttiltroll;
-    int buttonpin,ppmpin,ppminpin;
-    bool ppminvert;
+    int buttonpin,ppmoutpin,ppminpin;
+    bool ppmoutinvert;
     bool ppmininvert;
-    PpmOut *_ppm; // Local reference to PPM output Class
+    PpmOut *_ppmout; // Local reference to PPM output Class
     PpmIn *_ppmin; // Local reference to PPM input Class
+    int btmode;
 
 // Data
     float gyrox,gyroy,gyroz;

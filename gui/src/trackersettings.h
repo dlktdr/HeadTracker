@@ -34,6 +34,7 @@ public:
     static constexpr float MIN_GAIN= 0;
     static constexpr float MAX_GAIN= 50.0;
     static constexpr float DEF_GAIN= 10.0;
+    static constexpr int DEF_BT_MODE= 0; // Bluetooth Disabled
 
     TrackerSettings(QObject *parent=nullptr);
     int Rll_min() const;
@@ -102,21 +103,20 @@ public:
     uint rollCh() const;
     void setRollCh(uint value);
 
-    uint ppmPin() const {return _data["ppmpin"].toUInt();}
-    void setPPMPin(uint value) {_data["ppmpin"] = value;}
+    int ppmOutPin() const;
+    void setPpmOutPin(int value);
 
-    bool invertedPPM() const {return _data["ppminvert"].toBool();}
-    void setInvertedPPM(bool value) {_data["ppminvert"] = value;}
+    bool invertedPpmOut() const;
+    void setInvertedPpmOut(bool value);
 
-    bool invertedPPMIn() const {return _data["ppmininvert"].toBool();}
-    void setInvertedPPMIn(bool value) {_data["ppmininvert"] = value;}
+    int ppmInPin() const;
+    void setPpmInPin(int value);
 
-    uint ppmInPin() const {return _data["ppminpin"].toUInt();}
-    void setPPMInPin(uint value) {_data["ppminpin"] = value;}
+    bool invertedPpmIn() const;
+    void setInvertedPpmIn(bool value);
 
-    uint buttonPin() const {return _data["buttonpin"].toUInt();}
-    void setButtonPin(uint value) {_data["buttonpin"] = value;}
-
+    int buttonPin() const;
+    void setButtonPin(int value);
 
     void gyroOffset(float &x, float &y, float &z);
     void setGyroOffset(float x,float y, float z);
@@ -138,6 +138,9 @@ public:
     uint axisSign() const {return _data["axissign"].toUInt();}
     void setAxisSign(uint value);
 
+    int blueToothMode();
+    void setBlueToothMode(int mode);
+
     void storeSettings(QSettings *settings);
     void loadSettings(QSettings *settings);
 
@@ -154,8 +157,7 @@ public:
     QString getFWVersion() {return _data["Vers"].toString();}
     void setHardware(QString vers,QString hard);
 
-    void setInvertedPPM(bool inv) {_data["ppminvert"] = inv;}
-    bool isInverted() {return _data["ppminvert"].toBool();}
+
 
 signals:
     void rawGyroChanged(float x, float y, float z);

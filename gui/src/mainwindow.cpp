@@ -52,6 +52,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->chkpanrev,&QCheckBox::clicked,this,&MainWindow::updateFromUI);
     connect(ui->chkrllrev,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
     connect(ui->chktltrev,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
+    connect(ui->chkInvertedPPM,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
+    connect(ui->chkInvertedPPMIn,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
     connect(ui->chkRawData,SIGNAL(clicked(bool)),this,SLOT(setDataMode(bool)));
 
     // Spin Boxes
@@ -99,6 +101,9 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->cmbrllchn,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbRemap,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbSigns,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->cmbButtonPin,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->cmbPpmInPin,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->cmbPpmOutPin,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
 
     // Menu Actions
     connect(ui->action_Save_to_File,SIGNAL(triggered()),this,SLOT(saveSettings()));
@@ -121,7 +126,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Start a timer to tell the device that we are here
     // Times out at 10 seconds so send an ack every 8
-    acknowledge.start(8000);
+    acknowledge.start(8000);   
 }
 
 MainWindow::~MainWindow()
@@ -227,15 +232,16 @@ void MainWindow::fwDiscovered(QString vers, QString hard)
         ui->cmbRemap->setVisible(false);
         ui->cmbSigns->setVisible(false);
         ui->stackedWidget->setCurrentIndex(2);
-        ui->grbSettings->setTitle("Settings Nano 33 BLE");
-
+        ui->chkRawData->setVisible(false);
+        ui->grbSettings->setTitle("Nano 33 BLE");
     } else if (hard == "BNO055") {
         ui->cmdStartGraph->setVisible(true);
         ui->cmdStopGraph->setVisible(true);
         ui->cmbRemap->setVisible(true);
         ui->cmbSigns->setVisible(true);
+        ui->chkRawData->setVisible(true);
         ui->stackedWidget->setCurrentIndex(1);
-        ui->grbSettings->setTitle("Settings BNO055");
+        ui->grbSettings->setTitle("BNO055");
     }
 }
 
@@ -246,13 +252,16 @@ void MainWindow::fwDiscovered(QString vers, QString hard)
 void MainWindow::sendSerialData(QByteArray data)
 {
     if(data.isEmpty() || !serialcon->isOpen())
-        return;
-
-    addToLog("TX: " + data + "\n");
+        return;    
 
     ui->txled->setState(true);
     txledtimer.start();
     serialcon->write(data);
+
+    if(data =="\x02{\"Cmd\":\"ACK\"}\x03")
+        return;
+    addToLog("TX: " + data + "\n");
+
 }
 
 /* parseIncomingHT()
@@ -360,11 +369,6 @@ void MainWindow::sendSerialJSON(QString command, QVariantMap map)
     QJsonDocument jdoc(jobj);
     QString json = QJsonDocument(jdoc).toJson(QJsonDocument::Compact);
     sendSerialData((char)0x02 + json.toLatin1() + (char)0x03);
-
-    // Delay this so there is time to process it on the other side
-    QTime dieTime= QTime::currentTime().addMSecs(100);
-    while (QTime::currentTime() < dieTime)
-        QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
 }
 
 /* addToLog()
@@ -407,13 +411,13 @@ void MainWindow::serialConnect()
     if(serialcon->isOpen())
         serialcon->close();
 
-    // Setup serial port 8N1, 1M Baud
+    // Setup serial port 8N1, 1M BaudU
     serialcon->setPortName(port);
     serialcon->setParity(QSerialPort::NoParity);
     serialcon->setDataBits(QSerialPort::Data8);
     serialcon->setStopBits(QSerialPort::OneStop);
-    serialcon->setBaudRate(921600); // 1 Mega Baud
-    serialcon->setFlowControl(QSerialPort::NoFlowControl);
+    serialcon->setBaudRate(QSerialPort::Baud115200); // CDC doesn't actuall make a dif.. cool
+    serialcon->setFlowControl(QSerialPort::HardwareControl);
 
     if(!serialcon->open(QIODevice::ReadWrite)) {
         QMessageBox::critical(this,"Error",tr("Could not open Com ") + serialcon->portName());
@@ -497,14 +501,15 @@ void MainWindow::updateToUI()
     ui->chkpanrev->setChecked(trkset.isPanReversed());
     ui->chkrllrev->setChecked(trkset.isRollReversed());
     ui->chktltrev->setChecked(trkset.isTiltReversed());
-    ui->chkInvertedPPM->setChecked(trkset.invertedPPM());
-    ui->chkInvertedPPMIn->setChecked(trkset.invertedPPMIn());
+    ui->chkInvertedPPM->setChecked(trkset.invertedPpmOut());
+    ui->chkInvertedPPMIn->setChecked(trkset.invertedPpmIn());
 
     ui->cmbpanchn->blockSignals(true);
     ui->cmbrllchn->blockSignals(true);
     ui->cmbtiltchn->blockSignals(true);
     ui->cmbRemap->blockSignals(true);
-    ui->cmbPPMpin->blockSignals(true);
+    ui->cmbPpmOutPin->blockSignals(true);
+    ui->cmbPpmInPin->blockSignals(true);
     ui->cmbButtonPin->blockSignals(true);
 
     ui->cmbpanchn->setCurrentIndex(trkset.panCh()-1);
@@ -512,16 +517,21 @@ void MainWindow::updateToUI()
     ui->cmbtiltchn->setCurrentIndex(trkset.tiltCh()-1);
     ui->cmbRemap->setCurrentIndex(ui->cmbRemap->findData(trkset.axisRemap()));
     ui->cmbSigns->setCurrentIndex(trkset.axisSign());
-    ui->cmbPPMpin->setCurrentIndex(trkset.ppmPin()+2); // Starts at D2
-    ui->cmbButtonPin->setCurrentIndex(trkset.buttonPin()+2); // Starts at D2
+
+    int ppout_index = trkset.ppmOutPin()-1;
+    int ppin_index = trkset.ppmInPin()-1;
+    int but_index = trkset.buttonPin()-1;
+    ui->cmbPpmOutPin->setCurrentIndex(ppout_index < 1 ? 0 : ppout_index);
+    ui->cmbPpmInPin->setCurrentIndex(ppin_index < 1 ? 0 : ppin_index);
+    ui->cmbButtonPin->setCurrentIndex(but_index < 1 ? 0 : but_index);
 
     ui->cmbpanchn->blockSignals(false);
     ui->cmbrllchn->blockSignals(false);
     ui->cmbtiltchn->blockSignals(false);
     ui->cmbRemap->blockSignals(false);
-    ui->cmbPPMpin->blockSignals(false);
+    ui->cmbPpmOutPin->blockSignals(false);
+    ui->cmbPpmInPin->blockSignals(false);
     ui->cmbButtonPin->blockSignals(false);
-
 }
 
 /* offOrientChanged()
@@ -577,11 +587,16 @@ void MainWindow::updateFromUI()
     trkset.setAxisRemap(ui->cmbRemap->currentData().toUInt());
     trkset.setAxisSign(ui->cmbSigns->currentIndex());
 
-    trkset.setPPMPin(ui->cmbPPMpin->currentIndex()+2);
-    trkset.setButtonPin(ui->cmbButtonPin->currentIndex()+2);
+    // Shift the index of the disabled choice to -1 in settings
+    int ppout_index = ui->cmbPpmOutPin->currentIndex()+1;
+    int ppin_index = ui->cmbPpmInPin->currentIndex()+1;
+    int but_index = ui->cmbButtonPin->currentIndex()+1;
+    trkset.setPpmOutPin(ppout_index==1?-1:ppout_index);
+    trkset.setPpmInPin(ppin_index==1?-1:ppin_index);
+    trkset.setButtonPin(but_index==1?-1:but_index);
 
-    trkset.setInvertedPPM(ui->chkInvertPPM->isChecked());
-    trkset.setInvertedPPMIn(ui->chkInvertedPPMIn->isChecked());
+    trkset.setInvertedPpmOut(ui->chkInvertedPPM->isChecked());
+    trkset.setInvertedPpmIn(ui->chkInvertedPPMIn->isChecked());
 
     updatesettingstmr.start(1000);
 }

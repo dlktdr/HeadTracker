@@ -5,18 +5,18 @@ TrackerSettings::TrackerSettings(QObject *parent):
     QObject(parent)
 {
     // Defaults
-    _data["rll_min"] = MIN_PWM;
-    _data["rll_max"] = MAX_PWM;
+    _data["rll_min"] = DEF_MIN_PWM;
+    _data["rll_max"] = DEF_MAX_PWM;
     _data["rll_gain"] = DEF_GAIN;
     _data["rll_cnt"] = DEF_CENTER;
 
-    _data["pan_min"] = MIN_PWM;
-    _data["pan_max"] = MAX_PWM;
+    _data["pan_min"] = DEF_MIN_PWM;
+    _data["pan_max"] = DEF_MAX_PWM;
     _data["pan_gain"] = DEF_GAIN;
     _data["pan_cnt"] = DEF_CENTER;
 
-    _data["tlt_min"] = MIN_PWM;
-    _data["tlt_max"] = MAX_PWM;
+    _data["tlt_min"] = DEF_MIN_PWM;
+    _data["tlt_max"] = DEF_MAX_PWM;
     _data["tlt_gain"] = DEF_GAIN;
     _data["tlt_cnt"] = DEF_CENTER;
 
@@ -34,6 +34,12 @@ TrackerSettings::TrackerSettings(QObject *parent):
 
     _data["axisremap"] = (uint)AXES_MAP(AXIS_X,AXIS_Y,AXIS_Z);
     _data["axissign"] = (uint)0;
+
+    _data["buttonpin"] = DEF_BUTTON_IN;
+    _data["ppminpin"] = DEF_PPM_IN;
+    _data["ppmoutpin"] = DEF_PPM_OUT;
+    _data["ppmoutinvert"] = false;
+    _data["ppmininvert"] = false;
 }
 
 int TrackerSettings::Rll_min() const
@@ -326,6 +332,56 @@ void TrackerSettings::setRollCh(uint value)
         _data["rllch"] = (uint)value;
 }
 
+int TrackerSettings::ppmOutPin() const
+{
+    return _data["ppmoutpin"].toInt();
+}
+
+void TrackerSettings::setPpmOutPin(int value)
+{
+    _data["ppmoutpin"] = value;
+}
+
+bool TrackerSettings::invertedPpmOut() const
+{
+    return _data["ppmoutinvert"].toBool();
+}
+
+void TrackerSettings::setInvertedPpmOut(bool value)
+{
+    _data["ppmoutinvert"] = value;
+}
+
+int TrackerSettings::ppmInPin() const
+{
+    return _data["ppminpin"].toInt();
+}
+
+void TrackerSettings::setPpmInPin(int value)
+{
+    _data["ppminpin"] = value;
+}
+
+bool TrackerSettings::invertedPpmIn() const
+{
+    return _data["ppmininvert"].toBool();
+}
+
+void TrackerSettings::setInvertedPpmIn(bool value)
+{
+    _data["ppmininvert"] = value;
+}
+
+int TrackerSettings::buttonPin() const
+{
+    return _data["buttonpin"].toInt();
+}
+
+void TrackerSettings::setButtonPin(int value)
+{
+    _data["buttonpin"] = value;
+}
+
 void TrackerSettings::gyroOffset(float &x, float &y, float &z)
 {
     x=_data["gyrxoff"].toFloat();
@@ -375,6 +431,16 @@ void TrackerSettings::setAxisRemap(uint value)
 void TrackerSettings::setAxisSign(uint value)
 {        
     _data["axissign"] = (uint)(value & 0x07);
+}
+
+int TrackerSettings::blueToothMode()
+{
+    return _data["btmode"].toBool();
+}
+
+void TrackerSettings::setBlueToothMode(int mode) {
+    if(mode >0 &&mode < 2)
+        _data["btmode"] = mode;
 }
 
 void TrackerSettings::storeSettings(QSettings *settings)

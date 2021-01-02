@@ -55,6 +55,11 @@ void sense_Thread()
   float magxoff=0, magyoff=0, magzoff=0;
   float accxoff=0, accyoff=0, acczoff=0;
   float gyrxoff=0, gyryoff=0, gyrzoff=0;
+
+  float rotatex=0,rotatety=0,rotatez=0;
+
+  PpmOut *ppmout;
+  uint16_t ppmchans[MAX_PPM_CHANNELS];
   SF fusion;
   Timer runt;
   
@@ -102,24 +107,29 @@ void sense_Thread()
         panoffset = pan;
         tiltoffset = tilt;
     }
-
-    // Tilt output
-    float tiltout = (tilt - tiltoffset) * trkset.Tlt_gain() * (trkset.isTiltReversed()?-1.0:1.0);
-    uint16_t tiltout_ui = tiltout + trkset.Tlt_cnt();
-    tiltout_ui = MAX(MIN(tiltout_ui,trkset.Tlt_max()),trkset.Tlt_min());
-    ppmout->setChannel(trkset.tiltCh(),tiltout_ui);
-
-    // Roll output
-    float rollout = (roll - rolloffset) * trkset.Rll_gain() * (trkset.isRollReversed()? -1.0:1.0);
-    uint16_t rollout_ui = rollout + trkset.Rll_cnt();
-    rollout_ui = MAX(MIN(rollout_ui,trkset.Rll_max()),trkset.Rll_min()) ;
-    ppmout->setChannel(trkset.rollCh(),rollout_ui);
     
-    // Pan output, Normalize to +/- 180 Degrees
-    float panout = normalize((pan-panoffset),-180,180)  * trkset.Pan_gain() * (trkset.isPanReversed()? -1.0:1.0);    
-    uint16_t panout_ui = panout + trkset.Pan_cnt();
-    panout_ui = MAX(MIN(panout_ui,trkset.Pan_max()),trkset.Pan_min());
-    ppmout->setChannel(trkset.panCh(),panout_ui);
+      // Tilt output
+      float tiltout = (tilt - tiltoffset) * trkset.Tlt_gain() * (trkset.isTiltReversed()?-1.0:1.0);
+      uint16_t tiltout_ui = tiltout + trkset.Tlt_cnt();
+      tiltout_ui = MAX(MIN(tiltout_ui,trkset.Tlt_max()),trkset.Tlt_min());
+      
+      // Roll output
+      float rollout = (roll - rolloffset) * trkset.Rll_gain() * (trkset.isRollReversed()? -1.0:1.0);
+      uint16_t rollout_ui = rollout + trkset.Rll_cnt();
+      rollout_ui = MAX(MIN(rollout_ui,trkset.Rll_max()),trkset.Rll_min()) ;
+      
+      // Pan output, Normalize to +/- 180 Degrees
+      float panout = normalize((pan-panoffset),-180,180)  * trkset.Pan_gain() * (trkset.isPanReversed()? -1.0:1.0);    
+      uint16_t panout_ui = panout + trkset.Pan_cnt();
+      panout_ui = MAX(MIN(panout_ui,trkset.Pan_max()),trkset.Pan_min());
+
+    // Set the PPM Outputs
+    ppmout = trkset.getPpmOut();
+    if(ppmout != nullptr) {
+      ppmout->setChannel(trkset.tiltCh(),tiltout_ui);
+      ppmout->setChannel(trkset.rollCh(),rollout_ui);
+      ppmout->setChannel(trkset.panCh(),panout_ui);
+    }
 
     // ---------------------- Get new data
 //********************************
