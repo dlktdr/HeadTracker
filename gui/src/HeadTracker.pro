@@ -18,6 +18,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     calibrateble.cpp \
     calibratebno.cpp \
+    diagnosticdisplay.cpp \
     firmware.cpp \
     main.cpp \
     mainwindow.cpp \
@@ -31,6 +32,7 @@ SOURCES += \
 HEADERS += \
     calibrateble.h \
     calibratebno.h \
+    diagnosticdisplay.h \
     firmware.h \
     mainwindow.h \
     led.h \
@@ -43,6 +45,7 @@ HEADERS += \
 FORMS += \
     calibrateble.ui \
     calibratebno.ui \
+    diagnosticdisplay.ui \
     firmware.ui \
     mainwindow.ui
 

@@ -1357,8 +1357,15 @@
     </property>
     <addaction name="actionUpload_Firmware"/>
    </widget>
+   <widget class="QMenu" name="menu_Diagnostics">
+    <property name="title">
+     <string>&amp;Diagnostics</string>
+    </property>
+    <addaction name="actionShow_Data"/>
+   </widget>
    <addaction name="menu_File"/>
    <addaction name="menuUpdate_Firmware"/>
+   <addaction name="menu_Diagnostics"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="action_Save_to_File">
@@ -1390,6 +1397,11 @@
   <action name="actionUpload_Firmware">
    <property name="text">
     <string>Upload Firmware</string>
+   </property>
+  </action>
+  <action name="actionShow_Data">
+   <property name="text">
+    <string>Show Data</string>
    </property>
   </action>
  </widget>

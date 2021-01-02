@@ -17,6 +17,8 @@ MainWindow::MainWindow(QWidget *parent)
     serialcon = new QSerialPort;
     bnoCalibratorDialog = new CalibrateBNO;
     bleCalibratorDialog = new CalibrateBLE(&trkset);
+    diagnostic = new DiagnosticDisplay(&trkset);
+
     ui->statusbar->showMessage("Disconnected");
     findSerialPorts();
     ui->cmdDisconnect->setEnabled(false);
@@ -110,6 +112,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->action_Load,SIGNAL(triggered()),this,SLOT(loadSettings()));
     connect(ui->actionE_xit,SIGNAL(triggered()),QCoreApplication::instance(),SLOT(quit()));
     connect(ui->actionUpload_Firmware,SIGNAL(triggered()),this,SLOT(uploadFirmwareClick()));
+    connect(ui->actionShow_Data,&QAction::triggered,diagnostic,&DiagnosticDisplay::show);
 
     // LED Timers
     rxledtimer.setInterval(100);
@@ -390,6 +393,17 @@ void MainWindow::addToLog(QString log)
 
     // Scroll to bottom
     ui->serialData->verticalScrollBar()->setValue(ui->serialData->verticalScrollBar()->maximum());
+}
+
+void MainWindow::keyPressEvent(QKeyEvent *event)
+{
+    if(event->type() == QKeyEvent::KeyPress) {
+        if(event->modifiers() & Qt::ControlModifier &&
+           event->key() & Qt::Key_D) {
+            // Cntrl - D Pressed
+            diagnostic->show();
+        }
+    }
 }
 
 // Finds available serial ports
@@ -687,7 +701,7 @@ void MainWindow::requestTimer()
     sendSerialData("$GSET");
 
     // Request in JSON Mode
-    sendSerialJSON("FWR"); // Get the firmware
+    sendSerialJSON("FW"); // Get the firmware
     sendSerialJSON("GetSet"); // Get the Settings
 
     ackTimeout(); // Tell it we are here*/

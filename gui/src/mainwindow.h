@@ -15,6 +15,7 @@
 #include "firmware.h"
 #include "calibratebno.h"
 #include "calibrateble.h"
+#include "diagnosticdisplay.h"
 
 const int MAX_LOG_LENGTH=6000;
 
@@ -46,6 +47,7 @@ private:
     Firmware *firmwareUploader;
     CalibrateBNO *bnoCalibratorDialog;
     CalibrateBLE *bleCalibratorDialog;
+    DiagnosticDisplay *diagnostic;
 
     int xtime;
     bool graphing;
@@ -63,7 +65,8 @@ private:
 
     void addToLog(QString log);
 
-
+protected:
+    void keyPressEvent(QKeyEvent *event);
 
 private slots:
     void findSerialPorts();
