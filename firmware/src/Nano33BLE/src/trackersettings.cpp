@@ -37,13 +37,10 @@ TrackerSettings::TrackerSettings()
     lppan = 75;
     lptiltroll = 75;
 
-    gyroweightpan = 30;
-    gyroweighttiltroll = 40;
-
     // Sensor Offsets    
-    magxoff=-1.84; magyoff=31.45; magzoff=-1.61;
+    magxoff=0; magyoff=0; magzoff=0;
     accxoff=0; accyoff=0; acczoff=0;
-    gyrxoff=4.1; gyryoff=-0.33; gyrzoff=1.5;
+    gyrxoff=0; gyryoff=0; gyrzoff=0;
 
     // Soft Iron Mag Offset
     magsioff[0] = 1; magsioff[1] = 0; magsioff[2] = 0;
@@ -259,26 +256,6 @@ void TrackerSettings::setLPPan(int value)
     lppan = value;
 }
 
-int TrackerSettings::gyroWeightTiltRoll() const
-{
-    return gyroweighttiltroll;
-}
-
-void TrackerSettings::setGyroWeightTiltRoll(int value)
-{
-    gyroweighttiltroll = value;
-}
-
-int TrackerSettings::gyroWeightPan() const
-{
-    return gyroweightpan;
-}
-
-void TrackerSettings::setGyroWeightPan(int value)
-{
-    gyroweightpan = value;
-}
-
 char TrackerSettings::servoReverse() const
 {
     return servoreverse;
@@ -466,6 +443,46 @@ void TrackerSettings::setPpmInPin(int value)
     }
 }
 
+bool TrackerSettings::resetOnWave() const 
+{
+    return rstonwave;
+}
+
+void TrackerSettings::setResetOnWave(bool value) 
+{
+    rstonwave = value;
+}
+
+void TrackerSettings::gyroOffset(float &x, float &y, float &z) const 
+{
+    x=gyrxoff;y=gyryoff;z=gyrzoff;
+}
+
+void TrackerSettings::setGyroOffset(float x,float y, float z) 
+{
+    gyrxoff=x;gyryoff=y;gyrzoff=z;
+}
+
+void TrackerSettings::accOffset(float &x, float &y, float &z) const 
+{
+    x=accxoff;y=accyoff;z=acczoff;
+}
+
+void TrackerSettings::setAccOffset(float x,float y, float z) 
+{
+    accxoff=x;accyoff=y;acczoff=z;
+}
+
+void TrackerSettings::magOffset(float &x, float &y, float &z) const 
+{
+    x=magxoff;y=magyoff;z=magzoff;
+}
+
+void TrackerSettings::setMagOffset(float x,float y, float z) 
+{
+    magxoff=x;magyoff=y;magzoff=z;
+}
+
 // Set Inverted
 void TrackerSettings::setInvertedPpmOut(bool inv) 
 {
@@ -526,13 +543,33 @@ void TrackerSettings::setRawMag(float x, float y, float z)
     magz = z;
 }
 
+void TrackerSettings::setOffGyro(float x, float y, float z)
+{
+    off_gyrox = x;
+    off_gyroy = y;
+    off_gyroz = z;
+}
+
+void TrackerSettings::setOffAccel(float x, float y, float z)
+{
+    off_accx = x;
+    off_accy = y;
+    off_accz = z;
+}
+
+void TrackerSettings::setOffMag(float x, float y, float z)
+{
+    off_magx = x;
+    off_magy = y;
+    off_magz = z;
+}
+
 void TrackerSettings::setRawOrient(float t, float r, float p) 
 {
     tilt=t;
     roll=r;
     pan=p;
 }
-
 
 void TrackerSettings::setOffOrient(float t, float r, float p) 
 {
@@ -594,8 +631,6 @@ void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
 // Misc Gains
     v = json["lppan"];              if(!v.isNull()) setLPPan(v);
     v = json["lptiltroll"];         if(!v.isNull()) setLPTiltRoll(v);
-    v = json["gyroweightpan"];      if(!v.isNull()) setGyroWeightPan(v);
-    v = json["gyroweighttiltroll"]; if(!v.isNull()) setGyroWeightTiltRoll(v);
 
 // Bluetooth Mode        
     v = json["btmode"]; if(!v.isNull()) setBlueToothMode(v);
@@ -636,19 +671,30 @@ void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
 
     if(!v.isNull() && !v1.isNull() && !v2.isNull())
     {   
-        setMagOffset(v,v1,v2);
-        //serialWriteln("Mag offsets set");
+        setMagOffset(v,v1,v2);        
+        serialWriteln("Mag offsets set");
     }
 
+    // Soft Iron Offsets
+    v = json["so00"]; if(!v.isNull()) magsioff[0] = v;
+    v = json["so01"]; if(!v.isNull()) magsioff[1] = v;
+    v = json["so02"]; if(!v.isNull()) magsioff[2] = v;
+    v = json["so10"]; if(!v.isNull()) magsioff[3] = v;
+    v = json["so11"]; if(!v.isNull()) magsioff[4] = v;
+    v = json["so12"]; if(!v.isNull()) magsioff[5] = v;
+    v = json["so20"]; if(!v.isNull()) magsioff[6] = v;
+    v = json["so21"]; if(!v.isNull()) magsioff[7] = v;
+    v = json["so22"]; if(!v.isNull()) magsioff[8] = v;
+
 // Calibrarion Values
-    v = json["gyrxoff"]; 
-    v1 =json["gyryoff"]; 
-    v2 =json["gyrzoff"]; 
+    v = json["gyrxoff"];
+    v1 =json["gyryoff"];
+    v2 =json["gyrzoff"];
 
     if(!v.isNull() && !v1.isNull() && !v2.isNull())
     {   
         setGyroOffset(v,v1,v2);
-        //serialWriteln("Gyr offsets set");
+        serialWriteln("Gyr offsets set");
     }
 
 // Calibrarion Values
@@ -659,7 +705,7 @@ void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
     if(!v.isNull() && !v1.isNull() && !v2.isNull())
     {   
         setAccOffset(v,v1,v2);
-        serialWriteln("Gyr offsets set");
+        serialWriteln("Acc offsets set");
     }
 
 }
@@ -689,8 +735,8 @@ void TrackerSettings::setJSONSettings(DynamicJsonDocument &json)
 
     json["lppan"] = lppan;
     json["lptiltroll"] = lptiltroll;
-    json["gyroweightpan"] = gyroweightpan;
-    json["gyroweighttiltroll"] = gyroweighttiltroll;
+    //json["gyroweightpan"] = gyroweightpan;
+    //json["gyroweighttiltroll"] = gyroweighttiltroll;
 
     json["buttonpin"] = buttonpin;
     json["ppmoutpin"] = ppmoutpin;
@@ -701,6 +747,30 @@ void TrackerSettings::setJSONSettings(DynamicJsonDocument &json)
 
     json["btmode"] = btmode;
     json["rstonwave"] = rstonwave;
+
+// Calibration Values
+    json["accxoff"] = accxoff; 
+    json["accyoff"] = accyoff; 
+    json["acczoff"] = acczoff; 
+
+    json["gyrxoff"] = gyrxoff;
+    json["gyryoff"] = gyryoff;
+    json["gyrzoff"] = gyrzoff;
+
+    json["magxoff"] = magxoff;
+    json["magyoff"] = magyoff;
+    json["magzoff"] = magzoff;
+
+// Soft Iron Offsets
+    json["so00"] = magsioff[0];
+    json["so01"] = magsioff[1];
+    json["so02"] = magsioff[2];
+    json["so10"] = magsioff[3];
+    json["so11"] = magsioff[4];
+    json["so12"] = magsioff[5];
+    json["so20"] = magsioff[6];
+    json["so21"] = magsioff[7];
+    json["so22"] = magsioff[8];
 }
 
 void TrackerSettings::saveToEEPROM()
@@ -724,7 +794,7 @@ void TrackerSettings::loadFromEEPROM()
     DynamicJsonDocument json(1000);
     DeserializationError de;
     de = deserializeJson(json, flashSpace);
-
+    
     if(de != DeserializationError::Ok) 
         serialWriteln("Invalid JSON Data");
     
@@ -748,19 +818,34 @@ void TrackerSettings::setJSONData(DynamicJsonDocument &json)
     json["gyroy"] = roundf(gyroy*1000)/1000;
     json["gyroz"] = roundf(gyroz*1000)/1000;
 
+/* Live Values for Debugging 
     json["accx"] = roundf(accx*1000)/1000;
     json["accy"] = roundf(accy*1000)/1000;
     json["accz"] = roundf(accz*1000)/1000;
 
+    json["offmagx"] = roundf(off_magx*1000)/1000;
+    json["offmagy"] = roundf(off_magy*1000)/1000;
+    json["offmagz"] = roundf(off_magz*1000)/1000;
+
+    json["offgyrox"] = roundf(off_gyrox*1000)/1000;
+    json["offgyroy"] = roundf(off_gyroy*1000)/1000;
+    json["offgyroz"] = roundf(off_gyroz*1000)/1000;
+
+    json["offaccx"] = roundf(accx*1000)/1000;
+    json["offaccy"] = roundf(accy*1000)/1000;
+    json["offaccz"] = roundf(accz*1000)/1000;
+
     json["tiltraw"] = roundf(tilt*1000)/1000;
     json["rollraw"] = roundf(roll*1000)/1000;
-    json["panraw"] = roundf(pan*1000)/1000;
+    json["panraw"] = roundf(pan*1000)/1000;    
+*/
+
+    json["panoff"] = roundf(panoff*1000)/1000;
+    json["tiltoff"] = roundf(tiltoff*1000)/1000;
+    json["rolloff"] = roundf(rolloff*1000)/1000;    
     
     json["panout"] = panout;
     json["tiltout"] = tiltout;
     json["rollout"] = rollout;
 
-    json["panoff"] = roundf(panoff*1000)/1000;
-    json["tiltoff"] = roundf(tiltoff*1000)/1000;
-    json["rolloff"] = roundf(rolloff*1000)/1000;    
 }

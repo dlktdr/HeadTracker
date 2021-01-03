@@ -6,6 +6,7 @@
 #include "PPM/PPMOut.h"
 #include "PPM/PPMIn.h"
 #include "config.h"
+#include "serial.h"
 
 #define EXAMPLE_KV_VALUE_LENGTH 64
 #define KV_KEY_LENGTH 32
@@ -77,12 +78,6 @@ public:
     int lpTiltRoll() const;
     void setLPTiltRoll(int value);
 
-    int gyroWeightTiltRoll() const;
-    void setGyroWeightTiltRoll(int value);
-
-    int gyroWeightPan() const;
-    void setGyroWeightPan(int value);
-
     char servoReverse() const;
     void setServoreverse(char value);
     void setRollReversed(bool value);
@@ -116,17 +111,17 @@ public:
     int buttonPin() const;
     void setButtonPin(int value);
 
-    bool resetOnWave() const {return rstonwave;}
-    void setResetOnWave(bool value) {rstonwave = value;}
+    bool resetOnWave() const;
+    void setResetOnWave(bool value);
 
-    void gyroOffset(float &x, float &y, float &z) {x=gyrxoff;y=gyryoff;z=gyrzoff;}
-    void setGyroOffset(float x,float y, float z) {gyrxoff=x;gyryoff=y;gyrzoff=z;}
+    void gyroOffset(float &x, float &y, float &z) const;
+    void setGyroOffset(float x,float y, float z);
 
-    void accOffset(float &x, float &y, float &z) {x=accxoff;y=accyoff;z=acczoff;}
-    void setAccOffset(float x,float y, float z) {accxoff=x;accyoff=y;acczoff=z;}
+    void accOffset(float &x, float &y, float &z) const;
+    void setAccOffset(float x,float y, float z);
 
-    void magOffset(float &x, float &y, float &z) {x=magxoff;y=magyoff;z=magzoff;}
-    void setMagOffset(float x,float y, float z) {magxoff=x;magyoff=y;magzoff=z;}
+    void magOffset(float &x, float &y, float &z) const;
+    void setMagOffset(float x,float y, float z);
 
     int blueToothMode() const;
     void setBlueToothMode(int mode);
@@ -150,6 +145,9 @@ public:
     void setRawAccel(float x, float y, float z);
     void setRawMag(float x, float y, float z);
     void setRawOrient(float t, float r, float p);
+    void setOffGyro(float x, float y, float z);
+    void setOffAccel(float x, float y, float z);
+    void setOffMag(float x, float y, float z);    
     void setOffOrient(float t, float r, float p);
     void setPPMOut(uint16_t t, uint16_t r, uint16_t p);
     void setJSONData(DynamicJsonDocument &json);
@@ -175,8 +173,6 @@ private:
     
     int servoreverse;
     int lppan,lptiltroll;
-    int gyroweightpan;
-    int gyroweighttiltroll;
     int buttonpin,ppmoutpin,ppminpin;
     bool ppmoutinvert;
     bool ppmininvert;
@@ -190,6 +186,9 @@ private:
     float gyrox,gyroy,gyroz;
     float accx,accy,accz;
     float magx,magy,magz;
+    float off_gyrox,off_gyroy,off_gyroz;
+    float off_accx,off_accy,off_accz;
+    float off_magx,off_magy,off_magz;
     float tilt,roll,pan;
     float tiltoff,rolloff,panoff;
     uint16_t panout,tiltout,rollout;
