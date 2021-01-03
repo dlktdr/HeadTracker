@@ -64,6 +64,7 @@ void sense_Thread()
     float accxoff=0, accyoff=0, acczoff=0;
     float gyrxoff=0, gyryoff=0, gyrzoff=0;
     float rotatex=0,rotatety=0,rotatez=0;
+    float l_panout=0, l_tiltout=0, l_rollout=0;
 
     PpmOut *ppmout;
     PpmIn *ppmin;
@@ -141,18 +142,26 @@ void sense_Thread()
         
         // Tilt output
         float tiltout = (tilt - tiltoffset) * trkset.Tlt_gain() * (trkset.isTiltReversed()?-1.0:1.0);
-        uint16_t tiltout_ui = tiltout + trkset.Tlt_cnt();
-        tiltout_ui = MAX(MIN(tiltout_ui,trkset.Tlt_max()),trkset.Tlt_min());
-        
+        float beta = (float)trkset.lpTiltRoll() / 100;                        // LP Beta
+        tiltout = beta * tiltout + (1.0 - beta) * l_tiltout;                  // Low Pass
+        l_tiltout = tiltout;
+        uint16_t tiltout_ui = tiltout + trkset.Tlt_cnt();                     // Apply Center Offset
+        tiltout_ui = MAX(MIN(tiltout_ui,trkset.Tlt_max()),trkset.Tlt_min());  // Limit Output
+               
         // Roll output
         float rollout = (roll - rolloffset) * trkset.Rll_gain() * (trkset.isRollReversed()? -1.0:1.0);
-        uint16_t rollout_ui = rollout + trkset.Rll_cnt();
-        rollout_ui = MAX(MIN(rollout_ui,trkset.Rll_max()),trkset.Rll_min()) ;
+        rollout = beta * rollout + (1.0 - beta) * l_rollout;                  // Low Pass        
+        l_rollout = rollout;
+        uint16_t rollout_ui = rollout + trkset.Rll_cnt();                     // Apply Center Offset
+        rollout_ui = MAX(MIN(rollout_ui,trkset.Rll_max()),trkset.Rll_min());  // Limit Output
         
         // Pan output, Normalize to +/- 180 Degrees
         float panout = normalize((pan-panoffset),-180,180)  * trkset.Pan_gain() * (trkset.isPanReversed()? -1.0:1.0);    
-        uint16_t panout_ui = panout + trkset.Pan_cnt();
-        panout_ui = MAX(MIN(panout_ui,trkset.Pan_max()),trkset.Pan_min());
+        beta = (float)trkset.lpPan() / 100;                                // LP Beta
+        panout = beta * panout + (1.0 - beta) * l_panout;                  // Low Pass
+        l_panout = panout;
+        uint16_t panout_ui = panout + trkset.Pan_cnt();                    // Apply Center Offset
+        panout_ui = MAX(MIN(panout_ui,trkset.Pan_max()),trkset.Pan_min()); // Limit Output
 
         // Reset all PPM Channels to Center
         for(int i=0;i<MAX_PPM_CHANNELS;i++)
