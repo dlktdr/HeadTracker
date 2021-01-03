@@ -34,11 +34,14 @@ void serial_Thread()
 {  
   while(1) {
     // Don't like this but can't get bufferedserial to work and the Arduino serial lib has blocking writes after buffer fill.
-    // Also no notify if its full or not...    
+    // Also no notify if its full or not...
     digitalWrite(LEDG,LOW); // Serial RX Green, ON
     int bytx = serout.size();
-    char txa[64];
-    bytx = MIN(bytx,64); // Apparenlty buffer is 64chars?? More than this causes blocking
+    char txa[SERIAL_TX_MAX_PACKET];
+    bytx = MIN(bytx,SERIAL_TX_MAX_PACKET); // Packet size for USB FullSpeed is 64bytes..
+    // Now if only I could tell when the packet is gone...
+    // probably have to look at the nrf datasheet.
+
     for(int i =0;i<bytx;i++) {
       serout.pop(txa[i]);      
     }
@@ -53,13 +56,13 @@ char *getJSONBuffer()
     __disable_irq();    
     int bi = bufIndex;
     int bu = bufsUsed;
-    bufsUsed--;
-    __enable_irq();
+    bufsUsed--;    
     int i = bi - bu;
     while (i >= RX_BUFFERS)
         i = i - RX_BUFFERS;
     while (i < 0)
         i = i + RX_BUFFERS;
+    __enable_irq();
     return jsondatabuf[i];
 }
 
@@ -79,7 +82,6 @@ void serialrx_Int()
     char sc = Serial.read();
     if(sc == 0x02) {  // Start Of Text Character, clear buffer
         serin.reset();
-        //  New data move to next buffer
 
     } else if (sc == 0x03) { // End of Text Characher, parse JSON data
         
@@ -188,8 +190,8 @@ void serialWriteJSON(DynamicJsonDocument &json)
 {  
   serWriteMutex.lock(); 
   
-  char data[500];
-  int br = serializeJson(json, data, 500); // Serialize, with max 500 char buffer
+  char data[TX_BUF_SIZE];
+  int br = serializeJson(json, data, TX_BUF_SIZE); // Serialize, with max 500 char buffer
 
   serout.push(0x02);
   // Append Output to the serial output buffer
