@@ -42,6 +42,9 @@ FlashIAP flash;
 
 void setup() { 
   serial_Init();
+  
+  // Startup delay to get serial connected to see startup issues
+  //delay(4000);
 
   init_Flash();   
   io_Init();
