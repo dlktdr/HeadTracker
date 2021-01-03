@@ -244,11 +244,11 @@ float LSM9DS1Class::getAccelBW() //Bandwidth setting 0,1,2,3  see documentation 
 
 int LSM9DS1Class::setAccelFS(uint8_t range) // 0: ±2g ; 1: ±16g ; 2: ±4g ; 3: ±8g  
 {	if (range >=4) return 0;
+    lastAccelFS = range;
+    storedAccelFS = true;
     range = (range & 0b00000011) << 3;
 	uint8_t setting = ((readRegister(LSM9DS1_ADDRESS, LSM9DS1_CTRL_REG6_XL) & 0xE7) | range);
-	lastAccelFS = setting;
-  storedAccelFS = true;
-  return writeRegister(LSM9DS1_ADDRESS, LSM9DS1_CTRL_REG6_XL,setting) ;
+    return writeRegister(LSM9DS1_ADDRESS, LSM9DS1_CTRL_REG6_XL,setting) ;
 }
 
 float LSM9DS1Class::getAccelFS() // Full scale dimensionless, but its value corresponds to g
@@ -376,17 +376,17 @@ float LSM9DS1Class::getGyroBW()
    
 int LSM9DS1Class::setGyroFS(uint8_t range) // (0: 245 dps; 1: 500 dps; 2: 1000  dps; 3: 2000 dps)
 {  if (range >=4) return 0;
-   range = (range & 0b00000011) << 3;	
-   uint8_t setting = ((readRegister(LSM9DS1_ADDRESS, LSM9DS1_CTRL_REG1_G) & 0xE7) | range );
-   lastGyroFS = setting;
+   lastGyroFS = range;
    storedGyroFS = true;
+   range = (range & 0b00000011) << 3;	
+   uint8_t setting = ((readRegister(LSM9DS1_ADDRESS, LSM9DS1_CTRL_REG1_G) & 0xE7) | range );      
    return writeRegister(LSM9DS1_ADDRESS, LSM9DS1_CTRL_REG1_G,setting) ;
 }
 
 float LSM9DS1Class::getGyroFS() //   dimensionless, but its value defaults to deg/s
 { float Ranges[] ={245.0, 500.0, 1000.0, 2000.0}; //dps
   if(!storedGyroFS) {
-    lastGyroFS = (readRegister(LSM9DS1_ADDRESS, LSM9DS1_CTRL_REG1_G) & 0x18) >> 3;
+    lastGyroFS = (readRegister(LSM9DS1_ADDRESS, LSM9DS1_CTRL_REG1_G) & 0x18) >> 3;    
     storedGyroFS = true;
   }
   return Ranges[lastGyroFS] ;
@@ -444,9 +444,9 @@ void LSM9DS1Class::setMagnetSlope(float x, float y, float z)
 	
 int LSM9DS1Class::setMagnetFS(uint8_t range) // 0=400.0; 1=800.0; 2=1200.0 , 3=1600.0  (µT)
 {  if (range >=4) return 0;
-   range = (range & 0b00000011) << 5;	
    lastMagnetFS = range;
    storedMagnetFS = true;
+   range = (range & 0b00000011) << 5;	      
    return writeRegister(LSM9DS1_ADDRESS_M, LSM9DS1_CTRL_REG2_M,range) ;
 }
 
