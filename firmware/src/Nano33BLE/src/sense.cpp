@@ -1,6 +1,11 @@
 #include <Arduino.h>
 #include <Arduino_APDS9960.h>
 
+// Pick a Filter
+#define NXP_FILTER 
+//#define MADGWICK 
+//#define MAHONY   
+
 #include "trackersettings.h"
 #include "sense.h"
 #include "mbed.h"
@@ -12,12 +17,6 @@
 #include "Wire.h"
 #include "NXPFusion/Adafruit_AHRS_NXPFusion.h"
 
-
-// Pick one
-#define NXP_FILTER 
-//#define MADGWICK 
-//#define MAHONY   
-
 #ifdef NXP_FILTER
 Adafruit_NXPSensorFusion nxpfilter;
 #endif
@@ -26,21 +25,23 @@ bool blesenseboard = true;
 
 int sense_Init()
 { 
-    // I2C High Speed  
     if (!IMU.begin()) {
         serialWriteln("Failed to initalize sensors");
         return -1;
     }  
-    // Increase Clock Speed, save some CPU, pretty sure it's using blocking in lsmlib
+
+    IMU.setGyroFS(2); // 1000dps gyro    
+    IMU.setGyroODR(2); // 50hz
+
+    // Increase Clock Speed, save some CPU due to blocking i2c
     Wire1.setClock(400000);  
 
 #ifdef NXP_FILTER
     nxpfilter.begin(125); // Frequency discovered by oscilliscope
 #else
-    IMU.setGyroFS(3); // 2000dps gyro
-    IMU.setGyroODR(1);
 #endif
 
+    // Initalize Gesture Sensor
     if(!APDS.begin()) 
         blesenseboard = false;
     
@@ -55,6 +56,7 @@ void sense_Thread()
     float raccx=0,raccy=0,raccz=0;
     float rmagx=0,rmagy=0,rmagz=0;
     float rgyrx=0,rgyry=0,rgyrz=0;  
+    float l_rgyrx=0,l_rgyry=0,l_rgyrz=0;  
     float accx=0,accy=0,accz=0;
     float magx=0,magy=0,magz=0;
     float gyrx=0,gyry=0,gyrz=0;
@@ -100,11 +102,11 @@ void sense_Thread()
         float deltat = fusion.deltatUpdate();
     #ifdef MADGWICK 
         fusion.MadgwickUpdate(gyrx * DEG_TO_RAD, gyry * DEG_TO_RAD, gyrz * DEG_TO_RAD, 
-                            accx*9.807, accy*9.807, accz*9.807, 
+                            accx, accy, accz, 
                             magx, magy, magz, 
         deltat);  
     #elif defined(MAHONY)
-        fusion.MahonyUpdate(gyrx, gyry, gyrz, accx, accy, accz, magx, magy, magz, deltat);  //else use the magwick, it is slower but more accurate
+        fusion.MahonyUpdate(gyrx* DEG_TO_RAD, gyry* DEG_TO_RAD, gyrz* DEG_TO_RAD, accx, accy, accz, magx, magy, magz, deltat);  //else use the magwick, it is slower but more accurate
     #endif    
 
         roll = fusion.getPitch();
@@ -188,79 +190,64 @@ void sense_Thread()
         
 
         // ---------------------- Get new data
-    //********************************
-    // THIS CODE NEEDS TO BE FASTER DOWN HERE
+        //********************************
+        // THIS CODE SHOULD BE FASTER DOWN HERE, NoN-Blocking I2C eventually?
 
         if(++counter == SENSEUPDATE) { // Run Filter 5 more often than measurements
-        counter = 0;
-        // Accelerometer
-        if(IMU.accelerationAvailable()) {
-            IMU.readRawAccel(raccx, raccy, raccz);
-            trkset.accOffset(accxoff,accyoff,acczoff);
-            accx = raccx - accxoff;
-            accy = raccy - accyoff;
-            accz = raccz - acczoff;
-        }
+            counter = 0;
+            // Accelerometer
+            if(IMU.accelerationAvailable()) {
+                IMU.readRawAccel(raccx, raccy, raccz);            
+                raccx *= -1.0; // Flip X to make classic cartesian (+X Right, +Y Up, +Z Vert)
+                trkset.accOffset(accxoff,accyoff,acczoff);
+                accx = raccx - accxoff;
+                accy = raccy - accyoff;
+                accz = raccz - acczoff;
+            }
 
-        // Gyrometer
-        if(IMU.gyroscopeAvailable()) {
-            IMU.readRawGyro(rgyrx,rgyry,rgyrz);
-            trkset.gyroOffset(gyrxoff,gyryoff,gyrzoff);
-            gyrx = rgyrx - gyrxoff; 
-            gyry = rgyry - gyryoff; 
-            gyrz = rgyrz - gyrzoff; 
-            gyrx *= -1;
-            gyry *= -1;
-            //gyrz *= -1;
-        }
+            // Gyrometer
+            if(IMU.gyroscopeAvailable()) {
+                IMU.readRawGyro(rgyrx,rgyry,rgyrz);
+                rgyrx *= -1.0; // Flip X to make classic cartesian (+X Right, +Y Up, +Z Vert)
+                trkset.gyroOffset(gyrxoff,gyryoff,gyrzoff);            
+                gyrx = rgyrx - gyrxoff; 
+                gyry = rgyry - gyryoff; 
+                gyrz = rgyrz - gyrzoff; 
+            }
 
-        // Magnetometer
-        if(IMU.magneticFieldAvailable()) {
-            IMU.readRawMagnet(rmagx,rmagy,rmagz);
-            // On first read set the min/max values to this reading
-            // Get Offsets and Apply them
-            trkset.magOffset(magxoff,magyoff,magzoff);              
+            // Magnetometer
+            if(IMU.magneticFieldAvailable()) {
+                IMU.readRawMagnet(rmagx,rmagy,rmagz);
+                // On first read set the min/max values to this reading
+                // Get Offsets and Apply them
+                trkset.magOffset(magxoff,magyoff,magzoff);              
+                // Calibrate Hard Iron Offsets
+                magx = rmagx - magxoff; 
+                magy = rmagy - magyoff;
+                magz = rmagz - magzoff;       
 
-            // Calibrate Hard Iron Offsets
-            magx = rmagx - magxoff; 
-            magy = rmagy - magyoff;
-            magz = rmagz - magzoff;       
-
-            // Calibrate soft iron offsets 
-            float magsioff[9];
-            trkset.magSiOffset(magsioff);
-            magx = magx * magsioff[0] + magy * magsioff[1] + magz *magsioff[2];
-            magy = magx * magsioff[3] + magy * magsioff[4] + magz *magsioff[5];
-            magz = magx * magsioff[6] + magy * magsioff[7] + magz *magsioff[8];
-
-        /* static int o=0;
-            if(o++ > 50) {
-            o=0;          
-            serialWrite("MagX:");
-            serialWrite(magx);
-            serialWrite(" Y:");
-            serialWrite(magy);
-            serialWrite(" Z:");
-            serialWrite(magz);
-            serialWriteln("");
-
-            serialWrite("CalX:");
-            serialWrite(magxoff);
-            serialWrite(" Y:");
-            serialWrite(magyoff);
-            serialWrite(" Z:");
-            serialWrite(magzoff);
-            serialWriteln("");
-            }*/
-        }
-        }
+                // Calibrate soft iron offsets 
+                float magsioff[9];
+                trkset.magSiOffset(magsioff);
+                magx = magx * magsioff[0] + magy * magsioff[1] + magz *magsioff[2];
+                magy = magx * magsioff[3] + magy * magsioff[4] + magz *magsioff[5];
+                magz = magx * magsioff[6] + magy * magsioff[7] + magz *magsioff[8];
+            }
+        }        
 
         // Update the settings
         // Both data and sensor threads will use this data. If data thread has it locked skip this reading.
         if(dataMutex.trylock()) {
+            // Raw values for calibration
             trkset.setRawAccel(raccx,raccy,raccz);
             trkset.setRawGyro(rgyrx,rgyry,rgyrz);
             trkset.setRawMag(rmagx,rmagy,rmagz);
+
+            // Offset values for debug
+            //trkset.setOffAccel(accx,accy,accz);
+            trkset.setOffGyro(gyrx,gyry,gyrz);
+            trkset.setOffMag(magx,magy,magz);
+            
             trkset.setRawOrient(tilt,roll,pan);
             trkset.setOffOrient(tilt-tiltoffset,roll-rolloffset, normalize(pan-panoffset,-180,180));
             trkset.setPPMOut(tiltout_ui,rollout_ui,panout_ui);
