@@ -5,9 +5,12 @@
 // thread sleep. Can't seem to get faster than this
 const int SLEEPTIME = 7000;
 
-// Runs Filter 5x more than update sensors 
-// 
-const int SENSEUPDATE = 6; 
+// Oversample Setting
+#if defined(MAHONY) || defined(MADGWICK)
+    const int SENSEUPDATE = 1; 
+#else
+    const int SENSEUPDATE = 6; 
+#endif
 
 int sense_Init();
 void sense_Thread();
