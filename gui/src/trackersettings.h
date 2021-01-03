@@ -160,6 +160,10 @@ public:
     QString getFWVersion() {return _data["Vers"].toString();}
     void setHardware(QString vers,QString hard);
 
+    void setSoftIronOffsets(float soo[3][3]);
+
+    void clear() {_data.clear();_live.clear();}
+
 signals:
     void rawGyroChanged(float x, float y, float z);
     void rawAccelChanged(float x, float y, float z);

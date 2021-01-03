@@ -391,9 +391,9 @@ void TrackerSettings::gyroOffset(float &x, float &y, float &z)
 
 void TrackerSettings::setGyroOffset(float x, float y, float z)
 {
-    _data["gyrxoff"]=x;
-    _data["gyryoff"]=y;
-    _data["gyrzoff"]=z;
+    _data["gyrxoff"]=QString::number(x,'g',3);
+    _data["gyryoff"]=QString::number(y,'g',3);
+    _data["gyrzoff"]=QString::number(z,'g',3);
 }
 
 void TrackerSettings::accOffset(float &x, float &y, float &z)
@@ -405,9 +405,9 @@ void TrackerSettings::accOffset(float &x, float &y, float &z)
 
 void TrackerSettings::setAccOffset(float x, float y, float z)
 {
-    _data["accxoff"]=x;
-    _data["accyoff"]=y;
-    _data["acczoff"]=z;}
+    _data["accxoff"]=QString::number(x,'g',3);
+    _data["accyoff"]=QString::number(y,'g',3);
+    _data["acczoff"]=QString::number(z,'g',3);}
 
 void TrackerSettings::magOffset(float &x, float &y, float &z)
 {
@@ -418,9 +418,9 @@ void TrackerSettings::magOffset(float &x, float &y, float &z)
 
 void TrackerSettings::setMagOffset(float x, float y, float z)
 {
-    _data["magxoff"]=x;
-    _data["magyoff"]=y;
-    _data["magzoff"]=z;
+    _data["magxoff"]=QString::number(x,'g',3);
+    _data["magyoff"]=QString::number(y,'g',3);
+    _data["magzoff"]=QString::number(z,'g',3);
 }
 
 void TrackerSettings::setAxisRemap(uint value)
@@ -543,4 +543,14 @@ void TrackerSettings::setHardware(QString vers, QString hard)
 {
     _data["Vers"] = vers;
     _data["Hard"] = hard;
+}
+
+void TrackerSettings::setSoftIronOffsets(float soo[3][3])
+{
+    for(int i=0;i < 3; i++){
+        for(int j=0;j<3;j++) {
+            QString element = QString("so%1%2").arg(i).arg(j);
+            _data[element] = QString::number(soo[i][j],'g',3);
+        }
+    }
 }
