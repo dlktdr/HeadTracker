@@ -34,8 +34,8 @@
 
 // kalman filter noise variances
 #define FQVA_9DOF_GBY_KALMAN 2E-6F // accelerometer noise g^2 so 1.4mg RMS
-#define FQVM_9DOF_GBY_KALMAN 0.1F  // magnetometer noise uT^2
-#define FQVG_9DOF_GBY_KALMAN 0.3F  // gyro noise (deg/s)^2
+#define FQVM_9DOF_GBY_KALMAN 0.3F  // magnetometer noise uT^2
+#define FQVG_9DOF_GBY_KALMAN 1.0F  // gyro noise (deg/s)^2
 #define FQWB_9DOF_GBY_KALMAN                                                   \
   1E-9F // gyro offset drift (deg/s)^2: 1E-9 implies 0.09deg/s max at 50Hz
 #define FQWA_9DOF_GBY_KALMAN                                                   \
@@ -43,7 +43,7 @@
         // reduces sensitivity to shake)
 #define FQWD_9DOF_GBY_KALMAN                                                   \
   0.5F // magnetic disturbance drift uT^2 (increase slows convergence to B but
-       // reduces sensitivity to magnet)
+       // reduces sensitivity to magnet) 0.5
 // initialization of Qw covariance matrix
 #define FQWINITTHTH_9DOF_GBY_KALMAN 2000E-5F // th_e * th_e terms
 #define FQWINITBB_9DOF_GBY_KALMAN 250E-3F    // b_e * b_e terms
