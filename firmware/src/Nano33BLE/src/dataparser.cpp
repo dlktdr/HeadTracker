@@ -26,8 +26,8 @@ void data_Thread()
 
     // Check if data is ready
     while(buffersFilled() > 0) {
-        
-        DeserializationError de = deserializeJson(json, getJSONBuffer());
+        char *buffer = getJSONBuffer();
+        DeserializationError de = deserializeJson(json, buffer);
         if(de) {
             if(de == DeserializationError::IncompleteInput)
                 serialWrite("HT: DeserializeJson() Failed - IncompleteInput\r\n");
