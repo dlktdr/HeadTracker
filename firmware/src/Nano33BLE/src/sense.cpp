@@ -2,8 +2,8 @@
 #include <Arduino_APDS9960.h>
 
 // Pick a Filter
-#define NXP_FILTER 
-//#define MADGWICK 
+//#define NXP_FILTER
+#define MADGWICK  // My Choice, seems to work well and not a ton of CPU used
 //#define MAHONY   
 
 #include "trackersettings.h"
@@ -213,6 +213,10 @@ void sense_Thread()
                 gyrx = rgyrx - gyrxoff; 
                 gyry = rgyry - gyryoff; 
                 gyrz = rgyrz - gyrzoff; 
+
+                // Deadband on GyroZ
+                if(fabs(gyrz) < GYRO_DEADBAND)
+                    gyrz = 0;
             }
 
             // Magnetometer
