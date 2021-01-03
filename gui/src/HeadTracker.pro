@@ -1,6 +1,6 @@
 QT       += core gui serialport network
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets opengl
 
 CONFIG += c++11 file_copies
 
@@ -16,24 +16,35 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    calibrate/fusion.cpp \
+    calibrate/imuread.cpp \
+    calibrate/magcal.cpp \
+    calibrate/mahony.cpp \
+    calibrate/matrix.cpp \
+    calibrate/quality.cpp \
+    calibrate/rawdata.cpp \
     calibrateble.cpp \
     calibratebno.cpp \
     diagnosticdisplay.cpp \
     firmware.cpp \
+    magcalwidget.cpp \
     main.cpp \
     mainwindow.cpp \
     led.cpp \
     graph.cpp \
     servominmax.cpp \
-    signalbars.cpp \
+    signalbars.cpp \    
     trackersettings.cpp \
     ucrc16lib.cpp
 
+
 HEADERS += \
+    calibrate/imuread.h \
     calibrateble.h \
     calibratebno.h \
     diagnosticdisplay.h \
     firmware.h \
+    magcalwidget.h \
     mainwindow.h \
     led.h \
     graph.h \
@@ -56,6 +67,8 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 RESOURCES += \
     Resources.qrc
+
+LIBS += -lOpengl32 -lglu32
 
 COPIES += stylesheets
 stylesheets.files = $$files("css/*.*")

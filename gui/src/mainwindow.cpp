@@ -340,7 +340,6 @@ void MainWindow::parseIncomingHT(QString cmd, QStringList args)
             vers = args.at(0);
             if(!hard.isEmpty())
                 fwDiscovered(vers,hard);
-
         }
     } else if(cmd == "$HARD") {
         if(args.length() == 1) {
@@ -388,8 +387,8 @@ void MainWindow::addToLog(QString log)
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
     if(event->type() == QKeyEvent::KeyPress) {
-        if(event->modifiers() & Qt::ControlModifier &&
-           event->key() & Qt::Key_D) {
+        if((event->modifiers() & Qt::ControlModifier) &&
+           (event->key() & Qt::Key_D)) {
             // Cntrl - D Pressed
             diagnostic->show();
         }
@@ -430,6 +429,7 @@ void MainWindow::serialConnect()
 
     logd.clear();
     ui->serialData->clear();
+    trkset.clear();
 
     ui->cmdDisconnect->setEnabled(true);
     ui->cmdConnect->setEnabled(false);
@@ -675,6 +675,7 @@ void MainWindow::storeSettings()
     ui->statusbar->showMessage(tr("Settings Sent"),2000);
 }
 
+// Automatic Send Changes.. Not used for now
 void MainWindow::updateSettings()
 {
 

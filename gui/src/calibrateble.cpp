@@ -1,5 +1,3 @@
-#include <math.h>
-
 #include "calibrateble.h"
 #include "ui_calibrateble.h"
 
@@ -11,12 +9,16 @@ CalibrateBLE::CalibrateBLE(TrackerSettings *ts, QWidget *parent) :
     ui->setupUi(this);
     step = 0;
 
-    connect(trkset,&TrackerSettings::rawGyroChanged,this,&CalibrateBLE::rawGyroChanged);
-    connect(trkset,&TrackerSettings::rawMagChanged,this,&CalibrateBLE::rawMagChanged);
+    connect(trkset,&TrackerSettings::rawGyroChanged,this,&CalibrateBLE::rawGyroChanged);    
 
     connect(ui->cmdNext,SIGNAL(clicked()),this,SLOT(nextClicked()));
     connect(ui->cmdPrevious,SIGNAL(clicked()),this,SLOT(prevClicked()));
+
     ui->stackedWidget->setCurrentIndex(0);
+
+    ui->magcalwid->setTracker(trkset);
+
+    connect(ui->magcalwid,&MagCalWidget::dataUpdate,this,&CalibrateBLE::dataUpdate);
 }
 
 CalibrateBLE::~CalibrateBLE()
@@ -90,42 +92,6 @@ void CalibrateBLE::rawGyroChanged(float x, float y, float z)
 
 }
 
-void CalibrateBLE::rawMagChanged(float x, float y, float z)
-{
-    // *** To do - fit to elipsode Maybe some 3d graphing
-
-    ui->lblMagX->setText(QString::number(x,'g',3));
-    ui->lblMagY->setText(QString::number(y,'g',3));
-    ui->lblMagZ->setText(QString::number(z,'g',3));
-    mag[0] = x;
-    mag[1] = y;
-    mag[2] = z;
-    // On first run set min/max to cur val
-    if(firstmag) {
-        for(int i=0;i<3;i++) {
-            magmax[i] = mag[i];
-            magmin[i] = mag[i];
-        }
-        firstmag = false;
-    }
-
-    for(int i=0;i<3;i++) {
-        magmax[i] = MAX(mag[i],magmax[i]);
-        magmin[i] = MIN(mag[i],magmin[i]);
-        magoff[i] = (magmax[i]+magmin[i])/2;
-    }
-
-    ui->lblMagXMax->setText(QString::number(magmax[0],'g',3));
-    ui->lblMagYMax->setText(QString::number(magmax[1],'g',3));
-    ui->lblMagZMax->setText(QString::number(magmax[2],'g',3));
-    ui->lblMagXMin->setText(QString::number(magmin[0],'g',3));
-    ui->lblMagYMin->setText(QString::number(magmin[1],'g',3));
-    ui->lblMagZMin->setText(QString::number(magmin[2],'g',3));
-    ui->lblMagXOff->setText(QString::number(magoff[0],'g',3));
-    ui->lblMagYOff->setText(QString::number(magoff[1],'g',3));
-    ui->lblMagZOff->setText(QString::number(magoff[2],'g',3));
-}
-
 
 void CalibrateBLE::nextClicked()
 {
@@ -135,17 +101,36 @@ void CalibrateBLE::nextClicked()
         ui->stackedWidget->setCurrentIndex(1);
         ui->cmdPrevious->setText("Previous");
 
+        // REMOVE ONCE ACCEL CAL READY
+           ui->cmdNext->setText("Save");
+        // ------------
+
         firstmag = true;
         for(int i=0;i<3;i++)
             gyrsaveoff[i] = gyroff[i]; // Values to save
         step = 1;
+      //  ui->cmdNext->setDisabled(true);
         break;
     }
     // Magnetometer
     case 1: {
         ui->stackedWidget->setCurrentIndex(2);
         ui->cmdNext->setText("Save");
-        step = 2;
+         step = 2;
+
+        // REMOVE ONCE ACCEL CAL READY
+            hide();
+            ui->stackedWidget->setCurrentIndex(0);
+            ui->cmdNext->setText("Next");
+            trkset->setMagOffset(_hoo[0], _hoo[1], _hoo[2]);
+            trkset->setSoftIronOffsets(_soo);
+            trkset->setGyroOffset(gyrsaveoff[0],gyrsaveoff[1],gyrsaveoff[2]);
+            emit calibrationSave();
+            step = 0;
+        //----------------------------------------
+
+
+
         break;
     }
     // Accelerometer - If clicked here save + close
@@ -154,12 +139,9 @@ void CalibrateBLE::nextClicked()
         hide();
         ui->stackedWidget->setCurrentIndex(0);
         ui->cmdNext->setText("Next");
-        trkset->setMagOffset(roundf(magoff[0]*1000)/1000,
-                             roundf(magoff[1]*1000)/10000,
-                             roundf(magoff[2]*1000)/1000);
-        trkset->setGyroOffset(roundf(gyrsaveoff[0]*1000)/1000,
-                              roundf(gyrsaveoff[1]*1000)/1000,
-                              roundf(gyrsaveoff[2]*1000)/1000);
+        trkset->setMagOffset(_hoo[0], _hoo[1], _hoo[2]);
+        trkset->setSoftIronOffsets(_soo);
+        trkset->setGyroOffset(gyrsaveoff[0],gyrsaveoff[1],gyrsaveoff[2]);
         emit calibrationSave();
         step = 0;
         break;
@@ -173,12 +155,14 @@ void CalibrateBLE::prevClicked()
     // Gyrometer - If clicked here close
     case 0: {
         step = 0;
+
         hide();
         break;
     }
     // Magnetometer
     case 1: {
         ui->cmdPrevious->setText("Cancel");
+        ui->cmdNext->setText("Next");
         ui->stackedWidget->setCurrentIndex(0);
         step = 0;
         break;
@@ -193,4 +177,32 @@ void CalibrateBLE::prevClicked()
     }
     }
 
+}
+
+void CalibrateBLE::dataUpdate(float variance,
+                              float gaps,
+                              float wobble,
+                              float fiterror,
+                              float hoo[3],
+                              float soo[3][3])
+{
+    ui->lblFitError->setText(QString::number(fiterror,'g',3) + "%");
+    ui->lblVariance->setText(QString::number(variance,'g',3) + "%");
+    ui->lblWobble->setText(QString::number(wobble,'g',3) + "%");
+    ui->lblGaps->setText(QString::number(gaps,'g',3) + "%");
+
+    if(step == 1) { // On the magcal step?
+        if(gaps < 15.0f && variance < 4.5f && wobble < 4.0f && fiterror < 5.0f)
+            ui->cmdNext->setDisabled(false);
+        else if(gaps > 20.0f && variance > 5.0f && wobble > 5.0f && fiterror > 6.0f)
+            ui->cmdNext->setDisabled(true);
+    }
+
+    // Save the current offsets locally
+    for(int i=0;i<3;i++) {
+        for(int j=0;j<3;j++) {
+            _soo[i][j] = soo[i][j];
+        }
+        _hoo[i] = hoo[i];
+    }
 }

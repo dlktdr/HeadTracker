@@ -6,6 +6,7 @@
 #include <QDateTime>
 #include <QTimer>
 #include "trackersettings.h"
+#include "magcalwidget.h"
 
 #define MIN(x,y) x < y ? x : y
 #define MAX(x,y) x > y ? x : y
@@ -33,17 +34,20 @@ private:
     double lgyrate[3];
     double gyrsaveoff[3];
 
-    double mag[3];
-    double magmin[3];
-    double magmax[3];
-    double magoff[3];
-    bool firstmag=true;
+    float _soo[3][3]; // Soft Iron
+    float _hoo[3]; // Hard Iron
+    bool firstmag=true;    
 
 private slots:
     void rawGyroChanged(float x, float y, float z);
-    void rawMagChanged(float x, float y, float z);
     void nextClicked();
     void prevClicked();
+    void dataUpdate(float variance,
+                    float gaps,
+                    float wobble,
+                    float fiterror,
+                    float hoop[3],
+                    float soo[3][3]);
 signals:
     void calibrationSave();
 };
