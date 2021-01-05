@@ -8,7 +8,7 @@
  
 using namespace mbed;
 using namespace rtos;
-using namespace std;
+using namespace std::chrono;
 
  
 PpmOut::PpmOut(PinName pin, uint8_t channel_number): ppm(pin) {
@@ -21,8 +21,11 @@ PpmOut::PpmOut(PinName pin, uint8_t channel_number): ppm(pin) {
     pulse_out = 1;
     ppm = pulse_out;
     current_dot = 0;
-
+    
     timeout.attach_us(callback(this, &PpmOut::attimeout), (us_timestamp_t)(FRAME_LEN));    
+    
+    // Start a timer to measure actual time.
+    timer.start();
 }
 
 PpmOut::~PpmOut()
@@ -71,16 +74,34 @@ void PpmOut::setInverted(bool inv)
     }
 }
 
-void PpmOut::attimeout() {
+void PpmOut::attimeout() {    
+    
+    // We should have fired early. Find out by how much
+    uint64_t ex_wait = (dots[current_dot] * 1000) - duration_cast<nanoseconds>(timer.elapsed_time()).count();
+    // Start measuring for next pulse
+    timer.reset();
+    
+
+    digitalWrite(A1,HIGH); // Measure how much time wasted here
+    
+    // Pause only when output high, sync pulse can vary without effect
+    if(ex_wait < 30000 && pulse_out == 1)                
+        wait_ns(ex_wait);
+
+    digitalWrite(A1,LOW);
+
     pulse_out = !pulse_out;
     ppm = pulse_out;
-    
-    timeout.attach_us(callback(this, &PpmOut::attimeout), dots[current_dot]);
+       
+    // Setup next interrupt, fire it early to adjust out some jitter
+    timeout.attach_us(callback(this, &PpmOut::attimeout), dots[current_dot] - JITTER_TIME);
     current_dot++;
- 
+     
     if(current_dot == channel_number*2+2) { // 2 for FRAME_SYNC
-        current_dot = 0;
+        current_dot = 0;        
     }
+    
+    
 }
  
 void PpmOut::resetChannels() {
