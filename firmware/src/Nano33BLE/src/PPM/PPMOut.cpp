@@ -22,10 +22,11 @@ PpmOut::PpmOut(PinName pin, uint8_t channel_number): ppm(pin) {
     ppm = pulse_out;
     current_dot = 0;
     
-    timeout.attach_us(callback(this, &PpmOut::attimeout), (us_timestamp_t)(FRAME_LEN));    
-    
-    // Start a timer to measure actual time.
+    // Save current time
+    lasttime = micros();
     timer.start();
+    // Setup the interrupt
+    timeout.attach_us(callback(this, &PpmOut::attimeout), (us_timestamp_t)(FRAME_LEN));    
 }
 
 PpmOut::~PpmOut()
@@ -74,20 +75,24 @@ void PpmOut::setInverted(bool inv)
     }
 }
 
-void PpmOut::attimeout() {    
-    
+void PpmOut::attimeout() {        
     // We should have fired early. Find out by how much
-    uint64_t ex_wait = (dots[current_dot] * 1000) - duration_cast<nanoseconds>(timer.elapsed_time()).count();
-    // Start measuring for next pulse
-    timer.reset();
+    uint64_t waittime = dots[last_dot] - duration_cast<microseconds>(timer.elapsed_time()).count();
     
+    // Start measuring for next pulse
+    
+
+    // How early did the interrupt fire?
+    /*uint64_t now = micros();
+    uint64_t waittime = dots[last_dot] - lasttime - now;   
+    lasttime = now;    
+    */
 
     digitalWrite(A1,HIGH); // Measure how much time wasted here
     
-    // Pause only when output high, sync pulse can vary without effect
-    if(ex_wait < 30000 && pulse_out == 1)                
-        wait_ns(ex_wait);
-
+    if(waittime < JITTER_TIME && current_dot > 0) // Ignore frame sync
+        wait_us(waittime);
+    
     digitalWrite(A1,LOW);
 
     pulse_out = !pulse_out;
@@ -95,13 +100,13 @@ void PpmOut::attimeout() {
        
     // Setup next interrupt, fire it early to adjust out some jitter
     timeout.attach_us(callback(this, &PpmOut::attimeout), dots[current_dot] - JITTER_TIME);
+    timer.reset();
+    last_dot = current_dot;
     current_dot++;
      
     if(current_dot == channel_number*2+2) { // 2 for FRAME_SYNC
         current_dot = 0;        
-    }
-    
-    
+    }       
 }
  
 void PpmOut::resetChannels() {

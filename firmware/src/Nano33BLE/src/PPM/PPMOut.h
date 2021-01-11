@@ -20,7 +20,7 @@ class PpmOut{
         static const uint16_t DOTS = MAX_PPM_CHANNELS*2+2; // two dots per channel + FRAME_SYNC
         
         // Added this to fire all interrupts 30us early, to remove most jitter on ppm channels
-        static const uint16_t JITTER_TIME = 40; // Fire all interrupts 30us Early
+        static const uint16_t JITTER_TIME = 30; // Fire all interrupts 30us Early
  
         // Will start the PPM output 
         PpmOut(PinName pin, uint8_t channel_number);
@@ -38,9 +38,11 @@ class PpmOut{
          //   from 0 to 1 and in reverse 
         uint16_t dots[DOTS];
         Timeout timeout;
-        Timer timer;        
+        Timer timer;           
+        uint64_t lasttime;     
         DigitalOut ppm;
         uint8_t current_dot;
+        uint8_t last_dot;
         uint8_t channel_number;
         uint16_t frame_length;
         uint16_t pulse_out;
