@@ -79,27 +79,21 @@ void PpmOut::attimeout() {
     // We should have fired early. Find out by how much
     uint64_t waittime = dots[last_dot] - duration_cast<microseconds>(timer.elapsed_time()).count();
     
-    // Start measuring for next pulse
-    
 
-    // How early did the interrupt fire?
-    /*uint64_t now = micros();
-    uint64_t waittime = dots[last_dot] - lasttime - now;   
-    lasttime = now;    
-    */
-
-    digitalWrite(A1,HIGH); // Measure how much time wasted here
+    //digitalWrite(A1,HIGH); // Measure how much time wasted here
     
+    // Hog CPU until exact time output should switch
     if(waittime < JITTER_TIME && current_dot > 0) // Ignore frame sync
         wait_us(waittime);
     
-    digitalWrite(A1,LOW);
+    //digitalWrite(A1,LOW);
 
     pulse_out = !pulse_out;
     ppm = pulse_out;
        
     // Setup next interrupt, fire it early to adjust out some jitter
     timeout.attach_us(callback(this, &PpmOut::attimeout), dots[current_dot] - JITTER_TIME);
+    // Start measuring for next pulse
     timer.reset();
     last_dot = current_dot;
     current_dot++;
