@@ -639,7 +639,7 @@ void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
     v = json["rstonwave"]; if(!v.isNull()) setResetOnWave(v);
 
 // Button and PIns
-
+    // Disable all pins first
     setButtonPin(-1);
     setPpmInPin(-1);
     setPpmOutPin(-1);
@@ -672,7 +672,7 @@ void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
     if(!v.isNull() && !v1.isNull() && !v2.isNull())
     {   
         setMagOffset(v,v1,v2);        
-        serialWriteln("Mag offsets set");
+        //serialWriteln("HT: Mag offsets set");
     }
 
     // Soft Iron Offsets
@@ -694,7 +694,7 @@ void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
     if(!v.isNull() && !v1.isNull() && !v2.isNull())
     {   
         setGyroOffset(v,v1,v2);
-        serialWriteln("Gyr offsets set");
+        //serialWriteln("HT: Gyr offsets set");
     }
 
 // Calibrarion Values
@@ -705,7 +705,7 @@ void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
     if(!v.isNull() && !v1.isNull() && !v2.isNull())
     {   
         setAccOffset(v,v1,v2);
-        serialWriteln("Acc offsets set");
+        //serialWriteln("HT: Acc offsets set");
     }
 
 }
@@ -781,9 +781,9 @@ void TrackerSettings::saveToEEPROM()
     int len = serializeJson(json,buffer,1000);
 
     if(writeFlash(buffer,len)) {
-        serialWriteln("Flash Write Failed");
+        serialWriteln("HT: Flash Write Failed");
     } else {
-        serialWriteln("Saved to EEPROM");
+        serialWriteln("HT: Saved to EEPROM");
     }    
 }
 
@@ -796,13 +796,13 @@ void TrackerSettings::loadFromEEPROM()
     de = deserializeJson(json, flashSpace);
     
     if(de != DeserializationError::Ok) 
-        serialWriteln("Invalid JSON Data");
+        serialWriteln("HT: Invalid JSON Data");
     
     if(json["UUID"] == 837727) {
-        serialWriteln("Device has been freshly programmed");
+        serialWriteln("HT: Device has been freshly programmed");
 
     } else {
-        serialWriteln("Device contains saved code");
+        serialWriteln("HT: Device contains saved code");
         loadJSONSettings(json);
     }
 }
