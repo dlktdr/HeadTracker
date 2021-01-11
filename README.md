@@ -10,8 +10,10 @@ Currently not functional. This is a work in progress. Feel free to contact us an
 6) Small Push Button Switch, for resetting zero
 
 ## To Do
-* Choose a fusion algorithm
-* Add calibration to the GUI
+~~* Choose a fusion algorithm~~
+~~* Add calibration to the GUI~~
 * Test PPM output library
-* Save config to flash
+** PPM has a lot of gitter due to interrupt timing.. trying to find a solution.
+~~* Save config to flash~~
 * FRsky trainer connection
+* HM10 Wireless remote PPM Board?
