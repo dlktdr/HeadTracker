@@ -91,7 +91,7 @@ void PpmOut::attimeout() {
     ppm = pulse_out;
        
     // Setup next interrupt, fire it early to adjust out some jitter
-    timeout.attach(callback(this, &PpmOut::attimeout), milliseconds(dots[current_dot] - JITTER_TIME));
+    timeout.attach(callback(this, &PpmOut::attimeout), microseconds(dots[current_dot] - JITTER_TIME));
     // Start measuring for next pulse
     timer.reset();
     last_dot = current_dot;
