@@ -170,8 +170,8 @@ void sense_Thread()
             ppmchans[i] = TrackerSettings::DEF_CENTER;
 
         // Read all PPM inputs, if enabled
-        ppmout = trkset.getPpmOut();
-        if(ppmout != nullptr) {    
+        ppmin = trkset.getPpmIn();
+        if(ppmin != nullptr ) {    
             // Read All PPM Inputs
             // *** TODO
         }
@@ -266,9 +266,9 @@ void sense_Thread()
         int micros = duration_cast<microseconds>(runt.elapsed_time()).count();
         int sleepyt = (SLEEPTIME - micros); // Ideally 5ms period
 
-        // Don't sleep for too long it something wrong above
+        // Don't sleep for too short it something wrong above
         if(sleepyt < 5)
-        sleepyt = 5;    
+            sleepyt = 5;
 
         // **** Not super accurate being only in ms values
         // Not sure why but +1 works out on time
