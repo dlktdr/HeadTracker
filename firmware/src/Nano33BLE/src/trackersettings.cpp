@@ -800,6 +800,9 @@ void TrackerSettings::loadFromEEPROM()
     
     if(json["UUID"] == 837727) {
         serialWriteln("Device has been freshly programmed");
+        setPpmOutPin(DEF_PPM_OUT);
+        setPpmInPin(DEF_PPM_IN);
+        setButtonPin(DEF_BUTTON_IN);
 
     } else {
         serialWriteln("Device contains saved code");

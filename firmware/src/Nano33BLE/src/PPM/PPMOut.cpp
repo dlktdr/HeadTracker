@@ -77,16 +77,20 @@ void PpmOut::setInverted(bool inv)
 void PpmOut::attimeout() {    
     
     // We should have fired early. Find out by how much
-    uint64_t ex_wait = (dots[current_dot] * 1000) - duration_cast<nanoseconds>(timer.elapsed_time()).count();
-    // Start measuring for next pulse
+    //uint64_t ex_wait = (dots[current_dot] * 1000) - duration_cast<nanoseconds>(timer.elapsed_time()).count();
+    
+    int64_t ex_wait = static_cast<int64_t>(dots[current_dot]) - static_cast<int64_t>(duration_cast<microseconds>(timer.elapsed_time()).count());
     timer.reset();
+    
+    // Start measuring for next pulse
+    
     
 
     digitalWrite(A1,HIGH); // Measure how much time wasted here
     
-    // Pause only when output high, sync pulse can vary without effect
-    if(ex_wait < 30000 && pulse_out == 1)                
-        wait_ns(ex_wait);
+    // Pause only when output high, sync pulse can vary without
+    /*if(ex_wait < 100)                
+        wait_us(ex_wait);*/
 
     digitalWrite(A1,LOW);
 
@@ -94,11 +98,12 @@ void PpmOut::attimeout() {
     ppm = pulse_out;
        
     // Setup next interrupt, fire it early to adjust out some jitter
-    timeout.attach_us(callback(this, &PpmOut::attimeout), dots[current_dot] - JITTER_TIME);
+    timeout.attach_us(callback(this, &PpmOut::attimeout), dots[current_dot] - JITTER_TIME * 2);
+    
     current_dot++;
      
     if(current_dot == channel_number*2+2) { // 2 for FRAME_SYNC
-        current_dot = 0;        
+        current_dot = 0;
     }
     
     
