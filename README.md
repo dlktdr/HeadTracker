@@ -1,7 +1,7 @@
 # HeadTracker
 A Headtracker for use with the Arduino Nano 33 BLE
 
-Currently not functional. This is a work in progress. Feel free to contact us and help out.
+Currently not functional. This is a work in progress. Feel free to contact us and help out
 
 ## Whats needed
 1) Arduino Nano 33 BLE (or Sense) - Digikey/Newark many others..
@@ -10,8 +10,10 @@ Currently not functional. This is a work in progress. Feel free to contact us an
 6) Small Push Button Switch, for resetting zero
 
 ## To Do
-* Choose a fusion algorithm
-* Add calibration to the GUI
-* Test PPM output library
-* Save config to flash
-* FRsky trainer connection
+- [x] Choose a fusion algorithm, went with Madgwick
+- [x] Add calibration to the GUI
+- [X] Save config to flash
+- [ ] HM10+Nano Wireless remote PPM Board?
+- [ ] FRsky trainer connection
+- [ ] Find solution to PPM output gitter from interrupt timing issues
+- [ ] PPM Input Functionality and Testing
