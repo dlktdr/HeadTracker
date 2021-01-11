@@ -79,7 +79,6 @@ void PpmOut::attimeout() {
     // We should have fired early. Find out by how much
     uint64_t waittime = dots[last_dot] - duration_cast<microseconds>(timer.elapsed_time()).count();
     
-
     //digitalWrite(A1,HIGH); // Measure how much time wasted here
     
     // Hog CPU until exact time output should switch
@@ -92,7 +91,7 @@ void PpmOut::attimeout() {
     ppm = pulse_out;
        
     // Setup next interrupt, fire it early to adjust out some jitter
-    timeout.attach_us(callback(this, &PpmOut::attimeout), dots[current_dot] - JITTER_TIME);
+    timeout.attach(callback(this, &PpmOut::attimeout), milliseconds(dots[current_dot] - JITTER_TIME));
     // Start measuring for next pulse
     timer.reset();
     last_dot = current_dot;
