@@ -56,6 +56,8 @@ TrackerSettings::TrackerSettings()
 
     // Setup button input & ppm output pins
     setButtonPin(DEF_BUTTON_IN);
+    setPpmInPin(DEF_PPM_IN);
+    setPpmOutPin(DEF_PPM_OUT);
 
     ppmoutpin = DEF_PPM_OUT;
     ppminpin = DEF_PPM_IN; 
