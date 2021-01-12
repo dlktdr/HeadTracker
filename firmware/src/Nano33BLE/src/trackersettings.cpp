@@ -54,20 +54,24 @@ TrackerSettings::TrackerSettings()
     tilt=0,roll=0,pan=0;
     panout=0,tiltout=0,rollout=0;
 
-    // Setup button input & ppm output pins
-    setButtonPin(DEF_BUTTON_IN);
-    setPpmInPin(DEF_PPM_IN);
-    setPpmOutPin(DEF_PPM_OUT);
-
-    ppmoutpin = DEF_PPM_OUT;
-    ppminpin = DEF_PPM_IN; 
+    // PPM Defaults
+    ppmoutpin = -1;
+    ppminpin = -1; 
     ppmoutinvert = false;
     ppmininvert = false;
     _ppmout = nullptr;
     _ppmin = nullptr;
 
+    // Bluetooth defaults
     btmode = 0;
+
+    // Features defaults
     rstonwave = false;
+
+    // Setup button input & ppm output pins
+    setButtonPin(DEF_BUTTON_IN);
+    setPpmInPin(DEF_PPM_IN);
+    setPpmOutPin(DEF_PPM_OUT);
 }
 
 int TrackerSettings::Rll_min() const
