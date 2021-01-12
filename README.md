@@ -15,5 +15,5 @@ Currently not functional. This is a work in progress. Feel free to contact us an
 - [X] Save config to flash
 - [ ] HM10+Nano Wireless remote PPM Board?
 - [ ] FRsky trainer connection
-- [ ] Find solution to PPM output gitter from interrupt timing issues
+- [X] Find solution to PPM output gitter from interrupt timing issues
 - [ ] PPM Input Functionality and Testing
