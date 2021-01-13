@@ -20,6 +20,7 @@ MainWindow::MainWindow(QWidget *parent)
     diagnostic = new DiagnosticDisplay(&trkset);
     savedToNVM = true;
     sentToHT = true;
+    ui->cmdStore->setEnabled(false);
 
     ui->statusbar->showMessage("Disconnected");
     findSerialPorts();
@@ -128,8 +129,9 @@ MainWindow::MainWindow(QWidget *parent)
     // On BLE Calibration Save update to device
     connect(bleCalibratorDialog,&CalibrateBLE::calibrationSave,this,&MainWindow::storeSettings);
 
-    // Timer to cause an update, prevents too many data writes -- NOT USED ATM
+    // Timer to cause an update, prevents too many data writes --
     connect(&updatesettingstmr,&QTimer::timeout,this,&MainWindow::updateSettings);
+    updatesettingstmr.setSingleShot(true);
 
     // Start a timer to tell the device that we are here
     // Times out at 10 seconds so send an ack every 8
@@ -196,7 +198,6 @@ void MainWindow::parseIncomingJSON(const QVariantMap &map)
     if(map["Cmd"].toString() == "Settings") {        
         trkset.setAllData(map);
         updateToUI();
-
     // Data sent, Update the graph / servo sliders / calibration
     } else if (map["Cmd"].toString() == "Data") {
         // Add all the data to the settings
@@ -269,7 +270,7 @@ void MainWindow::parseIncomingHT(QString cmd, QStringList args)
     // CRC ERROR
     if(cmd == "$CRCERR") {
         ui->statusbar->showMessage("CRC Error : Error Setting Values, Retrying",2000);
-        updatesettingstmr.start(500);
+        updatesettingstmr.start(500); // Resend
     }
 
     // CRC OK
@@ -389,8 +390,10 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
     if(event->type() == QKeyEvent::KeyPress) {
         if((event->modifiers() & Qt::ControlModifier) &&
            (event->key() & Qt::Key_D)) {
-            // Cntrl - D Pressed
+            // Ctrl - D Pressed
             diagnostic->show();
+            diagnostic->activateWindow();
+            diagnostic->raise();
         }
     }
 }
@@ -540,6 +543,7 @@ void MainWindow::updateToUI()
 
     savedToNVM = true; // Values are the same as the HT
     sentToHT = true;
+    ui->cmdStore->setEnabled(false);
 }
 
 /* offOrientChanged()
@@ -609,6 +613,7 @@ void MainWindow::updateFromUI()
 
     savedToNVM = false; // Indicate values have not been save to NVM
     sentToHT = false; // Indivate changes haven't been sent to HT
+    ui->cmdStore->setEnabled(true);
 
     updatesettingstmr.start(1000);
 }
@@ -668,17 +673,18 @@ void MainWindow::stopGraph()
 // Send All Settings to the Controller
 void MainWindow::storeSettings()
 {
-
     sendSerialJSON("Setttings", trkset.getAllData());
     sentToHT = true;
+    ui->cmdStore->setEnabled(false);
     diagnostic->update();
     ui->statusbar->showMessage(tr("Settings Sent"),2000);
 }
 
-// Automatic Send Changes.. Not used for now
+// Automatic Send Changes.
+
 void MainWindow::updateSettings()
 {
-
+    storeSettings();
 }
 
 void MainWindow::resetCenter()
@@ -797,12 +803,12 @@ void MainWindow::closeEvent (QCloseEvent *event)
 {
     bool close=true;
     if(!sentToHT) {
-        QMessageBox::StandardButton rval = QMessageBox::question(this,"Are you sure?","Are you sure you want to close?\n"\
+        QMessageBox::StandardButton rval = QMessageBox::question(this,"Changes not sent","Are you sure you want to close?\n"\
                               "Changes haven't been sent to the headtracker\nClick \"Send Changes\" first",QMessageBox::Yes|QMessageBox::No);
         if(rval != QMessageBox::Yes)
             close = false;
     } else if(!savedToNVM) {
-        QMessageBox::StandardButton rval = QMessageBox::question(this,"Are you sure you?","Are you sure you want to close?\n"\
+        QMessageBox::StandardButton rval = QMessageBox::question(this,"Changes not saved on tracker","Are you sure you want to close?\n"\
                               "Changes haven't been permanently stored on headtracker\nClick \"Save to NVM\" first",QMessageBox::Yes|QMessageBox::No);
         if(rval != QMessageBox::Yes)
             close = false;
