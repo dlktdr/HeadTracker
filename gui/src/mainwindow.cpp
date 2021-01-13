@@ -173,12 +173,10 @@ void MainWindow::parseSerialData()
             QStringList args = QString(data).mid(pos).split(',',Qt::KeepEmptyParts);
             parseIncomingHT(data.left(pos),args);
 
-
             // Other data, Show to the user
         } else {
             addToLog(data + "\n");
         }
-
 
         // Remove data read from the buffer
         serialData = serialData.right(serialData.length()-nlindex-2);
@@ -198,6 +196,7 @@ void MainWindow::parseIncomingJSON(const QVariantMap &map)
     if(map["Cmd"].toString() == "Settings") {        
         trkset.setAllData(map);
         updateToUI();
+
     // Data sent, Update the graph / servo sliders / calibration
     } else if (map["Cmd"].toString() == "Data") {
         // Add all the data to the settings
@@ -236,7 +235,7 @@ void MainWindow::fwDiscovered(QString vers, QString hard)
         ui->chkRawData->setVisible(true);
         ui->stackedWidget->setCurrentIndex(1);
         ui->grbSettings->setTitle("BNO055");
-    }
+    } // More HERE
 }
 
 /* sendSerialData()
