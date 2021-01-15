@@ -7,7 +7,7 @@ Should be functional now but this is still a work in progress. Feel free to cont
 1) Arduino Nano 33 BLE (or Sense) - Digikey/Newark many others..
 3) Soldering Iron
 5) 3.5mm mono audio cable. I got a right angle one
-6) Small Push Button Switch, for resetting zero
+6) Small Push Button Switch, for resetting zero. Note: If you buy BLE 33 Sense you can now wave over the gesture sensor to reset. No button required.
 
 ## To Do
 - [x] Choose a fusion algorithm, went with Madgwick
