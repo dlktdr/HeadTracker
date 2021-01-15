@@ -1,13 +1,13 @@
 # HeadTracker
 A Headtracker for use with the Arduino Nano 33 BLE
 
-Currently not functional. This is a work in progress. Feel free to contact us and help out
+Should be functional now but this is still a work in progress. Feel free to contact us and help out
 
 ## Whats needed
 1) Arduino Nano 33 BLE (or Sense) - Digikey/Newark many others..
 3) Soldering Iron
 5) 3.5mm mono audio cable. I got a right angle one
-6) Small Push Button Switch, for resetting zero
+6) Small Push Button Switch, for resetting zero. Note: If you buy BLE 33 Sense you can now wave over the gesture sensor to reset. No button required.
 
 ## To Do
 - [x] Choose a fusion algorithm, went with Madgwick
@@ -17,3 +17,4 @@ Currently not functional. This is a work in progress. Feel free to contact us an
 - [ ] FRsky trainer connection
 - [X] Find solution to PPM output gitter from interrupt timing issues
 - [ ] PPM Input Functionality and Testing
+- [X] Add ability to program from the firmware window
