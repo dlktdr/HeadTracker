@@ -12,7 +12,7 @@
 
 // !!!! Move me to a adjustable settings file !!!!! **********************
 const QString baseurl = "https://raw.githubusercontent.com/dlktdr/HeadTracker/master/firmware/bin/";
-const QString avrdudecommand = "avrdude.exe";
+
 const QString localfilename = "online.hex";
 
 
@@ -40,6 +40,8 @@ private:
     QString comport;
 
     void startProgramming(const QString &filename);
+
+    QString avrdudecommand;
 
 private slots:
     void loadOnlineFirmware();

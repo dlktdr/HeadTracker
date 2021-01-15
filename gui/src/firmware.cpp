@@ -2,6 +2,7 @@
 #include <QNetworkAccessManager>
 #include <QSettings>
 #include <QTimer>
+#include <QScrollBar>
 #include "firmware.h"
 #include "ui_firmware.h"
 
@@ -21,6 +22,7 @@ Firmware::Firmware(QWidget *parent) :
     avrdude = new QProcess(this);
     avrdudelog = new QPlainTextEdit;
     avrdudelog->setWindowTitle("Firmware Programming Output");
+    avrdudecommand = "avrdude.exe";
     connect(avrdude, SIGNAL(readyReadStandardOutput()), this, SLOT(avrDudeSTDOUTReady()));
     connect(avrdude, SIGNAL(readyReadStandardError()), this, SLOT(avrDudeSTDERRReady()));
     connect(avrdude, SIGNAL(started()), this, SLOT(avrDudeStarted()));
@@ -48,13 +50,23 @@ void Firmware::startProgramming(const QString &filename)
         return;
 
     QMap<QString, QVariant>data = itm->data(Qt::UserRole).toMap();
-    arguments = data["args"].toStringList();
 
-    arguments.append(QString("-Uflash:w:%1").arg(filename));
-    arguments.append(QString("-P%1").arg(comport));
-    arguments.append(QString("-Cavrdude.conf"));
+    if(data["Uploader"].isNull()) {
 
-    avrdude->start(avrdudecommand, arguments);
+        arguments = data["args"].toStringList();
+
+        arguments.append(QString("-Uflash:w:%1").arg(filename));
+        arguments.append(QString("-P%1").arg(comport));
+        arguments.append(QString("-Cavrdude.conf"));
+        avrdude->start(avrdudecommand, arguments);
+
+
+    // Add ability to use different uploaders. %1 is the comport, %2 is the filename
+    } else {
+        avrdudecommand = data["Uploader"].toString();
+        arguments = data["args"].toString().arg(comport).arg(filename).split(' ');
+        avrdude->start(avrdudecommand, arguments);
+    }
 }
 
 void Firmware::loadOnlineFirmware()
@@ -199,12 +211,14 @@ void Firmware::avrDudeSTDOUTReady()
 {
     QByteArray ba = avrdude->readAllStandardOutput();
     avrdudelog->setPlainText(avrdudelog->toPlainText() + ba);
+    avrdudelog->verticalScrollBar()->setValue(avrdudelog->verticalScrollBar()->maximum());
 }
 
 void Firmware::avrDudeSTDERRReady()
 {
     QByteArray ba = avrdude->readAllStandardError();
     avrdudelog->setPlainText(avrdudelog->toPlainText() + ba);
+    avrdudelog->verticalScrollBar()->setValue(avrdudelog->verticalScrollBar()->maximum());
 }
 
 void Firmware::avrDudeStarted()
@@ -235,6 +249,6 @@ void Firmware::avrDudeFinished(int exitCode, QProcess::ExitStatus exitStatus)
         QTimer::singleShot(1500,avrdudelog,SLOT(close()));
         QMessageBox::about(this, "Programming Success", "Programming Successful!");
     } else {
-        QMessageBox::critical(this, "Programming Failure", "Programming Failed, Please check the log for information");
+        QMessageBox::critical(this, "Programming Failure", "Programming Failed, Please check the log for information\nFor Nane33BLE Double tap reset button to enter programming mode.\nClose this window and verify proper com port");
     }
 }
