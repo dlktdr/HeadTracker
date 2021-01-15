@@ -1,7 +1,7 @@
 # HeadTracker
 A Headtracker for use with the Arduino Nano 33 BLE
 
-Currently not functional. This is a work in progress. Feel free to contact us and help out
+Should be functional now but this is still a work in progress. Feel free to contact us and help out
 
 ## Whats needed
 1) Arduino Nano 33 BLE (or Sense) - Digikey/Newark many others..
@@ -17,3 +17,4 @@ Currently not functional. This is a work in progress. Feel free to contact us an
 - [ ] FRsky trainer connection
 - [X] Find solution to PPM output gitter from interrupt timing issues
 - [ ] PPM Input Functionality and Testing
+- [X] Add ability to program from the firmware window
