@@ -13,7 +13,7 @@ static const int RX_BUF_SIZE=1500; // RX Buffer Size
 static const int RX_BUFFERS=3; // Number of RX Buffers
 static const int TX_BUF_SIZE=1500; // RX Buffer Size
 static const int SERIAL_THREAD_PERIOD = 13;
-static const int SERIAL_TX_MAX_PACKET = 63;
+static const int SERIAL_TX_MAX_PACKET = 64;
 
 void serial_Init();
 void serial_Thread(); // Transmits data in outgoing buffer 64char at a time
