@@ -32,18 +32,14 @@ void io_Init()
 // Reset Button Pressed Flag on Read
 bool wasButtonPressed() {
   if(buttonpressed) {
-    __disable_irq();
     buttonpressed = false;
-    __enable_irq();
     return true;
   }
   return false;
 }
 
-void pressButton() {
-  __disable_irq();
+void pressButton() {  
   buttonpressed = true;
-  __enable_irq();
 }
 
 // Any IO Related Tasks, buttons, etc.. ISR. Run at 1Khz
