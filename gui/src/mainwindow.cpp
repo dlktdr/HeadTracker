@@ -157,6 +157,7 @@ void MainWindow::parseSerialData()
         if(nlindex < 0)
             return;  // No New line found
 
+        qDebug() << serialData;
         // Strip data up the the CR LF \r\n
         QByteArray data = serialData.left(nlindex);
 
@@ -421,8 +422,8 @@ void MainWindow::serialConnect()
     serialcon->setParity(QSerialPort::NoParity);
     serialcon->setDataBits(QSerialPort::Data8);
     serialcon->setStopBits(QSerialPort::OneStop);
-    serialcon->setBaudRate(QSerialPort::Baud115200); // CDC doesn't actuall make a dif.. cool
-    serialcon->setFlowControl(QSerialPort::HardwareControl);
+    serialcon->setBaudRate(QSerialPort::Baud57600); // CDC doesn't actuall make a dif.. cool
+    serialcon->setFlowControl(QSerialPort::NoFlowControl);
 
     if(!serialcon->open(QIODevice::ReadWrite)) {
         QMessageBox::critical(this,"Error",tr("Could not open Com ") + serialcon->portName());
