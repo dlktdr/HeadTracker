@@ -17,4 +17,9 @@ Should be functional now but this is still a work in progress. Feel free to cont
 - [ ] FRsky trainer connection
 - [X] Find solution to PPM output gitter from interrupt timing issues
 - [ ] PPM Input Functionality and Testing
-- [X] Add ability to program from the firmware window
+- [X] Add ability to program from the firmware window, sample firmware in master
+- [ ] Create binaries for gui
+- [ ] Combine with master
+
+## Screenshot
+![alt text](https://github.com/dlktdr/HeadTracker/raw/Nano-33-BLE/gui/src/ScreenCapture1007.png)
