@@ -19,15 +19,15 @@ Firmware::Firmware(QWidget *parent) :
     reply = nullptr;
 
     // AVR Dude Programmer
-    avrdude = new QProcess(this);
-    avrdudelog = new QPlainTextEdit;
-    avrdudelog->setWindowTitle("Firmware Programming Output");
-    avrdudecommand = "avrdude.exe";
-    connect(avrdude, SIGNAL(readyReadStandardOutput()), this, SLOT(avrDudeSTDOUTReady()));
-    connect(avrdude, SIGNAL(readyReadStandardError()), this, SLOT(avrDudeSTDERRReady()));
-    connect(avrdude, SIGNAL(started()), this, SLOT(avrDudeStarted()));
-    connect(avrdude, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(avrDudeFinished(int, QProcess::ExitStatus)));
-    connect(avrdude, SIGNAL(errorOccurred(QProcess::ProcessError)), this, SLOT(avrDudeErrorOccured(QProcess::ProcessError)));
+    programmer = new QProcess(this);
+    programmerlog = new QPlainTextEdit;
+    programmerlog->setWindowTitle("Firmware Programming Output");
+    programmercommand = "programmer.exe";
+    connect(programmer, SIGNAL(readyReadStandardOutput()), this, SLOT(programmerSTDOUTReady()));
+    connect(programmer, SIGNAL(readyReadStandardError()), this, SLOT(programmerSTDERRReady()));
+    connect(programmer, SIGNAL(started()), this, SLOT(programmerStarted()));
+    connect(programmer, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(programmerFinished(int, QProcess::ExitStatus)));
+    connect(programmer, SIGNAL(errorOccurred(QProcess::ProcessError)), this, SLOT(programmerErrorOccured(QProcess::ProcessError)));
 }
 
 Firmware::~Firmware()
@@ -38,8 +38,8 @@ Firmware::~Firmware()
     if (firmreply != nullptr)
         delete reply;
 
-    delete avrdude;
-    delete avrdudelog;
+    delete programmer;
+    delete programmerlog;
 }
 
 void Firmware::startProgramming(const QString &filename)
@@ -57,15 +57,15 @@ void Firmware::startProgramming(const QString &filename)
 
         arguments.append(QString("-Uflash:w:%1").arg(filename));
         arguments.append(QString("-P%1").arg(comport));
-        arguments.append(QString("-Cavrdude.conf"));
-        avrdude->start(avrdudecommand, arguments);
+        arguments.append(QString("-Cprogrammer.conf"));
+        programmer->start(programmercommand, arguments);
 
 
     // Add ability to use different uploaders. %1 is the comport, %2 is the filename
     } else {
-        avrdudecommand = data["Uploader"].toString();
+        programmercommand = data["Uploader"].toString();
         arguments = data["args"].toString().arg(comport).arg(filename).split(' ');
-        avrdude->start(avrdudecommand, arguments);
+        programmer->start(programmercommand, arguments);
     }
 }
 
@@ -200,37 +200,37 @@ void Firmware::uploadClicked()
     connect(firmreply,SIGNAL(sslErrors(const QList<QSslError> &)),this, SLOT(ssLerrors(const QList<QSslError> &)));
     connect(firmreply,SIGNAL(errorOccurred(QNetworkReply::NetworkError)),this,SLOT(replyErrorOccurred(QNetworkReply::NetworkError)));
 
-    avrdudelog->clear();
-    avrdudelog->show();
-    avrdudelog->setMinimumSize(640,480);
-    avrdudelog->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
-    avrdudelog->appendPlainText("Downloading " + url.toString() + "\n");
+    programmerlog->clear();
+    programmerlog->show();
+    programmerlog->setMinimumSize(640,480);
+    programmerlog->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
+    programmerlog->appendPlainText("Downloading " + url.toString() + "\n");
 }
 
-void Firmware::avrDudeSTDOUTReady()
+void Firmware::programmerSTDOUTReady()
 {
-    QByteArray ba = avrdude->readAllStandardOutput();
-    avrdudelog->setPlainText(avrdudelog->toPlainText() + ba);
-    avrdudelog->verticalScrollBar()->setValue(avrdudelog->verticalScrollBar()->maximum());
+    QByteArray ba = programmer->readAllStandardOutput();
+    programmerlog->setPlainText(programmerlog->toPlainText() + ba);
+    programmerlog->verticalScrollBar()->setValue(programmerlog->verticalScrollBar()->maximum());
 }
 
-void Firmware::avrDudeSTDERRReady()
+void Firmware::programmerSTDERRReady()
 {
-    QByteArray ba = avrdude->readAllStandardError();
-    avrdudelog->setPlainText(avrdudelog->toPlainText() + ba);
-    avrdudelog->verticalScrollBar()->setValue(avrdudelog->verticalScrollBar()->maximum());
+    QByteArray ba = programmer->readAllStandardError();
+    programmerlog->setPlainText(programmerlog->toPlainText() + ba);
+    programmerlog->verticalScrollBar()->setValue(programmerlog->verticalScrollBar()->maximum());
 }
 
-void Firmware::avrDudeStarted()
+void Firmware::programmerStarted()
 {
-    avrdudelog->appendPlainText("Starting " + avrdudecommand + " " + arguments.join(" ") + "\n");
+    programmerlog->appendPlainText("Starting " + programmercommand + " " + arguments.join(" ") + "\n");
 }
 
-void Firmware::avrDudeErrorOccured(QProcess::ProcessError error)
+void Firmware::programmerErrorOccured(QProcess::ProcessError error)
 {
     switch (error) {
     case QProcess::FailedToStart: {
-        QMessageBox::critical(this, "Error", "Unable to open " + avrdudecommand);
+        QMessageBox::critical(this, "Error", "Unable to open " + programmercommand);
         break;
     }
     default: {
@@ -239,14 +239,14 @@ void Firmware::avrDudeErrorOccured(QProcess::ProcessError error)
     }
 }
 
-void Firmware::avrDudeFinished(int exitCode, QProcess::ExitStatus exitStatus)
+void Firmware::programmerFinished(int exitCode, QProcess::ExitStatus exitStatus)
 {
     Q_UNUSED(exitStatus);
     Q_UNUSED(exitCode);
 
     if(exitCode == 0) {
         // If Successfull autoclose window.
-        QTimer::singleShot(1500,avrdudelog,SLOT(close()));
+        QTimer::singleShot(1500,programmerlog,SLOT(close()));
         QMessageBox::about(this, "Programming Success", "Programming Successful!");
     } else {
         QMessageBox::critical(this, "Programming Failure", "Programming Failed, Please check the log for information\nFor Nane33BLE Double tap reset button to enter programming mode.\nClose this window and verify proper com port");

@@ -34,14 +34,14 @@ private:
     QNetworkAccessManager manager;
     QNetworkReply* reply;
     QNetworkReply* firmreply;
-    QProcess *avrdude;
-    QPlainTextEdit *avrdudelog;
+    QProcess *programmer;
+    QPlainTextEdit *programmerlog;
     QStringList arguments;
     QString comport;
 
     void startProgramming(const QString &filename);
 
-    QString avrdudecommand;
+    QString programmercommand;
 
 private slots:
     void loadOnlineFirmware();
@@ -51,11 +51,11 @@ private slots:
     void replyErrorOccurred(QNetworkReply::NetworkError code);
     void firmwareSelected(QListWidgetItem *lwi);
     void uploadClicked();
-    void avrDudeSTDOUTReady();
-    void avrDudeSTDERRReady();
-    void avrDudeStarted();
-    void avrDudeErrorOccured(QProcess::ProcessError error);
-    void avrDudeFinished(int exitCode, QProcess::ExitStatus exitStatus);
+    void programmerSTDOUTReady();
+    void programmerSTDERRReady();
+    void programmerStarted();
+    void programmerErrorOccured(QProcess::ProcessError error);
+    void programmerFinished(int exitCode, QProcess::ExitStatus exitStatus);
 };
 
 #endif // FIRMWARE_H
