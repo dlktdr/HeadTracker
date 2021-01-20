@@ -350,19 +350,18 @@ void loop()
                 {
                     tiltInverse = -1;
                 }
-
-                servoPanCenter = valuesReceived[8];
-                panMinPulse = valuesReceived[9];
-                panMaxPulse = valuesReceived[10];         
+                servoPanCenter = (valuesReceived[8] - 400) * 2 ;
+                panMinPulse = (valuesReceived[9] - 400) * 2;
+                panMaxPulse = (valuesReceived[10] - 400) * 2;         
          
-                servoTiltCenter = valuesReceived[11];
-                tiltMinPulse = valuesReceived[12];
-                tiltMaxPulse = valuesReceived[13];         
+                servoTiltCenter = (valuesReceived[11] - 400) * 2;
+                tiltMinPulse = (valuesReceived[12] - 400) * 2;
+                tiltMaxPulse = (valuesReceived[13] - 400) * 2
 
-                servoRollCenter = valuesReceived[14];
-                rollMinPulse = valuesReceived[15];
-                rollMaxPulse = valuesReceived[16];              
-     
+                servoRollCenter = (valuesReceived[14] - 400) * 2;
+                rollMinPulse = (valuesReceived[15] - 400) * 2;
+                rollMaxPulse = (valuesReceived[16] - 400) * 2;   
+                    
                 htChannels[0] = valuesReceived[17];                   
                 htChannels[1] = valuesReceived[18];              
                 htChannels[2] = valuesReceived[19];            
@@ -562,23 +561,23 @@ void SendSettings() {
   Serial.print(",");
   Serial.print(servoReverseMask);
   Serial.print(",");
-  Serial.print(servoPanCenter);
+  Serial.print(servoPanCenter / 2 + 400);
   Serial.print(",");
-  Serial.print(panMinPulse);
+  Serial.print(panMinPulse / 2 + 400);
   Serial.print(",");
-  Serial.print(panMaxPulse);
+  Serial.print(panMaxPulse / 2 + 400);
   Serial.print(",");
-  Serial.print(servoTiltCenter);
+  Serial.print(servoTiltCenter / 2 + 400);
   Serial.print(",");
-  Serial.print(tiltMinPulse);
+  Serial.print(tiltMinPulse / 2 + 400);
   Serial.print(",");
-  Serial.print(tiltMaxPulse);
+  Serial.print(tiltMaxPulse / 2 + 400);
   Serial.print(",");
-  Serial.print(servoRollCenter);
+  Serial.print(servoRollCenter / 2 + 400);
   Serial.print(",");
-  Serial.print(rollMinPulse);
+  Serial.print(rollMinPulse / 2 + 400);
   Serial.print(",");
-  Serial.print(rollMaxPulse);
+  Serial.print(rollMaxPulse / 2 + 400);
   Serial.print(",");
   Serial.print(htChannels[0]);
   Serial.print(",");
