@@ -42,7 +42,6 @@ Mapping example:
 $123456789111CH
 */
 
-
 // Local file variables
 //
 int frameNumber = 0;		    // Frame count since last debug serial output
@@ -291,7 +290,7 @@ void loop()
                     Serial.println("$CRCERR");
                     return;
                 } else {                    
-                    Serial.println("$CRCOK:HT Settings Retrieved");
+                    Serial.println("$CRCOK\r\nHT: Settings received from GUI!");
                 }
            
                 int valuesReceived[22] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
@@ -352,11 +351,11 @@ void loop()
                 }
                 servoPanCenter = (valuesReceived[8] - 400) * 2 ;
                 panMinPulse = (valuesReceived[9] - 400) * 2;
-                panMaxPulse = (valuesReceived[10] - 400) * 2;         
+                panMaxPulse = (valuesReceived[10] - 400) * 2;
          
                 servoTiltCenter = (valuesReceived[11] - 400) * 2;
                 tiltMinPulse = (valuesReceived[12] - 400) * 2;
-                tiltMaxPulse = (valuesReceived[13] - 400) * 2
+                tiltMaxPulse = (valuesReceived[13] - 400) * 2;
 
                 servoRollCenter = (valuesReceived[14] - 400) * 2;
                 rollMinPulse = (valuesReceived[15] - 400) * 2;
@@ -406,7 +405,7 @@ void loop()
             // Reset Button Via Software
             else if (IsCommand("RST"))
             {
-                Serial.println("Reset Values Complete ");
+                Serial.println("HT: Resetting center");
                 resetValues = 1;
                 serial_index = 0;
                 string_started = 0;
@@ -415,7 +414,7 @@ void loop()
             // Clear Offsets via Software
             else if (IsCommand("STO"))
             {
-                Serial.println("Calibration saved when all sensors at maximum");
+                Serial.println("HT: Calibration saved when all sensors at maximum");
                 doCalibrate = true;
                 serial_index = 0;
                 string_started = 0;
@@ -424,7 +423,7 @@ void loop()
             // Clear Offsets via Software
             else if (IsCommand("CLR"))
             {
-                Serial.println("Clearing Offsets");
+                Serial.println("HT: Clearing Offsets");
                 tiltStart = 0;        
                 panStart = 0;                
                 rollStart = 0; 
@@ -435,7 +434,7 @@ void loop()
             // Graph raw sensor data
             else if (IsCommand("GRAW"))
             {
-                Serial.println("Showing Raw Sensor Data");
+                Serial.println("HT: Showing Raw Sensor Data");
                 graphRaw = 1;        
                 serial_index = 0;
                 string_started = 0;
@@ -444,7 +443,7 @@ void loop()
             // Graph offset sensor data
             else if (IsCommand("GOFF"))
             {
-                Serial.println("Showing Offset Sensor Data");
+                Serial.println("HT: Showing Offset Sensor Data");
                 graphRaw = 0;        
                 serial_index = 0;
                 string_started = 0;
@@ -487,7 +486,7 @@ void loop()
 
                 SendSettings();
 
-                Serial.println("Settings Retrieved");
+                Serial.println("HT: Settings sent to GUI");
                 
                 serial_index = 0;
                 string_started = 0;
@@ -655,7 +654,7 @@ void SaveSettings()
   
     EEPROM.write(0,EEPROM_MAGIC_NUMBER); 
 
-    Serial.println("Settings saved!");
+    Serial.println("HT: Settings saved to EEPROM!");
 }
 
 //--------------------------------------------------------------------------------------
@@ -711,6 +710,7 @@ void GetSettings()
     htChannels[2] = EEPROM.read(34);    
 
     axisRemap = EEPROM.read(35);
+    axisSign = EEPROM.read(36);
 
 #if (DEBUG)
     DebugOutput();
@@ -726,7 +726,7 @@ void DebugOutput()
     Serial.println();  
     Serial.println();
     Serial.println();
-    Serial.println("------ Debug info------");
+    Serial.println("HT: ------ Debug info------");
 
     Serial.print("FW Version: ");
     Serial.println(FIRMWARE_VERSION_FLOAT, 2);
