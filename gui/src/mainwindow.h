@@ -18,6 +18,8 @@
 #include "diagnosticdisplay.h"
 
 const int MAX_LOG_LENGTH=6000;
+const QString version="0.4";
+const QStringList firmwares={"BNO055","NANO33BLE","REMOTEBLE"};
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -50,15 +52,17 @@ private:
     DiagnosticDisplay *diagnostic;
     bool savedToNVM;
     bool sentToHT;
+    bool fwdiscovered;
 
     int xtime;
     bool graphing;
+    bool rawmode;
 
     void parseSerialData();
     void sendSerialData(QByteArray data);
 
     // HT Format
-    void parseIncomingHT(QString cmd, QStringList args);
+    void parseIncomingHT(QString cmd);
     // JSON format
     void sendSerialJSON(QString command, QVariantMap map=QVariantMap());
     void parseIncomingJSON(const QVariantMap &map);
@@ -75,6 +79,7 @@ private slots:
     void serialConnect();
     void serialDisconnect();
     void serialError(QSerialPort::SerialPortError);
+    void connectTimeout();
     void updateFromUI();
     void updateToUI();
     void offOrientChanged(float,float,float);

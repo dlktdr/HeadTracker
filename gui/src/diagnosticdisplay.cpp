@@ -22,8 +22,8 @@ DiagnosticDisplay::~DiagnosticDisplay()
 
 void DiagnosticDisplay::updated()
 {
-    QVariantMap livedata=trkset->getLiveDataMap();
-    QVariantMap settings=trkset->getAllData();
+    QVariantMap livedata=trkset->liveDataMap();
+    QVariantMap settings=trkset->allData();
 
     ui->tblParams->clear();
     ui->tblParams->setColumnCount(2);

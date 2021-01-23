@@ -470,7 +470,7 @@ void TrackerSettings::setAllData(const QVariantMap &data)
     }
 }
 
-QVariant TrackerSettings::getLiveData(const QString &name)
+QVariant TrackerSettings::liveData(const QString &name)
 {
     return _live[name];
 }
@@ -482,7 +482,7 @@ void TrackerSettings::setLiveData(const QString &name, const QVariant &live)
     setLiveDataMap(map);
 }
 
-QVariantMap TrackerSettings::getLiveDataMap()
+QVariantMap TrackerSettings::liveDataMap()
 {
     return _live;
 }

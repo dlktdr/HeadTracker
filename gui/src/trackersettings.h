@@ -147,17 +147,17 @@ public:
     void storeSettings(QSettings *settings);
     void loadSettings(QSettings *settings);
 
-    QVariantMap getAllData() {return _data;}
+    QVariantMap allData() {return _data;}
     void setAllData(const QVariantMap &data);
 
-    QVariant getLiveData(const QString &name);
+    QVariant liveData(const QString &name);
     void setLiveData(const QString &name, const QVariant &live);
 
-    QVariantMap getLiveDataMap();
+    QVariantMap liveDataMap();
     void setLiveDataMap(const QVariantMap &livelist, bool clear=false);
 
-    QString getHardware() {return _data["Hard"].toString();}
-    QString getFWVersion() {return _data["Vers"].toString();}
+    QString hardware() {return _data["Hard"].toString();}
+    QString fwVersion() {return _data["Vers"].toString();}
     void setHardware(QString vers,QString hard);
 
     void setSoftIronOffsets(float soo[3][3]);

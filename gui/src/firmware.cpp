@@ -71,7 +71,7 @@ void Firmware::startProgramming(const QString &filename)
 
 void Firmware::loadOnlineFirmware()
 {
-    QUrl url = QUrl(baseurl + "Firmwares.ini");
+    QUrl url = QUrl(baseurl + "firmwares04.ini");
     QNetworkRequest request(url);
     reply = manager.get(request);
     connect(reply,SIGNAL(finished()),this,SLOT(firmwareVersionsReady()));
