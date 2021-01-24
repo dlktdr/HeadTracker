@@ -12,6 +12,7 @@ class MagCalWidget : public QOpenGLWidget
 public:
     explicit MagCalWidget(QWidget *parent = nullptr);
     void setTracker(TrackerSettings *trkset);
+    void resetDataPoints();
 
 protected:
     void initializeGL() override;

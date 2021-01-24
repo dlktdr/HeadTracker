@@ -37,6 +37,7 @@ private:
     float _soo[3][3]; // Soft Iron
     float _hoo[3]; // Hard Iron
     bool firstmag=true;    
+    enum STEP {GYROCAL=0,MAGCAL,ACCELCAL};
 
 private slots:
     void rawGyroChanged(float x, float y, float z);

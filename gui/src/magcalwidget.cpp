@@ -91,6 +91,11 @@ void MagCalWidget::setTracker(TrackerSettings *trk)
     connect(trkset,&TrackerSettings::rawMagChanged,this,&MagCalWidget::rawMagChanged);
 }
 
+void MagCalWidget::resetDataPoints()
+{
+    raw_data_reset();
+}
+
 void MagCalWidget::initializeGL()
 {
     GLUquadric *sphere;

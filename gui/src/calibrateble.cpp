@@ -43,53 +43,6 @@ void CalibrateBLE::rawGyroChanged(float x, float y, float z)
     ui->lblGyroXOff->setText(QString::number(gyroff[0],'g',2));
     ui->lblGyroYOff->setText(QString::number(gyroff[1],'g',2));
     ui->lblGyroZOff->setText(QString::number(gyroff[2],'g',2));
-
-    /*qint64 curtime = QDateTime::currentMSecsSinceEpoch();
-    double period = (double)(curtime - lasttime)/ 1000.0;
-    lasttime = curtime;
-    qDebug() << "Period" << period;
-    if(period == 0) {
-        period = 0.1;
-    }
-
-    // Rate of change on average
-    for(int i=0;i<3;i++) {
-        gyrate[i] += 0.015 * (gyrate[i] - lgyrate[i]);   // Low pass
-        lgyrate[i] = gyrate[i];
-
-        gyrate[i] = (gyroff[i] - lgyroff[i]) / period; // Differentiate
-        lgyroff[i] = gyroff[i];
-
-        qDebug() << "Gyro Rate" << i << gyrate[i];
-    }
-
-    bool done=true;
-    if(abs(gyrate[0]) > 0.1) {
-        ui->lblGyroXOff->setStyleSheet("background-color: red;");
-        done = false;
-    } else
-        ui->lblGyroXOff->setStyleSheet("background-color: rgb(0, 229, 0);");
-
-    if(abs(gyrate[1]) > 0.1) {
-        ui->lblGyroYOff->setStyleSheet("background-color: red;");
-        done = false;
-    } else
-        ui->lblGyroYOff->setStyleSheet("background-color: rgb(0, 229, 0);");
-
-    if(abs(gyrate[2]) > 0.1) {
-        ui->lblGyroZOff->setStyleSheet("background-color: red;");
-        done = false;
-    } else
-        ui->lblGyroZOff->setStyleSheet("background-color: rgb(0, 229, 0);");
-
-
-    if(done) {
-        enableNext.start(1000);
-    } else {
-        ui->cmdNext->setEnabled(false);
-        enableNext.stop();
-    }*/
-
 }
 
 
@@ -97,7 +50,7 @@ void CalibrateBLE::nextClicked()
 {
     switch (step) {
     // Gyrometer
-    case 0: {
+    case GYROCAL: {
         ui->stackedWidget->setCurrentIndex(1);
         ui->cmdPrevious->setText("Previous");
 
@@ -108,15 +61,16 @@ void CalibrateBLE::nextClicked()
         firstmag = true;
         for(int i=0;i<3;i++)
             gyrsaveoff[i] = gyroff[i]; // Values to save
-        step = 1;
-      //  ui->cmdNext->setDisabled(true);
+        step = MAGCAL;
+        ui->cmdNext->setDisabled(true);
+        ui->magcalwid->resetDataPoints();
         break;
     }
     // Magnetometer
-    case 1: {
+    case MAGCAL: {
         ui->stackedWidget->setCurrentIndex(2);
         ui->cmdNext->setText("Save");
-         step = 2;
+         step = ACCELCAL;
 
         // REMOVE ONCE ACCEL CAL READY
             hide();
@@ -126,15 +80,13 @@ void CalibrateBLE::nextClicked()
             trkset->setSoftIronOffsets(_soo);
             trkset->setGyroOffset(gyrsaveoff[0],gyrsaveoff[1],gyrsaveoff[2]);
             emit calibrationSave();
-            step = 0;
+            step = GYROCAL;
         //----------------------------------------
-
-
 
         break;
     }
     // Accelerometer - If clicked here save + close
-    case 2: {
+    case ACCELCAL: {
         // SAVE HERE + CLOSE
         hide();
         ui->stackedWidget->setCurrentIndex(0);
@@ -153,25 +105,24 @@ void CalibrateBLE::prevClicked()
 {
     switch (step) {
     // Gyrometer - If clicked here close
-    case 0: {
-        step = 0;
-
+    case GYROCAL: {
         hide();
         break;
     }
     // Magnetometer
-    case 1: {
+    case MAGCAL: {
         ui->cmdPrevious->setText("Cancel");
         ui->cmdNext->setText("Next");
+        ui->cmdNext->setDisabled(false);
         ui->stackedWidget->setCurrentIndex(0);
-        step = 0;
+        step = GYROCAL;
         break;
     }
     // Accelerometer
-    case 2: {
+    case ACCELCAL: {
         ui->stackedWidget->setCurrentIndex(1);
         ui->cmdNext->setText("Next");
-        step = 1;
+        step = MAGCAL;
         firstmag = true;
         break;
     }
@@ -191,12 +142,11 @@ void CalibrateBLE::dataUpdate(float variance,
     ui->lblWobble->setText(QString::number(wobble,'g',3) + "%");
     ui->lblGaps->setText(QString::number(gaps,'g',3) + "%");
 
-    if(step == 1) { // On the magcal step?
-        if(gaps < 15.0f && variance < 4.5f && wobble < 4.0f && fiterror < 5.0f)
-            ui->cmdNext->setDisabled(false);
-        else if(gaps > 20.0f && variance > 5.0f && wobble > 5.0f && fiterror > 6.0f)
-            ui->cmdNext->setDisabled(true);
-    }
+     // On the magcal step and values all good?
+    if(step == MAGCAL && gaps < 15.0f && variance < 4.5f && wobble < 4.0f && fiterror < 5.0f)
+            ui->cmdNext->setDisabled(false);    
+    else
+        ui->cmdNext->setDisabled(true);
 
     // Save the current offsets locally
     for(int i=0;i<3;i++) {
