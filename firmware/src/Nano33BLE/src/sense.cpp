@@ -49,10 +49,6 @@ int sense_Init()
 }
 
 
-// Read all IMU data and do the calculations,
-// This is run as a Thread at Real Time Priority
-void sense_Thread()
-{
     float raccx=0,raccy=0,raccz=0;
     float rmagx=0,rmagy=0,rmagz=0;
     float rgyrx=0,rgyry=0,rgyrz=0;  
@@ -61,7 +57,7 @@ void sense_Thread()
     float magx=0,magy=0,magz=0;
     float gyrx=0,gyry=0,gyrz=0;
     float tilt=0,roll=0,pan=0;
-    float rolloffset=0, panoffset=0, tiltoffset=0;
+    float rolloffset=0, panoffset=180, tiltoffset=0;
     float magxoff=0, magyoff=0, magzoff=0;
     float accxoff=0, accyoff=0, acczoff=0;
     float gyrxoff=0, gyryoff=0, gyrzoff=0;
@@ -77,11 +73,18 @@ void sense_Thread()
     int counter=0;
     int lastgesture = -1;
 
-    while(1) {
 
-        if(pauseForEEPROM) {
-        ThisThread::sleep_for(std::chrono::milliseconds(100)); 
-        continue;
+// Read all IMU data and do the calculations,
+// This is run as a Thread at Real Time Priority
+void sense_Thread()
+{
+
+
+//    while(1) {
+
+        if(pauseThreads) {
+            queue.call_in(std::chrono::milliseconds(100),sense_Thread);
+            return;
         }
 
         // Used to measure how long this took to adjust sleep timer
@@ -116,22 +119,27 @@ void sense_Thread()
 
         // Reset Center on Wave
         if(blesenseboard) {
+            bool btnpress=false;
             if (trkset.resetOnWave() && APDS.gestureAvailable()) {
                 // a gesture was detected, read and print to serial monitor                
                 int gesture = APDS.readGesture();               
                 if(lastgesture == GESTURE_DOWN && 
                    gesture == GESTURE_UP)
-                    pressButton();
+                    btnpress=true;
                 else if(lastgesture == GESTURE_UP && 
                         gesture == GESTURE_DOWN)
-                    pressButton();
+                    btnpress=true;
                 else if(lastgesture == GESTURE_LEFT && 
                         gesture == GESTURE_RIGHT)
-                    pressButton();
+                    btnpress=true;
                 else if(lastgesture == GESTURE_RIGHT && 
                         gesture == GESTURE_LEFT)
-                    pressButton();
+                    btnpress=true;
                 lastgesture = gesture;
+                if(btnpress) {
+                    pressButton();
+                    serialWriteln("HT: Reset center from a wave");
+                }
             }
         }
 
@@ -264,7 +272,7 @@ void sense_Thread()
         runt.stop();
         using namespace std::chrono;
         int micros = duration_cast<microseconds>(runt.elapsed_time()).count();
-        int sleepyt = (SLEEPTIME - micros); // Ideally 5ms period
+        int sleepyt = (SENSE_PERIOD - micros); // Ideally 5ms period
 
         // Don't sleep for too short it something wrong above
         if(sleepyt < 5)
@@ -272,9 +280,11 @@ void sense_Thread()
 
         // **** Not super accurate being only in ms values
         // Not sure why but +1 works out on time
-        ThisThread::sleep_for(std::chrono::milliseconds(sleepyt/1000+1)); 
 
-    } // END THREAD LOOP
+        queue.call_in(std::chrono::milliseconds(sleepyt/1000+1),sense_Thread);
+        //ThisThread::sleep_for(std::chrono::milliseconds(sleepyt/1000+1)); 
+
+    //} // END THREAD LOOP
 }
 
 

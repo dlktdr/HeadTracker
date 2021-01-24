@@ -3,7 +3,6 @@
 
 // Ideal period of filter, not super accurate due low precision on 
 // thread sleep. Can't seem to get faster than this
-const int SLEEPTIME = 7000;
 
 #define GYRO_DEADBAND 3.0 // Gyro deadband, seems to help with this sensor
 

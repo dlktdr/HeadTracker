@@ -151,6 +151,7 @@ public:
     void setOffOrient(float t, float r, float p);
     void setPPMOut(uint16_t t, uint16_t r, uint16_t p);
     void setJSONData(DynamicJsonDocument &json);
+    void setBLEAddress(const char *addr);
     void getPPMValues(uint16_t &t, uint16_t &r, uint16_t &p);
 
     PpmOut *getPpmOut() {return _ppmout;}
@@ -192,6 +193,7 @@ private:
     float tilt,roll,pan;
     float tiltoff,rolloff,panoff;
     uint16_t panout,tiltout,rollout;
+    char bleaddress[20];
 };
     
 #endif

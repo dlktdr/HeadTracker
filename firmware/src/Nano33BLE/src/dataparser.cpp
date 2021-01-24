@@ -19,9 +19,14 @@ bool sendData=false;
 // Handles all data transmission with the UI via Serial port
 void data_Thread()
 {     
-  DynamicJsonDocument json(RX_BUF_SIZE);
+    if(pauseThreads) {
+        queue.call_in(std::chrono::milliseconds(100),data_Thread);
+        return;
+    }
 
-  while(1) {    
+    DynamicJsonDocument json(RX_BUF_SIZE);
+
+    //while(1) {    
     digitalWrite(LEDR,LOW); // Serial RX Blue, Off
 
     // Check if data is ready
@@ -83,8 +88,8 @@ void data_Thread()
     } 
 
     digitalWrite(LEDR,HIGH); // Serial RX Blue, Off
-    ThisThread::sleep_for(std::chrono::milliseconds(DATA_THREAD_PERIOD));
-  }
+ 
+    queue.call_in(std::chrono::milliseconds(DATA_PERIOD),data_Thread);
 }
 
 // New JSON data received from the PC
@@ -105,9 +110,9 @@ void parseData(DynamicJsonDocument &json)
       pressButton();
 
     // Settings Sent from UI
-    } else if (strcmp(command, "Setttings") == 0) {
-        serialWrite("HT: Saving Settings\r\n");           
+    } else if (strcmp(command, "Setttings") == 0) {        
         trkset.loadJSONSettings(json);
+        serialWrite("HT: Saving Settings\r\n");           
 
     // Save to Flash
     } else if (strcmp(command, "Flash") == 0) {
@@ -124,9 +129,7 @@ void parseData(DynamicJsonDocument &json)
 
     // ACK Received, Means the GUI is running, send it data
     } else if (strcmp(command, "ACK") == 0) {
-        //serialWrite("HT: Ack Received\r\n");
         uiResponsive = Kernel::Clock::now() + std::chrono::milliseconds(UIRESPONSIVE_TIME);
-        //dataSendTime = Kernel::Clock::now() + std::chrono::milliseconds(DATA_SEND_TIME);        
     
     // Firmware Reqest
     } else if (strcmp(command, "FW") == 0) {

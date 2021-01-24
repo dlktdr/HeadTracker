@@ -72,6 +72,9 @@ TrackerSettings::TrackerSettings()
     setButtonPin(DEF_BUTTON_IN);
     setPpmInPin(DEF_PPM_IN);
     setPpmOutPin(DEF_PPM_OUT);
+
+
+    sprintf(bleaddress,"00:00:00:00:00:00");
 }
 
 int TrackerSettings::Rll_min() const
@@ -527,6 +530,10 @@ void TrackerSettings::setBlueToothMode(int mode)
 //----------------------------------------------------------------------------------------
 // Data sent the PC, for calibration and info
 
+void TrackerSettings::setBLEAddress(const char *addr)
+{
+    strcpy(bleaddress,addr);
+}
 
 void TrackerSettings::setRawGyro(float x, float y, float z)
 {
@@ -781,23 +788,23 @@ void TrackerSettings::setJSONSettings(DynamicJsonDocument &json)
 
 void TrackerSettings::saveToEEPROM()
 {
-    char buffer[1000];
-    DynamicJsonDocument json(1000);
+    char buffer[RX_BUF_SIZE];
+    DynamicJsonDocument json(RX_BUF_SIZE);
     setJSONSettings(json);
-    int len = serializeJson(json,buffer,1000);
+    int len = serializeJson(json,buffer,RX_BUF_SIZE);
 
     if(writeFlash(buffer,len)) {
         serialWriteln("HT: Flash Write Failed");
     } else {
         serialWriteln("HT: Saved to EEPROM");
-    }    
+    }
 }
 
 // Must be called on startup to create PPM object
 void TrackerSettings::loadFromEEPROM()
 {
     // Load Settings
-    DynamicJsonDocument json(1000);
+    DynamicJsonDocument json(RX_BUF_SIZE);
     DeserializationError de;
     de = deserializeJson(json, flashSpace);
     
@@ -854,4 +861,5 @@ void TrackerSettings::setJSONData(DynamicJsonDocument &json)
     json["tiltout"] = tiltout;
     json["rollout"] = rollout;
 
+    json["bleaddress"] = bleaddress;
 }

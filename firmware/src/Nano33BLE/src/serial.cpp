@@ -2,6 +2,7 @@
 #include "dataparser.h"
 
 #include "serial.h"
+#include "main.h"
 
 // Really don't like this but for the life of me I couldn't get
 // any ready to go buffered serial methods to work.
@@ -32,7 +33,12 @@ void serial_Init()
 
 void serial_Thread()
 {  
-  while(1) {
+    if(pauseThreads) {
+        queue.call_in(std::chrono::milliseconds(100),serial_Thread);
+        return;
+    }
+
+ // while(1) {
     // Don't like this but can't get bufferedserial to work and the Arduino serial lib has blocking writes after buffer fill.
     // Also no notify if its full or not...
     digitalWrite(LEDG,LOW); // Serial RX Green, ON
@@ -47,8 +53,10 @@ void serial_Thread()
     }
     Serial.write(txa,bytx); // !!!! ONLY PLACE SERIAL.WRITE SHOULD BE USED !!!!
     digitalWrite(LEDG,HIGH); // Serial RX Green, ON
-    ThisThread::sleep_for(std::chrono::milliseconds(SERIAL_THREAD_PERIOD));
-};}
+    queue.call_in(std::chrono::milliseconds(SERIAL_PERIOD),serial_Thread);
+  //  ThisThread::sleep_for(std::chrono::milliseconds(SERIAL_THREAD_PERIOD));
+//};
+}
 
 // Pop a JSON item off the buffer
 char *getJSONBuffer() 
