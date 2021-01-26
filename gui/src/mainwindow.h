@@ -50,9 +50,11 @@ private:
     CalibrateBNO *bnoCalibratorDialog;
     CalibrateBLE *bleCalibratorDialog;
     DiagnosticDisplay *diagnostic;
+    QMessageBox msgbox;
     bool savedToNVM;
     bool sentToHT;
     bool fwdiscovered;
+    bool calmsgshowed;
 
     int xtime;
     bool graphing;

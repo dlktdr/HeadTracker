@@ -194,6 +194,7 @@ private:
     float tiltoff,rolloff,panoff;
     uint16_t panout,tiltout,rollout;
     char bleaddress[20];
+    bool isCalibrated;
 };
     
 #endif

@@ -67,6 +67,7 @@ TrackerSettings::TrackerSettings()
 
     // Features defaults
     rstonwave = false;
+    isCalibrated = false;
 
     // Setup button input & ppm output pins
     setButtonPin(DEF_BUTTON_IN);
@@ -685,6 +686,7 @@ void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
     if(!v.isNull() && !v1.isNull() && !v2.isNull())
     {   
         setMagOffset(v,v1,v2);        
+        isCalibrated = true; // Add a notify flag calibration is complete
         //serialWriteln("HT: Mag offsets set");
     }
 
@@ -862,4 +864,5 @@ void TrackerSettings::setJSONData(DynamicJsonDocument &json)
     json["rollout"] = rollout;
 
     json["bleaddress"] = bleaddress;
+    json["magcal"] = isCalibrated;
 }

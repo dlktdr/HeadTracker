@@ -23,6 +23,7 @@ MainWindow::MainWindow(QWidget *parent)
     sentToHT = true;
     fwdiscovered = false;
     rawmode = false;
+    calmsgshowed = false;
     ui->cmdStore->setEnabled(false);
     ui->stackedWidget->setCurrentIndex(0);
 
@@ -214,6 +215,7 @@ void MainWindow::serialDisconnect()
     bleCalibratorDialog->hide();
     bnoCalibratorDialog->hide();
     fwdiscovered = false;
+    calmsgshowed = false;
 }
 
 void MainWindow::serialError(QSerialPort::SerialPortError err)
@@ -325,6 +327,8 @@ void MainWindow::connectTimeout()
 
 void MainWindow::parseIncomingJSON(const QVariantMap &map)
 {
+
+
     // Settings from the Tracker Sent, save them and update the UI
     if(map["Cmd"].toString() == "Settings") {        
         trkset.setAllData(map);
@@ -333,6 +337,15 @@ void MainWindow::parseIncomingJSON(const QVariantMap &map)
     } else if (map["Cmd"].toString() == "Data") {
         // Add all the data to the settings
         trkset.setLiveDataMap(map);
+
+        // Remind user to calibrate
+        if(map["magcal"].toBool() == false && calmsgshowed == false) {
+            msgbox.setText("Calibration has not been performed.\nPlease calibrate or load from a saved file");
+            msgbox.setWindowTitle("Calibrate");
+            msgbox.show();
+            calmsgshowed = true;
+        }
+
     // Firmware Hardware and Version
     } else if (map["Cmd"].toString() == "FW") {
         fwDiscovered(map["Vers"].toString(), map["Hard"].toString());
