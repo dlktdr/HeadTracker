@@ -19,6 +19,7 @@
 
 const int MAX_LOG_LENGTH=6000;
 const QString version="0.4";
+const QString fwversion="04";
 const QStringList firmwares={"BNO055","NANO33BLE","REMOTEBLE"};
 
 QT_BEGIN_NAMESPACE
