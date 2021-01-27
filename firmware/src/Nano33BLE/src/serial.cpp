@@ -83,51 +83,54 @@ int buffersFilled()
 // Serial RX Interrupt, Stay Fast as possible Here
 void serialrx_Int()
 {  
-   digitalWrite(LEDG,LOW); // Serial RX Green, ON
+    digitalWrite(LEDG,LOW); // Serial RX Green, ON
   
+    int bytes = Serial.available();
+    
+
   // Read all available data from Serial  
-  while(Serial.available()) {
-    char sc = Serial.read();
-    if(sc == 0x02) {  // Start Of Text Character, clear buffer
-        serin.reset();
+    for(int i=0; i < bytes; i++) {
+        char sc = Serial.read();
+        if(sc == 0x02) {  // Start Of Text Character, clear buffer
+            serin.reset();
 
-    } else if (sc == 0x03) { // End of Text Characher, parse JSON data
+        } else if (sc == 0x03) { // End of Text Characher, parse JSON data
         
-        // All buffers filled? Ditch this message                
-        if(bufsUsed == RX_BUFFERS)   {
-            JSONfault = true;
-            serin.reset();
+            // All buffers filled? Ditch this message                
+            if(bufsUsed == RX_BUFFERS)   {
+                JSONfault = true;
+                serin.reset();
 
-        // Good to store to buffer
-        } else  { 
-            // Move from the circular buffer into character String
-            int bsz = serin.size();
-            char *dataptr = jsondatabuf[bufIndex];
-            for(int i=0; i < bsz; i++) 
-                serin.pop(*(dataptr++));
-            *dataptr = 0;
+            // Good to store to buffer
+            } else  { 
+                // Move from the circular buffer into character String
+                int bsz = serin.size();
+                char *dataptr = jsondatabuf[bufIndex];
+                for(int i=0; i < bsz; i++) 
+                    serin.pop(*(dataptr++));
+                *dataptr = 0;
 
-            bufIndex = (bufIndex+1) % RX_BUFFERS;
-            bufsUsed++;
+                bufIndex = (bufIndex+1) % RX_BUFFERS;
+                bufsUsed++;
+            }
+
+        serin.reset();      
         }
 
-      serin.reset();      
-    }
+        else { // Add data to buffer
+            // Check how much data is in the buffer
 
-    else { // Add data to buffer
-        // Check how much data is in the buffer
-
-        if(serin.size() >= RX_BUF_SIZE - 1) {
-            BuffToSmall = true;
-            serin.reset();
+            if(serin.size() >= RX_BUF_SIZE - 1) {
+                BuffToSmall = true;
+                serin.reset();
+            }
+            // 
+            serin.push(sc);
+            if(serin.full())
+                SerBufOverflow = true;      
         }
-        // 
-        serin.push(sc);
-        if(serin.full())
-            SerBufOverflow = true;      
-    }
-  }      
-  digitalWrite(LEDG,HIGH);  // Serial RX Green, OFF
+    }      
+    digitalWrite(LEDG,HIGH);  // Serial RX Green, OFF
 }
 
 
