@@ -45,10 +45,11 @@ void data_Thread()
             else if(de == DeserializationError::TooDeep)
                 serialWrite("HT: DeserializeJson() Failed - TooDeep\r\n");
             else 
-                serialWrite("HT: DeserializeJson() Failed - Other\r\n");      
+                serialWrite("HT: DeserializeJson() Failed - Other\r\n");
+        } else {
+            // Parse The JSON Data
+            parseData(json);            
         }
-        // Parse The JSON Data
-        parseData(json);            
     }
 
     if(JSONfault) {
