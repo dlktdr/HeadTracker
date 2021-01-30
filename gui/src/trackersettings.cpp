@@ -40,6 +40,7 @@ TrackerSettings::TrackerSettings(QObject *parent):
     _data["ppmoutpin"] = DEF_PPM_OUT;
     _data["ppmoutinvert"] = false;
     _data["ppmininvert"] = false;
+    _data["btmode"] = (uint)0;
 }
 
 int TrackerSettings::Rll_min() const
@@ -435,11 +436,11 @@ void TrackerSettings::setAxisSign(uint value)
 
 int TrackerSettings::blueToothMode()
 {
-    return _data["btmode"].toBool();
+    return _data["btmode"].toInt();
 }
 
 void TrackerSettings::setBlueToothMode(int mode) {
-    if(mode >0 &&mode < 2)
+    if(mode >= 0 && mode <= 2)
         _data["btmode"] = mode;
 }
 

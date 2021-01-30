@@ -36,7 +36,10 @@ public:
     static constexpr float DEF_GAIN= 10.0;
     static constexpr int DEF_BT_MODE= 0; // Bluetooth Disabled
 
+    enum {BTDISABLE,BTPARA,BTHM10};
+
     TrackerSettings(QObject *parent=nullptr);
+
     int Rll_min() const;
     void setRll_min(int value);
 
