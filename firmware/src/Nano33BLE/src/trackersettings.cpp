@@ -61,21 +61,20 @@ TrackerSettings::TrackerSettings()
     ppmininvert = false;
     _ppmout = nullptr;
     _ppmin = nullptr;
-
+    
     // Bluetooth defaults
     btmode = 0;
+    _btf = nullptr;
 
     // Features defaults
     rstonwave = false;
     isCalibrated = false;
 
-    // Setup button input & ppm output pins
+    // Setup button input & ppm output pins, bluetooth
     setButtonPin(DEF_BUTTON_IN);
     setPpmInPin(DEF_PPM_IN);
     setPpmOutPin(DEF_PPM_OUT);
-
-
-    sprintf(bleaddress,"00:00:00:00:00:00");
+    setBlueToothMode(DEF_BT_MODE);
 }
 
 int TrackerSettings::Rll_min() const
@@ -511,6 +510,9 @@ void TrackerSettings::setInvertedPpmIn(bool inv)
     }
 }    
 
+//---------------------------------
+// Bluetooth Settings
+
 int TrackerSettings::blueToothMode() const
 {
     return btmode;
@@ -518,16 +520,36 @@ int TrackerSettings::blueToothMode() const
 
 void TrackerSettings::setBlueToothMode(int mode)
 {
-    if(mode >0 && mode < 2)
-        btmode = mode;
+    if(mode < BTDISABLE || mode > BTHM10) 
+        return;    
+    
+    // Delete old bluetooth if changing
+    if(_btf != nullptr) {
+        if(mode != btmode) {
+            delete _btf;
+            _btf = nullptr;
+        }        
+    }
 
-    // Change the Bluetooth Mode Here
-    // Ideas for modes....
-    //  0 = Disabled
-    //  1 = Para Wireless Trainer
-    //  2 = HM10 + Nano Remote
-    //  3 = PC-For Updates?
+    // Save new mode
+    btmode = mode;
+
+    // Create new bluetooth
+    if(_btf == nullptr) {
+        // Disabled
+        if(mode == BTDISABLE) {
+            sprintf(bleaddress,"00:00:00:00:00:00");        
+        
+        // PARA FRSky Mode
+        } else if(mode == BTPARA) {
+            _btf = new BTPara();
+        // BTHM10 PPM Output
+        } else if(mode == BTHM10) {
+            //_btf = new BTHm10();
+        }
+    }
 }
+
 //----------------------------------------------------------------------------------------
 // Data sent the PC, for calibration and info
 
@@ -750,8 +772,6 @@ void TrackerSettings::setJSONSettings(DynamicJsonDocument &json)
 
     json["lppan"] = lppan;
     json["lptiltroll"] = lptiltroll;
-    //json["gyroweightpan"] = gyroweightpan;
-    //json["gyroweighttiltroll"] = gyroweighttiltroll;
 
     json["buttonpin"] = buttonpin;
     json["ppmoutpin"] = ppmoutpin;
@@ -814,10 +834,10 @@ void TrackerSettings::loadFromEEPROM()
         serialWriteln("HT: Invalid JSON Data");
     
     if(json["UUID"] == 837727) {
-        serialWriteln("HT: Device has been freshly programmed");
+        serialWriteln("HT: Device has been freshly programmed, no data found");
 
     } else {
-        serialWriteln("HT: Device contains saved code");
+        serialWriteln("HT: Loading settings from flash");
         loadJSONSettings(json);
     }
 }
@@ -833,7 +853,18 @@ void TrackerSettings::setJSONData(DynamicJsonDocument &json)
     json["gyroy"] = roundf(gyroy*1000)/1000;
     json["gyroz"] = roundf(gyroz*1000)/1000;
 
-/* Live Values for Debugging 
+    json["panoff"] = roundf(panoff*1000)/1000;
+    json["tiltoff"] = roundf(tiltoff*1000)/1000;
+    json["rolloff"] = roundf(rolloff*1000)/1000;    
+    
+    json["panout"] = panout;
+    json["tiltout"] = tiltout;
+    json["rollout"] = rollout;
+
+    json["btaddr"] = bleaddress;
+    json["magcal"] = isCalibrated;
+
+/* Live Values for Debugging, disabled for less data transfer
     json["accx"] = roundf(accx*1000)/1000;
     json["accy"] = roundf(accy*1000)/1000;
     json["accz"] = roundf(accz*1000)/1000;
@@ -855,14 +886,4 @@ void TrackerSettings::setJSONData(DynamicJsonDocument &json)
     json["panraw"] = roundf(pan*1000)/1000;    
 */
 
-    json["panoff"] = roundf(panoff*1000)/1000;
-    json["tiltoff"] = roundf(tiltoff*1000)/1000;
-    json["rolloff"] = roundf(rolloff*1000)/1000;    
-    
-    json["panout"] = panout;
-    json["tiltout"] = tiltout;
-    json["rollout"] = rollout;
-
-    json["bleaddress"] = bleaddress;
-    json["magcal"] = isCalibrated;
 }

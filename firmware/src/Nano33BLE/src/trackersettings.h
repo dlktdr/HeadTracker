@@ -7,14 +7,16 @@
 #include "PPM/PPMIn.h"
 #include "config.h"
 #include "serial.h"
+#include "btpara.h"
 
-#define EXAMPLE_KV_VALUE_LENGTH 64
-#define KV_KEY_LENGTH 32
-#define err_code(res) MBED_GET_ERROR_CODE(res)
+//#define EXAMPLE_KV_VALUE_LENGTH 64
+//#define KV_KEY_LENGTH 32
+//#define err_code(res) MBED_GET_ERROR_CODE(res)
+
 
 class TrackerSettings
 {    
-public:
+public:    
     static constexpr int MIN_PWM=1000;
     static constexpr int MAX_PWM=2000;
     static constexpr int DEF_MIN_PWM=1050;
@@ -24,7 +26,7 @@ public:
     static constexpr int HT_TILT_REVERSE_BIT  = 0x01;
     static constexpr int HT_ROLL_REVERSE_BIT  = 0x02;
     static constexpr int HT_PAN_REVERSE_BIT   = 0x04;
-    static constexpr int DEF_PPM_CHANNELS = 8;
+    static constexpr int DEF_PPM_CHANNELS = MAX_PPM_CHANNELS;
     static constexpr int DEF_BUTTON_IN = 2; // Chosen because it's beside ground
     static constexpr int DEF_PPM_OUT = 10; // Random choice
     static constexpr int DEF_PPM_IN = 9; // Random choice
@@ -32,7 +34,7 @@ public:
     static constexpr float MIN_GAIN= 0;
     static constexpr float MAX_GAIN= 50.0;
     static constexpr float DEF_GAIN= 10.0;
-    static constexpr int DEF_BT_MODE= 0; // Bluetooth Disabled
+    static constexpr int DEF_BT_MODE= BTDISABLE; // Bluetooth Disabled
 
     TrackerSettings();
 
@@ -138,7 +140,6 @@ public:
 
     void saveToEEPROM();
     void loadFromEEPROM();
-
     
 // Setting of data to be returned to the PC
     void setRawGyro(float x, float y, float z);
@@ -156,9 +157,10 @@ public:
 
     PpmOut *getPpmOut() {return _ppmout;}
     PpmIn *getPpmIn() {return _ppmin;}
+    BTFunction *getBTFunc() {return _btf;}
 
 private:
-// Saved Settings
+    // Saved Settings
     int rll_min,rll_max,rll_cnt;
     int tlt_min,tlt_max,tlt_cnt;
     int pan_min,pan_max,pan_cnt;
@@ -179,11 +181,12 @@ private:
     bool ppmininvert;
     PpmOut *_ppmout; // Local reference to PPM output Class
     PpmIn *_ppmin; // Local reference to PPM input Class
+    BTFunction *_btf; //Blue tooth Function
     int btmode;
     bool rstonwave;
-    bool freshProgram;
+    bool freshProgram;    
 
-// Data
+    // Data
     float gyrox,gyroy,gyroz;
     float accx,accy,accz;
     float magx,magy,magz;

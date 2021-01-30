@@ -2,6 +2,6 @@
 #define CONFIG_H
 
 // Global Config Values
-#define MAX_PPM_CHANNELS 12
+#define MAX_PPM_CHANNELS 8
 
 #endif
