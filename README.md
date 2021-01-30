@@ -5,7 +5,7 @@ You can sense the orientation of your FPV headset by using an IMU (Inertial Meas
 
 The Arduino Nano 33 BLE is an all in one solution, it has a processor and the sensor already to go.
 
-The Arduino Nano and BNO055 requires soldering the sensor to an arduino nano. This solution is less expensive and works equally well. I'm not recommending this at this time as the extra work to source and assemble extra components doesn't justify the minor extra cost of the BLE33.
+The Arduino Nano and BNO055 requires soldering the sensor to an arduino nano. This solution is less expensive and works equally well. I'm not recommending this at this time as the extra work to source and assemble extra components doesn't justify the minor extra cost and extra power of the BLE33 IMO.
 
 Once you have your board mounted to your headset you have to zero it out so your camera and the way your facing line up. There are two ways to do this. 
 1) With a switch 
@@ -97,13 +97,13 @@ New Release of the Headtracker Gui and
 - [x] Choose a fusion algorithm, went with Madgwick
 - [x] Add calibration to the GUI
 - [X] Save config to flash
-- [ ] HM10+Nano Wireless remote PPM Board?
-- [ ] FRsky trainer connection
+- [ ] HM10+Nano Wireless remote PPM Board
+- [X] FRsky trainer connection
 - [X] Find solution to PPM output gitter from interrupt timing issues
 - [ ] PPM Input Functionality and Testing
 - [X] Add ability to program from the firmware window, sample firmware in master
-- [ ] Create binaries for gui
-- [ ] Combine with master
+- [X] Create binaries for gui
+- [X] Combine with master
 
 ## Screenshot
 ![alt text](https://github.com/dlktdr/HeadTracker/raw/Nano-33-BLE/gui/src/ScreenCapture1007.png)
