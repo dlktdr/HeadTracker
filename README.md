@@ -1,25 +1,21 @@
-# HeadTracker
-A Headtracker for use with the Arduino Nano 33 BLE
+## RC HeadTracker
+If your an RC enthusiast like myself with a FPV headset at some point you thought wouldn't it be cool if I could turn my head and the camera would follow. That is the intention of this project. It is a continuation of the work started by Dennis Frie, Mark Mansur and others.
 
-Should be functional now but this is still a work in progress. Feel free to contact us and help out
+Please visit the WIKI https://github.com/dlktdr/HeadTracker/wiki for the hardware required and how to build one.
 
-## Whats needed
-1) Arduino Nano 33 BLE (or Sense) - Digikey/Newark many others..
-3) Soldering Iron
-5) 3.5mm mono audio cable. I got a right angle one
-6) Small Push Button Switch, for resetting zero. Note: If you buy BLE 33 Sense you can now wave over the gesture sensor to reset. No button required.
+Download the latest version from https://github.com/dlktdr/HeadTracker/releases if your running on a Windows machine.
 
 ## To Do
 - [x] Choose a fusion algorithm, went with Madgwick
 - [x] Add calibration to the GUI
 - [X] Save config to flash
-- [ ] HM10+Nano Wireless remote PPM Board?
-- [ ] FRsky trainer connection
+- [ ] HM10+Nano Wireless remote PPM Board  for BLE33
+- [X] FRsky trainer connection
 - [X] Find solution to PPM output gitter from interrupt timing issues
-- [ ] PPM Input Functionality and Testing
+- [ ] PPM Input Functionality and testing on BLE33
 - [X] Add ability to program from the firmware window, sample firmware in master
-- [ ] Create binaries for gui
-- [ ] Combine with master
+- [X] Create binaries for Gui
+- [ ] Add rotation to mount board in other orientations BLE33
 
 ## Screenshot
 ![alt text](https://github.com/dlktdr/HeadTracker/raw/Nano-33-BLE/gui/src/ScreenCapture1007.png)
