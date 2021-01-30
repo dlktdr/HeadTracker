@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>686</width>
-    <height>695</height>
+    <height>714</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -210,7 +210,7 @@
          <item>
           <widget class="QStackedWidget" name="stackedWidget">
            <property name="currentIndex">
-            <number>0</number>
+            <number>2</number>
            </property>
            <widget class="QWidget" name="page">
             <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -341,118 +341,6 @@
            </widget>
            <widget class="QWidget" name="Welcome">
             <layout class="QGridLayout" name="gridLayout">
-             <item row="2" column="1" colspan="2">
-              <widget class="QComboBox" name="cmbButtonPin">
-               <item>
-                <property name="text">
-                 <string>Disabled</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>D2</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>D3</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>D4</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>D5</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>D6</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>D7</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>D8</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>D9</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>D10</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>D11</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>D12</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>D13</string>
-                </property>
-               </item>
-              </widget>
-             </item>
-             <item row="4" column="0" colspan="3">
-              <widget class="QCheckBox" name="chkResetCenterWave">
-               <property name="text">
-                <string>Center on Wave (BLE Sense Only)</string>
-               </property>
-              </widget>
-             </item>
-             <item row="3" column="0">
-              <widget class="QLabel" name="label_5">
-               <property name="text">
-                <string>Bluetooth Mode</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="2">
-              <widget class="QCheckBox" name="chkInvertedPPM">
-               <property name="text">
-                <string>Invert</string>
-               </property>
-              </widget>
-             </item>
-             <item row="3" column="1" colspan="2">
-              <widget class="QComboBox" name="cmbBtMode">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <item>
-                <property name="text">
-                 <string>Disabled</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Remote PPM via HM10</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>FrSky - PARA Wireless Trainer</string>
-                </property>
-               </item>
-              </widget>
-             </item>
              <item row="0" column="1">
               <widget class="QComboBox" name="cmbPpmOutPin">
                <property name="currentIndex">
@@ -525,6 +413,13 @@
                </item>
               </widget>
              </item>
+             <item row="5" column="0" colspan="3">
+              <widget class="QCheckBox" name="chkResetCenterWave">
+               <property name="text">
+                <string>Center on Wave (BLE Sense Only)</string>
+               </property>
+              </widget>
+             </item>
              <item row="0" column="0">
               <widget class="QLabel" name="label">
                <property name="text">
@@ -532,10 +427,108 @@
                </property>
               </widget>
              </item>
-             <item row="2" column="0">
-              <widget class="QLabel" name="label_3">
+             <item row="0" column="2">
+              <widget class="QCheckBox" name="chkInvertedPPM">
                <property name="text">
-                <string>Center Button</string>
+                <string>Invert</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="1" colspan="2">
+              <widget class="QComboBox" name="cmbBtMode">
+               <property name="enabled">
+                <bool>true</bool>
+               </property>
+               <item>
+                <property name="text">
+                 <string>Disabled</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>FrSky - PARA Wireless Trainer</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>HM10 + Arduino</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item row="2" column="1" colspan="2">
+              <widget class="QComboBox" name="cmbButtonPin">
+               <item>
+                <property name="text">
+                 <string>Disabled</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D2</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D3</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D4</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D5</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D6</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D7</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D8</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D9</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D10</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D11</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D12</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D13</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item row="3" column="0">
+              <widget class="QLabel" name="label_5">
+               <property name="text">
+                <string>Bluetooth Mode</string>
                </property>
               </widget>
              </item>
@@ -543,6 +536,23 @@
               <widget class="QLabel" name="label_14">
                <property name="text">
                 <string>PPM Input Pin</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="2">
+              <widget class="QCheckBox" name="chkInvertedPPMIn">
+               <property name="enabled">
+                <bool>true</bool>
+               </property>
+               <property name="text">
+                <string>Invert</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="label_3">
+               <property name="text">
+                <string>Center Button</string>
                </property>
               </widget>
              </item>
@@ -624,13 +634,10 @@
                </item>
               </widget>
              </item>
-             <item row="1" column="2">
-              <widget class="QCheckBox" name="chkInvertedPPMIn">
-               <property name="enabled">
-                <bool>true</bool>
-               </property>
+             <item row="4" column="1" colspan="2">
+              <widget class="QLabel" name="lblBLEAddress">
                <property name="text">
-                <string>Invert</string>
+                <string>TextLabel</string>
                </property>
               </widget>
              </item>
@@ -922,26 +929,6 @@
              <string>8</string>
             </property>
            </item>
-           <item>
-            <property name="text">
-             <string>9</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>10</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>11</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>12</string>
-            </property>
-           </item>
           </widget>
          </item>
          <item row="2" column="2">
@@ -1080,26 +1067,6 @@
              <string>8</string>
             </property>
            </item>
-           <item>
-            <property name="text">
-             <string>9</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>10</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>11</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>12</string>
-            </property>
-           </item>
           </widget>
          </item>
          <item row="3" column="0">
@@ -1199,26 +1166,6 @@
            <item>
             <property name="text">
              <string>8</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>9</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>10</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>11</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>12</string>
             </property>
            </item>
           </widget>

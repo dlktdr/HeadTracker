@@ -13,29 +13,28 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    firmwareUploader = new Firmware;
+
+    // Serial Connection
     serialcon = new QSerialPort;
 
+    // Calibrator Dialogs
     bnoCalibratorDialog = new CalibrateBNO;
     bleCalibratorDialog = new CalibrateBLE(&trkset);
-    diagnostic = new DiagnosticDisplay(&trkset);
-    savedToNVM = true;
-    sentToHT = true;
-    fwdiscovered = false;
-    rawmode = false;
-    calmsgshowed = false;
-    ui->cmdStore->setEnabled(false);
-    ui->stackedWidget->setCurrentIndex(0);
 
-    ui->statusbar->showMessage("Disconnected");
+    // Diagnostic Display
+    diagnostic = new DiagnosticDisplay(&trkset);
+
+    // Firmware loader loader dialog
+    firmwareUploader = new Firmware;
+
+    // Called to initalize GUI state to disabled
+    serialDisconnect();
+
+    // Get list of available ports
     findSerialPorts();
-    ui->cmdDisconnect->setEnabled(false);
-    ui->cmdStopGraph->setEnabled(false);
-    ui->cmdStartGraph->setEnabled(false);
-    ui->cmdSend->setEnabled(false);
-    QFont serifFont("Times", 10, QFont::Bold);
 
     // Use system default fixed witdh font
+    QFont serifFont("Times", 10, QFont::Bold);
     ui->serialData->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
     graphing = false;
     xtime = 0;
@@ -43,11 +42,11 @@ MainWindow::MainWindow(QWidget *parent)
     // Update default settings to UI
     updateToUI();
 
-// Serial data ready
+    // Serial data ready
     connect(serialcon,SIGNAL(readyRead()),this,SLOT(serialReadReady()));
     connect(serialcon, SIGNAL(errorOccurred(QSerialPort::SerialPortError)),this,SLOT(serialError(QSerialPort::SerialPortError)));
 
-// Buttons
+    // Buttons
     connect(ui->cmdConnect,SIGNAL(clicked()),this,SLOT(serialConnect()));
     connect(ui->cmdDisconnect,SIGNAL(clicked()),this,SLOT(serialDisconnect()));    
     connect(ui->cmdStore,SIGNAL(clicked()),this,SLOT(storeSettings()));
@@ -59,7 +58,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->cmdSaveNVM,&QPushButton::clicked,this, &MainWindow::saveToNVM);
     connect(ui->cmdRefresh,&QPushButton::clicked,this,&MainWindow::findSerialPorts);
 
-// Check Boxes
+    // Check Boxes
     connect(ui->chkpanrev,&QCheckBox::clicked,this,&MainWindow::updateFromUI);
     connect(ui->chkrllrev,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
     connect(ui->chktltrev,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
@@ -68,13 +67,13 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->chkResetCenterWave,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
     connect(ui->chkRawData,SIGNAL(clicked(bool)),this,SLOT(setDataMode(bool)));
 
-// Spin Boxes
+    // Spin Boxes
     //connect(ui->spnGyroPan,SIGNAL(editingFinished()),this,SLOT(updateFromUI()));
     //connect(ui->spnGyroTilt,SIGNAL(editingFinished()),this,SLOT(updateFromUI()));
     connect(ui->spnLPPan,SIGNAL(editingFinished()),this,SLOT(updateFromUI()));
     connect(ui->spnLPTiltRoll,SIGNAL(editingFinished()),this,SLOT(updateFromUI()));
 
-// Gain Sliders
+    // Gain Sliders
     connect(ui->til_gain,SIGNAL(sliderMoved(int)),this,SLOT(updateFromUI()));
     connect(ui->rll_gain,SIGNAL(sliderMoved(int)),this,SLOT(updateFromUI()));
     connect(ui->pan_gain,SIGNAL(sliderMoved(int)),this,SLOT(updateFromUI()));
@@ -82,7 +81,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->rll_gain->setMaximum(TrackerSettings::MAX_GAIN*10);
     ui->pan_gain->setMaximum(TrackerSettings::MAX_GAIN*10);
 
-// Servo Scaling Widgets
+    // Servo Scaling Widgets
     connect(ui->servoPan,&ServoMinMax::minimumChanged,this,&MainWindow::updateFromUI);
     connect(ui->servoPan,&ServoMinMax::maximumChanged,this,&MainWindow::updateFromUI);
     connect(ui->servoPan,&ServoMinMax::centerChanged,this,&MainWindow::updateFromUI);
@@ -93,13 +92,13 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->servoRoll,&ServoMinMax::maximumChanged,this,&MainWindow::updateFromUI);
     connect(ui->servoRoll,&ServoMinMax::centerChanged,this,&MainWindow::updateFromUI);
 
-// On Live Data Change
+    // On Live Data Change
     connect(&trkset,&TrackerSettings::rawOrientChanged,this,&MainWindow::offOrientChanged);
     connect(&trkset,&TrackerSettings::offOrientChanged,this,&MainWindow::offOrientChanged);
     connect(&trkset,&TrackerSettings::ppmOutChanged,this,&MainWindow::ppmOutChanged);
 
-// Combo Boxes
-    // Add Remap Choices + The corresponding values
+    // Combo Boxes
+        // Add Remap Choices + The corresponding values
     ui->cmbRemap->addItem("X,Y,Z",AXES_MAP(AXIS_X,AXIS_Y,AXIS_Z));
     ui->cmbRemap->addItem("X,Z,Y",AXES_MAP(AXIS_X,AXIS_Z,AXIS_Y));
     ui->cmbRemap->addItem("Y,X,Z",AXES_MAP(AXIS_Y,AXIS_X,AXIS_Z));
@@ -116,15 +115,16 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->cmbButtonPin,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbPpmInPin,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbPpmOutPin,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->cmbBtMode,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
 
-// Menu Actions
+    // Menu Actions
     connect(ui->action_Save_to_File,SIGNAL(triggered()),this,SLOT(saveSettings()));
     connect(ui->action_Load,SIGNAL(triggered()),this,SLOT(loadSettings()));
     connect(ui->actionE_xit,SIGNAL(triggered()),QCoreApplication::instance(),SLOT(quit()));
     connect(ui->actionUpload_Firmware,SIGNAL(triggered()),this,SLOT(uploadFirmwareClick()));
     connect(ui->actionShow_Data,&QAction::triggered,diagnostic,&DiagnosticDisplay::show);
 
-// Timers
+    // Timers
     rxledtimer.setInterval(100);
     txledtimer.setInterval(100);
     connect(&rxledtimer,SIGNAL(timeout()),this,SLOT(rxledtimeout()));
@@ -161,7 +161,7 @@ void MainWindow::serialConnect()
     if(serialcon->isOpen())
         serialcon->close();
 
-    // Setup serial port 8N1, 1M BaudU
+    // Setup serial port 8N1, 57600 Baud
     serialcon->setPortName(port);
     serialcon->setParity(QSerialPort::NoParity);
     serialcon->setDataBits(QSerialPort::Data8);
@@ -183,6 +183,8 @@ void MainWindow::serialConnect()
     ui->cmdStopGraph->setEnabled(true);
     ui->cmdStartGraph->setEnabled(true);
     ui->cmdSend->setEnabled(true);
+    ui->cmdSaveNVM->setEnabled(true);
+    ui->cmdCalibrate->setEnabled(true);
 
     ui->statusbar->showMessage(tr("Connected to ") + serialcon->portName());
 
@@ -195,6 +197,7 @@ void MainWindow::serialConnect()
 }
 
 // Disconnect from the serial port
+// Reset all gui settings to disable mode
 void MainWindow::serialDisconnect()
 {
     if(serialcon->isOpen()) {
@@ -208,13 +211,21 @@ void MainWindow::serialDisconnect()
     ui->cmdConnect->setEnabled(true);
     ui->cmdStopGraph->setEnabled(false);
     ui->cmdStartGraph->setEnabled(false);
+    ui->cmdSaveNVM->setEnabled(false);
     ui->servoPan->setShowActualPosition(true);
     ui->servoTilt->setShowActualPosition(true);
     ui->servoRoll->setShowActualPosition(true);
     ui->cmdSend->setEnabled(false);
+    ui->cmdCalibrate->setEnabled(false);
+    ui->stackedWidget->setCurrentIndex(0);
     bleCalibratorDialog->hide();
     bnoCalibratorDialog->hide();
+
     fwdiscovered = false;
+    calmsgshowed = false;
+    savedToNVM = true;
+    sentToHT = true;
+    rawmode = false;
     calmsgshowed = false;
 }
 
@@ -302,7 +313,7 @@ void MainWindow::fwDiscovered(QString vers, QString hard)
         fwdiscovered=true;
     } else {
 
-    }// More HERE
+    }
 }
 
 /* - Checks if the boards firmware was actually found.
@@ -311,7 +322,7 @@ void MainWindow::fwDiscovered(QString vers, QString hard)
 
 void MainWindow::connectTimeout()
 {
-    if(!fwdiscovered) {
+    if(!fwdiscovered && serialcon->isOpen()) {
         QMessageBox::information(this,"Error", "No valid board detected\nPlease check COM port or flash proper code");
         serialDisconnect();
     }
@@ -345,6 +356,9 @@ void MainWindow::parseIncomingJSON(const QVariantMap &map)
             msgbox.show();
             calmsgshowed = true;
         }
+
+        // Set BLE Address on GUI
+        ui->lblBLEAddress->setText("Addr: " + trkset.liveData("btaddr").toString());
 
     // Firmware Hardware and Version
     } else if (map["Cmd"].toString() == "FW") {
@@ -585,12 +599,14 @@ void MainWindow::updateToUI()
     ui->cmbPpmOutPin->blockSignals(true);
     ui->cmbPpmInPin->blockSignals(true);
     ui->cmbButtonPin->blockSignals(true);
+    ui->cmbBtMode->blockSignals(true);
 
     ui->cmbpanchn->setCurrentIndex(trkset.panCh()-1);
     ui->cmbrllchn->setCurrentIndex(trkset.rollCh()-1);
     ui->cmbtiltchn->setCurrentIndex(trkset.tiltCh()-1);
     ui->cmbRemap->setCurrentIndex(ui->cmbRemap->findData(trkset.axisRemap()));
     ui->cmbSigns->setCurrentIndex(trkset.axisSign());
+    ui->cmbBtMode->setCurrentIndex(trkset.blueToothMode());
 
     int ppout_index = trkset.ppmOutPin()-1;
     int ppin_index = trkset.ppmInPin()-1;
@@ -606,6 +622,7 @@ void MainWindow::updateToUI()
     ui->cmbPpmOutPin->blockSignals(false);
     ui->cmbPpmInPin->blockSignals(false);
     ui->cmbButtonPin->blockSignals(false);
+    ui->cmbBtMode->blockSignals(false);
 
     savedToNVM = true;
     sentToHT = true;
@@ -651,6 +668,8 @@ void MainWindow::updateFromUI()
     trkset.setPpmOutPin(ppout_index==1?-1:ppout_index);
     trkset.setPpmInPin(ppin_index==1?-1:ppin_index);
     trkset.setButtonPin(but_index==1?-1:but_index);
+
+    trkset.setBlueToothMode(ui->cmbBtMode->currentIndex());
 
     trkset.setInvertedPpmOut(ui->chkInvertedPPM->isChecked());
     trkset.setInvertedPpmIn(ui->chkInvertedPPMIn->isChecked());
