@@ -9,9 +9,9 @@
 using namespace mbed;
 using namespace events;
 
-#define DATA_PERIOD 170
+#define DATA_PERIOD 150
 #define BT_PERIOD 30
-#define SERIAL_PERIOD 15
+#define SERIAL_PERIOD 10
 #define IO_PERIOD 1 // milliseconds
 #define SENSE_PERIOD 7000 //microseconds
 
