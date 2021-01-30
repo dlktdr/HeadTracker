@@ -35,7 +35,7 @@
 //
 
 // Firmware Version, e.g. X.YY
-#define FIRMWARE_VERSION_FLOAT  2.00    // 2 decimal places
+#define FIRMWARE_VERSION_FLOAT  0.40    // 2 decimal places
 
 // Number of PPM channels out. 1 - 12 channels supported. 
 #define NUMBER_OF_CHANNELS 8
