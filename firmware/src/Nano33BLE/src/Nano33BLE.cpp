@@ -25,11 +25,7 @@ using namespace rtos;
 using namespace mbed;
 using namespace events;
 
-// Threads and IO
-//Thread btThread(osPriorityNormal1,OS_STACK_SIZE*3);
-//Thread dataThread(osPriorityNormal,OS_STACK_SIZE*3);
-//Thread serialThread(osPriorityNormal2);
-//Thread senseThread(osPriorityRealtime);
+// Event Queue
 EventQueue queue(32 * EVENTS_EVENT_SIZE);
 Ticker ioTick;
 
@@ -46,34 +42,29 @@ void setup() {
     // Setup Serial
     serial_Init();
     
-    // Startup delay to get serial connected to see startup issues
-    delay(2000);
+    // Startup delay to get serial connected to see any startup issues
+    delay(1000);
 
     // Setup Pins
     io_Init();
 
     // Read the Settings from Flash
     flash_Init();   
-    trkset.loadFromEEPROM();
-    
-    // Start the Data Thread
-    //dataThread.start(callback(data_Thread));
-    
-    // Serial Read Ready Interrupt
-    Serial.attach(&serialrx_Int);    
-    //serialThread.start(callback(serial_Thread));
 
     // Start the BT Thread, Higher Prority than data.
+    bt_Init();
+
+    trkset.loadFromEEPROM();
+       
+    // Serial Read Ready Interrupt
+    Serial.attach(&serialrx_Int);    
     
-    //btThread.start(); 
+    sense_Init();
     
     // Start the IO task at 1khz interrupt
     ioTick.attach(callback(io_Task),std::chrono::milliseconds(IO_PERIOD));
 
-    // Start the sensor thread, Realtime priority
-    bt_Init();
-    sense_Init();
-
+    // Setup Event Queue
     queue.call_in(std::chrono::milliseconds(10),sense_Thread);
     queue.call_in(std::chrono::milliseconds(SERIAL_PERIOD),serial_Thread);
     queue.call_in(std::chrono::milliseconds(BT_PERIOD),bt_Thread);
