@@ -12,7 +12,7 @@
 
 // !!!! Move me to a adjustable settings file !!!!! **********************
 const QString baseurl = "https://raw.githubusercontent.com/dlktdr/HeadTracker/master/firmware/bin/";
-const QString avrdudecommand = "avrdude.exe";
+
 const QString localfilename = "online.hex";
 
 
@@ -27,33 +27,40 @@ class Firmware : public QWidget
 public:
     explicit Firmware(QWidget *parent = nullptr);
     ~Firmware();
-    void setComPort(QString port) {comport = port;}
+    //void setComPort(QString port) {comport = port;}
 
 private:
     Ui::Firmware *ui;
     QNetworkAccessManager manager;
-    QNetworkReply* reply;
+    QNetworkReply* hexreply;
     QNetworkReply* firmreply;
-    QProcess *avrdude;
-    QPlainTextEdit *avrdudelog;
+    QProcess *programmer;
+    QPlainTextEdit *programmerlog;
     QStringList arguments;
     QString comport;
 
     void startProgramming(const QString &filename);
 
+    QString programmercommand;
+
 private slots:
+    void findSerialPorts();
     void loadOnlineFirmware();
     void firmwareVersionsReady();
     void firmwareReady();
     void ssLerrors(const QList<QSslError> &errors);
-    void replyErrorOccurred(QNetworkReply::NetworkError code);
+    void firmReplyErrorOccurred(QNetworkReply::NetworkError code);
+    void hexReplyErrorOccurred(QNetworkReply::NetworkError code);
     void firmwareSelected(QListWidgetItem *lwi);
     void uploadClicked();
-    void avrDudeSTDOUTReady();
-    void avrDudeSTDERRReady();
-    void avrDudeStarted();
-    void avrDudeErrorOccured(QProcess::ProcessError error);
-    void avrDudeFinished(int exitCode, QProcess::ExitStatus exitStatus);
+    void cmdKillClick();
+    void programmerSTDOUTReady();
+    void programmerSTDERRReady();
+    void programmerStarted();
+    void programmerErrorOccured(QProcess::ProcessError error);
+    void programmerFinished(int exitCode, QProcess::ExitStatus exitStatus);
+protected:
+    void showEvent(QShowEvent *event);
 };
 
 #endif // FIRMWARE_H

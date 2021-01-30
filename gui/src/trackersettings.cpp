@@ -1,23 +1,24 @@
 #include <QDebug>
 #include "trackersettings.h"
 
-TrackerSettings::TrackerSettings()
+TrackerSettings::TrackerSettings(QObject *parent):
+    QObject(parent)
 {
     // Defaults
-    _data["rll_min"] = MIN_PWM;
-    _data["rll_max"] = MAX_PWM;
-    _data["rll_gain"] =  (MAX_GAIN-MIN_GAIN)/2+MIN_GAIN;
-    _data["rll_cnt"] = (MAX_PWM-MIN_PWM)/2 + MIN_PWM;
+    _data["rll_min"] = DEF_MIN_PWM;
+    _data["rll_max"] = DEF_MAX_PWM;
+    _data["rll_gain"] = DEF_GAIN;
+    _data["rll_cnt"] = DEF_CENTER;
 
-    _data["pan_min"] = MIN_PWM;
-    _data["pan_max"] = MAX_PWM;
-    _data["pan_gain"] =  (MAX_GAIN-MIN_GAIN)/2+MIN_GAIN;
-    _data["pan_cnt"] = (MAX_PWM-MIN_PWM)/2 + MIN_PWM;
+    _data["pan_min"] = DEF_MIN_PWM;
+    _data["pan_max"] = DEF_MAX_PWM;
+    _data["pan_gain"] = DEF_GAIN;
+    _data["pan_cnt"] = DEF_CENTER;
 
-    _data["tlt_min"] = MIN_PWM;
-    _data["tlt_max"] = MAX_PWM;
-    _data["tlt_gain"] =  (MAX_GAIN-MIN_GAIN)/2+MIN_GAIN;
-    _data["tlt_cnt"] = (MAX_PWM-MIN_PWM)/2 + MIN_PWM;
+    _data["tlt_min"] = DEF_MIN_PWM;
+    _data["tlt_max"] = DEF_MAX_PWM;
+    _data["tlt_gain"] = DEF_GAIN;
+    _data["tlt_cnt"] = DEF_CENTER;
 
     _data["panch"] = (uint)6;
     _data["tltch"] = (uint)7;
@@ -33,6 +34,13 @@ TrackerSettings::TrackerSettings()
 
     _data["axisremap"] = (uint)AXES_MAP(AXIS_X,AXIS_Y,AXIS_Z);
     _data["axissign"] = (uint)0;
+
+    _data["buttonpin"] = DEF_BUTTON_IN;
+    _data["ppminpin"] = DEF_PPM_IN;
+    _data["ppmoutpin"] = DEF_PPM_OUT;
+    _data["ppmoutinvert"] = false;
+    _data["ppmininvert"] = false;
+    _data["btmode"] = (uint)0;
 }
 
 int TrackerSettings::Rll_min() const
@@ -63,12 +71,12 @@ void TrackerSettings::setRll_max(int value)
     _data["rll_max"] = value;
 }
 
-int TrackerSettings::Rll_gain() const
+float TrackerSettings::Rll_gain() const
 {
-    return _data["rll_gain"].toInt();
+    return _data["rll_gain"].toFloat();
 }
 
-void TrackerSettings::setRll_gain(int value)
+void TrackerSettings::setRll_gain(float value)
 {
     if(value < MIN_GAIN)
         value = MIN_GAIN;
@@ -119,12 +127,12 @@ void TrackerSettings::setPan_max(int value)
     _data["pan_max"] = value;
 }
 
-int TrackerSettings::Pan_gain() const
+float TrackerSettings::Pan_gain() const
 {
-    return _data["pan_gain"].toInt();
+    return _data["pan_gain"].toFloat();
 }
 
-void TrackerSettings::setPan_gain(int value)
+void TrackerSettings::setPan_gain(float value)
 {
     if(value < MIN_GAIN)
         value = MIN_GAIN;
@@ -175,12 +183,12 @@ void TrackerSettings::setTlt_max(int value)
     _data["tlt_max"] = value;
 }
 
-int TrackerSettings::Tlt_gain() const
+float TrackerSettings::Tlt_gain() const
 {
-    return _data["tlt_gain"].toInt();
+    return _data["tlt_gain"].toFloat();
 }
 
-void TrackerSettings::setTlt_gain(int value)
+void TrackerSettings::setTlt_gain(float value)
 {
     if(value < MIN_GAIN)
         value = MIN_GAIN;
@@ -325,6 +333,97 @@ void TrackerSettings::setRollCh(uint value)
         _data["rllch"] = (uint)value;
 }
 
+int TrackerSettings::ppmOutPin() const
+{
+    return _data["ppmoutpin"].toInt();
+}
+
+void TrackerSettings::setPpmOutPin(int value)
+{
+    _data["ppmoutpin"] = value;
+}
+
+bool TrackerSettings::invertedPpmOut() const
+{
+    return _data["ppmoutinvert"].toBool();
+}
+
+void TrackerSettings::setInvertedPpmOut(bool value)
+{
+    _data["ppmoutinvert"] = value;
+}
+
+int TrackerSettings::ppmInPin() const
+{
+    return _data["ppminpin"].toInt();
+}
+
+void TrackerSettings::setPpmInPin(int value)
+{
+    _data["ppminpin"] = value;
+}
+
+bool TrackerSettings::invertedPpmIn() const
+{
+    return _data["ppmininvert"].toBool();
+}
+
+void TrackerSettings::setInvertedPpmIn(bool value)
+{
+    _data["ppmininvert"] = value;
+}
+
+int TrackerSettings::buttonPin() const
+{
+    return _data["buttonpin"].toInt();
+}
+
+void TrackerSettings::setButtonPin(int value)
+{
+    _data["buttonpin"] = value;
+}
+
+void TrackerSettings::gyroOffset(float &x, float &y, float &z)
+{
+    x=_data["gyrxoff"].toFloat();
+    y=_data["gyryoff"].toFloat();
+    z=_data["gyrzoff"].toFloat();
+}
+
+void TrackerSettings::setGyroOffset(float x, float y, float z)
+{
+    _data["gyrxoff"]=QString::number(x,'g',3);
+    _data["gyryoff"]=QString::number(y,'g',3);
+    _data["gyrzoff"]=QString::number(z,'g',3);
+}
+
+void TrackerSettings::accOffset(float &x, float &y, float &z)
+{
+    x=_data["accxoff"].toFloat();
+    y=_data["accyoff"].toFloat();
+    z=_data["acczoff"].toFloat();
+}
+
+void TrackerSettings::setAccOffset(float x, float y, float z)
+{
+    _data["accxoff"]=QString::number(x,'g',3);
+    _data["accyoff"]=QString::number(y,'g',3);
+    _data["acczoff"]=QString::number(z,'g',3);}
+
+void TrackerSettings::magOffset(float &x, float &y, float &z)
+{
+    x=_data["magxoff"].toFloat();
+    y=_data["magyoff"].toFloat();
+    z=_data["magzoff"].toFloat();
+}
+
+void TrackerSettings::setMagOffset(float x, float y, float z)
+{
+    _data["magxoff"]=QString::number(x,'g',3);
+    _data["magyoff"]=QString::number(y,'g',3);
+    _data["magzoff"]=QString::number(z,'g',3);
+}
+
 void TrackerSettings::setAxisRemap(uint value)
 {
     _data["axisremap"] = (uint)(value & 0x3F);
@@ -333,6 +432,16 @@ void TrackerSettings::setAxisRemap(uint value)
 void TrackerSettings::setAxisSign(uint value)
 {        
     _data["axissign"] = (uint)(value & 0x07);
+}
+
+int TrackerSettings::blueToothMode()
+{
+    return _data["btmode"].toInt();
+}
+
+void TrackerSettings::setBlueToothMode(int mode) {
+    if(mode >= 0 && mode <= 2)
+        _data["btmode"] = mode;
 }
 
 void TrackerSettings::storeSettings(QSettings *settings)
@@ -351,5 +460,98 @@ void TrackerSettings::loadSettings(QSettings *settings)
 
     foreach(QString key,keys) {
         _data[key] = settings->value(key);
+    }
+}
+
+void TrackerSettings::setAllData(const QVariantMap &data)
+{
+    QStringList keys = data.keys();
+    foreach(QString key,keys) {
+        _data[key] = data.value(key);
+    }
+}
+
+QVariant TrackerSettings::liveData(const QString &name)
+{
+    return _live[name];
+}
+
+void TrackerSettings::setLiveData(const QString &name, const QVariant &live)
+{
+    QVariantMap map;
+    map[name] = live;
+    setLiveDataMap(map);
+}
+
+QVariantMap TrackerSettings::liveDataMap()
+{
+    return _live;
+}
+
+void TrackerSettings::setLiveDataMap(const QVariantMap &livelist,bool reset)
+{
+    if(reset)
+        _live.clear();
+
+    // Update List
+    _live.insert(livelist);
+
+    // Emit if a value has been updated
+    bool ge=false,ae=false,me=false,oe=false,ooe=false,ppm=false;
+    QMapIterator<QString, QVariant> i(livelist);
+    while (i.hasNext()) {
+        i.next();        
+        if((i.key() == "gyrox" || i.key() == "gyroy" || i.key() == "gyroz") && !ge) {
+            emit(rawGyroChanged(_live["gyrox"].toFloat(),
+                                _live["gyroy"].toFloat(),
+                                _live["gyroz"].toFloat()));
+            ge = true;
+        }
+        if((i.key() == "accx" || i.key() == "accy" || i.key() == "accz") && !ae) {
+            emit(rawAccelChanged(_live["gyrox"].toFloat(),
+                                _live["gyroy"].toFloat(),
+                                _live["gyroz"].toFloat()));
+            ae = true;
+        }
+        if((i.key() == "magx" || i.key() == "magy" || i.key() == "magz") && !me) {
+            emit(rawMagChanged(_live["magx"].toFloat(),
+                                _live["magy"].toFloat(),
+                                _live["magz"].toFloat()));
+            me = true;
+        }
+        if((i.key() == "tilt" || i.key() == "roll" || i.key() == "pan") && !oe) {
+            emit(rawOrientChanged(_live["tilt"].toFloat(),
+                                _live["roll"].toFloat(),
+                                _live["pan"].toFloat()));
+            oe = true;
+        }
+        if((i.key() == "tiltoff" || i.key() == "rolloff" || i.key() == "panoff") && !ooe) {
+            emit(offOrientChanged(_live["tiltoff"].toFloat(),
+                                _live["rolloff"].toFloat(),
+                                _live["panoff"].toFloat()));
+            ooe = true;
+        }
+        if((i.key() == "panout" || i.key() == "tiltout" || i.key() == "rollout") && !ppm) {
+            emit(ppmOutChanged(_live["tiltout"].toUInt(),
+                                _live["rollout"].toUInt(),
+                                _live["panout"].toUInt()));
+            ppm = true;
+        }
+    }
+}
+
+void TrackerSettings::setHardware(QString vers, QString hard)
+{
+    _data["Vers"] = vers;
+    _data["Hard"] = hard;
+}
+
+void TrackerSettings::setSoftIronOffsets(float soo[3][3])
+{
+    for(int i=0;i < 3; i++){
+        for(int j=0;j<3;j++) {
+            QString element = QString("so%1%2").arg(i).arg(j);
+            _data[element] = QString::number(soo[i][j],'g',3);
+        }
     }
 }

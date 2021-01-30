@@ -1,9 +1,9 @@
-#include "calibrate.h"
-#include "ui_calibrate.h"
+#include "CalibrateBNO.h"
+#include "ui_CalibrateBNO.h"
 
-Calibrate::Calibrate(QWidget *parent) :
+CalibrateBNO::CalibrateBNO(QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::Calibrate)
+    ui(new Ui::CalibrateBNO)
 {
     ui->setupUi(this);
     sys=0;
@@ -13,12 +13,12 @@ Calibrate::Calibrate(QWidget *parent) :
     calStatus=false;
 }
 
-Calibrate::~Calibrate()
+CalibrateBNO::~CalibrateBNO()
 {
     delete ui;
 }
 
-void Calibrate::setCalibration(int sys, int mag, int gyr, int acc)
+void CalibrateBNO::setCalibration(int sys, int mag, int gyr, int acc)
 {
     if(calStatus == true)
         return;
@@ -69,7 +69,7 @@ void Calibrate::setCalibration(int sys, int mag, int gyr, int acc)
     }
 }
 
-void Calibrate::startCalibration()
+void CalibrateBNO::startCalibration()
 {
     calStatus = false;
 }

@@ -42,7 +42,6 @@ Mapping example:
 $123456789111CH
 */
 
-
 // Local file variables
 //
 int frameNumber = 0;		    // Frame count since last debug serial output
@@ -250,8 +249,7 @@ void loop()
             }
             
             // Configure headtracker
-            else if (serial_data[serial_index-2] == 'H' &&
-                     serial_data[serial_index-1] == 'E')
+            else if (IsCommand("HE"))
             {
                 // HT parameters are passed in from the PC in this order:
                 //
@@ -292,7 +290,7 @@ void loop()
                     Serial.println("$CRCERR");
                     return;
                 } else {                    
-                    Serial.println("$CRCOK:HT Settings Retrieved");
+                    Serial.println("$CRCOK\r\nHT: Settings received from GUI!");
                 }
            
                 int valuesReceived[22] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
@@ -351,19 +349,18 @@ void loop()
                 {
                     tiltInverse = -1;
                 }
-
-                servoPanCenter = valuesReceived[8];
-                panMinPulse = valuesReceived[9];
-                panMaxPulse = valuesReceived[10];         
+                servoPanCenter = (valuesReceived[8] - 400) * 2 ;
+                panMinPulse = (valuesReceived[9] - 400) * 2;
+                panMaxPulse = (valuesReceived[10] - 400) * 2;
          
-                servoTiltCenter = valuesReceived[11];
-                tiltMinPulse = valuesReceived[12];
-                tiltMaxPulse = valuesReceived[13];         
+                servoTiltCenter = (valuesReceived[11] - 400) * 2;
+                tiltMinPulse = (valuesReceived[12] - 400) * 2;
+                tiltMaxPulse = (valuesReceived[13] - 400) * 2;
 
-                servoRollCenter = valuesReceived[14];
-                rollMinPulse = valuesReceived[15];
-                rollMaxPulse = valuesReceived[16];              
-     
+                servoRollCenter = (valuesReceived[14] - 400) * 2;
+                rollMinPulse = (valuesReceived[15] - 400) * 2;
+                rollMaxPulse = (valuesReceived[16] - 400) * 2;   
+                    
                 htChannels[0] = valuesReceived[17];                   
                 htChannels[1] = valuesReceived[18];              
                 htChannels[2] = valuesReceived[19];            
@@ -382,113 +379,99 @@ void loop()
             } // end configure headtracker
           
             // Debug info
-            else if (serial_data[serial_index-5] == 'D' &&
-                     serial_data[serial_index-4] == 'E' &&
-                     serial_data[serial_index-3] == 'B' &&
-                     serial_data[serial_index-2] == 'U' &&
-                     serial_data[serial_index-1] == 'G')
+            else if (IsCommand("DEBUG"))
             {  
                 DebugOutput();
                 serial_index = 0;
                 string_started = 0; 
             }
+            
+            // Firmware version requested
+            else if (IsCommand("VERS")) {
+                Serial.print("$VERS");
+                Serial.println(FIRMWARE_VERSION_FLOAT, 2);
+                serial_index = 0;
+                string_started = 0;
+            }
+
+            // Hardmware version requested
+            else if (IsCommand("HARD")) {
+                Serial.print("$HARD");
+                Serial.println(SENSOR_NAME);
+                serial_index = 0;
+                string_started = 0;
+            }
 
             // Reset Button Via Software
-            else if (serial_data[serial_index-3] == 'R' &&
-                     serial_data[serial_index-2] == 'S' &&
-                     serial_data[serial_index-1] == 'T')
+            else if (IsCommand("RST"))
             {
-                Serial.println("Reset Values Complete ");
+                Serial.println("HT: Resetting center");
                 resetValues = 1;
+                serial_index = 0;
+                string_started = 0;
             }
             
             // Clear Offsets via Software
-            else if (serial_data[serial_index-3] == 'S' &&
-                     serial_data[serial_index-2] == 'T' &&
-                     serial_data[serial_index-1] == 'O')
+            else if (IsCommand("STO"))
             {
-                Serial.println("Calibration saved when all sensors at maximum");
+                Serial.println("HT: Calibration saved when all sensors at maximum");
                 doCalibrate = true;
+                serial_index = 0;
+                string_started = 0;
             }
 
             // Clear Offsets via Software
-            else if (serial_data[serial_index-3] == 'C' &&
-                     serial_data[serial_index-2] == 'L' &&
-                     serial_data[serial_index-1] == 'R')
+            else if (IsCommand("CLR"))
             {
-                Serial.println("Clearing Offsets");
+                Serial.println("HT: Clearing Offsets");
                 tiltStart = 0;        
                 panStart = 0;                
                 rollStart = 0; 
+                serial_index = 0;
+                string_started = 0;
             }
 
             // Graph raw sensor data
-            else if (serial_data[serial_index-4] == 'G' &&
-                     serial_data[serial_index-3] == 'R' &&
-                     serial_data[serial_index-2] == 'A' &&
-                     serial_data[serial_index-1] == 'W')
+            else if (IsCommand("GRAW"))
             {
-                Serial.println("Showing Raw Sensor Data");
+                Serial.println("HT: Showing Raw Sensor Data");
                 graphRaw = 1;        
+                serial_index = 0;
+                string_started = 0;
             }
 
             // Graph offset sensor data
-            else if (serial_data[serial_index-4] == 'G' &&
-                     serial_data[serial_index-3] == 'O' &&
-                     serial_data[serial_index-2] == 'F' &&
-                     serial_data[serial_index-1] == 'F')
+            else if (IsCommand("GOFF"))
             {
-                Serial.println("Showing Offset Sensor Data");
+                Serial.println("HT: Showing Offset Sensor Data");
                 graphRaw = 0;        
-            }
-
-
-            // Firmware version requested
-            else if (serial_data[serial_index-4] == 'V' &&
-                     serial_data[serial_index-3] == 'E' &&
-                     serial_data[serial_index-2] == 'R' &&
-                     serial_data[serial_index-1] == 'S')
-            {
-                Serial.print("FW: ");
-                Serial.print(FIRMWARE_VERSION_FLOAT, 2.0);
-                Serial.println("");
                 serial_index = 0;
-                string_started = 0; 
+                string_started = 0;
             }
           
-            // Start tracking data stream
-            else if (serial_data[serial_index-4] == 'P' &&
-                     serial_data[serial_index-3] == 'L' &&
-                     serial_data[serial_index-2] == 'S' &&
-                     serial_data[serial_index-1] == 'T')
-            {  
-                outputTrack = 1;
+            // Stop any data stream commands (leave all aliases for compatibility
+            else if (IsCommand("CMAE") || IsCommand("CAEN") || IsCommand("GREN") || IsCommand("PLEN") ) {
                 outputMagAcc = 0;
                 outputMag = 0;
+                outputTrack = 0;
                 outputAcc = 0;
                 serial_index = 0;
-                string_started = 0; 
+                string_started = 0;
+            }
+           
+            // Start tracking data stream
+            else if (IsCommand("PLST"))
+            {  
+                outputAcc = 0;
+                outputMagAcc = 0;
+                outputMag = 0;
+                outputTrack = 1;
+                serial_index = 0;
+                string_started = 0;
             }        
 
-            // Stop tracking data stream          
-            else if (serial_data[serial_index-4] == 'P' &&
-                     serial_data[serial_index-3] == 'L' &&
-                     serial_data[serial_index-2] == 'E' &&
-                     serial_data[serial_index-1] == 'N')
-            {  
-                outputTrack = 0;
-                outputMag = 0;
-                outputAcc = 0;
-                outputMagAcc = 0;
-                serial_index = 0;
-                string_started = 0; 
-            }
-          
             // Save RAM settings to EEPROM
-            else if (serial_data[serial_index-4] == 'S' &&
-                     serial_data[serial_index-3] == 'A' &&
-                     serial_data[serial_index-2] == 'V' &&
-                     serial_data[serial_index-1] == 'E')
+            else if (IsCommand("SAVE"))
             {  
                 SaveSettings();     
                 serial_index = 0;
@@ -496,66 +479,18 @@ void loop()
             }          
           
             // Retrieve settings
-            else if (serial_data[serial_index-4] == 'G' &&
-                     serial_data[serial_index-3] == 'S' &&
-                     serial_data[serial_index-2] == 'E' &&
-                     serial_data[serial_index-1] == 'T' )
+            else if(IsCommand("GSET"))
             {
-                // Get Settings. Scale our local values to
-                // real-world values usable on the PC side.
-                //
+                // Get Settings. Scale our local values to real-world values usable on the PC side.
                 Serial.print("$SET$"); // something recognizable in the stream
 
-                Serial.print(tiltRollBeta * 100);
-                Serial.print(",");   
-                Serial.print(panBeta * 100);
-                Serial.print(",");
-                Serial.print(gyroWeightTiltRoll * 100);  
-                Serial.print(",");
-                Serial.print(GyroWeightPan * 100);
-                Serial.print(",");
-                Serial.print(tiltFactor * 10);
-                Serial.print(",");
-                Serial.print(panFactor * 10);
-                Serial.print(",");
-                Serial.print(rollFactor * 10);
-                Serial.print(",");
-                Serial.print(servoReverseMask);
-                Serial.print(",");
-                Serial.print(servoPanCenter);
-                Serial.print(",");
-                Serial.print(panMinPulse);
-                Serial.print(",");
-                Serial.print(panMaxPulse);
-                Serial.print(",");
-                Serial.print(servoTiltCenter);
-                Serial.print(",");
-                Serial.print(tiltMinPulse);
-                Serial.print(",");
-                Serial.print(tiltMaxPulse);
-                Serial.print(",");
-                Serial.print(servoRollCenter);
-                Serial.print(",");
-                Serial.print(rollMinPulse);
-                Serial.print(",");
-                Serial.print(rollMaxPulse);
-                Serial.print(",");
-                Serial.print(htChannels[0]);
-                Serial.print(",");
-                Serial.print(htChannels[1]);
-                Serial.print(",");
-                Serial.print(htChannels[2]);
-                Serial.print(",");
-                Serial.print(axisRemap);
-                Serial.print(",");
-                Serial.println(axisSign);
+                SendSettings();
 
-                Serial.println("Settings Sent!");
-
+                Serial.println("HT: Settings sent to GUI");
+                
                 serial_index = 0;
                 string_started = 0;
-            }
-            else if (serial_index > SERIAL_BUFFER_SIZE)
+            } else if (serial_index > SERIAL_BUFFER_SIZE)
             {
                 // If more than 100 bytes have been received, the string is not valid.
                 // Reset and "try again" (wait for $ to indicate start of new string). 
@@ -588,6 +523,70 @@ void loop()
         // Will first update read_sensors when everything is done.  
         read_sensors = 0;
     }
+}
+
+//--------------------------------------------------------------------------------------
+// Check if current line ends with specified command 
+//--------------------------------------------------------------------------------------
+bool IsCommand(String command) {
+    // Ensure we read enough characters
+    int cLength = command.length();
+    if( cLength > serial_index ) return false;
+    // ..and then check characters one by one
+    for (int i = 0; i < cLength; i++) {
+         if (serial_data[serial_index - cLength + i ] != command.charAt(i)) return false;
+    }
+    return true;
+}
+
+//--------------------------------------------------------------------------------------
+// Send Settings
+//--------------------------------------------------------------------------------------
+
+void SendSettings() {
+  Serial.print(tiltRollBeta * 100);
+  Serial.print(",");   
+  Serial.print(panBeta * 100);
+  Serial.print(",");
+  Serial.print(gyroWeightTiltRoll * 100);  
+  Serial.print(",");
+  Serial.print(GyroWeightPan * 100);
+  Serial.print(",");
+  Serial.print(tiltFactor * 10);
+  Serial.print(",");
+  Serial.print(panFactor * 10);
+  Serial.print(",");
+  Serial.print(rollFactor * 10);
+  Serial.print(",");
+  Serial.print(servoReverseMask);
+  Serial.print(",");
+  Serial.print(servoPanCenter / 2 + 400);
+  Serial.print(",");
+  Serial.print(panMinPulse / 2 + 400);
+  Serial.print(",");
+  Serial.print(panMaxPulse / 2 + 400);
+  Serial.print(",");
+  Serial.print(servoTiltCenter / 2 + 400);
+  Serial.print(",");
+  Serial.print(tiltMinPulse / 2 + 400);
+  Serial.print(",");
+  Serial.print(tiltMaxPulse / 2 + 400);
+  Serial.print(",");
+  Serial.print(servoRollCenter / 2 + 400);
+  Serial.print(",");
+  Serial.print(rollMinPulse / 2 + 400);
+  Serial.print(",");
+  Serial.print(rollMaxPulse / 2 + 400);
+  Serial.print(",");
+  Serial.print(htChannels[0]);
+  Serial.print(",");
+  Serial.print(htChannels[1]);
+  Serial.print(",");
+  Serial.print(htChannels[2]);
+  Serial.print(",");
+  Serial.print(axisRemap);
+  Serial.print(",");
+  Serial.println(axisSign);  
 }
 
 //--------------------------------------------------------------------------------------
@@ -655,7 +654,7 @@ void SaveSettings()
   
     EEPROM.write(0,EEPROM_MAGIC_NUMBER); 
 
-    Serial.println("Settings saved!");
+    Serial.println("HT: Settings saved to EEPROM!");
 }
 
 //--------------------------------------------------------------------------------------
@@ -711,6 +710,7 @@ void GetSettings()
     htChannels[2] = EEPROM.read(34);    
 
     axisRemap = EEPROM.read(35);
+    axisSign = EEPROM.read(36);
 
 #if (DEBUG)
     DebugOutput();
@@ -726,7 +726,7 @@ void DebugOutput()
     Serial.println();  
     Serial.println();
     Serial.println();
-    Serial.println("------ Debug info------");
+    Serial.println("HT: ------ Debug info------");
 
     Serial.print("FW Version: ");
     Serial.println(FIRMWARE_VERSION_FLOAT, 2);

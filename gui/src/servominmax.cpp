@@ -3,17 +3,17 @@
 
 ServoMinMax::ServoMinMax(QWidget *parent) : QWidget(parent)
 {    
-    min_travel = MIN_PWM; // In trackersettings.h
-    max_travel = MAX_PWM;
+    min_travel = TrackerSettings::MIN_PWM; // In trackersettings.h
+    max_travel = TrackerSettings::MAX_PWM;
 
-    c_max = MAX_CNT;
-    c_min = MIN_CNT;
+    c_max = TrackerSettings::MAX_CNT;
+    c_min = TrackerSettings::MIN_CNT;
 
     // Minimum value the maximum slider is allowed
-    min_max = min_travel + 550;
+    min_max = min_travel + 250;
 
     // Maximum value the minimum slider is allowed
-    max_min = max_travel - 550;
+    max_min = max_travel - 250;
 
     padding = 10;
     hpad = padding/2;
@@ -54,9 +54,9 @@ void ServoMinMax::reCenter()
 
 void ServoMinMax::setDefaults()
 {
-    c_value = (MAX_PWM-MIN_PWM)/2 + MIN_PWM;
-    min_val = DEF_MIN_PWM;
-    max_val = DEF_MAX_PWM;
+    c_value = (TrackerSettings::MAX_PWM-TrackerSettings::MIN_PWM)/2 + TrackerSettings::MIN_PWM;
+    min_val = TrackerSettings::DEF_MIN_PWM;
+    max_val = TrackerSettings::DEF_MAX_PWM;
 
     update();
     emit minimumChanged(min_val);

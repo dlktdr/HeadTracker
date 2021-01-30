@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>599</width>
-    <height>648</height>
+    <width>686</width>
+    <height>714</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Headtracker BNO055</string>
+   <string>Headtracker</string>
   </property>
   <property name="windowIcon">
    <iconset resource="Resources.qrc">
@@ -20,7 +20,7 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout_2">
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <layout class="QHBoxLayout" name="horizontalLayout_4">
       <item>
        <layout class="QGridLayout" name="gridLayout_4">
         <item row="4" column="0" colspan="2">
@@ -36,6 +36,16 @@
           </property>
          </widget>
         </item>
+        <item row="1" column="0">
+         <widget class="QComboBox" name="cmbPort">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+         </widget>
+        </item>
         <item row="1" column="1">
          <widget class="QPushButton" name="cmdRefresh">
           <property name="toolTip">
@@ -47,6 +57,52 @@
           <property name="icon">
            <iconset resource="Resources.qrc">
             <normaloff>:/Icons/refresh.svg</normaloff>:/Icons/refresh.svg</iconset>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0" colspan="2">
+         <widget class="QPushButton" name="cmdConnect">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>&amp;Connect</string>
+          </property>
+         </widget>
+        </item>
+        <item row="7" column="0" colspan="2">
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="3" column="0" colspan="2">
+         <widget class="QPushButton" name="cmdDisconnect">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>&amp;Disconnect</string>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="0" colspan="2">
+         <widget class="QPushButton" name="cmdCalibrate">
+          <property name="text">
+           <string>Calibrate</string>
           </property>
          </widget>
         </item>
@@ -112,59 +168,13 @@
           </item>
          </layout>
         </item>
-        <item row="2" column="0" colspan="2">
-         <widget class="QPushButton" name="cmdConnect">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>&amp;Connect</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0">
-         <widget class="QComboBox" name="cmdPort">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="0" colspan="2">
-         <widget class="QPushButton" name="cmdDisconnect">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>&amp;Disconnect</string>
-          </property>
-         </widget>
-        </item>
-        <item row="6" column="0" colspan="2">
-         <spacer name="verticalSpacer">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
         <item row="5" column="0" colspan="2">
-         <widget class="QPushButton" name="cmdCalibrate">
+         <widget class="QPushButton" name="cmdSaveNVM">
+          <property name="toolTip">
+           <string>Permanently save the settings on the headtracker</string>
+          </property>
           <property name="text">
-           <string>Calibrate</string>
+           <string>Save to NVM</string>
           </property>
          </widget>
         </item>
@@ -192,31 +202,448 @@
        </widget>
       </item>
       <item>
-       <widget class="QGroupBox" name="groupBox_3">
+       <widget class="QGroupBox" name="grbSettings">
         <property name="title">
-         <string>Advanced Params</string>
+         <string>Settings</string>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout">
          <item>
-          <widget class="QLabel" name="label">
-           <property name="text">
-            <string>Manual Command</string>
+          <widget class="QStackedWidget" name="stackedWidget">
+           <property name="currentIndex">
+            <number>2</number>
            </property>
+           <widget class="QWidget" name="page">
+            <layout class="QVBoxLayout" name="verticalLayout_3">
+             <item>
+              <widget class="QLabel" name="label_13">
+               <property name="text">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt; font-weight:600;&quot;&gt;Connect to Show All Settings&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+           <widget class="QWidget" name="BNO055">
+            <layout class="QGridLayout" name="gridLayout_6">
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_7">
+               <property name="text">
+                <string>Manual Command</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="label_8">
+               <property name="text">
+                <string>Axis Signs</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="2">
+              <widget class="QLabel" name="label_6">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>Axis Remapping</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="0">
+              <widget class="QComboBox" name="cmbSigns">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                 <horstretch>1</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>100</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <item>
+                <property name="text">
+                 <string>X+,Y+,Z+</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>X+,Y+,Z-</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>X+,Y-,Z+</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>X+,Y-,Z-</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>X-,Y+,Z+</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>X-,Y+,Z-</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>X-,Y-,Z+</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>X-,Y-,Z-</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item row="3" column="2">
+              <widget class="QComboBox" name="cmbRemap">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>100</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1" colspan="2">
+              <widget class="QLineEdit" name="txtCommand"/>
+             </item>
+             <item row="1" column="1" colspan="2">
+              <widget class="QPushButton" name="cmdSend">
+               <property name="text">
+                <string>&amp;Send</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+           <widget class="QWidget" name="Welcome">
+            <layout class="QGridLayout" name="gridLayout">
+             <item row="0" column="1">
+              <widget class="QComboBox" name="cmbPpmOutPin">
+               <property name="currentIndex">
+                <number>0</number>
+               </property>
+               <item>
+                <property name="text">
+                 <string>Disabled</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D2</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D3</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D4</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D5</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D6</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D7</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D8</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D9</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D10</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D11</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D12</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D13</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item row="5" column="0" colspan="3">
+              <widget class="QCheckBox" name="chkResetCenterWave">
+               <property name="text">
+                <string>Center on Wave (BLE Sense Only)</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="0">
+              <widget class="QLabel" name="label">
+               <property name="text">
+                <string>PPM Output Pin</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="2">
+              <widget class="QCheckBox" name="chkInvertedPPM">
+               <property name="text">
+                <string>Invert</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="1" colspan="2">
+              <widget class="QComboBox" name="cmbBtMode">
+               <property name="enabled">
+                <bool>true</bool>
+               </property>
+               <item>
+                <property name="text">
+                 <string>Disabled</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>FrSky - PARA Wireless Trainer</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>HM10 + Arduino</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item row="2" column="1" colspan="2">
+              <widget class="QComboBox" name="cmbButtonPin">
+               <item>
+                <property name="text">
+                 <string>Disabled</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D2</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D3</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D4</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D5</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D6</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D7</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D8</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D9</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D10</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D11</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D12</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D13</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item row="3" column="0">
+              <widget class="QLabel" name="label_5">
+               <property name="text">
+                <string>Bluetooth Mode</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="label_14">
+               <property name="text">
+                <string>PPM Input Pin</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="2">
+              <widget class="QCheckBox" name="chkInvertedPPMIn">
+               <property name="enabled">
+                <bool>true</bool>
+               </property>
+               <property name="text">
+                <string>Invert</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="label_3">
+               <property name="text">
+                <string>Center Button</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QComboBox" name="cmbPpmInPin">
+               <property name="enabled">
+                <bool>true</bool>
+               </property>
+               <property name="currentText">
+                <string>Disabled</string>
+               </property>
+               <property name="currentIndex">
+                <number>0</number>
+               </property>
+               <item>
+                <property name="text">
+                 <string>Disabled</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D2</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D3</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D4</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D5</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D6</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D7</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D8</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D9</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D10</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D11</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D12</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D13</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item row="4" column="1" colspan="2">
+              <widget class="QLabel" name="lblBLEAddress">
+               <property name="text">
+                <string>TextLabel</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
           </widget>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_4">
-           <item>
-            <widget class="QLineEdit" name="txtCommand"/>
-           </item>
-           <item>
-            <widget class="QPushButton" name="cmdSend">
-             <property name="text">
-              <string>&amp;Send</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
          </item>
          <item>
           <layout class="QGridLayout" name="gridLayout_2">
@@ -330,106 +757,27 @@
           </spacer>
          </item>
          <item>
-          <layout class="QGridLayout" name="gridLayout">
-           <item row="2" column="1">
-            <widget class="QComboBox" name="cmbRemap">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
+          <layout class="QHBoxLayout" name="horizontalLayout_2">
+           <item>
+            <spacer name="horizontalSpacer">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
              </property>
-             <property name="maximumSize">
+             <property name="sizeHint" stdset="0">
               <size>
-               <width>100</width>
-               <height>16777215</height>
+               <width>40</width>
+               <height>20</height>
               </size>
              </property>
-            </widget>
+            </spacer>
            </item>
-           <item row="2" column="0">
-            <widget class="QComboBox" name="cmbSigns">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-               <horstretch>1</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>100</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <item>
-              <property name="text">
-               <string>X+,Y+,Z+</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>X+,Y+,Z-</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>X+,Y-,Z+</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>X+,Y-,Z-</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>X-,Y+,Z+</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>X-,Y+,Z-</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>X-,Y-,Z+</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>X-,Y-,Z-</string>
-              </property>
-             </item>
-            </widget>
-           </item>
-           <item row="3" column="0" colspan="2">
+           <item>
             <widget class="QPushButton" name="cmdResetCenter">
              <property name="toolTip">
               <string>Performs same function as Reset Button (D11-&gt;Gnd)</string>
              </property>
              <property name="text">
               <string>&amp;Reset Center</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="1">
-            <widget class="QLabel" name="label_3">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="text">
-              <string>Axis Remapping</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="0">
-            <widget class="QLabel" name="label_5">
-             <property name="text">
-              <string>Axis Signs</string>
              </property>
             </widget>
            </item>
@@ -451,7 +799,7 @@
          </sizepolicy>
         </property>
         <property name="title">
-         <string>PPM Servo Output</string>
+         <string>Servo Output</string>
         </property>
         <layout class="QGridLayout" name="gridLayout_5">
          <property name="leftMargin">
@@ -504,7 +852,7 @@
             <number>0</number>
            </property>
            <property name="maximum">
-            <number>500</number>
+            <number>1000</number>
            </property>
            <property name="value">
             <number>250</number>
@@ -581,26 +929,6 @@
              <string>8</string>
             </property>
            </item>
-           <item>
-            <property name="text">
-             <string>9</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>10</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>11</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>12</string>
-            </property>
-           </item>
           </widget>
          </item>
          <item row="2" column="2">
@@ -615,7 +943,7 @@
             <number>0</number>
            </property>
            <property name="maximum">
-            <number>500</number>
+            <number>1000</number>
            </property>
            <property name="value">
             <number>250</number>
@@ -659,7 +987,7 @@
             <number>0</number>
            </property>
            <property name="maximum">
-            <number>500</number>
+            <number>1000</number>
            </property>
            <property name="value">
             <number>250</number>
@@ -737,26 +1065,6 @@
            <item>
             <property name="text">
              <string>8</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>9</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>10</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>11</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>12</string>
             </property>
            </item>
           </widget>
@@ -860,26 +1168,6 @@
              <string>8</string>
             </property>
            </item>
-           <item>
-            <property name="text">
-             <string>9</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>10</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>11</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>12</string>
-            </property>
-           </item>
           </widget>
          </item>
          <item row="4" column="4">
@@ -939,7 +1227,7 @@
         </widget>
        </item>
        <item>
-        <layout class="QVBoxLayout" name="verticalLayout_5">
+        <layout class="QVBoxLayout" name="SideBarVerticalLayout">
          <item>
           <widget class="QPushButton" name="cmdStartGraph">
            <property name="sizePolicy">
@@ -1007,7 +1295,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>599</width>
+     <width>686</width>
      <height>21</height>
     </rect>
    </property>
@@ -1026,8 +1314,15 @@
     </property>
     <addaction name="actionUpload_Firmware"/>
    </widget>
+   <widget class="QMenu" name="menu_Diagnostics">
+    <property name="title">
+     <string>&amp;Diagnostics</string>
+    </property>
+    <addaction name="actionShow_Data"/>
+   </widget>
    <addaction name="menu_File"/>
    <addaction name="menuUpdate_Firmware"/>
+   <addaction name="menu_Diagnostics"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="action_Save_to_File">
@@ -1059,6 +1354,11 @@
   <action name="actionUpload_Firmware">
    <property name="text">
     <string>Upload Firmware</string>
+   </property>
+  </action>
+  <action name="actionShow_Data">
+   <property name="text">
+    <string>Show Data</string>
    </property>
   </action>
  </widget>
