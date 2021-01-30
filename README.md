@@ -1,13 +1,12 @@
 # RC HeadTracker
 If your an RC enthusiast like myself with a FPV headset at some point you thought wouldn't it be cool if I could turn my head and the camera would follow. That is the intention of this project. It is a continuation of the work started by Dennis Frie, Mark Mansur and others.
 
-## Wiki
-Please visit the [**Wiki**](https://github.com/dlktdr/HeadTracker/wiki) for the hardware required and how to build one.
+## [Wiki](https://github.com/dlktdr/HeadTracker/wiki)
+* Please visit the  for the hardware required and how to build one.
 
-## Download
-Download the latest version from [**Download**](https://github.com/dlktdr/HeadTracker/releases) if your running Windows 7,8,10. 
-
-The GUI should compile on Linux and MacOS but I have not tested it (*Firmware upload will not work).
+## [Download](https://github.com/dlktdr/HeadTracker/releases)
+* Download the latest version from here if your running Windows 7,8,10. 
+* The GUI should compile on Linux and MacOS but I have not tested it (*Firmware upload will not work).
 
 ### To Do
 - [x] Choose a fusion algorithm, went with Madgwick
