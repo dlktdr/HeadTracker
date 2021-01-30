@@ -18,4 +18,4 @@ Download the latest version from https://github.com/dlktdr/HeadTracker/releases 
 - [ ] Add rotation to mount board in other orientations BLE33
 
 ## Screenshot
-![alt text](https://github.com/dlktdr/HeadTracker/raw/Nano-33-BLE/gui/src/ScreenCapture1007.png)
+![alt text](https://github.com/dlktdr/HeadTracker/raw/master/docs/ScreenCapture1006.png)
