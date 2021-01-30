@@ -141,11 +141,11 @@ void trackerOutput()
     Serial.print(panAngleLP);
     Serial.print(",");  
   }
-  Serial.print(channel_value[htChannels[0]]);
+  Serial.print(channel_value[htChannels[0]] / 2 + 400);
   Serial.print(",");    
-  Serial.print(channel_value[htChannels[1]]);
+  Serial.print(channel_value[htChannels[1]] / 2 + 400);
   Serial.print(",");    
-  Serial.print(channel_value[htChannels[2]]);
+  Serial.print(channel_value[htChannels[2]] /2 + 400);
   Serial.print(",");    
   Serial.print(sys, DEC);
   Serial.print(",");    
