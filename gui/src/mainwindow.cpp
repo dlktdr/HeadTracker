@@ -155,7 +155,7 @@ MainWindow::~MainWindow()
 // Connects to the serial port
 void MainWindow::serialConnect()
 {
-    QString port = ui->cmdPort->currentText();
+    QString port = ui->cmbPort->currentText();
     if(port.isEmpty())
         return;
     if(serialcon->isOpen())
@@ -493,6 +493,8 @@ void MainWindow::sendSerialData(QByteArray data)
 
 void MainWindow::sendSerialJSON(QString command, QVariantMap map)
 {    
+    map.remove("Hard");
+    map.remove("Vers");
     QJsonObject jobj = QJsonObject::fromVariantMap(map);
     jobj["Cmd"] = command;
     QJsonDocument jdoc(jobj);
@@ -556,10 +558,10 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 // Finds available serial ports
 void MainWindow::findSerialPorts()
 {
-    ui->cmdPort->clear();
+    ui->cmbPort->clear();
     QList<QSerialPortInfo> ports = QSerialPortInfo::availablePorts();
     foreach(QSerialPortInfo port,ports) {
-        ui->cmdPort->addItem(port.portName(),port.serialNumber());
+        ui->cmbPort->addItem(port.portName(),port.serialNumber());
     }
 }
 
@@ -878,7 +880,6 @@ void MainWindow::uploadFirmwareClick()
         firmwareUploader->show();
         firmwareUploader->activateWindow();
         firmwareUploader->raise();
-        firmwareUploader->setComPort(ui->cmdPort->currentText());
     }
 }
 

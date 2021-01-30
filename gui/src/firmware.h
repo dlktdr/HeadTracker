@@ -27,12 +27,12 @@ class Firmware : public QWidget
 public:
     explicit Firmware(QWidget *parent = nullptr);
     ~Firmware();
-    void setComPort(QString port) {comport = port;}
+    //void setComPort(QString port) {comport = port;}
 
 private:
     Ui::Firmware *ui;
     QNetworkAccessManager manager;
-    QNetworkReply* reply;
+    QNetworkReply* hexreply;
     QNetworkReply* firmreply;
     QProcess *programmer;
     QPlainTextEdit *programmerlog;
@@ -44,18 +44,23 @@ private:
     QString programmercommand;
 
 private slots:
+    void findSerialPorts();
     void loadOnlineFirmware();
     void firmwareVersionsReady();
     void firmwareReady();
     void ssLerrors(const QList<QSslError> &errors);
-    void replyErrorOccurred(QNetworkReply::NetworkError code);
+    void firmReplyErrorOccurred(QNetworkReply::NetworkError code);
+    void hexReplyErrorOccurred(QNetworkReply::NetworkError code);
     void firmwareSelected(QListWidgetItem *lwi);
     void uploadClicked();
+    void cmdKillClick();
     void programmerSTDOUTReady();
     void programmerSTDERRReady();
     void programmerStarted();
     void programmerErrorOccured(QProcess::ProcessError error);
     void programmerFinished(int exitCode, QProcess::ExitStatus exitStatus);
+protected:
+    void showEvent(QShowEvent *event);
 };
 
 #endif // FIRMWARE_H
