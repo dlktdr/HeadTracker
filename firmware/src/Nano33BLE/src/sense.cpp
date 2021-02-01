@@ -113,32 +113,34 @@ void sense_Thread()
     // Reset Center on Wave or Proximity
     if(blesenseboard) {
         bool btnpress=false;
-        if (trkset.resetOnWave() && APDS.gestureAvailable()) {
-            // a gesture was detected, read and print to serial monitor                
-            int gesture = APDS.readGesture();               
-            if(lastgesture == GESTURE_DOWN && 
-                gesture == GESTURE_UP)
-                btnpress=true;
-            else if(lastgesture == GESTURE_UP && 
-                    gesture == GESTURE_DOWN)
-                btnpress=true;
-            else if(lastgesture == GESTURE_LEFT && 
-                    gesture == GESTURE_RIGHT)
-                btnpress=true;
-            else if(lastgesture == GESTURE_RIGHT && 
-                    gesture == GESTURE_LEFT)
-                btnpress=true;
-            lastgesture = gesture;                
-            if(btnpress) {
-                pressButton();
-                serialWriteln("HT: Reset center from a wave");
+        if (trkset.resetOnWave()) {
+            if(APDS.gestureAvailable()) {
+                // a gesture was detected, read and print to serial monitor                
+                int gesture = APDS.readGesture();               
+                if(lastgesture == GESTURE_DOWN && 
+                    gesture == GESTURE_UP)
+                    btnpress=true;
+                else if(lastgesture == GESTURE_UP && 
+                        gesture == GESTURE_DOWN)
+                    btnpress=true;
+                else if(lastgesture == GESTURE_LEFT && 
+                        gesture == GESTURE_RIGHT)
+                    btnpress=true;
+                else if(lastgesture == GESTURE_RIGHT && 
+                        gesture == GESTURE_LEFT)
+                    btnpress=true;
+                lastgesture = gesture;                
+                if(btnpress) {
+                    pressButton();
+                    serialWriteln("HT: Reset center from a wave");
+                }
             }
-        
-            // Reset on Proximity
+
+            // Reset on Proximity            
             if(APDS.proximityAvailable()) {
                 int proximity = APDS.readProximity();
             
-                if (proximity < 10 && lastproximity == false) {
+                if (proximity == 0 && lastproximity == false) {
                     pressButton();
                     serialWriteln("HT: Reset center from a close proximity");
                     lastproximity = true;
