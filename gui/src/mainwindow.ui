@@ -416,7 +416,7 @@
              <item row="5" column="0" colspan="3">
               <widget class="QCheckBox" name="chkResetCenterWave">
                <property name="text">
-                <string>Center on Wave (BLE Sense Only)</string>
+                <string>Center on Wave or Proximity (BLE Sense Only)</string>
                </property>
               </widget>
              </item>

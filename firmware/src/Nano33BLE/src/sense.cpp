@@ -45,6 +45,7 @@ static Timer runt;
 static int counter=0;
 static int lastgesture=-1;
 static bool blesenseboard=true;
+static bool lastproximity=false;
 
 int sense_Init()
 { 
@@ -109,7 +110,7 @@ void sense_Thread()
     pan = fusion.getYaw();
 #endif
 
-    // Reset Center on Wave
+    // Reset Center on Wave or Proximity
     if(blesenseboard) {
         bool btnpress=false;
         if (trkset.resetOnWave() && APDS.gestureAvailable()) {
@@ -127,10 +128,24 @@ void sense_Thread()
             else if(lastgesture == GESTURE_RIGHT && 
                     gesture == GESTURE_LEFT)
                 btnpress=true;
-            lastgesture = gesture;
+            lastgesture = gesture;                
             if(btnpress) {
                 pressButton();
                 serialWriteln("HT: Reset center from a wave");
+            }
+        
+            // Reset on Proximity
+            if(APDS.proximityAvailable()) {
+                int proximity = APDS.readProximity();
+            
+                if (proximity < 10 && lastproximity == false) {
+                    pressButton();
+                    serialWriteln("HT: Reset center from a close proximity");
+                    lastproximity = true;
+                } else if(proximity > 200) {
+                    // Clear flag on proximity clear
+                    lastproximity = false;
+                }
             }
         }
     }
