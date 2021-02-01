@@ -14,6 +14,8 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+    setWindowTitle(windowTitle() + " " + version);
+
     // Serial Connection
     serialcon = new QSerialPort;
 

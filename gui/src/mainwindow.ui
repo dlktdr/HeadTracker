@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>686</width>
-    <height>714</height>
+    <width>704</width>
+    <height>756</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -447,11 +447,6 @@
                <item>
                 <property name="text">
                  <string>FrSky - PARA Wireless Trainer</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>HM10 + Arduino</string>
                 </property>
                </item>
               </widget>
@@ -1295,7 +1290,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>686</width>
+     <width>704</width>
      <height>21</height>
     </rect>
    </property>
