@@ -32,8 +32,12 @@ void bt_Thread()
 
     digitalWrite(LEDB,HIGH); 
 
-    // Repeat in BT_PERIOD (ms)
-    queue.call_in(std::chrono::milliseconds(BT_PERIOD),bt_Thread);
+    // Slow down bluetooth when UI connected. Trying to prevent disconnects.
+    if(uiconnected)     
+        queue.call_in(std::chrono::milliseconds(BT_PERIOD*2),bt_Thread);
+    else
+        queue.call_in(std::chrono::milliseconds(BT_PERIOD),bt_Thread);
+
 }
 
 void bt_Init() 

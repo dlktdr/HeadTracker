@@ -58,7 +58,7 @@ int sense_Init()
     IMU.setGyroODR(2); // 50hz
 
     // Increase Clock Speed, save some CPU due to blocking i2c
-    Wire1.setClock(400000);  
+    Wire1.setClock(1000000);  
 
 #ifdef NXP_FILTER
     nxpfilter.begin(125); // Frequency discovered by oscilliscope
@@ -110,8 +110,10 @@ void sense_Thread()
     pan = fusion.getYaw();
 #endif
 
-    // Reset Center on Wave or Proximity
-    if(blesenseboard) {
+    // Reset Center on Wave or Proximity, Don't update often
+    static int sensecount=0;    
+    if(blesenseboard && sensecount++ == 50) {
+        sensecount = 0;
         bool btnpress=false;
         if (trkset.resetOnWave()) {
             if(APDS.gestureAvailable()) {

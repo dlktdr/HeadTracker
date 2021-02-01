@@ -8,4 +8,6 @@ static const int UIRESPONSIVE_TIME = 10000; // 10Seconds without an ack data wil
 void data_Thread();
 void parseData(DynamicJsonDocument &json);
 
+extern bool uiconnected;
+
 #endif

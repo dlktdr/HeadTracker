@@ -15,6 +15,7 @@ using namespace mbed;
 Kernel::Clock::time_point uiResponsive = Kernel::Clock::now();
 
 bool sendData=false;
+bool uiconnected=false;
 
 // Handles all data transmission with the UI via Serial port
 void data_Thread()
@@ -76,6 +77,7 @@ void data_Thread()
     Kernel::Clock::time_point curtime = Kernel::Clock::now();
 
     if(uiResponsive > curtime) {
+        uiconnected = true;
         // Build JSON of Data
         json.clear();      
         dataMutex.lock();
@@ -86,7 +88,9 @@ void data_Thread()
         json["Cmd"] = "Data";               
 
         serialWriteJSON(json);
-    } 
+    }  else 
+        uiconnected = false;
+
 
     digitalWrite(LEDR,HIGH); // Serial RX Blue, Off
  
