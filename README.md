@@ -12,7 +12,7 @@ If your an RC enthusiast like myself with a FPV headset at some point you though
 - [x] Choose a fusion algorithm, went with Madgwick
 - [x] Add calibration to the GUI
 - [X] Save config to flash
-- [ ] HM10+Nano Wireless remote PPM Board  for BLE33
+- [X] Wireless PPM using a second Nano33BLE
 - [X] FRsky trainer connection
 - [X] Find solution to PPM output jitter from interrupt timing issues
 - [ ] PPM Input Functionality and testing on BLE33
