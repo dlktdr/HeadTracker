@@ -77,6 +77,8 @@ void Firmware::loadOnlineFirmware()
     QUrl url = QUrl(baseurl + QString("firmware%1.ini").arg(fwversion));
     qDebug() << url;
     QNetworkRequest request(url);
+    request.setAttribute(QNetworkRequest::CacheSaveControlAttribute,false);
+    request.setAttribute(QNetworkRequest::CacheLoadControlAttribute,false);
     firmreply = manager.get(request);
     connect(firmreply,SIGNAL(finished()),this,SLOT(firmwareVersionsReady()));
     connect(firmreply,SIGNAL(sslErrors(const QList<QSslError> &)),this, SLOT(ssLerrors(const QList<QSslError> &)));
@@ -206,6 +208,8 @@ void Firmware::uploadClicked()
     QUrl url = baseurl + QUrl::toPercentEncoding(data["filename"].toString());
 
     QNetworkRequest request(url);
+    request.setAttribute(QNetworkRequest::CacheSaveControlAttribute,false);
+    request.setAttribute(QNetworkRequest::CacheLoadControlAttribute,false);
     hexreply = manager.get(request);
     connect(hexreply,SIGNAL(finished()),this,SLOT(firmwareReady()));
     connect(hexreply,SIGNAL(sslErrors(const QList<QSslError> &)),this, SLOT(ssLerrors(const QList<QSslError> &)));
