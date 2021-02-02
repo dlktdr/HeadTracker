@@ -6,6 +6,9 @@ I would like to throw out thanks to Yuri for the BLE Para work. https://github.c
 ## [Wiki](https://github.com/dlktdr/HeadTracker/wiki)
 * Please visit the  for the hardware required and how to build one.
 
+## [Nano33BLE Build Link](https://github.com/dlktdr/HeadTracker/wiki/Nano33BLE-Build-Instructions)
+* How to for the new BLE33 board
+
 ## [Download](https://github.com/dlktdr/HeadTracker/releases)
 * Download the latest version from here if your running Windows 7,8,10. 
 * The GUI should compile on Linux and MacOS but I have not tested it (*Firmware upload will not work).
