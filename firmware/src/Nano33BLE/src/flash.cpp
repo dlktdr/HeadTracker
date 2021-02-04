@@ -1,5 +1,4 @@
 // Writing to flash
-
  #include "flash.h"
  #include "main.h"
  #include "serial.h"
@@ -9,11 +8,9 @@
 const char flashSpace[SECTOR_SIZE*STORAGE_PAGES] __attribute__ ((section("FLASH"), aligned (0x1000))) =\
      "{\"UUID\":837727}";
 
-// A section of flash at the end that isn't used
-void *flashSpace2;
-char *fs2;
-
 const int storageBytes = SECTOR_SIZE*STORAGE_PAGES;
+
+FlashIAP flash;
 
 void flash_Init() {
         flash.init();
@@ -27,9 +24,6 @@ int writeFlash(char *data, int len)
 
     // Pauses all threads. It's too slow here
     pauseThreads = true;
-    
-    // Give time for the rest of the threads to go into sleep loops
-    //ThisThread::sleep_for(std::chrono::milliseconds(50));
     
     // Determine where we can write that won't overwite this program 
     uint32_t addr = (uint32_t)flashSpace;    
@@ -46,7 +40,6 @@ int writeFlash(char *data, int len)
          //   serialWriteln("Erasing Page");
         }
 
-        //serialWrite("Programming addr:"); serialWrite((int)(cuaddr-data)); serialWriteln("");
         // Program page
         flash.program(cuaddr, addr, page_size);
 

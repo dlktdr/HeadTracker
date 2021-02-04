@@ -10,6 +10,5 @@ void flash_Init();
 int writeFlash(char *data, int len);
 
 extern const char flashSpace[];
-extern void *flashSpace2;
 
 #endif
