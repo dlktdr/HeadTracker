@@ -47,10 +47,10 @@ void io_Task()
 {
   static int i =0;
   // Fast Blink to know it's running
-  if(i==100) {
+  if(i==10) {
     digitalWrite(LED_BUILTIN, HIGH);
   } 
-  if(i==200) {
+  if(i==20) {
     digitalWrite(LED_BUILTIN, LOW);
     i=0;
   }
