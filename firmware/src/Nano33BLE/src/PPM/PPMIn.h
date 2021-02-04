@@ -3,28 +3,9 @@
 
 #include "config.h"
 
-using namespace mbed;
+void PpmIn_setPin(int pinNum);
+int PpmIn_getChannels(uint16_t *ch);
+void PpmIn_setInverted(bool inv);
+void PpmIn_execute();
 
-class PpmIn
-{
-    public:
-        uint16_t period;
-        uint16_t channels[MAX_PPM_CHANNELS+2]; 
-        uint8_t nochannels;
-        bool state;
-        
-        PpmIn(PinName pin, int channels=8);
-        ~PpmIn();
-        
-        uint16_t* getPpm();
-        void rise();
-        void setInverted(bool inv);
-        
-     protected:     
-        InterruptIn ppm;        
-        Timer timer;
-        uint8_t current_channel;
-        bool inverted;
-};
- 
-#endif
+ #endif

@@ -2,69 +2,211 @@
 
 #include <Arduino.h>
 #include <mbed.h>
+#include <rtos.h>
+
+#include <nrfx_ppi.h>
+#include <nrfx_gpiote.h>
+
+#include "serial.h"
 
 #include "PPMIn.h"
 
-// *** NOT TESTED.
+using namespace mbed;
 
-using namespace std::chrono;
-  
-PpmIn::PpmIn(PinName pin, int channels): ppm(pin), nochannels(channels)
+static uint32_t oldGPIOTEInterrupt=0;
+
+static bool framestarted=false;
+static bool ppminstarted=false;
+static bool ppminverted=false;
+static int setPin=-1;
+
+// Used in ISR
+static uint16_t isrchannels[16];
+static int isrch_count=0;
+
+// Used to read data at once, read with isr disabled
+static uint16_t channels[16];
+static int ch_count=0;
+
+static Timer runt;
+
+extern "C" void GPIOTE_IRQHandler2(void)
 {
-    current_channel = 0;
-    state = false;
-    timer.start();
+    if(NRF_GPIOTE->EVENTS_IN[6]) {
+        // Clear Flag
+        NRF_GPIOTE->EVENTS_IN[6] = 0;
 
-    // Add invertered options here to watch on fall
-    inverted = false;
-    setInverted(inverted);    
+        // Read Timer Captured Value
+        uint32_t time = NRF_TIMER4->CC[0];
+        
+        // Long pulse = Start.. Minimum frame sync is 4ms.. Giving a 10us leway
+        if(time > 3990) {  
+            // Copy all data to another buffer so it can be read complete
+            for(int i=0;i<16;i++) {
+                ch_count = isrch_count;                
+                channels[i] = isrchannels[i];
+            }
+            isrch_count = 0;
+            framestarted = true;
+            runt.reset(); // Used to check if a signal is here
+        
+        // Valid Ch Range
+        } else if(time > 900 && time < 2100 && 
+                  framestarted == true && 
+                  isrch_count < 16) { 
+            isrchannels[isrch_count] = time;
+            isrch_count++;
+
+        // Fault, Reset
+        } else { 
+            isrch_count = 0; 
+            framestarted = false;
+        }
+    }
+
+    // Call overridden IRQ handler
+    if(oldGPIOTEInterrupt != 0) {
+        void (*GPIOVector)(void) = (void (*)(void))oldGPIOTEInterrupt;
+        GPIOVector();
+    }
 }
 
-PpmIn::~PpmIn()
-{
-    // Disable interrupts
-    ppm.rise(0);
-    ppm.fall(0);
-}
+// Set pin to -1 to disable
 
-void PpmIn::setInverted(bool inv)
+void PpmIn_setPin(int pinNum)
 {
-    // Delete previous interrupt handlers
-    ppm.rise(0);
-    ppm.fall(0);
-    if(!inv) 
-        ppm.rise(callback(this, &PpmIn::rise));
-    else
-        ppm.fall(callback(this, &PpmIn::rise));
-}
+    // Same pin, just quit
+    if(pinNum == setPin)
+        return;
 
-uint16_t* PpmIn::getPpm()
-{
-    return &channels[2];
-}
+    // THIS MUST BE DEFINED SOMEWHERE... CAN'T FIND IT!
+    int dpintopin[]  = {0,0,11,12,15,13,14,23,21,27,2,1,8,13};
+    int dpintoport[] = {0,0,1 ,1 ,1 ,1 ,1 ,0 ,0 ,0 ,1,1,1,0 };
+
+    int pin;
+    pin = dpintopin[pinNum];    
+    int port;
+    port = dpintoport[pinNum];    
+    
+    if(pinNum < 0 && ppminstarted) { // Disable
+        setPin = pinNum;    
+        __disable_irq();
+        NRF_GPIOTE->INTENSET &= 0xFFFFFFFF^GPIOTE_INTENSET_IN6_Msk; // Disable Interrupt
+        NRF_GPIOTE->CONFIG[6] = 0; // Disable Config
+        NRF_GPIOTE->EVENTS_IN[6] = 0; // Clear interrupt
+        ppminstarted = false;
+        NVIC_SetVector(GPIOTE_IRQn,oldGPIOTEInterrupt); // Reset Orig Interupt Vector
+        __enable_irq();        
+
+    } else {
+        setPin = pinNum;
+        __disable_irq();
+
+        NRF_GPIOTE->INTENSET &= 0xFFFFFFFF^GPIOTE_INTENSET_IN6_Msk; // Disable Interrupt
+        NRF_GPIOTE->EVENTS_IN[6] = 0;
+
+        if(!ppminverted) {
+            NRF_GPIOTE->CONFIG[6] = (GPIOTE_CONFIG_MODE_Event << GPIOTE_CONFIG_MODE_Pos) |
+                            (GPIOTE_CONFIG_POLARITY_LoToHi << GPIOTE_CONFIG_POLARITY_Pos) |
+                            (pin <<  GPIOTE_CONFIG_PSEL_Pos) |
+                            (port << GPIOTE_CONFIG_PORT_Pos);
+        } else {
+            NRF_GPIOTE->CONFIG[6] = (GPIOTE_CONFIG_MODE_Event << GPIOTE_CONFIG_MODE_Pos) |
+                            (GPIOTE_CONFIG_POLARITY_HiToLo << GPIOTE_CONFIG_POLARITY_Pos) |
+                            (pin <<  GPIOTE_CONFIG_PSEL_Pos) |
+                            (port << GPIOTE_CONFIG_PORT_Pos);
+        }
+
+        if(!ppminstarted) {
+
+            // Start Timers, they can stay running all the time.
+            NRF_TIMER4->PRESCALER = 4; // 16Mhz/2^4 = 1Mhz = 1us Resolution, 1.048s Max@32bit
+            NRF_TIMER4->MODE = TIMER_MODE_MODE_Timer << TIMER_MODE_MODE_Pos;
+            NRF_TIMER4->BITMODE = TIMER_BITMODE_BITMODE_32Bit << TIMER_BITMODE_BITMODE_Pos;
+
+            // Start timer
+            NRF_TIMER4->TASKS_START = 1;
+
+            // On Transition, Capture Timer 4
+            NRF_PPI->CH[8].EEP = (uint32_t)&NRF_GPIOTE->EVENTS_IN[6];
+            NRF_PPI->CH[8].TEP = (uint32_t)&NRF_TIMER4->TASKS_CAPTURE[0];
+
+            // On Transition, Clear Timer 4    
+            NRF_PPI->CH[9].EEP = (uint32_t)&NRF_GPIOTE->EVENTS_IN[6];
+            NRF_PPI->CH[9].TEP = (uint32_t)&NRF_TIMER4->TASKS_CLEAR;
+
+            // Enable PPI 8+9
+            NRF_PPI->CHEN |= (PPI_CHEN_CH8_Enabled << PPI_CHEN_CH8_Pos);
+            NRF_PPI->CHEN |= (PPI_CHEN_CH9_Enabled << PPI_CHEN_CH9_Pos);
+
+            // Override default GPIOTE interrupt vector with new one
+            NVIC_DisableIRQ(GPIOTE_IRQn);
+            oldGPIOTEInterrupt = NVIC_GetVector(GPIOTE_IRQn);
+            NVIC_SetVector(GPIOTE_IRQn,(uint32_t)&GPIOTE_IRQHandler2);
+            NVIC_EnableIRQ(GPIOTE_IRQn);
+
+
+            NRF_GPIOTE->INTENSET |= GPIOTE_INTENSET_IN6_Set << GPIOTE_INTENSET_IN6_Pos;
             
-void PpmIn::rise()
-{
-    
-    //uint16_t time = timer.read_us();
-    uint16_t time = duration_cast<microseconds>(timer.elapsed_time()).count();
-    
-    // we are in synchro zone
-    if(time > 2500)
-    {
-       // *** Should reset all channels to 1500 incase they aren't being sent
-       current_channel = 0;
+            ppminstarted = true;
+        }
+        // Enable Interrupt            
+        NRF_GPIOTE->EVENTS_IN[6] = 0;
+        NRF_GPIOTE->INTENSET |= GPIOTE_INTENSET_IN6_Set << GPIOTE_INTENSET_IN6_Pos;
+        __enable_irq();
+    }
+}
 
-       // return values 
-       state = true;
+void PpmIn_setInverted(bool inv)
+{
+    if(!ppminstarted)
+        return;
+
+    if(ppminverted != inv) {
+        int op = setPin;
+        PpmIn_setPin(-1);
+        ppminverted = inv;
+        PpmIn_setPin(op);
     }
-    else if(current_channel < MAX_PPM_CHANNELS+2)
-    {
-        channels[current_channel] = duration_cast<microseconds>(timer.elapsed_time()).count();
-        current_channel += 1;     
+}
+
+
+
+void PpmIn_execute()
+{
+    static bool sentconn=false;
+    // Start a timer
+    runt.start();    
+
+    // ISR should stop timer on frame start signal
+    using namespace std::chrono;
+    int micros = duration_cast<microseconds>(runt.elapsed_time()).count();
+    if(micros > 60000) {
+        if(sentconn == false) {
+            serialWriteln("PPM Input Data Lost");
+            sentconn = true;
+            ch_count = 0;
+        }
+    } else {
+        if(sentconn == true && ch_count >= 4 && ch_count <= 16) {
+            serialWriteln("PPM Input Data Reveived");
+            sentconn = false;
+        } 
     }
-    
-    timer.reset();
-    
-    //if (current_channel > (CHANNELS + 2 - 1)); //+frame and - 1 indexing of channels list
+}
+
+// Returns number of channels read
+int PpmIn_getChannels(uint16_t *ch)
+{
+    if(!ppminstarted)
+        return 0;
+
+    __disable_irq();
+    for(int i=0; i < ch_count;i++) {
+        ch[i] = channels[i];
+    }
+    int rval = ch_count;
+    __enable_irq();
+
+    return rval;
 }

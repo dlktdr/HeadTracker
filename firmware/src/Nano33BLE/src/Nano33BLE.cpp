@@ -18,7 +18,8 @@
 #include "serial.h"
 #include "main.h"
 
-const char *FW_VERSION = "0.4";
+
+const char *FW_VERSION = "0.42";
 const char *FW_BOARD = "NANO33BLE";
 
 using namespace rtos;
@@ -36,32 +37,39 @@ Mutex eepromWait;
 ConditionVariable eepromWriting(eepromWait);
 volatile bool pauseThreads=false;
 
-FlashIAP flash;
+volatile bool dataready=false;
+uint32_t buffer[20];
+int bufindex=0;
 
-void setup() { 
+void setup() 
+{
     // Setup Serial
     serial_Init();
-    
-    // Startup delay to get serial connected to see any startup issues
+
+    // Startup delay to get serial connected & see any startup issues
     delay(1000);
 
-    // Setup Pins
+    // Setup Pins - io.cpp
     io_Init();
 
-    // Read the Settings from Flash
-    flash_Init();   
+    // Read the Settings from Flash - flash.cpp
+    flash_Init();
 
-    // Start the BT Thread, Higher Prority than data.
+    // Start the BT Thread, Higher Prority than data. - bt.cpp
     bt_Init();
-
-    trkset.loadFromEEPROM();
-       
-    // Serial Read Ready Interrupt
-    Serial.attach(&serialrx_Int);    
-    
+         
+    // Actual Calculations - sense.cpp
     sense_Init();
+
+    // Load settings from flash - trackersettings.cpp
+    trkset.loadFromEEPROM();
     
-    // Start the IO task at 1khz interrupt
+    // --- Starts all Events & ISR's Below ---
+
+    // Serial Read Ready Interrupt - serial.cpp
+    Serial.attach(&serialrx_Int);
+
+    // Start the IO task at 100hz interrupt
     ioTick.attach(callback(io_Task),std::chrono::milliseconds(IO_PERIOD));
 
     // Setup Event Queue
@@ -69,8 +77,10 @@ void setup() {
     queue.call_in(std::chrono::milliseconds(SERIAL_PERIOD),serial_Thread);
     queue.call_in(std::chrono::milliseconds(BT_PERIOD),bt_Thread);
     queue.call_in(std::chrono::milliseconds(DATA_PERIOD),data_Thread);
-    queue.dispatch_forever();    
+
+    // Start everything
+    queue.dispatch_forever();
 }
 
 // Not Used
-void loop() {}  
+void loop() {}

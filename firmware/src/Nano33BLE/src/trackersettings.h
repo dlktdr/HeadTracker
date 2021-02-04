@@ -29,7 +29,7 @@ public:
     static constexpr int DEF_PPM_CHANNELS = MAX_PPM_CHANNELS;
     static constexpr int DEF_BUTTON_IN = 2; // Chosen because it's beside ground
     static constexpr int DEF_PPM_OUT = 10; // Random choice
-    static constexpr int DEF_PPM_IN = 9; // Random choice
+    static constexpr int DEF_PPM_IN = -1; // Random choice
     static constexpr int DEF_CENTER = 1500;
     static constexpr float MIN_GAIN= 0;
     static constexpr float MAX_GAIN= 50.0;
@@ -153,10 +153,13 @@ public:
     void setPPMOut(uint16_t t, uint16_t r, uint16_t p);
     void setJSONData(DynamicJsonDocument &json);
     void setBLEAddress(const char *addr);
+    void setPPMInValues(uint16_t *vals, int chans);
+
+    // Check me.. Not needed anymore..
     void getPPMValues(uint16_t &t, uint16_t &r, uint16_t &p);
+    
 
     PpmOut *getPpmOut() {return _ppmout;}
-    PpmIn *getPpmIn() {return _ppmin;}
     BTFunction *getBTFunc() {return _btf;}
 
 private:
@@ -180,8 +183,7 @@ private:
     bool ppmoutinvert;
     bool ppmininvert;
     PpmOut *_ppmout; // Local reference to PPM output Class
-    PpmIn *_ppmin; // Local reference to PPM input Class
-    BTFunction *_btf; //Blue tooth Function
+    BTFunction *_btf; // Blue tooth Function
     int btmode;
     bool rstonwave;
     bool freshProgram;    
@@ -196,6 +198,8 @@ private:
     float tilt,roll,pan;
     float tiltoff,rolloff,panoff;
     uint16_t panout,tiltout,rollout;
+    uint16_t ppminvals[16];
+    int ppmchans;
     char bleaddress[20];
     bool isCalibrated;
 };

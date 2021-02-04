@@ -57,10 +57,10 @@ TrackerSettings::TrackerSettings()
     // PPM Defaults
     ppmoutpin = -1;
     ppminpin = -1; 
+    ppmchans = 0;
     ppmoutinvert = false;
     ppmininvert = false;
-    _ppmout = nullptr;
-    _ppmin = nullptr;
+    _ppmout = nullptr;    
     
     // Bluetooth defaults
     btmode = 0;
@@ -417,38 +417,8 @@ void TrackerSettings::setPpmOutPin(int value)
 
 void TrackerSettings::setPpmInPin(int value)
 {
-    if(value > 1 && value < 14)  {
-
-        // If already have a PPM output, delete it.
-        if(_ppmin != nullptr) {
-            delete _ppmin;
-            _ppmin = nullptr;
-        }
-
-        if(ppminpin > 0)
-            pinMode(ppminpin,INPUT); // Disable old ppmoutpin
-        pinMode(value,INPUT); // Assign new
-        ppminpin = value;
-
-        // Create a new object, pass the pointer back.
-        _ppmin = new PpmIn(digitalPinToPinName((uint16_t)ppminpin), DEF_PPM_CHANNELS);        
-
-        // Set the inverted flag on it
-        _ppmin->setInverted(ppmininvert);
-
-    // Disabled pin, also set before switching pins around
-    } else if(value < 0) {
-        // If already have a PPM output, delete it.
-        if(_ppmin != nullptr) {
-            delete _ppmin;
-            _ppmin = nullptr;
-        }
-
-        // Disable old ppminpin, set to input
-        if(ppminpin > 0)  {
-            pinMode(ppminpin,INPUT); 
-            ppminpin = -1;
-        }
+    if((value > 1 && value < 14) || value == -1)  {
+        PpmIn_setPin(value);
     }
 }
 
@@ -505,9 +475,7 @@ void TrackerSettings::setInvertedPpmOut(bool inv)
 void TrackerSettings::setInvertedPpmIn(bool inv) 
 {
     ppmininvert = inv;
-    if(_ppmin != nullptr) {
-        _ppmin->setInverted(inv);
-    }
+    PpmIn_setInverted(inv);
 }    
 
 //---------------------------------
@@ -556,6 +524,17 @@ void TrackerSettings::setBlueToothMode(int mode)
 void TrackerSettings::setBLEAddress(const char *addr)
 {
     strcpy(bleaddress,addr);
+}
+
+void TrackerSettings::setPPMInValues(uint16_t *vals, int chans)
+{
+    if(chans > 16)
+        return;
+
+    for(int i=0;i<chans;i++) 
+        ppminvals[i] = vals[i];    
+
+    ppmchans = chans;
 }
 
 void TrackerSettings::setRawGyro(float x, float y, float z)
@@ -674,11 +653,7 @@ void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
 // Reset On Wave    
     v = json["rstonwave"]; if(!v.isNull()) setResetOnWave(v);
 
-// Button and PIns
-    // Disable all pins first
-    setButtonPin(-1);
-    setPpmInPin(-1);
-    setPpmOutPin(-1);
+// Button and Pins
 
     // Get the pins
     int bp=-1,ppmi=-1,ppmo=-1;
@@ -692,11 +667,16 @@ void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
        (ppmo > 0 && (ppmo == bp || ppmo == ppmi))) {
         serialWriteln("HT: FAULT! Setting Pins, cannot have duplicates");
     } else {
+        // Disable all pins first, so no conflicts on change
+        setButtonPin(-1);
+        setPpmInPin(-1);
+        setPpmOutPin(-1);
+
+        // Enable them all
         setButtonPin(bp);
         setPpmOutPin(ppmo);
         setPpmInPin(ppmi);
     }
-
     v = json["ppmininvert"]; if(!v.isNull()) setInvertedPpmIn(v);    
     v = json["ppmoutinvert"]; if(!v.isNull()) setInvertedPpmOut(v);
 
@@ -864,7 +844,15 @@ void TrackerSettings::setJSONData(DynamicJsonDocument &json)
     json["btaddr"] = bleaddress;
     json["magcal"] = isCalibrated;
 
-/* Live Values for Debugging, disabled for less data transfer
+    // Create string for PpmIn Chans
+    char pstr[100];
+    sprintf(pstr,"#CH(%d) ",ppmchans);
+    for(int i=0;i<ppmchans; i++) {
+        sprintf(pstr,"%s %d",pstr,ppminvals[i]);
+    }
+    json["ppmin"] = pstr;
+
+/* Live Values for Debugging. disabled for less data transfer
     json["accx"] = roundf(accx*1000)/1000;
     json["accy"] = roundf(accy*1000)/1000;
     json["accz"] = roundf(accz*1000)/1000;
@@ -885,5 +873,4 @@ void TrackerSettings::setJSONData(DynamicJsonDocument &json)
     json["rollraw"] = roundf(roll*1000)/1000;
     json["panraw"] = roundf(pan*1000)/1000;    
 */
-
 }

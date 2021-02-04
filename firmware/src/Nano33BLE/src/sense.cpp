@@ -37,7 +37,6 @@ static float gyrxoff=0, gyryoff=0, gyrzoff=0;
 static float l_panout=0, l_tiltout=0, l_rollout=0;
 
 static PpmOut *ppmout;
-static PpmIn *ppmin;
 static uint16_t ppmchans[MAX_PPM_CHANNELS];
 static SF fusion;
 static Timer runt;
@@ -116,7 +115,7 @@ void sense_Thread()
         sensecount = 0;
         bool btnpress=false;
         if (trkset.resetOnWave()) {
-            if(APDS.gestureAvailable()) {
+            /*if(APDS.gestureAvailable()) {
                 // a gesture was detected, read and print to serial monitor                
                 int gesture = APDS.readGesture();               
                 if(lastgesture == GESTURE_DOWN && 
@@ -136,7 +135,7 @@ void sense_Thread()
                     pressButton();
                     serialWriteln("HT: Reset center from a wave");
                 }
-            }
+            }*/
 
             // Reset on Proximity            
             if(APDS.proximityAvailable()) {
@@ -188,11 +187,16 @@ void sense_Thread()
     for(int i=0;i<MAX_PPM_CHANNELS;i++)
         ppmchans[i] = TrackerSettings::DEF_CENTER;
 
-    // Read all PPM inputs, if enabled
-    ppmin = trkset.getPpmIn();
-    if(ppmin != nullptr ) {    
-        // Read All PPM Inputs
-        // *** TODO
+    // Read all PPM inputs, should return 0 channels if disabled or lost
+    PpmIn_execute();
+    uint16_t ppminchans[16];
+    int ppmi_chcnt = PpmIn_getChannels(ppminchans);
+    if(ppmi_chcnt >= 4 && ppmi_chcnt <= 16) {
+        for(int i=0;i<MIN(ppmi_chcnt,MAX_PPM_CHANNELS);i++) {
+            ppmchans[i] = ppminchans[i];
+        }
+    } else {
+        ppmi_chcnt = 0;
     }
 
     // Set the PPM Outputs, if output enabled
@@ -203,7 +207,7 @@ void sense_Thread()
         ppmchans[trkset.panCh()-1] = panout_ui;
         // Send them all
         for(int i=0;i<MAX_PPM_CHANNELS;i++) {
-            ppmout->setChannel(i,ppmchans[i]);
+            ppmout->setChannel(i+1,ppmchans[i]);
         }
     }
 
@@ -280,6 +284,9 @@ void sense_Thread()
         trkset.setRawOrient(tilt,roll,pan);
         trkset.setOffOrient(tilt-tiltoffset,roll-rolloffset, normalize(pan-panoffset,-180,180));
         trkset.setPPMOut(tiltout_ui,rollout_ui,panout_ui);
+    
+        // PPM Input Values
+        trkset.setPPMInValues(ppminchans,ppmi_chcnt);
         
         dataMutex.unlock();
     }
