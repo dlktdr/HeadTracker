@@ -183,13 +183,13 @@ void PpmIn_execute()
     int micros = duration_cast<microseconds>(runt.elapsed_time()).count();
     if(micros > 60000) {
         if(sentconn == false) {
-            serialWriteln("PPM Input Data Lost");
+            serialWriteln("HT: PPM Input Data Lost");
             sentconn = true;
             ch_count = 0;
         }
     } else {
         if(sentconn == true && ch_count >= 4 && ch_count <= 16) {
-            serialWriteln("PPM Input Data Reveived");
+            serialWriteln("HT: PPM Input Data Received");
             sentconn = false;
         } 
     }
