@@ -23,7 +23,7 @@ I would like to throw out thanks to Yuri for the BLE Para work. https://github.c
 - [X] PPM Input Functionality and testing on BLE33 (Firmware available in 0.42)
 - [X] Add ability to program from the firmware window, sample firmware in master
 - [X] Create binaries for Gui
-- [ ] Add rotation to mount board in other orientations BLE33
+- [X] Add rotation to mount board in other orientations BLE33
 
 ### Screenshot
 ![alt text](https://github.com/dlktdr/HeadTracker/raw/master/docs/ScreenCapture1006.png)
