@@ -172,6 +172,7 @@ void setup()
     GetSettings();                // Get settings saved in EEPROM
     InitSensors();                // Initialize I2C sensors    
     ResetCenter();
+    RemapAxes();
     InitTimerInterrupt();         // Start timer interrupt (for sensors)  
 }
 
