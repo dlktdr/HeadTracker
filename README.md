@@ -20,7 +20,7 @@ I would like to throw out thanks to Yuri for the BLE Para work. https://github.c
 - [X] Wireless PPM using a second Nano33BLE
 - [X] FRsky trainer connection
 - [X] Find solution to PPM output jitter from interrupt timing issues
-- [ ] PPM Input Functionality and testing on BLE33
+- [X] PPM Input Functionality and testing on BLE33 (Firmware available in 0.42)
 - [X] Add ability to program from the firmware window, sample firmware in master
 - [X] Create binaries for Gui
 - [ ] Add rotation to mount board in other orientations BLE33
