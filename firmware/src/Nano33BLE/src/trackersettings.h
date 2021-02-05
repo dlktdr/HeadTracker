@@ -128,6 +128,10 @@ public:
     int blueToothMode() const;
     void setBlueToothMode(int mode);
 
+    int orientation();
+    void setOrientation(int ori);
+    void orientRotations(float rot[3]);
+
     void magSiOffset(float v[]) {memcpy(v,magsioff,9*sizeof(float));}
     void setMagSiOffset(float v[]) {memcpy(magsioff,v,9*sizeof(float));}
     
@@ -154,11 +158,7 @@ public:
     void setJSONData(DynamicJsonDocument &json);
     void setBLEAddress(const char *addr);
     void setPPMInValues(uint16_t *vals, int chans);
-
-    // Check me.. Not needed anymore..
-    void getPPMValues(uint16_t &t, uint16_t &r, uint16_t &p);
-    
-
+   
     PpmOut *getPpmOut() {return _ppmout;}
     BTFunction *getBTFunc() {return _btf;}
 
@@ -187,6 +187,7 @@ private:
     int btmode;
     bool rstonwave;
     bool freshProgram;    
+    int orient;
 
     // Data
     float gyrox,gyroy,gyroz;

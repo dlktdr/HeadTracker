@@ -118,6 +118,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->cmbPpmInPin,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbPpmOutPin,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbBtMode,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->cmbOrientation,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
 
     // Menu Actions
     connect(ui->action_Save_to_File,SIGNAL(triggered()),this,SLOT(saveSettings()));
@@ -604,6 +605,7 @@ void MainWindow::updateToUI()
     ui->cmbPpmInPin->blockSignals(true);
     ui->cmbButtonPin->blockSignals(true);
     ui->cmbBtMode->blockSignals(true);
+    ui->cmbOrientation->blockSignals(true);
 
     ui->cmbpanchn->setCurrentIndex(trkset.panCh()-1);
     ui->cmbrllchn->setCurrentIndex(trkset.rollCh()-1);
@@ -611,6 +613,7 @@ void MainWindow::updateToUI()
     ui->cmbRemap->setCurrentIndex(ui->cmbRemap->findData(trkset.axisRemap()));
     ui->cmbSigns->setCurrentIndex(trkset.axisSign());
     ui->cmbBtMode->setCurrentIndex(trkset.blueToothMode());
+    ui->cmbOrientation->setCurrentIndex(trkset.orientation());
 
     int ppout_index = trkset.ppmOutPin()-1;
     int ppin_index = trkset.ppmInPin()-1;
@@ -627,6 +630,7 @@ void MainWindow::updateToUI()
     ui->cmbPpmInPin->blockSignals(false);
     ui->cmbButtonPin->blockSignals(false);
     ui->cmbBtMode->blockSignals(false);
+    ui->cmbOrientation->blockSignals(false);
 
     savedToNVM = true;
     sentToHT = true;
@@ -674,6 +678,7 @@ void MainWindow::updateFromUI()
     trkset.setButtonPin(but_index==1?-1:but_index);
 
     trkset.setBlueToothMode(ui->cmbBtMode->currentIndex());
+    trkset.setOrientation(ui->cmbOrientation->currentIndex());
 
     trkset.setInvertedPpmOut(ui->chkInvertedPPM->isChecked());
     trkset.setInvertedPpmIn(ui->chkInvertedPPMIn->isChecked());

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>704</width>
-    <height>756</height>
+    <width>686</width>
+    <height>740</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -413,18 +413,106 @@
                </item>
               </widget>
              </item>
-             <item row="5" column="0" colspan="3">
-              <widget class="QCheckBox" name="chkResetCenterWave">
+             <item row="4" column="0">
+              <widget class="QLabel" name="label_5">
                <property name="text">
-                <string>Center on Wave or Proximity (BLE Sense Only)</string>
+                <string>Bluetooth Mode</string>
                </property>
               </widget>
              </item>
-             <item row="0" column="0">
-              <widget class="QLabel" name="label">
+             <item row="2" column="0">
+              <widget class="QLabel" name="label_3">
                <property name="text">
-                <string>PPM Output Pin</string>
+                <string>Center Button</string>
                </property>
+              </widget>
+             </item>
+             <item row="1" column="2">
+              <widget class="QCheckBox" name="chkInvertedPPMIn">
+               <property name="enabled">
+                <bool>true</bool>
+               </property>
+               <property name="text">
+                <string>Invert</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QComboBox" name="cmbPpmInPin">
+               <property name="enabled">
+                <bool>true</bool>
+               </property>
+               <property name="currentText">
+                <string>Disabled</string>
+               </property>
+               <property name="currentIndex">
+                <number>0</number>
+               </property>
+               <item>
+                <property name="text">
+                 <string>Disabled</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D2</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D3</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D4</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D5</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D6</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D7</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D8</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D9</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D10</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D11</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D12</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D13</string>
+                </property>
+               </item>
               </widget>
              </item>
              <item row="0" column="2">
@@ -434,7 +522,21 @@
                </property>
               </widget>
              </item>
-             <item row="3" column="1" colspan="2">
+             <item row="1" column="0">
+              <widget class="QLabel" name="label_14">
+               <property name="text">
+                <string>PPM Input Pin</string>
+               </property>
+              </widget>
+             </item>
+             <item row="5" column="1" colspan="2">
+              <widget class="QLabel" name="lblBLEAddress">
+               <property name="text">
+                <string>TextLabel</string>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="1" colspan="2">
               <widget class="QComboBox" name="cmbBtMode">
                <property name="enabled">
                 <bool>true</bool>
@@ -520,120 +622,62 @@
                </item>
               </widget>
              </item>
+             <item row="6" column="0" colspan="3">
+              <widget class="QCheckBox" name="chkResetCenterWave">
+               <property name="text">
+                <string>Center on Wave or Proximity (BLE Sense Only)</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="0">
+              <widget class="QLabel" name="label">
+               <property name="text">
+                <string>PPM Output Pin</string>
+               </property>
+              </widget>
+             </item>
              <item row="3" column="0">
-              <widget class="QLabel" name="label_5">
+              <widget class="QLabel" name="label_15">
                <property name="text">
-                <string>Bluetooth Mode</string>
+                <string>Board Rotation</string>
                </property>
               </widget>
              </item>
-             <item row="1" column="0">
-              <widget class="QLabel" name="label_14">
-               <property name="text">
-                <string>PPM Input Pin</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="2">
-              <widget class="QCheckBox" name="chkInvertedPPMIn">
-               <property name="enabled">
-                <bool>true</bool>
-               </property>
-               <property name="text">
-                <string>Invert</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="0">
-              <widget class="QLabel" name="label_3">
-               <property name="text">
-                <string>Center Button</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="1">
-              <widget class="QComboBox" name="cmbPpmInPin">
-               <property name="enabled">
-                <bool>true</bool>
-               </property>
-               <property name="currentText">
-                <string>Disabled</string>
-               </property>
-               <property name="currentIndex">
-                <number>0</number>
+             <item row="3" column="1" colspan="2">
+              <widget class="QComboBox" name="cmbOrientation">
+               <property name="toolTip">
+                <string>After changing do a figure 8 to allow algorithm to stabilize</string>
                </property>
                <item>
                 <property name="text">
-                 <string>Disabled</string>
+                 <string>Default</string>
                 </property>
                </item>
                <item>
                 <property name="text">
-                 <string>D2</string>
+                 <string>Tilt 90</string>
                 </property>
                </item>
                <item>
                 <property name="text">
-                 <string>D3</string>
+                 <string>Tilt -90</string>
                 </property>
                </item>
                <item>
                 <property name="text">
-                 <string>D4</string>
+                 <string>Till 180</string>
                 </property>
                </item>
                <item>
                 <property name="text">
-                 <string>D5</string>
+                 <string>Roll 90</string>
                 </property>
                </item>
                <item>
                 <property name="text">
-                 <string>D6</string>
+                 <string>Roll -90</string>
                 </property>
                </item>
-               <item>
-                <property name="text">
-                 <string>D7</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>D8</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>D9</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>D10</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>D11</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>D12</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>D13</string>
-                </property>
-               </item>
-              </widget>
-             </item>
-             <item row="4" column="1" colspan="2">
-              <widget class="QLabel" name="lblBLEAddress">
-               <property name="text">
-                <string>TextLabel</string>
-               </property>
               </widget>
              </item>
             </layout>
@@ -1290,7 +1334,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>704</width>
+     <width>686</width>
      <height>21</height>
     </rect>
    </property>

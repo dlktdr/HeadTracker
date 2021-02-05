@@ -33,7 +33,6 @@ static float rolloffset=0, panoffset=180, tiltoffset=0;
 static float magxoff=0, magyoff=0, magzoff=0;
 static float accxoff=0, accyoff=0, acczoff=0;
 static float gyrxoff=0, gyryoff=0, gyrzoff=0;
-//static float rotatex=0,rotatety=0,rotatez=0; // Future Use
 static float l_panout=0, l_tiltout=0, l_rollout=0;
 
 static PpmOut *ppmout;
@@ -42,7 +41,7 @@ static SF fusion;
 static Timer runt;
 
 static int counter=0;
-static int lastgesture=-1;
+//static int lastgesture=-1;
 static bool blesenseboard=true;
 static bool lastproximity=false;
 
@@ -57,7 +56,7 @@ int sense_Init()
     IMU.setGyroODR(2); // 50hz
 
     // Increase Clock Speed, save some CPU due to blocking i2c
-    Wire1.setClock(1000000);  
+    Wire1.setClock(400000);  
 
 #ifdef NXP_FILTER
     nxpfilter.begin(125); // Frequency discovered by oscilliscope
@@ -113,7 +112,7 @@ void sense_Thread()
     static int sensecount=0;    
     if(blesenseboard && sensecount++ == 50) {
         sensecount = 0;
-        bool btnpress=false;
+        //bool btnpress=false;
         if (trkset.resetOnWave()) {
             /*if(APDS.gestureAvailable()) {
                 // a gesture was detected, read and print to serial monitor                
@@ -223,28 +222,44 @@ void sense_Thread()
     // Get new data from sensors
     if(++counter == SENSEUPDATE) { // Run Filter 5 more often than measurements
         counter = 0;
+        
+        // Setup Rotations
+        float rotation[3];
+        trkset.orientRotations(rotation);
+
         // Accelerometer
         if(IMU.accelerationAvailable()) {
             IMU.readRawAccel(raccx, raccy, raccz);            
             raccx *= -1.0; // Flip X to make classic cartesian (+X Right, +Y Up, +Z Vert)
             trkset.accOffset(accxoff,accyoff,acczoff);
+            
             accx = raccx - accxoff;
             accy = raccy - accyoff;
             accz = raccz - acczoff;
+
+            // Apply Rotation
+            float tmpacc[3] = {accx,accy,accz};
+            rotate(tmpacc,rotation);
+            accx = tmpacc[0]; accy = tmpacc[1]; accz = tmpacc[2];
         }
 
         // Gyrometer
         if(IMU.gyroscopeAvailable()) {
             IMU.readRawGyro(rgyrx,rgyry,rgyrz);
-            rgyrx *= -1.0; // Flip X to make classic cartesian (+X Right, +Y Up, +Z Vert)
+            rgyrx *= -1.0; // Flip X to match other sensors
             trkset.gyroOffset(gyrxoff,gyryoff,gyrzoff);            
-            gyrx = rgyrx - gyrxoff; 
-            gyry = rgyry - gyryoff; 
-            gyrz = rgyrz - gyrzoff; 
+            gyrx = rgyrx - gyrxoff;
+            gyry = rgyry - gyryoff;
+            gyrz = rgyrz - gyrzoff;
 
             // Deadband on GyroZ
             if(fabs(gyrz) < GYRO_DEADBAND)
                 gyrz = 0;
+
+            // Apply Rotation
+            float tmpgyr[3] = {gyrx,gyry,gyrz};
+            rotate(tmpgyr,rotation);
+            gyrx = tmpgyr[0]; gyry = tmpgyr[1]; gyrz = tmpgyr[2];
         }
 
         // Magnetometer
@@ -265,6 +280,11 @@ void sense_Thread()
             magx = magx * magsioff[0] + magy * magsioff[1] + magz *magsioff[2];
             magy = magx * magsioff[3] + magy * magsioff[4] + magz *magsioff[5];
             magz = magx * magsioff[6] + magy * magsioff[7] + magz *magsioff[8];
+
+            // Apply Rotation
+            float tmpmag[3] = {magx,magy,magz};
+            rotate(tmpmag, rotation);
+            magx = tmpmag[0]; magy = tmpmag[1]; magz = tmpmag[2];
         }
     }        
 
@@ -319,4 +339,37 @@ float normalize( const float value, const float start, const float end )
 
     return ( offsetValue - ( floor( offsetValue / width ) * width ) ) + start ;
     // + start to reset back to start of original range
+}
+
+// Rotate, in Order X -> Y -> Z
+
+void rotate(float pn[3], const float rotation[3])
+{  
+    float rot[3] = {0,0,0};
+    memcpy(rot,rotation,sizeof(rot[0])*3);
+
+    // Passed in Degrees
+    rot[0] *= DEG_TO_RAD;
+    rot[1] *= DEG_TO_RAD;
+    rot[2] *= DEG_TO_RAD;
+
+    float out[3];
+
+    // X Rotation
+    out[0] = pn[0]*1 + pn[1]*0            + pn[2]*0;
+    out[1] = pn[0]*0 + pn[1]*cos(rot[0])  - pn[2]*sin(rot[0]);
+    out[2] = pn[0]*0 + pn[1]*sin(rot[0])  + pn[2]*cos(rot[0]);
+    memcpy(pn,out,sizeof(out[0])*3);
+
+    // Y Rotation
+    out[0] =  pn[0]*cos(rot[1]) - pn[1]*0 + pn[2]*sin(rot[1]);
+    out[1] =  pn[0]*0           + pn[1]*1 + pn[2]*0;
+    out[2] = -pn[0]*sin(rot[1]) + pn[1]*0 + pn[2]*cos(rot[1]);
+    memcpy(pn,out,sizeof(out[0])*3);
+
+    // Z Rotation
+    out[0] = pn[0]*cos(rot[2]) - pn[1]*sin(rot[2]) + pn[2]*0;
+    out[1] = pn[0]*sin(rot[2]) + pn[1]*cos(rot[2]) + pn[2]*0;
+    out[2] = pn[0]*0           + pn[1]*0           + pn[2]*1;
+    memcpy(pn,out,sizeof(out[0])*3);
 }

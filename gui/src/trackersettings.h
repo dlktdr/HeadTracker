@@ -124,6 +124,9 @@ public:
     bool resetOnWave() const {return _data["rstonwave"].toBool();}
     void setResetOnWave(bool value) {_data["rstonwave"] = value;}
 
+    uint orientation();
+    void setOrientation(uint value);
+
     void gyroOffset(float &x, float &y, float &z);
     void setGyroOffset(float x,float y, float z);
 

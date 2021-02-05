@@ -41,6 +41,7 @@ TrackerSettings::TrackerSettings(QObject *parent):
     _data["ppmoutinvert"] = false;
     _data["ppmininvert"] = false;
     _data["btmode"] = (uint)0;
+    _data["orient"] = (uint)0;
 }
 
 int TrackerSettings::Rll_min() const
@@ -381,6 +382,16 @@ int TrackerSettings::buttonPin() const
 void TrackerSettings::setButtonPin(int value)
 {
     _data["buttonpin"] = value;
+}
+
+uint TrackerSettings::orientation()
+{
+    return _data["orient"].toUInt();
+}
+
+void TrackerSettings::setOrientation(uint val)
+{
+    _data["orient"] = val;
 }
 
 void TrackerSettings::gyroOffset(float &x, float &y, float &z)

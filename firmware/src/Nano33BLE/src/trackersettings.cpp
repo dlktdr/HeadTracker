@@ -69,6 +69,7 @@ TrackerSettings::TrackerSettings()
     // Features defaults
     rstonwave = false;
     isCalibrated = false;
+    orient = 0;
 
     // Setup button input & ppm output pins, bluetooth
     setButtonPin(DEF_BUTTON_IN);
@@ -518,6 +519,47 @@ void TrackerSettings::setBlueToothMode(int mode)
     }
 }
 
+//----------------------------------------------------------------
+// Orentation 
+
+int TrackerSettings::orientation() 
+{
+    return orient;
+}
+
+void TrackerSettings::setOrientation(int ori)
+{
+    if(ori >= 0 && ori <= 5)
+        orient = ori;
+}
+
+void TrackerSettings::orientRotations(float rot[3])
+{
+    switch(orient) {
+        case 0: // Default
+            rot[0] = 0; rot[1] = 0; rot[2] = 0;
+            break;
+        case 1: // Tilt 90
+            rot[0] = 90; rot[1] = 0; rot[2] = 0;
+            break;
+        case 2: // Tilt -90
+            rot[0] = -90; rot[1] = 0; rot[2] = 0;
+            break;
+        case 3: // Tilt 180
+            rot[0] = 180; rot[1] = 0; rot[2] = 0;
+            break;
+        case 4: // Roll 90
+            rot[0] = 0; rot[1] = 90; rot[2] = 0;
+            break;
+        case 5: // Roll -90
+            rot[0] = 0; rot[1] = 90; rot[2] = 0;
+            break;
+        default:
+            rot[0] = 0; rot[1] = 0; rot[2] = 0;
+    }
+}
+
+
 //----------------------------------------------------------------------------------------
 // Data sent the PC, for calibration and info
 
@@ -600,14 +642,6 @@ void TrackerSettings::setPPMOut(uint16_t t, uint16_t r, uint16_t p)
     panout=p;
 }
 
-// Used for the BlueTooth Thread
-void TrackerSettings::getPPMValues(uint16_t &t, uint16_t &r, uint16_t &p)
-{
-    t = tiltout;
-    r = rollout;
-    p = panout;
-}
-
 //--------------------------------------------------------------------------------------
 // Send and receive the data from PC
 // Takes the JSON and loads the settings into the local class
@@ -649,6 +683,9 @@ void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
 
 // Bluetooth Mode        
     v = json["btmode"]; if(!v.isNull()) setBlueToothMode(v);
+
+// Orientation
+   v = json["orient"]; if(!v.isNull()) setOrientation(v);
 
 // Reset On Wave    
     v = json["rstonwave"]; if(!v.isNull()) setResetOnWave(v);
@@ -711,7 +748,6 @@ void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
     if(!v.isNull() && !v1.isNull() && !v2.isNull())
     {   
         setGyroOffset(v,v1,v2);
-        //serialWriteln("HT: Gyr offsets set");
     }
 
 // Calibrarion Values
@@ -722,9 +758,7 @@ void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
     if(!v.isNull() && !v1.isNull() && !v2.isNull())
     {   
         setAccOffset(v,v1,v2);
-        //serialWriteln("HT: Acc offsets set");
     }
-
 }
 
 void TrackerSettings::setJSONSettings(DynamicJsonDocument &json)
@@ -762,6 +796,7 @@ void TrackerSettings::setJSONSettings(DynamicJsonDocument &json)
 
     json["btmode"] = btmode;
     json["rstonwave"] = rstonwave;
+    json["orient"] = orient;
 
 // Calibration Values
     json["accxoff"] = accxoff; 
@@ -845,14 +880,14 @@ void TrackerSettings::setJSONData(DynamicJsonDocument &json)
     json["magcal"] = isCalibrated;
 
     // Create string for PpmIn Chans
-    char pstr[100];
-    sprintf(pstr,"#CH(%d) ",ppmchans);
+    char pstr[120];
+    sprintf(pstr,"#CH=%d ",ppmchans);
     for(int i=0;i<ppmchans; i++) {
         sprintf(pstr,"%s %d",pstr,ppminvals[i]);
     }
     json["ppmin"] = pstr;
 
-/* Live Values for Debugging. disabled for less data transfer
+/*// Live Values for Debugging. disabled for too much data transfer
     json["accx"] = roundf(accx*1000)/1000;
     json["accy"] = roundf(accy*1000)/1000;
     json["accz"] = roundf(accz*1000)/1000;
@@ -871,6 +906,6 @@ void TrackerSettings::setJSONData(DynamicJsonDocument &json)
 
     json["tiltraw"] = roundf(tilt*1000)/1000;
     json["rollraw"] = roundf(roll*1000)/1000;
-    json["panraw"] = roundf(pan*1000)/1000;    
-*/
+    json["panraw"] = roundf(pan*1000)/1000; */
+
 }
