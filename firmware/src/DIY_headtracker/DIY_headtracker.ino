@@ -156,7 +156,7 @@ void setup()
 
     InitPWMInterrupt();         // Start PWM interrupt  
     Wire.begin();               // Start I2C
-
+    delay(200);                 // Short delay before I2C check
     CheckI2CPresent();
 
     // If the device have just been programmed, write initial config/values to EEPROM:
