@@ -9,6 +9,9 @@ I would like to throw out thanks to Yuri for the BLE Para work. https://github.c
 ## [Nano33BLE Build Link](https://github.com/dlktdr/HeadTracker/wiki/Nano33BLE-Build-Instructions)
 * How to for the new BLE33 board
 
+## [BNO055 + Nano Build Link](https://github.com/dlktdr/HeadTracker/wiki/BNO055-Build-Instructions)
+* How to for the BNO055 Sensor board + Arduino Nano
+
 ## [Download](https://github.com/dlktdr/HeadTracker/releases)
 * Download the latest version from here if your running Windows 7,8,10. 
 * The GUI should compile on Linux and MacOS but I have not tested it (*Firmware upload will not work).
@@ -23,7 +26,7 @@ I would like to throw out thanks to Yuri for the BLE Para work. https://github.c
 - [X] PPM Input Functionality and testing on BLE33 (Firmware available in 0.42)
 - [X] Add ability to program from the firmware window, sample firmware in master
 - [X] Create binaries for Gui
-- [ ] Add rotation to mount board in other orientations BLE33
+- [X] Add rotation to mount board in other orientations BLE33
 
 ### Screenshot
 ![alt text](https://github.com/dlktdr/HeadTracker/raw/master/docs/ScreenCapture1006.png)
