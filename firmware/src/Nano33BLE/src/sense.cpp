@@ -198,12 +198,14 @@ void sense_Thread()
         ppmi_chcnt = 0;
     }
 
+    // Override Channels with Tilt, Roll, Pan
+    ppmchans[trkset.tiltCh()-1] = tiltout_ui; // Channel 1 = Index 0
+    ppmchans[trkset.rollCh()-1] = rollout_ui;
+    ppmchans[trkset.panCh()-1] = panout_ui;
+
     // Set the PPM Outputs, if output enabled
     ppmout = trkset.getPpmOut();
     if(ppmout != nullptr) {
-        ppmchans[trkset.tiltCh()-1] = tiltout_ui; // Channel 1 = Index 0
-        ppmchans[trkset.rollCh()-1] = rollout_ui;
-        ppmchans[trkset.panCh()-1] = panout_ui;
         // Send them all
         for(int i=0;i<MAX_PPM_CHANNELS;i++) {
             ppmout->setChannel(i+1,ppmchans[i]);
