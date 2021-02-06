@@ -6,7 +6,7 @@
 #include <ArduinoJson.h>
 #include <chrono>
 
-#include "PPM/PPMOut.h"
+#include "PPM/PPMOut2.h"
 #include "PPM/PPMIn.h"
 #include "dataparser.h"
 #include "trackersettings.h"
@@ -47,12 +47,17 @@ void setup()
     serial_Init();
 
     // Startup delay to get serial connected & see any startup issues
-    delay(1000);
+    delay(4000);
+
+    PpmOut_setChnCount(8);
+    PpmOut_setChannel(0,1800);
+    PpmOut_setPin(D8);
+
 
     // Setup Pins - io.cpp
     io_Init();
 
-    // Read the Settings from Flash - flash.cpp
+   /* // Read the Settings from Flash - flash.cpp
     flash_Init();
 
     // Start the BT Thread, Higher Prority than data. - bt.cpp
@@ -68,10 +73,10 @@ void setup()
 
     // Serial Read Ready Interrupt - serial.cpp
     Serial.attach(&serialrx_Int);
-
+*/
     // Start the IO task at 100hz interrupt
     ioTick.attach(callback(io_Task),std::chrono::milliseconds(IO_PERIOD));
-
+/*
     // Setup Event Queue
     queue.call_in(std::chrono::milliseconds(10),sense_Thread);
     queue.call_in(std::chrono::milliseconds(SERIAL_PERIOD),serial_Thread);
@@ -79,8 +84,13 @@ void setup()
     queue.call_in(std::chrono::milliseconds(DATA_PERIOD),data_Thread);
 
     // Start everything
-    queue.dispatch_forever();
+    queue.dispatch_forever();*/
 }
 
 // Not Used
-void loop() {}
+void loop() 
+{
+    delay(100);
+    Serial.print("Interrupt "); 
+    Serial.println(interrupt=true?"YES":"NO");
+}
