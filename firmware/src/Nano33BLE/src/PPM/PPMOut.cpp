@@ -1,6 +1,6 @@
 /* From https://os.mbed.com/users/edy05/code/PPM/
 */
-
+/*
 #include <mbed.h>
 #include <chrono>
 
@@ -112,4 +112,4 @@ void PpmOut::resetChannels() {
         dots[channel*2+1] = CHANNEL_PAD_SYNC;
     }
     setFrameSync();
-}
+}*/

@@ -1,4 +1,4 @@
-#ifndef PPM_OUT
+/*#ifndef PPM_OUT
 #define PPM_OUT
 
 #include <rtos.h>
@@ -54,4 +54,4 @@ class PpmOut{
         inline void setFrameSync();
 };
 
-#endif
+#endif*/

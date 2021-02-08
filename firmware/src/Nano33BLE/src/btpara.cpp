@@ -20,8 +20,7 @@ BTPara::BTPara() : BTFunction()
     fff2 = new BLEByteCharacteristic("FFF2", BLERead);
     fff3 = new BLECharacteristic("FFF3", BLEWriteWithoutResponse, 32);
     fff5 = new BLECharacteristic("FFF5", BLERead, 32);
-    //fff6 = new BLECharacteristic("FFF6", BLEWriteWithoutResponse | BLENotify | BLEAutoSubscribe, 32);  
-    fff6 = new BLECharacteristic("FFF6", BLEWriteWithoutResponse | BLENotify, 32);  
+    fff6 = new BLECharacteristic("FFF6", BLEWriteWithoutResponse | BLENotify | BLEAutoSubscribe, 32);      
     
     serialWriteln("HT: Starting Para Bluetooth");
     

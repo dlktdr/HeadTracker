@@ -104,9 +104,8 @@ void PpmIn_setPin(int pinNum)
         setPin = pinNum;
         __disable_irq();
         
-        NRF_GPIOTE->INTENCLR = GPIOTE_INTENSET_IN6_Set << GPIOTE_INTENSET_IN6_Pos; // Disable Interrupt
-        // Set wrong register to stop interrupt
-//        NRF_GPIOTE->INTENSET &= 0xFFFFFFFF^GPIOTE_INTENSET_IN6_Msk; // Disable Interrupt
+        // Disable Interrupt, Clear event
+        NRF_GPIOTE->INTENCLR = GPIOTE_INTENSET_IN6_Set << GPIOTE_INTENSET_IN6_Pos; 
         NRF_GPIOTE->EVENTS_IN[6] = 0;
 
         if(!ppminverted) {
@@ -134,8 +133,9 @@ void PpmIn_setPin(int pinNum)
             // On Transition, Capture Timer 4
             NRF_PPI->CH[8].EEP = (uint32_t)&NRF_GPIOTE->EVENTS_IN[6];
             NRF_PPI->CH[8].TEP = (uint32_t)&NRF_TIMER4->TASKS_CAPTURE[0];
+            //NRF_PPI->FORK[8].TEP = (uint32_t)&NRF_TIMER4->TASKS_CLEAR;
 
-            // On Transition, Clear Timer 4    
+            // On Transition, Clear Timer 4
             NRF_PPI->CH[9].EEP = (uint32_t)&NRF_GPIOTE->EVENTS_IN[6];
             NRF_PPI->CH[9].TEP = (uint32_t)&NRF_TIMER4->TASKS_CLEAR;
 
@@ -144,10 +144,10 @@ void PpmIn_setPin(int pinNum)
             NRF_PPI->CHEN |= (PPI_CHEN_CH9_Enabled << PPI_CHEN_CH9_Pos);
 
             // Override default GPIOTE interrupt vector with new one                    
-            //NVIC_DisableIRQ(GPIOTE_IRQn); // .. Remove, global irq already disabled
+            NVIC_DisableIRQ(GPIOTE_IRQn); // .. Remove, global irq already disabled
             oldGPIOTEInterrupt = NVIC_GetVector(GPIOTE_IRQn);
             NVIC_SetVector(GPIOTE_IRQn,(uint32_t)&GPIOTE_IRQHandler2);
-            //NVIC_EnableIRQ(GPIOTE_IRQn); // .. Remove, global irq already disabled
+            NVIC_EnableIRQ(GPIOTE_IRQn); // .. Remove, global irq already disabled
 
             // Redundant.. Remove
             //NRF_GPIOTE->INTENSET |= GPIOTE_INTENSET_IN6_Set << GPIOTE_INTENSET_IN6_Pos;

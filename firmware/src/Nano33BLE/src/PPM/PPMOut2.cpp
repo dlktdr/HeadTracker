@@ -20,74 +20,84 @@ static int setPin=-1;
 static uint16_t ch_values[16];
 static int ch_count=0;
 
-static uint16_t framesync = 20000;
-static uint16_t sync = 300;
-static uint32_t chsteps[34] {framesync,sync};
+static uint16_t framesync = 4000; // Minimum Frame Sync Pulse
+static int framelength = 20000; // Ideal frame length
+static uint16_t sync = 300; // Sync Pulse Length
+
+// Local data - Only build with interrupts disabled
+static uint32_t chsteps[35] {framesync,sync};
+
+// ISR Values - Values from chsteps are copied here on step 0.
+// prevent an update from happening mid stream.
+static uint32_t isrchsteps[35] {framesync,sync};
 static uint16_t chstepcnt=1;
 static uint16_t curstep=0;
+volatile bool buildingdata=false;
 
+/* Builds an array with all the transition times
+ */
 void buildChannels() 
-{    
-    // Start high/low
-    // Toggle first time after frame sync
-    
-    // 1) Toggle at first sync pulse
-    // 2) Toggle at chvalue - sync pulse
-
-    // Repeat 1+2 until end
+{        
+    buildingdata = true; // Prevent a read happing while this is building
 
     int ch=0;
     int i;
     uint32_t curtime=framesync;
     chsteps[0] = curtime;    
-    Serial.print("Chan Timing: ");
-    Serial.print(chsteps[0]); 
     for(i=1; i<ch_count*2+1;i+=2) {
         curtime += sync;
         chsteps[i] = curtime;
-        curtime += ch_values[ch++]-sync;
+        curtime += (ch_values[ch++]-sync);
         chsteps[i+1] = curtime;
-        Serial.print(" ");
-        Serial.print(chsteps[i]);
-        Serial.print(" ");
-        Serial.print(chsteps[i+1]);
     }
+    // Add Final Sync
+    curtime += sync;
+    chsteps[i++] = curtime;
     chstepcnt = i;
-    Serial.print(" S:");
-    Serial.print(chstepcnt);
-    
+    // Now we know how long the train is. Try to make the entire frame == framelength
+    // If possible it will add this to the frame sync pulse
+    int ft = framelength-curtime;
+    if(ft < 0) // Not possible, no time left
+        ft = 0;
+    chsteps[i] = ft; // Store at end of sequence
+    buildingdata = false;
 }
 
 void resetChannels() 
 {
     // Set all channels to center
-    for(int i=0;i<32;i++)
+    for(int i=0;i<16;i++)
         ch_values[i] = 1500;
 }
 
 extern "C" void Timer3ISR_Handler(void)
 {
+    digitalWrite(A1,HIGH);
     if(NRF_TIMER3->EVENTS_COMPARE[0] == 1) {
-        interrupt = true;
         // Clear event
         NRF_TIMER3->EVENTS_COMPARE[0] = 0;
-        
-        // If step 0, reset counter to zero
-        if(curstep == 0) {
-            // Reset timer to zero, everything counts from this base 0.
-            // The little delay from the isr call to this won't matter here
-            NRF_TIMER3->TASKS_CLEAR = 1;
-        }
-            
-        // Setup next capture event value
-        // values should always be larger than last
-        NRF_TIMER3->CC[0] = chsteps[curstep];
-        curstep++;
-        if(curstep > chstepcnt) {
-            curstep = 0;
 
-        }    
+        // Reset, don't get stuck in the wrong order.
+        if(curstep == 0) {
+            if(ppmoutinverted)
+                NRF_GPIOTE->TASKS_CLR[7];
+            else
+                NRF_GPIOTE->TASKS_SET[7];
+        }
+
+        curstep++;        
+        // Loop
+        if(curstep >= chstepcnt) {
+            if(!buildingdata)
+                memcpy(isrchsteps,chsteps,sizeof(uint32_t)*35);
+            NRF_TIMER3->TASKS_CLEAR = 1;            
+            curstep = 0;
+        }          
+        
+        // Setup next capture event value     
+        NRF_TIMER3->CC[0] = isrchsteps[curstep] + isrchsteps[chstepcnt]; // Offset by the extra time required to make frame length right
     }
+    digitalWrite(A1,LOW);
 }
 
 // Set pin to -1 to disable
@@ -98,7 +108,7 @@ void PpmOut_setPin(int pinNum)
     if(pinNum == setPin)
         return;
 
-    // THIS MUST BE DEFINED SOMEWHERE... CAN'T FIND IT!
+    // THIS MUST BE DEFINED SOMEWHERE... I COULDN'T FIND IT!
     int dpintopin[]  = {0,0,11,12,15,13,14,23,21,27,2,1,8,13};
     int dpintoport[] = {0,0,1 ,1 ,1 ,1 ,1 ,0 ,0 ,0 ,1,1,1,0 };
 
@@ -115,9 +125,11 @@ void PpmOut_setPin(int pinNum)
         NRF_TIMER3->TASKS_STOP = 1;
         NRF_TIMER3->INTENCLR = TIMER_INTENSET_COMPARE0_Enabled << TIMER_INTENSET_COMPARE0_Pos;
         NRF_TIMER3->EVENTS_COMPARE[0] = 0;      
-        NVIC_SetVector(GPIOTE_IRQn,oldTimer3Interrupt); // Reset Orig Interupt Vector
-        __enable_irq();        
-        Serial.println("Stopped Interrupt");
+        NRF_GPIOTE->CONFIG[7] = 0; // Free up pin
+        NVIC_DisableIRQ(TIMER3_IRQn); 
+        NVIC_SetVector(GPIOTE_IRQn,oldTimer3Interrupt); // Reset Orig Interupt Vector        
+        oldTimer3Interrupt = 0;
+        __enable_irq();                
 
     // Enabled OR Not Started
     } else {
@@ -125,7 +137,7 @@ void PpmOut_setPin(int pinNum)
         __disable_irq();
 
         // Disable timer interrupt
-        NRF_TIMER3->INTENCLR = TIMER_INTENSET_COMPARE0_Enabled << TIMER_INTENSET_COMPARE0_Pos;
+        NRF_TIMER3->INTENCLR |= TIMER_INTENSET_COMPARE0_Enabled << TIMER_INTENSET_COMPARE0_Pos;
         NRF_TIMER3->EVENTS_COMPARE[0] = 0;      
 
         // Setup GPOITE[7] to toggle output on every timer capture, Start High
@@ -149,84 +161,61 @@ void PpmOut_setPin(int pinNum)
         if(!ppmoutstarted) {
 
             // Start Timers, they can stay running all the time.
-            NRF_TIMER3->PRESCALER = 4; // 16Mhz/2^4 = 1Mhz = 1us Resolution, 1.048s Max@32bit
+            NRF_TIMER3->PRESCALER = 4; // 16Mhz/2^(4) = 1Mhz = 1us Resolution, 1.048s Max@32bit
             NRF_TIMER3->MODE = TIMER_MODE_MODE_Timer << TIMER_MODE_MODE_Pos;
-            NRF_TIMER3->BITMODE = TIMER_BITMODE_BITMODE_32Bit << TIMER_BITMODE_BITMODE_Pos;
-
-            // Start timer
-            NRF_TIMER3->CC[0] = chsteps[0]; // Frame sync - Step 0
-            NRF_TIMER3->TASKS_START = 1;
-
+            NRF_TIMER3->BITMODE = TIMER_BITMODE_BITMODE_16Bit << TIMER_BITMODE_BITMODE_Pos;
+            
             // On Compare equals Value, Toggle IO Pin
             NRF_PPI->CH[10].EEP = (uint32_t)&NRF_TIMER3->EVENTS_COMPARE[0];
-            NRF_PPI->CH[10].TEP = (uint32_t)NRF_GPIOTE_TASKS_OUT_7;
+            NRF_PPI->CH[10].TEP = (uint32_t)&NRF_GPIOTE->TASKS_OUT[7];
 
             // Enable PPI 10
             NRF_PPI->CHEN |= (PPI_CHEN_CH10_Enabled << PPI_CHEN_CH10_Pos);
 
             // Change timer3 interrupt handler
+            NVIC_DisableIRQ(TIMER3_IRQn);
             oldTimer3Interrupt = NVIC_GetVector(TIMER3_IRQn);
             NVIC_SetVector(TIMER3_IRQn,(uint32_t)&Timer3ISR_Handler);
+            NVIC_EnableIRQ(TIMER3_IRQn);
 
+            // Start timer
+            memcpy(isrchsteps,chsteps,sizeof(uint32_t)*32);
+            NRF_TIMER3->CC[0] = framesync;
+            curstep = 0;
+            NRF_TIMER3->TASKS_CLEAR = 1;
+            NRF_TIMER3->TASKS_START = 1;
             
             ppmoutstarted = true;
         }
 
         // Enable timer interrupt
-        NRF_TIMER3->INTENSET = TIMER_INTENSET_COMPARE0_Enabled << TIMER_INTENSET_COMPARE0_Pos;
-        NRF_TIMER3->EVENTS_COMPARE[0] = 0;   
-
+        NRF_TIMER3->EVENTS_COMPARE[0] = 0;
+        NRF_TIMER3->INTENSET |= TIMER_INTENSET_COMPARE0_Enabled << TIMER_INTENSET_COMPARE0_Pos;
+        
         __enable_irq();
-        Serial.println("Started Interrupt");
     }
 }
 
 void PpmOut_setInverted(bool inv)
 {
-    if(!ppmoutstarted)
-        return;
-
-    if(ppmoutinverted != inv) {
-        int op = setPin;
-        PpmOut_setInverted(-1);
-        ppmoutinverted = inv;
-        PpmOut_setInverted(op);
-    }
+    /// Should cause the change on the next frame in the ISR
+    ppmoutinverted = inv;
 }
 
 void PpmOut_execute()
 {
-   /* static bool sentconn=false;
-    // Start a timer
-    runt.start();    
 
-    // ISR should stop timer on frame start signal
-    using namespace std::chrono;
-    int micros = duration_cast<microseconds>(runt.elapsed_time()).count();
-    if(micros > 60000) {
-        if(sentconn == false) {
-            serialWriteln("HT: PPM Input Data Lost");
-            sentconn = true;
-            ch_count = 0;
-        }
-    } else {
-        if(sentconn == true && ch_count >= 4 && ch_count <= 16) {
-            serialWriteln("HT: PPM Input Data Received");
-            sentconn = false;
-        } 
-    }*/
 }
 
 void PpmOut_setChnCount(int chans)
 {
     if(chans >= 4 && chans <=16) {
         ch_count = chans;
-        resetChannels();
-        Serial.print("Chans Set To "); Serial.println(ch_count);
+        resetChannels();        
     }
+    buildChannels();
 }
 
-// Returns number of channels read
 void PpmOut_setChannel(int chan, uint16_t val)
 {
     if(chan >= 0 && chan <= ch_count &&
@@ -234,4 +223,9 @@ void PpmOut_setChannel(int chan, uint16_t val)
         ch_values[chan] = val;
     }
     buildChannels();
+}
+
+int PpmOut_getChnCount()
+{
+    return ch_count;
 }

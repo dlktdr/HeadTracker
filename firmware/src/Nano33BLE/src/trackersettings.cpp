@@ -60,7 +60,7 @@ TrackerSettings::TrackerSettings()
     ppmchans = 0;
     ppmoutinvert = false;
     ppmininvert = false;
-    _ppmout = nullptr;    
+    //_ppmout = nullptr;    
     
     // Bluetooth defaults
     btmode = 0;
@@ -381,38 +381,9 @@ int TrackerSettings::ppmOutPin() const
 
 void TrackerSettings::setPpmOutPin(int value)
 {
-    if(value > 1 && value < 14) {       
-        // If already have a PPM output, delete it.
-        if(_ppmout != nullptr) {
-            delete _ppmout;
-            _ppmout = nullptr;
-        }
-                
-        if(ppmoutpin > 0)
-            pinMode(ppmoutpin,INPUT); // Disable old ppmoutpin
-        ppmoutpin = value;
-        pinMode(value,OUTPUT); // Assign new as output
-        
-        // Create a new object, pass the pointer back.       
-        _ppmout = new PpmOut(digitalPinToPinName((uint16_t)ppmoutpin), DEF_PPM_CHANNELS);        
-        
-        // Set the inverted flag on it        
-        _ppmout->setInverted(ppmoutinvert);
-        
-    // If value less than zero disable the pin
-    } else if(value < 0) {        
-        // If already have a PPM output, delete it.
-        if(_ppmout != nullptr) {            
-            delete _ppmout;
-            _ppmout = nullptr;            
-        }
-        
-        if(ppmoutpin > 0) {
-            
-            pinMode(ppmoutpin,INPUT); // Disable old ppmoutpin
-            ppmoutpin = -1;
-            
-        }
+    if((value > 1 && value < 14) || value == -1)  {
+       PpmOut_setChnCount(MAX_PPM_CHANNELS);
+       PpmOut_setPin(value);
     }
 }
 
@@ -463,13 +434,11 @@ void TrackerSettings::setMagOffset(float x,float y, float z)
     magxoff=x;magyoff=y;magzoff=z;
 }
 
-// Set Inverted
+// Set Inverted on PPMout
 void TrackerSettings::setInvertedPpmOut(bool inv) 
 {
     ppmoutinvert = inv;
-    if(_ppmout != nullptr) {
-        _ppmout->setInverted(inv);
-    }
+    PpmOut_setInverted(inv);
 }    
 
 // Set Inverted on PPMin

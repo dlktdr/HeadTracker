@@ -38,7 +38,6 @@ void serial_Thread()
         return;
     }
 
- // while(1) {
     // Don't like this but can't get bufferedserial to work and the Arduino serial lib has blocking writes after buffer fill.
     // Also no notify if its full or not...
     digitalWrite(LEDG,LOW); // Serial RX Green, ON
@@ -53,9 +52,7 @@ void serial_Thread()
     }
     Serial.write(txa,bytx); // !!!! ONLY PLACE SERIAL.WRITE SHOULD BE USED !!!!
     digitalWrite(LEDG,HIGH); // Serial RX Green, ON
-    queue.call_in(std::chrono::milliseconds(SERIAL_PERIOD),serial_Thread);
-  //  ThisThread::sleep_for(std::chrono::milliseconds(SERIAL_THREAD_PERIOD));
-//};
+    queue.call_in(std::chrono::milliseconds(SERIAL_PERIOD),serial_Thread);  
 }
 
 // Pop a JSON item off the buffer
@@ -80,15 +77,14 @@ int buffersFilled()
     return bufsUsed;
 }
 
-// Serial RX Interrupt, Stay Fast as possible Here
+// Serial RX Interrupt, Stay Fast as possible Here,
 void serialrx_Int()
 {  
     digitalWrite(LEDG,LOW); // Serial RX Green, ON
   
-    int bytes = Serial.available();
-    
+    int bytes = Serial.available();   
 
-  // Read all available data from Serial  
+    // Read all available data from Serial  
     for(int i=0; i < bytes; i++) {
         char sc = Serial.read();
         if(sc == 0x02) {  // Start Of Text Character, clear buffer
