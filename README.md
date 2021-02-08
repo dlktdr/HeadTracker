@@ -30,3 +30,10 @@ I would like to throw out thanks to Yuri for the BLE Para work. https://github.c
 
 ### Screenshot
 ![alt text](https://github.com/dlktdr/HeadTracker/raw/master/docs/ScreenCapture1006.png)
+
+
+### Compiling Code
+
+I used VS Code & Platform IO to write this. It should work equally well in Arduino's IDE if thats your choice. Please rename the Nano33BLE.cpp to Nano33BLE.ino. It will complain about the startup folder just allow it to move it. I've had an issue with the most recent JSON library so I downgraded to 6.17.2
+
+There is also a patch that needs to be applied to the Arduino BLE library or PARA will not connect. Please see https://github.com/ysoldak/ArduinoBLE/compare/master...ysoldak:cccd_hack
