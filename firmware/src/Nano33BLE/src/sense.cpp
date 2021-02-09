@@ -221,8 +221,10 @@ void sense_Thread()
         }
     }                
 
-    // Get new data from sensors
-    if(++counter == SENSEUPDATE) { // Run Filter 5 more often than measurements
+    // Get new data from sensors.. 
+    //  FIX MEE I2C is hogging 40% of processor just waiting!!! UGG Needs to be changed to non-blocking
+    
+    if(++counter == SENSEUPDATE) { 
         counter = 0;
         
         // Setup Rotations
