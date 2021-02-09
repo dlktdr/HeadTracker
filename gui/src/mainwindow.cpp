@@ -123,7 +123,7 @@ MainWindow::MainWindow(QWidget *parent)
     // Menu Actions
     connect(ui->action_Save_to_File,SIGNAL(triggered()),this,SLOT(saveSettings()));
     connect(ui->action_Load,SIGNAL(triggered()),this,SLOT(loadSettings()));
-    connect(ui->actionE_xit,SIGNAL(triggered()),QCoreApplication::instance(),SLOT(quit()));
+    connect(ui->actionE_xit,SIGNAL(triggered()),this,SLOT(close()));
     connect(ui->actionUpload_Firmware,SIGNAL(triggered()),this,SLOT(uploadFirmwareClick()));
     connect(ui->actionShow_Data,&QAction::triggered,diagnostic,&DiagnosticDisplay::show);
 
