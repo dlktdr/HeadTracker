@@ -1,0 +1,5 @@
+GUI Version revisions
+
+< 0.51 - Wasn't keeping track...
+
+0.51 - Fixed a bug which didn't check if saved if you close from File->Exit

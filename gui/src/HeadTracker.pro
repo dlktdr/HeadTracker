@@ -97,6 +97,7 @@ win32 {
     }
 }
 
-DISTFILES +=
+DISTFILES += \
+    Revisions.txt
 
 
