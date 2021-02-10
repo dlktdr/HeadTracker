@@ -34,7 +34,7 @@ void bt_Thread()
 
     // Slow down bluetooth when UI connected. Trying to prevent disconnects.
     if(uiconnected)     
-        queue.call_in(std::chrono::milliseconds(BT_PERIOD*2),bt_Thread);
+        queue.call_in(std::chrono::milliseconds(BT_PERIOD*3),bt_Thread);
     else
         queue.call_in(std::chrono::milliseconds(BT_PERIOD),bt_Thread);
 
