@@ -694,8 +694,11 @@ void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
 
     if(!v.isNull() && !v1.isNull() && !v2.isNull())
     {   
-        setMagOffset(v,v1,v2);        
-        isCalibrated = true; // Add a notify flag calibration is complete
+        // If all zero it's not actually calibrated
+        if(v != 0.0 || v1 != 0.0 || v2 != 0) {
+            isCalibrated = true; // Add a notify flag calibration is complete                        
+        }
+        setMagOffset(v,v1,v2);
         //serialWriteln("HT: Mag offsets set");
     }
 
