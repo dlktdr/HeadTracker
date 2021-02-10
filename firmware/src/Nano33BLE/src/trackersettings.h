@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 #include <ArduinoJson.h>
-#include "PPM/PPMOut2.h"
+#include "PPM/PPMOut.h"
 #include "PPM/PPMIn.h"
 #include "config.h"
 #include "serial.h"
@@ -28,7 +28,7 @@ public:
     static constexpr int HT_PAN_REVERSE_BIT   = 0x04;
     static constexpr int DEF_PPM_CHANNELS = MAX_PPM_CHANNELS;
     static constexpr int DEF_BUTTON_IN = 2; // Chosen because it's beside ground
-    static constexpr int DEF_PPM_OUT = -1;
+    static constexpr int DEF_PPM_OUT = D10;
     static constexpr int DEF_PPM_IN = -1;
     static constexpr int DEF_CENTER = 1500;
     static constexpr float MIN_GAIN= 0;
@@ -159,7 +159,6 @@ public:
     void setBLEAddress(const char *addr);
     void setPPMInValues(uint16_t *vals, int chans);
    
-    //PpmOut *getPpmOut() {return _ppmout;}
     BTFunction *getBTFunc() {return _btf;}
 
 private:
@@ -182,7 +181,6 @@ private:
     int buttonpin,ppmoutpin,ppminpin;
     bool ppmoutinvert;
     bool ppmininvert;
-    //PpmOut *_ppmout; // Local reference to PPM output Class
     BTFunction *_btf; // Blue tooth Function
     int btmode;
     bool rstonwave;

@@ -12,7 +12,7 @@
 #include "PPMIn.h"
 
 using namespace mbed;
-
+bool GPIOTEIntEnabled=false;
 static uint32_t oldGPIOTEInterrupt=0;
 
 static bool framestarted=false;
@@ -62,17 +62,15 @@ extern "C" void GPIOTE_IRQHandler2(void)
             isrch_count = 0; 
             framestarted = false;
         }
-    }
 
-    // Call overridden IRQ handler
-    if(oldGPIOTEInterrupt != 0) {
+    // Call old handler if it was enabled
+    } else if(oldGPIOTEInterrupt != 0) {
         void (*GPIOVector)(void) = (void (*)(void))oldGPIOTEInterrupt;
         GPIOVector();
     }
 }
 
 // Set pin to -1 to disable
-
 void PpmIn_setPin(int pinNum)
 {
     // Same pin, just quit
@@ -83,29 +81,42 @@ void PpmIn_setPin(int pinNum)
     int dpintopin[]  = {0,0,11,12,15,13,14,23,21,27,2,1,8,13};
     int dpintoport[] = {0,0,1 ,1 ,1 ,1 ,1 ,0 ,0 ,0 ,1,1,1,0 };
 
-    int pin;
-    pin = dpintopin[pinNum];    
-    int port;
-    port = dpintoport[pinNum];    
+    int pin = dpintopin[pinNum];    
+    int port = dpintoport[pinNum];    
     
     if(pinNum < 0 && ppminstarted) { // Disable
-        setPin = pinNum;    
         __disable_irq();
-        NRF_GPIOTE->INTENCLR = GPIOTE_INTENSET_IN6_Set << GPIOTE_INTENSET_IN6_Pos; // Disable Interrupt
-
-        //NRF_GPIOTE->INTENSET &= 0xFFFFFFFF^GPIOTE_INTENSET_IN6_Msk; // Disable Interrupt
+        
+        // Stop Interrupt
+        NRF_GPIOTE->INTENCLR = GPIOTE_INTENSET_IN6_Msk;         
+        
+        // Clear interrupt flag
+        NRF_GPIOTE->EVENTS_IN[6] = 0;  
         NRF_GPIOTE->CONFIG[6] = 0; // Disable Config
-        NRF_GPIOTE->EVENTS_IN[6] = 0; // Clear interrupt
-        ppminstarted = false;
-        NVIC_SetVector(GPIOTE_IRQn,oldGPIOTEInterrupt); // Reset Orig Interupt Vector
+        
+        // Was there a previous handler?
+        if(oldGPIOTEInterrupt != 0) {
+            NVIC_DisableIRQ(GPIOTE_IRQn);
+            NVIC_SetVector(GPIOTE_IRQn,oldGPIOTEInterrupt); // Reset Orig Interupt Vector
+            NVIC_EnableIRQ(GPIOTE_IRQn);
+            oldGPIOTEInterrupt = 0;
+        // No - just stop the interrupt them
+        } else {
+            NVIC_DisableIRQ(GPIOTE_IRQn);
+        }
+
         __enable_irq();        
+
+        // Set pin num and started flag
+        setPin = pinNum;    
+        ppminstarted = false;
 
     } else {
         setPin = pinNum;
         __disable_irq();
-        
+
         // Disable Interrupt, Clear event
-        NRF_GPIOTE->INTENCLR = GPIOTE_INTENSET_IN6_Set << GPIOTE_INTENSET_IN6_Pos; 
+        NRF_GPIOTE->INTENCLR = GPIOTE_INTENSET_IN6_Msk; 
         NRF_GPIOTE->EVENTS_IN[6] = 0;
 
         if(!ppminverted) {
@@ -121,7 +132,6 @@ void PpmIn_setPin(int pinNum)
         }
 
         if(!ppminstarted) {
-
             // Start Timers, they can stay running all the time.
             NRF_TIMER4->PRESCALER = 4; // 16Mhz/2^4 = 1Mhz = 1us Resolution, 1.048s Max@32bit
             NRF_TIMER4->MODE = TIMER_MODE_MODE_Timer << TIMER_MODE_MODE_Pos;
@@ -143,20 +153,25 @@ void PpmIn_setPin(int pinNum)
             NRF_PPI->CHEN |= (PPI_CHEN_CH8_Enabled << PPI_CHEN_CH8_Pos);
             NRF_PPI->CHEN |= (PPI_CHEN_CH9_Enabled << PPI_CHEN_CH9_Pos);
 
-            // Override default GPIOTE interrupt vector with new one                    
-            NVIC_DisableIRQ(GPIOTE_IRQn); // .. Remove, global irq already disabled
-            oldGPIOTEInterrupt = NVIC_GetVector(GPIOTE_IRQn);
-            NVIC_SetVector(GPIOTE_IRQn,(uint32_t)&GPIOTE_IRQHandler2);
-            NVIC_EnableIRQ(GPIOTE_IRQn); // .. Remove, global irq already disabled
+            // If GPIOTE already enabled, 
+            // Override other GPIOTE interrupt vector with new one, will call in ours
+            if(NVIC_GetEnableIRQ(GPIOTE_IRQn)) {
+                oldGPIOTEInterrupt = NVIC_GetVector(GPIOTE_IRQn);
+                NVIC_DisableIRQ(GPIOTE_IRQn);                
+            } else
+                oldGPIOTEInterrupt = 0;
 
-            // Redundant.. Remove
-            //NRF_GPIOTE->INTENSET |= GPIOTE_INTENSET_IN6_Set << GPIOTE_INTENSET_IN6_Pos;
-            
+            // Set our handler
+            NVIC_SetVector(GPIOTE_IRQn,(uint32_t)&GPIOTE_IRQHandler2);
+            NVIC_EnableIRQ(GPIOTE_IRQn);
+
             ppminstarted = true;
         }
-        // Enable Interrupt            
+
+        // Clear flags and enable interrupt           
         NRF_GPIOTE->EVENTS_IN[6] = 0;
         NRF_GPIOTE->INTENSET |= GPIOTE_INTENSET_IN6_Set << GPIOTE_INTENSET_IN6_Pos;
+
         __enable_irq();
     }
 }

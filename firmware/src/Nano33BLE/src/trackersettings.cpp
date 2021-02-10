@@ -55,12 +55,11 @@ TrackerSettings::TrackerSettings()
     panout=0,tiltout=0,rollout=0;
 
     // PPM Defaults
-    ppmoutpin = -1;
-    ppminpin = -1; 
+    ppmoutpin = DEF_PPM_OUT;
+    ppminpin = DEF_PPM_IN; 
     ppmchans = 0;
     ppmoutinvert = false;
     ppmininvert = false;
-    //_ppmout = nullptr;    
     
     // Bluetooth defaults
     btmode = 0;
@@ -384,6 +383,7 @@ void TrackerSettings::setPpmOutPin(int value)
     if((value > 1 && value < 14) || value == -1)  {
        PpmOut_setChnCount(MAX_PPM_CHANNELS);
        PpmOut_setPin(value);
+       ppmoutpin = value;
     }
 }
 
@@ -391,6 +391,7 @@ void TrackerSettings::setPpmInPin(int value)
 {
     if((value > 1 && value < 14) || value == -1)  {
         PpmIn_setPin(value);
+        ppminpin = value;
     }
 }
 
