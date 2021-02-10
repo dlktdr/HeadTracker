@@ -495,7 +495,7 @@
        <item>
         <widget class="QLabel" name="label_16">
          <property name="text">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Rotate the head tracker in all axis. The ideal calibration is a perfectly centered sphere. You can click Save once enough data points are received.&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;&lt;br/&gt;&lt;br/&gt;&lt;/span&gt;&lt;span style=&quot; font-size:12pt; text-decoration: underline;&quot;&gt;Required&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;&lt;br/&gt;&lt;/span&gt;Gaps &amp;lt; 15%, Variance &amp;lt; 4.5%, Wobble &amp;lt; 4%, Fit Error &amp;lt; 5%&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Rotate the head tracker in all axes. The ideal calibration is a perfectly centered sphere. You can click Save once enough data points are received.&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;&lt;br/&gt;&lt;br/&gt;&lt;/span&gt;&lt;span style=&quot; font-size:12pt; text-decoration: underline;&quot;&gt;Required&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;&lt;br/&gt;&lt;/span&gt;Wobble &amp;lt; 4%, Variance &amp;lt; 4.5%, Gaps &amp;lt; 15%, Fit Error &amp;lt; 5%&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="wordWrap">
           <bool>true</bool>
