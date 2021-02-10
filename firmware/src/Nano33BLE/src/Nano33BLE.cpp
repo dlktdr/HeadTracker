@@ -18,8 +18,7 @@
 #include "serial.h"
 #include "main.h"
 
-
-const char *FW_VERSION = "0.42";
+const char *FW_VERSION = "0.5";
 const char *FW_BOARD = "NANO33BLE";
 
 using namespace rtos;
@@ -34,10 +33,10 @@ Ticker ioTick;
 TrackerSettings trkset;
 Mutex dataMutex;
 Mutex eepromWait;
-ConditionVariable eepromWriting(eepromWait);
+//ConditionVariable eepromWriting(eepromWait);
 volatile bool pauseThreads=false;
-
 volatile bool dataready=false;
+
 uint32_t buffer[20];
 int bufindex=0;
 
@@ -83,4 +82,6 @@ void setup()
 }
 
 // Not Used
-void loop() {}
+void loop() 
+{
+}

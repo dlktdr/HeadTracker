@@ -35,7 +35,6 @@ static float accxoff=0, accyoff=0, acczoff=0;
 static float gyrxoff=0, gyryoff=0, gyrzoff=0;
 static float l_panout=0, l_tiltout=0, l_rollout=0;
 
-static PpmOut *ppmout;
 static uint16_t ppmchans[MAX_PPM_CHANNELS];
 static SF fusion;
 static Timer runt;
@@ -195,21 +194,19 @@ void sense_Thread()
             ppmchans[i] = ppminchans[i];
         }
     } else {
-        ppmi_chcnt = 0;
+        ppmi_chcnt = 0; // Not within range set to zero
     }
 
-    // Override Channels with Tilt, Roll, Pan
+    // **** ADD CHECK STATE OF PPMINPUT PIN FOR RESET CENTER HERE ****
+
+    // Set PPM Channel Values
     ppmchans[trkset.tiltCh()-1] = tiltout_ui; // Channel 1 = Index 0
     ppmchans[trkset.rollCh()-1] = rollout_ui;
     ppmchans[trkset.panCh()-1] = panout_ui;
 
-    // Set the PPM Outputs, if output enabled
-    ppmout = trkset.getPpmOut();
-    if(ppmout != nullptr) {
-        // Send them all
-        for(int i=0;i<MAX_PPM_CHANNELS;i++) {
-            ppmout->setChannel(i+1,ppmchans[i]);
-        }
+    // Set the PPM Outputs
+    for(int i=0;i<PpmOut_getChnCount();i++) {
+        PpmOut_setChannel(i,ppmchans[i]);
     }
 
     // Set all the BT Channels
