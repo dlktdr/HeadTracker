@@ -197,7 +197,21 @@ void sense_Thread()
         ppmi_chcnt = 0; // Not within range set to zero
     }
 
-    // **** ADD CHECK STATE OF PPMINPUT PIN FOR RESET CENTER HERE ****
+    // If selected PPM input channel went > 1800us reset the center
+    // wait for it to drop below 1700 before allowing another reset
+    int rstppmch = trkset.resetCntPPM() - 1;
+    static bool hasrstppm=false;
+    if(rstppmch >= 0 && rstppmch < MAX_PPM_CHANNELS) {
+        if(ppmchans[rstppmch] > 1800 && hasrstppm == false) {
+            serialWrite("HT: Reset Center - PPM Channel ");
+            serialWrite(rstppmch+1);
+            serialWriteln(" > 1800us");
+            pressButton();
+            hasrstppm = true;
+        } else if (ppmchans[rstppmch] < 1700 && hasrstppm == true) {
+            hasrstppm = false;
+        }
+    }
 
     // Set PPM Channel Values
     ppmchans[trkset.tiltCh()-1] = tiltout_ui; // Channel 1 = Index 0

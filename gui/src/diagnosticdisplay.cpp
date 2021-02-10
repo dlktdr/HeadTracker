@@ -12,7 +12,6 @@ DiagnosticDisplay::DiagnosticDisplay(TrackerSettings *ts, QWidget *parent) :
     updated();
     ui->tblParams->verticalHeader()->setVisible(false);
     ui->tblParams->horizontalHeader()->setVisible(false);
-    //ui->tblParams->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tblParams->horizontalHeader()->setStretchLastSection(true);
     ui->tblParams->setColumnWidth(0,100);
 }

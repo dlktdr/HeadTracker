@@ -60,6 +60,7 @@ TrackerSettings::TrackerSettings()
     ppmchans = 0;
     ppmoutinvert = false;
     ppmininvert = false;
+    rstppm = DEF_RST_PPM;
     
     // Bluetooth defaults
     btmode = 0;
@@ -395,6 +396,17 @@ void TrackerSettings::setPpmInPin(int value)
     }
 }
 
+int TrackerSettings::resetCntPPM() const
+{
+    return rstppm;
+}
+
+void TrackerSettings::setResetCntPPM(int value)
+{
+    if((value >= 1 && value <= 8) || value == -1)
+        rstppm = value;
+}
+
 bool TrackerSettings::resetOnWave() const 
 {
     return rstonwave;
@@ -687,6 +699,9 @@ void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
     v = json["ppmininvert"]; if(!v.isNull()) setInvertedPpmIn(v);    
     v = json["ppmoutinvert"]; if(!v.isNull()) setInvertedPpmOut(v);
 
+// Reset center on PPM Ch > 1800us
+    v = json["rstppm"]; if(!v.isNull()) setResetCntPPM(v);
+
 // Calibrarion Values
     v = json["magxoff"];
     v1 =json["magyoff"];
@@ -766,6 +781,7 @@ void TrackerSettings::setJSONSettings(DynamicJsonDocument &json)
     
     json["ppminpin"] = ppminpin;
     json["ppmininvert"] = ppmininvert;    
+    json["rstppm"] = rstppm;
 
     json["btmode"] = btmode;
     json["rstonwave"] = rstonwave;

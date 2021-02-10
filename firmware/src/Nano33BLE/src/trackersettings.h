@@ -35,6 +35,7 @@ public:
     static constexpr float MAX_GAIN= 50.0;
     static constexpr float DEF_GAIN= 10.0;
     static constexpr int DEF_BT_MODE= BTDISABLE; // Bluetooth Disabled
+    static constexpr int DEF_RST_PPM = -1;
 
     TrackerSettings();
 
@@ -113,6 +114,9 @@ public:
     int buttonPin() const;
     void setButtonPin(int value);
 
+    int resetCntPPM() const;
+    void setResetCntPPM(int value);
+
     bool resetOnWave() const;
     void setResetOnWave(bool value);
 
@@ -186,6 +190,7 @@ private:
     bool rstonwave;
     bool freshProgram;    
     int orient;
+    int rstppm;
 
     // Data
     float gyrox,gyroy,gyroz;

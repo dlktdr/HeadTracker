@@ -29,12 +29,13 @@ public:
     static constexpr int DEF_PPM_CHANNELS = 8;
     static constexpr int DEF_BUTTON_IN = 2; // Chosen because it's beside ground
     static constexpr int DEF_PPM_OUT = 10; // Random choice
-    static constexpr int DEF_PPM_IN = 9; // Random choice
+    static constexpr int DEF_PPM_IN = -1;
     static constexpr int DEF_CENTER = 1500;
     static constexpr float MIN_GAIN= 0;
     static constexpr float MAX_GAIN= 50.0;
     static constexpr float DEF_GAIN= 10.0;
     static constexpr int DEF_BT_MODE= 0; // Bluetooth Disabled
+    static constexpr int DEF_RST_PPM = -1;
 
     enum {BTDISABLE,BTPARA,BTHM10};
 
@@ -120,6 +121,9 @@ public:
 
     int buttonPin() const;
     void setButtonPin(int value);
+
+    int resetCntPPM() const;
+    void setResetCntPPM(int value);
 
     bool resetOnWave() const {return _data["rstonwave"].toBool();}
     void setResetOnWave(bool value) {_data["rstonwave"] = value;}

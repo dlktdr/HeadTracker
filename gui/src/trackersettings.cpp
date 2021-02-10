@@ -42,6 +42,7 @@ TrackerSettings::TrackerSettings(QObject *parent):
     _data["ppmininvert"] = false;
     _data["btmode"] = (uint)0;
     _data["orient"] = (uint)0;
+    _data["rstppm"] = DEF_RST_PPM;
 }
 
 int TrackerSettings::Rll_min() const
@@ -382,6 +383,17 @@ int TrackerSettings::buttonPin() const
 void TrackerSettings::setButtonPin(int value)
 {
     _data["buttonpin"] = value;
+}
+
+int TrackerSettings::resetCntPPM() const
+{
+    return _data["rstppm"].toInt();
+}
+
+void TrackerSettings::setResetCntPPM(int value)
+{
+    if((value >= 1 && value <= 8) || value == -1)
+        _data["rstppm"] = value;
 }
 
 uint TrackerSettings::orientation()

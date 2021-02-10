@@ -119,6 +119,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->cmbPpmOutPin,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbBtMode,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbOrientation,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->cmbResetOnPPM,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
 
     // Menu Actions
     connect(ui->action_Save_to_File,SIGNAL(triggered()),this,SLOT(saveSettings()));
@@ -606,21 +607,24 @@ void MainWindow::updateToUI()
     ui->cmbButtonPin->blockSignals(true);
     ui->cmbBtMode->blockSignals(true);
     ui->cmbOrientation->blockSignals(true);
+    ui->cmbResetOnPPM->blockSignals(true);
 
     ui->cmbpanchn->setCurrentIndex(trkset.panCh()-1);
     ui->cmbrllchn->setCurrentIndex(trkset.rollCh()-1);
     ui->cmbtiltchn->setCurrentIndex(trkset.tiltCh()-1);
     ui->cmbRemap->setCurrentIndex(ui->cmbRemap->findData(trkset.axisRemap()));
     ui->cmbSigns->setCurrentIndex(trkset.axisSign());
-    ui->cmbBtMode->setCurrentIndex(trkset.blueToothMode());
+    ui->cmbBtMode->setCurrentIndex(trkset.blueToothMode());    
     ui->cmbOrientation->setCurrentIndex(trkset.orientation());
 
     int ppout_index = trkset.ppmOutPin()-1;
     int ppin_index = trkset.ppmInPin()-1;
     int but_index = trkset.buttonPin()-1;
+    int resppm_index = trkset.resetCntPPM();
     ui->cmbPpmOutPin->setCurrentIndex(ppout_index < 1 ? 0 : ppout_index);
     ui->cmbPpmInPin->setCurrentIndex(ppin_index < 1 ? 0 : ppin_index);
     ui->cmbButtonPin->setCurrentIndex(but_index < 1 ? 0 : but_index);
+    ui->cmbResetOnPPM->setCurrentIndex(resppm_index < 0 ? 0: resppm_index);
 
     ui->cmbpanchn->blockSignals(false);
     ui->cmbrllchn->blockSignals(false);
@@ -631,6 +635,7 @@ void MainWindow::updateToUI()
     ui->cmbButtonPin->blockSignals(false);
     ui->cmbBtMode->blockSignals(false);
     ui->cmbOrientation->blockSignals(false);
+    ui->cmbResetOnPPM->blockSignals(false);
 
     savedToNVM = true;
     sentToHT = true;
@@ -673,9 +678,12 @@ void MainWindow::updateFromUI()
     int ppout_index = ui->cmbPpmOutPin->currentIndex()+1;
     int ppin_index = ui->cmbPpmInPin->currentIndex()+1;
     int but_index = ui->cmbButtonPin->currentIndex()+1;
+    int rstppm_index = ui->cmbResetOnPPM->currentIndex();
+
     trkset.setPpmOutPin(ppout_index==1?-1:ppout_index);
     trkset.setPpmInPin(ppin_index==1?-1:ppin_index);
     trkset.setButtonPin(but_index==1?-1:but_index);
+    trkset.setResetCntPPM(rstppm_index==0?-1:rstppm_index);
 
     trkset.setBlueToothMode(ui->cmbBtMode->currentIndex());
     trkset.setOrientation(ui->cmbOrientation->currentIndex());
@@ -683,6 +691,7 @@ void MainWindow::updateFromUI()
     trkset.setInvertedPpmOut(ui->chkInvertedPPM->isChecked());
     trkset.setInvertedPpmIn(ui->chkInvertedPPMIn->isChecked());
     trkset.setResetOnWave(ui->chkResetCenterWave->isChecked());
+
 
     savedToNVM = false; // Indicate values have not been save to NVM
     sentToHT = false; // Indicate changes haven't been sent to HT
