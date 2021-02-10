@@ -3,6 +3,7 @@
 #include <QSettings>
 #include <QTimer>
 #include <QScrollBar>
+#include <QFileDialog>
 #include "mainwindow.h"
 #include "firmware.h"
 #include "ui_firmware.h"
@@ -18,6 +19,7 @@ Firmware::Firmware(QWidget *parent) :
     connect(ui->cmdUploadOnline,SIGNAL(clicked()),this,SLOT(uploadClicked()));
     connect(ui->cmdStopUpload,SIGNAL(clicked()),this,SLOT(cmdKillClick()));
     connect(ui->cmdRefreshPorts,SIGNAL(clicked()),this,SLOT(findSerialPorts()));
+    connect(ui->cmdOpenLocal,SIGNAL(clicked()),this,SLOT(loadLocalFirmware()));
     hexreply = nullptr;
     firmreply = nullptr;
 
@@ -53,6 +55,43 @@ void Firmware::findSerialPorts()
     QList<QSerialPortInfo> ports = QSerialPortInfo::availablePorts();
     foreach(QSerialPortInfo port,ports) {
         ui->cmbPort->addItem(port.portName(),port.serialNumber());
+    }
+}
+
+void Firmware::loadLocalFirmware()
+{
+    QString filename = QFileDialog::getOpenFileName(this,"Open File",QString(),"Fimware files (*.hex *.bin)");
+    if(!filename.isEmpty()) {
+        QFile file(filename);
+        QString sufix = QFileInfo(file).suffix().toUpper();
+        QStringList args;
+        qDebug() << "Open " << filename;
+        if(sufix == "BIN") {
+            programmercommand = "bossac.exe";
+            args += "-d";
+            args += QString("--port=%1").arg(ui->cmbPort->currentText());
+            args += "-U";
+            args += "-i";
+            args += "-e";
+            args += "-w";
+            args += filename;
+            args += "-R";
+        } else if(sufix == "HEX") {
+            QFile localfile("localfile.hex");
+            programmercommand = "avrdude.exe";
+            args += "-patmega328p";
+            args += "-carduino";
+            args += "-b115200";
+            args += "-D";
+            args += QString("-Uflash:w:'" + filename + "':i");
+            args += QString ("-P" + ui->cmbPort->currentText());
+            args += "-Cavrdude.conf";
+        } else {
+            return;
+        }
+
+        qDebug() << "STARTING:" << programmercommand << args;
+        programmer->start(programmercommand,args);
     }
 }
 

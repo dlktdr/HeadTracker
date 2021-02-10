@@ -45,6 +45,7 @@ private:
 
 private slots:
     void findSerialPorts();
+    void loadLocalFirmware();
     void loadOnlineFirmware();
     void firmwareVersionsReady();
     void firmwareReady();
