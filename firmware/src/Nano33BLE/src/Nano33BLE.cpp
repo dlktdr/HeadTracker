@@ -18,7 +18,7 @@
 #include "serial.h"
 #include "main.h"
 
-const char *FW_VERSION = "0.5";
+const char *FW_VERSION = "0.6";
 const char *FW_BOARD = "NANO33BLE";
 
 using namespace rtos;
