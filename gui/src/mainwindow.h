@@ -18,7 +18,7 @@
 #include "diagnosticdisplay.h"
 
 const int MAX_LOG_LENGTH=6000;
-const QString version="0.51";
+const QString version="0.7";
 const QString fwversion="04"; // Which Firmware file to Use
 const QStringList firmwares={"BNO055","NANO33BLE","REMOTEBLE"};
 

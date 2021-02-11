@@ -1,5 +1,8 @@
 GUI Version revisions
 
 < 0.51 - Wasn't keeping track...
-
 0.51 - Fixed a bug which didn't check if saved if you close from File->Exit
+0.6 - Skipped this version
+0.7 - Add upload from local file
+    - Add ResetOnPPMChannel gui option
+    - Switch to a 32bit x86 release
