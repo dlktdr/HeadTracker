@@ -156,21 +156,12 @@ void PpmOut_setPin(int pinNum)
         NRF_TIMER3->INTENCLR = TIMER_INTENSET_COMPARE0_Msk;
         NRF_TIMER3->EVENTS_COMPARE[0] = 0;      
 
-        // Setup GPOITE[7] to toggle output on every timer capture, Start High
-        if(!ppmoutinverted) {        
-            NRF_GPIOTE->CONFIG[7] = (GPIOTE_CONFIG_MODE_Task << GPIOTE_CONFIG_MODE_Pos) |
-                        (GPIOTE_CONFIG_POLARITY_Toggle << GPIOTE_CONFIG_POLARITY_Pos) |
-                        (pin <<  GPIOTE_CONFIG_PSEL_Pos) |
-                        (port << GPIOTE_CONFIG_PORT_Pos);
-        
-        // Setup GPOITE[7] to toggle output on every timer capture, Start Low
-        } else {        
-            NRF_GPIOTE->CONFIG[7] = (GPIOTE_CONFIG_MODE_Task << GPIOTE_CONFIG_MODE_Pos) |
-                        (GPIOTE_CONFIG_POLARITY_Toggle << GPIOTE_CONFIG_POLARITY_Pos) |
-                        (pin <<  GPIOTE_CONFIG_PSEL_Pos) |
-                        (port << GPIOTE_CONFIG_PORT_Pos);
-        }
-
+        // Setup GPOITE[7] to toggle output on every timer capture
+        NRF_GPIOTE->CONFIG[7] = (GPIOTE_CONFIG_MODE_Task << GPIOTE_CONFIG_MODE_Pos) |
+            (GPIOTE_CONFIG_POLARITY_Toggle << GPIOTE_CONFIG_POLARITY_Pos) |
+            (pin <<  GPIOTE_CONFIG_PSEL_Pos) |
+            (port << GPIOTE_CONFIG_PORT_Pos);
+       
         // If not started
         if(!ppmoutstarted) {
 
