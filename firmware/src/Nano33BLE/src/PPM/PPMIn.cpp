@@ -1,5 +1,3 @@
-// FROM https://os.mbed.com/users/edy05/code/PPM/
-
 #include <Arduino.h>
 #include <mbed.h>
 #include <rtos.h>
