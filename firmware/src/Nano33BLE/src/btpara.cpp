@@ -2,6 +2,8 @@
 #include <Arduino.h>
 #include "btpara.h"
 #include "serial.h"
+#include "io.h"
+#include "main.h"
 
 //-------------------------------------------
 // FRSKY Para Wireless Traniner interface
@@ -15,12 +17,17 @@ BTPara::BTPara() : BTFunction()
     manufacturer = new BLECharacteristic("2A29", BLERead, 3);
     ieee = new BLECharacteristic("2A2A", BLERead, 14);
     pnpid = new BLECharacteristic("2A50", BLERead, 7);
+    
     para = new BLEService("FFF0");
     fff1 = new BLEByteCharacteristic("FFF1", BLERead | BLEWrite);
     fff2 = new BLEByteCharacteristic("FFF2", BLERead);
     fff3 = new BLECharacteristic("FFF3", BLEWriteWithoutResponse, 32);
     fff5 = new BLECharacteristic("FFF5", BLERead, 32);
-    fff6 = new BLECharacteristic("FFF6", BLEWriteWithoutResponse | BLENotify | BLEAutoSubscribe, 32);      
+    fff6 = new BLECharacteristic("FFF6", BLEWriteWithoutResponse | BLENotify | BLEAutoSubscribe, 32);
+    
+    rmbrd = new BLEService("FFF1");
+    rbfff1 = new BLECharacteristic("FFF1", BLERead, 2); // Overridden Channels 16bits
+    rbfff2 = new BLEBoolCharacteristic("FFF2", BLEWrite);
     
     serialWriteln("HT: Starting Para Bluetooth");
     
@@ -44,10 +51,16 @@ BTPara::BTPara() : BTFunction()
     para->addCharacteristic(*fff3);
     para->addCharacteristic(*fff5);
     para->addCharacteristic(*fff6);
-
     BLE.addService(*para);
+        
     fff1->writeValue(0x01);
     fff2->writeValue(0x02);
+
+    // Remote Slave board Returned Information
+    rmbrd->addCharacteristic(*rbfff1);
+    rmbrd->addCharacteristic(*rbfff2);
+    BLE.addService(*rmbrd);
+    rbfff1->writeValue("\x00\x00",2); // Channels overridden    
 
     BLE.advertise();
 
@@ -75,7 +88,12 @@ BTPara::~BTPara()
     delete ieee;
     delete manufacturer;
     delete sysid;
-    delete info;    
+    delete info; 
+
+    // Delete Service 3
+    delete rbfff2;
+    delete rbfff1;
+    delete rmbrd;
 }
 
 void BTPara::execute()
@@ -96,8 +114,33 @@ void BTPara::execute()
     }
 
     // Connected
-     if(bleconnected) 
+     if(bleconnected) {
         sendTrainer();
+
+        // Get the returned data from the slave bluetooth board
+        static bool rbprs = false;
+        char butval;
+        int len = rbfff2->readValue(&butval,1);
+        if(len == 1) {
+            if(butval == 'R' && rbprs == false) {
+                serialWriteln("HT: Remote BT Button Pressed");
+                pressButton();
+                rbprs = true;
+            } else if(butval != 'R' && rbprs == true) {
+                rbprs = false;
+            }
+        }
+
+        // Set the bits of the overridden channels, for remote PPM in/out
+        static uint16_t last_ovridech = 0;
+        uint16_t ovridech = 0;
+        ovridech |= 1 << (trkset.tiltCh()-1);
+        ovridech |= 1 << (trkset.rollCh()-1);
+        ovridech |= 1 << (trkset.panCh()-1);
+        if(last_ovridech != ovridech)
+            rbfff1->writeValue(ovridech);
+        last_ovridech = ovridech;
+    }
 }
 
 void BTPara::sendTrainer() 

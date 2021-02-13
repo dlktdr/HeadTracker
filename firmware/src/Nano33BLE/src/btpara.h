@@ -36,6 +36,10 @@ private:
     BLECharacteristic *fff5;
     BLECharacteristic *fff6;
 
+    BLEService *rmbrd;
+    BLECharacteristic *rbfff1;
+    BLECharacteristic *rbfff2;
+
     char _address[20];
 };
 
