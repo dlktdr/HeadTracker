@@ -5,6 +5,7 @@ GUI Version revisions
 0.6 - Skipped this version
 0.7 - Add upload from local file
     - Add ResetOnPPMChannel gui option
-    - Switch to a 32bit x86 release
+    - Switch to a 32bit x86 release   
 0.71 - Fix "TLS Initalization" Issue
+     - Switch back to x64 release
 0.72 - Fix a bug not showing the visualization on some PC's
