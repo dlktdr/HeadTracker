@@ -5,6 +5,7 @@
 
 int main(int argc, char *argv[])
 {
+    QApplication::setAttribute(Qt::AA_UseDesktopOpenGL);
     QApplication a(argc, argv);
 
     QFile stylesheet("stylesheet.css");
@@ -16,7 +17,7 @@ int main(int argc, char *argv[])
     }
 
     MainWindow w;
-    //QObject::connect(&w, &QMainWindow::, &a, &QApplication::quit);
+
     w.show();
     return a.exec();
 }
