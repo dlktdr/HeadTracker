@@ -26,8 +26,8 @@ BTPara::BTPara() : BTFunction()
     fff6 = new BLECharacteristic("FFF6", BLEWriteWithoutResponse | BLENotify | BLEAutoSubscribe, 32);
     
     rmbrd = new BLEService("FFF1");
-    rbfff1 = new BLECharacteristic("FFF1", BLERead, 2); // Overridden Channels 16bits
-    rbfff2 = new BLEBoolCharacteristic("FFF2", BLEWrite | BLENotify);
+    rbfff1 = new BLECharacteristic("FFF1", BLERead | BLENotify, 2); // Overridden Channels 16bits
+    rbfff2 = new BLEBoolCharacteristic("FFF2", BLEWrite );
     
     serialWriteln("HT: Starting Para Bluetooth");
     
