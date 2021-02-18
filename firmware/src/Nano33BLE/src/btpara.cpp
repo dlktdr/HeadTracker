@@ -60,7 +60,7 @@ BTPara::BTPara() : BTFunction()
     rmbrd->addCharacteristic(*rbfff1);
     rmbrd->addCharacteristic(*rbfff2);
     BLE.addService(*rmbrd);
-    rbfff1->writeValue("\x00\x00",2); // Channels overridden    
+    rbfff1->writeValue((uint16_t)0); // Channels overridden    
 
     BLE.advertise();
 
