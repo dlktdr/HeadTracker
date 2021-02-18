@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>693</width>
+    <width>697</width>
     <height>691</height>
    </rect>
   </property>
@@ -83,6 +83,12 @@
          <spacer name="verticalSpacer">
           <property name="orientation">
            <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
           </property>
          </spacer>
         </item>
@@ -1399,7 +1405,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>693</width>
+     <width>697</width>
      <height>21</height>
     </rect>
    </property>
@@ -1434,7 +1440,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>&amp;Save</string>
+    <string>&amp;Save Settings</string>
    </property>
   </action>
   <action name="action_Load">
@@ -1442,7 +1448,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>&amp;Open</string>
+    <string>&amp;Load Settings</string>
    </property>
   </action>
   <action name="actionE_xit">

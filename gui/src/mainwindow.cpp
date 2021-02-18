@@ -358,6 +358,7 @@ void MainWindow::parseIncomingJSON(const QVariantMap &map)
             msgbox.setText("Calibration has not been performed.\nPlease calibrate or load from a saved file");
             msgbox.setWindowTitle("Calibrate");
             msgbox.show();
+            ui->statusbar->showMessage(tr("Not calibrated"),10000);
             calmsgshowed = true;
         }
 
@@ -777,6 +778,9 @@ void MainWindow::stopGraph()
 
 void MainWindow::storeSettings()
 {
+    if(!serialcon->isOpen())
+        return;
+
     if(trkset.hardware() == "NANO33BLE") {
         sendSerialJSON("Setttings", trkset.allData());
         sentToHT = true;
@@ -879,6 +883,11 @@ void MainWindow::saveSettings()
 
 void MainWindow::loadSettings()
 {
+    if(!serialcon->isOpen()) {
+        QMessageBox::information(this, "Info","Please connect before restoring a saved file");
+        return;
+    }
+
     QString filename = QFileDialog::getOpenFileName(this,tr("Open File"),QString(),"Config Files (*.ini)");
     if(!filename.isEmpty()) {
         QSettings settings(filename,QSettings::IniFormat);
