@@ -126,7 +126,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->action_Load,SIGNAL(triggered()),this,SLOT(loadSettings()));
     connect(ui->actionE_xit,SIGNAL(triggered()),this,SLOT(close()));
     connect(ui->actionUpload_Firmware,SIGNAL(triggered()),this,SLOT(uploadFirmwareClick()));
-    connect(ui->actionShow_Data,&QAction::triggered,diagnostic,&DiagnosticDisplay::show);
+    connect(ui->actionShow_Data,SIGNAL(triggered()),this,SLOT(showDiagsClicked()));
 
     // Timers
     rxledtimer.setInterval(100);
@@ -940,6 +940,13 @@ void MainWindow::saveToNVM()
             savedToNVM = true;
         }
     }
+}
+
+void MainWindow::showDiagsClicked()
+{
+    diagnostic->show();
+    diagnostic->activateWindow();
+    diagnostic->raise();
 }
 
 void MainWindow::closeEvent (QCloseEvent *event)

@@ -104,6 +104,7 @@ private slots:
     void startCalibration();
     void ackTimeout();
     void saveToNVM();
+    void showDiagsClicked();
 
 };
 #endif // MAINWINDOW_H
