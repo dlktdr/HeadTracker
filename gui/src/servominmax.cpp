@@ -1,3 +1,5 @@
+
+#include <QToolTip>
 #include "servominmax.h"
 #include "trackersettings.h"
 
@@ -28,6 +30,7 @@ ServoMinMax::ServoMinMax(QWidget *parent) : QWidget(parent)
 
     setDefaults();
     setContextMenuPolicy(Qt::CustomContextMenu);
+    setMouseTracking(true);
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)),this, SLOT(showContextMenu(const QPoint &)));
 }
 
@@ -63,6 +66,7 @@ void ServoMinMax::setDefaults()
     emit maximumChanged(max_val);
     emit centerChanged(c_value);
 }
+
 
 void ServoMinMax::paintEvent(QPaintEvent *event)
 {
@@ -243,4 +247,25 @@ void ServoMinMax::mouseDoubleClickEvent(QMouseEvent *event)
             reCenter();
         }
     }
+}
+
+bool ServoMinMax::event(QEvent *event)
+{
+    if (event->type() == QEvent::ToolTip) {
+            QHelpEvent *helpEvent = static_cast<QHelpEvent *>(event);
+            QPoint glbpoint = helpEvent->globalPos();
+            glbpoint.setY(glbpoint.y()-40);
+            if(minSlider.contains(helpEvent->pos())) {
+                QToolTip::showText(glbpoint, QString::number(min_val) + "uS");
+            } else if(maxSlider.contains(helpEvent->pos())) {
+                QToolTip::showText(glbpoint, QString::number(max_val) + "uS");
+            } else if(centerSlider.contains(helpEvent->pos())) {
+                QToolTip::showText(glbpoint, QString::number(c_value) + "uS");
+            } else {
+                QToolTip::hideText();
+                event->ignore();
+            }
+            return true;
+        }
+        return QWidget::event(event);
 }

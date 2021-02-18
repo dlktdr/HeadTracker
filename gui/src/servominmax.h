@@ -68,7 +68,7 @@ private:
     double centerSliderPos;
     double minmaxp;
     double maxminp;
-
+    bool event(QEvent *event);
     void paintEvent(QPaintEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
     void mousePressEvent(QMouseEvent *event);
