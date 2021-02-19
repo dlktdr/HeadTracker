@@ -292,9 +292,9 @@ void sense_Thread()
             // Calibrate soft iron offsets 
             float magsioff[9];
             trkset.magSiOffset(magsioff);
-            magx = magx * magsioff[0] + magy * magsioff[1] + magz * magsioff[2];
-            magy = magx * magsioff[3] + magy * magsioff[4] + magz * magsioff[5];
-            magz = magx * magsioff[6] + magy * magsioff[7] + magz * magsioff[8];
+            magx = (magx * magsioff[0]) + (magy * magsioff[1]) + (magz * magsioff[2]);
+            magy = (magx * magsioff[3]) + (magy * magsioff[4]) + (magz * magsioff[5]);
+            magz = (magx * magsioff[6]) + (magy * magsioff[7]) + (magz * magsioff[8]);
 
             // Apply Rotation
             float tmpmag[3] = {magx,magy,magz};
