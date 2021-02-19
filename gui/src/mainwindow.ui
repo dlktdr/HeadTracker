@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>697</width>
-    <height>691</height>
+    <height>676</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -414,6 +414,11 @@
                <item>
                 <property name="text">
                  <string>Roll -90</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Tilt 90,Pan 90</string>
                 </property>
                </item>
               </widget>

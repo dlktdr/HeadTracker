@@ -511,7 +511,7 @@ int TrackerSettings::orientation()
 
 void TrackerSettings::setOrientation(int ori)
 {
-    if(ori >= 0 && ori <= 5)
+    if(ori >= 0 && ori <= 6)
         orient = ori;
 }
 
@@ -535,6 +535,9 @@ void TrackerSettings::orientRotations(float rot[3])
             break;
         case 5: // Roll -90
             rot[0] = 0; rot[1] = 90; rot[2] = 0;
+            break;
+        case 6: // Tilt 90, Pan 90
+            rot[0] = 90; rot[1] = 0; rot[2] = 90;
             break;
         default:
             rot[0] = 0; rot[1] = 0; rot[2] = 0;
