@@ -486,12 +486,37 @@ void TrackerSettings::loadSettings(QSettings *settings)
     }
 }
 
-void TrackerSettings::setAllData(const QVariantMap &data)
+QVariantMap TrackerSettings::allData()
 {
+    return _data;
+}
+
+void TrackerSettings::setAllData(const QVariantMap &data)
+{    
     QStringList keys = data.keys();
     foreach(QString key,keys) {
         _data[key] = data.value(key);
+        _devicedata[key] = data.value(key);
     }
+}
+
+QVariantMap TrackerSettings::changedData()
+{
+    QVariantMap changed;
+    QStringList keys = _data.keys();
+    foreach(QString key,keys) {
+        // Current Data != Data on Device
+        if(_data[key] != _devicedata[key]) {
+            changed[key] = _data[key];
+        }
+    }
+    return changed;
+}
+
+void TrackerSettings::setDataMatched()
+{
+    // Update device data to current data
+    _devicedata = _data;
 }
 
 QVariant TrackerSettings::liveData(const QString &name)

@@ -11,6 +11,7 @@
 #include <QFileDialog>
 #include <QSettings>
 #include <QCloseEvent>
+#include <QQueue>
 #include "trackersettings.h"
 #include "firmware.h"
 #include "calibratebno.h"
@@ -18,9 +19,10 @@
 #include "diagnosticdisplay.h"
 
 const int MAX_LOG_LENGTH=6000;
-const QString version="0.72";
+const QString version="0.8";
 const QString fwversion="04"; // Which Firmware file to Use
 const QStringList firmwares={"BNO055","NANO33BLE","REMOTEBLE"};
+const int IMHERETIME=8000;
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -56,6 +58,11 @@ private:
     bool sentToHT;
     bool fwdiscovered;
     bool calmsgshowed;
+    bool settingstoHT;
+
+    int jsonfaults;
+    QByteArray lastjson;
+    QQueue<QByteArray> jsonqueue;
 
     int xtime;
     bool graphing;
@@ -67,7 +74,7 @@ private:
     // HT Format
     void parseIncomingHT(QString cmd);
     // JSON format
-    void sendSerialJSON(QString command, QVariantMap map=QVariantMap());
+    bool sendSerialJSON(QString command, QVariantMap map=QVariantMap());
     void parseIncomingJSON(const QVariantMap &map);
     void fwDiscovered(QString vers, QString hard);
     void addToLog(QString log);
@@ -102,7 +109,7 @@ private slots:
     void loadSettings();
     void uploadFirmwareClick();
     void startCalibration();
-    void ackTimeout();
+    void ihTimeout();
     void saveToNVM();
     void showDiagsClicked();
 

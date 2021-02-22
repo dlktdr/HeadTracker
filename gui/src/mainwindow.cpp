@@ -40,6 +40,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->serialData->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
     graphing = false;
     xtime = 0;
+    jsonfaults = 0;
 
     // Update default settings to UI
     updateToUI();
@@ -133,7 +134,7 @@ MainWindow::MainWindow(QWidget *parent)
     txledtimer.setInterval(100);
     connect(&rxledtimer,SIGNAL(timeout()),this,SLOT(rxledtimeout()));
     connect(&txledtimer,SIGNAL(timeout()),this,SLOT(txledtimeout()));
-    connect(&acknowledge,SIGNAL(timeout()),this,SLOT(ackTimeout()));
+    connect(&acknowledge,SIGNAL(timeout()),this,SLOT(ihTimeout()));
 
     // On BLE Calibration Save update to device
     connect(bleCalibratorDialog,&CalibrateBLE::calibrationSave,this,&MainWindow::storeSettings);
@@ -144,7 +145,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Start a timer to tell the device that we are here
     // Times out at 10 seconds so send an ack every 8
-    acknowledge.start(8000);
+    acknowledge.start(IMHERETIME);
 }
 
 MainWindow::~MainWindow()
@@ -256,10 +257,8 @@ void MainWindow::parseSerialData()
         if(nlindex < 0)
             return;  // No New line found
 
-
         // Strip data up the the CR LF \r\n
         QByteArray data = serialData.left(nlindex);
-//        qDebug() << data;
 
         // Found a SOT & EOT Character, JSON Data Sent
         if(data.left(1)[0] == (char)0x02 && data.right(1)[0] == (char)0x03) { // JSON Data
@@ -269,9 +268,6 @@ void MainWindow::parseSerialData()
         // Found an HT value sent
         } else if(data.left(1) == "$") {
             parseIncomingHT(data);
-
-            // DEBUG
-            //dToLog("HT$:" + data + "\n");
 
         // Other data show the user
         } else {
@@ -342,12 +338,37 @@ void MainWindow::connectTimeout()
 
 void MainWindow::parseIncomingJSON(const QVariantMap &map)
 {
-
-
     // Settings from the Tracker Sent, save them and update the UI
     if(map["Cmd"].toString() == "Settings") {        
         trkset.setAllData(map);
         updateToUI();
+
+    // Board received last message properly
+    } else if (map["Cmd"].toString() == "ACK") {
+        jsonfaults = 0;
+        if(!jsonqueue.isEmpty()) {
+            sendSerialData(jsonqueue.dequeue());
+            jsonfaults = 1;
+        }
+
+    // Board didn't receive last information properly, send again
+    } else if (map["Cmd"].toString() == "NAK") {
+        // If too many faults, disconnect...
+        if(jsonfaults > 10) {
+            addToLog("\r\nCRITICAL ERROR - COM x3 FAULT DISCONNECTING\r\n");
+            serialDisconnect();
+        } else {
+
+
+            // Resend last JSON
+            sendSerialData(lastjson);
+        }
+
+        addToLog("JSON FAULT");
+
+        // Increment fault counter
+        jsonfaults++;
+
     // Data sent, Update the graph / servo sliders / calibration
     } else if (map["Cmd"].toString() == "Data") {
         // Add all the data to the settings
@@ -488,23 +509,45 @@ void MainWindow::sendSerialData(QByteArray data)
     // Skip nuisance messagae
     if(data =="\x02{\"Cmd\":\"ACK\"}\x03")
         return;
-    addToLog("TX: " + data + "\n");
 
+    addToLog("TX: " + data + "\n");
 }
 
 /* sendSerialJSON()
  *      Sends a JSON Packet
  */
 
-void MainWindow::sendSerialJSON(QString command, QVariantMap map)
-{    
+bool MainWindow::sendSerialJSON(QString command, QVariantMap map)
+{
+    // Don't send any new data until last has been received successfully
     map.remove("Hard");
     map.remove("Vers");
     QJsonObject jobj = QJsonObject::fromVariantMap(map);
     jobj["Cmd"] = command;
     QJsonDocument jdoc(jobj);
     QString json = QJsonDocument(jdoc).toJson(QJsonDocument::Compact);
-    sendSerialData((char)0x02 + json.toLatin1() + (char)0x03);
+
+    // Calculate the CRC Checksum
+    uint16_t CRC = uCRC16Lib::calculate(json.toUtf8().data(),json.length());
+    lastjson = (char)0x02 + json.toLatin1() + QByteArray::fromRawData((char*)&CRC,2) + (char)0x03;
+
+    // If there is data that didn't make it there yet push this data to the stack
+    if(jsonfaults != 0) {
+        jsonqueue.enqueue(lastjson);
+        return false;
+    }
+
+    // Send the data
+    sendSerialData(lastjson);
+
+    // Set as faulted until ACK returned
+    jsonfaults = 1;
+
+    // Reset Ack Timer
+    acknowledge.stop();
+    acknowledge.start(IMHERETIME);
+
+    return true;
 }
 
 void MainWindow::requestTimer()
@@ -520,7 +563,7 @@ void MainWindow::requestTimer()
     // Request in JSON Mode
     sendSerialJSON("FW"); // Get the firmware
     sendSerialJSON("GetSet"); // Get the Settings
-    sendSerialJSON("ACK"); // Start Data Transfer right away
+    sendSerialJSON("IH"); // Start Data Transfer right away (Im here)
 
     // Checks if it gets a response within 1sec
     QTimer::singleShot(1000,this,&MainWindow::connectTimeout);
@@ -782,7 +825,14 @@ void MainWindow::storeSettings()
         return;
 
     if(trkset.hardware() == "NANO33BLE") {
-        sendSerialJSON("Setttings", trkset.allData());
+        QVariantMap d2s = trkset.changedData();
+        d2s.remove("axisremap");
+        d2s.remove("axissign");
+        // Send Changed Data
+        sendSerialJSON("Setttings", d2s);
+        // Set the data is now matched on the device
+        trkset.setDataMatched();
+        // Flag for exit, has data been sent
         sentToHT = true;
         ui->cmdStore->setEnabled(false);
     } else if(trkset.hardware() == "BNO055") {
@@ -929,11 +979,12 @@ void MainWindow::startCalibration()
     }
 }
 
-// Nano33BLE - Let hardware know were here
-void MainWindow::ackTimeout()
+// Nano33BLE - Let hardware know were here (I'm Here)
+
+void MainWindow::ihTimeout()
 {
     if(serialcon->isOpen() && trkset.hardware() == "NANO33BLE") {
-        sendSerialJSON("ACK");
+        sendSerialJSON("IH");
     }
 }
 

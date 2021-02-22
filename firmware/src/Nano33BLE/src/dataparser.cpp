@@ -7,6 +7,7 @@
 #include "dataparser.h"
 #include "main.h"
 #include "serial.h"
+#include "ucrc16lib.h"
 
 using namespace rtos;
 using namespace mbed;
@@ -33,6 +34,26 @@ void data_Thread()
     // Check if data is ready
     while(buffersFilled() > 0) {
         char *buffer = getJSONBuffer();
+
+        // CRC Check Data
+        int len = strlen(buffer);
+        bool failed=false;
+        if(len > 2) {
+            uint16_t calccrc = uCRC16Lib::calculate(buffer,len-sizeof(uint16_t));
+            if(calccrc != *(uint16_t*)(buffer+len-sizeof(uint16_t))) {
+                serialWrite("\x02{\"Cmd\":\"NAK\"}\x03\r\n");                
+                failed = true;
+            } else {
+                serialWrite("\x02{\"Cmd\":\"ACK\"}\x03\r\n");
+            }
+            // Remove CRC from end of buffer
+            buffer[len-sizeof(uint16_t)] = 0;
+        }
+
+        if(failed) {
+            continue;
+        }
+
         DeserializationError de = deserializeJson(json, buffer);
         if(de) {
             if(de == DeserializationError::IncompleteInput)
@@ -111,18 +132,21 @@ void parseData(DynamicJsonDocument &json)
     
     // Reset Center
     if(strcmp(command,"RstCnt") == 0) { 
-      serialWrite("HT: Resetting Center\r\n");
-      pressButton();
+        serialWrite("HT: Resetting Center\r\n");
+        pressButton();
+        uiResponsive = Kernel::Clock::now() + std::chrono::milliseconds(UIRESPONSIVE_TIME);
 
     // Settings Sent from UI
     } else if (strcmp(command, "Setttings") == 0) {        
         trkset.loadJSONSettings(json);
         serialWrite("HT: Saving Settings\r\n");           
+        uiResponsive = Kernel::Clock::now() + std::chrono::milliseconds(UIRESPONSIVE_TIME);
 
     // Save to Flash
     } else if (strcmp(command, "Flash") == 0) {
         serialWrite("HT: Saving Settings\r\n");           
         trkset.saveToEEPROM();
+        uiResponsive = Kernel::Clock::now() + std::chrono::milliseconds(UIRESPONSIVE_TIME);
 
     // Get settings
     } else if (strcmp(command, "GetSet") == 0) {  
@@ -131,11 +155,16 @@ void parseData(DynamicJsonDocument &json)
         trkset.setJSONSettings(json);
         json["Cmd"] = "Settings";
         serialWriteJSON(json);
-
-    // ACK Received, Means the GUI is running, send it data
-    } else if (strcmp(command, "ACK") == 0) {
         uiResponsive = Kernel::Clock::now() + std::chrono::milliseconds(UIRESPONSIVE_TIME);
-    
+
+    // Im Here Received, Means the GUI is running, keep sending it data
+    } else if (strcmp(command, "IH") == 0) {
+        uiResponsive = Kernel::Clock::now() + std::chrono::milliseconds(UIRESPONSIVE_TIME);
+
+    // NAK means GUI didn't receive last data packet
+    } else if (strcmp(command, "NAK") == 0) {
+        // Figure out what to do here....
+
     // Firmware Reqest
     } else if (strcmp(command, "FW") == 0) {
       serialWrite("HT: FW Requested\r\n");
@@ -144,6 +173,7 @@ void parseData(DynamicJsonDocument &json)
       json["Vers"] = FW_VERSION;
       json["Hard"] = FW_BOARD;
       serialWriteJSON(json);
+      uiResponsive = Kernel::Clock::now() + std::chrono::milliseconds(UIRESPONSIVE_TIME);
 
     // Unknown Command
     } else {
