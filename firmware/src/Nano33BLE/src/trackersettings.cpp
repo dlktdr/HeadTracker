@@ -57,6 +57,7 @@ TrackerSettings::TrackerSettings()
     // PPM Defaults
     ppmoutpin = DEF_PPM_OUT;
     ppminpin = DEF_PPM_IN; 
+    buttonpin = DEF_BUTTON_IN;
     ppmchans = 0;
     ppmoutinvert = false;
     ppmininvert = false;
@@ -72,10 +73,10 @@ TrackerSettings::TrackerSettings()
     orient = 0;
 
     // Setup button input & ppm output pins, bluetooth
-    setButtonPin(DEF_BUTTON_IN);
-    setPpmInPin(DEF_PPM_IN);
-    setPpmOutPin(DEF_PPM_OUT);
-    setBlueToothMode(DEF_BT_MODE);
+    setButtonPin(buttonpin);
+    setPpmInPin(ppminpin);
+    setPpmOutPin(ppmoutpin);
+    setBlueToothMode(btmode);
 }
 
 int TrackerSettings::Rll_min() const
@@ -676,17 +677,20 @@ void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
     v = json["rstonwave"]; if(!v.isNull()) setResetOnWave(v);
 
 // Button and Pins
+    bool setpins=false;
+    int bp=buttonpin;
+    int ppmi=ppminpin;
+    int ppmo=ppmoutpin;
 
-    // Get the pins
-    int bp=-1,ppmi=-1,ppmo=-1;
-    v = json["buttonpin"]; if(!v.isNull()) bp=v;
-    v = json["ppmoutpin"]; if(!v.isNull()) ppmo=v;
-    v = json["ppminpin"]; if(!v.isNull()) ppmi=v;
+    v = json["buttonpin"]; if(!v.isNull()) {bp=v; setpins=true;}
+    v = json["ppmoutpin"]; if(!v.isNull()) {ppmo=v; setpins=true;}
+    v = json["ppminpin"]; if(!v.isNull()) {ppmi=v; setpins=true;}
 
     // Check and make sure none are the same if they aren't disabled
-    if((bp   > 0 && (bp == ppmi || bp == ppmo)) || 
+    if(setpins && (
+       (bp   > 0 && (bp == ppmi || bp == ppmo)) || 
        (ppmi > 0 && (ppmi == bp || ppmi == ppmo)) ||
-       (ppmo > 0 && (ppmo == bp || ppmo == ppmi))) {
+       (ppmo > 0 && (ppmo == bp || ppmo == ppmi)))) {
         serialWriteln("HT: FAULT! Setting Pins, cannot have duplicates");
     } else {
         // Disable all pins first, so no conflicts on change
@@ -696,9 +700,10 @@ void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
 
         // Enable them all
         setButtonPin(bp);
-        setPpmOutPin(ppmo);
         setPpmInPin(ppmi);
+        setPpmOutPin(ppmo);
     }
+    
     v = json["ppmininvert"]; if(!v.isNull()) setInvertedPpmIn(v);    
     v = json["ppmoutinvert"]; if(!v.isNull()) setInvertedPpmOut(v);
 
