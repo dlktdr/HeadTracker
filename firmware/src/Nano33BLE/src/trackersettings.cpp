@@ -815,6 +815,7 @@ void TrackerSettings::setJSONSettings(DynamicJsonDocument &json)
     json["so22"] = magsioff[8];
 }
 
+// Saves current data to flash
 void TrackerSettings::saveToEEPROM()
 {
     char buffer[RX_BUF_SIZE];
@@ -829,7 +830,8 @@ void TrackerSettings::saveToEEPROM()
     }
 }
 
-// Must be called on startup to create PPM object
+// Called on startup to read the data from Flash
+
 void TrackerSettings::loadFromEEPROM()
 {
     // Load Settings
