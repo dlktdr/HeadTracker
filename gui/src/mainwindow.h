@@ -51,7 +51,7 @@ private:
     QTimer rxledtimer;
     QTimer txledtimer;
     QTimer updatesettingstmr;
-    QTimer acknowledge;
+    QTimer imheretimout;
     QTimer comtimeout;
     QString logd;
     Firmware *firmwareUploader;
@@ -82,8 +82,7 @@ private:
     void parseIncomingJSON(const QVariantMap &map);
     void fwDiscovered(QString vers, QString hard);
     void addToLog(QString log);
-
-
+    uint16_t escapeCRC(uint16_t crc);
 protected:
     void keyPressEvent(QKeyEvent *event);
 
