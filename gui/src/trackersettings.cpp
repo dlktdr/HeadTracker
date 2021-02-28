@@ -29,8 +29,8 @@ TrackerSettings::TrackerSettings(QObject *parent):
     _data["lppan"] = (uint)10;
     _data["lptiltroll"] = (uint)20;
 
-    _data["gyroweightpan"] = (uint)30;
-    _data["gyroweighttiltroll"] = (uint)40;
+    //_data["gyroweightpan"] = (uint)30;
+    //_data["gyroweighttiltroll"] = (uint)40;
 
     _data["axisremap"] = (uint)AXES_MAP(AXIS_X,AXIS_Y,AXIS_Z);
     _data["axissign"] = (uint)0;
@@ -486,12 +486,37 @@ void TrackerSettings::loadSettings(QSettings *settings)
     }
 }
 
-void TrackerSettings::setAllData(const QVariantMap &data)
+QVariantMap TrackerSettings::allData()
 {
+    return _data;
+}
+
+void TrackerSettings::setAllData(const QVariantMap &data)
+{    
     QStringList keys = data.keys();
     foreach(QString key,keys) {
         _data[key] = data.value(key);
+        _devicedata[key] = data.value(key);
     }
+}
+
+QVariantMap TrackerSettings::changedData()
+{
+    QVariantMap changed;
+    QStringList keys = _data.keys();
+    foreach(QString key,keys) {
+        // Current Data != Data on Device
+        if(_data[key] != _devicedata[key]) {
+            changed[key] = _data[key];
+        }
+    }
+    return changed;
+}
+
+void TrackerSettings::setDataMatched()
+{
+    // Update device data to current data
+    _devicedata = _data;
 }
 
 QVariant TrackerSettings::liveData(const QString &name)

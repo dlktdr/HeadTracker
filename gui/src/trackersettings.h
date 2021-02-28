@@ -157,8 +157,11 @@ public:
     void storeSettings(QSettings *settings);
     void loadSettings(QSettings *settings);
 
-    QVariantMap allData() {return _data;}
+    QVariantMap allData();
     void setAllData(const QVariantMap &data);
+
+    QVariantMap changedData();
+    void setDataMatched();
 
     QVariant liveData(const QString &name);
     void setLiveData(const QString &name, const QVariant &live);
@@ -184,6 +187,7 @@ signals:
 
 private:
     QVariantMap _data; // Stored Data
+    QVariantMap _devicedata; // Stored Data
     QVariantMap _live; // Live Data
 };
 

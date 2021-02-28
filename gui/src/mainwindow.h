@@ -11,16 +11,22 @@
 #include <QFileDialog>
 #include <QSettings>
 #include <QCloseEvent>
+#include <QQueue>
 #include "trackersettings.h"
 #include "firmware.h"
 #include "calibratebno.h"
 #include "calibrateble.h"
 #include "diagnosticdisplay.h"
 
-const int MAX_LOG_LENGTH=6000;
-const QString version="0.72";
-const QString fwversion="04"; // Which Firmware file to Use
-const QStringList firmwares={"BNO055","NANO33BLE","REMOTEBLE"};
+const int MAX_LOG_LENGTH=6000; // How many bytes to keep of log data in the gui
+const QString version="0.8"; // Current Version Number
+const QString fwversion="04"; // Which suffix on firmware file to use from GITHUB
+const QStringList firmwares={"BNO055","NANO33BLE"}; // Allowable hardware types
+
+const int IMHERETIME=8000; // milliseconds before sending another I'm Here Message to keep communication open
+const int MAX_TX_FAULTS=8; // Number of times to try re-sending data
+const int TX_FAULT_PAUSE=750; // milliseconds wait before trying another send
+const int ACKNAK_TIMEOUT=500; // milliseconds without an ack/nak is a fault
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -46,6 +52,7 @@ private:
     QTimer txledtimer;
     QTimer updatesettingstmr;
     QTimer acknowledge;
+    QTimer comtimeout;
     QString logd;
     Firmware *firmwareUploader;
     CalibrateBNO *bnoCalibratorDialog;
@@ -56,8 +63,12 @@ private:
     bool sentToHT;
     bool fwdiscovered;
     bool calmsgshowed;
+    bool settingstoHT;
 
-    int xtime;
+    int jsonfaults;
+    QByteArray lastjson;
+    QQueue<QByteArray> jsonqueue;
+
     bool graphing;
     bool rawmode;
 
@@ -83,6 +94,7 @@ private slots:
     void serialDisconnect();
     void serialError(QSerialPort::SerialPortError);
     void connectTimeout();
+    void comTimeout();
     void updateFromUI();
     void updateToUI();
     void offOrientChanged(float,float,float);
@@ -102,7 +114,7 @@ private slots:
     void loadSettings();
     void uploadFirmwareClick();
     void startCalibration();
-    void ackTimeout();
+    void ihTimeout();
     void saveToNVM();
     void showDiagsClicked();
 
