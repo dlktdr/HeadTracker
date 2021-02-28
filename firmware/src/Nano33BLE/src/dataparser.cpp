@@ -37,21 +37,16 @@ void data_Thread()
 
         // CRC Check Data
         int len = strlen(buffer);
-        bool failed=false;
         if(len > 2) {
             uint16_t calccrc = uCRC16Lib::calculate(buffer,len-sizeof(uint16_t));
             if(calccrc != *(uint16_t*)(buffer+len-sizeof(uint16_t))) {
-                serialWrite("\x02{\"Cmd\":\"NAK\"}\x03\r\n");                
-                failed = true;
+                serialWrite("\x15\r\n"); // Not-Acknowledged      
+                continue;
             } else {
-                serialWrite("\x02{\"Cmd\":\"ACK\"}\x03\r\n");
+                serialWrite("\x06\r\n"); // Acknowledged
             }
             // Remove CRC from end of buffer
             buffer[len-sizeof(uint16_t)] = 0;
-        }
-
-        if(failed) {
-            continue;
         }
 
         DeserializationError de = deserializeJson(json, buffer);
