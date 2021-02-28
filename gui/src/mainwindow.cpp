@@ -30,6 +30,7 @@ MainWindow::MainWindow(QWidget *parent)
     firmwareUploader = new Firmware;
 
     // Called to initalize GUI state to disabled
+    graphing = false;
     serialDisconnect();
 
     // Get list of available ports
@@ -38,9 +39,6 @@ MainWindow::MainWindow(QWidget *parent)
     // Use system default fixed witdh font
     QFont serifFont("Times", 10, QFont::Bold);
     ui->serialData->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
-    graphing = false;
-    xtime = 0;
-    jsonfaults = 0;
 
     // Update default settings to UI
     updateToUI();
@@ -143,6 +141,9 @@ MainWindow::MainWindow(QWidget *parent)
     connect(&updatesettingstmr,&QTimer::timeout,this,&MainWindow::updateSettings);
     updatesettingstmr.setSingleShot(true);
 
+    // Communication timer. Checks for lack of ACK & NAK codes
+    connect(&comtimeout,&QTimer::timeout,this,&MainWindow::comTimeout);
+
     // Start a timer to tell the device that we are here
     // Times out at 10 seconds so send an ack every 8
     acknowledge.start(IMHERETIME);
@@ -231,7 +232,7 @@ void MainWindow::serialDisconnect()
     savedToNVM = true;
     sentToHT = true;
     rawmode = false;
-    calmsgshowed = false;
+    jsonfaults = 0;
 }
 
 void MainWindow::serialError(QSerialPort::SerialPortError err)
@@ -250,7 +251,7 @@ void MainWindow::serialError(QSerialPort::SerialPortError err)
 
 // Parse the data received from the serial port
 void MainWindow::parseSerialData()
-{      
+{
     bool done = true;
     while(done) {
         int nlindex = serialData.indexOf("\r\n");
@@ -260,16 +261,62 @@ void MainWindow::parseSerialData()
         // Strip data up the the CR LF \r\n
         QByteArray data = serialData.left(nlindex);
 
-        // Found a SOT & EOT Character, JSON Data Sent
+        // Return if only a \r\n, no data.
+        if(data.length() < 1) {
+            serialData = serialData.right(serialData.length()-nlindex-2);
+            return;
+        }
+
+        // Found a SOT & EOT Character. JSON Data was sent
         if(data.left(1)[0] == (char)0x02 && data.right(1)[0] == (char)0x03) { // JSON Data
             QByteArray stripped = data.mid(1,data.length()-2);
-            parseIncomingJSON(QJsonDocument::fromJson(stripped).object().toVariantMap());
+
+            // *** TODO - Add CRC check here, issue a new settings request.
+            // Increment RXerror counter and fault out if too many errors.
+
+            parseIncomingJSON(QJsonDocument::fromJson(stripped).object().toVariantMap());            
+
+        //  Found the acknowldege Character, data was received without error
+        } else if(data.left(1)[0] == (char)0x06) {
+            // Clear the fault counter
+            jsonfaults = 0;
+
+            // If more data in queue, send it and wait for another ack char.
+            if(!jsonqueue.isEmpty()) {
+                sendSerialData(jsonqueue.dequeue());
+                jsonfaults = 1;
+            }
+
+        // Found a not-acknowldege character
+        } else if(data.left(1)[0] == (char)0x15) {
+
+            // Device is still there, reset the communication timer
+            comtimeout.stop();
+
+            // If too many faults, disconnect.
+            if(jsonfaults > MAX_TX_FAULTS) {
+                addToLog("\r\nERROR: Critical - " + QString(MAX_TX_FAULTS)+ " transmission faults, disconnecting\r\n");
+                serialDisconnect();
+
+            } else {
+                // Pause a bit, give time for device to catch up
+                Sleep(TX_FAULT_PAUSE);
+
+                // Resend last JSON
+                sendSerialData(lastjson);
+                addToLog("ERROR: CRC Fault - Re-sending data\n");
+            }
+
+
+
+            // Increment fault counter
+            jsonfaults++;
 
         // Found an HT value sent
         } else if(data.left(1) == "$") {
             parseIncomingHT(data);
 
-        // Other data show the user
+        // Other data sent, show the user
         } else {
             addToLog(data + "\n");
         }
@@ -328,12 +375,20 @@ void MainWindow::connectTimeout()
     }
 }
 
+/* Called if waiting for an ack or nak doesn't ever arrive (~1 second)
+ *   Try re-sending twice, then disconnect
+ */
+
+void MainWindow::comTimeout()
+{
+    // *** TODO
+}
 
 /* Decide what to do with incoming JSON packet
  * v1.0 Possible Incoming JSON Commands
- *      "GetSet"  Tracker Settings Send
- *      "FW"  Firmware Version
+ *      "Settings"  Tracker Settings Send
  *      "Data" Live Data for Info / Calibration
+ *      "FW"  Firmware Version + Hardware
  */
 
 void MainWindow::parseIncomingJSON(const QVariantMap &map)
@@ -342,32 +397,6 @@ void MainWindow::parseIncomingJSON(const QVariantMap &map)
     if(map["Cmd"].toString() == "Settings") {        
         trkset.setAllData(map);
         updateToUI();
-
-    // Board received last message properly
-    } else if (map["Cmd"].toString() == "ACK") {
-        jsonfaults = 0;
-        if(!jsonqueue.isEmpty()) {
-            sendSerialData(jsonqueue.dequeue());
-            jsonfaults = 1;
-        }
-
-    // Board didn't receive last information properly, send again
-    } else if (map["Cmd"].toString() == "NAK") {
-        // If too many faults, disconnect...
-        if(jsonfaults > 10) {
-            addToLog("\r\nCRITICAL ERROR - COM x3 FAULT DISCONNECTING\r\n");
-            serialDisconnect();
-        } else {
-
-
-            // Resend last JSON
-            sendSerialData(lastjson);
-        }
-
-        addToLog("JSON FAULT");
-
-        // Increment fault counter
-        jsonfaults++;
 
     // Data sent, Update the graph / servo sliders / calibration
     } else if (map["Cmd"].toString() == "Data") {
@@ -494,7 +523,7 @@ void MainWindow::parseIncomingHT(QString cmd)
 
 
 /* sendSerialData()
- *      Send String Data To The Serial Port
+ *      Send Raw Data To The Serial Port
  */
 
 void MainWindow::sendSerialData(QByteArray data)
@@ -506,18 +535,23 @@ void MainWindow::sendSerialData(QByteArray data)
     txledtimer.start();
     serialcon->write(data);
 
-    // Skip nuisance messagae
-    if(data =="\x02{\"Cmd\":\"ACK\"}\x03")
+    // Start a timer so if we don't get an ack/nak then fault out
+    if(trkset.hardware() == "NANO33BLE") {
+        comtimeout.start(ACKNAK_TIMEOUT);
+    }
+
+    // Skip nuisance I'm here message
+    if(QString(data).contains("{\"Cmd\":\"IH\"}"))
         return;
 
-    addToLog("TX: " + data + "\n");
+    addToLog("GUI: " + data + "\n");
 }
 
 /* sendSerialJSON()
  *      Sends a JSON Packet
  */
 
-bool MainWindow::sendSerialJSON(QString command, QVariantMap map)
+void MainWindow::sendSerialJSON(QString command, QVariantMap map)
 {
     // Don't send any new data until last has been received successfully
     map.remove("Hard");
@@ -531,10 +565,11 @@ bool MainWindow::sendSerialJSON(QString command, QVariantMap map)
     uint16_t CRC = uCRC16Lib::calculate(json.toUtf8().data(),json.length());
     lastjson = (char)0x02 + json.toLatin1() + QByteArray::fromRawData((char*)&CRC,2) + (char)0x03;
 
-    // If there is data that didn't make it there yet push this data to the stack
+    // If there is data that didn't make it there yet push this data to the queue
+    // to be sent later
     if(jsonfaults != 0) {
         jsonqueue.enqueue(lastjson);
-        return false;
+        return;
     }
 
     // Send the data
@@ -546,8 +581,6 @@ bool MainWindow::sendSerialJSON(QString command, QVariantMap map)
     // Reset Ack Timer
     acknowledge.stop();
     acknowledge.start(IMHERETIME);
-
-    return true;
 }
 
 void MainWindow::requestTimer()
@@ -800,7 +833,6 @@ void MainWindow::startGraph()
         return;
     sendSerialData("$PLST");
     graphing = true;
-    xtime = 0;
     ui->servoPan->setShowActualPosition(true);
     ui->servoTilt->setShowActualPosition(true);
     ui->servoRoll->setShowActualPosition(true);
@@ -924,10 +956,16 @@ void MainWindow::txledtimeout()
 
 void MainWindow::saveSettings()
 {
-    QString filename = QFileDialog::getSaveFileName(this,tr("Save Settings"),QString(),"Config Files (*.ini)");
-    if(!filename.isEmpty()) {
-        QSettings settings(filename,QSettings::IniFormat);
-        trkset.storeSettings(&settings);
+    QString filename;
+    QFileDialog savefd(this);
+    savefd.setWindowTitle("Save Settigns");
+    savefd.setNameFilter("Config Files (*.ini)");
+    if(savefd.exec()) {
+        if(savefd.selectedFiles().count()) {
+            filename = savefd.selectedFiles().at(0);
+            QSettings settings(filename,QSettings::IniFormat);
+            trkset.storeSettings(&settings);
+        }
     }
 }
 
