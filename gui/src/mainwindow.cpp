@@ -132,7 +132,7 @@ MainWindow::MainWindow(QWidget *parent)
     txledtimer.setInterval(100);
     connect(&rxledtimer,SIGNAL(timeout()),this,SLOT(rxledtimeout()));
     connect(&txledtimer,SIGNAL(timeout()),this,SLOT(txledtimeout()));
-    connect(&acknowledge,SIGNAL(timeout()),this,SLOT(ihTimeout()));
+    connect(&imheretimout,SIGNAL(timeout()),this,SLOT(ihTimeout()));
 
     // On BLE Calibration Save update to device
     connect(bleCalibratorDialog,&CalibrateBLE::calibrationSave,this,&MainWindow::storeSettings);
@@ -143,10 +143,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Communication timer. Checks for lack of ACK & NAK codes
     connect(&comtimeout,&QTimer::timeout,this,&MainWindow::comTimeout);
-
-    // Start a timer to tell the device that we are here
-    // Times out at 10 seconds so send an ack every 8
-    acknowledge.start(IMHERETIME);
 }
 
 MainWindow::~MainWindow()
@@ -233,6 +229,10 @@ void MainWindow::serialDisconnect()
     sentToHT = true;
     rawmode = false;
     jsonfaults = 0;
+    comtimeout.stop();
+    updatesettingstmr.stop();
+    imheretimout.stop();
+    jsonqueue.clear();
 }
 
 void MainWindow::serialError(QSerialPort::SerialPortError err)
@@ -280,6 +280,7 @@ void MainWindow::parseSerialData()
         } else if(data.left(1)[0] == (char)0x06) {
             // Clear the fault counter
             jsonfaults = 0;
+            comtimeout.stop();
 
             // If more data in queue, send it and wait for another ack char.
             if(!jsonqueue.isEmpty()) {
@@ -287,30 +288,9 @@ void MainWindow::parseSerialData()
                 jsonfaults = 1;
             }
 
-        // Found a not-acknowldege character
+        // Found a not-acknowldege character, resend data
         } else if(data.left(1)[0] == (char)0x15) {
-
-            // Device is still there, reset the communication timer
-            comtimeout.stop();
-
-            // If too many faults, disconnect.
-            if(jsonfaults > MAX_TX_FAULTS) {
-                addToLog("\r\nERROR: Critical - " + QString(MAX_TX_FAULTS)+ " transmission faults, disconnecting\r\n");
-                serialDisconnect();
-
-            } else {
-                // Pause a bit, give time for device to catch up
-                Sleep(TX_FAULT_PAUSE);
-
-                // Resend last JSON
-                sendSerialData(lastjson);
-                addToLog("ERROR: CRC Fault - Re-sending data\n");
-            }
-
-
-
-            // Increment fault counter
-            jsonfaults++;
+            comTimeout();
 
         // Found an HT value sent
         } else if(data.left(1) == "$") {
@@ -376,12 +356,30 @@ void MainWindow::connectTimeout()
 }
 
 /* Called if waiting for an ack or nak doesn't ever arrive (~1 second)
- *   Try re-sending twice, then disconnect
+ *  Also called on a nak received from a bad CRC on headtracker
+ *   Try re-sending data
  */
 
 void MainWindow::comTimeout()
 {
-    // *** TODO
+    comtimeout.stop();
+
+    // If too many faults, disconnect.
+    if(jsonfaults > MAX_TX_FAULTS) {
+        addToLog("\r\nERROR: Critical - " + QString(MAX_TX_FAULTS)+ " transmission faults, disconnecting\r\n");
+        serialDisconnect();
+
+    } else {
+        // Pause a bit, give time for device to catch up
+        Sleep(TX_FAULT_PAUSE);
+
+        // Resend last JSON
+        sendSerialData(lastjson);
+        addToLog("ERROR: CRC Fault - Re-sending data (" +  lastjson + ")\n");
+    }
+
+    // Increment fault counter
+    jsonfaults++;
 }
 
 /* Decide what to do with incoming JSON packet
@@ -537,7 +535,7 @@ void MainWindow::sendSerialData(QByteArray data)
 
     // Start a timer so if we don't get an ack/nak then fault out
     if(trkset.hardware() == "NANO33BLE") {
-        comtimeout.start(ACKNAK_TIMEOUT);
+        //comtimeout.start(ACKNAK_TIMEOUT);
     }
 
     // Skip nuisance I'm here message
@@ -562,7 +560,9 @@ void MainWindow::sendSerialJSON(QString command, QVariantMap map)
     QString json = QJsonDocument(jdoc).toJson(QJsonDocument::Compact);
 
     // Calculate the CRC Checksum
-    uint16_t CRC = uCRC16Lib::calculate(json.toUtf8().data(),json.length());
+    uint16_t CRC = escapeCRC(uCRC16Lib::calculate(json.toUtf8().data(),json.length()));
+
+    qDebug() << "CRC" << CRC << "Len" << json.length();
     lastjson = (char)0x02 + json.toLatin1() + QByteArray::fromRawData((char*)&CRC,2) + (char)0x03;
 
     // If there is data that didn't make it there yet push this data to the queue
@@ -579,8 +579,8 @@ void MainWindow::sendSerialJSON(QString command, QVariantMap map)
     jsonfaults = 1;
 
     // Reset Ack Timer
-    acknowledge.stop();
-    acknowledge.start(IMHERETIME);
+    imheretimout.stop();
+    imheretimout.start(IMHERETIME);
 }
 
 void MainWindow::requestTimer()
@@ -621,6 +621,26 @@ void MainWindow::addToLog(QString log)
 
     // Scroll to bottom
     ui->serialData->verticalScrollBar()->setValue(ui->serialData->verticalScrollBar()->maximum());
+}
+
+uint16_t MainWindow::escapeCRC(uint16_t crc)
+{
+    // Characters to escape out
+    uint8_t crclow = crc & 0xFF;
+    uint8_t crchigh = (crc >> 8) & 0xFF;
+    if(crclow == 0x00 ||
+       crclow == 0x02 ||
+       crclow == 0x03 ||
+       crclow == 0x06 ||
+       crclow == 0x15)
+        crclow ^= 0xFF; //?? why not..
+    if(crchigh == 0x00 ||
+       crchigh == 0x02 ||
+       crchigh == 0x03 ||
+       crchigh == 0x06 ||
+       crchigh == 0x15)
+        crchigh ^= 0xFF; //?? why not..
+    return (uint16_t)crclow | ((uint16_t)crchigh << 8);
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
@@ -753,13 +773,32 @@ void MainWindow::updateFromUI()
 
     // Shift the index of the disabled choice to -1 in settings
     int ppout_index = ui->cmbPpmOutPin->currentIndex()+1;
+    ppout_index = ppout_index==1?-1:ppout_index;
     int ppin_index = ui->cmbPpmInPin->currentIndex()+1;
+    ppin_index = ppin_index==1?-1:ppin_index;
     int but_index = ui->cmbButtonPin->currentIndex()+1;
-    int rstppm_index = ui->cmbResetOnPPM->currentIndex();
+    but_index = but_index==1?-1:but_index;
 
-    trkset.setPpmOutPin(ppout_index==1?-1:ppout_index);
-    trkset.setPpmInPin(ppin_index==1?-1:ppin_index);
-    trkset.setButtonPin(but_index==1?-1:but_index);
+    // Check for pin duplicates
+    if((but_index   > 0 && (but_index == ppin_index || but_index == ppout_index)) ||
+       (ppin_index > 0 && (ppin_index == but_index || ppin_index == ppout_index)) ||
+       (ppout_index > 0 && (ppout_index == but_index || ppout_index == ppin_index))) {
+        QMessageBox::information(this,"Error", "Cannot pick dulplicate pins");
+
+        // Reset gui to old values
+        ppout_index = trkset.ppmOutPin()-1;
+        ppin_index = trkset.ppmInPin()-1;
+        but_index = trkset.buttonPin()-1;
+        ui->cmbPpmOutPin->setCurrentIndex(ppout_index < 1 ? 0 : ppout_index);
+        ui->cmbPpmInPin->setCurrentIndex(ppin_index < 1 ? 0 : ppin_index);
+        ui->cmbButtonPin->setCurrentIndex(but_index < 1 ? 0 : but_index);
+    } else {
+        trkset.setPpmOutPin(ppout_index);
+        trkset.setPpmInPin(ppin_index);
+        trkset.setButtonPin(but_index);
+    }
+
+    int rstppm_index = ui->cmbResetOnPPM->currentIndex();
     trkset.setResetCntPPM(rstppm_index==0?-1:rstppm_index);
 
     trkset.setBlueToothMode(ui->cmbBtMode->currentIndex());
@@ -768,7 +807,6 @@ void MainWindow::updateFromUI()
     trkset.setInvertedPpmOut(ui->chkInvertedPPM->isChecked());
     trkset.setInvertedPpmIn(ui->chkInvertedPPMIn->isChecked());
     trkset.setResetOnWave(ui->chkResetCenterWave->isChecked());
-
 
     savedToNVM = false; // Indicate values have not been save to NVM
     sentToHT = false; // Indicate changes haven't been sent to HT
@@ -858,8 +896,15 @@ void MainWindow::storeSettings()
 
     if(trkset.hardware() == "NANO33BLE") {
         QVariantMap d2s = trkset.changedData();
+        // Remove useless items
         d2s.remove("axisremap");
         d2s.remove("axissign");
+        d2s.remove("Hard");
+        d2s.remove("Vers");
+        // If no changes, return
+        if(d2s.count() == 0)
+            return;
+
         // Send Changed Data
         sendSerialJSON("Setttings", d2s);
         // Set the data is now matched on the device
