@@ -29,8 +29,8 @@ TrackerSettings::TrackerSettings(QObject *parent):
     _data["lppan"] = (uint)10;
     _data["lptiltroll"] = (uint)20;
 
-    _data["gyroweightpan"] = (uint)30;
-    _data["gyroweighttiltroll"] = (uint)40;
+    //_data["gyroweightpan"] = (uint)30;
+    //_data["gyroweighttiltroll"] = (uint)40;
 
     _data["axisremap"] = (uint)AXES_MAP(AXIS_X,AXIS_Y,AXIS_Z);
     _data["axissign"] = (uint)0;
