@@ -71,8 +71,8 @@ MainWindow::MainWindow(QWidget *parent)
     // Spin Boxes
     //connect(ui->spnGyroPan,SIGNAL(editingFinished()),this,SLOT(updateFromUI()));
     //connect(ui->spnGyroTilt,SIGNAL(editingFinished()),this,SLOT(updateFromUI()));
-    connect(ui->spnLPPan,SIGNAL(editingFinished()),this,SLOT(updateFromUI()));
-    connect(ui->spnLPTiltRoll,SIGNAL(editingFinished()),this,SLOT(updateFromUI()));
+    connect(ui->spnLPPan,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->spnLPTiltRoll,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
 
     // Gain Sliders
     connect(ui->til_gain,SIGNAL(sliderMoved(int)),this,SLOT(updateFromUI()));
@@ -705,6 +705,8 @@ void MainWindow::updateToUI()
     ui->cmbBtMode->blockSignals(true);
     ui->cmbOrientation->blockSignals(true);
     ui->cmbResetOnPPM->blockSignals(true);
+    ui->spnLPPan->blockSignals(true);
+    ui->spnLPTiltRoll->blockSignals(true);
 
     ui->cmbpanchn->setCurrentIndex(trkset.panCh()-1);
     ui->cmbrllchn->setCurrentIndex(trkset.rollCh()-1);
@@ -733,6 +735,9 @@ void MainWindow::updateToUI()
     ui->cmbBtMode->blockSignals(false);
     ui->cmbOrientation->blockSignals(false);
     ui->cmbResetOnPPM->blockSignals(false);
+    ui->spnLPPan->blockSignals(false);
+    ui->spnLPTiltRoll->blockSignals(false);
+
 
     savedToNVM = true;
     sentToHT = true;
