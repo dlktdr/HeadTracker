@@ -18,7 +18,7 @@
 #include "serial.h"
 #include "main.h"
 
-const char *FW_VERSION = "0.72";
+const char *FW_VERSION = "0.8";
 const char *FW_BOARD = "NANO33BLE";
 
 using namespace rtos;
@@ -40,7 +40,7 @@ volatile bool dataready=false;
 uint32_t buffer[20];
 int bufindex=0;
 
-void setup() 
+void setup()
 {
     // Setup Serial
     serial_Init();
@@ -56,13 +56,13 @@ void setup()
 
     // Start the BT Thread, Higher Prority than data. - bt.cpp
     bt_Init();
-         
+
     // Actual Calculations - sense.cpp
     sense_Init();
 
     // Load settings from flash - trackersettings.cpp
     trkset.loadFromEEPROM();
-    
+
     // --- Starts all Events & ISR's Below ---
 
     // Serial Read Ready Interrupt - serial.cpp
@@ -82,6 +82,6 @@ void setup()
 }
 
 // Not Used
-void loop() 
+void loop()
 {
 }
