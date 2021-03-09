@@ -4,6 +4,7 @@
 #include <QTimer>
 #include <QScrollBar>
 #include <QFileDialog>
+
 #include "mainwindow.h"
 #include "firmware.h"
 #include "ui_firmware.h"
@@ -34,6 +35,35 @@ Firmware::Firmware(QWidget *parent) :
     connect(programmer, SIGNAL(errorOccurred(QProcess::ProcessError)), this, SLOT(programmerErrorOccured(QProcess::ProcessError)));
     ui->cmdStopUpload->setEnabled(false);
     findSerialPorts();
+
+    // Read the firmware file.
+    QFile file("firmware.xml");
+    if(file.open(QIODevice::ReadOnly)) {
+        QString error;
+        if(!xmlfirmwares.setContent(&file,false,&error)) {
+            qDebug() << "Error" << error;
+        } else {
+            file.close();
+
+            // print out the element names of all elements that are direct children
+            // of the outermost element.
+            QDomElement docElem = xmlfirmwares.documentElement();
+            qDebug() << "Prexir" << docElem.parentNode().toElement().tagName();
+
+
+            QDomNode n = docElem.firstChild();
+            while(!n.isNull()) {
+                QDomElement e = n.toElement(); // try to convert the node to an element.
+                if(!e.isNull()) {
+                    qDebug() << e.tagName() << Qt::endl; // the node really is an element.
+                }
+                n = n.nextSibling();
+            }
+        }
+    } else {
+        qDebug() << "Couldn't load firmware.xml";
+        file.close();
+    }
 }
 
 Firmware::~Firmware()

@@ -9,6 +9,7 @@
 #include <QMessageBox>
 #include <QProcess>
 #include <QPlainTextEdit>
+#include <QDomDocument>
 
 // !!!! Move me to a adjustable settings file !!!!! **********************
 const QString baseurl = "https://raw.githubusercontent.com/dlktdr/HeadTracker/master/firmware/bin/";
@@ -26,8 +27,7 @@ class Firmware : public QWidget
 
 public:
     explicit Firmware(QWidget *parent = nullptr);
-    ~Firmware();
-    //void setComPort(QString port) {comport = port;}
+    ~Firmware();    
 
 private:
     Ui::Firmware *ui;
@@ -38,6 +38,7 @@ private:
     QPlainTextEdit *programmerlog;
     QStringList arguments;
     QString comport;
+    QDomDocument xmlfirmwares;
 
     void startProgramming(const QString &filename);
 
