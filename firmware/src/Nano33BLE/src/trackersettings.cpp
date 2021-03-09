@@ -37,7 +37,7 @@ TrackerSettings::TrackerSettings()
     lppan = 75;
     lptiltroll = 75;
 
-    // Sensor Offsets    
+    // Sensor Offsets
     magxoff=0; magyoff=0; magzoff=0;
     accxoff=0; accyoff=0; acczoff=0;
     gyrxoff=0; gyryoff=0; gyrzoff=0;
@@ -46,7 +46,7 @@ TrackerSettings::TrackerSettings()
     magsioff[0] = 1; magsioff[1] = 0; magsioff[2] = 0;
     magsioff[3] = 0; magsioff[4] = 1; magsioff[5] = 0;
     magsioff[6] = 0; magsioff[7] = 0; magsioff[8] = 1;
-    
+
     // Output values
     gyrox=0;gyroy=0;gyroz=0;
     accx=0;accy=0;accz=0;
@@ -56,13 +56,13 @@ TrackerSettings::TrackerSettings()
 
     // PPM Defaults
     ppmoutpin = DEF_PPM_OUT;
-    ppminpin = DEF_PPM_IN; 
+    ppminpin = DEF_PPM_IN;
     buttonpin = DEF_BUTTON_IN;
     ppmchans = 0;
     ppmoutinvert = false;
     ppmininvert = false;
     rstppm = DEF_RST_PPM;
-    
+
     // Bluetooth defaults
     btmode = 0;
     _btf = nullptr;
@@ -346,7 +346,7 @@ int TrackerSettings::rollCh() const
 void TrackerSettings::setRollCh(int value)
 {
     if(value > 0 && value <= DEF_PPM_CHANNELS)
-        rllch = (int)value;    
+        rllch = (int)value;
 }
 
 //----------------------------------------------------------------------------------------
@@ -358,11 +358,11 @@ int TrackerSettings::buttonPin() const
 }
 
 void TrackerSettings::setButtonPin(int value)
-{   
+{
     if(value > 1 && value < 14) {
         if(buttonpin > 0)
             pinMode(buttonpin,INPUT); // Disable old button pin
-        pinMode(value,INPUT_PULLUP);    // Button as Input        
+        pinMode(value,INPUT_PULLUP);    // Button as Input
         buttonpin = value; // Save
         io_Init();
 
@@ -372,7 +372,7 @@ void TrackerSettings::setButtonPin(int value)
             pinMode(buttonpin,INPUT); // Disable old button pin
         buttonpin = -1;
         io_Init();
-    }    
+    }
 }
 
 int TrackerSettings::ppmOutPin() const
@@ -408,59 +408,59 @@ void TrackerSettings::setResetCntPPM(int value)
         rstppm = value;
 }
 
-bool TrackerSettings::resetOnWave() const 
+bool TrackerSettings::resetOnWave() const
 {
     return rstonwave;
 }
 
-void TrackerSettings::setResetOnWave(bool value) 
+void TrackerSettings::setResetOnWave(bool value)
 {
     rstonwave = value;
 }
 
-void TrackerSettings::gyroOffset(float &x, float &y, float &z) const 
+void TrackerSettings::gyroOffset(float &x, float &y, float &z) const
 {
     x=gyrxoff;y=gyryoff;z=gyrzoff;
 }
 
-void TrackerSettings::setGyroOffset(float x,float y, float z) 
+void TrackerSettings::setGyroOffset(float x,float y, float z)
 {
     gyrxoff=x;gyryoff=y;gyrzoff=z;
 }
 
-void TrackerSettings::accOffset(float &x, float &y, float &z) const 
+void TrackerSettings::accOffset(float &x, float &y, float &z) const
 {
     x=accxoff;y=accyoff;z=acczoff;
 }
 
-void TrackerSettings::setAccOffset(float x,float y, float z) 
+void TrackerSettings::setAccOffset(float x,float y, float z)
 {
     accxoff=x;accyoff=y;acczoff=z;
 }
 
-void TrackerSettings::magOffset(float &x, float &y, float &z) const 
+void TrackerSettings::magOffset(float &x, float &y, float &z) const
 {
     x=magxoff;y=magyoff;z=magzoff;
 }
 
-void TrackerSettings::setMagOffset(float x,float y, float z) 
+void TrackerSettings::setMagOffset(float x,float y, float z)
 {
     magxoff=x;magyoff=y;magzoff=z;
 }
 
 // Set Inverted on PPMout
-void TrackerSettings::setInvertedPpmOut(bool inv) 
+void TrackerSettings::setInvertedPpmOut(bool inv)
 {
     ppmoutinvert = inv;
     PpmOut_setInverted(inv);
-}    
+}
 
 // Set Inverted on PPMin
-void TrackerSettings::setInvertedPpmIn(bool inv) 
+void TrackerSettings::setInvertedPpmIn(bool inv)
 {
     ppmininvert = inv;
     PpmIn_setInverted(inv);
-}    
+}
 
 //---------------------------------
 // Bluetooth Settings
@@ -472,15 +472,15 @@ int TrackerSettings::blueToothMode() const
 
 void TrackerSettings::setBlueToothMode(int mode)
 {
-    if(mode < BTDISABLE || mode > BTHM10) 
-        return;    
-    
+    if(mode < BTDISABLE || mode > BTHM10)
+        return;
+
     // Delete old bluetooth if changing
     if(_btf != nullptr) {
         if(mode != btmode) {
             delete _btf;
             _btf = nullptr;
-        }        
+        }
     }
 
     // Save new mode
@@ -490,8 +490,8 @@ void TrackerSettings::setBlueToothMode(int mode)
     if(_btf == nullptr) {
         // Disabled
         if(mode == BTDISABLE) {
-            sprintf(bleaddress,"00:00:00:00:00:00");        
-        
+            sprintf(bleaddress,"00:00:00:00:00:00");
+
         // PARA FRSky Mode
         } else if(mode == BTPARA) {
             _btf = new BTPara();
@@ -503,9 +503,9 @@ void TrackerSettings::setBlueToothMode(int mode)
 }
 
 //----------------------------------------------------------------
-// Orentation 
+// Orentation
 
-int TrackerSettings::orientation() 
+int TrackerSettings::orientation()
 {
     return orient;
 }
@@ -559,8 +559,8 @@ void TrackerSettings::setPPMInValues(uint16_t *vals, int chans)
     if(chans > 16)
         return;
 
-    for(int i=0;i<chans;i++) 
-        ppminvals[i] = vals[i];    
+    for(int i=0;i<chans;i++)
+        ppminvals[i] = vals[i];
 
     ppmchans = chans;
 }
@@ -607,25 +607,30 @@ void TrackerSettings::setOffMag(float x, float y, float z)
     off_magz = z;
 }
 
-void TrackerSettings::setRawOrient(float t, float r, float p) 
+void TrackerSettings::setRawOrient(float t, float r, float p)
 {
     tilt=t;
     roll=r;
     pan=p;
 }
 
-void TrackerSettings::setOffOrient(float t, float r, float p) 
+void TrackerSettings::setOffOrient(float t, float r, float p)
 {
     tiltoff=t;
     rolloff=r;
     panoff=p;
 }
 
-void TrackerSettings::setPPMOut(uint16_t t, uint16_t r, uint16_t p) 
+void TrackerSettings::setPPMOut(uint16_t t, uint16_t r, uint16_t p)
 {
     tiltout=t;
     rollout=r;
     panout=p;
+}
+
+void TrackerSettings::setQuaternion(float q[4])
+{
+    memcpy(quat, q,sizeof(float)*4);
 }
 
 //--------------------------------------------------------------------------------------
@@ -645,7 +650,7 @@ void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
 // Servo Reversed
     v = json["servoreverse"]; if(!v.isNull()) setServoreverse(v);
 
-// Roll 
+// Roll
     v = json["rll_min"];  if(!v.isNull()) setRll_min(v);
     v = json["rll_max"];  if(!v.isNull()) setRll_max(v);
     v = json["rll_gain"]; if(!v.isNull()) setRll_gain(v);
@@ -667,13 +672,13 @@ void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
     v = json["lppan"];              if(!v.isNull()) setLPPan(v);
     v = json["lptiltroll"];         if(!v.isNull()) setLPTiltRoll(v);
 
-// Bluetooth Mode        
+// Bluetooth Mode
     v = json["btmode"]; if(!v.isNull()) setBlueToothMode(v);
 
 // Orientation
    v = json["orient"]; if(!v.isNull()) setOrientation(v);
 
-// Reset On Wave    
+// Reset On Wave
     v = json["rstonwave"]; if(!v.isNull()) setResetOnWave(v);
 
 // Button and Pins
@@ -688,7 +693,7 @@ void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
 
     // Check and make sure none are the same if they aren't disabled
     if(setpins && (
-       (bp   > 0 && (bp == ppmi || bp == ppmo)) || 
+       (bp   > 0 && (bp == ppmi || bp == ppmo)) ||
        (ppmi > 0 && (ppmi == bp || ppmi == ppmo)) ||
        (ppmo > 0 && (ppmo == bp || ppmo == ppmi)))) {
         serialWriteln("HT: FAULT! Setting Pins, cannot have duplicates");
@@ -703,8 +708,8 @@ void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
         setPpmInPin(ppmi);
         setPpmOutPin(ppmo);
     }
-    
-    v = json["ppmininvert"]; if(!v.isNull()) setInvertedPpmIn(v);    
+
+    v = json["ppmininvert"]; if(!v.isNull()) setInvertedPpmIn(v);
     v = json["ppmoutinvert"]; if(!v.isNull()) setInvertedPpmOut(v);
 
 // Reset center on PPM Ch > 1800us
@@ -716,10 +721,10 @@ void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
     v2 =json["magzoff"];
 
     if(!v.isNull() && !v1.isNull() && !v2.isNull())
-    {   
+    {
         // If all zero it's not actually calibrated
         if(v != 0.0 || v1 != 0.0 || v2 != 0) {
-            isCalibrated = true; // Add a notify flag calibration is complete                        
+            isCalibrated = true; // Add a notify flag calibration is complete
         }
         setMagOffset(v,v1,v2);
         //serialWriteln("HT: Mag offsets set");
@@ -742,17 +747,17 @@ void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
     v2 =json["gyrzoff"];
 
     if(!v.isNull() && !v1.isNull() && !v2.isNull())
-    {   
+    {
         setGyroOffset(v,v1,v2);
     }
 
 // Calibrarion Values
-    v = json["accxoff"]; 
-    v1 =json["accyoff"]; 
-    v2 =json["acczoff"]; 
+    v = json["accxoff"];
+    v1 =json["accyoff"];
+    v2 =json["acczoff"];
 
     if(!v.isNull() && !v1.isNull() && !v2.isNull())
-    {   
+    {
         setAccOffset(v,v1,v2);
     }
 }
@@ -786,9 +791,9 @@ void TrackerSettings::setJSONSettings(DynamicJsonDocument &json)
     json["buttonpin"] = buttonpin;
     json["ppmoutpin"] = ppmoutpin;
     json["ppmoutinvert"] = ppmoutinvert;
-    
+
     json["ppminpin"] = ppminpin;
-    json["ppmininvert"] = ppmininvert;    
+    json["ppmininvert"] = ppmininvert;
     json["rstppm"] = rstppm;
 
     json["btmode"] = btmode;
@@ -796,9 +801,9 @@ void TrackerSettings::setJSONSettings(DynamicJsonDocument &json)
     json["orient"] = orient;
 
 // Calibration Values
-    json["accxoff"] = accxoff; 
-    json["accyoff"] = accyoff; 
-    json["acczoff"] = acczoff; 
+    json["accxoff"] = accxoff;
+    json["accyoff"] = accyoff;
+    json["acczoff"] = acczoff;
 
     json["gyrxoff"] = gyrxoff;
     json["gyryoff"] = gyryoff;
@@ -843,10 +848,10 @@ void TrackerSettings::loadFromEEPROM()
     DynamicJsonDocument json(RX_BUF_SIZE);
     DeserializationError de;
     de = deserializeJson(json, flashSpace);
-    
-    if(de != DeserializationError::Ok) 
+
+    if(de != DeserializationError::Ok)
         serialWriteln("HT: Invalid JSON Data");
-    
+
     if(json["UUID"] == 837727) {
         serialWriteln("HT: Device has been freshly programmed, no data found");
 
@@ -855,6 +860,8 @@ void TrackerSettings::loadFromEEPROM()
         loadJSONSettings(json);
     }
 }
+
+extern uint16_t zaccelout;
 
 // Used to transmit raw data back to the PC
 void TrackerSettings::setJSONData(DynamicJsonDocument &json)
@@ -869,11 +876,14 @@ void TrackerSettings::setJSONData(DynamicJsonDocument &json)
 
     json["panoff"] = roundf(panoff*1000)/1000;
     json["tiltoff"] = roundf(tiltoff*1000)/1000;
-    json["rolloff"] = roundf(rolloff*1000)/1000;    
-    
+    json["rolloff"] = roundf(rolloff*1000)/1000;
+
     json["panout"] = panout;
     json["tiltout"] = tiltout;
     json["rollout"] = rollout;
+
+    // Acceleration Heave Output
+    //json["heaveoutput"]  = zaccelout;
 
     json["btaddr"] = bleaddress;
     json["magcal"] = isCalibrated;
@@ -886,8 +896,8 @@ void TrackerSettings::setJSONData(DynamicJsonDocument &json)
     }
     json["ppmin"] = pstr;
 
-/*// Live Values for Debugging. disabled for too much data transfer
-    json["accx"] = roundf(accx*1000)/1000;
+// Live Values for Debugging. disabled for too much data transfer
+    /*json["accx"] = roundf(accx*1000)/1000;
     json["accy"] = roundf(accy*1000)/1000;
     json["accz"] = roundf(accz*1000)/1000;
 
@@ -907,4 +917,8 @@ void TrackerSettings::setJSONData(DynamicJsonDocument &json)
     json["rollraw"] = roundf(roll*1000)/1000;
     json["panraw"] = roundf(pan*1000)/1000; */
 
+    json["quat0"] = roundf(quat[0]*1000)/1000;
+    json["quat1"] = roundf(quat[1]*1000)/1000;
+    json["quat2"] = roundf(quat[2]*1000)/1000;
+    json["quat3"] = roundf(quat[3]*1000)/1000;
 }

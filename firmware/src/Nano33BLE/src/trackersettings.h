@@ -15,10 +15,10 @@
 
 
 class TrackerSettings
-{    
-public:    
-    static constexpr int MIN_PWM=1000;
-    static constexpr int MAX_PWM=2000;
+{
+public:
+    static constexpr int MIN_PWM=988;
+    static constexpr int MAX_PWM=2012;
     static constexpr int DEF_MIN_PWM=1050;
     static constexpr int DEF_MAX_PWM=1950;
     static constexpr int MIN_CNT=(((MAX_PWM-MIN_PWM)/2)+MIN_PWM-250);
@@ -32,7 +32,7 @@ public:
     static constexpr int DEF_PPM_IN = -1;
     static constexpr int DEF_CENTER = 1500;
     static constexpr float MIN_GAIN= 0;
-    static constexpr float MAX_GAIN= 50.0;
+    static constexpr float MAX_GAIN= 40.0;
     static constexpr float DEF_GAIN= 10.0;
     static constexpr int DEF_BT_MODE= BTDISABLE; // Bluetooth Disabled
     static constexpr int DEF_RST_PPM = -1;
@@ -104,13 +104,13 @@ public:
 
     bool invertedPpmOut() {return ppmoutinvert;}
     void setInvertedPpmOut(bool inv);
-    
+
     int ppmInPin() const;
     void setPpmInPin(int value);
 
     bool invertedPppmIn() {return ppmininvert;}
     void setInvertedPpmIn(bool inv);
-        
+
     int buttonPin() const;
     void setButtonPin(int value);
 
@@ -138,7 +138,7 @@ public:
 
     void magSiOffset(float v[]) {memcpy(v,magsioff,9*sizeof(float));}
     void setMagSiOffset(float v[]) {memcpy(magsioff,v,9*sizeof(float));}
-    
+
     // Future use where channel number adjustable
     int ppmChannels() {return ppmchannels;}
     void setPPMChannels(int num) {}
@@ -148,7 +148,7 @@ public:
 
     void saveToEEPROM();
     void loadFromEEPROM();
-    
+
 // Setting of data to be returned to the PC
     void setRawGyro(float x, float y, float z);
     void setRawAccel(float x, float y, float z);
@@ -156,13 +156,14 @@ public:
     void setRawOrient(float t, float r, float p);
     void setOffGyro(float x, float y, float z);
     void setOffAccel(float x, float y, float z);
-    void setOffMag(float x, float y, float z);    
+    void setOffMag(float x, float y, float z);
     void setOffOrient(float t, float r, float p);
     void setPPMOut(uint16_t t, uint16_t r, uint16_t p);
     void setJSONData(DynamicJsonDocument &json);
     void setBLEAddress(const char *addr);
     void setPPMInValues(uint16_t *vals, int chans);
-   
+    void setQuaternion(float q[4]);
+
     BTFunction *getBTFunc() {return _btf;}
 
 private:
@@ -173,13 +174,13 @@ private:
     float rll_gain,tlt_gain,pan_gain;
     int tltch,rllch,panch;
     int ppmchannels;
-    
+
     // Calibration
     float magxoff, magyoff, magzoff;
     float magsioff[9];
     float accxoff, accyoff, acczoff;
     float gyrxoff, gyryoff, gyrzoff;
-    
+
     int servoreverse;
     int lppan,lptiltroll;
     int buttonpin,ppmoutpin,ppminpin;
@@ -188,7 +189,7 @@ private:
     BTFunction *_btf; // Blue tooth Function
     int btmode;
     bool rstonwave;
-    bool freshProgram;    
+    bool freshProgram;
     int orient;
     int rstppm;
 
@@ -201,11 +202,12 @@ private:
     float off_magx,off_magy,off_magz;
     float tilt,roll,pan;
     float tiltoff,rolloff,panoff;
+    float quat[4];
     uint16_t panout,tiltout,rollout;
     uint16_t ppminvals[16];
     int ppmchans;
     char bleaddress[20];
     bool isCalibrated;
 };
-    
+
 #endif
