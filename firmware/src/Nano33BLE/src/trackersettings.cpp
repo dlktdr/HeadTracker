@@ -915,10 +915,10 @@ void TrackerSettings::setJSONData(DynamicJsonDocument &json)
 
     json["tiltraw"] = roundf(tilt*1000)/1000;
     json["rollraw"] = roundf(roll*1000)/1000;
-    json["panraw"] = roundf(pan*1000)/1000; */
+    json["panraw"] = roundf(pan*1000)/1000;
 
     json["quat0"] = roundf(quat[0]*1000)/1000;
     json["quat1"] = roundf(quat[1]*1000)/1000;
     json["quat2"] = roundf(quat[2]*1000)/1000;
-    json["quat3"] = roundf(quat[3]*1000)/1000;
+    json["quat3"] = roundf(quat[3]*1000)/1000; */
 }
