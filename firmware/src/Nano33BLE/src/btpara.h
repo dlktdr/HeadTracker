@@ -6,7 +6,7 @@
 #include "ble.h"
 
 class BTPara : public BTFunction {
-public:    
+public:
     BTPara();
     ~BTPara();
     char *address() {return _address;}
@@ -23,17 +23,17 @@ private:
     uint8_t pnpid_data[7] = { 0x01, 0x0D, 0x00, 0x00, 0x00, 0x10, 0x01 };
 
     BLELocalDevice *bledev;
-    BLEService *info;
+    /*BLEService *info;
     BLECharacteristic *sysid;
     BLECharacteristic *manufacturer;
     BLECharacteristic *ieee;
-    BLECharacteristic *pnpid;
+    BLECharacteristic *pnpid;*/
 
     BLEService *para;
-    BLEByteCharacteristic *fff1;
+    /*BLEByteCharacteristic *fff1;
     BLEByteCharacteristic *fff2;
     BLECharacteristic *fff3;
-    BLECharacteristic *fff5;
+    BLECharacteristic *fff5;*/
     BLECharacteristic *fff6;
 
     BLEService *rmbrd;
