@@ -1,4 +1,7 @@
 # RC HeadTracker
+
+[![Join the chat at https://gitter.im/HeadTracker/community](https://badges.gitter.im/HeadTracker/community.svg)](https://gitter.im/HeadTracker/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 If your an RC enthusiast like myself with a FPV headset at some point you thought wouldn't it be cool if I could turn my head and the camera would follow. That is the intention of this project. It is a continuation of the work started by Dennis Frie, Mark Mansur and others in an effort to make it a more simple project.
 
 I would like to throw out thanks to Yuri for the BLE Para work. https://github.com/ysoldak/HeadTracker
