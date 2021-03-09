@@ -4,7 +4,7 @@
 // Pick a Filter
 //#define NXP_FILTER
 #define MADGWICK  // My Choice, seems to work well and not a ton of CPU used
-//#define MAHONY   
+//#define MAHONY
 
 #include "trackersettings.h"
 #include "sense.h"
@@ -24,7 +24,7 @@ Adafruit_NXPSensorFusion nxpfilter;
 
 static float raccx=0,raccy=0,raccz=0;
 static float rmagx=0,rmagy=0,rmagz=0;
-static float rgyrx=0,rgyry=0,rgyrz=0;  
+static float rgyrx=0,rgyry=0,rgyrz=0;
 static float accx=0,accy=0,accz=0;
 static float magx=0,magy=0,magz=0;
 static float gyrx=0,gyry=0,gyrz=0;
@@ -34,6 +34,8 @@ static float magxoff=0, magyoff=0, magzoff=0;
 static float accxoff=0, accyoff=0, acczoff=0;
 static float gyrxoff=0, gyryoff=0, gyrzoff=0;
 static float l_panout=0, l_tiltout=0, l_rollout=0;
+
+uint16_t zaccelout=1500;
 
 static uint16_t ppmchans[MAX_PPM_CHANNELS];
 static SF fusion;
@@ -45,17 +47,14 @@ static bool blesenseboard=true;
 static bool lastproximity=false;
 
 int sense_Init()
-{ 
+{
     if (!IMU.begin()) {
         serialWriteln("Failed to initalize sensors");
         return -1;
-    }  
-
-    IMU.setGyroFS(2); // 1000dps gyro    
-    IMU.setGyroODR(2); // 50hz
+    }
 
     // Increase Clock Speed, save some CPU due to blocking i2c
-    Wire1.setClock(400000);  
+    Wire1.setClock(400000);
 
 #ifdef NXP_FILTER
     nxpfilter.begin(125); // Frequency discovered by oscilliscope
@@ -63,10 +62,10 @@ int sense_Init()
 #endif
 
     // Initalize Gesture Sensor
-    if(!APDS.begin()) 
+    if(!APDS.begin())
         blesenseboard = false;
-    
-    return 0;        
+
+    return 0;
 }
 
 // Read all IMU data and do the calculations,
@@ -81,64 +80,64 @@ void sense_Thread()
     // Used to measure how long this took to adjust sleep timer
     runt.reset();
     runt.start();
-    
+
     digitalWrite(A0,HIGH);
 
-    // Run this first to keep most accurate timing    
+    // Run this first to keep most accurate timing
 #ifdef NXP_FILTER
-    // NXP 
+    // NXP
     nxpfilter.update(gyrx, gyry, gyrz, accx*9.807, accy*9.807, accz*9.807, magx, magy, magz);
     roll = nxpfilter.getPitch();
     tilt = nxpfilter.getRoll();
     pan = nxpfilter.getYaw();
-#else 
+#else
     // Period Between Samples
     float deltat = fusion.deltatUpdate();
-#ifdef MADGWICK 
-    fusion.MadgwickUpdate(gyrx * DEG_TO_RAD, gyry * DEG_TO_RAD, gyrz * DEG_TO_RAD, 
-                        accx, accy, accz, 
-                        magx, magy, magz, 
-    deltat);  
+#ifdef MADGWICK
+    fusion.MadgwickUpdate(gyrx * DEG_TO_RAD, gyry * DEG_TO_RAD, gyrz * DEG_TO_RAD,
+                        accx, accy, accz,
+                        magx, magy, magz,
+    deltat);
 #elif defined(MAHONY)
     fusion.MahonyUpdate(gyrx* DEG_TO_RAD, gyry* DEG_TO_RAD, gyrz* DEG_TO_RAD, accx, accy, accz, magx, magy, magz, deltat);  //else use the magwick, it is slower but more accurate
-#endif    
+#endif
     roll = fusion.getPitch();
     tilt = fusion.getRoll();
     pan = fusion.getYaw();
 #endif
 
     // Reset Center on Wave or Proximity, Don't update often
-    static int sensecount=0;    
+    static int sensecount=0;
     if(blesenseboard && sensecount++ == 50) {
         sensecount = 0;
         //bool btnpress=false;
         if (trkset.resetOnWave()) {
             /*if(APDS.gestureAvailable()) {
-                // a gesture was detected, read and print to serial monitor                
-                int gesture = APDS.readGesture();               
-                if(lastgesture == GESTURE_DOWN && 
+                // a gesture was detected, read and print to serial monitor
+                int gesture = APDS.readGesture();
+                if(lastgesture == GESTURE_DOWN &&
                     gesture == GESTURE_UP)
                     btnpress=true;
-                else if(lastgesture == GESTURE_UP && 
+                else if(lastgesture == GESTURE_UP &&
                         gesture == GESTURE_DOWN)
                     btnpress=true;
-                else if(lastgesture == GESTURE_LEFT && 
+                else if(lastgesture == GESTURE_LEFT &&
                         gesture == GESTURE_RIGHT)
                     btnpress=true;
-                else if(lastgesture == GESTURE_RIGHT && 
+                else if(lastgesture == GESTURE_RIGHT &&
                         gesture == GESTURE_LEFT)
                     btnpress=true;
-                lastgesture = gesture;                
+                lastgesture = gesture;
                 if(btnpress) {
                     pressButton();
                     serialWriteln("HT: Reset center from a wave");
                 }
             }*/
 
-            // Reset on Proximity            
+            // Reset on Proximity
             if(APDS.proximityAvailable()) {
                 int proximity = APDS.readProximity();
-            
+
                 if (proximity == 0 && lastproximity == false) {
                     pressButton();
                     serialWriteln("HT: Reset center from a close proximity");
@@ -157,7 +156,7 @@ void sense_Thread()
         panoffset = pan;
         tiltoffset = tilt;
     }
-    
+
     // Tilt output
     float tiltout = (tilt - tiltoffset) * trkset.Tlt_gain() * (trkset.isTiltReversed()?-1.0:1.0);
     float beta = (float)trkset.lpTiltRoll() / 100;                        // LP Beta
@@ -165,16 +164,16 @@ void sense_Thread()
     l_tiltout = tiltout;
     uint16_t tiltout_ui = tiltout + trkset.Tlt_cnt();                     // Apply Center Offset
     tiltout_ui = MAX(MIN(tiltout_ui,trkset.Tlt_max()),trkset.Tlt_min());  // Limit Output
-            
+
     // Roll output
     float rollout = (roll - rolloffset) * trkset.Rll_gain() * (trkset.isRollReversed()? -1.0:1.0);
-    rollout = beta * rollout + (1.0 - beta) * l_rollout;                  // Low Pass        
+    rollout = beta * rollout + (1.0 - beta) * l_rollout;                  // Low Pass
     l_rollout = rollout;
     uint16_t rollout_ui = rollout + trkset.Rll_cnt();                     // Apply Center Offset
     rollout_ui = MAX(MIN(rollout_ui,trkset.Rll_max()),trkset.Rll_min());  // Limit Output
-    
+
     // Pan output, Normalize to +/- 180 Degrees
-    float panout = normalize((pan-panoffset),-180,180)  * trkset.Pan_gain() * (trkset.isPanReversed()? -1.0:1.0);    
+    float panout = normalize((pan-panoffset),-180,180)  * trkset.Pan_gain() * (trkset.isPanReversed()? -1.0:1.0);
     beta = (float)trkset.lpPan() / 100;                                // LP Beta
     panout = beta * panout + (1.0 - beta) * l_panout;                  // Low Pass
     l_panout = panout;
@@ -218,6 +217,10 @@ void sense_Thread()
     ppmchans[trkset.rollCh()-1] = rollout_ui;
     ppmchans[trkset.panCh()-1] = panout_ui;
 
+    // Z Acceleration output on channel 4
+    //ppmchans[3] = MIN(MAX((((raccz  - 1.0) / 2) * 1000)+1500,TrackerSettings::MIN_PWM),TrackerSettings::MAX_PWM);
+    //zaccelout = ppmchans[3];
+
     // Set the PPM Outputs
     for(int i=0;i<PpmOut_getChnCount();i++) {
         PpmOut_setChannel(i,ppmchans[i]);
@@ -230,24 +233,27 @@ void sense_Thread()
         for(int i=0;i<MAX_PPM_CHANNELS;i++) {
             bt->setChannel(i,ppmchans[i]);
         }
-    }                
+    }
 
-    // Get new data from sensors.. 
+    digitalWrite(A0,LOW); // Pin for timing check
+    digitalWrite(A1,HIGH);
+
+    // Get new data from sensors..
     //  FIX MEE I2C is hogging 40% of processor just waiting!!! UGG Needs to be changed to non-blocking
-    
-    if(++counter == SENSEUPDATE) { 
+
+    if(++counter == SENSEUPDATE) {
         counter = 0;
-        
+
         // Setup Rotations
         float rotation[3];
         trkset.orientRotations(rotation);
 
         // Accelerometer
         if(IMU.accelerationAvailable()) {
-            IMU.readRawAccel(raccx, raccy, raccz);            
+            IMU.readAcceleration(raccx, raccy, raccz);
             raccx *= -1.0; // Flip X to make classic cartesian (+X Right, +Y Up, +Z Vert)
             trkset.accOffset(accxoff,accyoff,acczoff);
-            
+
             accx = raccx - accxoff;
             accy = raccy - accyoff;
             accz = raccz - acczoff;
@@ -260,9 +266,9 @@ void sense_Thread()
 
         // Gyrometer
         if(IMU.gyroscopeAvailable()) {
-            IMU.readRawGyro(rgyrx,rgyry,rgyrz);
+            IMU.readGyroscope(rgyrx,rgyry,rgyrz);
             rgyrx *= -1.0; // Flip X to match other sensors
-            trkset.gyroOffset(gyrxoff,gyryoff,gyrzoff);            
+            trkset.gyroOffset(gyrxoff,gyryoff,gyrzoff);
             gyrx = rgyrx - gyrxoff;
             gyry = rgyry - gyryoff;
             gyrz = rgyrz - gyrzoff;
@@ -279,17 +285,17 @@ void sense_Thread()
 
         // Magnetometer
         if(IMU.magneticFieldAvailable()) {
-            IMU.readRawMagnet(rmagx,rmagy,rmagz);
+            IMU.readMagneticField(rmagx,rmagy,rmagz);
             // On first read set the min/max values to this reading
             // Get Offsets and Apply them
-            trkset.magOffset(magxoff,magyoff,magzoff);              
+            trkset.magOffset(magxoff,magyoff,magzoff);
 
             // Calibrate Hard Iron Offsets
-            magx = rmagx - magxoff; 
+            magx = rmagx - magxoff;
             magy = rmagy - magyoff;
-            magz = rmagz - magzoff;       
+            magz = rmagz - magzoff;
 
-            // Calibrate soft iron offsets 
+            // Calibrate soft iron offsets
             float magsioff[9];
             trkset.magSiOffset(magsioff);
             magx = (magx * magsioff[0]) + (magy * magsioff[1]) + (magz * magsioff[2]);
@@ -301,7 +307,7 @@ void sense_Thread()
             rotate(tmpmag, rotation);
             magx = tmpmag[0]; magy = tmpmag[1]; magz = tmpmag[2];
         }
-    }        
+    }
 
     // Update the settings
     // Both data and sensor threads will use this data. If data thread has it locked skip this reading.
@@ -315,24 +321,29 @@ void sense_Thread()
         trkset.setOffAccel(accx,accy,accz);
         trkset.setOffGyro(gyrx,gyry,gyrz);
         trkset.setOffMag(magx,magy,magz);
-        
+
         trkset.setRawOrient(tilt,roll,pan);
         trkset.setOffOrient(tilt-tiltoffset,roll-rolloffset, normalize(pan-panoffset,-180,180));
         trkset.setPPMOut(tiltout_ui,rollout_ui,panout_ui);
-    
+
         // PPM Input Values
         trkset.setPPMInValues(ppminchans,ppmi_chcnt);
-        
+
+        // Qauterion Data
+        float *qd = fusion.getQuat();
+        trkset.setQuaternion(qd);
+
         dataMutex.unlock();
     }
-    
-    digitalWrite(A0,LOW); // Pin for timing check
+
+    digitalWrite(A1,HIGH);
+
 
     // Use this time to determine how long to sleep for, save in microseconds in sleepyt
     runt.stop();
     using namespace std::chrono;
     int micros = duration_cast<microseconds>(runt.elapsed_time()).count();
-    int sleepyt = (SENSE_PERIOD - micros); 
+    int sleepyt = (SENSE_PERIOD - micros);
 
     // Don't sleep for too short it something wrong above
     if(sleepyt < 5)
@@ -345,11 +356,11 @@ void sense_Thread()
 
 
 // FROM https://stackoverflow.com/questions/1628386/normalise-orientation-between-0-and-360
-// Normalizes any number to an arbitrary range 
-// by assuming the range wraps around when going below min or above max 
-float normalize( const float value, const float start, const float end ) 
+// Normalizes any number to an arbitrary range
+// by assuming the range wraps around when going below min or above max
+float normalize( const float value, const float start, const float end )
 {
-    const float width       = end - start   ;   // 
+    const float width       = end - start   ;   //
     const float offsetValue = value - start ;   // value relative to 0
 
     return ( offsetValue - ( floor( offsetValue / width ) * width ) ) + start ;
@@ -359,7 +370,7 @@ float normalize( const float value, const float start, const float end )
 // Rotate, in Order X -> Y -> Z
 
 void rotate(float pn[3], const float rotation[3])
-{  
+{
     float rot[3] = {0,0,0};
     memcpy(rot,rotation,sizeof(rot[0])*3);
 
