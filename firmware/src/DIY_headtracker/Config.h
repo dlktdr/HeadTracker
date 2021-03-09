@@ -35,7 +35,7 @@
 //
 
 // Firmware Version, e.g. X.YY
-#define FIRMWARE_VERSION_FLOAT  0.40    // 2 decimal places
+#define FIRMWARE_VERSION_FLOAT  0.43    // 2 decimal places
 
 // Number of PPM channels out. 1 - 12 channels supported. 
 #define NUMBER_OF_CHANNELS 8
@@ -47,10 +47,10 @@
 #define SERIAL_OUTPUT_FRAME_INTERVAL    10
 
 // Serial communication speed. 
-#define SERIAL_BAUD 57600
+#define SERIAL_BAUD 115200
 
 // Serial Read Buffer 
-#define SERIAL_BUFFER_SIZE 100
+#define SERIAL_BUFFER_SIZE 200
 
 // Sensor board update-rate. Not done yet. 
 #define UPDATE_RATE 50
