@@ -239,6 +239,7 @@ void ServoMinMax::mousePressEvent(QMouseEvent *event)
             min_start = min_val;
             minspinbox->show();
             minspinbox->move(this->mapToGlobal(QPoint(minSlider.x()-minspinbox->width()/2+minSlider.width()/2,-minspinbox->height()+padding/2)));
+            minspinbox->setValue(min_val);
             minspinbox->setFocus();
         } else if(maxSlider.contains(event->pos())) {
             mouseDownPoint = event->globalPos();
@@ -246,6 +247,7 @@ void ServoMinMax::mousePressEvent(QMouseEvent *event)
             max_start = max_val;
             maxspinbox->show();
             maxspinbox->setFocus();
+            maxspinbox->setValue(max_val);
             maxspinbox->move(this->mapToGlobal(QPoint(maxSlider.x()-maxspinbox->width()/2+maxSlider.width()/2,-maxspinbox->height()+padding/2)));
         } else if(centerSlider.contains(event->pos())) {
             mouseDownPoint = event->globalPos();
@@ -253,6 +255,7 @@ void ServoMinMax::mousePressEvent(QMouseEvent *event)
             cnt_start = c_value;
             cntspinbox->show();
             cntspinbox->setFocus();
+            cntspinbox->setValue(c_value);
             cntspinbox->move(this->mapToGlobal(QPoint(centerSlider.x()-cntspinbox->width()/2+centerSlider.width()/2,-cntspinbox->height()+padding/2)));
         } else {
         }
