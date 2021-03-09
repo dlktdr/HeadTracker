@@ -3,7 +3,7 @@
 
 #include <nrfx_ppi.h>
 #include <nrfx_gpiote.h>
-
+#include "trackersettings.h"
 #include "serial.h"
 
 static uint32_t oldTimer3Interrupt=0;
@@ -36,14 +36,14 @@ volatile bool buildingdata=false;
 
 /* Builds an array with all the transition times
  */
-void buildChannels() 
-{        
+void buildChannels()
+{
     buildingdata = true; // Prevent a read happing while this is building
 
     int ch=0;
     int i;
     uint32_t curtime=framesync;
-    chsteps[0] = curtime;    
+    chsteps[0] = curtime;
     for(i=1; i<ch_count*2+1;i+=2) {
         curtime += sync;
         chsteps[i] = curtime;
@@ -63,7 +63,7 @@ void buildChannels()
     buildingdata = false;
 }
 
-void resetChannels() 
+void resetChannels()
 {
     // Set all channels to center
     for(int i=0;i<16;i++)
@@ -72,7 +72,6 @@ void resetChannels()
 
 extern "C" void Timer3ISR_Handler(void)
 {
-    digitalWrite(A1,HIGH);
     if(NRF_TIMER3->EVENTS_COMPARE[0] == 1) {
         // Clear event
         NRF_TIMER3->EVENTS_COMPARE[0] = 0;
@@ -82,7 +81,7 @@ extern "C" void Timer3ISR_Handler(void)
             if(ppmoutinverted)
                 NRF_GPIOTE->TASKS_SET[7] = 1;
             else
-                NRF_GPIOTE->TASKS_CLR[7] = 1;            
+                NRF_GPIOTE->TASKS_CLR[7] = 1;
         }
 
         curstep++;
@@ -90,14 +89,13 @@ extern "C" void Timer3ISR_Handler(void)
         if(curstep >= chstepcnt) {
             if(!buildingdata)
                 memcpy(isrchsteps,chsteps,sizeof(uint32_t)*35);
-            NRF_TIMER3->TASKS_CLEAR = 1;            
+            NRF_TIMER3->TASKS_CLEAR = 1;
             curstep = 0;
-        }          
-        
-        // Setup next capture event value     
+        }
+
+        // Setup next capture event value
         NRF_TIMER3->CC[0] = isrchsteps[curstep] + isrchsteps[chstepcnt]; // Offset by the extra time required to make frame length right
     }
-    digitalWrite(A1,LOW);
 }
 
 // Set pin to -1 to disable
@@ -113,24 +111,24 @@ void PpmOut_setPin(int pinNum)
     int dpintoport[] = {0,0,1 ,1 ,1 ,1 ,1 ,0 ,0 ,0 ,1,1,1,0 };
 
     int pin;
-    pin = dpintopin[pinNum];    
+    pin = dpintopin[pinNum];
     int port;
-    port = dpintoport[pinNum];    
-    
+    port = dpintoport[pinNum];
+
     // Disabled and already Started - Shutdown
-    if(pinNum < 0 && ppmoutstarted) {        
+    if(pinNum < 0 && ppmoutstarted) {
         __disable_irq();
-        
+
         // Stop Timer
         NRF_TIMER3->TASKS_STOP = 1;
-        
+
         // Stop Interrupt
         NRF_TIMER3->INTENCLR = TIMER_INTENSET_COMPARE0_Msk;
 
         // Clear interrupt flag
-        NRF_TIMER3->EVENTS_COMPARE[0] = 0;      
+        NRF_TIMER3->EVENTS_COMPARE[0] = 0;
         NRF_GPIOTE->CONFIG[7] = 0; // Disable Config
-        
+
         // Was there a previous handler?
         if(oldTimer3Interrupt != 0) {
             NVIC_DisableIRQ(TIMER3_IRQn);
@@ -142,7 +140,7 @@ void PpmOut_setPin(int pinNum)
             NVIC_DisableIRQ(TIMER3_IRQn);
         }
 
-        __enable_irq();                
+        __enable_irq();
 
         setPin = pinNum;
         ppmoutstarted = false;
@@ -154,14 +152,14 @@ void PpmOut_setPin(int pinNum)
 
         // Disable timer interrupt
         NRF_TIMER3->INTENCLR = TIMER_INTENSET_COMPARE0_Msk;
-        NRF_TIMER3->EVENTS_COMPARE[0] = 0;      
+        NRF_TIMER3->EVENTS_COMPARE[0] = 0;
 
         // Setup GPOITE[7] to toggle output on every timer capture
         NRF_GPIOTE->CONFIG[7] = (GPIOTE_CONFIG_MODE_Task << GPIOTE_CONFIG_MODE_Pos) |
             (GPIOTE_CONFIG_POLARITY_Toggle << GPIOTE_CONFIG_POLARITY_Pos) |
             (pin <<  GPIOTE_CONFIG_PSEL_Pos) |
             (port << GPIOTE_CONFIG_PORT_Pos);
-       
+
         // If not started
         if(!ppmoutstarted) {
 
@@ -169,7 +167,7 @@ void PpmOut_setPin(int pinNum)
             NRF_TIMER3->PRESCALER = 4; // 16Mhz/2^(4) = 1Mhz = 1us Resolution, 1.048s Max@32bit
             NRF_TIMER3->MODE = TIMER_MODE_MODE_Timer << TIMER_MODE_MODE_Pos;
             NRF_TIMER3->BITMODE = TIMER_BITMODE_BITMODE_16Bit << TIMER_BITMODE_BITMODE_Pos;
-            
+
             // On Compare equals Value, Toggle IO Pin
             NRF_PPI->CH[10].EEP = (uint32_t)&NRF_TIMER3->EVENTS_COMPARE[0];
             NRF_PPI->CH[10].TEP = (uint32_t)&NRF_GPIOTE->TASKS_OUT[7];
@@ -180,7 +178,7 @@ void PpmOut_setPin(int pinNum)
             // Change timer3 interrupt handler, if enabled
             if(NVIC_GetEnableIRQ(TIMER3_IRQn)) {
                 oldTimer3Interrupt = NVIC_GetVector(TIMER3_IRQn);
-                NVIC_DisableIRQ(TIMER3_IRQn);                
+                NVIC_DisableIRQ(TIMER3_IRQn);
             } else
                 oldTimer3Interrupt = 0;
 
@@ -193,14 +191,14 @@ void PpmOut_setPin(int pinNum)
             curstep = 0;
             NRF_TIMER3->TASKS_CLEAR = 1;
             NRF_TIMER3->TASKS_START = 1;
-            
+
             ppmoutstarted = true;
         }
 
         // Enable timer interrupt
         NRF_TIMER3->EVENTS_COMPARE[0] = 0;
         NRF_TIMER3->INTENSET |= TIMER_INTENSET_COMPARE0_Enabled << TIMER_INTENSET_COMPARE0_Pos;
-        
+
         __enable_irq();
     }
 }
@@ -220,7 +218,7 @@ void PpmOut_setChnCount(int chans)
 {
     if(chans >= 4 && chans <=16) {
         ch_count = chans;
-        resetChannels();        
+        resetChannels();
     }
     buildChannels();
 }
@@ -228,7 +226,7 @@ void PpmOut_setChnCount(int chans)
 void PpmOut_setChannel(int chan, uint16_t val)
 {
     if(chan >= 0 && chan <= ch_count &&
-       val >= 1000 && val <= 2000) {
+       val >= TrackerSettings::MIN_PWM && val <= TrackerSettings::MAX_PWM) {
         ch_values[chan] = val;
     }
     buildChannels();
