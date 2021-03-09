@@ -8,6 +8,9 @@
 #include <QMenu>
 #include <QStylePainter>
 #include <QStyleOptionSlider>
+#include <QSpinBox>
+#include <QTimer>
+#include "popupslider.h"
 
 class ServoMinMax : public QWidget
 {
@@ -30,6 +33,9 @@ private slots:
     void showContextMenu(const QPoint &p);
     void reCenter();
     void setDefaults();
+    void cntSpinChanged(int);
+    void minSpinChanged(int);
+    void maxSpinChanged(int);
 
 public slots:
     void setCenter(int value) {c_value = value;update();} // !Add Limit Check!
@@ -38,13 +44,16 @@ public slots:
     void setShowActualPosition(bool on) {showPos = on;update();}
     void setActualPosition(int value) {actValue = value;update();}
 
-
 signals:
     void minimumChanged(int value);
     void maximumChanged(int value);
     void centerChanged(int value);
 
 private:
+    PopupSlider *cntspinbox;
+    PopupSlider *minspinbox;
+    PopupSlider *maxspinbox;
+
     bool showPos;
     int min_travel;
     int max_travel;
@@ -85,6 +94,7 @@ private:
     int min_start;
     int max_start;
     int cnt_start;
+    QTimer hidepopup;
 };
 
 #endif // SERVOMINMAX_H

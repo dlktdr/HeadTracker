@@ -84,7 +84,7 @@ void TrackerSettings::setRll_gain(float value)
         value = MIN_GAIN;
     if(value > MAX_GAIN)
         value = MAX_GAIN;
-    _data["rll_gain"] = value;
+    _data["rll_gain"] = QString::number(value,'g',3);
 }
 
 int TrackerSettings::Rll_cnt() const
@@ -140,7 +140,7 @@ void TrackerSettings::setPan_gain(float value)
         value = MIN_GAIN;
     if(value > MAX_GAIN)
         value = MAX_GAIN;
-    _data["pan_gain"] = value;
+    _data["pan_gain"] = QString::number(value,'g',3);
 }
 
 int TrackerSettings::Pan_cnt() const
@@ -196,7 +196,7 @@ void TrackerSettings::setTlt_gain(float value)
         value = MIN_GAIN;
     if(value > MAX_GAIN)
         value = MAX_GAIN;
-    _data["tlt_gain"] = value;
+    _data["tlt_gain"] = QString::number(value,'g',3);
 }
 
 int TrackerSettings::Tlt_cnt() const

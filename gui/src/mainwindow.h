@@ -12,6 +12,7 @@
 #include <QSettings>
 #include <QCloseEvent>
 #include <QQueue>
+#include <QPlainTextEdit>
 #include "trackersettings.h"
 #include "firmware.h"
 #include "calibratebno.h"
@@ -20,7 +21,7 @@
 
 const int MAX_LOG_LENGTH=6000; // How many bytes to keep of log data in the gui
 const QString version="0.8"; // Current Version Number
-const QString fwversion="04"; // Which suffix on firmware file to use from GITHUB
+const QString fwversion="08"; // Which suffix on firmware file to use from GITHUB
 const QStringList firmwares={"BNO055","NANO33BLE"}; // Allowable hardware types
 
 const int IMHERETIME=8000; // milliseconds before sending another I'm Here Message to keep communication open
@@ -53,12 +54,14 @@ private:
     QTimer updatesettingstmr;
     QTimer imheretimout;
     QTimer comtimeout;
+    QTimer connectTimer;
     QString logd;
     Firmware *firmwareUploader;
     CalibrateBNO *bnoCalibratorDialog;
     CalibrateBLE *bleCalibratorDialog;
     DiagnosticDisplay *diagnostic;
     QMessageBox msgbox;
+    QPlainTextEdit *serialDebug;
     bool savedToNVM;
     bool sentToHT;
     bool fwdiscovered;
@@ -83,6 +86,8 @@ private:
     void fwDiscovered(QString vers, QString hard);
     void addToLog(QString log);
     uint16_t escapeCRC(uint16_t crc);
+    uint16_t escapeCRCHT(uint16_t crc);
+    bool checkSaved();
 protected:
     void keyPressEvent(QKeyEvent *event);
 
@@ -111,11 +116,13 @@ private slots:
     void txledtimeout();
     void saveSettings();
     void loadSettings();
+
     void uploadFirmwareClick();
     void startCalibration();
     void ihTimeout();
     void saveToNVM();
     void showDiagsClicked();
+    void showSerialDiagClicked();
 
 };
 #endif // MAINWINDOW_H

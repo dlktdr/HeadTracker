@@ -25,6 +25,14 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Diagnostic Display
     diagnostic = new DiagnosticDisplay(&trkset);
+    serialDebug = new QPlainTextEdit();
+    serialDebug->setWindowTitle("Serial Information");
+    serialDebug->resize(600,300);
+
+    // Hide these buttons until connected
+    ui->cmdStartGraph->setVisible(false);
+    ui->cmdStopGraph->setVisible(false);
+    ui->chkRawData->setVisible(false);
 
     // Firmware loader loader dialog
     firmwareUploader = new Firmware;
@@ -38,7 +46,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Use system default fixed witdh font
     QFont serifFont("Times", 10, QFont::Bold);
-    ui->serialData->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
+    serialDebug->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
 
     // Update default settings to UI
     updateToUI();
@@ -126,6 +134,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->actionE_xit,SIGNAL(triggered()),this,SLOT(close()));
     connect(ui->actionUpload_Firmware,SIGNAL(triggered()),this,SLOT(uploadFirmwareClick()));
     connect(ui->actionShow_Data,SIGNAL(triggered()),this,SLOT(showDiagsClicked()));
+    connect(ui->actionShow_Serial_Transmissions,SIGNAL(triggered()),this,SLOT(showSerialDiagClicked()));
 
     // Timers
     rxledtimer.setInterval(100);
@@ -133,6 +142,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(&rxledtimer,SIGNAL(timeout()),this,SLOT(rxledtimeout()));
     connect(&txledtimer,SIGNAL(timeout()),this,SLOT(txledtimeout()));
     connect(&imheretimout,SIGNAL(timeout()),this,SLOT(ihTimeout()));
+    connect(&connectTimer,SIGNAL(timeout()),this,SLOT(connectTimeout()));
+    connectTimer.setSingleShot(true);
 
     // On BLE Calibration Save update to device
     connect(bleCalibratorDialog,&CalibrateBLE::calibrationSave,this,&MainWindow::storeSettings);
@@ -151,6 +162,7 @@ MainWindow::~MainWindow()
     delete firmwareUploader;
     delete bnoCalibratorDialog;
     delete bleCalibratorDialog;
+    delete serialDebug;
     delete ui;
 }
 
@@ -168,7 +180,7 @@ void MainWindow::serialConnect()
     serialcon->setParity(QSerialPort::NoParity);
     serialcon->setDataBits(QSerialPort::Data8);
     serialcon->setStopBits(QSerialPort::OneStop);
-    serialcon->setBaudRate(QSerialPort::Baud57600); // CDC doesn't actuall make a dif.. cool
+    serialcon->setBaudRate(QSerialPort::Baud115200); // CDC doesn't actuall make a dif.. cool
     serialcon->setFlowControl(QSerialPort::NoFlowControl);
 
     if(!serialcon->open(QIODevice::ReadWrite)) {
@@ -177,21 +189,18 @@ void MainWindow::serialConnect()
     }
 
     logd.clear();
-    ui->serialData->clear();
+    serialDebug->clear();
     trkset.clear();
 
     ui->cmdDisconnect->setEnabled(true);
     ui->cmdConnect->setEnabled(false);
-    ui->cmdStopGraph->setEnabled(true);
-    ui->cmdStartGraph->setEnabled(true);
-    ui->cmdSend->setEnabled(true);
-    ui->cmdSaveNVM->setEnabled(true);
-    ui->cmdCalibrate->setEnabled(true);
+
 
     ui->statusbar->showMessage(tr("Connected to ") + serialcon->portName());
 
     serialcon->setDataTerminalReady(true);
 
+    ui->stackedWidget->setCurrentIndex(1);
     addToLog("Waiting for board to boot...\n");
     QTimer::singleShot(4000,this,&MainWindow::requestTimer);
 
@@ -202,7 +211,12 @@ void MainWindow::serialConnect()
 // Reset all gui settings to disable mode
 void MainWindow::serialDisconnect()
 {
+    connectTimer.stop();
+
     if(serialcon->isOpen()) {
+        // Check if user wants to save first
+        if(!checkSaved())
+            return;
         if(graphing)
             stopGraph();
         serialcon->flush();
@@ -233,6 +247,8 @@ void MainWindow::serialDisconnect()
     updatesettingstmr.stop();
     imheretimout.stop();
     jsonqueue.clear();
+
+    connectTimer.stop();
 }
 
 void MainWindow::serialError(QSerialPort::SerialPortError err)
@@ -321,12 +337,19 @@ void MainWindow::fwDiscovered(QString vers, QString hard)
     if(hard == "NANO33BLE") {
         ui->cmdStartGraph->setVisible(false);
         ui->cmdStopGraph->setVisible(false);
+        ui->chkRawData->setVisible(false);
         ui->cmbRemap->setVisible(false);
         ui->cmbSigns->setVisible(false);
-        ui->stackedWidget->setCurrentIndex(2);
-        ui->chkRawData->setVisible(false);
+        ui->stackedWidget->setCurrentIndex(3);
+
         ui->cmdSaveNVM->setVisible(true);
         ui->grbSettings->setTitle("Nano 33 BLE");
+
+        ui->cmdStopGraph->setEnabled(true);
+        ui->cmdStartGraph->setEnabled(true);
+        ui->cmdSend->setEnabled(true);
+        ui->cmdSaveNVM->setEnabled(true);
+        ui->cmdCalibrate->setEnabled(true);
         fwdiscovered=true;
     } else if (hard == "BNO055") {
         ui->cmdStartGraph->setVisible(true);
@@ -335,8 +358,14 @@ void MainWindow::fwDiscovered(QString vers, QString hard)
         ui->cmbSigns->setVisible(true);
         ui->chkRawData->setVisible(true);
         ui->cmdSaveNVM->setVisible(false);
-        ui->stackedWidget->setCurrentIndex(1);
+        ui->stackedWidget->setCurrentIndex(2);
         ui->grbSettings->setTitle("BNO055");
+
+        ui->cmdStopGraph->setEnabled(true);
+        ui->cmdStartGraph->setEnabled(true);
+        ui->cmdSend->setEnabled(true);
+        ui->cmdSaveNVM->setEnabled(true);
+        ui->cmdCalibrate->setEnabled(true);
         fwdiscovered=true;
     } else {
 
@@ -402,7 +431,7 @@ void MainWindow::parseIncomingJSON(const QVariantMap &map)
         trkset.setLiveDataMap(map);
 
         // Remind user to calibrate
-        if(map["magcal"].toBool() == false && calmsgshowed == false) {
+        if(map["magcal"].toBool() == false && calmsgshowed == false && fwdiscovered) {
             msgbox.setText("Calibration has not been performed.\nPlease calibrate or load from a saved file");
             msgbox.setWindowTitle("Calibrate");
             msgbox.show();
@@ -430,8 +459,9 @@ void MainWindow::parseIncomingHT(QString cmd)
 
     // CRC ERROR
     if(cmd.left(7) == "$CRCERR") {
+        addToLog("Headtracker CRC Error!\n");
         ui->statusbar->showMessage("CRC Error : Error Setting Values, Retrying",2000);
-        updatesettingstmr.start(500); // Resend
+        updatesettingstmr.start(1000); // Resend
     }
 
     // CRC OK
@@ -533,11 +563,6 @@ void MainWindow::sendSerialData(QByteArray data)
     txledtimer.start();
     serialcon->write(data);
 
-    // Start a timer so if we don't get an ack/nak then fault out
-    if(trkset.hardware() == "NANO33BLE") {
-        //comtimeout.start(ACKNAK_TIMEOUT);
-    }
-
     // Skip nuisance I'm here message
     if(QString(data).contains("{\"Cmd\":\"IH\"}"))
         return;
@@ -598,8 +623,10 @@ void MainWindow::requestTimer()
     sendSerialJSON("GetSet"); // Get the Settings
     sendSerialJSON("IH"); // Start Data Transfer right away (Im here)
 
-    // Checks if it gets a response within 1sec
-    QTimer::singleShot(1000,this,&MainWindow::connectTimeout);
+    // Timer to make sure it a response within 1 sec after sending this data
+    connectTimer.stop();
+    connectTimer.setInterval(1000);
+    connectTimer.start();
 }
 
 /* addToLog()
@@ -617,10 +644,10 @@ void MainWindow::addToLog(QString log)
         logd = logd.mid(logd.length() - MAX_LOG_LENGTH);
 
     // Set Gui text from local string
-    ui->serialData->setPlainText(logd);
+    serialDebug->setPlainText(logd);
 
     // Scroll to bottom
-    ui->serialData->verticalScrollBar()->setValue(ui->serialData->verticalScrollBar()->maximum());
+    serialDebug->verticalScrollBar()->setValue(serialDebug->verticalScrollBar()->maximum());
 }
 
 uint16_t MainWindow::escapeCRC(uint16_t crc)
@@ -642,6 +669,21 @@ uint16_t MainWindow::escapeCRC(uint16_t crc)
         crchigh ^= 0xFF; //?? why not..
     return (uint16_t)crclow | ((uint16_t)crchigh << 8);
 }
+
+uint16_t MainWindow::escapeCRCHT(uint16_t crc)
+{
+    // Characters to escape out
+    uint8_t crclow = crc & 0xFF;
+    uint8_t crchigh = (crc >> 8) & 0xFF;
+    if(crclow == 0x00 ||
+       crclow == 0x24)
+        crclow ^= 0xFF; //?? why not..
+    if(crchigh == 0x00 ||
+       crchigh == 0x24)
+        crchigh ^= 0xFF; //?? why not..
+    return (uint16_t)crclow | ((uint16_t)crchigh << 8);
+}
+
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
@@ -681,9 +723,6 @@ void MainWindow::updateToUI()
     ui->servoRoll->setMaximum(trkset.Rll_max());
     ui->servoRoll->setMinimum(trkset.Rll_min());
 
-    ui->til_gain->setValue(trkset.Tlt_gain()*10);
-    ui->pan_gain->setValue(trkset.Pan_gain()*10);
-    ui->rll_gain->setValue(trkset.Rll_gain()*10);
 
     ui->spnLPTiltRoll->setValue(trkset.lpTiltRoll());
     ui->spnLPPan->setValue(trkset.lpPan());
@@ -695,6 +734,7 @@ void MainWindow::updateToUI()
     ui->chkInvertedPPMIn->setChecked(trkset.invertedPpmIn());
     ui->chkResetCenterWave->setChecked(trkset.resetOnWave());
 
+    // Prevents a loop
     ui->cmbpanchn->blockSignals(true);
     ui->cmbrllchn->blockSignals(true);
     ui->cmbtiltchn->blockSignals(true);
@@ -707,6 +747,9 @@ void MainWindow::updateToUI()
     ui->cmbResetOnPPM->blockSignals(true);
     ui->spnLPPan->blockSignals(true);
     ui->spnLPTiltRoll->blockSignals(true);
+    ui->til_gain->blockSignals(true);
+    ui->rll_gain->blockSignals(true);
+    ui->pan_gain->blockSignals(true);
 
     ui->cmbpanchn->setCurrentIndex(trkset.panCh()-1);
     ui->cmbrllchn->setCurrentIndex(trkset.rollCh()-1);
@@ -715,6 +758,10 @@ void MainWindow::updateToUI()
     ui->cmbSigns->setCurrentIndex(trkset.axisSign());
     ui->cmbBtMode->setCurrentIndex(trkset.blueToothMode());    
     ui->cmbOrientation->setCurrentIndex(trkset.orientation());
+    ui->til_gain->setValue(trkset.Tlt_gain()*10);
+    ui->pan_gain->setValue(trkset.Pan_gain()*10);
+    ui->rll_gain->setValue(trkset.Rll_gain()*10);
+
 
     int ppout_index = trkset.ppmOutPin()-1;
     int ppin_index = trkset.ppmInPin()-1;
@@ -737,6 +784,9 @@ void MainWindow::updateToUI()
     ui->cmbResetOnPPM->blockSignals(false);
     ui->spnLPPan->blockSignals(false);
     ui->spnLPTiltRoll->blockSignals(false);
+    ui->til_gain->blockSignals(false);
+    ui->rll_gain->blockSignals(false);
+    ui->pan_gain->blockSignals(false);
 
 
     savedToNVM = true;
@@ -747,20 +797,22 @@ void MainWindow::updateToUI()
 // Update the Settings Class from the UI Data
 void MainWindow::updateFromUI()
 {
+    if(!serialcon->isOpen()) // Don't update anything if not connected
+        return;
     trkset.setPan_cnt(ui->servoPan->centerValue());
     trkset.setPan_min(ui->servoPan->minimumValue());
     trkset.setPan_max(ui->servoPan->maximumValue());
-    trkset.setPan_gain(ui->pan_gain->value()/10);
+    trkset.setPan_gain(static_cast<float>(ui->pan_gain->value())/10.0f);
 
     trkset.setTlt_cnt(ui->servoTilt->centerValue());
     trkset.setTlt_min(ui->servoTilt->minimumValue());
     trkset.setTlt_max(ui->servoTilt->maximumValue());
-    trkset.setTlt_gain(ui->til_gain->value()/10);
+    trkset.setTlt_gain(static_cast<float>(ui->til_gain->value())/10.0f);
 
     trkset.setRll_cnt(ui->servoRoll->centerValue());
     trkset.setRll_min(ui->servoRoll->minimumValue());
     trkset.setRll_max(ui->servoRoll->maximumValue());
-    trkset.setRll_gain(ui->rll_gain->value()/10);
+    trkset.setRll_gain(static_cast<float>(ui->rll_gain->value())/10.0f);
 
     trkset.setLPTiltRoll(ui->spnLPTiltRoll->value());
     trkset.setLPPan(ui->spnLPPan->value());
@@ -817,7 +869,7 @@ void MainWindow::updateFromUI()
     sentToHT = false; // Indicate changes haven't been sent to HT
     ui->cmdStore->setEnabled(true);
 
-    updatesettingstmr.start(1000);
+    updatesettingstmr.start(500);
 }
 
 // Data ready to be read from the serial port
@@ -828,15 +880,15 @@ void MainWindow::serialReadReady()
     QByteArray sd = serialcon->readAll();
     serialData.append(sd);
 
-    int slider = ui->serialData->verticalScrollBar()->value();
-    if(slider == ui->serialData->verticalScrollBar()->maximum())
+    int slider = serialDebug->verticalScrollBar()->value();
+    if(slider == serialDebug->verticalScrollBar()->maximum())
         scroll = true; 
 
     // Scroll to bottom
     if(scroll)
-        ui->serialData->verticalScrollBar()->setValue(ui->serialData->verticalScrollBar()->maximum());
+        serialDebug->verticalScrollBar()->setValue(serialDebug->verticalScrollBar()->maximum());
     else
-        ui->serialData->verticalScrollBar()->setValue(slider);
+        serialDebug->verticalScrollBar()->setValue(slider);
 
     parseSerialData();
 
@@ -899,6 +951,7 @@ void MainWindow::storeSettings()
     if(!serialcon->isOpen())
         return;
 
+    // Send Data to the NANO33BLE
     if(trkset.hardware() == "NANO33BLE") {
         QVariantMap d2s = trkset.changedData();
         // Remove useless items
@@ -917,6 +970,8 @@ void MainWindow::storeSettings()
         // Flag for exit, has data been sent
         sentToHT = true;
         ui->cmdStore->setEnabled(false);
+
+    // Send data to the BNO055
     } else if(trkset.hardware() == "BNO055") {
         // Disable Graphing output, all the extra data was causing issues
         // on update
@@ -951,10 +1006,10 @@ void MainWindow::storeSettings()
         QString data = lst.join(',');
 
         // Calculate the CRC Checksum
-        uint16_t CRC = uCRC16Lib::calculate(data.toUtf8().data(),data.length());
+        uint16_t CRC = escapeCRCHT(uCRC16Lib::calculate(data.toUtf8().data(),data.length()));
 
         // Append Data in a Byte Array
-        QByteArray bd = QString("$" + data).toLatin1() + QByteArray::fromRawData((char*)&CRC,2) + "HE";
+        QByteArray bd = "$" + QString(data).toLatin1() + QByteArray::fromRawData((char*)&CRC,2) + "HE";
 
         sendSerialData(bd);
 
@@ -969,7 +1024,6 @@ void MainWindow::storeSettings()
 }
 
 // Automatic Send Changes.
-
 void MainWindow::updateSettings()
 {
     storeSettings();
@@ -1035,6 +1089,23 @@ void MainWindow::loadSettings()
     }
 }
 
+bool MainWindow::checkSaved()
+{
+    bool close=true;
+    if(!sentToHT) {
+        QMessageBox::StandardButton rval = QMessageBox::question(this,"Changes not sent","Are you sure you want to disconnect?\n"\
+                              "Changes haven't been sent to the headtracker\nClick \"Send Changes\" first",QMessageBox::Yes|QMessageBox::No);
+        if(rval != QMessageBox::Yes)
+            close = false;
+    } else if(!savedToNVM && trkset.hardware() == "NANO33BLE") { // Ignore on BNO055
+        QMessageBox::StandardButton rval = QMessageBox::question(this,"Changes not saved on tracker","Are you sure you want to disconnet?\n"\
+                              "Changes haven't been permanently stored on headtracker\nClick \"Save to NVM\" first",QMessageBox::Yes|QMessageBox::No);
+        if(rval != QMessageBox::Yes)
+            close = false;
+    }
+    return close;
+}
+
 void MainWindow::uploadFirmwareClick()
 {
     if(serialcon->isOpen()) {
@@ -1097,20 +1168,16 @@ void MainWindow::showDiagsClicked()
     diagnostic->raise();
 }
 
-void MainWindow::closeEvent (QCloseEvent *event)
+void MainWindow::showSerialDiagClicked()
 {
-    bool close=true;
-    if(!sentToHT) {
-        QMessageBox::StandardButton rval = QMessageBox::question(this,"Changes not sent","Are you sure you want to close?\n"\
-                              "Changes haven't been sent to the headtracker\nClick \"Send Changes\" first",QMessageBox::Yes|QMessageBox::No);
-        if(rval != QMessageBox::Yes)
-            close = false;
-    } else if(!savedToNVM && trkset.hardware() == "NANO33BLE") { // Ignore on BNO055
-        QMessageBox::StandardButton rval = QMessageBox::question(this,"Changes not saved on tracker","Are you sure you want to close?\n"\
-                              "Changes haven't been permanently stored on headtracker\nClick \"Save to NVM\" first",QMessageBox::Yes|QMessageBox::No);
-        if(rval != QMessageBox::Yes)
-            close = false;
-    }
+    serialDebug->show();
+    serialDebug->activateWindow();
+    serialDebug->raise();
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{    
+    bool close=checkSaved();
 
     if(close) {
         QCoreApplication::quit();

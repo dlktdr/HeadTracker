@@ -17,8 +17,8 @@ class TrackerSettings : public QObject
 {    
     Q_OBJECT
 public:
-    static constexpr int MIN_PWM=1000; // 1000 us
-    static constexpr int MAX_PWM=2000; // 2000 us
+    static constexpr int MIN_PWM=988;
+    static constexpr int MAX_PWM=2012;
     static constexpr int DEF_MIN_PWM=1050;
     static constexpr int DEF_MAX_PWM=1950;
     static constexpr int MIN_CNT=(((MAX_PWM-MIN_PWM)/2)+MIN_PWM-250);
@@ -31,8 +31,8 @@ public:
     static constexpr int DEF_PPM_OUT = 10; // Random choice
     static constexpr int DEF_PPM_IN = -1;
     static constexpr int DEF_CENTER = 1500;
-    static constexpr float MIN_GAIN= 0;
-    static constexpr float MAX_GAIN= 50.0;
+    static constexpr float MIN_GAIN= 0.0;
+    static constexpr float MAX_GAIN= 40.0;
     static constexpr float DEF_GAIN= 10.0;
     static constexpr int DEF_BT_MODE= 0; // Bluetooth Disabled
     static constexpr int DEF_RST_PPM = -1;

@@ -1,4 +1,4 @@
-QT       += core gui serialport network
+QT       += core gui serialport network xml
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets opengl
 
@@ -27,11 +27,13 @@ SOURCES += \
     calibratebno.cpp \
     diagnosticdisplay.cpp \
     firmware.cpp \
+    gainslider.cpp \
     magcalwidget.cpp \
     main.cpp \
     mainwindow.cpp \
     led.cpp \
     graph.cpp \
+    popupslider.cpp \
     servominmax.cpp \
     signalbars.cpp \    
     trackersettings.cpp \
@@ -44,10 +46,12 @@ HEADERS += \
     calibratebno.h \
     diagnosticdisplay.h \
     firmware.h \
+    gainslider.h \
     magcalwidget.h \
     mainwindow.h \
     led.h \
     graph.h \
+    popupslider.h \
     servominmax.h \
     signalbars.h \
     trackersettings.h \
