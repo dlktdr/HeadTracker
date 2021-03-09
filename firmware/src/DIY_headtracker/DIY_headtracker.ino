@@ -42,13 +42,15 @@ Mapping example:
 $123456789111CH
 */
 
+uint16_t escapeCRC(uint16_t crc);
+
 // Local file variables
 //
 int frameNumber = 0;		    // Frame count since last debug serial output
 
 char serial_data[SERIAL_BUFFER_SIZE+1];          // Array for serial-data 
 unsigned char serial_index = 0; // How many bytes have been received?
-char string_started = 0;        // Only saves data if string starts with right byte
+bool string_started = false;        // Only saves data if string starts with right byte
 unsigned char channel_mapping[13];
 
 char outputMag = 0;             // Stream magnetometer data to host
@@ -212,46 +214,32 @@ void loop()
     //
     if (Serial.available())
     {
+        char serialchar = Serial.read();
+        
         // If no data received, wipe the buffer clean
         if(serial_index == 0)
           memset(serial_data,0,SERIAL_BUFFER_SIZE);
-      
-        if (string_started == 1)
+
+        // $ = Start of a command, clear the buffer, set string started
+        if (serialchar == '$')
         {
+            string_started = true;
+            serial_index = 0;
+        }else if (string_started == true) {
             // Read incoming byte
-            serial_data[serial_index++] = Serial.read();
-           
-            // If string ends with "CH" it's channel configuration, that have been received.
-            // String must always be 12 chars/bytes and ending with CH to be valid. 
-            if (serial_index == 14 &&
-                serial_data[serial_index-2] == 'C' &&
-                serial_data[serial_index-1] == 'H' )
-            {
-                // To keep it simple, we will not let the channels be 0-initialized, but
-                // start from 1 to match actual channels. 
-                for (unsigned char i = 0; i < 13; i++)
-                {
-                    channel_mapping[i + 1] = serial_data[i] - 48;
-                  
-                    // Update the dedicated PPM-in -> PPM-out array for faster performance.
-                    if ((serial_data[i] - 48) < 14)
-                    {
-                        PpmIn_PpmOut[serial_data[i]-48] = i + 1;
-                    }
-                }
-               
-                Serial.println("Channel mapping received");
-               
-               // Reset serial_index and serial_started
-               
-               // Clear buffer
-               serial_index = 0;
-               string_started = 0;
+            if(serial_index >= SERIAL_BUFFER_SIZE) {
+              Serial.println("Buffer Overflow");
+              serial_index = 0;
+              string_started = false;
+              return;
             }
-            
+              
+            serial_data[serial_index++] = serialchar;
+                      
             // Configure headtracker
-            else if (IsCommand("HE"))
+            if (IsCommand("HE"))
             {
+              serial_data[serial_index+1] = 0;
                 // HT parameters are passed in from the PC in this order:
                 //
                 // 0 tiltRollBeta      
@@ -274,13 +262,14 @@ void loop()
                 // 17 htChannels[0]  // pan            
                 // 18 htChannels[1]  // tilt 
                 // 19 htChannels[2]  // roll         
+                // 20 axis
              
                 // Parameters from the PC client need to be scaled to match our local
                 // expectations
                
                 // Do a CRC Check on the data to insure it's valid data
                 if(serial_index > 4)  {
-                  crc_calc = uCRC16Lib::calculate(serial_data, serial_index-4); // Calculate the CRC of the data                  
+                  crc_calc = escapeCRC(uCRC16Lib::calculate(serial_data, serial_index-4)); // Calculate the CRC of the data                  
                   memcpy(&crc_val,serial_data + serial_index - 4, sizeof(uint16_t));
                 }
                 else {
@@ -288,10 +277,12 @@ void loop()
                 }
 
                 if(crc_val != crc_calc) {
-                    Serial.println("$CRCERR");
+                    Serial.println("$CRCERR\r\nCRC ERROR!");
+                    serial_index = 0;
+                    string_started = false;
                     return;
                 } else {                    
-                    Serial.println("$CRCOK\r\nHT: Settings received from GUI!");
+                    Serial.println("$CRCOK\r\n");
                 }
            
                 int valuesReceived[22] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
@@ -370,13 +361,13 @@ void loop()
                 axisSign = valuesReceived[21];
 
                 // Update the BNO055 axis mapping
-                RemapAxes();   
+                RemapAxes();                
 
                 // Auto Save to EEPROM
                 SaveSettings();
 
                 serial_index = 0;
-                string_started = 0;
+                string_started = false;
             } // end configure headtracker
           
             // Debug info
@@ -384,7 +375,7 @@ void loop()
             {  
                 DebugOutput();
                 serial_index = 0;
-                string_started = 0; 
+                string_started = false; 
             }
             
             // Firmware version requested
@@ -392,7 +383,7 @@ void loop()
                 Serial.print("$VERS");
                 Serial.println(FIRMWARE_VERSION_FLOAT, 2);
                 serial_index = 0;
-                string_started = 0;
+                string_started = false;
             }
 
             // Hardmware version requested
@@ -400,7 +391,7 @@ void loop()
                 Serial.print("$HARD");
                 Serial.println(SENSOR_NAME);
                 serial_index = 0;
-                string_started = 0;
+                string_started = false;
             }
 
             // Reset Button Via Software
@@ -409,7 +400,7 @@ void loop()
                 Serial.println("HT: Resetting center");
                 resetValues = 1;
                 serial_index = 0;
-                string_started = 0;
+                string_started = false;
             }
             
             // Clear Offsets via Software
@@ -418,7 +409,7 @@ void loop()
                 Serial.println("HT: Calibration saved when all sensors at maximum");
                 doCalibrate = true;
                 serial_index = 0;
-                string_started = 0;
+                string_started = false;
             }
 
             // Clear Offsets via Software
@@ -429,7 +420,7 @@ void loop()
                 panStart = 0;                
                 rollStart = 0; 
                 serial_index = 0;
-                string_started = 0;
+                string_started = false;
             }
 
             // Graph raw sensor data
@@ -438,7 +429,7 @@ void loop()
                 Serial.println("HT: Showing Raw Sensor Data");
                 graphRaw = 1;        
                 serial_index = 0;
-                string_started = 0;
+                string_started = false;
             }
 
             // Graph offset sensor data
@@ -447,17 +438,17 @@ void loop()
                 Serial.println("HT: Showing Offset Sensor Data");
                 graphRaw = 0;        
                 serial_index = 0;
-                string_started = 0;
+                string_started = false;
             }
           
             // Stop any data stream commands (leave all aliases for compatibility
-            else if (IsCommand("CMAE") || IsCommand("CAEN") || IsCommand("GREN") || IsCommand("PLEN") ) {
+            else if (IsCommand("PLEN") ) {
                 outputMagAcc = 0;
                 outputMag = 0;
                 outputTrack = 0;
                 outputAcc = 0;
                 serial_index = 0;
-                string_started = 0;
+                string_started = false;
             }
            
             // Start tracking data stream
@@ -468,7 +459,7 @@ void loop()
                 outputMag = 0;
                 outputTrack = 1;
                 serial_index = 0;
-                string_started = 0;
+                string_started = false;
             }        
 
             // Save RAM settings to EEPROM
@@ -476,7 +467,7 @@ void loop()
             {  
                 SaveSettings();     
                 serial_index = 0;
-                string_started = 0; 
+                string_started = false; 
             }          
           
             // Retrieve settings
@@ -490,18 +481,8 @@ void loop()
                 Serial.println("HT: Settings sent to GUI");
                 
                 serial_index = 0;
-                string_started = 0;
-            } else if (serial_index > SERIAL_BUFFER_SIZE)
-            {
-                // If more than 100 bytes have been received, the string is not valid.
-                // Reset and "try again" (wait for $ to indicate start of new string). 
-                serial_index = 0;
-                string_started = 0;
+                string_started = false;
             }
-        }
-        else if (Serial.read() == '$')
-        {
-            string_started = 1;
         }
     } // serial port input
 
@@ -529,13 +510,13 @@ void loop()
 //--------------------------------------------------------------------------------------
 // Check if current line ends with specified command 
 //--------------------------------------------------------------------------------------
-bool IsCommand(String command) {
+bool IsCommand(const char *command) {
     // Ensure we read enough characters
-    int cLength = command.length();
+    int cLength = strlen(command);
     if( cLength > serial_index ) return false;
     // ..and then check characters one by one
     for (int i = 0; i < cLength; i++) {
-         if (serial_data[serial_index - cLength + i ] != command.charAt(i)) return false;
+         if (serial_data[serial_index - cLength + i ] != command[i]) return false;
     }
     return true;
 }
@@ -756,4 +737,21 @@ void DebugOutput()
     Serial.print("axisRemap: ");
     Serial.println(axisRemap); 
 
+    Serial.print("axisSign: ");
+    Serial.println(axisSign); 
+
+}
+
+uint16_t escapeCRC(uint16_t crc)
+{
+    // Characters to escape out
+    uint8_t crclow = crc & 0xFF;
+    uint8_t crchigh = (crc >> 8) & 0xFF;
+    if(crclow == 0x00 ||
+       crclow == 0x24)
+        crclow ^= 0xFF; //?? why not..
+    if(crchigh == 0x00 ||
+       crchigh == 0x24)
+        crchigh ^= 0xFF; //?? why not..
+    return (uint16_t)crclow | ((uint16_t)crchigh << 8);
 }
