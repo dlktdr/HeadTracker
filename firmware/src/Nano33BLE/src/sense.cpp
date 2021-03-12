@@ -250,7 +250,7 @@ void sense_Thread()
 
         // Accelerometer
         if(IMU.accelerationAvailable()) {
-            IMU.readAcceleration(raccx, raccy, raccz);
+            IMU.readRawAccel(raccx, raccy, raccz);
             raccx *= -1.0; // Flip X to make classic cartesian (+X Right, +Y Up, +Z Vert)
             trkset.accOffset(accxoff,accyoff,acczoff);
 
@@ -266,7 +266,7 @@ void sense_Thread()
 
         // Gyrometer
         if(IMU.gyroscopeAvailable()) {
-            IMU.readGyroscope(rgyrx,rgyry,rgyrz);
+            IMU.readRawGyro(rgyrx,rgyry,rgyrz);
             rgyrx *= -1.0; // Flip X to match other sensors
             trkset.gyroOffset(gyrxoff,gyryoff,gyrzoff);
             gyrx = rgyrx - gyrxoff;
@@ -285,7 +285,7 @@ void sense_Thread()
 
         // Magnetometer
         if(IMU.magneticFieldAvailable()) {
-            IMU.readMagneticField(rmagx,rmagy,rmagz);
+            IMU.readRawMagnet(rmagx,rmagy,rmagz);
             // On first read set the min/max values to this reading
             // Get Offsets and Apply them
             trkset.magOffset(magxoff,magyoff,magzoff);
