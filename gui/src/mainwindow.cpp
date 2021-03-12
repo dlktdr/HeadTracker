@@ -532,6 +532,10 @@ void MainWindow::updateFromUI()
 // Data ready to be read from the serial port
 void MainWindow::serialReadReady()
 {
+    // Receive LED
+    ui->rxled->setState(true);
+    rxledtimer.start();
+
     // Read all serial data
     bool scroll = false;
     QByteArray sd = serialcon->readAll();
@@ -570,8 +574,6 @@ void MainWindow::serialReadReady()
         serialData = serialData.right(serialData.length()-nlindex-2);
     }
 
-    ui->rxled->setState(true);
-    rxledtimer.start();
 }
 
 void MainWindow::manualSend()
@@ -652,7 +654,7 @@ bool MainWindow::checkSaved()
 
         } else if (!brd->_isBoardSavedToNVM()) {
             QMessageBox::StandardButton rval = QMessageBox::question(this,"Changes not saved on tracker","Are you sure you want to disconnect?\n"\
-                                  "Changes haven't been permanently stored on headtracker\nClick \"Save to NVM\" first",QMessageBox::Yes|QMessageBox::No);
+                                  "Changes haven't been permanently stored on headtracker\nClick \"Save to NVM\" (Non-Volatile Memory) first",QMessageBox::Yes|QMessageBox::No);
             if(rval != QMessageBox::Yes)
                 return false;
         }
