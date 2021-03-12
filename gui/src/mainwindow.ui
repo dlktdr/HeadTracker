@@ -1459,7 +1459,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>&amp;Load Settings</string>
+    <string>&amp;Restore Settings</string>
    </property>
   </action>
   <action name="actionE_xit">
