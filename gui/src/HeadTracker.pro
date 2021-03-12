@@ -16,6 +16,9 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    boardbno055.cpp \
+    boardnano33ble.cpp \
+    boardtype.cpp \
     calibrate/fusion.cpp \
     calibrate/imuread.cpp \
     calibrate/magcal.cpp \
@@ -41,6 +44,9 @@ SOURCES += \
 
 
 HEADERS += \
+    boardbno055.h \
+    boardnano33ble.h \
+    boardtype.h \
     calibrate/imuread.h \
     calibrateble.h \
     calibratebno.h \

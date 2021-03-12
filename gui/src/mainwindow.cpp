@@ -8,26 +8,41 @@
 #include "servominmax.h"
 #include "ucrc16lib.h"
 
+#define DEBUG_HT
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    waitingOnParameters = false;
+
+    // Start the board interface
+    nano33ble = new BoardNano33BLE(&trkset);
+    bno055 = new BoardBNO055(&trkset);
+
+    // Add it to the list of available boards
+    boards.append(nano33ble);
+    boards.append(bno055);
+
+    // Once correct board is discovered this will be set to one of the above boards
+    currentboard = nullptr;
 
     setWindowTitle(windowTitle() + " " + version);
 
     // Serial Connection
     serialcon = new QSerialPort;
 
-    // Calibrator Dialogs
-    bnoCalibratorDialog = new CalibrateBNO;
-    bleCalibratorDialog = new CalibrateBLE(&trkset);
-
-    // Diagnostic Display
+    // Diagnostic Display + Serial Debug
     diagnostic = new DiagnosticDisplay(&trkset);
     serialDebug = new QPlainTextEdit();
     serialDebug->setWindowTitle("Serial Information");
     serialDebug->resize(600,300);
+
+#ifdef DEBUG_HT
+    serialDebug->show();
+    diagnostic->show();
+#endif
 
     // Hide these buttons until connected
     ui->cmdStartGraph->setVisible(false);
@@ -36,10 +51,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Firmware loader loader dialog
     firmwareUploader = new Firmware;
-
-    // Called to initalize GUI state to disabled
-    graphing = false;
-    serialDisconnect();
 
     // Get list of available ports
     findSerialPorts();
@@ -51,6 +62,22 @@ MainWindow::MainWindow(QWidget *parent)
     // Update default settings to UI
     updateToUI();
 
+    // Board Connections, connects all boards signals to same end points
+    foreach(BoardType *brd, boards) {
+        connect(brd,SIGNAL(paramSendStart()), this, SLOT(paramSendStart()));
+        connect(brd,SIGNAL(paramSendFailure(int)), this, SLOT(paramSendFailure(int)));
+        connect(brd,SIGNAL(paramReceiveStart()), this, SLOT(paramReceiveStart()));
+        connect(brd,SIGNAL(paramReceiveComplete()), this, SLOT(paramReceiveComplete()));
+        connect(brd,SIGNAL(paramReceiveFailure(int)), this, SLOT(paramReceiveFailure(int)));
+        connect(brd,SIGNAL(calibrationSuccess()), this, SLOT(calibrationSuccess()));
+        connect(brd,SIGNAL(calibrationFailure()), this, SLOT(calibrationFailure()));
+        connect(brd,SIGNAL(serialTxReady()), this, SLOT(serialTxReady()));
+        connect(brd,SIGNAL(addToLog(QString)),this,SLOT(addToLog(QString)));
+        connect(brd,SIGNAL(needsCalibration()),this,SLOT(needsCalibration()));
+        connect(brd,SIGNAL(boardDiscovered(BoardType *)),this,SLOT(boardDiscovered(BoardType *)));
+        connect(brd,SIGNAL(statusMessage(QString,int)),this,SLOT(statusMessage(QString,int)));
+    }
+
     // Serial data ready
     connect(serialcon,SIGNAL(readyRead()),this,SLOT(serialReadReady()));
     connect(serialcon, SIGNAL(errorOccurred(QSerialPort::SerialPortError)),this,SLOT(serialError(QSerialPort::SerialPortError)));
@@ -58,27 +85,26 @@ MainWindow::MainWindow(QWidget *parent)
     // Buttons
     connect(ui->cmdConnect,SIGNAL(clicked()),this,SLOT(serialConnect()));
     connect(ui->cmdDisconnect,SIGNAL(clicked()),this,SLOT(serialDisconnect()));    
-    connect(ui->cmdStore,SIGNAL(clicked()),this,SLOT(storeSettings()));
+    connect(ui->cmdStore,SIGNAL(clicked()),this,SLOT(storeToRAM()));
     connect(ui->cmdSend,SIGNAL(clicked()),this,SLOT(manualSend()));
-    connect(ui->cmdStartGraph,SIGNAL(clicked()),this,SLOT(startGraph()));
-    connect(ui->cmdStopGraph,SIGNAL(clicked()),this,SLOT(stopGraph()));
+    //connect(ui->cmdStartGraph,SIGNAL(clicked()),this,SLOT(startGraph()));
+    //connect(ui->cmdStopGraph,SIGNAL(clicked()),this,SLOT(stopGraph()));
     connect(ui->cmdResetCenter,SIGNAL(clicked()),this, SLOT(resetCenter()));
     connect(ui->cmdCalibrate,SIGNAL(clicked()),this, SLOT(startCalibration()));
-    connect(ui->cmdSaveNVM,&QPushButton::clicked,this, &MainWindow::saveToNVM);
+    connect(ui->cmdSaveNVM,SIGNAL(clicked()),this,SLOT(storeToNVM()));
+    //***
     connect(ui->cmdRefresh,&QPushButton::clicked,this,&MainWindow::findSerialPorts);
 
     // Check Boxes
-    connect(ui->chkpanrev,&QCheckBox::clicked,this,&MainWindow::updateFromUI);
+    connect(ui->chkpanrev,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
     connect(ui->chkrllrev,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
     connect(ui->chktltrev,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
     connect(ui->chkInvertedPPM,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
     connect(ui->chkInvertedPPMIn,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
     connect(ui->chkResetCenterWave,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
-    connect(ui->chkRawData,SIGNAL(clicked(bool)),this,SLOT(setDataMode(bool)));
+    //connect(ui->chkRawData,SIGNAL(clicked(bool)),this,SLOT(setDataMode(bool)));
 
     // Spin Boxes
-    //connect(ui->spnGyroPan,SIGNAL(editingFinished()),this,SLOT(updateFromUI()));
-    //connect(ui->spnGyroTilt,SIGNAL(editingFinished()),this,SLOT(updateFromUI()));
     connect(ui->spnLPPan,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->spnLPTiltRoll,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
 
@@ -136,44 +162,44 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->actionShow_Data,SIGNAL(triggered()),this,SLOT(showDiagsClicked()));
     connect(ui->actionShow_Serial_Transmissions,SIGNAL(triggered()),this,SLOT(showSerialDiagClicked()));
 
-    // Timers
-    rxledtimer.setInterval(100);
-    txledtimer.setInterval(100);
+    // Timers    
     connect(&rxledtimer,SIGNAL(timeout()),this,SLOT(rxledtimeout()));
+    rxledtimer.setInterval(100);
     connect(&txledtimer,SIGNAL(timeout()),this,SLOT(txledtimeout()));
-    connect(&imheretimout,SIGNAL(timeout()),this,SLOT(ihTimeout()));
+    txledtimer.setInterval(100);
     connect(&connectTimer,SIGNAL(timeout()),this,SLOT(connectTimeout()));
     connectTimer.setSingleShot(true);
+    connect(&requestTimer,SIGNAL(timeout()),this,SLOT(requestTimeout()));
+    requestTimer.setSingleShot(true);
+    connect(&saveToRAMTimer,SIGNAL(timeout()),this,SLOT(saveToRAMTimeout()));
+    saveToRAMTimer.setSingleShot(true);
+    connect(&requestParamsTimer,SIGNAL(timeout()),this,SLOT(requestParamsTimeout()));
+    requestParamsTimer.setSingleShot(true);
 
-    // On BLE Calibration Save update to device
-    connect(bleCalibratorDialog,&CalibrateBLE::calibrationSave,this,&MainWindow::storeSettings);
-
-    // Timer to cause an update, prevents too many data writes
-    connect(&updatesettingstmr,&QTimer::timeout,this,&MainWindow::updateSettings);
-    updatesettingstmr.setSingleShot(true);
-
-    // Communication timer. Checks for lack of ACK & NAK codes
-    connect(&comtimeout,&QTimer::timeout,this,&MainWindow::comTimeout);
+    // Called to initalize GUI state to disconnected
+    serialDisconnect();
 }
 
 MainWindow::~MainWindow()
 {
     delete serialcon;
+    delete nano33ble;
     delete firmwareUploader;
-    delete bnoCalibratorDialog;
-    delete bleCalibratorDialog;
     delete serialDebug;
     delete ui;
 }
 
 // Connects to the serial port
+
 void MainWindow::serialConnect()
 {
     QString port = ui->cmbPort->currentText();
     if(port.isEmpty())
         return;
+
+    // If open close it first
     if(serialcon->isOpen())
-        serialcon->close();
+        serialDisconnect();
 
     // Setup serial port 8N1, 57600 Baud
     serialcon->setPortName(port);
@@ -194,17 +220,16 @@ void MainWindow::serialConnect()
 
     ui->cmdDisconnect->setEnabled(true);
     ui->cmdConnect->setEnabled(false);
-
-
-    ui->statusbar->showMessage(tr("Connected to ") + serialcon->portName());
+    statusMessage(tr("Connected to ") + serialcon->portName());
+    ui->stackedWidget->setCurrentIndex(1);
 
     serialcon->setDataTerminalReady(true);
 
-    ui->stackedWidget->setCurrentIndex(1);
+    // Begin the request to discover boards
     addToLog("Waiting for board to boot...\n");
-    QTimer::singleShot(4000,this,&MainWindow::requestTimer);
 
-    fwdiscovered = false;
+    requestTimer.stop();
+    requestTimer.start(4000);
 }
 
 // Disconnect from the serial port
@@ -217,12 +242,17 @@ void MainWindow::serialDisconnect()
         // Check if user wants to save first
         if(!checkSaved())
             return;
-        if(graphing)
-            stopGraph();
+
+        // Notify board connection is disconnected
+        foreach(BoardType *brd, boards) {
+            brd->_disconnected();
+            brd->allowAccess(false);
+        }
+
         serialcon->flush();
         serialcon->close();
     }
-    ui->statusbar->showMessage(tr("Disconnected"));
+    statusMessage(tr("Disconnected"));
     ui->cmdDisconnect->setEnabled(false);
     ui->cmdConnect->setEnabled(true);
     ui->cmdStopGraph->setEnabled(false);
@@ -234,21 +264,16 @@ void MainWindow::serialDisconnect()
     ui->cmdSend->setEnabled(false);
     ui->cmdCalibrate->setEnabled(false);
     ui->stackedWidget->setCurrentIndex(0);
-    bleCalibratorDialog->hide();
-    bnoCalibratorDialog->hide();
+    ui->servoPan->setShowActualPosition(false);
+    ui->servoTilt->setShowActualPosition(false);
+    ui->servoRoll->setShowActualPosition(false);
 
-    fwdiscovered = false;
-    calmsgshowed = false;
-    savedToNVM = true;
-    sentToHT = true;
-    rawmode = false;
-    jsonfaults = 0;
-    comtimeout.stop();
-    updatesettingstmr.stop();
-    imheretimout.stop();
-    jsonqueue.clear();
-
+    currentboard = nullptr;
+    boardRequestIndex=0;
     connectTimer.stop();
+    requestTimer.stop();
+
+    // Notify all boards we have disconnected
 }
 
 void MainWindow::serialError(QSerialPort::SerialPortError err)
@@ -265,290 +290,17 @@ void MainWindow::serialError(QSerialPort::SerialPortError err)
     }
 }
 
-// Parse the data received from the serial port
-void MainWindow::parseSerialData()
-{
-    bool done = true;
-    while(done) {
-        int nlindex = serialData.indexOf("\r\n");
-        if(nlindex < 0)
-            return;  // No New line found
-
-        // Strip data up the the CR LF \r\n
-        QByteArray data = serialData.left(nlindex);
-
-        // Return if only a \r\n, no data.
-        if(data.length() < 1) {
-            serialData = serialData.right(serialData.length()-nlindex-2);
-            return;
-        }
-
-        // Found a SOT & EOT Character. JSON Data was sent
-        if(data.left(1)[0] == (char)0x02 && data.right(1)[0] == (char)0x03) { // JSON Data
-            QByteArray stripped = data.mid(1,data.length()-2);
-
-            // *** TODO - Add CRC check here, issue a new settings request.
-            // Increment RXerror counter and fault out if too many errors.
-
-            parseIncomingJSON(QJsonDocument::fromJson(stripped).object().toVariantMap());            
-
-        //  Found the acknowldege Character, data was received without error
-        } else if(data.left(1)[0] == (char)0x06) {
-            // Clear the fault counter
-            jsonfaults = 0;
-            comtimeout.stop();
-
-            // If more data in queue, send it and wait for another ack char.
-            if(!jsonqueue.isEmpty()) {
-                sendSerialData(jsonqueue.dequeue());
-                jsonfaults = 1;
-            }
-
-        // Found a not-acknowldege character, resend data
-        } else if(data.left(1)[0] == (char)0x15) {
-            comTimeout();
-
-        // Found an HT value sent
-        } else if(data.left(1) == "$") {
-            parseIncomingHT(data);
-
-        // Other data sent, show the user
-        } else {
-            addToLog(data + "\n");
-        }
-
-        // Remove data read from the buffer
-        serialData = serialData.right(serialData.length()-nlindex-2);
-    }
-}
-
-/* fwDiscoverd()
- *      Enables/Disables sections of the GUI based on the hardware found
- */
-
-void MainWindow::fwDiscovered(QString vers, QString hard)
-{
-    Q_UNUSED(vers);
-
-    // Store in Tracker Settings
-    trkset.setHardware(vers,hard);
-
-    // Stack widget changes to hide some info depending on board
-    if(hard == "NANO33BLE") {
-        ui->cmdStartGraph->setVisible(false);
-        ui->cmdStopGraph->setVisible(false);
-        ui->chkRawData->setVisible(false);
-        ui->cmbRemap->setVisible(false);
-        ui->cmbSigns->setVisible(false);
-        ui->stackedWidget->setCurrentIndex(3);
-
-        ui->cmdSaveNVM->setVisible(true);
-        ui->grbSettings->setTitle("Nano 33 BLE");
-
-        ui->cmdStopGraph->setEnabled(true);
-        ui->cmdStartGraph->setEnabled(true);
-        ui->cmdSend->setEnabled(true);
-        ui->cmdSaveNVM->setEnabled(true);
-        ui->cmdCalibrate->setEnabled(true);
-        fwdiscovered=true;
-    } else if (hard == "BNO055") {
-        ui->cmdStartGraph->setVisible(true);
-        ui->cmdStopGraph->setVisible(true);
-        ui->cmbRemap->setVisible(true);
-        ui->cmbSigns->setVisible(true);
-        ui->chkRawData->setVisible(true);
-        ui->cmdSaveNVM->setVisible(false);
-        ui->stackedWidget->setCurrentIndex(2);
-        ui->grbSettings->setTitle("BNO055");
-
-        ui->cmdStopGraph->setEnabled(true);
-        ui->cmdStartGraph->setEnabled(true);
-        ui->cmdSend->setEnabled(true);
-        ui->cmdSaveNVM->setEnabled(true);
-        ui->cmdCalibrate->setEnabled(true);
-        fwdiscovered=true;
-    } else {
-
-    }
-}
-
 /* - Checks if the boards firmware was actually found.
- * This is called 1sec after
+ *   This is called 1sec after a request is sent for the board version
  */
 
 void MainWindow::connectTimeout()
 {
-    if(!fwdiscovered && serialcon->isOpen()) {
+    if(currentboard != nullptr && serialcon->isOpen()) {
         QMessageBox::information(this,"Error", "No valid board detected\nPlease check COM port or flash proper code");
         serialDisconnect();
     }
 }
-
-/* Called if waiting for an ack or nak doesn't ever arrive (~1 second)
- *  Also called on a nak received from a bad CRC on headtracker
- *   Try re-sending data
- */
-
-void MainWindow::comTimeout()
-{
-    comtimeout.stop();
-
-    // If too many faults, disconnect.
-    if(jsonfaults > MAX_TX_FAULTS) {
-        addToLog("\r\nERROR: Critical - " + QString(MAX_TX_FAULTS)+ " transmission faults, disconnecting\r\n");
-        serialDisconnect();
-
-    } else {
-        // Pause a bit, give time for device to catch up
-        Sleep(TX_FAULT_PAUSE);
-
-        // Resend last JSON
-        sendSerialData(lastjson);
-        addToLog("ERROR: CRC Fault - Re-sending data (" +  lastjson + ")\n");
-    }
-
-    // Increment fault counter
-    jsonfaults++;
-}
-
-/* Decide what to do with incoming JSON packet
- * v1.0 Possible Incoming JSON Commands
- *      "Settings"  Tracker Settings Send
- *      "Data" Live Data for Info / Calibration
- *      "FW"  Firmware Version + Hardware
- */
-
-void MainWindow::parseIncomingJSON(const QVariantMap &map)
-{
-    // Settings from the Tracker Sent, save them and update the UI
-    if(map["Cmd"].toString() == "Settings") {        
-        trkset.setAllData(map);
-        updateToUI();
-
-    // Data sent, Update the graph / servo sliders / calibration
-    } else if (map["Cmd"].toString() == "Data") {
-        // Add all the data to the settings
-        trkset.setLiveDataMap(map);
-
-        // Remind user to calibrate
-        if(map["magcal"].toBool() == false && calmsgshowed == false && fwdiscovered) {
-            msgbox.setText("Calibration has not been performed.\nPlease calibrate or load from a saved file");
-            msgbox.setWindowTitle("Calibrate");
-            msgbox.show();
-            ui->statusbar->showMessage(tr("Not calibrated"),10000);
-            calmsgshowed = true;
-        }
-
-        // Set BLE Address on GUI
-        ui->lblBLEAddress->setText("Addr: " + trkset.liveData("btaddr").toString());
-
-    // Firmware Hardware and Version
-    } else if (map["Cmd"].toString() == "FW") {
-        fwDiscovered(map["Vers"].toString(), map["Hard"].toString());
-    }
-}
-
-/* parseIncomingHT()
- *      Read older head tracker code
- */
-
-void MainWindow::parseIncomingHT(QString cmd)
-{
-    static QString vers;
-    static QString hard;
-
-    // CRC ERROR
-    if(cmd.left(7) == "$CRCERR") {
-        addToLog("Headtracker CRC Error!\n");
-        ui->statusbar->showMessage("CRC Error : Error Setting Values, Retrying",2000);
-        updatesettingstmr.start(1000); // Resend
-    }
-
-    // CRC OK
-    else if(cmd.left(6) == "$CRCOK") {
-        ui->statusbar->showMessage("Values Set On Headtracker",2000);
-        sentToHT = true;
-        ui->cmdStore->setEnabled(false);
-    }
-
-    // Calibration Saved
-    else if(cmd.left(7) == "$CALSAV") {
-        ui->statusbar->showMessage("Calibration Saved", 2000);
-    }
-
-    // Graph Data
-    else if(cmd.left(2) == "$G") {
-        cmd = cmd.mid(2).simplified();
-        QStringList rtd = cmd.split(',');
-        if(rtd.length() == 10) {
-            QVariantMap vm;
-            if(rawmode) {
-                vm["tilt"] = rtd.at(0);
-                vm["roll"] = rtd.at(1);
-                vm["pan"] = rtd.at(2);
-            } else {
-                vm["tiltoff"] = rtd.at(0);
-                vm["rolloff"] = rtd.at(1);
-                vm["panoff"] = rtd.at(2);
-            }
-            vm["panout"] = rtd.at(3);
-            vm["tiltout"] = rtd.at(4);
-            vm["rollout"] = rtd.at(5);
-            vm["syscal"] = rtd.at(6);
-            vm["gyrocal"] = rtd.at(7);
-            vm["accelcal"] = rtd.at(8);
-            vm["magcal"] = rtd.at(9);
-            trkset.setLiveDataMap(vm);
-            graphing = true;
-            bnoCalibratorDialog->setCalibration(vm["syscal"].toInt(),
-                                             vm["magcal"].toInt(),
-                                             vm["gyrocal"].toInt(),
-                                             vm["accelcal"].toInt());
-        }
-    }
-    // Setting Data
-    else if(cmd.left(5) == "$SET$") {
-        QStringList setd = cmd.right(cmd.length()-5).split(',',Qt::KeepEmptyParts);
-        if(setd.length() == trkset.count()) {
-            trkset.setLPTiltRoll(setd.at(0).toFloat());
-            trkset.setLPPan(setd.at(1).toFloat());
-            trkset.setGyroWeightTiltRoll(setd.at(2).toFloat());
-            trkset.setGyroWeightPan(setd.at(3).toFloat());
-            trkset.setTlt_gain(setd.at(4).toFloat() /10);
-            trkset.setPan_gain(setd.at(5).toFloat()/10);
-            trkset.setRll_gain(setd.at(6).toFloat()/10);
-            trkset.setServoreverse(setd.at(7).toInt());
-            trkset.setPan_cnt(setd.at(8).toInt());
-            trkset.setPan_min(setd.at(9).toInt());
-            trkset.setPan_max(setd.at(10).toInt());
-            trkset.setTlt_cnt(setd.at(11).toInt());
-            trkset.setTlt_min(setd.at(12).toInt());
-            trkset.setTlt_max(setd.at(13).toInt());
-            trkset.setRll_cnt(setd.at(14).toInt());
-            trkset.setRll_min(setd.at(15).toInt());
-            trkset.setRll_max(setd.at(16).toInt());
-            trkset.setPanCh(setd.at(17).toInt());
-            trkset.setTiltCh(setd.at(18).toInt());
-            trkset.setRollCh(setd.at(19).toInt());
-            trkset.setAxisRemap(setd.at(20).toUInt());
-            trkset.setAxisSign(setd.at(21).toUInt());
-
-            updateToUI();
-            ui->statusbar->showMessage(tr("Settings Received"),2000);
-        } else {
-            ui->statusbar->showMessage(tr("Error wrong # params"),2000);
-        }
-    } else if(cmd.left(5) == "$VERS") {
-        vers = cmd.mid(5);
-        if(!hard.isEmpty())
-            fwDiscovered(vers,hard);
-    } else if(cmd.left(5) == "$HARD") {
-        hard = cmd.mid(5);
-        if(!vers.isEmpty())
-                fwDiscovered(vers,hard);
-    }
-}
-
 
 /* sendSerialData()
  *      Send Raw Data To The Serial Port
@@ -557,7 +309,7 @@ void MainWindow::parseIncomingHT(QString cmd)
 void MainWindow::sendSerialData(QByteArray data)
 {
     if(data.isEmpty() || !serialcon->isOpen())
-        return;    
+        return;
 
     ui->txled->setState(true);
     txledtimer.start();
@@ -568,65 +320,6 @@ void MainWindow::sendSerialData(QByteArray data)
         return;
 
     addToLog("GUI: " + data + "\n");
-}
-
-/* sendSerialJSON()
- *      Sends a JSON Packet
- */
-
-void MainWindow::sendSerialJSON(QString command, QVariantMap map)
-{
-    // Don't send any new data until last has been received successfully
-    map.remove("Hard");
-    map.remove("Vers");
-    QJsonObject jobj = QJsonObject::fromVariantMap(map);
-    jobj["Cmd"] = command;
-    QJsonDocument jdoc(jobj);
-    QString json = QJsonDocument(jdoc).toJson(QJsonDocument::Compact);
-
-    // Calculate the CRC Checksum
-    uint16_t CRC = escapeCRC(uCRC16Lib::calculate(json.toUtf8().data(),json.length()));
-
-    qDebug() << "CRC" << CRC << "Len" << json.length();
-    lastjson = (char)0x02 + json.toLatin1() + QByteArray::fromRawData((char*)&CRC,2) + (char)0x03;
-
-    // If there is data that didn't make it there yet push this data to the queue
-    // to be sent later
-    if(jsonfaults != 0) {
-        jsonqueue.enqueue(lastjson);
-        return;
-    }
-
-    // Send the data
-    sendSerialData(lastjson);
-
-    // Set as faulted until ACK returned
-    jsonfaults = 1;
-
-    // Reset Ack Timer
-    imheretimout.stop();
-    imheretimout.start(IMHERETIME);
-}
-
-void MainWindow::requestTimer()
-{
-    // Start by blasting out all the startup commands for all tracker variants
-    // will figure out which one it is on response
-
-    // Request in HT Mode
-    sendSerialData("$VERS");
-    sendSerialData("$HARD");
-    sendSerialData("$GSET");
-
-    // Request in JSON Mode
-    sendSerialJSON("FW"); // Get the firmware
-    sendSerialJSON("GetSet"); // Get the Settings
-    sendSerialJSON("IH"); // Start Data Transfer right away (Im here)
-
-    // Timer to make sure it a response within 1 sec after sending this data
-    connectTimer.stop();
-    connectTimer.setInterval(1000);
-    connectTimer.start();
 }
 
 /* addToLog()
@@ -649,41 +342,6 @@ void MainWindow::addToLog(QString log)
     // Scroll to bottom
     serialDebug->verticalScrollBar()->setValue(serialDebug->verticalScrollBar()->maximum());
 }
-
-uint16_t MainWindow::escapeCRC(uint16_t crc)
-{
-    // Characters to escape out
-    uint8_t crclow = crc & 0xFF;
-    uint8_t crchigh = (crc >> 8) & 0xFF;
-    if(crclow == 0x00 ||
-       crclow == 0x02 ||
-       crclow == 0x03 ||
-       crclow == 0x06 ||
-       crclow == 0x15)
-        crclow ^= 0xFF; //?? why not..
-    if(crchigh == 0x00 ||
-       crchigh == 0x02 ||
-       crchigh == 0x03 ||
-       crchigh == 0x06 ||
-       crchigh == 0x15)
-        crchigh ^= 0xFF; //?? why not..
-    return (uint16_t)crclow | ((uint16_t)crchigh << 8);
-}
-
-uint16_t MainWindow::escapeCRCHT(uint16_t crc)
-{
-    // Characters to escape out
-    uint8_t crclow = crc & 0xFF;
-    uint8_t crchigh = (crc >> 8) & 0xFF;
-    if(crclow == 0x00 ||
-       crclow == 0x24)
-        crclow ^= 0xFF; //?? why not..
-    if(crchigh == 0x00 ||
-       crchigh == 0x24)
-        crchigh ^= 0xFF; //?? why not..
-    return (uint16_t)crclow | ((uint16_t)crchigh << 8);
-}
-
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
@@ -711,6 +369,10 @@ void MainWindow::findSerialPorts()
 // Update the UI Settings from the settings class
 void MainWindow::updateToUI()
 {
+    // Don't update GUI if haven't got data from the device yet
+    if(waitingOnParameters)
+        return;
+
     ui->servoTilt->setCenter(trkset.Tlt_cnt());
     ui->servoTilt->setMaximum(trkset.Tlt_max());
     ui->servoTilt->setMinimum(trkset.Tlt_min());
@@ -724,9 +386,6 @@ void MainWindow::updateToUI()
     ui->servoRoll->setMinimum(trkset.Rll_min());
 
 
-    ui->spnLPTiltRoll->setValue(trkset.lpTiltRoll());
-    ui->spnLPPan->setValue(trkset.lpPan());
-
     ui->chkpanrev->setChecked(trkset.isPanReversed());
     ui->chkrllrev->setChecked(trkset.isRollReversed());
     ui->chktltrev->setChecked(trkset.isTiltReversed());
@@ -734,7 +393,7 @@ void MainWindow::updateToUI()
     ui->chkInvertedPPMIn->setChecked(trkset.invertedPpmIn());
     ui->chkResetCenterWave->setChecked(trkset.resetOnWave());
 
-    // Prevents a loop
+    // Prevents signals from these items causing another update
     ui->cmbpanchn->blockSignals(true);
     ui->cmbrllchn->blockSignals(true);
     ui->cmbtiltchn->blockSignals(true);
@@ -751,6 +410,8 @@ void MainWindow::updateToUI()
     ui->rll_gain->blockSignals(true);
     ui->pan_gain->blockSignals(true);
 
+    ui->spnLPTiltRoll->setValue(trkset.lpTiltRoll());
+    ui->spnLPPan->setValue(trkset.lpPan());
     ui->cmbpanchn->setCurrentIndex(trkset.panCh()-1);
     ui->cmbrllchn->setCurrentIndex(trkset.rollCh()-1);
     ui->cmbtiltchn->setCurrentIndex(trkset.tiltCh()-1);
@@ -761,7 +422,6 @@ void MainWindow::updateToUI()
     ui->til_gain->setValue(trkset.Tlt_gain()*10);
     ui->pan_gain->setValue(trkset.Pan_gain()*10);
     ui->rll_gain->setValue(trkset.Rll_gain()*10);
-
 
     int ppout_index = trkset.ppmOutPin()-1;
     int ppin_index = trkset.ppmInPin()-1;
@@ -788,9 +448,6 @@ void MainWindow::updateToUI()
     ui->rll_gain->blockSignals(false);
     ui->pan_gain->blockSignals(false);
 
-
-    savedToNVM = true;
-    sentToHT = true;
     ui->cmdStore->setEnabled(false);
 }
 
@@ -799,6 +456,7 @@ void MainWindow::updateFromUI()
 {
     if(!serialcon->isOpen()) // Don't update anything if not connected
         return;
+
     trkset.setPan_cnt(ui->servoPan->centerValue());
     trkset.setPan_min(ui->servoPan->minimumValue());
     trkset.setPan_max(ui->servoPan->maximumValue());
@@ -865,11 +523,11 @@ void MainWindow::updateFromUI()
     trkset.setInvertedPpmIn(ui->chkInvertedPPMIn->isChecked());
     trkset.setResetOnWave(ui->chkResetCenterWave->isChecked());
 
-    savedToNVM = false; // Indicate values have not been save to NVM
-    sentToHT = false; // Indicate changes haven't been sent to HT
     ui->cmdStore->setEnabled(true);
+    ui->cmdSaveNVM->setEnabled(true);
 
-    updatesettingstmr.start(500);
+    // Use timer to prevent too many writes while drags, etc.. happen
+    saveToRAMTimer.start(500);
 }
 
 // Data ready to be read from the serial port
@@ -890,7 +548,28 @@ void MainWindow::serialReadReady()
     else
         serialDebug->verticalScrollBar()->setValue(slider);
 
-    parseSerialData();
+    bool done = true;
+    while(done) {
+        int nlindex = serialData.indexOf("\r\n");
+        if(nlindex < 0)
+            return;  // No New line found
+
+        // Strip data up the the CR LF \r\n
+        QByteArray data = serialData.left(nlindex);
+
+        // Return if only a \r\n, no data.
+        if(data.length() < 1) {
+            serialData = serialData.right(serialData.length()-nlindex-2);
+            return;
+        }
+
+        // Send complete lines to
+        foreach(BoardType *brd, boards) {
+            brd->_dataIn(data);
+        }
+
+        serialData = serialData.right(serialData.length()-nlindex-2);
+    }
 
     ui->rxled->setState(true);
     rxledtimer.start();
@@ -920,133 +599,11 @@ void MainWindow::ppmOutChanged(int t,int r,int p)
     ui->servoPan->setShowActualPosition(true);
     ui->servoTilt->setShowActualPosition(true);
     ui->servoRoll->setShowActualPosition(true);
+
+    // Good enough spot to update it...
+    ui->lblBLEAddress->setText("Address: " + trkset.blueToothAddress());
 }
 
-void MainWindow::startGraph()
-{
-    if(!serialcon->isOpen())
-        return;
-    sendSerialData("$PLST");
-    graphing = true;
-    ui->servoPan->setShowActualPosition(true);
-    ui->servoTilt->setShowActualPosition(true);
-    ui->servoRoll->setShowActualPosition(true);
-}
-
-void MainWindow::stopGraph()
-{
-    if(!serialcon->isOpen())
-        return;
-    sendSerialData("$PLEN");
-    graphing = false;
-    ui->servoPan->setShowActualPosition(false);
-    ui->servoTilt->setShowActualPosition(false);
-    ui->servoRoll->setShowActualPosition(false);
-}
-
-// Send All Settings to the Controller
-
-void MainWindow::storeSettings()
-{
-    if(!serialcon->isOpen())
-        return;
-
-    // Send Data to the NANO33BLE
-    if(trkset.hardware() == "NANO33BLE") {
-        QVariantMap d2s = trkset.changedData();
-        // Remove useless items
-        d2s.remove("axisremap");
-        d2s.remove("axissign");
-        d2s.remove("Hard");
-        d2s.remove("Vers");
-        // If no changes, return
-        if(d2s.count() == 0)
-            return;
-
-        // Send Changed Data
-        sendSerialJSON("Setttings", d2s);
-        // Set the data is now matched on the device
-        trkset.setDataMatched();
-        // Flag for exit, has data been sent
-        sentToHT = true;
-        ui->cmdStore->setEnabled(false);
-
-    // Send data to the BNO055
-    } else if(trkset.hardware() == "BNO055") {
-        // Disable Graphing output, all the extra data was causing issues
-        // on update
-        if(graphing) {
-            sendSerialData("$PLEN");
-        }
-
-        updatesettingstmr.stop();
-        QStringList lst;
-        lst.append(QString::number(trkset.lpTiltRoll()));
-        lst.append(QString::number(trkset.lpPan()));
-        lst.append(QString::number(trkset.gyroWeightTiltRoll()));
-        lst.append(QString::number(trkset.gyroWeightPan()));
-        lst.append(QString::number(trkset.Tlt_gain()*10));
-        lst.append(QString::number(trkset.Pan_gain()*10));
-        lst.append(QString::number(trkset.Rll_gain()*10));
-        lst.append(QString::number(trkset.servoReverse()));
-        lst.append(QString::number(trkset.Pan_cnt()));
-        lst.append(QString::number(trkset.Pan_min()));
-        lst.append(QString::number(trkset.Pan_max()));
-        lst.append(QString::number(trkset.Tlt_cnt()));
-        lst.append(QString::number(trkset.Tlt_min()));
-        lst.append(QString::number(trkset.Tlt_max()));
-        lst.append(QString::number(trkset.Rll_cnt()));
-        lst.append(QString::number(trkset.Rll_min()));
-        lst.append(QString::number(trkset.Rll_max()));
-        lst.append(QString::number(trkset.panCh()));
-        lst.append(QString::number(trkset.tiltCh()));
-        lst.append(QString::number(trkset.rollCh()));
-        lst.append(QString::number(trkset.axisRemap()));
-        lst.append(QString::number(trkset.axisSign()));
-        QString data = lst.join(',');
-
-        // Calculate the CRC Checksum
-        uint16_t CRC = escapeCRCHT(uCRC16Lib::calculate(data.toUtf8().data(),data.length()));
-
-        // Append Data in a Byte Array
-        QByteArray bd = "$" + QString(data).toLatin1() + QByteArray::fromRawData((char*)&CRC,2) + "HE";
-
-        sendSerialData(bd);
-
-        // Re-Enable Graphing if required
-        if(graphing) {
-            sendSerialData("$PLST");
-        }
-    }
-
-    diagnostic->update();
-    ui->statusbar->showMessage(tr("Settings Sent"),2000);
-}
-
-// Automatic Send Changes.
-void MainWindow::updateSettings()
-{
-    storeSettings();
-}
-
-void MainWindow::resetCenter()
-{
-    if(trkset.hardware() == "NANO33BLE")
-        sendSerialJSON("RstCnt");
-    else if(trkset.hardware() == "BNO055")
-        sendSerialData("$RST");
-}
-
-void MainWindow::setDataMode(bool rm)
-{
-    // Change mode to show offset vs raw unfiltered data
-    if(rm)
-        sendSerialData("$GRAW ");
-    else
-        sendSerialData("$GOFF ");
-
-    rawmode = rm;
-}
 
 void MainWindow::rxledtimeout()
 {
@@ -1060,16 +617,10 @@ void MainWindow::txledtimeout()
 
 void MainWindow::saveSettings()
 {
-    QString filename;
-    QFileDialog savefd(this);
-    savefd.setWindowTitle("Save Settigns");
-    savefd.setNameFilter("Config Files (*.ini)");
-    if(savefd.exec()) {
-        if(savefd.selectedFiles().count()) {
-            filename = savefd.selectedFiles().at(0);
-            QSettings settings(filename,QSettings::IniFormat);
-            trkset.storeSettings(&settings);
-        }
+    QString filename = QFileDialog::getSaveFileName(this,"Save Settings",QString(), "Config Files (*.ini)");
+    if(!filename.isEmpty()) {
+        QSettings settings(filename,QSettings::IniFormat);
+        trkset.storeSettings(&settings);
     }
 }
 
@@ -1085,25 +636,29 @@ void MainWindow::loadSettings()
         QSettings settings(filename,QSettings::IniFormat);
         trkset.loadSettings(&settings);
         updateToUI();
-        updateSettings();
+        storeToRAM();
     }
 }
 
 bool MainWindow::checkSaved()
 {
-    bool close=true;
-    if(!sentToHT) {
-        QMessageBox::StandardButton rval = QMessageBox::question(this,"Changes not sent","Are you sure you want to disconnect?\n"\
-                              "Changes haven't been sent to the headtracker\nClick \"Send Changes\" first",QMessageBox::Yes|QMessageBox::No);
-        if(rval != QMessageBox::Yes)
-            close = false;
-    } else if(!savedToNVM && trkset.hardware() == "NANO33BLE") { // Ignore on BNO055
-        QMessageBox::StandardButton rval = QMessageBox::question(this,"Changes not saved on tracker","Are you sure you want to disconnet?\n"\
-                              "Changes haven't been permanently stored on headtracker\nClick \"Save to NVM\" first",QMessageBox::Yes|QMessageBox::No);
-        if(rval != QMessageBox::Yes)
-            close = false;
+    foreach(BoardType *brd, boards) {
+        if(!brd->isAccessAllowed())
+            continue;
+        if(!brd->_isBoardSavedToRAM()) {
+            QMessageBox::StandardButton rval = QMessageBox::question(this,"Changes not sent","Are you sure you want to disconnect?\n"\
+                                  "Changes haven't been sent to the headtracker\nClick \"Send Changes\" first",QMessageBox::Yes|QMessageBox::No);
+            if(rval != QMessageBox::Yes)
+                return false;
+
+        } else if (!brd->_isBoardSavedToNVM()) {
+            QMessageBox::StandardButton rval = QMessageBox::question(this,"Changes not saved on tracker","Are you sure you want to disconnet?\n"\
+                                  "Changes haven't been permanently stored on headtracker\nClick \"Save to NVM\" first",QMessageBox::Yes|QMessageBox::No);
+            if(rval != QMessageBox::Yes)
+                return false;
+        }
     }
-    return close;
+    return true;
 }
 
 void MainWindow::uploadFirmwareClick()
@@ -1117,8 +672,62 @@ void MainWindow::uploadFirmwareClick()
     }
 }
 
-// Start the various calibration dialogs
+/* requestTimeout()
+ *      This timeout is called after waiting for the board to boot
+ * it requests the hardware and version from the board, gives each board
+ * 250ms to respond before trying the next one. Sets the allowAccess so
+ * other boards won't respond on the serial line at the same time.
+ */
 
+void MainWindow::requestTimeout()
+{
+    // Was a board discovered, if so just quit
+    if(currentboard != nullptr)
+        return;
+
+    // Otherwise increment to the next board and try again
+    if(boardRequestIndex == boards.length()) {
+        msgbox.setText("Was unable to determine the board type");
+        msgbox.setWindowTitle("Error");
+        msgbox.show();
+        statusMessage("Board discovery failed");
+        serialDisconnect();
+        return;
+    }
+
+    // Prevent last board class from interfering
+    if(boardRequestIndex > 0)
+        boards[boardRequestIndex-1]->allowAccess(false);
+
+    // Request hardware information from the new board
+    addToLog("Trying to connect to " + boards[boardRequestIndex]->boardName() + "\n");
+    boards[boardRequestIndex]->allowAccess(true);
+    boards[boardRequestIndex]->requestHardware();
+    requestTimer.start(250);
+
+    // Move to next board
+    boardRequestIndex++;
+}
+
+void MainWindow::saveToRAMTimeout()
+{
+    // Request hardware from all board types
+    foreach(BoardType *brd, boards) {
+        brd->_saveToRAM();
+        ui->cmdStore->setEnabled(false);
+    }
+}
+
+void MainWindow::requestParamsTimeout()
+{
+    waitingOnParameters=true;
+    // Request hardware from all board types
+    foreach(BoardType *brd, boards) {
+        brd->_requestParameters();
+    }
+}
+
+// Start the various calibration dialogs
 void MainWindow::startCalibration()
 {
     if(!serialcon->isOpen()) {
@@ -1126,38 +735,29 @@ void MainWindow::startCalibration()
         return;
     }
 
-    if(trkset.hardware() == "NANO33BLE") {
-        bleCalibratorDialog->show();
-
-    } else if (trkset.hardware() == "BNO055") {
-        // Start calibration, start graphing.
-        sendSerialData("$STO");
-        startGraph();
-        bnoCalibratorDialog->startCalibration();
-        bnoCalibratorDialog->show();
+    foreach(BoardType *brd, boards) {
+        brd->_startCalibration();
     }
 }
 
-// Nano33BLE - Let hardware know were here (I'm Here)
-
-void MainWindow::ihTimeout()
+void MainWindow::storeToNVM()
 {
-    if(serialcon->isOpen() && trkset.hardware() == "NANO33BLE") {
-        sendSerialJSON("IH");
+    foreach(BoardType *brd, boards) {
+        brd->_saveToNVM();
     }
 }
 
-// BNO055 saves to EEPROM on receive
-// NANO 33 BLE user must click the button so there aren't as many write cycles
-// wearing out the flash.
-
-void MainWindow::saveToNVM()
+void MainWindow::storeToRAM()
 {
-    if(serialcon->isOpen()) {
-        if(trkset.hardware() == "NANO33BLE") {
-            sendSerialJSON("Flash");
-            savedToNVM = true;
-        }
+    foreach(BoardType *brd, boards) {
+        brd->_saveToRAM();
+    }
+}
+
+void MainWindow::resetCenter()
+{
+    foreach(BoardType *brd, boards) {
+        brd->_resetCenter();
     }
 }
 
@@ -1173,6 +773,129 @@ void MainWindow::showSerialDiagClicked()
     serialDebug->show();
     serialDebug->activateWindow();
     serialDebug->raise();
+}
+
+void MainWindow::paramSendStart()
+{
+    statusMessage("Starting parameter send");
+}
+
+void MainWindow::paramSendComplete()
+{
+    statusMessage("Parameter(s) saved");
+    ui->cmdStore->setEnabled(false);
+}
+
+void MainWindow::paramSendFailure(int)
+{
+    msgbox.setText("Unable to upload the parameter(s)");
+    msgbox.setWindowTitle("Error");
+    msgbox.show();
+    statusMessage("Parameters Send Failure");
+    serialDisconnect();
+}
+
+void MainWindow::paramReceiveStart()
+{
+    statusMessage("Parameters Request Started",5000);
+}
+
+void MainWindow::paramReceiveComplete()
+{
+    statusMessage("Parameters Request Started",5000);
+    waitingOnParameters = false;
+    updateToUI();
+}
+
+void MainWindow::paramReceiveFailure(int)
+{
+    msgbox.setText("Unable to receive the parameters");
+    msgbox.setWindowTitle("Error");
+    msgbox.show();
+    statusMessage("Parameter Received Failure");
+    serialDisconnect();
+}
+
+void MainWindow::calibrationSuccess()
+{
+    statusMessage("Calibration Success",5000);
+}
+
+void MainWindow::calibrationFailure()
+{
+    statusMessage("Calibration Failure",5000);
+}
+
+void MainWindow::serialTxReady()
+{
+    foreach(BoardType *brd, boards) {
+        sendSerialData(brd->_dataout());
+    }
+}
+
+void MainWindow::needsCalibration()
+{
+    msgbox.setText("Calibration has not been performed.\nPlease calibrate or restore from a saved file");
+    msgbox.setWindowTitle("Calibrate");
+    msgbox.show();
+}
+
+void MainWindow::boardDiscovered(BoardType *brd)
+{
+    // Board discovered, save it
+    currentboard = brd;
+
+    // Stack widget changes to hide some info depending on board
+    if(brd->boardName() == "NANO33BLE") {
+        addToLog("Connect to a " + brd->boardName() + "\n");
+        ui->cmdStartGraph->setVisible(false);
+        ui->cmdStopGraph->setVisible(false);
+        ui->chkRawData->setVisible(false);
+        ui->cmbRemap->setVisible(false);
+        ui->cmbSigns->setVisible(false);
+        ui->cmdSaveNVM->setVisible(true);
+        ui->grbSettings->setTitle("Nano 33 BLE");
+        ui->cmdStopGraph->setEnabled(true);
+        ui->cmdStartGraph->setEnabled(true);
+        ui->cmdSend->setEnabled(true);
+        ui->cmdSaveNVM->setEnabled(true);
+        ui->cmdCalibrate->setEnabled(true);
+        ui->stackedWidget->setCurrentIndex(3);
+
+    } else if (brd->boardName() == "BNO055") {
+        addToLog("Connect to a " + brd->boardName() + "\n");
+        ui->cmdStartGraph->setVisible(true);
+        ui->cmdStopGraph->setVisible(true);
+        ui->cmbRemap->setVisible(true);
+        ui->cmbSigns->setVisible(true);
+        ui->chkRawData->setVisible(true);
+        ui->cmdSaveNVM->setVisible(false);
+        ui->grbSettings->setTitle("BNO055");
+        ui->cmdStopGraph->setEnabled(true);
+        ui->cmdStartGraph->setEnabled(true);
+        ui->cmdSend->setEnabled(true);
+        ui->cmdSaveNVM->setEnabled(true);
+        ui->cmdCalibrate->setEnabled(true);
+        ui->stackedWidget->setCurrentIndex(2);
+
+    } else if (brd->boardName() == "NANO33REMOTE") {
+        addToLog("Connect to a " + brd->boardName() + "\n");
+
+    } else {
+        msgbox.setText("Unknown board type");
+        msgbox.setWindowTitle("Error");
+        msgbox.show();
+        statusMessage("Unknown board type");
+        serialDisconnect();
+    }
+
+    // Request the parameters from the device now
+    requestParamsTimer.start(50);
+}
+
+void MainWindow::statusMessage(QString str, int timeout)
+{
+    ui->statusbar->showMessage(str,timeout);
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)

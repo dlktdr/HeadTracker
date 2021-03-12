@@ -18,6 +18,8 @@
 #include "calibratebno.h"
 #include "calibrateble.h"
 #include "diagnosticdisplay.h"
+#include "boardnano33ble.h"
+#include "boardbno055.h"
 
 const int MAX_LOG_LENGTH=6000; // How many bytes to keep of log data in the gui
 const QString version="0.8"; // Current Version Number
@@ -44,53 +46,39 @@ public:
 protected:
     void closeEvent(QCloseEvent *event);
 
-private:
+private:    
     Ui::MainWindow *ui;
+    QList<BoardType*> boards;
     QSerialPort *serialcon;
     TrackerSettings trkset;
     QByteArray serialData;
     QTimer rxledtimer;
     QTimer txledtimer;
-    QTimer updatesettingstmr;
-    QTimer imheretimout;
-    QTimer comtimeout;
+    QTimer requestTimer;
     QTimer connectTimer;
+    QTimer saveToRAMTimer;
+    QTimer requestParamsTimer;
+    bool waitingOnParameters;
+
     QString logd;
     Firmware *firmwareUploader;
-    CalibrateBNO *bnoCalibratorDialog;
-    CalibrateBLE *bleCalibratorDialog;
     DiagnosticDisplay *diagnostic;
     QMessageBox msgbox;
     QPlainTextEdit *serialDebug;
-    bool savedToNVM;
-    bool sentToHT;
-    bool fwdiscovered;
-    bool calmsgshowed;
+
     bool settingstoHT;
+    int boardRequestIndex;
 
-    int jsonfaults;
-    QByteArray lastjson;
-    QQueue<QByteArray> jsonqueue;
-
-    bool graphing;
-    bool rawmode;
+    BoardNano33BLE *nano33ble;
+    BoardBNO055 *bno055;
+    BoardType *currentboard;
 
     void parseSerialData();
     void sendSerialData(QByteArray data);
-
-    // HT Format
-    void parseIncomingHT(QString cmd);
-    // JSON format
-    void sendSerialJSON(QString command, QVariantMap map=QVariantMap());
-    void parseIncomingJSON(const QVariantMap &map);
-    void fwDiscovered(QString vers, QString hard);
-    void addToLog(QString log);
-    uint16_t escapeCRC(uint16_t crc);
-    uint16_t escapeCRCHT(uint16_t crc);
     bool checkSaved();
+
 protected:
     void keyPressEvent(QKeyEvent *event);
-
 
 private slots:
     void findSerialPorts();
@@ -98,31 +86,40 @@ private slots:
     void serialDisconnect();
     void serialError(QSerialPort::SerialPortError);
     void connectTimeout();
-    void comTimeout();
+    void requestTimeout();
+    void saveToRAMTimeout();
+    void requestParamsTimeout();
     void updateFromUI();
     void updateToUI();
     void offOrientChanged(float,float,float);
     void ppmOutChanged(int,int,int);
     void serialReadReady();
     void manualSend();
-    void startGraph();
-    void stopGraph();
-    void storeSettings(); // Save to eeprom
-    void updateSettings(); // Update to chip
+    void storeToNVM();
+    void storeToRAM();
     void resetCenter();
-    void setDataMode(bool);
-    void requestTimer();
     void rxledtimeout();
     void txledtimeout();
     void saveSettings();
     void loadSettings();
-
     void uploadFirmwareClick();
     void startCalibration();
-    void ihTimeout();
-    void saveToNVM();
     void showDiagsClicked();
     void showSerialDiagClicked();
 
+    // Board Connections
+    void paramSendStart();
+    void paramSendComplete();
+    void paramSendFailure(int);
+    void paramReceiveStart();
+    void paramReceiveComplete();
+    void paramReceiveFailure(int);
+    void calibrationSuccess();
+    void calibrationFailure();
+    void serialTxReady();
+    void addToLog(QString log);
+    void needsCalibration();
+    void boardDiscovered(BoardType *);
+    void statusMessage(QString,int timeout=0);
 };
 #endif // MAINWINDOW_H
