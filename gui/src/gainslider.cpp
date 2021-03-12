@@ -35,8 +35,6 @@ void GainSlider::setMinimum(int val)
 
 void GainSlider::setValue(int val)
 {
-    //popslide->setValue(val);
-    //QSlider::set
     QSlider::setValue(val);
 }
 
