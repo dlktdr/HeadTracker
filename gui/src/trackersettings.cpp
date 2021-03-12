@@ -43,6 +43,8 @@ TrackerSettings::TrackerSettings(QObject *parent):
     _data["btmode"] = (uint)0;
     _data["orient"] = (uint)0;
     _data["rstppm"] = DEF_RST_PPM;
+
+    _live["btaddr"] = QString("00:00:00:00:00:00");
 }
 
 int TrackerSettings::Rll_min() const
@@ -467,12 +469,19 @@ void TrackerSettings::setBlueToothMode(int mode) {
         _data["btmode"] = mode;
 }
 
+QString TrackerSettings::blueToothAddress()
+{
+    return _live["btaddr"].toString();
+}
+
 void TrackerSettings::storeSettings(QSettings *settings)
 {
     settings->clear();
     QMapIterator<QString, QVariant> i(_data);
     while (i.hasNext()) {
         i.next();
+        if(i.key() == "Cmd")
+            continue;
         settings->setValue(i.key(),i.value());
     }
 }

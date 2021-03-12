@@ -153,6 +153,7 @@ public:
 
     int blueToothMode();
     void setBlueToothMode(int mode);
+    QString blueToothAddress();
 
     void storeSettings(QSettings *settings);
     void loadSettings(QSettings *settings);
