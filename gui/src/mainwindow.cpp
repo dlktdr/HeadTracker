@@ -8,7 +8,7 @@
 #include "servominmax.h"
 #include "ucrc16lib.h"
 
-#define DEBUG_HT
+//#define DEBUG_HT
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -65,6 +65,7 @@ MainWindow::MainWindow(QWidget *parent)
     // Board Connections, connects all boards signals to same end points
     foreach(BoardType *brd, boards) {
         connect(brd,SIGNAL(paramSendStart()), this, SLOT(paramSendStart()));
+        connect(brd,SIGNAL(paramSendComplete()), this, SLOT(paramSendComplete()));
         connect(brd,SIGNAL(paramSendFailure(int)), this, SLOT(paramSendFailure(int)));
         connect(brd,SIGNAL(paramReceiveStart()), this, SLOT(paramReceiveStart()));
         connect(brd,SIGNAL(paramReceiveComplete()), this, SLOT(paramReceiveComplete()));
@@ -447,8 +448,6 @@ void MainWindow::updateToUI()
     ui->til_gain->blockSignals(false);
     ui->rll_gain->blockSignals(false);
     ui->pan_gain->blockSignals(false);
-
-    ui->cmdStore->setEnabled(false);
 }
 
 // Update the Settings Class from the UI Data
@@ -652,7 +651,7 @@ bool MainWindow::checkSaved()
                 return false;
 
         } else if (!brd->_isBoardSavedToNVM()) {
-            QMessageBox::StandardButton rval = QMessageBox::question(this,"Changes not saved on tracker","Are you sure you want to disconnet?\n"\
+            QMessageBox::StandardButton rval = QMessageBox::question(this,"Changes not saved on tracker","Are you sure you want to disconnect?\n"\
                                   "Changes haven't been permanently stored on headtracker\nClick \"Save to NVM\" first",QMessageBox::Yes|QMessageBox::No);
             if(rval != QMessageBox::Yes)
                 return false;
@@ -745,6 +744,7 @@ void MainWindow::storeToNVM()
     foreach(BoardType *brd, boards) {
         brd->_saveToNVM();
     }
+    statusMessage("Storing Parameters to non-volatile memory");
 }
 
 void MainWindow::storeToRAM()
@@ -777,12 +777,12 @@ void MainWindow::showSerialDiagClicked()
 
 void MainWindow::paramSendStart()
 {
-    statusMessage("Starting parameter send");
+    statusMessage("Starting parameter send",3000);
 }
 
 void MainWindow::paramSendComplete()
 {
-    statusMessage("Parameter(s) saved");
+    statusMessage("Parameter(s) saved", 5000);
     ui->cmdStore->setEnabled(false);
 }
 
@@ -802,7 +802,7 @@ void MainWindow::paramReceiveStart()
 
 void MainWindow::paramReceiveComplete()
 {
-    statusMessage("Parameters Request Started",5000);
+    statusMessage("Parameters Request Complete",5000);
     waitingOnParameters = false;
     updateToUI();
 }
