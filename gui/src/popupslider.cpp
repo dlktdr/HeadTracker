@@ -43,6 +43,8 @@ void PopupSlider::setLimits(int low, int high)
 void PopupSlider::setValue(int val)
 {
     spinbox->setValue(val);
+    spinbox->setFocusPolicy(Qt::StrongFocus);
+    spinbox->setFocus();
 }
 
 void PopupSlider::setSuffix(QString suf)
