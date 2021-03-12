@@ -12,10 +12,10 @@ ServoMinMax::ServoMinMax(QWidget *parent) : QWidget(parent)
     c_min = TrackerSettings::MIN_CNT;
 
     // Minimum value the maximum slider is allowed
-    min_max = min_travel + 250;
+    min_max = min_travel + TrackerSettings::MINMAX_RNG;
 
     // Maximum value the minimum slider is allowed
-    max_min = max_travel - 250;
+    max_min = max_travel - TrackerSettings::MINMAX_RNG;
 
     padding = 10;
     hpad = padding/2;
@@ -85,6 +85,8 @@ void ServoMinMax::cntSpinChanged(int v)
 {
     c_value = v;
     update();
+
+    cntspinbox->move(this->mapToGlobal(QPoint(centerSlider.x()-((max_val - min_travel) / travel)-cntspinbox->width()/2+centerSlider.width()/2,-cntspinbox->height()+padding/2)));
     emit centerChanged(c_value);
 }
 
@@ -92,6 +94,7 @@ void ServoMinMax::minSpinChanged(int v)
 {
     min_val = v;
     update();
+    minspinbox->move(this->mapToGlobal(QPoint(minSlider.x()-((max_val - min_travel) / travel)-minspinbox->width()/2+minSlider.width()/2,-minspinbox->height()+padding/2)));
     emit minimumChanged(min_val);
 }
 
