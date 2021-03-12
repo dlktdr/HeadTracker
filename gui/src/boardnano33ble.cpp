@@ -6,6 +6,8 @@ BoardNano33BLE::BoardNano33BLE(TrackerSettings *ts)
     bleCalibratorDialog = new CalibrateBLE(trkset);
 
     connect(&imheretimout,SIGNAL(timeout()),this,SLOT(ihTimeout()));
+    connect(&rxParamsTimer,SIGNAL(timeout()),this,SLOT(rxParamsTimeout()));
+    rxParamsTimer.setSingleShot(true);
     connect(bleCalibratorDialog,&CalibrateBLE::calibrationSave,this,&BoardNano33BLE::saveToRAM);
 }
 
@@ -87,18 +89,41 @@ void BoardNano33BLE::saveToRAM()
 
     // Flag for exit, has data been sent
     savedToRAM = true;
+    savedToNVM = false;
 }
 
 void BoardNano33BLE::saveToNVM()
 {
     sendSerialJSON("Flash");
+    savedToNVM = true;
 }
+
+
+// Parameters requested from the board
 
 void BoardNano33BLE::requestParameters()
 {
-    emit paramReceiveStart();
+    if(rxparamfaults == 0) {
+        emit paramReceiveStart();
+    } else if (rxparamfaults > 3) {
+        emit paramReceiveFailure(1);
+        return;
+    }
+
     sendSerialJSON("GetSet"); // Get the Settings
+
+    rxParamsTimer.stop();
+    rxParamsTimer.start(500); // Start a timer, if we haven't got them, try again
 }
+
+// Timer if parameters are not received in time
+void BoardNano33BLE::rxParamsTimeout()
+{
+    // Increment fault counter
+    rxparamfaults++;
+    requestParameters();
+}
+
 
 void BoardNano33BLE::startCalibration()
 {
@@ -116,10 +141,12 @@ void BoardNano33BLE::allowAccessChanged(bool acc)
     savedToRAM=true;
     serialDataOut.clear();
     jsonfaults =0;
+    rxparamfaults=0;
     jsonqueue.clear();
     lastjson.clear();
     imheretimout.stop();
     updatesettingstmr.stop();
+    rxParamsTimer.stop();
 }
 
 void BoardNano33BLE::disconnected()
@@ -171,8 +198,10 @@ void BoardNano33BLE::parseIncomingJSON(const QVariantMap &map)
 {
     // Settings from the Tracker Sent, save them and update the UI
     if(map["Cmd"].toString() == "Settings") {
+        rxParamsTimer.stop(); // Stop error timer
+        rxparamfaults = 0;
         trkset->setAllData(map);
-        emit paramReceiveComplete();
+        emit paramReceiveComplete();        
 
     // Data sent, Update the graph / servo sliders / calibration
     } else if (map["Cmd"].toString() == "Data") {
@@ -237,3 +266,4 @@ void BoardNano33BLE::ihTimeout()
 {
     sendSerialJSON("IH");
 }
+

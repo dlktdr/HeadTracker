@@ -49,11 +49,13 @@ private:
     bool savedToNVM;
     bool savedToRAM;
     int jsonfaults;
+    int rxparamfaults;
     QByteArray serialDataOut;
     QByteArray lastjson;
     QQueue<QByteArray> jsonqueue;
     QTimer imheretimout;
     QTimer updatesettingstmr;
+    QTimer rxParamsTimer;
 
     CalibrateBLE *bleCalibratorDialog;
 
@@ -64,6 +66,7 @@ private:
 private slots:
     void comTimeout();
     void ihTimeout();
+    void rxParamsTimeout();
 };
 
 #endif // BOARDNANO33BLE_H
