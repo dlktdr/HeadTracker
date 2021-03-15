@@ -34,7 +34,7 @@ public:
     static constexpr int DEF_CENTER = 1500;
     static constexpr float MIN_GAIN= 0.0;
     static constexpr float MAX_GAIN= 35.0;
-    static constexpr float DEF_GAIN= 10.0;
+    static constexpr float DEF_GAIN= 5.0;
     static constexpr int DEF_BT_MODE= BTDISABLE; // Bluetooth Disabled
     static constexpr int DEF_RST_PPM = -1;
 
