@@ -30,15 +30,12 @@ ServoMinMax::ServoMinMax(QWidget *parent) : QWidget(parent)
 
     // Spin Boxes for direct entry
     cntspinbox = new PopupSlider(this);
-    cntspinbox->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
     cntspinbox->setLimits(c_min,c_max);
     connect(cntspinbox,SIGNAL(valueChanged(int)),this,SLOT(cntSpinChanged(int)));
     minspinbox = new PopupSlider(this);
-    minspinbox->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
     minspinbox->setLimits(min_travel,min_max);
     connect(minspinbox,SIGNAL(valueChanged(int)),this,SLOT(minSpinChanged(int)));
     maxspinbox = new PopupSlider(this);
-    maxspinbox->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
     maxspinbox->setLimits(max_min,max_travel);
     connect(maxspinbox,SIGNAL(valueChanged(int)),this,SLOT(maxSpinChanged(int)));
 
@@ -48,16 +45,24 @@ ServoMinMax::ServoMinMax(QWidget *parent) : QWidget(parent)
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)),this, SLOT(showContextMenu(const QPoint &)));
 }
 
+ServoMinMax::~ServoMinMax()
+{
+
+}
+
 void ServoMinMax::showContextMenu(const QPoint &pos)
 {
        QMenu contextMenu(tr("Context menu"), this);
 
        QAction action1("Default Values", this);
        QAction action2("Re-Center", this);
+       QAction action3("Maximum Values", this);
 
        connect(&action1, SIGNAL(triggered()), this, SLOT(setDefaults()));
        connect(&action2, SIGNAL(triggered()), this, SLOT(reCenter()));
+       connect(&action3, SIGNAL(triggered()), this, SLOT(actSetMax()));
        contextMenu.addAction(&action1);
+       contextMenu.addAction(&action3);
        contextMenu.addAction(&action2);
        contextMenu.exec(mapToGlobal(pos));
 }
@@ -81,28 +86,39 @@ void ServoMinMax::setDefaults()
     emit centerChanged(c_value);
 }
 
+void ServoMinMax::actSetMax()
+{
+    c_value = (TrackerSettings::MAX_PWM-TrackerSettings::MIN_PWM)/2 + TrackerSettings::MIN_PWM;
+    min_val = TrackerSettings::MIN_PWM;
+    max_val = TrackerSettings::MAX_PWM;
+
+    update();
+    emit minimumChanged(min_val);
+    emit maximumChanged(max_val);
+    emit centerChanged(c_value);
+}
+
 void ServoMinMax::cntSpinChanged(int v)
 {
-    c_value = v;
-    update();
-
+    c_value = v;   
     cntspinbox->move(this->mapToGlobal(QPoint(centerSlider.x()-((max_val - min_travel) / travel)-cntspinbox->width()/2+centerSlider.width()/2,-cntspinbox->height()+padding/2)));
+    update();
     emit centerChanged(c_value);
 }
 
 void ServoMinMax::minSpinChanged(int v)
 {
-    min_val = v;
-    update();
+    min_val = v;    
     minspinbox->move(this->mapToGlobal(QPoint(minSlider.x()-((max_val - min_travel) / travel)-minspinbox->width()/2+minSlider.width()/2,-minspinbox->height()+padding/2)));
+    update();
     emit minimumChanged(min_val);
 }
 
 void ServoMinMax::maxSpinChanged(int v)
 {
     max_val = v;
-    update();
     maxspinbox->move(this->mapToGlobal(QPoint(maxSlider.x()-((max_val - min_travel) / travel)-maxspinbox->width()/2+maxSlider.width()/2,-maxspinbox->height()+padding/2)));
+    update();
     emit maximumChanged(max_val);
 }
 
@@ -243,23 +259,22 @@ void ServoMinMax::mousePressEvent(QMouseEvent *event)
             minspinbox->show();
             minspinbox->move(this->mapToGlobal(QPoint(minSlider.x()-minspinbox->width()/2+minSlider.width()/2,-minspinbox->height()+padding/2)));
             minspinbox->setValue(min_val);
-            minspinbox->setFocus();
+
         } else if(maxSlider.contains(event->pos())) {
             mouseDownPoint = event->globalPos();
             maxSliderSelected = true;
             max_start = max_val;
             maxspinbox->show();
-            maxspinbox->setFocus();
-            maxspinbox->setValue(max_val);
             maxspinbox->move(this->mapToGlobal(QPoint(maxSlider.x()-maxspinbox->width()/2+maxSlider.width()/2,-maxspinbox->height()+padding/2)));
+            maxspinbox->setValue(max_val);
+
         } else if(centerSlider.contains(event->pos())) {
             mouseDownPoint = event->globalPos();
             centerSliderSelected = true;
             cnt_start = c_value;
             cntspinbox->show();
-            cntspinbox->setFocus();
-            cntspinbox->setValue(c_value);
             cntspinbox->move(this->mapToGlobal(QPoint(centerSlider.x()-cntspinbox->width()/2+centerSlider.width()/2,-cntspinbox->height()+padding/2)));
+            cntspinbox->setValue(c_value);
         } else {
         }
     }
@@ -314,7 +329,7 @@ void ServoMinMax::mouseDoubleClickEvent(QMouseEvent *event)
 
 bool ServoMinMax::event(QEvent *event)
 {
-    /*if (event->type() == QEvent::ToolTip) {
+    if (event->type() == QEvent::ToolTip) {
             QHelpEvent *helpEvent = static_cast<QHelpEvent *>(event);
             QPoint glbpoint = helpEvent->globalPos();
             glbpoint.setY(glbpoint.y()-40);
@@ -329,6 +344,6 @@ bool ServoMinMax::event(QEvent *event)
                 event->ignore();
             }
             return true;
-        }*/
+        }
         return QWidget::event(event);
 }

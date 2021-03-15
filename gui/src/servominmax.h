@@ -21,6 +21,7 @@ class ServoMinMax : public QWidget
 
 public:
     explicit ServoMinMax(QWidget *parent = nullptr);
+    ~ServoMinMax();
     int centerValue() {return c_value;}
     int minimumValue() {return min_val;}
     int maximumValue() {return max_val;}
@@ -33,6 +34,7 @@ private slots:
     void showContextMenu(const QPoint &p);
     void reCenter();
     void setDefaults();
+    void actSetMax();
     void cntSpinChanged(int);
     void minSpinChanged(int);
     void maxSpinChanged(int);
