@@ -1,7 +1,7 @@
 # RC HeadTracker
 If your an RC enthusiast like myself with a FPV headset at some point you thought wouldn't it be cool if I could turn my head and the camera would follow. That is the intention of this project. It is a continuation of the work started by Dennis Frie, Mark Mansur and others in an effort to make it a more simple project.
 
-I would like to throw out thanks to Yuri for the BLE Para work. https://github.com/ysoldak/HeadTracker
+I would like to throw out thanks to Yuri for the BLE Para work + Orientation fix. https://github.com/ysoldak/HeadTracker
 
 ## [Wiki](https://github.com/dlktdr/HeadTracker/wiki)
 * Please visit the  for the hardware required and how to build one.
@@ -13,7 +13,7 @@ I would like to throw out thanks to Yuri for the BLE Para work. https://github.c
 * How to for the BNO055 Sensor board + Arduino Nano
 
 ## [Download](https://github.com/dlktdr/HeadTracker/releases)
-* Download the latest version from here if your running Windows 7,8,10. 
+* Download the latest version from here if your running Windows 7,8,10. Win 7+8 need a driver for the BLE33. Please see the build page
 * The GUI should compile on Linux and MacOS but I have not tested it (*Firmware upload will not work).
 
 ### To Do
