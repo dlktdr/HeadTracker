@@ -3,6 +3,8 @@
 
 #include "serial.h"
 #include "main.h"
+#include "ucrc16lib.h"
+#include "dataparser.h"
 
 // Really don't like this but for the life of me I couldn't get
 // any ready to go buffered serial methods to work.
@@ -196,19 +198,22 @@ void serialWrite(char c) {
 
 void serialWriteJSON(DynamicJsonDocument &json)
 {
-  serWriteMutex.lock();
+    serWriteMutex.lock();
 
-  char data[TX_BUF_SIZE];
-  int br = serializeJson(json, data, TX_BUF_SIZE); // Serialize, with max 500 char buffer
+    char data[TX_BUF_SIZE];
+    int br = serializeJson(json, data, TX_BUF_SIZE-sizeof(uint16_t));
+    uint16_t calccrc = escapeCRC(uCRC16Lib::calculate(data,br));
 
-  serout.push(0x02);
-  // Append Output to the serial output buffer
-  for(int i =0; i < br; i++) {
-    serout.push(data[i]);
-  }
-  serout.push(0x03);
-  serout.push('\r');
-  serout.push('\n');
+    serout.push(0x02);
+    // Append Output to the serial output buffer
+    for(int i =0; i < br; i++) {
+        serout.push(data[i]);
+    }
+    serout.push((calccrc >> 8 ) & 0xFF);
+    serout.push(calccrc & 0xFF);
+    serout.push(0x03);
+    serout.push('\r');
+    serout.push('\n');
 
-  serWriteMutex.unlock();
+    serWriteMutex.unlock();
 }

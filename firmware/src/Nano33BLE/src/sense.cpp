@@ -4,7 +4,6 @@
 // Pick a Filter
 //#define NXP_FILTER
 #define MADGWICK  // My Choice, seems to work well and not a ton of CPU used
-//#define MAHONY
 
 #include "trackersettings.h"
 #include "sense.h"
@@ -12,11 +11,11 @@
 #include "main.h"
 #include "dataparser.h"
 #include "LSM9DS1/Arduino_LSM9DS1.h"
-#include "SensorFusion.h"
 #include "serial.h"
 #include "Wire.h"
 #include "ble.h"
 #include "NXPFusion/Adafruit_AHRS_NXPFusion.h"
+#include "MadgwickAHRS/MadgwickAHRS.h"
 
 #ifdef NXP_FILTER
 Adafruit_NXPSensorFusion nxpfilter;
@@ -29,7 +28,7 @@ static float accx=0,accy=0,accz=0;
 static float magx=0,magy=0,magz=0;
 static float gyrx=0,gyry=0,gyrz=0;
 static float tilt=0,roll=0,pan=0;
-static float rolloffset=0, panoffset=180, tiltoffset=0;
+static float rolloffset=0, panoffset=0, tiltoffset=0;
 static float magxoff=0, magyoff=0, magzoff=0;
 static float accxoff=0, accyoff=0, acczoff=0;
 static float gyrxoff=0, gyryoff=0, gyrzoff=0;
@@ -38,13 +37,14 @@ static float l_panout=0, l_tiltout=0, l_rollout=0;
 uint16_t zaccelout=1500;
 
 static uint16_t ppmchans[MAX_PPM_CHANNELS];
-static SF fusion;
+Madgwick madgwick;
 static Timer runt;
 
 static int counter=0;
-//static int lastgesture=-1;
 static bool blesenseboard=true;
 static bool lastproximity=false;
+
+void MagCalc();
 
 int sense_Init()
 {
@@ -64,6 +64,19 @@ int sense_Init()
     // Initalize Gesture Sensor
     if(!APDS.begin())
         blesenseboard = false;
+
+
+    // Initalize Quaternion to The Startup angle
+    while(!IMU.accelAvailable());
+    IMU.readRawAccel(raccx, raccy, raccz);
+    while(!IMU.magnetAvailable());
+    IMU.readRawMagnet(rmagx, rmagy, rmagz);
+    trkset.magOffset(magxoff,magyoff,magzoff);
+    // Calibrate Hard Iron Offsets
+    magx = rmagx - magxoff;
+    magy = rmagy - magyoff;
+    magz = rmagz - magzoff;
+    madgwick.begin(-raccx, raccy, raccz, rmagx, rmagy, rmagz);
 
     return 0;
 }
@@ -92,48 +105,31 @@ void sense_Thread()
     pan = nxpfilter.getYaw();
 #else
     // Period Between Samples
-    float deltat = fusion.deltatUpdate();
+    float deltat = madgwick.deltatUpdate();
 #ifdef MADGWICK
-    fusion.MadgwickUpdate(gyrx * DEG_TO_RAD, gyry * DEG_TO_RAD, gyrz * DEG_TO_RAD,
+    madgwick.update(gyrx * DEG_TO_RAD, gyry * DEG_TO_RAD, gyrz * DEG_TO_RAD,
                         accx, accy, accz,
                         magx, magy, magz,
-    deltat);
+                        deltat);
 #elif defined(MAHONY)
     fusion.MahonyUpdate(gyrx* DEG_TO_RAD, gyry* DEG_TO_RAD, gyrz* DEG_TO_RAD, accx, accy, accz, magx, magy, magz, deltat);  //else use the magwick, it is slower but more accurate
 #endif
-    roll = fusion.getPitch();
-    tilt = fusion.getRoll();
-    pan = fusion.getYaw();
+    roll = madgwick.getPitch();
+    tilt = madgwick.getRoll();
+    pan = madgwick.getYaw();
+    static bool firstrun=true;
+    if(firstrun) {
+        panoffset = pan;
+        firstrun = false;
+    }
 #endif
 
-    // Reset Center on Wave or Proximity, Don't update often
+    // Reset Center on Wave or Proximity, Don't need to updated this often
     static int sensecount=0;
     if(blesenseboard && sensecount++ == 50) {
         sensecount = 0;
         //bool btnpress=false;
         if (trkset.resetOnWave()) {
-            /*if(APDS.gestureAvailable()) {
-                // a gesture was detected, read and print to serial monitor
-                int gesture = APDS.readGesture();
-                if(lastgesture == GESTURE_DOWN &&
-                    gesture == GESTURE_UP)
-                    btnpress=true;
-                else if(lastgesture == GESTURE_UP &&
-                        gesture == GESTURE_DOWN)
-                    btnpress=true;
-                else if(lastgesture == GESTURE_LEFT &&
-                        gesture == GESTURE_RIGHT)
-                    btnpress=true;
-                else if(lastgesture == GESTURE_RIGHT &&
-                        gesture == GESTURE_LEFT)
-                    btnpress=true;
-                lastgesture = gesture;
-                if(btnpress) {
-                    pressButton();
-                    serialWriteln("HT: Reset center from a wave");
-                }
-            }*/
-
             // Reset on Proximity
             if(APDS.proximityAvailable()) {
                 int proximity = APDS.readProximity();
@@ -330,7 +326,7 @@ void sense_Thread()
         trkset.setPPMInValues(ppminchans,ppmi_chcnt);
 
         // Qauterion Data
-        float *qd = fusion.getQuat();
+        float *qd = madgwick.getQuat();
         trkset.setQuaternion(qd);
 
         dataMutex.unlock();
