@@ -16,6 +16,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     waitingOnParameters = false;
+    msgbox = new QMessageBox(this);
 
     // Start the board interface
     nano33ble = new BoardNano33BLE(&trkset);
@@ -35,7 +36,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Diagnostic Display + Serial Debug
     diagnostic = new DiagnosticDisplay(&trkset);
-    serialDebug = new QPlainTextEdit();
+    serialDebug = new QTextEdit();
     serialDebug->setWindowTitle("Serial Information");
     serialDebug->resize(600,300);
 
@@ -73,7 +74,7 @@ MainWindow::MainWindow(QWidget *parent)
         connect(brd,SIGNAL(calibrationSuccess()), this, SLOT(calibrationSuccess()));
         connect(brd,SIGNAL(calibrationFailure()), this, SLOT(calibrationFailure()));
         connect(brd,SIGNAL(serialTxReady()), this, SLOT(serialTxReady()));
-        connect(brd,SIGNAL(addToLog(QString)),this,SLOT(addToLog(QString)));
+        connect(brd,SIGNAL(addToLog(QString,int)),this,SLOT(addToLog(QString,int)));
         connect(brd,SIGNAL(needsCalibration()),this,SLOT(needsCalibration()));
         connect(brd,SIGNAL(boardDiscovered(BoardType *)),this,SLOT(boardDiscovered(BoardType *)));
         connect(brd,SIGNAL(statusMessage(QString,int)),this,SLOT(statusMessage(QString,int)));
@@ -110,9 +111,9 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->spnLPTiltRoll,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
 
     // Gain Sliders
-    connect(ui->til_gain,SIGNAL(sliderMoved(int)),this,SLOT(updateFromUI()));
-    connect(ui->rll_gain,SIGNAL(sliderMoved(int)),this,SLOT(updateFromUI()));
-    connect(ui->pan_gain,SIGNAL(sliderMoved(int)),this,SLOT(updateFromUI()));
+    connect(ui->til_gain,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->rll_gain,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->pan_gain,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
     ui->til_gain->setMaximum(TrackerSettings::MAX_GAIN*10);
     ui->rll_gain->setMaximum(TrackerSettings::MAX_GAIN*10);
     ui->pan_gain->setMaximum(TrackerSettings::MAX_GAIN*10);
@@ -212,6 +213,7 @@ void MainWindow::serialConnect()
 
     if(!serialcon->open(QIODevice::ReadWrite)) {
         QMessageBox::critical(this,"Error",tr("Could not open Com ") + serialcon->portName());
+        addToLog("Could not open " + serialcon->portName(),2);
         return;
     }
 
@@ -221,13 +223,12 @@ void MainWindow::serialConnect()
 
     ui->cmdDisconnect->setEnabled(true);
     ui->cmdConnect->setEnabled(false);
+    addToLog("Connected to " + serialcon->portName());
     statusMessage(tr("Connected to ") + serialcon->portName());
+
     ui->stackedWidget->setCurrentIndex(1);
 
     serialcon->setDataTerminalReady(true);
-
-    // Begin the request to discover boards
-    addToLog("Waiting for board to boot...\n");
 
     requestTimer.stop();
     requestTimer.start(4000);
@@ -235,6 +236,7 @@ void MainWindow::serialConnect()
 
 // Disconnect from the serial port
 // Reset all gui settings to disable mode
+
 void MainWindow::serialDisconnect()
 {
     connectTimer.stop();
@@ -243,6 +245,8 @@ void MainWindow::serialDisconnect()
         // Check if user wants to save first
         if(!checkSaved())
             return;
+
+        addToLog("Disconnecting from " + serialcon->portName());
 
         // Notify board connection is disconnected
         foreach(BoardType *brd, boards) {
@@ -259,6 +263,7 @@ void MainWindow::serialDisconnect()
     ui->cmdStopGraph->setEnabled(false);
     ui->cmdStartGraph->setEnabled(false);
     ui->cmdSaveNVM->setEnabled(false);
+    ui->cmdStore->setEnabled(false);
     ui->servoPan->setShowActualPosition(true);
     ui->servoTilt->setShowActualPosition(true);
     ui->servoRoll->setShowActualPosition(true);
@@ -271,8 +276,11 @@ void MainWindow::serialDisconnect()
 
     currentboard = nullptr;
     boardRequestIndex=0;
-    connectTimer.stop();
+    saveToRAMTimer.stop();
     requestTimer.stop();
+    requestParamsTimer.stop();
+    waitingOnParameters = false;
+
 
     // Notify all boards we have disconnected
 }
@@ -282,6 +290,7 @@ void MainWindow::serialError(QSerialPort::SerialPortError err)
     switch(err) {
     // Issue with connection - device unplugged
     case QSerialPort::ResourceError: {
+        serialcon->close();
         serialDisconnect();
         break;
     }
@@ -327,10 +336,19 @@ void MainWindow::sendSerialData(QByteArray data)
  *      Add other information to the LOG
  */
 
-void MainWindow::addToLog(QString log)
+void MainWindow::addToLog(QString log, int ll)
 {
-    // Add information to the Log
-    logd += log;
+    QString color = "black";
+    if(ll==2) // Debug
+        color = "red";
+    else if(log.contains("HT:"))
+        color = "green";
+    else if(log.contains("GUI:"))
+        color = "blue";
+    else if(log.contains("\"Cmd\":\"Data\"")) // Don't show return measurment data
+        return;
+
+    logd += "<font color=\"" + color + "\">" + log + "</font><br>";
 
     // Limit Max Log Length
     int loglen = logd.length();
@@ -338,7 +356,7 @@ void MainWindow::addToLog(QString log)
         logd = logd.mid(logd.length() - MAX_LOG_LENGTH);
 
     // Set Gui text from local string
-    serialDebug->setPlainText(logd);
+    serialDebug->setHtml(logd);
 
     // Scroll to bottom
     serialDebug->verticalScrollBar()->setValue(serialDebug->verticalScrollBar()->maximum());
@@ -688,9 +706,9 @@ void MainWindow::requestTimeout()
 
     // Otherwise increment to the next board and try again
     if(boardRequestIndex == boards.length()) {
-        msgbox.setText("Was unable to determine the board type");
-        msgbox.setWindowTitle("Error");
-        msgbox.show();
+        msgbox->setText("Was unable to determine the board type");
+        msgbox->setWindowTitle("Error");
+        msgbox->show();
         statusMessage("Board discovery failed");
         serialDisconnect();
         return;
@@ -722,6 +740,7 @@ void MainWindow::saveToRAMTimeout()
 void MainWindow::requestParamsTimeout()
 {
     waitingOnParameters=true;
+
     // Request hardware from all board types
     foreach(BoardType *brd, boards) {
         brd->_requestParameters();
@@ -790,9 +809,9 @@ void MainWindow::paramSendComplete()
 
 void MainWindow::paramSendFailure(int)
 {
-    msgbox.setText("Unable to upload the parameter(s)");
-    msgbox.setWindowTitle("Error");
-    msgbox.show();
+    msgbox->setText("Unable to upload the parameter(s)");
+    msgbox->setWindowTitle("Error");
+    msgbox->show();
     statusMessage("Parameters Send Failure");
     serialDisconnect();
 }
@@ -811,9 +830,9 @@ void MainWindow::paramReceiveComplete()
 
 void MainWindow::paramReceiveFailure(int)
 {
-    msgbox.setText("Unable to receive the parameters");
-    msgbox.setWindowTitle("Error");
-    msgbox.show();
+    msgbox->setText("Unable to receive the parameters");
+    msgbox->setWindowTitle("Error");
+    msgbox->show();
     statusMessage("Parameter Received Failure");
     serialDisconnect();
 }
@@ -837,9 +856,9 @@ void MainWindow::serialTxReady()
 
 void MainWindow::needsCalibration()
 {
-    msgbox.setText("Calibration has not been performed.\nPlease calibrate or restore from a saved file");
-    msgbox.setWindowTitle("Calibrate");
-    msgbox.show();
+    msgbox->setText("Calibration has not been performed.\nPlease calibrate or restore from a saved file");
+    msgbox->setWindowTitle("Calibrate");
+    msgbox->show();
 }
 
 void MainWindow::boardDiscovered(BoardType *brd)
@@ -849,7 +868,7 @@ void MainWindow::boardDiscovered(BoardType *brd)
 
     // Stack widget changes to hide some info depending on board
     if(brd->boardName() == "NANO33BLE") {
-        addToLog("Connect to a " + brd->boardName() + "\n");
+        addToLog("Connected to a " + brd->boardName() + "\n");
         ui->cmdStartGraph->setVisible(false);
         ui->cmdStopGraph->setVisible(false);
         ui->chkRawData->setVisible(false);
@@ -865,7 +884,7 @@ void MainWindow::boardDiscovered(BoardType *brd)
         ui->stackedWidget->setCurrentIndex(3);
 
     } else if (brd->boardName() == "BNO055") {
-        addToLog("Connect to a " + brd->boardName() + "\n");
+        addToLog("Connected to a " + brd->boardName() + "\n");
         ui->cmdStartGraph->setVisible(true);
         ui->cmdStopGraph->setVisible(true);
         ui->cmbRemap->setVisible(true);
@@ -881,18 +900,17 @@ void MainWindow::boardDiscovered(BoardType *brd)
         ui->stackedWidget->setCurrentIndex(2);
 
     } else if (brd->boardName() == "NANO33REMOTE") {
-        addToLog("Connect to a " + brd->boardName() + "\n");
+        addToLog("Connected to a " + brd->boardName() + "\n");
 
     } else {
-        msgbox.setText("Unknown board type");
-        msgbox.setWindowTitle("Error");
-        msgbox.show();
+        msgbox->setText("Unknown board type");
+        msgbox->setWindowTitle("Error");
+        msgbox->show();
         statusMessage("Unknown board type");
         serialDisconnect();
     }
 
-    // Request the parameters from the device now
-    requestParamsTimer.start(50);
+    requestParamsTimeout();
 }
 
 void MainWindow::statusMessage(QString str, int timeout)

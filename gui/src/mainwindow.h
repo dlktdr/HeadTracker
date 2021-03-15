@@ -12,7 +12,7 @@
 #include <QSettings>
 #include <QCloseEvent>
 #include <QQueue>
-#include <QPlainTextEdit>
+#include <QTextEdit>
 #include "trackersettings.h"
 #include "firmware.h"
 #include "calibratebno.h"
@@ -30,6 +30,8 @@ const int IMHERETIME=8000; // milliseconds before sending another I'm Here Messa
 const int MAX_TX_FAULTS=8; // Number of times to try re-sending data
 const int TX_FAULT_PAUSE=750; // milliseconds wait before trying another send
 const int ACKNAK_TIMEOUT=500; // milliseconds without an ack/nak is a fault
+
+
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -59,15 +61,13 @@ private:
     QTimer saveToRAMTimer;
     QTimer requestParamsTimer;
     bool waitingOnParameters;
+    int boardRequestIndex;
 
     QString logd;
     Firmware *firmwareUploader;
     DiagnosticDisplay *diagnostic;
-    QMessageBox msgbox;
-    QPlainTextEdit *serialDebug;
-
-    bool settingstoHT;
-    int boardRequestIndex;
+    QMessageBox *msgbox;
+    QTextEdit *serialDebug;
 
     BoardNano33BLE *nano33ble;
     BoardBNO055 *bno055;
@@ -77,10 +77,12 @@ private:
     void sendSerialData(QByteArray data);
     bool checkSaved();
 
+
 protected:
     void keyPressEvent(QKeyEvent *event);
 
 private slots:
+    void addToLog(QString log, int ll=0);
     void findSerialPorts();
     void serialConnect();
     void serialDisconnect();
@@ -117,7 +119,6 @@ private slots:
     void calibrationSuccess();
     void calibrationFailure();
     void serialTxReady();
-    void addToLog(QString log);
     void needsCalibration();
     void boardDiscovered(BoardType *);
     void statusMessage(QString,int timeout=0);
