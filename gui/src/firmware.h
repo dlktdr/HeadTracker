@@ -9,7 +9,7 @@
 #include <QMessageBox>
 #include <QProcess>
 #include <QPlainTextEdit>
-#include <QDomDocument>
+//#include <QDomDocument>
 
 // !!!! Move me to a adjustable settings file !!!!! **********************
 const QString baseurl = "https://raw.githubusercontent.com/dlktdr/HeadTracker/master/firmware/bin/";
@@ -38,7 +38,7 @@ private:
     QPlainTextEdit *programmerlog;
     QStringList arguments;
     QString comport;
-    QDomDocument xmlfirmwares;
+    //QDomDocument xmlfirmwares;
 
     void startProgramming(const QString &filename);
 

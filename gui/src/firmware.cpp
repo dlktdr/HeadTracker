@@ -37,7 +37,7 @@ Firmware::Firmware(QWidget *parent) :
     findSerialPorts();
 
     // Read the firmware file.
-    QFile file("firmware.xml");
+    /*QFile file("firmware.xml");
     if(file.open(QIODevice::ReadOnly)) {
         QString error;
         if(!xmlfirmwares.setContent(&file,false,&error)) {
@@ -63,7 +63,7 @@ Firmware::Firmware(QWidget *parent) :
     } else {
         qDebug() << "Couldn't load firmware.xml";
         file.close();
-    }
+    }*/
 }
 
 Firmware::~Firmware()
