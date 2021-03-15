@@ -4,7 +4,7 @@
 
 FSpinBox::FSpinBox(QWidget *parent) : QSpinBox(parent)
 {
-
+    setKeyboardTracking(false);
 }
 
 void FSpinBox::focusOutEvent(QFocusEvent *event)
@@ -29,7 +29,7 @@ PopupSlider::PopupSlider(QWidget *parent) : QWidget(parent)
     spinbox->setAlignment(Qt::AlignCenter);
     connect(spinbox, SIGNAL(valueChanged(int)), this, SLOT(valueCh(int)));
     setFocusPolicy(Qt::ClickFocus);
-    setWindowFlags(Qt::FramelessWindowHint);
+    setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
     setAttribute(Qt::WA_NoSystemBackground);
     setAttribute(Qt::WA_TranslucentBackground);
 }
@@ -45,6 +45,7 @@ void PopupSlider::setValue(int val)
     spinbox->setValue(val);
     spinbox->setFocusPolicy(Qt::StrongFocus);
     spinbox->setFocus();
+    spinbox->selectAll();
 }
 
 void PopupSlider::setSuffix(QString suf)

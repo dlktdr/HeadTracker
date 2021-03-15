@@ -9,6 +9,7 @@ GainSlider::GainSlider(QWidget *parent) : QSlider(parent)
     connect(this,&QSlider::sliderPressed,this,&GainSlider::sliderPressedH);
     connect(this,&QSlider::sliderMoved,this,&GainSlider::sliderMovedH);
     connect(popslide,&PopupSlider::valueChanged,this,&GainSlider::popValChanged);
+    setMouseTracking(true);
 }
 
 GainSlider::~GainSlider()
@@ -59,7 +60,6 @@ void GainSlider::sliderMovedH(int val)
     popslide->show();
     popslide->move(this->mapToGlobal(QPoint(xloc,-popslide->height())));
     popslide->setValue(val);
-    popslide->setFocus();
 }
 
 void GainSlider::popValChanged(int v)
