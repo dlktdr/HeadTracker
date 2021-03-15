@@ -12,8 +12,6 @@ class BoardType : public QObject
 {
     Q_OBJECT
 public:
-    enum {LOG_DEBUG,LOG_INFO,LOG_ERROR};
-
     BoardType(QObject *parent=nullptr);
 
     // Saves the settings storage class
@@ -59,7 +57,7 @@ signals:
     void calibrationSuccess();
     void calibrationFailure();
     void serialTxReady();
-    void addToLog(QString log);
+    void addToLog(QString log, int ll=0);
     void needsCalibration();
     void boardDiscovered(BoardType *);
     void statusMessage(QString,int timeout=0);
