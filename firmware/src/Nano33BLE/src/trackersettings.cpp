@@ -5,6 +5,7 @@
 #include "serial.h"
 #include "flash.h"
 #include "io.h"
+#include "sense.h"
 
 #include "trackersettings.h"
 
@@ -512,8 +513,10 @@ int TrackerSettings::orientation()
 
 void TrackerSettings::setOrientation(int ori)
 {
-    if(ori >= 0 && ori <= 6)
+    if(ori >= 0 && ori <= 6) {
         orient = ori;
+        reset_fusion();
+    }
 }
 
 void TrackerSettings::orientRotations(float rot[3])

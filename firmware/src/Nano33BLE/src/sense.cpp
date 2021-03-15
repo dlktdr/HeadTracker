@@ -49,6 +49,10 @@ void MagCalc();
 #define MADGINIT_ACCEL 0x01
 #define MADGINIT_MAG 0x02
 #define MADGINIT_READY (MADGINIT_ACCEL|MADGINIT_MAG)
+static bool madginit=false;
+static int madgsensreads=0;
+static bool firstrun=true;
+
 
 int sense_Init()
 {
@@ -99,8 +103,6 @@ void sense_Thread()
     float deltat = madgwick.deltatUpdate();
 
     // Only do this update after the first mag and accel data have been read.
-    static bool madginit=false;
-    static int madgsensreads=0;
     if(madginit == false && madgsensreads == MADGINIT_READY) {
         madgwick.begin(accx, accy, accz, magx, magy, magz);
         panoffset = pan;
@@ -115,8 +117,7 @@ void sense_Thread()
         tilt = madgwick.getRoll();
         pan = madgwick.getYaw();
 
-        static bool firstrun=true;
-        if(firstrun && madginit) {
+        if(firstrun) {
             panoffset = pan;
             firstrun = false;
         }
@@ -399,4 +400,15 @@ void rotate(float pn[3], const float rotation[3])
     out[1] = pn[0]*sin(rot[2]) + pn[1]*cos(rot[2]) + pn[2]*0;
     out[2] = pn[0]*0           + pn[1]*0           + pn[2]*1;
     memcpy(pn,out,sizeof(out[0])*3);
+}
+
+/* reset_fusion()
+ *      Causes the madgwick filter to reset. Used when board rotation changes
+ */
+
+void reset_fusion()
+{
+    madginit=false;
+    madgsensreads=0;
+    firstrun=true;
 }
