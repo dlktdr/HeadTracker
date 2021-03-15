@@ -11,7 +11,11 @@ GUI Version revisions
 0.72 - Fix a bug not showing the visualization on some PC's
 0.8 - Added Spin box Sliders for text entry of values and incrementing by 1
     - Added CRC checing of sent data and re-sending if not received
-    - Seperated Board types into child classes to make adding a new board easier
+    - Seperated Board types into child classes to make adding a new board easier & cleaner code
     - Adjusted defaults to more reasonable values
-    - Increase max servo outputs to 988-2012 to utilize full output in some radios
+    - Increase max servo outputs to 988-2012 to utilize full output on some radios
     - Moved serial information into a seperate window
+    - Included Windows 7+8 Drivers
+    - Included a local copy of the firmware, for offline computers
+    - Included Microsoft VC++ Distributables, "TLS Initalization Error"
+    
