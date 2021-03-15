@@ -134,7 +134,7 @@ void parseData(DynamicJsonDocument &json)
         uiResponsive = Kernel::Clock::now() + std::chrono::milliseconds(UIRESPONSIVE_TIME);
 
     // Settings Sent from UI
-    } else if (strcmp(command, "Setttings") == 0) {
+    } else if (strcmp(command, "Set") == 0) {
         trkset.loadJSONSettings(json);
         serialWrite("HT: Saving Settings\r\n");
         uiResponsive = Kernel::Clock::now() + std::chrono::milliseconds(UIRESPONSIVE_TIME);
@@ -146,21 +146,17 @@ void parseData(DynamicJsonDocument &json)
         uiResponsive = Kernel::Clock::now() + std::chrono::milliseconds(UIRESPONSIVE_TIME);
 
     // Get settings
-    } else if (strcmp(command, "GetSet") == 0) {
+    } else if (strcmp(command, "Get") == 0) {
         serialWrite("HT: Sending Settings\r\n");
         json.clear();
         trkset.setJSONSettings(json);
-        json["Cmd"] = "Settings";
+        json["Cmd"] = "Set";
         serialWriteJSON(json);
         uiResponsive = Kernel::Clock::now() + std::chrono::milliseconds(UIRESPONSIVE_TIME);
 
     // Im Here Received, Means the GUI is running, keep sending it data
     } else if (strcmp(command, "IH") == 0) {
         uiResponsive = Kernel::Clock::now() + std::chrono::milliseconds(UIRESPONSIVE_TIME);
-
-    // NAK means GUI didn't receive last data packet
-    } else if (strcmp(command, "NAK") == 0) {
-        // Figure out what to do here....
 
     // Firmware Reqest
     } else if (strcmp(command, "FW") == 0) {
