@@ -46,6 +46,10 @@ static bool lastproximity=false;
 
 void MagCalc();
 
+#define MADGINIT_ACCEL 0x01
+#define MADGINIT_MAG 0x02
+#define MADGINIT_READY (MADGINIT_ACCEL|MADGINIT_MAG)
+
 int sense_Init()
 {
     if (!IMU.begin()) {
@@ -64,19 +68,6 @@ int sense_Init()
     // Initalize Gesture Sensor
     if(!APDS.begin())
         blesenseboard = false;
-
-
-    // Initalize Quaternion to The Startup angle
-    while(!IMU.accelAvailable());
-    IMU.readRawAccel(raccx, raccy, raccz);
-    while(!IMU.magnetAvailable());
-    IMU.readRawMagnet(rmagx, rmagy, rmagz);
-    trkset.magOffset(magxoff,magyoff,magzoff);
-    // Calibrate Hard Iron Offsets
-    magx = rmagx - magxoff;
-    magy = rmagy - magyoff;
-    magz = rmagz - magzoff;
-    madgwick.begin(-raccx, raccy, raccz, rmagx, rmagy, rmagz);
 
     return 0;
 }
@@ -106,21 +97,29 @@ void sense_Thread()
 #else
     // Period Between Samples
     float deltat = madgwick.deltatUpdate();
-#ifdef MADGWICK
-    madgwick.update(gyrx * DEG_TO_RAD, gyry * DEG_TO_RAD, gyrz * DEG_TO_RAD,
+
+    // Only do this update after the first mag and accel data have been read.
+    static bool madginit=false;
+    static int madgsensreads=0;
+    if(madginit == false && madgsensreads == MADGINIT_READY) {
+        madgwick.begin(accx, accy, accz, magx, magy, magz);
+        panoffset = pan;
+        madginit = true;
+    }
+    if(madginit) {
+        madgwick.update(gyrx * DEG_TO_RAD, gyry * DEG_TO_RAD, gyrz * DEG_TO_RAD,
                         accx, accy, accz,
                         magx, magy, magz,
                         deltat);
-#elif defined(MAHONY)
-    fusion.MahonyUpdate(gyrx* DEG_TO_RAD, gyry* DEG_TO_RAD, gyrz* DEG_TO_RAD, accx, accy, accz, magx, magy, magz, deltat);  //else use the magwick, it is slower but more accurate
-#endif
-    roll = madgwick.getPitch();
-    tilt = madgwick.getRoll();
-    pan = madgwick.getYaw();
-    static bool firstrun=true;
-    if(firstrun) {
-        panoffset = pan;
-        firstrun = false;
+        roll = madgwick.getPitch();
+        tilt = madgwick.getRoll();
+        pan = madgwick.getYaw();
+
+        static bool firstrun=true;
+        if(firstrun && madginit) {
+            panoffset = pan;
+            firstrun = false;
+        }
     }
 #endif
 
@@ -258,6 +257,9 @@ void sense_Thread()
             float tmpacc[3] = {accx,accy,accz};
             rotate(tmpacc,rotation);
             accx = tmpacc[0]; accy = tmpacc[1]; accz = tmpacc[2];
+
+            // For intial orientation setup
+            madgsensreads |= MADGINIT_ACCEL;
         }
 
         // Gyrometer
@@ -302,6 +304,9 @@ void sense_Thread()
             float tmpmag[3] = {magx,magy,magz};
             rotate(tmpmag, rotation);
             magx = tmpmag[0]; magy = tmpmag[1]; magz = tmpmag[2];
+
+            // For inital orientation setup
+            madgsensreads |= MADGINIT_MAG;
         }
     }
 
