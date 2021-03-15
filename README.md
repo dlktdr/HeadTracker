@@ -36,7 +36,7 @@ I would like to throw out thanks to Yuri for the BLE Para work. https://github.c
 - [ ] Create an installer to automatically install missing dependancies
 - [ ] Compile, test and create packages for MacOS (Need help here)
 - [ ] Compile, test and create packages for Linux
-- [ ] Roughly determine orientation on boot, pre-load filters to reduce startup drift
+- [x] Roughly determine orientation on boot, pre-load filters to reduce startup drift (in v0.8)
 
 ### Screenshot
 ![alt text](https://github.com/dlktdr/HeadTracker/raw/master/docs/ScreenCapture1006.png)
