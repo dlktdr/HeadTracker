@@ -17,6 +17,8 @@ class TrackerSettings : public QObject
 {    
     Q_OBJECT
 public:
+    enum {BTDISABLE,BTMASTER,BTREMOTE};
+
     static constexpr int MIN_PWM=988;
     static constexpr int MAX_PWM=2012;
     static constexpr int DEF_MIN_PWM=1050;
@@ -33,12 +35,10 @@ public:
     static constexpr int DEF_PPM_IN = -1;
     static constexpr int DEF_CENTER = 1500;
     static constexpr float MIN_GAIN= 0.0;
-    static constexpr float MAX_GAIN= 40.0;
+    static constexpr float MAX_GAIN= 35.0;
     static constexpr float DEF_GAIN= 10.0;
-    static constexpr int DEF_BT_MODE= 0; // Bluetooth Disabled
+    static constexpr int DEF_BT_MODE= BTDISABLE; // Bluetooth Disabled
     static constexpr int DEF_RST_PPM = -1;
-
-    enum {BTDISABLE,BTPARA,BTHM10};
 
     TrackerSettings(QObject *parent=nullptr);
 
@@ -141,10 +141,7 @@ public:
     void magOffset(float &x, float &y, float &z);
     void setMagOffset(float x,float y, float z);
 
-    /*void magSiOffset(float v[]) {memcpy(v,_data["magsioff",9*sizeof(float));}
-    void setMagSiOffset(float *v) {memcpy(magsioff,v,9*sizeof(float));}
-    QList<float> magsioff;*/
-    int count() const {return 22;}
+    int count() const {return 22;} //BNO, how many values should there be
 
     uint axisRemap() const {return _data["axisremap"].toUInt();}
     void setAxisRemap(uint value);

@@ -20,14 +20,14 @@ TrackerSettings::TrackerSettings(QObject *parent):
     _data["tlt_gain"] = DEF_GAIN;
     _data["tlt_cnt"] = DEF_CENTER;
 
-    _data["panch"] = (uint)6;
-    _data["tltch"] = (uint)7;
-    _data["rllch"] = (uint)8;
+    _data["panch"] = (uint)1;
+    _data["tltch"] = (uint)2;
+    _data["rllch"] = (uint)3;
 
     _data["servoreverse"] = (uint)0x00;
 
-    _data["lppan"] = (uint)10;
-    _data["lptiltroll"] = (uint)20;
+    _data["lppan"] = (uint)75;
+    _data["lptiltroll"] = (uint)75;
 
     //_data["gyroweightpan"] = (uint)30;
     //_data["gyroweighttiltroll"] = (uint)40;
