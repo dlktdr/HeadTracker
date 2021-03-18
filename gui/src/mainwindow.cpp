@@ -239,7 +239,7 @@ void MainWindow::serialConnect()
 
 void MainWindow::serialDisconnect()
 {
-    connectTimer.stop();
+
 
     if(serialcon->isOpen()) {
         // Check if user wants to save first
@@ -249,14 +249,16 @@ void MainWindow::serialDisconnect()
         addToLog("Disconnecting from " + serialcon->portName());
 
         // Notify board connection is disconnected
-        foreach(BoardType *brd, boards) {
-            brd->_disconnected();
-            brd->allowAccess(false);
-        }
 
         serialcon->flush();
         serialcon->close();
     }
+
+    foreach(BoardType *brd, boards) {
+        brd->_disconnected();
+        brd->allowAccess(false);
+    }
+
     statusMessage(tr("Disconnected"));
     ui->cmdDisconnect->setEnabled(false);
     ui->cmdConnect->setEnabled(true);
@@ -276,11 +278,12 @@ void MainWindow::serialDisconnect()
 
     currentboard = nullptr;
     boardRequestIndex=0;
+    connectTimer.stop();
     saveToRAMTimer.stop();
     requestTimer.stop();
     requestParamsTimer.stop();
     waitingOnParameters = false;
-
+    serialData.clear();
 
     // Notify all boards we have disconnected
 }
@@ -722,7 +725,7 @@ void MainWindow::requestTimeout()
     addToLog("Trying to connect to " + boards[boardRequestIndex]->boardName() + "\n");
     boards[boardRequestIndex]->allowAccess(true);
     boards[boardRequestIndex]->requestHardware();
-    requestTimer.start(250);
+    requestTimer.start(200);
 
     // Move to next board
     boardRequestIndex++;
@@ -910,7 +913,9 @@ void MainWindow::boardDiscovered(BoardType *brd)
         serialDisconnect();
     }
 
-    requestParamsTimeout();
+    requestParamsTimer.stop();
+    requestParamsTimer.start(50);
+
 }
 
 void MainWindow::statusMessage(QString str, int timeout)
