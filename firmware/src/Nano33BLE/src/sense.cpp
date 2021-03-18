@@ -46,13 +46,16 @@ static bool lastproximity=false;
 
 void MagCalc();
 
+// Initial Orientation Data+Vars
 #define MADGINIT_ACCEL 0x01
-#define MADGINIT_MAG 0x02
+#define MADGINIT_MAG   0x02
+#define MADGSTART_SAMPLES 10
 #define MADGINIT_READY (MADGINIT_ACCEL|MADGINIT_MAG)
-static bool madginit=false;
-static int madgsensreads=0;
+static int madgreads=0;
+static uint8_t madgsensbits=0;
 static bool firstrun=true;
-
+static float aacc[3]={0,0,0};
+static float amag[3]={0,0,0};
 
 int sense_Init()
 {
@@ -94,21 +97,50 @@ void sense_Thread()
     // Run this first to keep most accurate timing
 #ifdef NXP_FILTER
     // NXP
-    nxpfilter.update(gyrx, gyry, gyrz, accx*9.807, accy*9.807, accz*9.807, magx, magy, magz);
+    nxpfilter.update(gyrx, gyry, gyrz, accx, accy, accz, magx, magy, magz);
     roll = nxpfilter.getPitch();
     tilt = nxpfilter.getRoll();
     pan = nxpfilter.getYaw();
+    if(madgreads == 10)
+        nxpfilter.reset(); // 10 samples, then reset
+    else if(madgreads < 1500)
+        panoffset = pan; // Latch output at zero
+    else if(madgreads > 1500) // Prevent loop
+        madgreads = 1500;
+    madgreads++;
+
 #else
     // Period Between Samples
     float deltat = madgwick.deltatUpdate();
 
     // Only do this update after the first mag and accel data have been read.
-    if(madginit == false && madgsensreads == MADGINIT_READY) {
-        madgwick.begin(accx, accy, accz, magx, magy, magz);
+    if(madgreads == 0) {
+        if(madgsensbits == MADGINIT_READY) {
+            madgsensbits = 0;
+            madgreads++;
+            aacc[0] = accx; aacc[1] = accy;  aacc[2] = accz;
+            amag[0] = magx; amag[1] = magy;  amag[2] = magz;
+
+        }
+    } else if(madgreads < MADGSTART_SAMPLES-1) {
+        if(madgsensbits == MADGINIT_READY) {
+            madgsensbits = 0;
+            madgreads++;
+            aacc[0] += accx; aacc[1] += accy;  aacc[2] += accz;
+            aacc[0] /= 2;    aacc[1] /= 2;     aacc[2] /= 2;
+            amag[0] += magx; amag[1] += magy;  amag[2] += magz;
+            amag[0] /= 2;    amag[1] /= 2;     amag[2] /= 2;
+        }
+
+    // Got 10 Values
+    } else if(madgreads == MADGSTART_SAMPLES-1) {
+        // Pass it averaged values
+        madgwick.begin(aacc[0], aacc[1], aacc[2], amag[0], amag[1], amag[2]);
         panoffset = pan;
-        madginit = true;
+        madgreads = MADGSTART_SAMPLES;
     }
-    if(madginit) {
+
+    if(madgreads == MADGSTART_SAMPLES) {
         madgwick.update(gyrx * DEG_TO_RAD, gyry * DEG_TO_RAD, gyrz * DEG_TO_RAD,
                         accx, accy, accz,
                         magx, magy, magz,
@@ -123,6 +155,8 @@ void sense_Thread()
         }
     }
 #endif
+
+
 
     // Reset Center on Wave or Proximity, Don't need to updated this often
     static int sensecount=0;
@@ -260,7 +294,7 @@ void sense_Thread()
             accx = tmpacc[0]; accy = tmpacc[1]; accz = tmpacc[2];
 
             // For intial orientation setup
-            madgsensreads |= MADGINIT_ACCEL;
+            madgsensbits |= MADGINIT_ACCEL;
         }
 
         // Gyrometer
@@ -307,7 +341,7 @@ void sense_Thread()
             magx = tmpmag[0]; magy = tmpmag[1]; magz = tmpmag[2];
 
             // For inital orientation setup
-            madgsensreads |= MADGINIT_MAG;
+            madgsensbits |= MADGINIT_MAG;
         }
     }
 
@@ -384,21 +418,21 @@ void rotate(float pn[3], const float rotation[3])
     float out[3];
 
     // X Rotation
-    out[0] = pn[0]*1 + pn[1]*0            + pn[2]*0;
-    out[1] = pn[0]*0 + pn[1]*cos(rot[0])  - pn[2]*sin(rot[0]);
-    out[2] = pn[0]*0 + pn[1]*sin(rot[0])  + pn[2]*cos(rot[0]);
+    out[0] = pn[0] * 1 + pn[1] * 0            + pn[2] * 0;
+    out[1] = pn[0] * 0 + pn[1] * cos(rot[0])  - pn[2] * sin(rot[0]);
+    out[2] = pn[0] * 0 + pn[1] * sin(rot[0])  + pn[2] * cos(rot[0]);
     memcpy(pn,out,sizeof(out[0])*3);
 
     // Y Rotation
-    out[0] =  pn[0]*cos(rot[1]) - pn[1]*0 + pn[2]*sin(rot[1]);
-    out[1] =  pn[0]*0           + pn[1]*1 + pn[2]*0;
-    out[2] = -pn[0]*sin(rot[1]) + pn[1]*0 + pn[2]*cos(rot[1]);
+    out[0] =  pn[0] * cos(rot[1]) - pn[1] * 0 + pn[2] * sin(rot[1]);
+    out[1] =  pn[0] * 0           + pn[1] * 1 + pn[2] * 0;
+    out[2] = -pn[0] * sin(rot[1]) + pn[1] * 0 + pn[2] * cos(rot[1]);
     memcpy(pn,out,sizeof(out[0])*3);
 
     // Z Rotation
-    out[0] = pn[0]*cos(rot[2]) - pn[1]*sin(rot[2]) + pn[2]*0;
-    out[1] = pn[0]*sin(rot[2]) + pn[1]*cos(rot[2]) + pn[2]*0;
-    out[2] = pn[0]*0           + pn[1]*0           + pn[2]*1;
+    out[0] = pn[0] * cos(rot[2]) - pn[1] * sin(rot[2]) + pn[2] * 0;
+    out[1] = pn[0] * sin(rot[2]) + pn[1] * cos(rot[2]) + pn[2] * 0;
+    out[2] = pn[0] * 0           + pn[1] * 0           + pn[2] * 1;
     memcpy(pn,out,sizeof(out[0])*3);
 }
 
@@ -408,7 +442,9 @@ void rotate(float pn[3], const float rotation[3])
 
 void reset_fusion()
 {
-    madginit=false;
-    madgsensreads=0;
-    firstrun=true;
+    madgreads = 0;
+    madgsensbits = 0;
+    firstrun = true;
+    aacc[0] = 0; aacc[1] = 0; aacc[2] = 0;
+    amag[0] = 0; amag[1] = 0; amag[2] = 0;
 }
