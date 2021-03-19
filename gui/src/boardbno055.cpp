@@ -42,19 +42,21 @@ QByteArray BoardBNO055::dataout()
 
 void BoardBNO055::disconnected()
 {
+    stopGraph();
     bnoCalibratorDialog->hide();
     serialDataOut.clear();
 }
 
 void BoardBNO055::resetCenter()
 {
-
+    serialDataOut += "$RST\r\n";
+    emit serialTxReady();
 }
 
 void BoardBNO055::requestHardware()
 {
-    serialDataOut += "$VERS\r\n";
     serialDataOut += "$HARD\r\n";
+    serialDataOut += "$VERS\r\n";
     emit serialTxReady();
 }
 
@@ -91,7 +93,7 @@ void BoardBNO055::saveToRAM()
     // Append Data in a Byte Array
     QByteArray bd = "$" + QString(data).toLatin1() + QByteArray::fromRawData((char*)&CRC,2) + "HE";
 
-    serialDataOut += bd;
+    serialDataOut += bd + "\r\n";
     emit serialTxReady();
 }
 
@@ -103,6 +105,7 @@ void BoardBNO055::saveToNVM()
 void BoardBNO055::requestParameters()
 {
     serialDataOut += "$GSET\r\n";
+    emit serialTxReady();
     emit paramReceiveStart();
 }
 
@@ -116,13 +119,13 @@ void BoardBNO055::allowAccessChanged(bool acc)
     Q_UNUSED(acc)
     savedToNVM=true;
     savedToRAM=true;
+    vers = QString();
+    hard = QString();
 }
 
 void BoardBNO055::parseIncomingHT(QString cmd)
 {
     static int fails=0;
-    static QString vers;
-    static QString hard;
 
     // CRC ERROR
     if(cmd.left(7) == "$CRCERR") {
@@ -180,7 +183,7 @@ void BoardBNO055::parseIncomingHT(QString cmd)
     // Setting Data
     else if(cmd.left(5) == "$SET$") {
         QStringList setd = cmd.right(cmd.length()-5).split(',',Qt::KeepEmptyParts);
-        if(setd.length() == trkset->count()) {
+        if(setd.length() == 22) {
             trkset->setLPTiltRoll(setd.at(0).toFloat());
             trkset->setLPPan(setd.at(1).toFloat());
             trkset->setGyroWeightTiltRoll(setd.at(2).toFloat());
@@ -214,12 +217,14 @@ void BoardBNO055::parseIncomingHT(QString cmd)
         if(!hard.isEmpty()) {
             emit boardDiscovered(this);
             trkset->setHardware(vers,hard);
+            startGraph();
         }
     } else if(cmd.left(5) == "$HARD") {
         hard = cmd.mid(5);
         if(!vers.isEmpty()) {
             emit boardDiscovered(this);
             trkset->setHardware(vers,hard);
+            startGraph();
         }
     }
 }
@@ -243,41 +248,28 @@ void BoardBNO055::comTimeout()
 
 }
 
-/*
 void BoardBNO055::startGraph()
 {
-    if(!serialcon->isOpen())
-        return;
-
     serialDataOut += "$PLST\r\n";
     emit serialTxReady();
-
     graphing = true;
-    ui->servoPan->setShowActualPosition(true);
-    ui->servoTilt->setShowActualPosition(true);
-    ui->servoRoll->setShowActualPosition(true);
 }
 
 void BoardBNO055::stopGraph()
 {
-    if(!serialcon->isOpen())
-        return;
-
-    //sendSerialData("$PLEN");
-    graphing = false;
-    ui->servoPan->setShowActualPosition(false);
-    ui->servoTilt->setShowActualPosition(false);
-    ui->servoRoll->setShowActualPosition(false);
+    serialDataOut += "$PLST\r\n";
+    emit serialTxReady();
+    graphing = false;    
 }
 
-void MainWindow::setDataMode(bool rm)
+void BoardBNO055::setDataMode(bool rm)
 {
     // Change mode to show offset vs raw unfiltered data
     if(rm)
-        sendSerialData("$GRAW ");
+        serialDataOut += "$GRAW\r\n";
     else
-        sendSerialData("$GOFF ");
-
+        serialDataOut += "$GOFF\r\n";
+    emit serialTxReady();
     rawmode = rm;
-}*/
+}
 

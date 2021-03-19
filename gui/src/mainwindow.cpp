@@ -239,16 +239,12 @@ void MainWindow::serialConnect()
 
 void MainWindow::serialDisconnect()
 {
-
-
     if(serialcon->isOpen()) {
         // Check if user wants to save first
         if(!checkSaved())
             return;
 
         addToLog("Disconnecting from " + serialcon->portName());
-
-        // Notify board connection is disconnected
 
         serialcon->flush();
         serialcon->close();
@@ -324,15 +320,26 @@ void MainWindow::sendSerialData(QByteArray data)
     if(data.isEmpty() || !serialcon->isOpen())
         return;
 
+    bool done = true;
+    while(done) {
+        int nlindex = data.indexOf("\r\n");
+        if(nlindex < 0)
+           break;  // No New line found
+
+        // Strip data up the the CR LF \r\n
+        QByteArray sdata = data.left(nlindex);
+        serialcon->write(sdata + "\r\n");
+
+        // Skip nuisance I'm here message
+        if(QString(sdata).contains("{\"Cmd\":\"IH\"}"))
+            return;
+
+        addToLog("GUI: " + sdata + "\n");
+        data = data.right(data.length()-nlindex-2);
+    }
+
     ui->txled->setState(true);
     txledtimer.start();
-    serialcon->write(data);
-
-    // Skip nuisance I'm here message
-    if(QString(data).contains("{\"Cmd\":\"IH\"}"))
-        return;
-
-    addToLog("GUI: " + data + "\n");
 }
 
 /* addToLog()
@@ -594,7 +601,6 @@ void MainWindow::serialReadReady()
 
         serialData = serialData.right(serialData.length()-nlindex-2);
     }
-
 }
 
 void MainWindow::manualSend()
@@ -915,7 +921,6 @@ void MainWindow::boardDiscovered(BoardType *brd)
 
     requestParamsTimer.stop();
     requestParamsTimer.start(50);
-
 }
 
 void MainWindow::statusMessage(QString str, int timeout)

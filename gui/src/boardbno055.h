@@ -39,6 +39,8 @@ private:
     bool savedToRAM;
     bool graphing;
     bool rawmode;
+    QString vers;
+    QString hard;
 
     QByteArray serialDataOut;
 
@@ -48,7 +50,7 @@ private:
     uint16_t escapeCRC(uint16_t crc);
     void startGraph();
     void stopGraph();
-
+    void setDataMode(bool);
 private slots:
     void comTimeout();
 

@@ -183,7 +183,7 @@ void BoardNano33BLE::sendSerialJSON(QString command, QVariantMap map)
     // Calculate the CRC Checksum
     uint16_t CRC = escapeCRC(uCRC16Lib::calculate(json.toUtf8().data(),json.length()));
 
-    lastjson = (char)0x02 + json.toLatin1() + QByteArray::fromRawData((char*)&CRC,2) + (char)0x03;
+    lastjson = (char)0x02 + json.toLatin1() + QByteArray::fromRawData((char*)&CRC,2) + (char)0x03 + "\r\n";
 
     // If there is data that didn't make it there yet push this data to the queue
     // to be sent later
