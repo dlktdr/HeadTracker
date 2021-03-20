@@ -14,8 +14,11 @@ GUI Version revisions
     - Seperated Board types into child classes to make adding a new board easier & cleaner code
     - Adjusted defaults to more reasonable values
     - Increase max servo outputs to 988-2012 to utilize full output on some radios
+    - Added Right click to set maximum values on sliders
     - Moved serial information into a seperate window
     - Included Windows 7+8 Drivers
-    - Included a local copy of the firmware, for offline computers
     - Included Microsoft VC++ Distributables, "TLS Initalization Error"
+    - Added PPMinput to main GUI page
+    - Added BT connection status led
+    - Prevent two digital pins being set the same
     
