@@ -2,6 +2,7 @@
 #define SENSE_H
 
 #define GYRO_DEADBAND 0.0 // Gyro deadband, seems to help with this sensor
+#define APDS_HYSTERISIS 10
 
 // Oversample Setting
 #if defined(MAHONY) || defined(MADGWICK)

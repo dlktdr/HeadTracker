@@ -156,25 +156,33 @@ void sense_Thread()
     }
 #endif
 
-
-
     // Reset Center on Wave or Proximity, Don't need to updated this often
     static int sensecount=0;
+    static int minproximity=100; // Keeps smallest proximity read.
+    static int maxproximity=0; // Keeps largest proximity value read.
     if(blesenseboard && sensecount++ == 50) {
         sensecount = 0;
-        //bool btnpress=false;
         if (trkset.resetOnWave()) {
             // Reset on Proximity
             if(APDS.proximityAvailable()) {
                 int proximity = APDS.readProximity();
 
-                if (proximity == 0 && lastproximity == false) {
-                    pressButton();
-                    serialWriteln("HT: Reset center from a close proximity");
-                    lastproximity = true;
-                } else if(proximity > 200) {
-                    // Clear flag on proximity clear
-                    lastproximity = false;
+                // Store High and Low Values, Generate reset thresholds
+                maxproximity = MAX(proximity, maxproximity);
+                minproximity = MIN(proximity, minproximity);
+                int lowthreshold = minproximity + APDS_HYSTERISIS;
+                int highthreshold = maxproximity - APDS_HYSTERISIS;
+
+                // Don't allow reset if high and low thresholds are too close
+                if(highthreshold - lowthreshold > APDS_HYSTERISIS*2) {
+                    if (proximity < lowthreshold && lastproximity == false) {
+                        pressButton();
+                        serialWriteln("HT: Reset center from a close proximity");
+                        lastproximity = true;
+                    } else if(proximity > highthreshold) {
+                        // Clear flag on proximity clear
+                        lastproximity = false;
+                    }
                 }
             }
         }
@@ -257,13 +265,18 @@ void sense_Thread()
     }
 
     // Set all the BT Channels
+    bool bleconnected=false;
     BTFunction *bt = trkset.getBTFunc();
     if(bt != nullptr) {
+        bleconnected = bt->isConnected();
         trkset.setBLEAddress(bt->address());
+
         for(int i=0;i<MAX_PPM_CHANNELS;i++) {
             bt->setChannel(i,ppmchans[i]);
         }
     }
+
+    trkset.setBlueToothConnected(bleconnected);
 
     digitalWrite(A0,LOW); // Pin for timing check
     digitalWrite(A1,HIGH);
