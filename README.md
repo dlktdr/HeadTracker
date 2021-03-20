@@ -6,7 +6,7 @@ I would like to throw out thanks to Yuri for the BLE Para work + Orientation fix
 ## [Wiki](https://github.com/dlktdr/HeadTracker/wiki)
 * Please visit the  for the hardware required and how to build one.
 
-## [Nano33BLE Build Link](https://github.com/dlktdr/HeadTracker/wiki/Nano33BLE-Build-Instructions)
+## [Nano33BLE Build Link](https://github.com/dlktdr/HeadTracker/wiki/Nano33BLE-Build-Instructions)  **Recommended**
 * How to for the new BLE33 board
 
 ## [BNO055 + Nano Build Link](https://github.com/dlktdr/HeadTracker/wiki/BNO055-Build-Instructions)
@@ -32,7 +32,7 @@ I would like to throw out thanks to Yuri for the BLE Para work + Orientation fix
 - [ ] Error checking of received/downloaded parameters
 - [ ] Combine remote and head firmwares into a single file, add GUI handling for remote board
 - [ ] Check current GUI and FW versions with online source to notify if updates available
-- [ ] SBUS Input/Output? Is this a good idea
+- [ ] SBUS Input/Output? Is this a good idea?
 - [ ] Create an installer to automatically install missing dependancies
 - [ ] Compile, test and create packages for MacOS (Need help here)
 - [ ] Compile, test and create packages for Linux
