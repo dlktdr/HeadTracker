@@ -220,9 +220,11 @@ void BoardNano33BLE::parseIncomingJSON(const QVariantMap &map)
         trkset->setLiveDataMap(map);
 
         // Remind user to calibrate
-        if(map["magcal"].toBool() == false && calmsgshowed == false) {
-            emit needsCalibration();
-            calmsgshowed = true;
+        if(map.contains("magcal")) {
+            if(map["magcal"].toBool() == false && calmsgshowed == false) {
+                emit needsCalibration();
+                calmsgshowed = true;
+            }
         }
 
     // Firmware Hardware and Version
