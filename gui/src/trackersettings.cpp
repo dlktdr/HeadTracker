@@ -40,7 +40,7 @@ TrackerSettings::TrackerSettings(QObject *parent):
     _data["ppmoutpin"] = DEF_PPM_OUT;
     _data["ppmoutinvert"] = false;
     _data["ppmininvert"] = false;
-    _data["btmode"] = (uint)0;
+    _data["btmode"] = (uint)0;    
     _data["orient"] = (uint)0;
     _data["rstppm"] = DEF_RST_PPM;
 

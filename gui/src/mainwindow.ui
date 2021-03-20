@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>706</width>
-    <height>620</height>
+    <height>628</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -352,10 +352,70 @@
            </widget>
            <widget class="QWidget" name="Welcome">
             <layout class="QGridLayout" name="gridLayout">
-             <item row="0" column="3">
-              <widget class="QLabel" name="label_14">
+             <item row="3" column="3" colspan="2">
+              <widget class="QLabel" name="lblBLEAddress">
                <property name="text">
-                <string>PPM Input Pin</string>
+                <string>TextLabel</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="0" colspan="3">
+              <widget class="QCheckBox" name="chkResetCenterWave">
+               <property name="text">
+                <string>Center on Proximity Detect (BLE Sense Only)</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="label_15">
+               <property name="text">
+                <string>Board Rotation</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1" colspan="2">
+              <widget class="QComboBox" name="cmbOrientation">
+               <item>
+                <property name="text">
+                 <string>Default</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Tilt 90</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Tilt -90</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Till 180</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Roll 90</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Roll -90</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Tilt 90,Pan 90</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="label_3">
+               <property name="text">
+                <string>Center Button</string>
                </property>
               </widget>
              </item>
@@ -431,24 +491,52 @@
                </item>
               </widget>
              </item>
-             <item row="4" column="3">
-              <widget class="QLabel" name="label_5">
+             <item row="1" column="3">
+              <widget class="QLabel" name="label_16">
                <property name="text">
-                <string>Bluetooth Mode</string>
+                <string>Reset Cnt on PPM</string>
                </property>
               </widget>
              </item>
-             <item row="2" column="5">
-              <widget class="QLabel" name="label_22">
-               <property name="toolTip">
-                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Will reset center if CH&amp;lt;x&amp;gt; goes above 1800us.&lt;/p&gt;&lt;p&gt;Channel must go below 1700us to reset&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             <item row="2" column="4" colspan="2">
+              <widget class="QComboBox" name="cmbBtMode">
+               <property name="enabled">
+                <bool>true</bool>
                </property>
+               <item>
+                <property name="text">
+                 <string>Disabled</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>FrSky - PARA Wireless Trainer</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item row="0" column="3">
+              <widget class="QLabel" name="label_14">
                <property name="text">
-                <string>&gt; 1800us</string>
+                <string>PPM Input Pin</string>
                </property>
               </widget>
              </item>
-             <item row="2" column="4">
+             <item row="0" column="0">
+              <widget class="QLabel" name="label">
+               <property name="text">
+                <string>PPM Output Pin</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="2">
+              <widget class="QCheckBox" name="chkInvertedPPM">
+               <property name="text">
+                <string>Invert</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="4">
               <widget class="QComboBox" name="cmbResetOnPPM">
                <property name="toolTip">
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Will reset center if CH&amp;lt;x&amp;gt; goes above 1800us.&lt;/p&gt;&lt;p&gt;Channel must go below 1700us to reset&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -500,86 +588,46 @@
                </item>
               </widget>
              </item>
-             <item row="6" column="0" colspan="3">
-              <widget class="QCheckBox" name="chkResetCenterWave">
-               <property name="text">
-                <string>Center on Proximity Detect (BLE Sense Only)</string>
+             <item row="3" column="5">
+              <layout class="QHBoxLayout" name="horizontalLayout_5">
+               <item>
+                <widget class="QLabel" name="label_24">
+                 <property name="text">
+                  <string>BT Connection</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="Led" name="btLed" native="true">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>20</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>20</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item row="1" column="5">
+              <widget class="QLabel" name="label_22">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Will reset center if CH&amp;lt;x&amp;gt; goes above 1800us.&lt;/p&gt;&lt;p&gt;Channel must go below 1700us to reset&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
-              </widget>
-             </item>
-             <item row="2" column="1">
-              <widget class="QComboBox" name="cmbButtonPin">
-               <item>
-                <property name="text">
-                 <string>Disabled</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>D2</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>D3</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>D4</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>D5</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>D6</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>D7</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>D8</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>D9</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>D10</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>D11</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>D12</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>D13</string>
-                </property>
-               </item>
-              </widget>
-             </item>
-             <item row="0" column="0">
-              <widget class="QLabel" name="label">
                <property name="text">
-                <string>PPM Output Pin</string>
+                <string>&gt; 1800us</string>
                </property>
               </widget>
              </item>
@@ -664,11 +712,8 @@
                </item>
               </widget>
              </item>
-             <item row="4" column="4" colspan="2">
-              <widget class="QComboBox" name="cmbBtMode">
-               <property name="enabled">
-                <bool>true</bool>
-               </property>
+             <item row="1" column="1">
+              <widget class="QComboBox" name="cmbButtonPin">
                <item>
                 <property name="text">
                  <string>Disabled</string>
@@ -676,54 +721,70 @@
                </item>
                <item>
                 <property name="text">
-                 <string>FrSky - PARA Wireless Trainer</string>
+                 <string>D2</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D3</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D4</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D5</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D6</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D7</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D8</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D9</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D10</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D11</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D12</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D13</string>
                 </property>
                </item>
               </widget>
              </item>
-             <item row="4" column="1" colspan="2">
-              <widget class="QComboBox" name="cmbOrientation">
-               <item>
-                <property name="text">
-                 <string>Default</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Tilt 90</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Tilt -90</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Till 180</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Roll 90</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Roll -90</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Tilt 90,Pan 90</string>
-                </property>
-               </item>
-              </widget>
-             </item>
-             <item row="4" column="0">
-              <widget class="QLabel" name="label_15">
+             <item row="2" column="3">
+              <widget class="QLabel" name="label_5">
                <property name="text">
-                <string>Board Rotation</string>
+                <string>Bluetooth Mode</string>
                </property>
               </widget>
              </item>
@@ -740,31 +801,10 @@
                </property>
               </widget>
              </item>
-             <item row="2" column="0">
-              <widget class="QLabel" name="label_3">
+             <item row="4" column="0" colspan="6">
+              <widget class="QLabel" name="lblPPMin">
                <property name="text">
-                <string>Center Button</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="3">
-              <widget class="QLabel" name="label_16">
-               <property name="text">
-                <string>Reset Cnt on PPM</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="2">
-              <widget class="QCheckBox" name="chkInvertedPPM">
-               <property name="text">
-                <string>Invert</string>
-               </property>
-              </widget>
-             </item>
-             <item row="6" column="4" colspan="2">
-              <widget class="QLabel" name="lblBLEAddress">
-               <property name="text">
-                <string>TextLabel</string>
+                <string/>
                </property>
               </widget>
              </item>

@@ -66,6 +66,7 @@ TrackerSettings::TrackerSettings()
 
     // Bluetooth defaults
     btmode = 0;
+    btcon = false;
     _btf = nullptr;
 
     // Features defaults
@@ -866,7 +867,7 @@ void TrackerSettings::loadFromEEPROM()
 
 extern uint16_t zaccelout;
 
-// Used to transmit raw data back to the PC
+// Used to transmit raw data back to the GUI
 void TrackerSettings::setJSONData(DynamicJsonDocument &json)
 {
     json["magx"] = roundf(magx*1000)/1000;
@@ -885,12 +886,6 @@ void TrackerSettings::setJSONData(DynamicJsonDocument &json)
     json["tiltout"] = tiltout;
     json["rollout"] = rollout;
 
-    // Acceleration Heave Output
-    //json["heaveoutput"]  = zaccelout;
-
-    json["btaddr"] = bleaddress;
-    json["magcal"] = isCalibrated;
-
     // Create string for PpmIn Chans
     char pstr[120];
     sprintf(pstr,"#CH=%d ",ppmchans);
@@ -899,7 +894,16 @@ void TrackerSettings::setJSONData(DynamicJsonDocument &json)
     }
     json["ppmin"] = pstr;
 
-// Live Values for Debugging. disabled for too much data transfer
+    // Items that don't need to be updated often
+    static uint16_t slowrate=0;
+    if(slowrate++ > 25) {
+        json["btaddr"] = bleaddress;
+        json["btcon"] = btcon;
+        json["magcal"] = isCalibrated;
+        slowrate = 0;
+    }
+
+// Live Values for Debugging.
     /*json["accx"] = roundf(accx*1000)/1000;
     json["accy"] = roundf(accy*1000)/1000;
     json["accz"] = roundf(accz*1000)/1000;

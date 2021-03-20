@@ -152,6 +152,8 @@ public:
     int blueToothMode();
     void setBlueToothMode(int mode);
     QString blueToothAddress();
+    bool blueToothConnected() {return _live["btcon"].toBool();}
+    QString PPMInString() {return _live["ppmin"].toString();}
 
     void storeSettings(QSettings *settings);
     void loadSettings(QSettings *settings);
@@ -185,8 +187,8 @@ signals:
     void ppmOutChanged(int t, int r, int p);
 
 private:
-    QVariantMap _data; // Stored Data
-    QVariantMap _devicedata; // Stored Data
+    QVariantMap _data; // Data in GUI
+    QVariantMap _devicedata; // Stored Data on Device
     QVariantMap _live; // Live Data
 };
 

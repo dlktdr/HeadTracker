@@ -414,7 +414,6 @@ void MainWindow::updateToUI()
     ui->servoRoll->setMaximum(trkset.Rll_max());
     ui->servoRoll->setMinimum(trkset.Rll_min());
 
-
     ui->chkpanrev->setChecked(trkset.isPanReversed());
     ui->chkrllrev->setChecked(trkset.isRollReversed());
     ui->chktltrev->setChecked(trkset.isTiltReversed());
@@ -628,8 +627,10 @@ void MainWindow::ppmOutChanged(int t,int r,int p)
     ui->servoTilt->setShowActualPosition(true);
     ui->servoRoll->setShowActualPosition(true);
 
-    // Good enough spot to update it...
+    // Good enough spot to update these values...
     ui->lblBLEAddress->setText("Address: " + trkset.blueToothAddress());
+    ui->lblPPMin->setText("<b>PPM Input Values:</b> " + trkset.PPMInString());
+    ui->btLed->setState(trkset.blueToothConnected());
 }
 
 
@@ -775,6 +776,7 @@ void MainWindow::storeToNVM()
         brd->_saveToNVM();
     }
     statusMessage("Storing Parameters to non-volatile memory");
+    ui->cmdSaveNVM->setEnabled(false);
 }
 
 void MainWindow::storeToRAM()

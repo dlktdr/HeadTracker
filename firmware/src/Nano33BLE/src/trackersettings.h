@@ -132,6 +132,8 @@ public:
 
     int blueToothMode() const;
     void setBlueToothMode(int mode);
+    bool isBlueToothConnected() {return btcon;}
+    void setBlueToothConnected(bool con) {btcon = con;}
 
     int orientation();
     void setOrientation(int ori);
@@ -189,6 +191,7 @@ private:
     bool ppmininvert;
     BTFunction *_btf; // Blue tooth Function
     int btmode;
+    bool btcon;
     bool rstonwave;
     bool freshProgram;
     int orient;
