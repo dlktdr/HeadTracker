@@ -313,7 +313,7 @@ int TrackerSettings::panCh() const
 void TrackerSettings::setPanCh(int value)
 {
     if((value > 0 && value < 17) || value == -1)
-        _data["panch"] = (int)value;
+        _data["panch"] = value;
 }
 
 int TrackerSettings::tiltCh() const
@@ -324,7 +324,7 @@ int TrackerSettings::tiltCh() const
 void TrackerSettings::setTiltCh(int value)
 {
     if((value > 0 && value < 17) || value == -1)
-        _data["tltch"] = (uint)value;
+        _data["tltch"] = value;
 }
 
 int TrackerSettings::rollCh() const
@@ -335,7 +335,7 @@ int TrackerSettings::rollCh() const
 void TrackerSettings::setRollCh(int value)
 {
     if((value > 0 && value < 17) || value == -1)
-        _data["rllch"] = (uint)value;
+        _data["rllch"] = value;
 }
 
 int TrackerSettings::ppmOutPin() const
