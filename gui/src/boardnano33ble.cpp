@@ -45,7 +45,7 @@ void BoardNano33BLE::dataIn(QByteArray &data)
 
         // Found a not-acknowldege character, resend data
     } else if(data.left(1)[0] == (char)0x15) {
-        comTimeout();
+        nakError();
 
         // Other data sent, show the user
     } else {
@@ -93,6 +93,8 @@ void BoardNano33BLE::saveToRAM()
     // Flag for exit, has data been sent
     savedToRAM = true;
     savedToNVM = false;
+    paramTXErrorSent = false;
+    paramRXErrorSent = false;
 }
 
 void BoardNano33BLE::saveToNVM()
@@ -106,11 +108,14 @@ void BoardNano33BLE::saveToNVM()
 
 void BoardNano33BLE::requestParameters()
 {
-    qDebug() << "JSON Data" << jsonqueue.length();
+//    qDebug() << "JSON Data" << jsonqueue.length();
     if(rxparamfaults == 0) {
         emit paramReceiveStart();
     } else if (rxparamfaults > 3) {
-        emit paramReceiveFailure(1);
+        if(!paramRXErrorSent) {
+            emit paramReceiveFailure(1);
+            paramRXErrorSent = true;
+        }
         return;
     }
 
@@ -134,7 +139,6 @@ void BoardNano33BLE::rxParamsTimeout()
     }
 }
 
-
 void BoardNano33BLE::startCalibration()
 {
     bleCalibratorDialog->show();
@@ -149,6 +153,8 @@ void BoardNano33BLE::allowAccessChanged(bool acc)
     calmsgshowed = false;
     savedToNVM=true;
     savedToRAM=true;
+    paramTXErrorSent=false;
+    paramRXErrorSent=false;
     serialDataOut.clear();
     jsonfaults =0;
     rxparamfaults=0;
@@ -254,25 +260,27 @@ uint16_t BoardNano33BLE::escapeCRC(uint16_t crc)
     return (uint16_t)crclow | ((uint16_t)crchigh << 8);
 }
 
-void BoardNano33BLE::comTimeout()
+void BoardNano33BLE::nakError()
 {
     // If too many faults, disconnect.
     if(jsonfaults > MAX_TX_FAULTS) {
-        emit addToLog("\r\nERROR: Critical - " + QString(MAX_TX_FAULTS)+ " transmission faults, disconnecting\r\n");
-        emit paramSendFailure(1);
-
+        if(!paramTXErrorSent) {
+            emit addToLog("\r\nERROR: Critical - " + QString(MAX_TX_FAULTS)+ " transmission faults, disconnecting\r\n");
+            emit paramSendFailure(1);
+            paramTXErrorSent = true;
+        }
     } else {
         // Pause a bit, give time for device to catch up
-        // **** Sleep(TX_FAULT_PAUSE);
+        Sleep(TX_FAULT_PAUSE);
 
         // Resend last JSON
         serialDataOut += lastjson;
         emit serialTxReady();
-        emit addToLog("ERROR: CRC Fault - Re-sending data (" +  lastjson + ")\n");
-    }
+        emit addToLog("ERROR: CRC Fault - Re-sending data\r\nGUI: " +  lastjson + "\r\n");
 
-    // Increment fault counter
-    jsonfaults++;
+        // Increment fault counter
+        jsonfaults++;
+    }
 }
 
 void BoardNano33BLE::ihTimeout()

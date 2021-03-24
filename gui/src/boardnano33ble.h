@@ -48,6 +48,8 @@ private:
     bool calmsgshowed;
     bool savedToNVM;
     bool savedToRAM;
+    bool paramTXErrorSent;
+    bool paramRXErrorSent;
     int jsonfaults;
     int rxparamfaults;
     QByteArray serialDataOut;
@@ -62,9 +64,10 @@ private:
     void sendSerialJSON(QString command, QVariantMap map=QVariantMap());
     void parseIncomingJSON(const QVariantMap &map);
     uint16_t escapeCRC(uint16_t crc);
+    void nakError();
 
 private slots:
-    void comTimeout();
+
     void ihTimeout();
     void rxParamsTimeout();
 };
