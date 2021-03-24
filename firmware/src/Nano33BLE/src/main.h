@@ -10,10 +10,10 @@ using namespace mbed;
 using namespace events;
 
 #define DATA_PERIOD 120
-#define BT_PERIOD 40
-#define SERIAL_PERIOD  15
-#define IO_PERIOD 10 // milliseconds
-#define SENSE_PERIOD 7000 //microseconds
+#define BT_PERIOD 40      // Bluetooth update rate
+#define SERIAL_PERIOD 20  // Serial processing
+#define IO_PERIOD 20      // milliseconds
+#define SENSE_PERIOD 9000 //100hz Update Rate
 
 // Globals
 extern TrackerSettings trkset;

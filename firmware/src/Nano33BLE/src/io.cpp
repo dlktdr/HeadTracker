@@ -18,13 +18,13 @@ void io_Init()
 
   // Pins used to check timing
   pinMode(A0, OUTPUT); // Sensor thread
-  pinMode(A1, OUTPUT); // 
-  pinMode(A2, OUTPUT); // 
-  pinMode(A3, OUTPUT); // 
-  pinMode(A4, OUTPUT); // 
-  pinMode(A5, OUTPUT); // 
-  pinMode(A6, OUTPUT); // 
-  pinMode(A7, OUTPUT); // 
+  pinMode(A1, OUTPUT); //
+  pinMode(A2, OUTPUT); //
+  pinMode(A3, OUTPUT); //
+  pinMode(A4, OUTPUT); //
+  pinMode(A5, OUTPUT); //
+  pinMode(A6, OUTPUT); //
+  pinMode(A7, OUTPUT); //
 
   butpin = trkset.buttonPin();
 }
@@ -38,7 +38,7 @@ bool wasButtonPressed() {
   return false;
 }
 
-void pressButton() {  
+void pressButton() {
   buttonpressed = true;
 }
 
@@ -47,10 +47,10 @@ void io_Task()
 {
   static int i =0;
   // Fast Blink to know it's running
-  if(i==10) {
+  if(i==5) {
     digitalWrite(LED_BUILTIN, HIGH);
-  } 
-  if(i==20) {
+  }
+  if(i==10) {
     digitalWrite(LED_BUILTIN, LOW);
     i=0;
   }
@@ -59,7 +59,7 @@ void io_Task()
   // Make sure button pin is enabled
   if(butpin < 1 || butpin > 13 )
     return;
-  
+
   // Check button inputs, set flag, could make this an ISR but button for sure will be down for at least 1ms, also debounces
   if(digitalRead(butpin) == 0)
     buttonpressed = true;

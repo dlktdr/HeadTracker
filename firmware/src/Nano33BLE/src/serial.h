@@ -15,10 +15,12 @@ static const int TX_BUF_SIZE=2000; // RX Buffer Size
 static const int SERIAL_TX_MAX_PACKET = 60;
 
 void serial_Init();
-void serial_Thread(); // Transmits data in outgoing buffer 64char at a time
+void serial_Thread(); // Transmits data in outgoing buffer.
 void serialrx_Int();
+void serialrx_Process();
 char* getJSONBuffer();
 int buffersFilled();
+
 
 // ONLY use these serial write methods, they are buffered.
 void serialWrite(arduino::String str);
@@ -30,10 +32,6 @@ void serialWrite(float f);
 void serialWriteln(char const *data);
 void serialWriteJSON(DynamicJsonDocument &json);
 
-extern CircularBuffer<char, TX_BUF_SIZE> serout;
-extern CircularBuffer<char, TX_BUF_SIZE> serin;
-extern Mutex serWriteMutex;
-extern Mutex writingBufffer;
 extern volatile bool JSONready;
 extern volatile bool JSONfault;
 extern volatile bool SerBufOverflow;
