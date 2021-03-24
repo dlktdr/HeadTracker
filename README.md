@@ -6,7 +6,7 @@ I would like to throw out thanks to Yuri for the BLE Para work + Orientation fix
 ## [Wiki](https://github.com/dlktdr/HeadTracker/wiki)
 * Please visit the  for the hardware required and how to build one.
 
-## [Nano33BLE Build Link](https://github.com/dlktdr/HeadTracker/wiki/Nano33BLE-Build-Instructions)  **Recommended**
+## [Nano33BLE Build Link](https://github.com/dlktdr/HeadTracker/wiki/Nano33BLE-Build-Instructions)  * **Recommended**
 * How to for the new BLE33 board
 
 ## [BNO055 + Nano Build Link](https://github.com/dlktdr/HeadTracker/wiki/BNO055-Build-Instructions)
