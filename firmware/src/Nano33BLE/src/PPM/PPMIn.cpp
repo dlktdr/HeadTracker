@@ -36,28 +36,28 @@ extern "C" void GPIOTE_IRQHandler2(void)
 
         // Read Timer Captured Value
         uint32_t time = NRF_TIMER4->CC[0];
-        
+
         // Long pulse = Start.. Minimum frame sync is 4ms.. Giving a 10us leway
-        if(time > 3990) {  
+        if(time > 3990) {
             // Copy all data to another buffer so it can be read complete
             for(int i=0;i<16;i++) {
-                ch_count = isrch_count;                
+                ch_count = isrch_count;
                 channels[i] = isrchannels[i];
             }
             isrch_count = 0;
             framestarted = true;
             runt.reset(); // Used to check if a signal is here
-        
+
         // Valid Ch Range
-        } else if(time > 900 && time < 2100 && 
-                  framestarted == true && 
-                  isrch_count < 16) { 
+        } else if(time > 900 && time < 2100 &&
+                  framestarted == true &&
+                  isrch_count < 16) {
             isrchannels[isrch_count] = time;
             isrch_count++;
 
         // Fault, Reset
-        } else { 
-            isrch_count = 0; 
+        } else {
+            isrch_count = 0;
             framestarted = false;
         }
 
@@ -79,19 +79,19 @@ void PpmIn_setPin(int pinNum)
     int dpintopin[]  = {0,0,11,12,15,13,14,23,21,27,2,1,8,13};
     int dpintoport[] = {0,0,1 ,1 ,1 ,1 ,1 ,0 ,0 ,0 ,1,1,1,0 };
 
-    int pin = dpintopin[pinNum];    
-    int port = dpintoport[pinNum];    
-    
+    int pin = dpintopin[pinNum];
+    int port = dpintoport[pinNum];
+
     if(pinNum < 0 && ppminstarted) { // Disable
         __disable_irq();
-        
+
         // Stop Interrupt
-        NRF_GPIOTE->INTENCLR = GPIOTE_INTENSET_IN6_Msk;         
-        
+        NRF_GPIOTE->INTENCLR = GPIOTE_INTENSET_IN6_Msk;
+
         // Clear interrupt flag
-        NRF_GPIOTE->EVENTS_IN[6] = 0;  
+        NRF_GPIOTE->EVENTS_IN[6] = 0;
         NRF_GPIOTE->CONFIG[6] = 0; // Disable Config
-        
+
         // Was there a previous handler?
         if(oldGPIOTEInterrupt != 0) {
             NVIC_DisableIRQ(GPIOTE_IRQn);
@@ -103,10 +103,10 @@ void PpmIn_setPin(int pinNum)
             NVIC_DisableIRQ(GPIOTE_IRQn);
         }
 
-        __enable_irq();        
+        __enable_irq();
 
         // Set pin num and started flag
-        setPin = pinNum;    
+        setPin = pinNum;
         ppminstarted = false;
 
     } else {
@@ -114,7 +114,7 @@ void PpmIn_setPin(int pinNum)
         __disable_irq();
 
         // Disable Interrupt, Clear event
-        NRF_GPIOTE->INTENCLR = GPIOTE_INTENSET_IN6_Msk; 
+        NRF_GPIOTE->INTENCLR = GPIOTE_INTENSET_IN6_Msk;
         NRF_GPIOTE->EVENTS_IN[6] = 0;
 
         if(!ppminverted) {
@@ -151,11 +151,11 @@ void PpmIn_setPin(int pinNum)
             NRF_PPI->CHEN |= (PPI_CHEN_CH8_Enabled << PPI_CHEN_CH8_Pos);
             NRF_PPI->CHEN |= (PPI_CHEN_CH9_Enabled << PPI_CHEN_CH9_Pos);
 
-            // If GPIOTE already enabled, 
+            // If GPIOTE already enabled,
             // Override other GPIOTE interrupt vector with new one, will call in ours
             if(NVIC_GetEnableIRQ(GPIOTE_IRQn)) {
                 oldGPIOTEInterrupt = NVIC_GetVector(GPIOTE_IRQn);
-                NVIC_DisableIRQ(GPIOTE_IRQn);                
+                NVIC_DisableIRQ(GPIOTE_IRQn);
             } else
                 oldGPIOTEInterrupt = 0;
 
@@ -166,7 +166,7 @@ void PpmIn_setPin(int pinNum)
             ppminstarted = true;
         }
 
-        // Clear flags and enable interrupt           
+        // Clear flags and enable interrupt
         NRF_GPIOTE->EVENTS_IN[6] = 0;
         NRF_GPIOTE->INTENSET |= GPIOTE_INTENSET_IN6_Set << GPIOTE_INTENSET_IN6_Pos;
 
@@ -193,7 +193,7 @@ void PpmIn_execute()
 {
     static bool sentconn=false;
     // Start a timer
-    runt.start();    
+    runt.start();
 
     // ISR should stop timer on frame start signal
     using namespace std::chrono;
@@ -208,7 +208,7 @@ void PpmIn_execute()
         if(sentconn == true && ch_count >= 4 && ch_count <= 16) {
             serialWriteln("HT: PPM Input Data Received");
             sentconn = false;
-        } 
+        }
     }
 }
 
