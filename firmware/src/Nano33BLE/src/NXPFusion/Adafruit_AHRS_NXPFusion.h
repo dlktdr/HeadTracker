@@ -42,6 +42,8 @@ public:
   float getPitch() { return ThePl; }
   float getYaw() { return PsiPl; }
 
+  void reset() {resetflag = true;}
+
   void getQuaternion(float *w, float *x, float *y, float *z) {
     *w = qPl.q0;
     *x = qPl.q1;
