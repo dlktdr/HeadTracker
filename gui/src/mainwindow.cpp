@@ -108,8 +108,9 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Spin Boxes
     connect(ui->spnLPPan,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->spnLPTiltRoll,SIGNAL(valueChanged(int)),this,SLOT(updateFr
-                                                                  omUI()));
+    connect(ui->spnLPTiltRoll,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->spnLPPan2,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->spnLPTiltRoll2,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->spnPPMSync,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->spnPPMFrameLen,SIGNAL(valueChanged(double)),this,SLOT(updateFromUI()));
 
@@ -441,6 +442,8 @@ void MainWindow::updateToUI()
     ui->cmbResetOnPPM->blockSignals(true);
     ui->spnLPPan->blockSignals(true);
     ui->spnLPTiltRoll->blockSignals(true);
+    ui->spnLPPan2->blockSignals(true);
+    ui->spnLPTiltRoll2->blockSignals(true);
     ui->til_gain->blockSignals(true);
     ui->rll_gain->blockSignals(true);
     ui->pan_gain->blockSignals(true);
@@ -448,6 +451,9 @@ void MainWindow::updateToUI()
 
     ui->spnLPTiltRoll->setValue(trkset.lpTiltRoll());
     ui->spnLPPan->setValue(trkset.lpPan());
+    ui->spnLPTiltRoll2->setValue(trkset.lpTiltRoll());
+    ui->spnLPPan2->setValue(trkset.lpPan());
+
 
     int panCh = trkset.panCh();
     int rllCh = trkset.rollCh();
@@ -483,7 +489,7 @@ void MainWindow::updateToUI()
     if(maxframelen > setframelen) {
         ui->lblPPMOut->setText("<b>Warning!</b> PPM Frame length possibly too short to support channel data");
     } else {
-        ui->lblPPMOut->setText("PPM data will fit in frame. Refresh rate: " + QString::number(1/(static_cast<float>(setframelen)/1000000.0),'f',2) + "Hz");
+        ui->lblPPMOut->setText("PPM data will fit in frame. Refresh rate: " + QString::number(1/(static_cast<float>(setframelen)/1000000.0),'f',2) + " Hz");
     }
 
     ui->cmbpanchn->blockSignals(false);
@@ -501,6 +507,8 @@ void MainWindow::updateToUI()
     ui->cmbResetOnPPM->blockSignals(false);
     ui->spnLPPan->blockSignals(false);
     ui->spnLPTiltRoll->blockSignals(false);
+    ui->spnLPPan2->blockSignals(false);
+    ui->spnLPTiltRoll2->blockSignals(false);
     ui->til_gain->blockSignals(false);
     ui->rll_gain->blockSignals(false);
     ui->pan_gain->blockSignals(false);
@@ -527,6 +535,14 @@ void MainWindow::updateFromUI()
     trkset.setRll_max(ui->servoRoll->maximumValue());
     trkset.setRll_gain(static_cast<float>(ui->rll_gain->value())/10.0f);
 
+    if(trkset.hardware() == "NANO33BLE") {
+        trkset.setLPTiltRoll(ui->spnLPTiltRoll->value());
+        trkset.setLPPan(ui->spnLPPan->value());
+    } else if (trkset.hardware() == "BNO055") {
+        trkset.setLPTiltRoll(ui->spnLPTiltRoll2->value());
+        trkset.setLPPan(ui->spnLPPan2->value());
+    }
+
     trkset.setLPTiltRoll(ui->spnLPTiltRoll->value());
     trkset.setLPPan(ui->spnLPPan->value());
 
@@ -538,8 +554,8 @@ void MainWindow::updateFromUI()
     int rllCh = ui->cmbrllchn->currentIndex();
     int tltCh = ui->cmbtiltchn->currentIndex();
     trkset.setPanCh(panCh==0?-1:panCh);
-    trkset.setRollCh(panCh==0?-1:rllCh);
-    trkset.setTiltCh(panCh==0?-1:tltCh);
+    trkset.setRollCh(rllCh==0?-1:rllCh);
+    trkset.setTiltCh(tltCh==0?-1:tltCh);
 
     trkset.setAxisRemap(ui->cmbRemap->currentData().toUInt());
     trkset.setAxisSign(ui->cmbSigns->currentIndex());
@@ -580,7 +596,7 @@ void MainWindow::updateFromUI()
     if(maxframelen > setframelen) {
         ui->lblPPMOut->setText("<b>Warning!</b> PPM Frame length possibly too short to support channel data");
     } else {
-        ui->lblPPMOut->setText("PPM data will fit in frame. Refresh rate: " + QString::number(1/(static_cast<float>(setframelen)/1000000.0),'f',2) + "Hz");
+        ui->lblPPMOut->setText("PPM data will fit in frame. Refresh rate: " + QString::number(1/(static_cast<float>(setframelen)/1000000.0),'f',2) + " Hz");
     }
 
     int rstppm_index = ui->cmbResetOnPPM->currentIndex();
@@ -673,7 +689,7 @@ void MainWindow::ppmOutChanged(int t,int r,int p)
 
     // Good enough spot to update these values...
     ui->lblBLEAddress->setText(trkset.blueToothAddress());
-    ui->lblPPMin->setText("<b>PPM Input Values:</b> " + trkset.PPMInString());
+    ui->lblPPMin->setText("<b>PPM Input:</b>\n" + trkset.PPMInString());
     ui->btLed->setState(trkset.blueToothConnected());
     if(trkset.blueToothConnected())
         ui->lblBTConnected->setText("Connected");
@@ -709,6 +725,7 @@ void MainWindow::loadSettings()
         QMessageBox::information(this, "Info","Please connect before restoring a saved file");
         return;
     }
+
 
     QString filename = QFileDialog::getOpenFileName(this,tr("Open File"),QString(),"Config Files (*.ini)");
     if(!filename.isEmpty()) {
