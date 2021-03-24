@@ -327,7 +327,7 @@ int TrackerSettings::panCh() const
 
 void TrackerSettings::setPanCh(int value)
 {
-    if((value > 0 && value <= DEF_PPM_CHANNELS) || value == -1)
+    if((value > 0 && value < 17) || value == -1)
         panch = (int)value;
 }
 
@@ -338,7 +338,7 @@ int TrackerSettings::tiltCh() const
 
 void TrackerSettings::setTiltCh(int value)
 {
-    if((value > 0 && value <= DEF_PPM_CHANNELS) || value == -1)
+    if((value > 0 && value < 17) || value == -1)
         tltch = (int)value;
 }
 
@@ -349,7 +349,7 @@ int TrackerSettings::rollCh() const
 
 void TrackerSettings::setRollCh(int value)
 {
-    if((value > 0 && value <= DEF_PPM_CHANNELS) || value == -1)
+    if((value > 0 && value < 17) || value == -1)
         rllch = (int)value;
 }
 
