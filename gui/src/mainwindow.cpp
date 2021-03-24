@@ -717,6 +717,9 @@ void MainWindow::saveSettings()
         QSettings settings(filename,QSettings::IniFormat);
         trkset.storeSettings(&settings);
     }
+
+    // Re-enable data if window was open too long
+    startData();
 }
 
 void MainWindow::loadSettings()
@@ -726,8 +729,11 @@ void MainWindow::loadSettings()
         return;
     }
 
-
     QString filename = QFileDialog::getOpenFileName(this,tr("Open File"),QString(),"Config Files (*.ini)");
+
+    // Re-enable data if window was open too long
+    startData();
+
     if(!filename.isEmpty()) {
         QSettings settings(filename,QSettings::IniFormat);
         trkset.loadSettings(&settings);
@@ -834,6 +840,14 @@ void MainWindow::startCalibration()
 
     foreach(BoardType *brd, boards) {
         brd->_startCalibration();
+    }
+}
+
+// Tell the board to start sending data again
+void MainWindow::startData()
+{
+    foreach(BoardType *brd, boards) {
+        brd->_startData();
     }
 }
 

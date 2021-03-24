@@ -40,6 +40,7 @@ public:
     ALWACCESS(void,requestHardware,,)
     ALWACCESS(void,requestParameters,,)
     ALWACCESS(void,startCalibration,,)
+    ALWACCESS(void,startData,,)
 
 protected:
     TrackerSettings *trkset;

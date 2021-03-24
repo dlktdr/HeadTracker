@@ -144,6 +144,13 @@ void BoardNano33BLE::startCalibration()
     bleCalibratorDialog->show();
 }
 
+void BoardNano33BLE::startData()
+{
+    jsonqueue.clear();
+    jsonfaults = 0;
+    ihTimeout();
+}
+
 void BoardNano33BLE::allowAccessChanged(bool acc)
 {
     Q_UNUSED(acc);

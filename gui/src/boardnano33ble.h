@@ -37,6 +37,7 @@ public:
     void requestHardware();
     void requestParameters();
     void startCalibration();
+    void startData();
     void allowAccessChanged(bool acc);
 
 private:

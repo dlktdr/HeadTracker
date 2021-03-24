@@ -21,4 +21,8 @@ GUI Version revisions
     - Added PPMinput to main GUI page
     - Added BT connection status led
     - Prevent two digital pins being set the same
-    
+0.81 - Fix too many parameters send errors sends multiple messages
+     - Added sleep between CRC error re-send
+0.9  - Added PPM output configuration options
+     - Fix error dialog loop
+     - Fix if save or restore open too long loss of connection

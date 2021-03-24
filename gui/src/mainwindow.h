@@ -75,7 +75,6 @@ private:
     void sendSerialData(QByteArray data);
     bool checkSaved();
 
-
 protected:
     void keyPressEvent(QKeyEvent *event);
 
@@ -104,6 +103,7 @@ private slots:
     void loadSettings();
     void uploadFirmwareClick();
     void startCalibration();
+    void startData();
     void showDiagsClicked();
     void showSerialDiagClicked();
 
@@ -117,7 +117,7 @@ private slots:
     void calibrationSuccess();
     void calibrationFailure();
     void serialTxReady();
-    void needsCalibration();
+    void needsCalibration();    
     void boardDiscovered(BoardType *);
     void statusMessage(QString,int timeout=0);
 };

@@ -114,6 +114,11 @@ void BoardBNO055::startCalibration()
     bnoCalibratorDialog->show();
 }
 
+void BoardBNO055::startData()
+{
+    startGraph();
+}
+
 void BoardBNO055::allowAccessChanged(bool acc)
 {
     Q_UNUSED(acc)
