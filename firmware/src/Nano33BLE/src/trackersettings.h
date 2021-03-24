@@ -9,10 +9,7 @@
 #include "serial.h"
 #include "btpara.h"
 
-//#define EXAMPLE_KV_VALUE_LENGTH 64
-//#define KV_KEY_LENGTH 32
-//#define err_code(res) MBED_GET_ERROR_CODE(res)
-
+// Global Config Values
 
 class TrackerSettings
 {
@@ -28,6 +25,13 @@ public:
     static constexpr int HT_ROLL_REVERSE_BIT  = 0x02;
     static constexpr int HT_PAN_REVERSE_BIT   = 0x04;
     static constexpr int DEF_PPM_CHANNELS = 8;
+    static constexpr uint16_t DEF_PPM_FRAME = 22500;
+    static constexpr uint16_t PPM_MAX_FRAME = 40000;
+    static constexpr uint16_t PPM_MIN_FRAME = 12500;
+    static constexpr uint16_t PPM_MIN_FRAMESYNC = 4000; // Not adjustable
+    static constexpr int DEF_PPM_SYNC=300;
+    static constexpr int PPM_MAX_SYNC=800;
+    static constexpr int PPM_MIN_SYNC=100;
     static constexpr int DEF_BUTTON_IN = 2; // Chosen because it's beside ground
     static constexpr int DEF_PPM_OUT = 10; // Random choice
     static constexpr int DEF_PPM_IN = -1;
@@ -37,6 +41,11 @@ public:
     static constexpr float DEF_GAIN= 5.0;
     static constexpr int DEF_BT_MODE= BTDISABLE; // Bluetooth Disabled
     static constexpr int DEF_RST_PPM = -1;
+    static constexpr int DEF_TILT_CH = 6;
+    static constexpr int DEF_ROLL_CH = 7;
+    static constexpr int DEF_PAN_CH = 8;
+    static constexpr int DEF_LP_PAN = 75;
+    static constexpr int DEF_LP_TLTRLL = 75;
 
     TrackerSettings();
 
@@ -106,6 +115,15 @@ public:
     bool invertedPpmOut() {return ppmoutinvert;}
     void setInvertedPpmOut(bool inv);
 
+    uint16_t ppmFrame() {return ppmfrm;}
+    void setPPMFrame(uint16_t v) { if(v >= PPM_MIN_FRAME  && v <= PPM_MAX_FRAME) ppmfrm = v;}
+
+    uint16_t ppmSync() {return ppmsync;}
+    void setPPMSync(uint16_t v) { if(v >= PPM_MIN_SYNC && v <= PPM_MAX_SYNC) ppmsync = v;}
+
+    int ppmChCount() {return ppmchcnt;}
+    void setPpmChCount(int v) { if(v > 3 && v < 17) ppmchcnt = v;}
+
     int ppmInPin() const;
     void setPpmInPin(int value);
 
@@ -142,10 +160,6 @@ public:
     void magSiOffset(float v[]) {memcpy(v,magsioff,9*sizeof(float));}
     void setMagSiOffset(float v[]) {memcpy(magsioff,v,9*sizeof(float));}
 
-    // Future use where channel number adjustable
-    int ppmChannels() {return ppmchannels;}
-    void setPPMChannels(int num) {}
-
     void loadJSONSettings(DynamicJsonDocument &json);
     void setJSONSettings(DynamicJsonDocument &json);
 
@@ -176,7 +190,6 @@ private:
     int pan_min,pan_max,pan_cnt;
     float rll_gain,tlt_gain,pan_gain;
     int tltch,rllch,panch;
-    int ppmchannels;
 
     // Calibration
     float magxoff, magyoff, magzoff;
@@ -196,6 +209,9 @@ private:
     bool freshProgram;
     int orient;
     int rstppm;
+    uint16_t ppmfrm;
+    uint16_t ppmsync;
+    uint16_t ppmchcnt;
 
     // Data
     float gyrox,gyroy,gyroz;
@@ -209,7 +225,7 @@ private:
     float quat[4];
     uint16_t panout,tiltout,rollout;
     uint16_t ppminvals[16];
-    int ppmchans;
+    int ppminchans;
     char bleaddress[20];
     bool isCalibrated;
 };

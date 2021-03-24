@@ -5,6 +5,7 @@
 #include <nrfx_gpiote.h>
 #include "trackersettings.h"
 #include "serial.h"
+#include "main.h"
 
 static uint32_t oldTimer3Interrupt=0;
 
@@ -18,11 +19,11 @@ static int setPin=-1;
 
 // Used to read data at once, read with isr disabled
 static uint16_t ch_values[16];
-static int ch_count=0;
+static int ch_count=TrackerSettings::DEF_PPM_CHANNELS;
 
-static uint16_t framesync = 4000; // Minimum Frame Sync Pulse
-static int framelength = 20000; // Ideal frame length
-static uint16_t sync = 300; // Sync Pulse Length
+static uint16_t framesync = TrackerSettings::PPM_MIN_FRAMESYNC; // Minimum Frame Sync Pulse
+static int32_t framelength = TrackerSettings::DEF_PPM_FRAME; // Ideal frame length
+static uint16_t sync = TrackerSettings::DEF_PPM_SYNC; // Sync Pulse Length
 
 // Local data - Only build with interrupts disabled
 static uint32_t chsteps[35] {framesync,sync};
@@ -39,6 +40,11 @@ volatile bool buildingdata=false;
 void buildChannels()
 {
     buildingdata = true; // Prevent a read happing while this is building
+
+    // Set user defined channel count, frame len, sync pulse
+    ch_count = trkset.ppmChCount();
+    sync = trkset.ppmSync();
+    framelength = trkset.ppmFrame();
 
     int ch=0;
     int i;
@@ -212,15 +218,6 @@ void PpmOut_setInverted(bool inv)
 void PpmOut_execute()
 {
 
-}
-
-void PpmOut_setChnCount(int chans)
-{
-    if(chans >= 4 && chans <=16) {
-        ch_count = chans;
-        resetChannels();
-    }
-    buildChannels();
 }
 
 void PpmOut_setChannel(int chan, uint16_t val)

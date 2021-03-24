@@ -32,6 +32,13 @@ public:
     static constexpr int DEF_PPM_CHANNELS = 8;
     static constexpr int DEF_BUTTON_IN = 2; // Chosen because it's beside ground
     static constexpr int DEF_PPM_OUT = 10; // Random choice
+    static constexpr uint16_t DEF_PPM_FRAME = 22500;
+    static constexpr uint16_t PPM_MAX_FRAME = 40000;
+    static constexpr uint16_t PPM_MIN_FRAME = 12500;
+    static constexpr uint16_t PPM_MIN_FRAMESYNC = 4000; // Not adjustable
+    static constexpr int DEF_PPM_SYNC=300;
+    static constexpr int PPM_MAX_SYNC=800;
+    static constexpr int PPM_MIN_SYNC=100;
     static constexpr int DEF_PPM_IN = -1;
     static constexpr int DEF_CENTER = 1500;
     static constexpr float MIN_GAIN= 0.0;
@@ -39,6 +46,11 @@ public:
     static constexpr float DEF_GAIN= 5.0;
     static constexpr int DEF_BT_MODE= BTDISABLE; // Bluetooth Disabled
     static constexpr int DEF_RST_PPM = -1;
+    static constexpr int DEF_TILT_CH = 6;
+    static constexpr int DEF_ROLL_CH = 7;
+    static constexpr int DEF_PAN_CH = 8;
+    static constexpr int DEF_LP_PAN = 75;
+    static constexpr int DEF_LP_TLTRLL = 75;
 
     TrackerSettings(QObject *parent=nullptr);
 
@@ -99,20 +111,29 @@ public:
     bool isTiltReversed();
     bool isPanReversed();
 
-    uint panCh() const;
-    void setPanCh(uint value);
+    int panCh() const;
+    void setPanCh(int value);
 
-    uint tiltCh() const;
-    void setTiltCh(uint value);
+    int tiltCh() const;
+    void setTiltCh(int value);
 
-    uint rollCh() const;
-    void setRollCh(uint value);
+    int rollCh() const;
+    void setRollCh(int value);
 
     int ppmOutPin() const;
     void setPpmOutPin(int value);
 
     bool invertedPpmOut() const;
     void setInvertedPpmOut(bool value);
+
+    uint ppmFrame() {return _data["ppmfrm"].toInt();}
+    void setPPMFrame(uint v) { if(v >= PPM_MIN_FRAME  && v <= PPM_MAX_FRAME) _data["ppmfrm"] = v;}
+
+    uint ppmSync() {return _data["ppmsync"].toInt();}
+    void setPPMSync(uint v) { if(v >= PPM_MIN_SYNC && v <= PPM_MAX_SYNC)_data["ppmsync"] = v;}
+
+    int ppmChCount() {return _data["ppmchcnt"].toInt();}
+    void setPpmChCount(int v) { if(v > 3 && v<17) _data["ppmchcnt"] = v;}
 
     int ppmInPin() const;
     void setPpmInPin(int value);

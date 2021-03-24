@@ -29,14 +29,14 @@ TrackerSettings::TrackerSettings()
     tlt_gain =  DEF_GAIN;
     tlt_cnt = DEF_CENTER;
 
-    tltch = 1;
-    rllch = 2;
-    panch = 3;
+    tltch = DEF_TILT_CH;
+    rllch = DEF_ROLL_CH;
+    panch = DEF_PAN_CH;
 
     servoreverse = 0x00;
 
-    lppan = 75;
-    lptiltroll = 75;
+    lppan = DEF_LP_PAN;
+    lptiltroll = DEF_LP_TLTRLL;
 
     // Sensor Offsets
     magxoff=0; magyoff=0; magzoff=0;
@@ -57,9 +57,11 @@ TrackerSettings::TrackerSettings()
 
     // PPM Defaults
     ppmoutpin = DEF_PPM_OUT;
+    ppmfrm = DEF_PPM_FRAME;
+    ppmsync = DEF_PPM_SYNC;
+    ppmchcnt = DEF_PPM_CHANNELS;
     ppminpin = DEF_PPM_IN;
     buttonpin = DEF_BUTTON_IN;
-    ppmchans = 0;
     ppmoutinvert = false;
     ppmininvert = false;
     rstppm = DEF_RST_PPM;
@@ -325,7 +327,7 @@ int TrackerSettings::panCh() const
 
 void TrackerSettings::setPanCh(int value)
 {
-    if(value > 0 && value <= DEF_PPM_CHANNELS)
+    if((value > 0 && value <= DEF_PPM_CHANNELS) || value == -1)
         panch = (int)value;
 }
 
@@ -336,7 +338,7 @@ int TrackerSettings::tiltCh() const
 
 void TrackerSettings::setTiltCh(int value)
 {
-    if(value > 0 && value <= DEF_PPM_CHANNELS)
+    if((value > 0 && value <= DEF_PPM_CHANNELS) || value == -1)
         tltch = (int)value;
 }
 
@@ -347,7 +349,7 @@ int TrackerSettings::rollCh() const
 
 void TrackerSettings::setRollCh(int value)
 {
-    if(value > 0 && value <= DEF_PPM_CHANNELS)
+    if((value > 0 && value <= DEF_PPM_CHANNELS) || value == -1)
         rllch = (int)value;
 }
 
@@ -385,7 +387,6 @@ int TrackerSettings::ppmOutPin() const
 void TrackerSettings::setPpmOutPin(int value)
 {
     if((value > 1 && value < 14) || value == -1)  {
-       PpmOut_setChnCount(MAX_PPM_CHANNELS);
        PpmOut_setPin(value);
        ppmoutpin = value;
     }
@@ -406,7 +407,7 @@ int TrackerSettings::resetCntPPM() const
 
 void TrackerSettings::setResetCntPPM(int value)
 {
-    if((value >= 1 && value <= 8) || value == -1)
+    if((value >= 1 && value <= 16) || value == -1)
         rstppm = value;
 }
 
@@ -566,7 +567,7 @@ void TrackerSettings::setPPMInValues(uint16_t *vals, int chans)
     for(int i=0;i<chans;i++)
         ppminvals[i] = vals[i];
 
-    ppmchans = chans;
+    ppminchans = chans;
 }
 
 void TrackerSettings::setRawGyro(float x, float y, float z)
@@ -719,6 +720,11 @@ void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
 // Reset center on PPM Ch > 1800us
     v = json["rstppm"]; if(!v.isNull()) setResetCntPPM(v);
 
+// PPM Data
+   v = json["ppmfrm"]; if(!v.isNull()) setPPMFrame(v);
+   v = json["ppmchcnt"]; if(!v.isNull()) setPpmChCount(v);
+   v = json["ppmsync"]; if(!v.isNull()) setPPMSync(v);
+
 // Calibrarion Values
     v = json["magxoff"];
     v1 =json["magyoff"];
@@ -768,6 +774,7 @@ void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
 
 void TrackerSettings::setJSONSettings(DynamicJsonDocument &json)
 {
+// Channel Min/Max/Center/Gains
     json["rll_min"] = rll_min;
     json["rll_max"] = rll_max;
     json["rll_cnt"] = rll_cnt;
@@ -783,6 +790,7 @@ void TrackerSettings::setJSONSettings(DynamicJsonDocument &json)
     json["pan_cnt"] = pan_cnt;
     json["pan_gain"] = pan_gain;
 
+// Channel Numbers
     json["rllch"] = rllch;
     json["panch"] = panch;
     json["tltch"] = tltch;
@@ -792,16 +800,26 @@ void TrackerSettings::setJSONSettings(DynamicJsonDocument &json)
     json["lppan"] = lppan;
     json["lptiltroll"] = lptiltroll;
 
+// Pins
+    json["ppminpin"] = ppminpin;
     json["buttonpin"] = buttonpin;
     json["ppmoutpin"] = ppmoutpin;
-    json["ppmoutinvert"] = ppmoutinvert;
 
-    json["ppminpin"] = ppminpin;
+// PPM Settings
+    json["ppmoutinvert"] = ppmoutinvert;
+    json["ppmfrm"] = ppmfrm;
+    json["ppmsync"] = ppmsync;
+    json["ppmchcnt"] = ppmchcnt;
     json["ppmininvert"] = ppmininvert;
     json["rstppm"] = rstppm;
 
+// Bluetooth Settings
     json["btmode"] = btmode;
+
+// Proximity Setting
     json["rstonwave"] = rstonwave;
+
+// Orientation
     json["orient"] = orient;
 
 // Calibration Values
@@ -888,8 +906,8 @@ void TrackerSettings::setJSONData(DynamicJsonDocument &json)
 
     // Create string for PpmIn Chans
     char pstr[120];
-    sprintf(pstr,"#CH=%d ",ppmchans);
-    for(int i=0;i<ppmchans; i++) {
+    sprintf(pstr,"#CH=%d ",ppminchans);
+    for(int i=0;i<ppminchans; i++) {
         sprintf(pstr,"%s %d",pstr,ppminvals[i]);
     }
     json["ppmin"] = pstr;
@@ -902,6 +920,9 @@ void TrackerSettings::setJSONData(DynamicJsonDocument &json)
         json["magcal"] = isCalibrated;
         slowrate = 0;
     }
+
+    // Custom Output Option
+    //json["heave"] = roundf(zaccelout * 1000)/1000;
 
 // Live Values for Debugging.
     /*json["accx"] = roundf(accx*1000)/1000;

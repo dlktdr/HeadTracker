@@ -20,17 +20,14 @@ TrackerSettings::TrackerSettings(QObject *parent):
     _data["tlt_gain"] = DEF_GAIN;
     _data["tlt_cnt"] = DEF_CENTER;
 
-    _data["panch"] = (uint)1;
-    _data["tltch"] = (uint)2;
-    _data["rllch"] = (uint)3;
+    _data["panch"] = DEF_PAN_CH;
+    _data["tltch"] = DEF_TILT_CH;
+    _data["rllch"] = DEF_ROLL_CH;
 
     _data["servoreverse"] = (uint)0x00;
 
-    _data["lppan"] = (uint)75;
-    _data["lptiltroll"] = (uint)75;
-
-    //_data["gyroweightpan"] = (uint)30;
-    //_data["gyroweighttiltroll"] = (uint)40;
+    _data["lppan"] = DEF_LP_PAN;
+    _data["lptiltroll"] = DEF_LP_TLTRLL;
 
     _data["axisremap"] = (uint)AXES_MAP(AXIS_X,AXIS_Y,AXIS_Z);
     _data["axissign"] = (uint)0;
@@ -39,6 +36,10 @@ TrackerSettings::TrackerSettings(QObject *parent):
     _data["ppminpin"] = DEF_PPM_IN;
     _data["ppmoutpin"] = DEF_PPM_OUT;
     _data["ppmoutinvert"] = false;
+    _data["ppmfrm"] = DEF_PPM_FRAME;
+    _data["ppmsync"] = DEF_PPM_SYNC;
+    _data["ppmchcnt"] = DEF_PPM_CHANNELS;
+
     _data["ppmininvert"] = false;
     _data["btmode"] = (uint)0;    
     _data["orient"] = (uint)0;
@@ -304,36 +305,36 @@ bool TrackerSettings::isPanReversed()
     return (_data["servoreverse"].toUInt() & HT_PAN_REVERSE_BIT);
 }
 
-uint TrackerSettings::panCh() const
+int TrackerSettings::panCh() const
 {
     return _data["panch"].toUInt();
 }
 
-void TrackerSettings::setPanCh(uint value)
+void TrackerSettings::setPanCh(int value)
 {
-    if(value > 0 && value < 17)
-        _data["panch"] = (uint)value;
+    if((value > 0 && value < 17) || value == -1)
+        _data["panch"] = (int)value;
 }
 
-uint TrackerSettings::tiltCh() const
+int TrackerSettings::tiltCh() const
 {
     return _data["tltch"].toUInt();
 }
 
-void TrackerSettings::setTiltCh(uint value)
+void TrackerSettings::setTiltCh(int value)
 {
-    if(value > 0 && value < 17)
+    if((value > 0 && value < 17) || value == -1)
         _data["tltch"] = (uint)value;
 }
 
-uint TrackerSettings::rollCh() const
+int TrackerSettings::rollCh() const
 {
     return _data["rllch"].toUInt();
 }
 
-void TrackerSettings::setRollCh(uint value)
+void TrackerSettings::setRollCh(int value)
 {
-    if(value > 0 && value < 17)
+    if((value > 0 && value < 17) || value == -1)
         _data["rllch"] = (uint)value;
 }
 
@@ -394,7 +395,7 @@ int TrackerSettings::resetCntPPM() const
 
 void TrackerSettings::setResetCntPPM(int value)
 {
-    if((value >= 1 && value <= 8) || value == -1)
+    if((value >= 1 && value <= 16) || value == -1)
         _data["rstppm"] = value;
 }
 

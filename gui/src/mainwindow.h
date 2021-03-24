@@ -22,16 +22,14 @@
 #include "boardbno055.h"
 
 const int MAX_LOG_LENGTH=6000; // How many bytes to keep of log data in the gui
-const QString version="0.8"; // Current Version Number
-const QString fwversion="08"; // Which suffix on firmware file to use from GITHUB
+const QString version="0.90"; // Current Version Number
+const QString fwversion="09"; // Which suffix on firmware file to use from GITHUB
 const QStringList firmwares={"BNO055","NANO33BLE"}; // Allowable hardware types
 
 const int IMHERETIME=8000; // milliseconds before sending another I'm Here Message to keep communication open
 const int MAX_TX_FAULTS=8; // Number of times to try re-sending data
 const int TX_FAULT_PAUSE=750; // milliseconds wait before trying another send
 const int ACKNAK_TIMEOUT=500; // milliseconds without an ack/nak is a fault
-
-
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }

@@ -17,7 +17,7 @@ enum {
     BTPARA,
     BTHM10
 };
-   
+
 class BTFunction {
 public:
     BTFunction();
@@ -33,7 +33,7 @@ public:
 protected:
     int setTrainer(uint8_t *addr);
     void pushByte(uint8_t byte);
-    uint16_t chan_vals[24];
+    uint16_t chan_vals[16];
 
 private:
     static constexpr uint8_t START_STOP = 0x7E;
@@ -42,7 +42,7 @@ private:
     uint8_t buffer[BLUETOOTH_LINE_LENGTH+1];
     uint8_t bufferIndex;
     uint8_t crc;
-    int num_chans;    
+    int num_chans;
 };
 
 /*

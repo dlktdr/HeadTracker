@@ -10,9 +10,11 @@
 using namespace mbed;
 using namespace events;
 
+#define BT_CHANNELS 8
+
 //-----------------------------------------------------
 
-void bt_Thread() 
+void bt_Thread()
 {
     // Blue LED Indicates bluetooth usage
     digitalWrite(LEDB,LOW);
@@ -22,7 +24,7 @@ void bt_Thread()
         queue.call_in(std::chrono::milliseconds(100),bt_Thread);
         return;
     }
-          
+
     // Is BT Enabled
     BTFunction *bt = trkset.getBTFunc();
     if(bt != nullptr) {
@@ -30,17 +32,17 @@ void bt_Thread()
         bt->execute();
     }
 
-    digitalWrite(LEDB,HIGH); 
+    digitalWrite(LEDB,HIGH);
 
     // Slow down bluetooth when UI connected. Trying to prevent disconnects.
-    if(uiconnected)     
-        queue.call_in(std::chrono::milliseconds(BT_PERIOD*4),bt_Thread);
+    if(uiconnected)
+        queue.call_in(std::chrono::milliseconds(BT_PERIOD*5),bt_Thread);
     else
         queue.call_in(std::chrono::milliseconds(BT_PERIOD),bt_Thread);
 
 }
 
-void bt_Init() 
+void bt_Init()
 {
     if(!BLE.begin()) {
         serialWriteln("HT: Fault Starting Bluetooth");
@@ -48,14 +50,14 @@ void bt_Init()
     }
 }
 
-// 
+//
 BTFunction::BTFunction()
 {
     // Reset all 24 channels
     for(int i=0;i < 24;i++) {
         chan_vals[i] = 1500;
     }
-    num_chans = MAX_PPM_CHANNELS;
+    num_chans = TrackerSettings::DEF_PPM_CHANNELS;
     crc = 0;
     bufferIndex = 0;
 }
@@ -69,14 +71,15 @@ BTFunction::~BTFunction()
 void BTFunction::setChannel(int channel, uint16_t value)
 {
     // Allowed 0-7 Channels
-    if(channel >= 0 && channel < MAX_PPM_CHANNELS)
+    if(channel >= 0 && channel < BT_CHANNELS)
         chan_vals[channel] = value;
 }
 
 // Sets channel count
 void BTFunction::setChannelCount(int count)
 {
-    num_chans = count;
+    if(count >= 0 && count < BT_CHANNELS)
+        num_chans = count;
 }
 
 // Part of setTrainer to calculate CRC
@@ -92,34 +95,34 @@ void BTFunction::pushByte(uint8_t byte)
     buffer[bufferIndex++] = byte;
 }
 
-/* Builds Trainer Data 
+/* Builds Trainer Data
 *     Returns the length of the encoded PPM + CRC
 *     Data saved into addr pointer
 */
 int BTFunction::setTrainer(uint8_t *addr)
 {
     // Allocate Channel Mappings, Set Default to all Center
-    uint8_t * cur = buffer; 
+    uint8_t * cur = buffer;
     bufferIndex = 0;
     crc = 0x00;
 
     buffer[bufferIndex++] = START_STOP; // start byte
     pushByte(0x80); // trainer frame type?
-    for (int channel=0; channel < num_chans; channel+=2, cur+=3) {        
+    for (int channel=0; channel < num_chans; channel+=2, cur+=3) {
         uint16_t channelValue1 = chan_vals[channel];
         uint16_t channelValue2 = chan_vals[channel+1];
-        
+
         pushByte(channelValue1 & 0x00ff);
         pushByte(((channelValue1 & 0x0f00) >> 4) + ((channelValue2 & 0x00f0) >> 4));
         pushByte(((channelValue2 & 0x000f) << 4) + ((channelValue2 & 0x0f00) >> 8));
     }
-    
+
     buffer[bufferIndex++] = crc;
     buffer[bufferIndex++] = START_STOP; // end byte
-    
+
     // Copy data to array
     memcpy(addr,buffer,bufferIndex);
-           
+
     return bufferIndex;
 }
 

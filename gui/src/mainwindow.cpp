@@ -108,7 +108,10 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Spin Boxes
     connect(ui->spnLPPan,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->spnLPTiltRoll,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->spnLPTiltRoll,SIGNAL(valueChanged(int)),this,SLOT(updateFr
+                                                                  omUI()));
+    connect(ui->spnPPMSync,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->spnPPMFrameLen,SIGNAL(valueChanged(double)),this,SLOT(updateFromUI()));
 
     // Gain Sliders
     connect(ui->til_gain,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
@@ -155,6 +158,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->cmbBtMode,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbOrientation,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbResetOnPPM,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->cmbPPMChCount,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
 
     // Menu Actions
     connect(ui->action_Save_to_File,SIGNAL(triggered()),this,SLOT(saveSettings()));
@@ -427,6 +431,9 @@ void MainWindow::updateToUI()
     ui->cmbtiltchn->blockSignals(true);
     ui->cmbRemap->blockSignals(true);
     ui->cmbPpmOutPin->blockSignals(true);
+    ui->spnPPMFrameLen->blockSignals(true);
+    ui->cmbPPMChCount->blockSignals(true);
+    ui->spnPPMSync->blockSignals(true);
     ui->cmbPpmInPin->blockSignals(true);
     ui->cmbButtonPin->blockSignals(true);
     ui->cmbBtMode->blockSignals(true);
@@ -438,11 +445,17 @@ void MainWindow::updateToUI()
     ui->rll_gain->blockSignals(true);
     ui->pan_gain->blockSignals(true);
 
+
     ui->spnLPTiltRoll->setValue(trkset.lpTiltRoll());
     ui->spnLPPan->setValue(trkset.lpPan());
-    ui->cmbpanchn->setCurrentIndex(trkset.panCh()-1);
-    ui->cmbrllchn->setCurrentIndex(trkset.rollCh()-1);
-    ui->cmbtiltchn->setCurrentIndex(trkset.tiltCh()-1);
+
+    int panCh = trkset.panCh();
+    int rllCh = trkset.rollCh();
+    int tltCh = trkset.tiltCh();
+    ui->cmbpanchn->setCurrentIndex(panCh==-1?0:panCh);
+    ui->cmbrllchn->setCurrentIndex(rllCh==-1?0:rllCh);
+    ui->cmbtiltchn->setCurrentIndex(tltCh==-1?0:tltCh);
+
     ui->cmbRemap->setCurrentIndex(ui->cmbRemap->findData(trkset.axisRemap()));
     ui->cmbSigns->setCurrentIndex(trkset.axisSign());
     ui->cmbBtMode->setCurrentIndex(trkset.blueToothMode());    
@@ -460,11 +473,27 @@ void MainWindow::updateToUI()
     ui->cmbButtonPin->setCurrentIndex(but_index < 1 ? 0 : but_index);
     ui->cmbResetOnPPM->setCurrentIndex(resppm_index < 0 ? 0: resppm_index);
 
+    // PPM Output Settings
+    int channels = trkset.ppmChCount();
+    ui->cmbPPMChCount->setCurrentIndex(channels-4);
+    uint16_t setframelen = trkset.ppmFrame();
+    ui->spnPPMFrameLen->setValue(static_cast<double>(setframelen)/1000.0f);
+    ui->spnPPMSync->setValue(trkset.ppmSync());
+    uint32_t maxframelen = TrackerSettings::PPM_MIN_FRAMESYNC + (channels * TrackerSettings::MAX_PWM);
+    if(maxframelen > setframelen) {
+        ui->lblPPMOut->setText("<b>Warning!</b> PPM Frame length possibly too short to support channel data");
+    } else {
+        ui->lblPPMOut->setText("PPM data will fit in frame. Refresh rate: " + QString::number(1/(static_cast<float>(setframelen)/1000000.0),'f',2) + "Hz");
+    }
+
     ui->cmbpanchn->blockSignals(false);
     ui->cmbrllchn->blockSignals(false);
     ui->cmbtiltchn->blockSignals(false);
     ui->cmbRemap->blockSignals(false);
     ui->cmbPpmOutPin->blockSignals(false);
+    ui->spnPPMFrameLen->blockSignals(false);
+    ui->cmbPPMChCount->blockSignals(false);
+    ui->spnPPMSync->blockSignals(false);
     ui->cmbPpmInPin->blockSignals(false);
     ui->cmbButtonPin->blockSignals(false);
     ui->cmbBtMode->blockSignals(false);
@@ -505,9 +534,12 @@ void MainWindow::updateFromUI()
     trkset.setPanReversed(ui->chkpanrev->isChecked());
     trkset.setTiltReversed(ui->chktltrev->isChecked());
 
-    trkset.setPanCh(ui->cmbpanchn->currentText().toInt());
-    trkset.setRollCh(ui->cmbrllchn->currentText().toInt());
-    trkset.setTiltCh(ui->cmbtiltchn->currentText().toInt());
+    int panCh = ui->cmbpanchn->currentIndex();
+    int rllCh = ui->cmbrllchn->currentIndex();
+    int tltCh = ui->cmbtiltchn->currentIndex();
+    trkset.setPanCh(panCh==0?-1:panCh);
+    trkset.setRollCh(panCh==0?-1:rllCh);
+    trkset.setTiltCh(panCh==0?-1:tltCh);
 
     trkset.setAxisRemap(ui->cmbRemap->currentData().toUInt());
     trkset.setAxisSign(ui->cmbSigns->currentIndex());
@@ -537,6 +569,18 @@ void MainWindow::updateFromUI()
         trkset.setPpmOutPin(ppout_index);
         trkset.setPpmInPin(ppin_index);
         trkset.setButtonPin(but_index);
+    }
+
+    uint16_t setframelen = ui->spnPPMFrameLen->value() * 1000;
+    trkset.setPPMFrame(setframelen);
+    trkset.setPPMSync(ui->spnPPMSync->value());
+    int channels = ui->cmbPPMChCount->currentIndex()+4;
+    trkset.setPpmChCount(channels);
+    uint32_t maxframelen = TrackerSettings::PPM_MIN_FRAMESYNC + (channels * TrackerSettings::MAX_PWM);
+    if(maxframelen > setframelen) {
+        ui->lblPPMOut->setText("<b>Warning!</b> PPM Frame length possibly too short to support channel data");
+    } else {
+        ui->lblPPMOut->setText("PPM data will fit in frame. Refresh rate: " + QString::number(1/(static_cast<float>(setframelen)/1000000.0),'f',2) + "Hz");
     }
 
     int rstppm_index = ui->cmbResetOnPPM->currentIndex();
@@ -628,9 +672,15 @@ void MainWindow::ppmOutChanged(int t,int r,int p)
     ui->servoRoll->setShowActualPosition(true);
 
     // Good enough spot to update these values...
-    ui->lblBLEAddress->setText("Address: " + trkset.blueToothAddress());
+    ui->lblBLEAddress->setText(trkset.blueToothAddress());
     ui->lblPPMin->setText("<b>PPM Input Values:</b> " + trkset.PPMInString());
     ui->btLed->setState(trkset.blueToothConnected());
+    if(trkset.blueToothConnected())
+        ui->lblBTConnected->setText("Connected");
+    else
+        ui->lblBTConnected->setText("Not connected");
+    if(trkset.blueToothMode() == TrackerSettings::BTDISABLE)
+        ui->lblBTConnected->setText("Disabled");
 }
 
 
@@ -892,7 +942,7 @@ void MainWindow::boardDiscovered(BoardType *brd)
         ui->cmdSend->setEnabled(true);
         ui->cmdSaveNVM->setEnabled(true);
         ui->cmdCalibrate->setEnabled(true);
-        ui->stackedWidget->setCurrentIndex(3);
+        ui->stackedWidget->setCurrentIndex(3);       
 
     } else if (brd->boardName() == "BNO055") {
         addToLog("Connected to a " + brd->boardName() + "\n");

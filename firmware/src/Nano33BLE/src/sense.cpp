@@ -36,7 +36,7 @@ static float l_panout=0, l_tiltout=0, l_rollout=0;
 
 uint16_t zaccelout=1500;
 
-static uint16_t ppmchans[MAX_PPM_CHANNELS];
+static uint16_t ppmchans[16];
 Madgwick madgwick;
 static Timer runt;
 
@@ -156,7 +156,7 @@ void sense_Thread()
     }
 #endif
 
-    // Reset Center on Wave or Proximity, Don't need to updated this often
+    // Reset Center on Proximity, Don't need to update this often
     static int sensecount=0;
     static int minproximity=100; // Keeps smallest proximity read.
     static int maxproximity=0; // Keeps largest proximity value read.
@@ -219,7 +219,7 @@ void sense_Thread()
     panout_ui = MAX(MIN(panout_ui,trkset.Pan_max()),trkset.Pan_min()); // Limit Output
 
     // Reset all PPM Channels to Center
-    for(int i=0;i<MAX_PPM_CHANNELS;i++)
+    for(int i=0;i<16;i++)
         ppmchans[i] = TrackerSettings::DEF_CENTER;
 
     // Read all PPM inputs, should return 0 channels if disabled or lost
@@ -227,7 +227,7 @@ void sense_Thread()
     uint16_t ppminchans[16];
     int ppmi_chcnt = PpmIn_getChannels(ppminchans);
     if(ppmi_chcnt >= 4 && ppmi_chcnt <= 16) {
-        for(int i=0;i<MIN(ppmi_chcnt,MAX_PPM_CHANNELS);i++) {
+        for(int i=0;i<MIN(ppmi_chcnt,16);i++) {
             ppmchans[i] = ppminchans[i];
         }
     } else {
@@ -238,7 +238,7 @@ void sense_Thread()
     // wait for it to drop below 1700 before allowing another reset
     int rstppmch = trkset.resetCntPPM() - 1;
     static bool hasrstppm=false;
-    if(rstppmch >= 0 && rstppmch < MAX_PPM_CHANNELS) {
+    if(rstppmch >= 0 && rstppmch < 16) {
         if(ppmchans[rstppmch] > 1800 && hasrstppm == false) {
             serialWrite("HT: Reset Center - PPM Channel ");
             serialWrite(rstppmch+1);
@@ -250,10 +250,16 @@ void sense_Thread()
         }
     }
 
-    // Set PPM Channel Values
-    ppmchans[trkset.tiltCh()-1] = tiltout_ui; // Channel 1 = Index 0
-    ppmchans[trkset.rollCh()-1] = rollout_ui;
-    ppmchans[trkset.panCh()-1] = panout_ui;
+    // Set PPM Channel Values if enabled
+    int tltch = trkset.tiltCh();
+    int rllch = trkset.rollCh();
+    int panch = trkset.panCh();
+    if(tltch > 0)
+        ppmchans[tltch - 1] = tiltout_ui; // Channel 1 = Index 0
+    if(rllch > 0)
+        ppmchans[rllch - 1] = rollout_ui;
+    if(panch > 0)
+        ppmchans[panch - 1] = panout_ui;
 
     // Z Acceleration output on channel 4
     //ppmchans[3] = MIN(MAX((((raccz  - 1.0) / 2) * 1000)+1500,TrackerSettings::MIN_PWM),TrackerSettings::MAX_PWM);
@@ -271,7 +277,7 @@ void sense_Thread()
         bleconnected = bt->isConnected();
         trkset.setBLEAddress(bt->address());
 
-        for(int i=0;i<MAX_PPM_CHANNELS;i++) {
+        for(int i=0;i<16;i++) {
             bt->setChannel(i,ppmchans[i]);
         }
     }
