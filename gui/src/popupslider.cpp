@@ -2,9 +2,11 @@
 #include <QPainterPath>
 #include "popupslider.h"
 
-FSpinBox::FSpinBox(QWidget *parent) : QSpinBox(parent)
+FSpinBox::FSpinBox(QWidget *parent) : QDoubleSpinBox(parent)
 {
     setKeyboardTracking(false);
+    setSingleStep(1);
+    setDecimals(0);
 }
 
 void FSpinBox::focusOutEvent(QFocusEvent *event)
@@ -14,7 +16,6 @@ void FSpinBox::focusOutEvent(QFocusEvent *event)
         hide();
         this->parentWidget()->hide();
     }
-
 }
 
 PopupSlider::PopupSlider(QWidget *parent) : QWidget(parent)
@@ -22,25 +23,25 @@ PopupSlider::PopupSlider(QWidget *parent) : QWidget(parent)
     padding = 10;
     widvertoff = 10;
     spinbox = new FSpinBox(this);
-    resize(90,30 + padding + widvertoff);
+    resize(100,30 + padding + widvertoff);
     spinbox->move(padding/2,padding/2);
     spinbox->resize(width()-padding,height()-padding-widvertoff);
     spinbox->setSuffix(" uS");
     spinbox->setAlignment(Qt::AlignCenter);
-    connect(spinbox, SIGNAL(valueChanged(int)), this, SLOT(valueCh(int)));
+    connect(spinbox, SIGNAL(valueChanged(double)), this, SLOT(valueCh(double)));
     setFocusPolicy(Qt::ClickFocus);
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
     setAttribute(Qt::WA_NoSystemBackground);
     setAttribute(Qt::WA_TranslucentBackground);
 }
 
-void PopupSlider::setLimits(int low, int high)
+void PopupSlider::setLimits(double low, double high)
 {
     spinbox->setMaximum(high);
     spinbox->setMinimum(low);
 }
 
-void PopupSlider::setValue(int val)
+void PopupSlider::setValue(double val)
 {
     spinbox->setValue(val);
     spinbox->setFocusPolicy(Qt::StrongFocus);
@@ -51,6 +52,16 @@ void PopupSlider::setValue(int val)
 void PopupSlider::setSuffix(QString suf)
 {
     spinbox->setSuffix(suf);
+}
+
+void PopupSlider::setPrecision(int dp)
+{
+    spinbox->setDecimals(dp);
+}
+
+void PopupSlider::setStep(double v)
+{
+    spinbox->setSingleStep(v);
 }
 
 void PopupSlider::paintEvent(QPaintEvent *event)
@@ -91,8 +102,8 @@ void PopupSlider::showEvent(QShowEvent *event)
     spinbox->show();
 }
 
-void PopupSlider::valueCh(int a)
+void PopupSlider::valueCh(double a)
 {
-    emit valueChanged(a);
+    emit valueChanged(static_cast<double>(a));
 }
 

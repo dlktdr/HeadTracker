@@ -31,13 +31,13 @@ ServoMinMax::ServoMinMax(QWidget *parent) : QWidget(parent)
     // Spin Boxes for direct entry
     cntspinbox = new PopupSlider(this);
     cntspinbox->setLimits(c_min,c_max);
-    connect(cntspinbox,SIGNAL(valueChanged(int)),this,SLOT(cntSpinChanged(int)));
+    connect(cntspinbox,SIGNAL(valueChanged(double)),this,SLOT(cntSpinChanged(double)));
     minspinbox = new PopupSlider(this);
     minspinbox->setLimits(min_travel,min_max);
-    connect(minspinbox,SIGNAL(valueChanged(int)),this,SLOT(minSpinChanged(int)));
+    connect(minspinbox,SIGNAL(valueChanged(double)),this,SLOT(minSpinChanged(double)));
     maxspinbox = new PopupSlider(this);
     maxspinbox->setLimits(max_min,max_travel);
-    connect(maxspinbox,SIGNAL(valueChanged(int)),this,SLOT(maxSpinChanged(int)));
+    connect(maxspinbox,SIGNAL(valueChanged(double)),this,SLOT(maxSpinChanged(double)));
 
     setDefaults();
     setContextMenuPolicy(Qt::CustomContextMenu);
@@ -98,7 +98,7 @@ void ServoMinMax::actSetMax()
     emit centerChanged(c_value);
 }
 
-void ServoMinMax::cntSpinChanged(int v)
+void ServoMinMax::cntSpinChanged(double v)
 {
     c_value = v;   
     cntspinbox->move(this->mapToGlobal(QPoint(centerSlider.x()-((max_val - min_travel) / travel)-cntspinbox->width()/2+centerSlider.width()/2,-cntspinbox->height()+padding/2)));
@@ -106,7 +106,7 @@ void ServoMinMax::cntSpinChanged(int v)
     emit centerChanged(c_value);
 }
 
-void ServoMinMax::minSpinChanged(int v)
+void ServoMinMax::minSpinChanged(double v)
 {
     min_val = v;    
     minspinbox->move(this->mapToGlobal(QPoint(minSlider.x()-((max_val - min_travel) / travel)-minspinbox->width()/2+minSlider.width()/2,-minspinbox->height()+padding/2)));
@@ -114,7 +114,7 @@ void ServoMinMax::minSpinChanged(int v)
     emit minimumChanged(min_val);
 }
 
-void ServoMinMax::maxSpinChanged(int v)
+void ServoMinMax::maxSpinChanged(double v)
 {
     max_val = v;
     maxspinbox->move(this->mapToGlobal(QPoint(maxSlider.x()-((max_val - min_travel) / travel)-maxspinbox->width()/2+maxSlider.width()/2,-maxspinbox->height()+padding/2)));

@@ -35,9 +35,9 @@ private slots:
     void reCenter();
     void setDefaults();
     void actSetMax();
-    void cntSpinChanged(int);
-    void minSpinChanged(int);
-    void maxSpinChanged(int);
+    void cntSpinChanged(double);
+    void minSpinChanged(double);
+    void maxSpinChanged(double);
 
 public slots:
     void setCenter(int value) {c_value = value;update();} // !Add Limit Check!

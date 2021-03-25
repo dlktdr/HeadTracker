@@ -24,7 +24,7 @@ private:
 private slots:
     void sliderPressedH();
     void sliderMovedH(int);
-    void popValChanged(int);
+    void popValChanged(double);
 };
 
 #endif // GAINSLIDER_H

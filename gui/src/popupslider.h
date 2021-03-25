@@ -5,9 +5,9 @@
 #include <QWidget>
 #include <QPainter>
 #include <QStyleOptionFrame>
-#include <QSpinBox>
+#include <QDoubleSpinBox>
 
-class FSpinBox : public QSpinBox
+class FSpinBox : public QDoubleSpinBox
 {
     Q_OBJECT
 public:
@@ -23,12 +23,14 @@ public:
     explicit PopupSlider(QWidget *parent = nullptr);
 
 public slots:
-    void setLimits(int low, int high);
-    void setValue(int val);
+    void setLimits(double low, double high);
+    void setValue(double val);
     void setSuffix(QString);
+    void setPrecision(int dp);
+    void setStep(double v);
 
 signals:
-    void valueChanged(int value);
+    void valueChanged(double value);
 
 private:
     FSpinBox *spinbox;
@@ -40,7 +42,7 @@ private:
     int widvertoff;
 
 private slots:
-    void valueCh(int a);
+    void valueCh(double a);
 };
 
 
