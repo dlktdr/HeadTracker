@@ -974,6 +974,7 @@ void MainWindow::boardDiscovered(BoardType *brd)
         ui->cmdSaveNVM->setEnabled(true);
         ui->cmdCalibrate->setEnabled(true);
         ui->stackedWidget->setCurrentIndex(3);       
+        ui->tabBLE->setCurrentIndex(0);
 
     } else if (brd->boardName() == "BNO055") {
         addToLog("Connected to a " + brd->boardName() + "\n");
