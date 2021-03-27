@@ -29,14 +29,16 @@ I would like to throw out thanks to Yuri for the BLE Para work + Orientation fix
 - [X] Create binaries for Gui
 - [X] Add rotation to mount board in other orientations BLE33
 - [X] Error checking of sent/uploaded parameters (Done release 0.8, coming soon)
+- [x] Roughly determine orientation on boot, pre-load filters to reduce startup drift (in v0.8)
 - [ ] Error checking of received/downloaded parameters
 - [ ] Combine remote and head firmwares into a single file, add GUI handling for remote board
 - [ ] Check current GUI and FW versions with online source to notify if updates available
-- [ ] SBUS Input/Output? Is this a good idea?
+- [ ] SBUS Input/Output ( Needs testing, see issues page )
+- [ ] Add 4 Channels of PWM output
+- [ ] Add 2 Channels of analog input
 - [ ] Create an installer to automatically install missing dependancies
 - [ ] Compile, test and create packages for MacOS (Need help here)
 - [ ] Compile, test and create packages for Linux
-- [x] Roughly determine orientation on boot, pre-load filters to reduce startup drift (in v0.8)
 
 ### Screenshot
 ![alt text](https://github.com/dlktdr/HeadTracker/raw/master/docs/ScreenCapture1006.png)
