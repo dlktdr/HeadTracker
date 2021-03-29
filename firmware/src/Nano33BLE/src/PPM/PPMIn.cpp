@@ -75,6 +75,8 @@ void PpmIn_setPin(int pinNum)
     if(pinNum == setPin)
         return;
 
+
+
     // THIS MUST BE DEFINED SOMEWHERE... CAN'T FIND IT!
     int dpintopin[]  = {0,0,11,12,15,13,14,23,21,27,2,1,8,13};
     int dpintoport[] = {0,0,1 ,1 ,1 ,1 ,1 ,0 ,0 ,0 ,1,1,1,0 };
@@ -111,6 +113,7 @@ void PpmIn_setPin(int pinNum)
 
     } else {
         setPin = pinNum;
+        pinMode(pinNum,INPUT_PULLUP); // Turn on Internal Pull Up
         __disable_irq();
 
         // Disable Interrupt, Clear event

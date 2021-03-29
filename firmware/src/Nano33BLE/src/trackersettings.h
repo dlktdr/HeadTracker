@@ -5,15 +5,26 @@
 #include <ArduinoJson.h>
 #include "PPM/PPMOut.h"
 #include "PPM/PPMIn.h"
+#include "bluetooth/btparahead.h"
+#include "bluetooth/btpararmt.h"
 #include "config.h"
 #include "serial.h"
-#include "btpara.h"
 
 // Global Config Values
 
 class TrackerSettings
 {
 public:
+    enum {AUX_DISABLE=-1,
+        AUX_NULL,
+        AUX_GYRX,
+        AUX_GYRY,
+        AUX_GYRZ,
+        AUX_ACCELX,
+        AUX_ACCELY,
+        AUX_ACCELZ,
+        AUX_ACCELZO};
+
     static constexpr int MIN_PWM=988;
     static constexpr int MAX_PWM=2012;
     static constexpr int DEF_MIN_PWM=1050;
@@ -41,12 +52,49 @@ public:
     static constexpr float DEF_GAIN= 5.0;
     static constexpr int DEF_BT_MODE= BTDISABLE; // Bluetooth Disabled
     static constexpr int DEF_RST_PPM = -1;
-    static constexpr int DEF_TILT_CH = 6;
-    static constexpr int DEF_ROLL_CH = 7;
-    static constexpr int DEF_PAN_CH = 8;
+    static constexpr int DEF_TILT_CH = -1;
+    static constexpr int DEF_ROLL_CH = -1;
+    static constexpr int DEF_PAN_CH = -1;
     static constexpr int DEF_LP_PAN = 75;
     static constexpr int DEF_LP_TLTRLL = 75;
-
+    static constexpr int DEF_PWM_A0_CH = -1;
+    static constexpr int DEF_PWM_A1_CH = -1;
+    static constexpr int DEF_PWM_A2_CH = -1;
+    static constexpr int DEF_PWM_A3_CH = -1;
+    static constexpr int DEF_ALG_A6_CH = -1;
+    static constexpr int DEF_ALG_A7_CH = -1;
+    static constexpr float DEF_ALG_GAIN = 303.3f;
+    static constexpr int DEF_ALG_OFFSET = 0;
+    static constexpr int DEF_AUX_CH0 = -1;
+    static constexpr int DEF_AUX_CH1 = -1;
+    static constexpr int DEF_AUX_FUNC = -1;
+    const char CHAN_DATA_STR[28][12] = {"TILT", //0
+                                        "ROLL",
+                                        "PAN",
+                                        "BT_IN_1", //3
+                                        "BT_IN_2",
+                                        "BT_IN_3",
+                                        "BT_IN_4",
+                                        "BT_IN_5",
+                                        "BT_IN_6",
+                                        "BT_IN_7",
+                                        "BT_IN_8",
+                                        "PWM_IN_1", // 11
+                                        "PWM_IN_2",
+                                        "PWM_IN_3",
+                                        "PWM_IN_4",
+                                        "PWM_IN_5",
+                                        "PWM_IN_6",
+                                        "PWM_IN_7",
+                                        "PWM_IN_8",
+                                        "PWM_IN_9",
+                                        "PWM_IN_10",
+                                        "PWM_IN_11",
+                                        "PWM_IN_12",
+                                        "PWM_IN_13",
+                                        "PWM_IN_14",
+                                        "PWM_IN_15",
+                                        "PWM_IN_16"};
     TrackerSettings();
 
     int Rll_min() const;
@@ -160,6 +208,30 @@ public:
     void magSiOffset(float v[]) {memcpy(v,magsioff,9*sizeof(float));}
     void setMagSiOffset(float v[]) {memcpy(magsioff,v,9*sizeof(float));}
 
+// PWM Channels
+    void setPWMCh(int pwmno, int &pwmch);
+    int PWMCh(int pwmno);
+
+// Analogs
+    void setAnalog6Ch(int channel);
+    void setAnalog6Gain(float gain) {an6gain=gain;}
+    void setAnalog6Offset(int offset) {an6off = offset;}
+    void setAnalog7Ch(int channel);
+    void setAnalog7Gain(float gain) { an7gain = gain;}
+    void setAnalog7Offset(int offset) {an7off = offset;}
+    int analog6Ch() {return an6ch;}
+    int analog7Ch() {return an7ch;}
+    float analog6Gain() {return an6gain;}
+    float analog7Gain() {return an7gain;}
+    int analog6Offset() {return an6off;}
+    int analog7Offset() {return an7off;}
+
+// Aux Func
+    void setAuxFunc0Ch(int channel);
+    void setAuxFunc1Ch(int channel);
+    void setAuxFunc0(int funct);
+    void setAuxFunc1(int funct);
+
     void loadJSONSettings(DynamicJsonDocument &json);
     void setJSONSettings(DynamicJsonDocument &json);
 
@@ -178,7 +250,9 @@ public:
     void setPPMOut(uint16_t t, uint16_t r, uint16_t p);
     void setJSONData(DynamicJsonDocument &json);
     void setBLEAddress(const char *addr);
+    void setBLEValues(uint16_t vals[BT_CHANNELS],uint32_t bto=0xFFFF);
     void setPPMInValues(uint16_t *vals, int chans);
+    void setPPMOutValues(uint16_t vals[16]);
     void setQuaternion(float q[4]);
 
     BTFunction *getBTFunc() {return _btf;}
@@ -204,7 +278,7 @@ private:
     bool ppmininvert;
     BTFunction *_btf; // Blue tooth Function
     int btmode;
-    bool btcon;
+
     bool rstonwave;
     bool freshProgram;
     int orient;
@@ -212,6 +286,13 @@ private:
     uint16_t ppmfrm;
     uint16_t ppmsync;
     uint16_t ppmchcnt;
+
+    int pwm0,pwm1,pwm2,pwm3;
+    int an6ch,an7ch;
+    float an6gain,an7gain;
+    float an6off,an7off;
+    int aux0ch,aux1ch;
+    int aux0func,aux1func;
 
     // Data
     float gyrox,gyroy,gyroz;
@@ -226,6 +307,10 @@ private:
     uint16_t panout,tiltout,rollout;
     uint16_t ppminvals[16];
     int ppminchans;
+    uint16_t btvalues[BT_CHANNELS];
+    uint16_t ppmoutchans[16];
+    uint32_t btoverride;
+    bool btcon;
     char bleaddress[20];
     bool isCalibrated;
 };

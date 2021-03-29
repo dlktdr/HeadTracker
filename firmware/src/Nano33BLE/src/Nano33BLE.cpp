@@ -17,6 +17,7 @@
 #include "flash.h"
 #include "serial.h"
 #include "main.h"
+#include "SBUS/sbus.h"
 
 const char *FW_VERSION = "0.9";
 const char *FW_BOARD = "NANO33BLE";
@@ -60,6 +61,9 @@ void setup()
     // Actual Calculations - sense.cpp
     sense_Init();
 
+    // Start SBUS
+    sbus_Init();
+
     // Load settings from flash - trackersettings.cpp
     trkset.loadFromEEPROM();
 
@@ -74,7 +78,7 @@ void setup()
     // Setup Event Queue
     queue.call_in(std::chrono::milliseconds(10),sense_Thread);
     queue.call_in(std::chrono::milliseconds(SERIAL_PERIOD),serial_Thread);
-    queue.call_in(std::chrono::milliseconds(BT_PERIOD),bt_Thread);
+    queue.call_in(std::chrono::milliseconds((int)BT_PERIOD),bt_Thread);
     queue.call_in(std::chrono::milliseconds(DATA_PERIOD),data_Thread);
 
     // Start everything

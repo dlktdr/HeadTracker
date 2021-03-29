@@ -13,7 +13,7 @@ using namespace mbed;
 
 TrackerSettings::TrackerSettings()
 {
-    // Defaults
+    // Tilt, Roll, Pan Defaults
     rll_min = DEF_MIN_PWM;
     rll_max = DEF_MAX_PWM;
     rll_gain =  DEF_GAIN;
@@ -33,8 +33,10 @@ TrackerSettings::TrackerSettings()
     rllch = DEF_ROLL_CH;
     panch = DEF_PAN_CH;
 
+    // Servo Reversed bits
     servoreverse = 0x00;
 
+    // Low Pass Filter
     lppan = DEF_LP_PAN;
     lptiltroll = DEF_LP_TLTRLL;
 
@@ -65,6 +67,26 @@ TrackerSettings::TrackerSettings()
     ppmoutinvert = false;
     ppmininvert = false;
     rstppm = DEF_RST_PPM;
+
+    // PWM defaults
+    pwm0 = DEF_PWM_A0_CH;
+    pwm1 = DEF_PWM_A1_CH;
+    pwm2 = DEF_PWM_A2_CH;
+    pwm3 = DEF_PWM_A3_CH;
+
+    // Analog defaults
+    an6ch = DEF_ALG_A6_CH;
+    an7ch = DEF_ALG_A7_CH;
+    an6gain = DEF_ALG_GAIN;
+    an7gain = DEF_ALG_GAIN;
+    an6off = DEF_ALG_OFFSET;
+    an7off = DEF_ALG_OFFSET;
+
+    // AUX defaults
+    aux0ch = DEF_AUX_CH0;
+    aux1ch = DEF_AUX_CH1;
+    aux0func = DEF_AUX_FUNC;
+    aux1func = DEF_AUX_FUNC;
 
     // Bluetooth defaults
     btmode = 0;
@@ -421,6 +443,51 @@ void TrackerSettings::setResetOnWave(bool value)
     rstonwave = value;
 }
 
+void TrackerSettings::setPWMCh(int pwmno, int &pwmch)
+{
+    if((pwmno > 0 && pwmno <= 16) || pwmno == -1) {
+        pwmch = pwmno;
+    }
+}
+
+void TrackerSettings::setAuxFunc0Ch(int channel)
+{
+    if((channel > 0 && channel <= 16) || channel == -1) {
+        aux0ch = channel;
+    }
+}
+
+void TrackerSettings::setAuxFunc1Ch(int channel)
+{
+    if((channel > 0 && channel <= 16) || channel == -1) {
+        aux1ch = channel;
+    }
+}
+
+void TrackerSettings::setAuxFunc0(int funct)
+{
+    if((funct >= AUX_GYRX && funct <= AUX_ACCELZO) || funct == -1)
+        aux0func = funct;
+}
+
+void TrackerSettings::setAuxFunc1(int funct)
+{
+    if((funct >= AUX_GYRX && funct <= AUX_ACCELZO) || funct == -1)
+        aux1func = funct;
+}
+
+void TrackerSettings::setAnalog6Ch(int channel)
+{
+    if(channel > 0 && channel <= 16 || channel == -1)
+        an6ch = channel;
+}
+
+void TrackerSettings::setAnalog7Ch(int channel)
+{
+    if(channel > 0 && channel <= 16 || channel == -1)
+        an7ch = channel;
+}
+
 void TrackerSettings::gyroOffset(float &x, float &y, float &z) const
 {
     x=gyrxoff;y=gyryoff;z=gyrzoff;
@@ -475,7 +542,7 @@ int TrackerSettings::blueToothMode() const
 
 void TrackerSettings::setBlueToothMode(int mode)
 {
-    if(mode < BTDISABLE || mode > BTHM10)
+    if(mode < BTDISABLE || mode > BTPARARMT)
         return;
 
     // Delete old bluetooth if changing
@@ -495,14 +562,20 @@ void TrackerSettings::setBlueToothMode(int mode)
         if(mode == BTDISABLE) {
             sprintf(bleaddress,"00:00:00:00:00:00");
 
-        // PARA FRSky Mode
-        } else if(mode == BTPARA) {
-            _btf = new BTPara();
-        // BTHM10 PPM Output
-        } else if(mode == BTHM10) {
-            //_btf = new BTHm10();
+        // PARA FRSky Mode Transmitter (Slave)
+        } else if(mode == BTPARAHEAD) {
+            _btf = new BTParaHead();
+        // PARA FRSky Mode Receiver (Master)
+        } else if(mode == BTPARARMT) {
+            _btf = new BTParaRmt();
         }
     }
+}
+
+void TrackerSettings::setBLEValues(uint16_t vals[BT_CHANNELS],uint32_t bto)
+{
+    memcpy(btvalues,vals,sizeof(uint16_t)*BT_CHANNELS);
+    btoverride = bto;
 }
 
 //----------------------------------------------------------------
@@ -568,6 +641,12 @@ void TrackerSettings::setPPMInValues(uint16_t *vals, int chans)
         ppminvals[i] = vals[i];
 
     ppminchans = chans;
+}
+
+void TrackerSettings::setPPMOutValues(uint16_t vals[16])
+{
+    for(int i=0;i<16;i++)
+        ppmoutchans[i] = vals[i];
 }
 
 void TrackerSettings::setRawGyro(float x, float y, float z)
@@ -721,9 +800,29 @@ void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
     v = json["rstppm"]; if(!v.isNull()) setResetCntPPM(v);
 
 // PPM Data
-   v = json["ppmfrm"]; if(!v.isNull()) setPPMFrame(v);
-   v = json["ppmchcnt"]; if(!v.isNull()) setPpmChCount(v);
-   v = json["ppmsync"]; if(!v.isNull()) setPPMSync(v);
+    v = json["ppmfrm"]; if(!v.isNull()) setPPMFrame(v);
+    v = json["ppmchcnt"]; if(!v.isNull()) setPpmChCount(v);
+    v = json["ppmsync"]; if(!v.isNull()) setPPMSync(v);
+
+// PWM Settings
+    v = json["pwm0"]; if(!v.isNull()) setPWMCh(0,pwm0);
+    v = json["pwm1"]; if(!v.isNull()) setPWMCh(1,pwm1);
+    v = json["pwm2"]; if(!v.isNull()) setPWMCh(2,pwm2);
+    v = json["pwm3"]; if(!v.isNull()) setPWMCh(3,pwm3);
+
+// Analog Settings
+    v = json["an6ch"]; if(!v.isNull()) setAnalog6Ch(v);
+    v = json["an6off"]; if(!v.isNull()) setAnalog6Offset(v);
+    v = json["an6gain"]; if(!v.isNull()) setAnalog6Gain(v);
+    v = json["an7ch"]; if(!v.isNull()) setAnalog7Ch(v);
+    v = json["an7off"]; if(!v.isNull()) setAnalog7Offset(v);
+    v = json["an7gain"]; if(!v.isNull()) setAnalog7Gain(v);
+
+// AUX Settings
+    v = json["aux0func"]; if(!v.isNull()) setAuxFunc0(v);
+    v = json["aux0ch"]; if(!v.isNull()) setAuxFunc0Ch(v);
+    v = json["aux1func"]; if(!v.isNull()) setAuxFunc1(v);
+    v = json["aux1ch"]; if(!v.isNull()) setAuxFunc1Ch(v);
 
 // Calibrarion Values
     v = json["magxoff"];
@@ -812,6 +911,26 @@ void TrackerSettings::setJSONSettings(DynamicJsonDocument &json)
     json["ppmchcnt"] = ppmchcnt;
     json["ppmininvert"] = ppmininvert;
     json["rstppm"] = rstppm;
+
+// PWM Settings
+    json["pwm0"] = pwm0;
+    json["pwm1"] = pwm1;
+    json["pwm2"] = pwm2;
+    json["pwm3"] = pwm3;
+
+// Analog Settings
+    json["an6ch"] = an6ch;
+    json["an6off"] = an6off;
+    json["an6gain"] = an6gain;
+    json["an7ch"] = an7ch;
+    json["an7off"] = an7off;
+    json["an7gain"] = an7gain;
+
+// AUX Settings
+    json["aux0func"] = aux0func;
+    json["aux0ch"] = aux0ch;
+    json["aux1func"] = aux1func;
+    json["aux1ch"] = aux1ch;
 
 // Bluetooth Settings
     json["btmode"] = btmode;
@@ -904,17 +1023,30 @@ void TrackerSettings::setJSONData(DynamicJsonDocument &json)
     json["tiltout"] = tiltout;
     json["rollout"] = rollout;
 
-    // Create string for PpmIn Chans
-    char pstr[120];
-    sprintf(pstr,"#CH=%d ",ppminchans);
-    for(int i=0;i<ppminchans; i++) {
-        sprintf(pstr,"%s %d",pstr,ppminvals[i]);
+    // Create string for BtIn Chans
+    char str[120]="";
+    if(btcon) {
+        for(int i=0;i<BT_CHANNELS; i++) {
+            if(btoverride & 1<<i)
+                sprintf(str,"%s (%d)",str,btvalues[i]);
+            else
+                sprintf(str,"%s %d",str,btvalues[i]);
+
+        }
+        json["btin"] = str;
     }
-    json["ppmin"] = pstr;
+
+    str[0] = 0;
+    // Create string for PpmIn Chans
+    sprintf(str,"#CH=%d ",ppminchans);
+    for(int i=0;i<ppminchans; i++) {
+        sprintf(str,"%s %d",str,ppminvals[i]);
+    }
+    json["ppmin"] = str;
 
     // Items that don't need to be updated often
     static uint16_t slowrate=0;
-    if(slowrate++ > 25) {
+    if(slowrate++ > 20) {
         json["btaddr"] = bleaddress;
         json["btcon"] = btcon;
         json["magcal"] = isCalibrated;
@@ -922,10 +1054,16 @@ void TrackerSettings::setJSONData(DynamicJsonDocument &json)
     }
 
     // Custom Output Option
-    //json["heave"] = roundf(zaccelout * 1000)/1000;
+
 
 // Live Values for Debugging.
-    /*json["accx"] = roundf(accx*1000)/1000;
+    str[0] = 0;
+    for(int i=0;i<16; i++) {
+        sprintf(str,"%s %d",str,ppmoutchans[i]);
+    }
+    json["ppmout"] = str;
+/*
+    json["accx"] = roundf(accx*1000)/1000;
     json["accy"] = roundf(accy*1000)/1000;
     json["accz"] = roundf(accz*1000)/1000;
 

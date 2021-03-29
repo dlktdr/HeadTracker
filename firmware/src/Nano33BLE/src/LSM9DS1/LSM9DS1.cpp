@@ -480,7 +480,7 @@ float LSM9DS1Class::getMagnetODR()  // Output {0.625, 1.25, 2.5, 5.0, 10.0, 20.0
 
 void LSM9DS1Class::measureODRcombined()        //Combined measurement for faster startUp.
 { float x, y, z;
-  unsigned long lastEventTimeA,lastEventTimeM,startA,startM;
+  unsigned long lastEventTimeA=0,lastEventTimeM=0,startA=0,startM=0;
   long countA=-3, countM = -2, countiter=0;    //Extra cycles to compensate for slow startup
   unsigned long start = micros();
   while ((micros()- start) < ODRCalibrationTime)
@@ -514,7 +514,7 @@ void LSM9DS1Class::measureODRcombined()        //Combined measurement for faster
 float LSM9DS1Class::measureAccelGyroODR()
 {  if (getOperationalMode()==0) return 0;
    float x, y, z;                               //dummies
-   unsigned long lastEventTime,
+   unsigned long lastEventTime=0,
                  start=micros();
    long count = -3;
    int fifoEna=continuousMode;                  //store FIFO status
@@ -536,7 +536,7 @@ float LSM9DS1Class::measureAccelGyroODR()
 
 float LSM9DS1Class::measureMagnetODR(unsigned long duration)
 {  float x, y, z;                               //dummies
-   unsigned long lastEventTime,
+   unsigned long lastEventTime=0,
                  start =micros();
    long count = -2;        // waste current registervalue and running cycle
    duration *=1000;                             //switch to micros

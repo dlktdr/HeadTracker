@@ -1,23 +1,19 @@
 #include <Arduino.h>
 #include <ArduinoBLE.h>
-#include <ArduinoJson.h>
-#include "dataparser.h"
 #include "ble.h"
-#include "PPM/PPMOut.h"
-#include "serial.h"
-#include "main.h"
+#include "../PPM/PPMOut.h"
+#include "../serial.h"
+#include "../main.h"
+#include "../dataparser.h"
 
 using namespace mbed;
 using namespace events;
-
-#define BT_CHANNELS 8
 
 //-----------------------------------------------------
 
 void bt_Thread()
 {
-    // Blue LED Indicates bluetooth usage
-    digitalWrite(LEDB,LOW);
+    digitalWrite(LEDB,HIGH);
 
     // Don't output bluetooth if threads paused
     if(pauseThreads) {
@@ -30,16 +26,23 @@ void bt_Thread()
     if(bt != nullptr) {
         // Then call the execute function
         bt->execute();
+        if(bt->isConnected())
+            digitalWrite(LEDB,LOW);
+        else
+            digitalWrite(LEDB,HIGH);
     }
 
-    digitalWrite(LEDB,HIGH);
+    // Reduces BT Data Rate while UI connected.. Issues with BLE lib
+    float btperiod = BT_PERIOD;
+    if(trkset.blueToothMode() == BTPARAHEAD) { // Head board
+        if(uiconnected) //Slow down transmission rate while connected to the GLUquadric
+            btperiod *= 5.0;
+    } else if(trkset.blueToothMode() == BTPARARMT) {  // Remote board.. Need to call poll often
+        // Full Speed, 40hz need to go fast as possible
+        btperiod *= 1.0;
+    }
 
-    // Slow down bluetooth when UI connected. Trying to prevent disconnects.
-    if(uiconnected)
-        queue.call_in(std::chrono::milliseconds(BT_PERIOD*5),bt_Thread);
-    else
-        queue.call_in(std::chrono::milliseconds(BT_PERIOD),bt_Thread);
-
+    queue.call_in(std::chrono::milliseconds((int)btperiod),bt_Thread);
 }
 
 void bt_Init()
@@ -53,11 +56,10 @@ void bt_Init()
 //
 BTFunction::BTFunction()
 {
-    // Reset all 24 channels
-    for(int i=0;i < 24;i++) {
+    for(int i=0;i < BT_CHANNELS;i++) {
         chan_vals[i] = 1500;
     }
-    num_chans = TrackerSettings::DEF_PPM_CHANNELS;
+    num_chans = BT_CHANNELS;
     crc = 0;
     bufferIndex = 0;
 }
@@ -78,9 +80,10 @@ void BTFunction::setChannel(int channel, uint16_t value)
 // Sets channel count
 void BTFunction::setChannelCount(int count)
 {
-    if(count >= 0 && count < BT_CHANNELS)
+    if(count >= 0 && count <= BT_CHANNELS)
         num_chans = count;
 }
+
 
 // Part of setTrainer to calculate CRC
 // From OpenTX

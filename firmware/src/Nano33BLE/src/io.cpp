@@ -23,8 +23,8 @@ void io_Init()
   pinMode(A3, OUTPUT); //
   pinMode(A4, OUTPUT); //
   pinMode(A5, OUTPUT); //
-  pinMode(A6, OUTPUT); //
-  pinMode(A7, OUTPUT); //
+  pinMode(A6, INPUT); // Analog input
+  pinMode(A7, INPUT); // Analog input
 
   butpin = trkset.buttonPin();
 }
