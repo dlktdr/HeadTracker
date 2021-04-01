@@ -126,7 +126,7 @@ void BTParaRmt::execute()
                 serialWriteln("BLE: Connecting...");
                 if(peripheral.connect()) {
                     serialWriteln("BLE: Connected");
-                    ThisThread::sleep_for(150);
+                    ThisThread::sleep_for(std::chrono::milliseconds(150));
 #ifdef DEBUG
                     serialWriteln("BLE: Discovering Attributes");
 #endif
@@ -142,7 +142,7 @@ void BTParaRmt::execute()
 #ifdef DEBUG
                             serialWriteln("BLE: Subscribing...");
 #endif
-                            ThisThread::sleep_for(150);
+                            ThisThread::sleep_for(std::chrono::milliseconds(150));
                             if(fff6.subscribe()) {
 #ifdef DEBUG
                                 serialWriteln("BLE: Subscribed to data!");
@@ -166,7 +166,7 @@ void BTParaRmt::execute()
                             // Initial read of overridden channels
                             overridech.readValue(chanoverrides);
                             serialWriteln("BLE: Tracker has sent the channels it wants overriden");
-                            ThisThread::sleep_for(150);
+                            ThisThread::sleep_for(std::chrono::milliseconds(150));
                             if(overridech.subscribe()) {
                                 serialWriteln("BLE: Subscribed to channel overrides!");
                             } else {

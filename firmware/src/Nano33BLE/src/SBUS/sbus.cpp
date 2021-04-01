@@ -42,7 +42,7 @@ void sbusThread() {
         sbusmutex.lock();
         sbus_tx.Write();
         sbusmutex.unlock();
-        rtos::ThisThread::sleep_for(23);
+        rtos::ThisThread::sleep_for(std::chrono::milliseconds(SBUS_PERIOD));
     }
 }
 
