@@ -1,3 +1,4 @@
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/donate?hosted_button_id=NMU3B9Z82JB3A)
 # RC HeadTracker
 If your an RC enthusiast like myself with a FPV headset at some point you thought wouldn't it be cool if I could turn my head and the camera would follow. That is the intention of this project. It is a continuation of the work started by Dennis Frie, Mark Mansur and others in an effort to make it a more simple project.
 
@@ -33,7 +34,7 @@ I would like to throw out thanks to Yuri for the BLE Para work + Orientation fix
 - [ ] Error checking of received/downloaded parameters
 - [ ] Combine remote and head firmwares into a single file, add GUI handling for remote board
 - [ ] Check current GUI and FW versions with online source to notify if updates available
-- [ ] SBUS Input/Output ( Needs testing, see issues page )
+- [ ] SBUS Input/Output ( Support on Remote board, testing phase, see https://github.com/dlktdr/HeadTracker/issues/23 )
 - [ ] Add 4 Channels of PWM output
 - [ ] Add 2 Channels of analog input
 - [ ] Create an installer to automatically install missing dependancies
