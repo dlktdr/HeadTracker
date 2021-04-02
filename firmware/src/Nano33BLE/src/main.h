@@ -14,6 +14,7 @@ using namespace events;
 #define SERIAL_PERIOD 20  // Serial processing
 #define IO_PERIOD 20      // milliseconds
 #define SENSE_PERIOD 9000 //100hz Update Rate
+#define SBUS_PERIOD 40
 
 // Globals
 extern TrackerSettings trkset;

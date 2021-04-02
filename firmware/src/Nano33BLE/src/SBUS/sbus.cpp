@@ -24,16 +24,19 @@
 */
 
 #include "Arduino.h"
+
 #include "sbus.h"
+#include "main.h"
 
 // SBUS
-rtos::Thread sbusthread(osPriorityHigh);
+rtos::Thread sbusthread(osPriorityNormal2);
 rtos::Mutex sbusmutex;
 bfs::SbusTx sbus_tx(&Serial1);
 std::array<uint16_t, 16> sbus_data;
 
 void sbus_Init()
 {
+    sbus_tx.Begin();
     sbusthread.start(sbusThread);
 }
 
