@@ -10,7 +10,7 @@ I would like to throw out thanks to Yuri for the BLE Para work + Orientation fix
 ## [Nano33BLE Build Link](https://github.com/dlktdr/HeadTracker/wiki/Nano33BLE-Build-Instructions)  * **Recommended**
 * How to for the new BLE33 board
 
-## [BNO055 + Nano Build Link](https://github.com/dlktdr/HeadTracker/wiki/BNO055-Build-Instructions)
+## [BNO055 + Nano Build Link](https://github.com/dlktdr/HeadTracker/wiki/BNO055-Build-Instructions) No longer in active development, support only
 * How to for the BNO055 Sensor board + Arduino Nano
 
 ## [Download](https://github.com/dlktdr/HeadTracker/releases)
