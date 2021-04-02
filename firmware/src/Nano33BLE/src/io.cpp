@@ -8,25 +8,28 @@ volatile int butpin;
 
 void io_Init()
 {
-  pinMode(LED_BUILTIN, OUTPUT);
-  pinMode(LEDR, OUTPUT);
-  pinMode(LEDG, OUTPUT);
-  pinMode(LEDB, OUTPUT);
-  digitalWrite(LEDR,HIGH);
-  digitalWrite(LEDG,HIGH);
-  digitalWrite(LEDB,HIGH);
+    pinMode(LED_BUILTIN, OUTPUT);
+    pinMode(LEDR, OUTPUT);
+    pinMode(LEDG, OUTPUT);
+    pinMode(LEDB, OUTPUT);
+    digitalWrite(LEDR,HIGH);
+    digitalWrite(LEDG,HIGH);
+    digitalWrite(LEDB,HIGH);
 
-  // Pins used to check timing
-  pinMode(A0, OUTPUT); // Sensor thread
-  pinMode(A1, OUTPUT); //
-  pinMode(A2, OUTPUT); //
-  pinMode(A3, OUTPUT); //
-  pinMode(A4, OUTPUT); //
-  pinMode(A5, OUTPUT); //
-  pinMode(A6, INPUT); // Analog input
-  pinMode(A7, INPUT); // Analog input
+    // Pins used to check timing
+    pinMode(A0, OUTPUT); // Sensor thread
+    pinMode(A1, OUTPUT); //
+    pinMode(A2, OUTPUT); //
+    pinMode(A3, OUTPUT); //
+    pinMode(A4, OUTPUT); //
+    pinMode(A5, OUTPUT); //
+    pinMode(A6, INPUT); // Analog input
+    pinMode(A7, INPUT); // Analog input
 
-  butpin = trkset.buttonPin();
+    // Set analog read resolution to 12bit
+    analogReadResolution(ANALOG_RESOLUTION);
+
+    butpin = trkset.buttonPin();
 }
 
 // Reset Button Pressed Flag on Read
