@@ -19,6 +19,15 @@ public:
 
 private:
     void sendTrainer();
+    int setTrainer(uint8_t *addr);
+    void pushByte(uint8_t byte);
+    static constexpr uint8_t START_STOP = 0x7E;
+    static constexpr uint8_t BYTE_STUFF = 0x7D;
+    static constexpr uint8_t STUFF_MASK = 0x20;
+    uint8_t buffer[BLUETOOTH_LINE_LENGTH+1];
+    uint8_t bufferIndex;
+    uint8_t crc;
+
     bool bleconnected;
 
     BLELocalDevice *bledev;
