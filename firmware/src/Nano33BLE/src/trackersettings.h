@@ -233,6 +233,10 @@ public:
     void setAuxFunc1Ch(int channel);
     void setAuxFunc0(int funct);
     void setAuxFunc1(int funct);
+    int auxFunc0Ch() {return aux0ch;}
+    int auxFunc1Ch() {return aux1ch;}
+    int auxFunc0() {return aux0func;}
+    int auxFunc1() {return aux1func;}
 
     void loadJSONSettings(DynamicJsonDocument &json);
     void setJSONSettings(DynamicJsonDocument &json);
