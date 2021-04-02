@@ -253,3 +253,9 @@ void fff6Written(BLEDevice central, BLECharacteristic characteristic) {
     Serial.println("");
 #endif
 }
+
+void BTParaRmt::sendButtonData(char bd)
+{
+    if(butpress)
+        butpress.writeValue((uint8_t)bd);
+}
