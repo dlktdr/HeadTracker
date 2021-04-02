@@ -28,7 +28,7 @@ BTParaRmt::BTParaRmt() : BTFunction()
     chanoverrides = 0xFFFF;
     // Reset all BT channels to center
     for(int i = 0; i <16; i++)
-        chan_vals[i] = TrackerSettings::DEF_CENTER;
+        chan_vals[i] = TrackerSettings::PPM_CENTER;
 
     serialWriteln("HT: Starting Remote Para Bluetooth");
 
@@ -43,7 +43,7 @@ BTParaRmt::~BTParaRmt()
     BTParaInst = nullptr;
     // Reset all BT channels to center
     for(int i = 0; i <16; i++)
-        chan_vals[i] = TrackerSettings::DEF_CENTER;
+        chan_vals[i] = TrackerSettings::PPM_CENTER;
 
     serialWriteln("HT: Stopping Remote Para Bluetooth");
 
@@ -59,7 +59,7 @@ uint16_t BTParaRmt::getChannel(int channel, bool &valid)
         }
     }
 
-    return TrackerSettings::DEF_CENTER;
+    return TrackerSettings::PPM_CENTER;
 }
 
 void BTParaRmt::execute()
@@ -67,13 +67,13 @@ void BTParaRmt::execute()
 
     if(!bleconnected) {
         for(int i=0;i < BT_CHANNELS; i++)
-            chan_vals[i] = TrackerSettings::DEF_CENTER;
+            chan_vals[i] = TrackerSettings::PPM_CENTER;
 
     // If connected, set all non-overrides to center
     } else {
         for(int i=0;i < BT_CHANNELS; i++) {
             if(!(chanoverrides & (1<<i))) {
-                chan_vals[i] = TrackerSettings::DEF_CENTER;
+                chan_vals[i] = TrackerSettings::PPM_CENTER;
             }
         }
     }

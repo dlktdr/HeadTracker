@@ -17,17 +17,17 @@ TrackerSettings::TrackerSettings()
     rll_min = DEF_MIN_PWM;
     rll_max = DEF_MAX_PWM;
     rll_gain =  DEF_GAIN;
-    rll_cnt = DEF_CENTER;
+    rll_cnt = PPM_CENTER;
 
     pan_min = DEF_MIN_PWM;
     pan_max = DEF_MAX_PWM;
     pan_gain =  DEF_GAIN;
-    pan_cnt = DEF_CENTER;
+    pan_cnt = PPM_CENTER;
 
     tlt_min = DEF_MIN_PWM;
     tlt_max = DEF_MAX_PWM;
     tlt_gain =  DEF_GAIN;
-    tlt_cnt = DEF_CENTER;
+    tlt_cnt = PPM_CENTER;
 
     tltch = DEF_TILT_CH;
     rllch = DEF_ROLL_CH;
@@ -97,6 +97,8 @@ TrackerSettings::TrackerSettings()
     rstonwave = false;
     isCalibrated = false;
     orient = 0;
+
+    strcpy(dataobjects[0],""
 
     // Setup button input & ppm output pins, bluetooth
     setButtonPin(buttonpin);
@@ -478,13 +480,13 @@ void TrackerSettings::setAuxFunc1(int funct)
 
 void TrackerSettings::setAnalog6Ch(int channel)
 {
-    if(channel > 0 && channel <= 16 || channel == -1)
+    if((channel > 0 && channel <= 16) || channel == -1)
         an6ch = channel;
 }
 
 void TrackerSettings::setAnalog7Ch(int channel)
 {
-    if(channel > 0 && channel <= 16 || channel == -1)
+    if((channel > 0 && channel <= 16) || channel == -1)
         an7ch = channel;
 }
 
@@ -1002,7 +1004,6 @@ void TrackerSettings::loadFromEEPROM()
     }
 }
 
-extern uint16_t zaccelout;
 
 // Used to transmit raw data back to the GUI
 void TrackerSettings::setJSONData(DynamicJsonDocument &json)
@@ -1023,8 +1024,27 @@ void TrackerSettings::setJSONData(DynamicJsonDocument &json)
     json["tiltout"] = tiltout;
     json["rollout"] = rollout;
 
-    // Create string for BtIn Chans
+    // Create string for PpmIn Chans
     char str[120]="";
+    sprintf(str,"#CH=%d ",ppminchans);
+    for(int i=0;i<ppminchans; i++) {
+        sprintf(str,"%s %d",str,ppminvals[i]);
+    }
+    json["ppmin"] = str;
+
+    // Items that don't need to be updated often
+    static uint16_t slowrate=0;
+    if(slowrate++ > 10) {
+        json["btaddr"] = bleaddress;
+        json["btcon"] = btcon;
+        json["magcal"] = isCalibrated;
+        slowrate = 0;
+    }
+
+// Live Values for Debugging.
+
+    // Create string for BtIn Chans
+/*    char str[120]="";
     if(btcon) {
         for(int i=0;i<BT_CHANNELS; i++) {
             if(btoverride & 1<<i)
@@ -1036,33 +1056,12 @@ void TrackerSettings::setJSONData(DynamicJsonDocument &json)
         json["btin"] = str;
     }
 
-    str[0] = 0;
-    // Create string for PpmIn Chans
-    sprintf(str,"#CH=%d ",ppminchans);
-    for(int i=0;i<ppminchans; i++) {
-        sprintf(str,"%s %d",str,ppminvals[i]);
-    }
-    json["ppmin"] = str;
-
-    // Items that don't need to be updated often
-    static uint16_t slowrate=0;
-    if(slowrate++ > 20) {
-        json["btaddr"] = bleaddress;
-        json["btcon"] = btcon;
-        json["magcal"] = isCalibrated;
-        slowrate = 0;
-    }
-
-    // Custom Output Option
-
-
-// Live Values for Debugging.
-    str[0] = 0;
+  str[0] = 0;
     for(int i=0;i<16; i++) {
         sprintf(str,"%s %d",str,ppmoutchans[i]);
     }
     json["ppmout"] = str;
-/*
+
     json["accx"] = roundf(accx*1000)/1000;
     json["accy"] = roundf(accy*1000)/1000;
     json["accz"] = roundf(accz*1000)/1000;

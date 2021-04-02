@@ -46,7 +46,9 @@ public:
     static constexpr int DEF_BUTTON_IN = 2; // Chosen because it's beside ground
     static constexpr int DEF_PPM_OUT = 10; // Random choice
     static constexpr int DEF_PPM_IN = -1;
-    static constexpr int DEF_CENTER = 1500;
+    static constexpr int PPM_CENTER = 1500;
+    static constexpr int SBUS_CENTER = 992;
+    static constexpr float SBUS_SCALE = 1.6f;
     static constexpr float MIN_GAIN= 0.0;
     static constexpr float MAX_GAIN= 35.0;
     static constexpr float DEF_GAIN= 5.0;
