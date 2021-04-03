@@ -1,5 +1,5 @@
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/donate?hosted_button_id=NMU3B9Z82JB3A)
-![Discord](https://img.shields.io/discord/827622724565467196?style=flat-square)
+![Discord][https://img.shields.io/discord/827622724565467196?style=flat-square](https://discord.com/channels/827622724565467196)
 # RC HeadTracker
 If your an RC enthusiast like myself with a FPV headset at some point you thought wouldn't it be cool if I could turn my head and the camera would follow. That is the intention of this project. It is a continuation of the work started by Dennis Frie, Mark Mansur and others in an effort to make it a more simple project.
 
