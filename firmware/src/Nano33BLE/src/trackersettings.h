@@ -10,20 +10,59 @@
 #include "config.h"
 #include "serial.h"
 
-// Global Config Values
 
+// Variables to be sent back to GUI if enabled
+#define DATA_VARS\
+    DV(float,magx)\
+    DV(float,magy)\
+    DV(float,magz)\
+    DV(float,gyrox)\
+    DV(float,gyroy)\
+    DV(float,gyroz)\
+    DV(float,accx)\
+    DV(float,accy)\
+    DV(float,accz)\
+    DV(float,off_magx)\
+    DV(float,off_magy)\
+    DV(float,off_magz)\
+    DV(float,off_gyrox)\
+    DV(float,off_gyroy)\
+    DV(float,off_gyroz)\
+    DV(float,off_accx)\
+    DV(float,off_accy)\
+    DV(float,off_accz)\
+    DV(float,tilt)\
+    DV(float,roll)\
+    DV(float,pan)\
+    DV(float,tiltoff)\
+    DV(float,rolloff)\
+    DV(float,panoff)\
+    DV(uint16_t,tiltout)\
+    DV(uint16_t,rollout)\
+    DV(uint16_t,panout)\
+    DV(bool,isCalibrated)\
+    DV(bool,btcon)
+
+// Arrays to be sent back to GUI if enabled
+#define DATA_ARRAYS\
+    DA(uint16_t, chout, 16)\
+    DA(uint16_t, btch, BT_CHANNELS)\
+    DA(uint16_t, ppmch, 16)\
+    DA(uint16_t, sbusch, 16)\
+    DA(float,quat,4)
+
+// Global Config Values
 class TrackerSettings
 {
 public:
     enum {AUX_DISABLE=-1,
-        AUX_NULL,
-        AUX_GYRX,
-        AUX_GYRY,
-        AUX_GYRZ,
-        AUX_ACCELX,
-        AUX_ACCELY,
-        AUX_ACCELZ,
-        AUX_ACCELZO};
+        AUX_GYRX, // 0
+        AUX_GYRY, // 1
+        AUX_GYRZ, // 2
+        AUX_ACCELX, // 3
+        AUX_ACCELY, // 4
+        AUX_ACCELZ, // 5
+        AUX_ACCELZO}; // 6
 
     static constexpr int MIN_PWM=988;
     static constexpr int MAX_PWM=2012;
@@ -70,6 +109,7 @@ public:
     static constexpr int DEF_AUX_CH0 = -1;
     static constexpr int DEF_AUX_CH1 = -1;
     static constexpr int DEF_AUX_FUNC = -1;
+    static constexpr int MAX_DATA_VARS = 30;
     const char CHAN_DATA_STR[28][12] = {"TILT", //0
                                         "ROLL",
                                         "PAN",
@@ -244,7 +284,7 @@ public:
     void saveToEEPROM();
     void loadFromEEPROM();
 
-// Setting of data to be returned to the PC
+// Setting of data to be returned to the GUI
     void setRawGyro(float x, float y, float z);
     void setRawAccel(float x, float y, float z);
     void setRawMag(float x, float y, float z);
@@ -256,10 +296,14 @@ public:
     void setPPMOut(uint16_t t, uint16_t r, uint16_t p);
     void setJSONData(DynamicJsonDocument &json);
     void setBLEAddress(const char *addr);
-    void setBLEValues(uint16_t vals[BT_CHANNELS],uint32_t bto=0xFFFF);
-    void setPPMInValues(uint16_t *vals, int chans);
-    void setPPMOutValues(uint16_t vals[16]);
+    void setBLEValues(uint16_t vals[BT_CHANNELS]);
+    void setSBUSValues(uint16_t vals[16]);
+    void setPPMInValues(uint16_t vals[16]);
+    void setChannelOutValues(uint16_t vals[16]);
     void setQuaternion(float q[4]);
+    void setDataItemSend(const char *var, bool enabled);
+    void stopAllData();
+    void setJSONDataList(DynamicJsonDocument &json);
 
     BTFunction *getBTFunc() {return _btf;}
 
@@ -289,36 +333,32 @@ private:
     bool freshProgram;
     int orient;
     int rstppm;
-    uint16_t ppmfrm;
-    uint16_t ppmsync;
-    uint16_t ppmchcnt;
+    uint16_t ppmfrm;   // PPM Frame Len
+    uint16_t ppmsync;  // Sync Setting
+    uint16_t ppmchcnt; // Channel Count
 
-    int pwm0,pwm1,pwm2,pwm3;
-    int an6ch,an7ch;
-    float an6gain,an7gain;
-    float an6off,an7off;
-    int aux0ch,aux1ch;
-    int aux0func,aux1func;
+    int pwm0,pwm1,pwm2,pwm3; // PWM Output Pins
+    int an6ch,an7ch; // Analog Channels
+    float an6gain,an7gain; // Analog Gains
+    float an6off,an7off; // Analog Offsets
+    int aux0ch,aux1ch; // Auxiliary Function Channels
+    int aux0func,aux1func; // Auxiliary Functions
 
-    // Data
-    float gyrox,gyroy,gyroz;
-    float accx,accy,accz;
-    float magx,magy,magz;
-    float off_gyrox,off_gyroy,off_gyroz;
-    float off_accx,off_accy,off_accz;
-    float off_magx,off_magy,off_magz;
-    float tilt,roll,pan;
-    float tiltoff,rolloff,panoff;
-    float quat[4];
-    uint16_t panout,tiltout,rollout;
-    uint16_t ppminvals[16];
-    int ppminchans;
-    uint16_t btvalues[BT_CHANNELS];
-    uint16_t ppmoutchans[16];
-    uint32_t btoverride;
-    bool btcon;
+    // Bit map of data to send to GUI, max 64 items
+    uint64_t senddatavars;
+    uint32_t senddataarry;
+
+    // Define Data Variables from X Macro
+    #define DV(DT, NAME) DT NAME;
+        DATA_VARS
+    #undef DV
+
+    // Define Data Arrays from X Macro
+    #define DA(DT, NAME, SIZE) DT NAME[SIZE];
+        DATA_ARRAYS
+    #undef DA
+
     char bleaddress[20];
-    bool isCalibrated;
-};
+    };
 
 #endif

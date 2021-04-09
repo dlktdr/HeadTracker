@@ -6,6 +6,7 @@
 #include "flash.h"
 #include "io.h"
 #include "sense.h"
+#include "base64.h"
 
 #include "trackersettings.h"
 
@@ -50,12 +51,19 @@ TrackerSettings::TrackerSettings()
     magsioff[3] = 0; magsioff[4] = 1; magsioff[5] = 0;
     magsioff[6] = 0; magsioff[7] = 0; magsioff[8] = 1;
 
-    // Output values
-    gyrox=0;gyroy=0;gyroz=0;
-    accx=0;accy=0;accz=0;
-    magx=0,magy=0,magz=0;
-    tilt=0,roll=0,pan=0;
-    panout=0,tiltout=0,rollout=0;
+    // Define Data Variables from X Macro
+    #define DV(DT, NAME) NAME = 0;
+        DATA_VARS
+    #undef DV
+
+    // Fill all arrays to zero
+    #define DA(DT, NAME, SIZE) memset(NAME, 0, sizeof(DT)*SIZE);
+        DATA_ARRAYS
+    #undef DA
+
+    // Default data outputs, Pan,Tilt,Roll outputs and Inputs for Graph and Output bars
+    senddatavars = 0b11111111000000000000000000000;
+    senddataarry = 0b1;
 
     // PPM Defaults
     ppmoutpin = DEF_PPM_OUT;
@@ -97,8 +105,6 @@ TrackerSettings::TrackerSettings()
     rstonwave = false;
     isCalibrated = false;
     orient = 0;
-
-    strcpy(dataobjects[0],""
 
     // Setup button input & ppm output pins, bluetooth
     setButtonPin(buttonpin);
@@ -574,10 +580,9 @@ void TrackerSettings::setBlueToothMode(int mode)
     }
 }
 
-void TrackerSettings::setBLEValues(uint16_t vals[BT_CHANNELS],uint32_t bto)
+void TrackerSettings::setBLEValues(uint16_t vals[BT_CHANNELS])
 {
-    memcpy(btvalues,vals,sizeof(uint16_t)*BT_CHANNELS);
-    btoverride = bto;
+    memcpy(btch,vals,sizeof(uint16_t)*BT_CHANNELS);
 }
 
 //----------------------------------------------------------------
@@ -634,21 +639,22 @@ void TrackerSettings::setBLEAddress(const char *addr)
     strcpy(bleaddress,addr);
 }
 
-void TrackerSettings::setPPMInValues(uint16_t *vals, int chans)
-{
-    if(chans > 16)
-        return;
-
-    for(int i=0;i<chans;i++)
-        ppminvals[i] = vals[i];
-
-    ppminchans = chans;
-}
-
-void TrackerSettings::setPPMOutValues(uint16_t vals[16])
+void TrackerSettings::setPPMInValues(uint16_t vals[16])
 {
     for(int i=0;i<16;i++)
-        ppmoutchans[i] = vals[i];
+        ppmch[i] = vals[i];
+}
+
+void TrackerSettings::setSBUSValues(uint16_t vals[16])
+{
+    for(int i=0;i<16;i++)
+        sbusch[i] = vals[i];
+}
+
+void TrackerSettings::setChannelOutValues(uint16_t vals[16])
+{
+    for(int i=0;i<16;i++)
+        chout[i] = vals[i];
 }
 
 void TrackerSettings::setRawGyro(float x, float y, float z)
@@ -1004,86 +1010,95 @@ void TrackerSettings::loadFromEEPROM()
     }
 }
 
+/* Sets if a data item should be included while in data to GUI
+ */
+
+void TrackerSettings::setDataItemSend(const char *var, bool enabled)
+{
+    int id=0;
+
+    // Macro Expansion for Data Variables + Arrays
+    #define DV(DT, NAME)\
+    if(strcmp(var,#NAME)==0)\
+    {\
+        enabled==true?senddatavars|=1<<id:senddatavars&=~(1<<id);\
+        return;\
+    }\
+    id++;
+        DATA_VARS
+    #undef DV
+
+    #define DA(DT, NAME, SIZE)\
+    if(strcmp(var,#NAME)==0)\
+    {\
+        enabled==true?senddataarry|=1<<id:senddataarry&=~(1<<id);\
+        return;\
+    }\
+    id++;
+        DATA_ARRAYS
+    #undef DA
+}
+
+/* Stops all Data Items from Sending
+ */
+
+void TrackerSettings::stopAllData()
+{
+    senddatavars = 0;
+    senddataarry = 0;
+}
+
+/* Returns a list of all the Data Variables available in json
+ */
+
+void TrackerSettings::setJSONDataList(DynamicJsonDocument &json)
+{
+    JsonArray array;
+
+    // Macro Expansion for Data Variables + Arrays
+    #define DV(DT, NAME)\
+        array.add(#NAME);
+        DATA_VARS
+    #undef DV
+
+    #define DA(DT, NAME, SIZE)\
+        array.add(#NAME);
+        DATA_ARRAYS
+    #undef DA
+
+    // Append All Variables in a JSON Array
+    json["ditems"] = array;
+}
 
 // Used to transmit raw data back to the GUI
 void TrackerSettings::setJSONData(DynamicJsonDocument &json)
 {
-    json["magx"] = roundf(magx*1000)/1000;
-    json["magy"] = roundf(magy*1000)/1000;
-    json["magz"] = roundf(magz*1000)/1000;
+    // Macro Expansion for Data Variables + Arrays
 
-    json["gyrox"] = roundf(gyrox*1000)/1000;
-    json["gyroy"] = roundf(gyroy*1000)/1000;
-    json["gyroz"] = roundf(gyroz*1000)/1000;
+    // Sends only requested data items
+    // Two Decimals is most precision of any data item req as of now.
+    // For most items ends up less bytes than base64 encoding everything
+    int id=0;
+    #define DV(DT, NAME)\
+    if(senddatavars & 1<<id) {\
+        json[#NAME] = roundf((float)NAME*100)/100;\
+    }\
+    id++;
+        DATA_VARS
+    #undef DV
 
-    json["panoff"] = roundf(panoff*1000)/1000;
-    json["tiltoff"] = roundf(tiltoff*1000)/1000;
-    json["rolloff"] = roundf(rolloff*1000)/1000;
-
-    json["panout"] = panout;
-    json["tiltout"] = tiltout;
-    json["rollout"] = rollout;
-
-    // Create string for PpmIn Chans
-    char str[120]="";
-    sprintf(str,"#CH=%d ",ppminchans);
-    for(int i=0;i<ppminchans; i++) {
-        sprintf(str,"%s %d",str,ppminvals[i]);
-    }
-    json["ppmin"] = str;
-
-    // Items that don't need to be updated often
-    static uint16_t slowrate=0;
-    if(slowrate++ > 10) {
-        json["btaddr"] = bleaddress;
-        json["btcon"] = btcon;
-        json["magcal"] = isCalibrated;
-        slowrate = 0;
-    }
-
-// Live Values for Debugging.
-
-    // Create string for BtIn Chans
-/*    char str[120]="";
-    if(btcon) {
-        for(int i=0;i<BT_CHANNELS; i++) {
-            if(btoverride & 1<<i)
-                sprintf(str,"%s (%d)",str,btvalues[i]);
-            else
-                sprintf(str,"%s %d",str,btvalues[i]);
-
-        }
-        json["btin"] = str;
-    }
-
-  str[0] = 0;
-    for(int i=0;i<16; i++) {
-        sprintf(str,"%s %d",str,ppmoutchans[i]);
-    }
-    json["ppmout"] = str;
-
-    json["accx"] = roundf(accx*1000)/1000;
-    json["accy"] = roundf(accy*1000)/1000;
-    json["accz"] = roundf(accz*1000)/1000;
-
-    json["offmagx"] = roundf(off_magx*1000)/1000;
-    json["offmagy"] = roundf(off_magy*1000)/1000;
-    json["offmagz"] = roundf(off_magz*1000)/1000;
-
-    json["offgyrox"] = roundf(off_gyrox*1000)/1000;
-    json["offgyroy"] = roundf(off_gyroy*1000)/1000;
-    json["offgyroz"] = roundf(off_gyroz*1000)/1000;
-
-    json["offaccx"] = roundf(accx*1000)/1000;
-    json["offaccy"] = roundf(accy*1000)/1000;
-    json["offaccz"] = roundf(accz*1000)/1000;
-
-    json["tiltraw"] = roundf(tilt*1000)/1000;
-    json["rollraw"] = roundf(roll*1000)/1000;
-    json["panraw"] = roundf(pan*1000)/1000;
-
-    json["quat0"] = roundf(quat[0]*1000)/1000;
-    json["quat1"] = roundf(quat[1]*1000)/1000;
-    json["quat2"] = roundf(quat[2]*1000)/1000;
-    json["quat3"] = roundf(quat[3]*1000)/1000; */
+    // Send only requested data arrays, arrays are base64 encoded for reduced data transfer
+    // Variable names prepended by 64 to so GUI can decode them
+    // Also sends the orig data type for decoding
+    id=0;
+    char b64array[500];
+    #define DA(DT, NAME, SIZE)\
+    if(senddataarry & 1<<id) {\
+        encode_base64((unsigned char*)NAME, sizeof(DT)*SIZE,(unsigned char*)b64array);\
+        json["64"#NAME] = b64array;\
+        json["dt"] = #DT;\
+    }\
+    id++;
+        DATA_ARRAYS
+    #undef DA
 }

@@ -150,8 +150,36 @@ void parseData(DynamicJsonDocument &json)
         json["Cmd"] = "Set";
         serialWriteJSON(json);
 
-    // Im Here Received, Means the GUI is running, keep sending it data
+    // Im Here Received, Means the GUI is running
     } else if (strcmp(command, "IH") == 0) {
+        __NOP();
+
+    // Stop All Data Items
+    } else if (strcmp(command, "DataItems") == 0) {
+        json.clear();
+        trkset.setJSONDataList(json);
+        json["Cmd"] = "DataList";
+        serialWriteJSON(json);
+
+    // Stop All Data Items
+    } else if (strcmp(command, "D--") == 0) {
+        trkset.stopAllData();
+
+    // Stop Data Item
+    } else if (strcmp(command, "D-") == 0) {
+        JsonVariant v = json["di"];
+        if(!v.isNull()) {
+            const char *di = v;
+            trkset.setDataItemSend(di,false);
+        }
+
+    // Request Data Item
+    } else if (strcmp(command, "D+") == 0) {
+        JsonVariant v = json["di"];
+        if(!v.isNull()) {
+            const char *di = v;
+            trkset.setDataItemSend(di,true);
+        }
 
     // Firmware Reqest
     } else if (strcmp(command, "FW") == 0) {
@@ -173,7 +201,6 @@ void parseData(DynamicJsonDocument &json)
 }
 
 // Remove any of the escape characters
-
 uint16_t escapeCRC(uint16_t crc)
 {
     // Characters to escape out
