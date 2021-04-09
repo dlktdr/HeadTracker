@@ -30,7 +30,7 @@
 #include <array>
 
 void sbus_Init();
-void sbusThread();
+void sbus_Thread();
 
 namespace bfs {
 

@@ -62,6 +62,7 @@ void setup()
     sense_Init();
 
     // Start SBUS
+    // Start SBUS - sbus.cpp
     sbus_Init();
 
     // Load settings from flash - trackersettings.cpp
@@ -80,6 +81,7 @@ void setup()
     queue.call_in(std::chrono::milliseconds(SERIAL_PERIOD),serial_Thread);
     queue.call_in(std::chrono::milliseconds((int)BT_PERIOD),bt_Thread);
     queue.call_in(std::chrono::milliseconds(DATA_PERIOD),data_Thread);
+    queue.call_in(std::chrono::milliseconds(SBUS_PERIOD),sbus_Thread);
 
     // Start everything
     queue.dispatch_forever();

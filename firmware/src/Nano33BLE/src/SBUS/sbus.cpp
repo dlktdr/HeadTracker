@@ -29,7 +29,7 @@
 #include "main.h"
 
 // SBUS
-rtos::Thread sbusthread(osPriorityNormal2);
+rtos::Thread sbusthread(osPriorityHigh);
 rtos::Mutex sbusmutex;
 bfs::SbusTx sbus_tx(&Serial1);
 std::array<uint16_t, 16> sbus_data;
@@ -37,16 +37,13 @@ std::array<uint16_t, 16> sbus_data;
 void sbus_Init()
 {
     sbus_tx.Begin();
-    sbusthread.start(sbusThread);
 }
 
-void sbusThread() {
-    while(true) {
-        sbusmutex.lock();
-        sbus_tx.Write();
-        sbusmutex.unlock();
-        rtos::ThisThread::sleep_for(std::chrono::milliseconds(SBUS_PERIOD));
-    }
+void sbus_Thread() {
+    sbusmutex.lock();
+    sbus_tx.Write();
+    sbusmutex.unlock();
+    queue.call_in(std::chrono::milliseconds(SBUS_PERIOD),sbus_Thread);
 }
 
 namespace bfs {
