@@ -131,19 +131,16 @@ void parseData(DynamicJsonDocument &json)
     if(strcmp(command,"RstCnt") == 0) {
         serialWrite("HT: Resetting Center\r\n");
         pressButton();
-        uiResponsive = Kernel::Clock::now() + std::chrono::milliseconds(UIRESPONSIVE_TIME);
 
     // Settings Sent from UI
     } else if (strcmp(command, "Set") == 0) {
         trkset.loadJSONSettings(json);
-        serialWrite("HT: Saving Settings\r\n");
-        uiResponsive = Kernel::Clock::now() + std::chrono::milliseconds(UIRESPONSIVE_TIME);
+        serialWrite("HT: Storing Settings\r\n");
 
     // Save to Flash
     } else if (strcmp(command, "Flash") == 0) {
-        serialWrite("HT: Saving Settings\r\n");
+        serialWrite("HT: Saving to Flash\r\n");
         trkset.saveToEEPROM();
-        uiResponsive = Kernel::Clock::now() + std::chrono::milliseconds(UIRESPONSIVE_TIME);
 
     // Get settings
     } else if (strcmp(command, "Get") == 0) {
@@ -152,11 +149,9 @@ void parseData(DynamicJsonDocument &json)
         trkset.setJSONSettings(json);
         json["Cmd"] = "Set";
         serialWriteJSON(json);
-        uiResponsive = Kernel::Clock::now() + std::chrono::milliseconds(UIRESPONSIVE_TIME);
 
     // Im Here Received, Means the GUI is running, keep sending it data
     } else if (strcmp(command, "IH") == 0) {
-        uiResponsive = Kernel::Clock::now() + std::chrono::milliseconds(UIRESPONSIVE_TIME);
 
     // Firmware Reqest
     } else if (strcmp(command, "FW") == 0) {
@@ -166,12 +161,15 @@ void parseData(DynamicJsonDocument &json)
       json["Vers"] = FW_VERSION;
       json["Hard"] = FW_BOARD;
       serialWriteJSON(json);
-      uiResponsive = Kernel::Clock::now() + std::chrono::milliseconds(UIRESPONSIVE_TIME);
 
     // Unknown Command
     } else {
         serialWrite("HT: Unknown Command\r\n");
+        return;
     }
+
+    // Valid Command, update last gui connected time
+    uiResponsive = Kernel::Clock::now() + std::chrono::milliseconds(UIRESPONSIVE_TIME);
 }
 
 // Remove any of the escape characters
