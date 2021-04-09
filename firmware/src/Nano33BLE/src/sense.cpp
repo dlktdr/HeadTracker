@@ -45,11 +45,6 @@ static uint16_t bt_in_chans[BT_CHANNELS];
 // Output channel data
 static uint16_t channel_data[16];
 
-// Flags set when channel data is valid
-bool valid_ppm_in = false;
-bool valid_sbus_in = false;
-bool valid_bt_in = false;
-
 Madgwick madgwick;
 static Timer runt;
 
@@ -266,39 +261,32 @@ void sense_Thread()
      *  12) Output PWM channels
      */
 
-    // 1) Reset all PPM Channels to Center
+    // 1) Reset all Channels to Center
     for(int i=0;i<16;i++)
         channel_data[i] = TrackerSettings::PPM_CENTER;
 
     // 2) Read all PPM inputs, should return 0 channels if disabled or lost
-    PpmIn_execute();
+    PpmIn_execute(); // Read all PPM inputs
+    for(int i=0;i<16;i++)
+        ppm_in_chans[i] = 0;    // Reset all PPM in channels to Zero (Not active)
     int ppm_in_chcnt = PpmIn_getChannels(ppm_in_chans);
     if(ppm_in_chcnt >= 4 && ppm_in_chcnt <= 16) {
         for(int i=0;i<MIN(ppm_in_chcnt,16);i++) {
             channel_data[i] = ppm_in_chans[i];
         }
-        valid_ppm_in = true;
-    } else {
-        ppm_in_chcnt = 0; // Not within range set to zero
-        valid_ppm_in = false;
     }
 
     // 3) Set all incoming SBUS values
-    valid_sbus_in = false;
 
     //*** Todo
 
     // 4) Set all incoming BT values, Only set the ones that are overridden
-
     uint32_t btoverride=0; // Valid Channels
-    valid_bt_in = false;
     if(btf != nullptr) {
         for(int i=0;i<BT_CHANNELS;i++) {
             btoverride <<= 1;
-            bool valid;
-            bt_in_chans[i] = btf->getChannel(i, valid);
-            if(valid) {
-                valid_bt_in = true;
+            bt_in_chans[i] = btf->getChannel(i);
+            if(i > 0) {
                 btoverride |= 1;
                 channel_data[i] = bt_in_chans[i];
             }
@@ -379,22 +367,18 @@ void sense_Thread()
     }
 
     // 11) Set all SBUS output channels
-    if(sbusmutex.trylock()) {  //  -- Sbus runs in it's own thread
-        for(int i=0;i<16;i++) {
-            sbus_data[i] = (static_cast<float>(channel_data[i]) - TrackerSettings::PPM_CENTER) * TrackerSettings::SBUS_SCALE + TrackerSettings::SBUS_CENTER;
-        }
-        sbus_tx.tx_channels(sbus_data);
-        sbus_tx.failsafe(false);
-        sbus_tx.lost_frame(false);
-        sbus_tx.ch17(false);
-        sbus_tx.ch18(false);
-        sbusmutex.unlock();
+    for(int i=0;i<16;i++) {
+        sbus_data[i] = (static_cast<float>(channel_data[i]) - TrackerSettings::PPM_CENTER) * TrackerSettings::SBUS_SCALE + TrackerSettings::SBUS_CENTER;
     }
+    sbus_tx.tx_channels(sbus_data);
+    sbus_tx.failsafe(false);
+    sbus_tx.lost_frame(false);
+    sbus_tx.ch17(false);
+    sbus_tx.ch18(false);
 
     // 12) Set PWM Channels
 
     // *** TODO
-
 
     // Get new data from sensors..
     //  FIX MEE I2C is hogging 40% of processor just waiting! UGG Needs to be changed to non-blocking
@@ -487,9 +471,9 @@ void sense_Thread()
         trkset.setPPMOut(tiltout_ui,rollout_ui,panout_ui);
 
         // PPM Input Values
-        trkset.setPPMInValues(ppm_in_chans,ppm_in_chcnt);
-        trkset.setBLEValues(bt_in_chans, btoverride);
-        trkset.setPPMOutValues(channel_data);
+        trkset.setPPMInValues(ppm_in_chans);
+        trkset.setBLEValues(bt_in_chans);
+        trkset.setChannelOutValues(channel_data);
 
         // Qauterion Data
         float *qd = madgwick.getQuat();
