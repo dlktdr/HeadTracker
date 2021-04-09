@@ -120,10 +120,9 @@ void BTParaHead::sendTrainer()
 }
 
 // Head BT does not return BT data
-uint16_t BTParaHead::getChannel(int channel, bool &valid)
+uint16_t BTParaHead::getChannel(int channel)
 {
-    valid = false;
-    return TrackerSettings::PPM_CENTER;
+    return 0;
 }
 
 // Part of setTrainer to calculate CRC

@@ -14,7 +14,7 @@ public:
     void execute();
     int mode() {return BTPARAHEAD;}
     bool isConnected() {return bleconnected;}
-    uint16_t getChannel(int channel, bool &valid);
+    uint16_t getChannel(int channel);
     void setChannel(int channel, uint16_t value);
 
 private:

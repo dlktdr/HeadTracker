@@ -25,7 +25,7 @@ public:
     virtual char *address()=0;
     virtual void execute()=0;
     virtual bool isConnected()=0;
-    virtual uint16_t getChannel(int chno, bool &valid)=0;
+    virtual uint16_t getChannel(int chno)=0;
     virtual int mode() {return BTDISABLE;}
     void setChannel(int channel, uint16_t value);
     void setChannelCount(int count);

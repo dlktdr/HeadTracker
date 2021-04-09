@@ -50,16 +50,16 @@ BTParaRmt::~BTParaRmt()
     // Disconnect
     BLE.disconnect();}
 
-uint16_t BTParaRmt::getChannel(int channel, bool &valid)
+// Non-overridden bluetooth channels return 0
+uint16_t BTParaRmt::getChannel(int channel)
 {
     if(channel >= 0 && channel < BT_CHANNELS && bleconnected) {
         if((1 << channel) & chanoverrides) {
-            valid = true;
             return chan_vals[channel];
         }
     }
 
-    return TrackerSettings::PPM_CENTER;
+    return 0;
 }
 
 void BTParaRmt::execute()

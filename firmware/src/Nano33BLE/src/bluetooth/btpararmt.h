@@ -23,7 +23,7 @@ public:
     void execute();
     int mode() {return BTPARARMT;}
     bool isConnected() {return bleconnected;}
-    uint16_t getChannel(int chno, bool &valid);
+    uint16_t getChannel(int chn);
     void setChannelOverrides(uint16_t ov) {chanoverrides = ov;}
     void sendButtonData(char bd);
 
