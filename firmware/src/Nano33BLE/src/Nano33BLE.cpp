@@ -10,7 +10,6 @@
 #include "PPM/PPMIn.h"
 #include "dataparser.h"
 #include "trackersettings.h"
-#include "Wire.h"
 #include "sense.h"
 #include "ble.h"
 #include "io.h"
@@ -19,7 +18,7 @@
 #include "main.h"
 #include "SBUS/sbus.h"
 
-const char *FW_VERSION = "0.9";
+const char *FW_VERSION = "1.0";
 const char *FW_BOARD = "NANO33BLE";
 
 using namespace rtos;
@@ -34,7 +33,7 @@ Ticker ioTick;
 TrackerSettings trkset;
 Mutex dataMutex;
 Mutex eepromWait;
-//ConditionVariable eepromWriting(eepromWait);
+
 volatile bool pauseThreads=false;
 volatile bool dataready=false;
 
@@ -61,7 +60,6 @@ void setup()
     // Actual Calculations - sense.cpp
     sense_Init();
 
-    // Start SBUS
     // Start SBUS - sbus.cpp
     sbus_Init();
 
@@ -90,4 +88,5 @@ void setup()
 // Not Used
 void loop()
 {
+    ThisThread::sleep_for(std::chrono::milliseconds(100000));
 }
