@@ -976,6 +976,29 @@ void MainWindow::boardDiscovered(BoardType *brd)
         ui->stackedWidget->setCurrentIndex(3);       
         ui->tabBLE->setCurrentIndex(0);
 
+        // Check Firmware Version is Compatible
+
+        // GUI Version
+        float lfver = version.toFloat();
+        int lmajver = roundf(lfver*10);    // Major Version 1.1x == 11
+
+        // Remote Version
+        float rfver = trkset.fwVersion().toFloat();
+        int rmajver = roundf(rfver*10);    // Major Version 1.1x == 11
+
+        // Firmware is too old
+        if(lmajver > rmajver) {
+            msgbox->setText("Firmware is outdated. Upload a firmware of " + QString::number((float)lmajver/10,'f',1) + "x for this GUI");
+            msgbox->setWindowTitle("Firmware Version Mismatch");
+            msgbox->show();
+
+        // Firmware is too new
+        } else if (lmajver < rmajver) {
+            msgbox->setText("Firmware is newer than supported by this GUI. Download " + QString::number((float)rmajver/10,'f',1) +"x \n\nfrom www.github.com/dlktdr/headtracker");
+            msgbox->setWindowTitle("Firmware Version Mismatch");
+            msgbox->show();
+        }
+
     } else if (brd->boardName() == "BNO055") {
         addToLog("Connected to a " + brd->boardName() + "\n");
         ui->cmdStartGraph->setVisible(true);
