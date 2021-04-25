@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>608</width>
-    <height>627</height>
+    <width>585</width>
+    <height>705</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -24,7 +24,10 @@
     <normaloff>:/Icons/Icon256.png</normaloff>:/Icons/Icon256.png</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout_2">
+   <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,2">
+    <property name="sizeConstraint">
+     <enum>QLayout::SetDefaultConstraint</enum>
+    </property>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_4">
       <item>
@@ -91,7 +94,7 @@
            <enum>Qt::Vertical</enum>
           </property>
           <property name="sizeType">
-           <enum>QSizePolicy::Expanding</enum>
+           <enum>QSizePolicy::MinimumExpanding</enum>
           </property>
           <property name="sizeHint" stdset="0">
            <size>
@@ -456,7 +459,7 @@
            </widget>
            <widget class="QWidget" name="NANO33BLE">
             <layout class="QGridLayout" name="gridLayout_8">
-             <item row="0" column="0">
+             <item row="0" column="1">
               <widget class="QTabWidget" name="tabBLE">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -468,50 +471,49 @@
                 <bool>false</bool>
                </property>
                <property name="currentIndex">
-                <number>0</number>
+                <number>5</number>
                </property>
                <widget class="QWidget" name="tab">
                 <attribute name="title">
                  <string>General</string>
                 </attribute>
                 <layout class="QGridLayout" name="gridLayout_7">
-                 <item row="1" column="1">
-                  <widget class="QComboBox" name="cmbOrientation">
-                   <item>
-                    <property name="text">
-                     <string>Default</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>Tilt 90</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>Tilt -90</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>Till 180</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>Roll 90</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>Roll -90</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>Tilt 90,Pan 90</string>
-                    </property>
-                   </item>
+                 <item row="4" column="0" colspan="2">
+                  <widget class="QCheckBox" name="chkResetCenterWave">
+                   <property name="text">
+                    <string>Center on Proximity Detect (BLE Sense Only)</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="3" column="1">
+                  <widget class="QSpinBox" name="spnLPPan">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="minimumSize">
+                    <size>
+                     <width>50</width>
+                     <height>25</height>
+                    </size>
+                   </property>
+                   <property name="baseSize">
+                    <size>
+                     <width>8</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <property name="suffix">
+                    <string>%</string>
+                   </property>
+                   <property name="minimum">
+                    <number>1</number>
+                   </property>
+                   <property name="maximum">
+                    <number>100</number>
+                   </property>
                   </widget>
                  </item>
                  <item row="5" column="0">
@@ -526,6 +528,39 @@
                     </size>
                    </property>
                   </spacer>
+                 </item>
+                 <item row="2" column="0">
+                  <widget class="QLabel" name="label_2">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="text">
+                    <string>Low Pass Filter on Tilt/Roll</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="3" column="0">
+                  <widget class="QLabel" name="label_4">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="text">
+                    <string>Low Pass Filter on Pan</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="0">
+                  <widget class="QLabel" name="label_15">
+                   <property name="text">
+                    <string>Board Rotation</string>
+                   </property>
+                  </widget>
                  </item>
                  <item row="0" column="1">
                   <widget class="QComboBox" name="cmbButtonPin">
@@ -596,13 +631,6 @@
                    </item>
                   </widget>
                  </item>
-                 <item row="4" column="0" colspan="2">
-                  <widget class="QCheckBox" name="chkResetCenterWave">
-                   <property name="text">
-                    <string>Center on Proximity Detect (BLE Sense Only)</string>
-                   </property>
-                  </widget>
-                 </item>
                  <item row="0" column="0">
                   <widget class="QLabel" name="label_3">
                    <property name="text">
@@ -610,24 +638,43 @@
                    </property>
                   </widget>
                  </item>
-                 <item row="1" column="0">
-                  <widget class="QLabel" name="label_15">
-                   <property name="text">
-                    <string>Board Rotation</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="2" column="0">
-                  <widget class="QLabel" name="label_2">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="text">
-                    <string>Low Pass Filter on Tilt/Roll</string>
-                   </property>
+                 <item row="1" column="1">
+                  <widget class="QComboBox" name="cmbOrientation">
+                   <item>
+                    <property name="text">
+                     <string>Default</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Tilt 90</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Tilt -90</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Till 180</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Roll 90</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Roll -90</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Tilt 90,Pan 90</string>
+                    </property>
+                   </item>
                   </widget>
                  </item>
                  <item row="2" column="1">
@@ -661,73 +708,73 @@
                    </property>
                   </widget>
                  </item>
-                 <item row="3" column="1">
-                  <widget class="QSpinBox" name="spnLPPan">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
+                 <item row="2" column="2">
+                  <spacer name="horizontalSpacer_3">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
                    </property>
-                   <property name="minimumSize">
+                   <property name="sizeHint" stdset="0">
                     <size>
-                     <width>50</width>
-                     <height>25</height>
+                     <width>40</width>
+                     <height>20</height>
                     </size>
                    </property>
-                   <property name="baseSize">
-                    <size>
-                     <width>8</width>
-                     <height>0</height>
-                    </size>
-                   </property>
-                   <property name="suffix">
-                    <string>%</string>
-                   </property>
-                   <property name="minimum">
-                    <number>1</number>
-                   </property>
-                   <property name="maximum">
-                    <number>100</number>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="3" column="0">
-                  <widget class="QLabel" name="label_4">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="text">
-                    <string>Low Pass Filter on Pan</string>
-                   </property>
-                  </widget>
+                  </spacer>
                  </item>
                 </layout>
                </widget>
                <widget class="QWidget" name="tab_2">
                 <attribute name="title">
-                 <string>PPM Output</string>
+                 <string>Output</string>
                 </attribute>
                 <layout class="QGridLayout" name="gridLayout_2">
-                 <item row="0" column="0">
-                  <widget class="QLabel" name="label_27">
-                   <property name="text">
-                    <string>Pin</string>
+                 <item row="4" column="1">
+                  <widget class="QSpinBox" name="spnPPMSync">
+                   <property name="minimumSize">
+                    <size>
+                     <width>100</width>
+                     <height>25</height>
+                    </size>
+                   </property>
+                   <property name="suffix">
+                    <string> us</string>
+                   </property>
+                   <property name="minimum">
+                    <number>100</number>
+                   </property>
+                   <property name="maximum">
+                    <number>800</number>
+                   </property>
+                   <property name="singleStep">
+                    <number>50</number>
+                   </property>
+                   <property name="value">
+                    <number>300</number>
                    </property>
                   </widget>
                  </item>
-                 <item row="0" column="1">
-                  <widget class="QLabel" name="label_28">
+                 <item row="3" column="0">
+                  <widget class="QLabel" name="label_25">
                    <property name="text">
-                    <string># Channels</string>
+                    <string>Frame Length</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="3" column="1">
+                  <widget class="QLabel" name="label_26">
+                   <property name="text">
+                    <string>Sync pulse</string>
                    </property>
                   </widget>
                  </item>
                  <item row="1" column="0">
                   <widget class="QComboBox" name="cmbPpmOutPin">
+                   <property name="minimumSize">
+                    <size>
+                     <width>100</width>
+                     <height>0</height>
+                    </size>
+                   </property>
                    <property name="currentIndex">
                     <number>0</number>
                    </property>
@@ -798,8 +845,72 @@
                    </item>
                   </widget>
                  </item>
+                 <item row="6" column="0">
+                  <spacer name="verticalSpacer_5">
+                   <property name="orientation">
+                    <enum>Qt::Vertical</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>20</width>
+                     <height>40</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
+                 <item row="5" column="0" colspan="2">
+                  <widget class="QLabel" name="lblPPMOut">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="text">
+                    <string>TextLabel</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="0">
+                  <widget class="QCheckBox" name="chkInvertedPPM">
+                   <property name="text">
+                    <string>Invert</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="4" column="0">
+                  <widget class="QDoubleSpinBox" name="spnPPMFrameLen">
+                   <property name="minimumSize">
+                    <size>
+                     <width>100</width>
+                     <height>25</height>
+                    </size>
+                   </property>
+                   <property name="suffix">
+                    <string> ms</string>
+                   </property>
+                   <property name="decimals">
+                    <number>1</number>
+                   </property>
+                   <property name="minimum">
+                    <double>12.500000000000000</double>
+                   </property>
+                   <property name="maximum">
+                    <double>40.000000000000000</double>
+                   </property>
+                   <property name="value">
+                    <double>22.500000000000000</double>
+                   </property>
+                  </widget>
+                 </item>
                  <item row="1" column="1">
                   <widget class="QComboBox" name="cmbPPMChCount">
+                   <property name="minimumSize">
+                    <size>
+                     <width>100</width>
+                     <height>0</height>
+                    </size>
+                   </property>
                    <property name="currentText">
                     <string>4</string>
                    </property>
@@ -873,99 +984,29 @@
                    </item>
                   </widget>
                  </item>
-                 <item row="2" column="0">
-                  <widget class="QCheckBox" name="chkInvertedPPM">
+                 <item row="0" column="1">
+                  <widget class="QLabel" name="label_28">
                    <property name="text">
-                    <string>Invert</string>
+                    <string># Channels</string>
                    </property>
                   </widget>
                  </item>
-                 <item row="3" column="0">
-                  <widget class="QLabel" name="label_25">
+                 <item row="0" column="0">
+                  <widget class="QLabel" name="label_27">
                    <property name="text">
-                    <string>Frame Length</string>
+                    <string>PPM Output</string>
                    </property>
                   </widget>
                  </item>
-                 <item row="3" column="1">
-                  <widget class="QLabel" name="label_26">
-                   <property name="text">
-                    <string>Sync pulse</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="4" column="0">
-                  <widget class="QDoubleSpinBox" name="spnPPMFrameLen">
-                   <property name="minimumSize">
-                    <size>
-                     <width>0</width>
-                     <height>25</height>
-                    </size>
-                   </property>
-                   <property name="suffix">
-                    <string> ms</string>
-                   </property>
-                   <property name="decimals">
-                    <number>1</number>
-                   </property>
-                   <property name="minimum">
-                    <double>12.500000000000000</double>
-                   </property>
-                   <property name="maximum">
-                    <double>40.000000000000000</double>
-                   </property>
-                   <property name="value">
-                    <double>22.500000000000000</double>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="4" column="1">
-                  <widget class="QSpinBox" name="spnPPMSync">
-                   <property name="minimumSize">
-                    <size>
-                     <width>0</width>
-                     <height>25</height>
-                    </size>
-                   </property>
-                   <property name="suffix">
-                    <string> us</string>
-                   </property>
-                   <property name="minimum">
-                    <number>100</number>
-                   </property>
-                   <property name="maximum">
-                    <number>800</number>
-                   </property>
-                   <property name="singleStep">
-                    <number>50</number>
-                   </property>
-                   <property name="value">
-                    <number>300</number>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="5" column="0" colspan="2">
-                  <widget class="QLabel" name="lblPPMOut">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="text">
-                    <string>TextLabel</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="6" column="0">
-                  <spacer name="verticalSpacer_5">
+                 <item row="1" column="2">
+                  <spacer name="horizontalSpacer_4">
                    <property name="orientation">
-                    <enum>Qt::Vertical</enum>
+                    <enum>Qt::Horizontal</enum>
                    </property>
                    <property name="sizeHint" stdset="0">
                     <size>
-                     <width>20</width>
-                     <height>40</height>
+                     <width>40</width>
+                     <height>20</height>
                     </size>
                    </property>
                   </spacer>
@@ -980,7 +1021,7 @@
                  <item row="1" column="0">
                   <widget class="QLabel" name="label_16">
                    <property name="text">
-                    <string>Reset Cnt on Ch.</string>
+                    <string>Reset Center on Ch #</string>
                    </property>
                   </widget>
                  </item>
@@ -997,7 +1038,7 @@
                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Will reset center if CH&amp;lt;x&amp;gt; goes above 1800us.&lt;/p&gt;&lt;p&gt;Channel must go below 1700us to reset&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                    </property>
                    <property name="text">
-                    <string>&gt; 1800us</string>
+                    <string>If &gt; 1800us</string>
                    </property>
                   </widget>
                  </item>
@@ -1187,13 +1228,6 @@
                    </property>
                   </spacer>
                  </item>
-                 <item row="2" column="0" colspan="2">
-                  <widget class="QLabel" name="lblPPMin">
-                   <property name="text">
-                    <string>PPM Data</string>
-                   </property>
-                  </widget>
-                 </item>
                  <item row="0" column="2">
                   <widget class="QCheckBox" name="chkInvertedPPMIn">
                    <property name="enabled">
@@ -1207,6 +1241,13 @@
                    </property>
                   </widget>
                  </item>
+                 <item row="2" column="0" colspan="3">
+                  <widget class="QLabel" name="lblPPMin">
+                   <property name="text">
+                    <string>PPM Data</string>
+                   </property>
+                  </widget>
+                 </item>
                 </layout>
                </widget>
                <widget class="QWidget" name="tab_4">
@@ -1214,30 +1255,6 @@
                  <string>BlueTooth</string>
                 </attribute>
                 <layout class="QGridLayout" name="gridLayout">
-                 <item row="1" column="0">
-                  <widget class="QLabel" name="label_29">
-                   <property name="text">
-                    <string>Status</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="2" column="1">
-                  <widget class="QLabel" name="lblBLEAddress">
-                   <property name="text">
-                    <string>TextLabel</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="3" column="0" colspan="2">
-                  <widget class="QLabel" name="label_30">
-                   <property name="text">
-                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:10pt; font-weight:600;&quot;&gt;Bluetooth supports 8 channels&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;Any channels that are set higher than 8 won't be transmitted.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                   </property>
-                   <property name="margin">
-                    <number>10</number>
-                   </property>
-                  </widget>
-                 </item>
                  <item row="0" column="0">
                   <widget class="QLabel" name="label_5">
                    <property name="text">
@@ -1245,21 +1262,11 @@
                    </property>
                   </widget>
                  </item>
-                 <item row="0" column="1">
-                  <widget class="QComboBox" name="cmbBtMode">
-                   <property name="enabled">
-                    <bool>true</bool>
+                 <item row="1" column="0">
+                  <widget class="QLabel" name="label_29">
+                   <property name="text">
+                    <string>Status</string>
                    </property>
-                   <item>
-                    <property name="text">
-                     <string>Disabled</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>FrSky - PARA Wireless Trainer</string>
-                    </property>
-                   </item>
                   </widget>
                  </item>
                  <item row="1" column="1">
@@ -1295,6 +1302,26 @@
                    </item>
                   </layout>
                  </item>
+                 <item row="5" column="1">
+                  <spacer name="verticalSpacer_7">
+                   <property name="orientation">
+                    <enum>Qt::Vertical</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>20</width>
+                     <height>40</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
+                 <item row="3" column="0" colspan="3">
+                  <widget class="QCheckBox" name="checkBox_2">
+                   <property name="text">
+                    <string>Offset Mode (Causes the output from head to be relative to remote)</string>
+                   </property>
+                  </widget>
+                 </item>
                  <item row="2" column="0">
                   <widget class="QLabel" name="label">
                    <property name="text">
@@ -1302,8 +1329,725 @@
                    </property>
                   </widget>
                  </item>
+                 <item row="2" column="1">
+                  <widget class="QLabel" name="lblBLEAddress">
+                   <property name="text">
+                    <string>TextLabel</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="4" column="0" colspan="3">
+                  <widget class="QLabel" name="label_30">
+                   <property name="text">
+                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:10pt; font-weight:600;&quot;&gt;Bluetooth supports 8 channels&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;Any channels that are set higher than 8 won't be transmitted.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   </property>
+                   <property name="margin">
+                    <number>10</number>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="1" colspan="2">
+                  <widget class="QComboBox" name="cmbBtMode">
+                   <property name="enabled">
+                    <bool>true</bool>
+                   </property>
+                   <item>
+                    <property name="text">
+                     <string>Disabled</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>FrSky - PARA Wireless Transmitter (Head)</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>FrSky - PARA Wireless Receiver (Remote)</string>
+                    </property>
+                   </item>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+               <widget class="QWidget" name="tab_5">
+                <attribute name="title">
+                 <string>PWM</string>
+                </attribute>
+                <layout class="QGridLayout" name="gridLayout_9">
+                 <item row="0" column="0" colspan="2">
+                  <widget class="QLabel" name="label_32">
+                   <property name="text">
+                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;PWM Output Pins&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="0">
+                  <widget class="QLabel" name="label_37">
+                   <property name="text">
+                    <string>A0</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="1">
+                  <widget class="QComboBox" name="cmbPWM0">
+                   <property name="minimumSize">
+                    <size>
+                     <width>100</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <item>
+                    <property name="text">
+                     <string>Disable</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Tilt</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Roll</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Pan</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>BT1</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>BT2</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>BT3</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>BT4</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>BT5</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>BT6</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>BT6</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>BT7</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>BT8</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM1</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM2</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM3</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM4</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM5</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM6</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM7</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM8</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM9</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM10</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM11</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM12</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM13</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM14</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM15</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM16</string>
+                    </property>
+                   </item>
+                  </widget>
+                 </item>
+                 <item row="2" column="0">
+                  <widget class="QLabel" name="label_38">
+                   <property name="text">
+                    <string>A1</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="1">
+                  <widget class="QComboBox" name="cmbPWM1">
+                   <property name="minimumSize">
+                    <size>
+                     <width>100</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <item>
+                    <property name="text">
+                     <string>Disable</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Tilt</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Roll</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Pan</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>BT1</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>BT2</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>BT3</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>BT4</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>BT5</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>BT6</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>BT6</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>BT7</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>BT8</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM1</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM2</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM3</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM4</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM5</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM6</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM7</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM8</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM9</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM10</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM11</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM12</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM13</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM14</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM15</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM16</string>
+                    </property>
+                   </item>
+                  </widget>
+                 </item>
+                 <item row="2" column="2">
+                  <spacer name="horizontalSpacer_2">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                   <property name="sizeType">
+                    <enum>QSizePolicy::MinimumExpanding</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>40</width>
+                     <height>20</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
+                 <item row="3" column="0">
+                  <widget class="QLabel" name="label_39">
+                   <property name="text">
+                    <string>A2</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="3" column="1">
+                  <widget class="QComboBox" name="cmbPWM2">
+                   <property name="minimumSize">
+                    <size>
+                     <width>100</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <item>
+                    <property name="text">
+                     <string>Disable</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Tilt</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Roll</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Pan</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>BT1</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>BT2</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>BT3</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>BT4</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>BT5</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>BT6</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>BT6</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>BT7</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>BT8</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM1</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM2</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM3</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM4</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM5</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM6</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM7</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM8</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM9</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM10</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM11</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM12</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM13</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM14</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM15</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM16</string>
+                    </property>
+                   </item>
+                  </widget>
+                 </item>
                  <item row="4" column="0">
-                  <spacer name="verticalSpacer_7">
+                  <widget class="QLabel" name="label_40">
+                   <property name="text">
+                    <string>A3</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="4" column="1">
+                  <widget class="QComboBox" name="cmbPWM4">
+                   <property name="minimumSize">
+                    <size>
+                     <width>100</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <item>
+                    <property name="text">
+                     <string>Disable</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Tilt</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Roll</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Pan</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>BT1</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>BT2</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>BT3</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>BT4</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>BT5</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>BT6</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>BT6</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>BT7</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>BT8</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM1</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM2</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM3</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM4</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM5</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM6</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM7</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM8</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM9</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM10</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM11</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM12</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM13</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM14</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM15</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>PPM16</string>
+                    </property>
+                   </item>
+                  </widget>
+                 </item>
+                 <item row="5" column="1">
+                  <spacer name="verticalSpacer_9">
                    <property name="orientation">
                     <enum>Qt::Vertical</enum>
                    </property>
@@ -1317,24 +2061,553 @@
                  </item>
                 </layout>
                </widget>
+               <widget class="QWidget" name="tab_6">
+                <attribute name="title">
+                 <string>Extras</string>
+                </attribute>
+                <layout class="QGridLayout" name="gridLayout_11">
+                 <item row="1" column="4" colspan="3">
+                  <widget class="QComboBox" name="cmbtiltchn_2">
+                   <item>
+                    <property name="text">
+                     <string>Off</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>1</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>2</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>3</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>4</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>5</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>6</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>7</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>8</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>9</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>10</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>11</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>12</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>13</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>14</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>15</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>16</string>
+                    </property>
+                   </item>
+                  </widget>
+                 </item>
+                 <item row="5" column="3">
+                  <widget class="QLabel" name="label_44">
+                   <property name="text">
+                    <string>Offset (us)</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="6" column="5" colspan="2">
+                  <widget class="QComboBox" name="cmbA6Ch">
+                   <item>
+                    <property name="text">
+                     <string>Off</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>1</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>2</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>3</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>4</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>5</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>6</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>7</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>8</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>9</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>10</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>11</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>12</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>13</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>14</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>15</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>16</string>
+                    </property>
+                   </item>
+                  </widget>
+                 </item>
+                 <item row="2" column="1" colspan="3">
+                  <widget class="QComboBox" name="comboBox_2">
+                   <item>
+                    <property name="text">
+                     <string>X Gyrometer +/- 1000deg/s</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Y Gyrometer +/- 1000deg/s</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Z Gyrometer +/- 1000deg/s</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>X Acceleration +/- 2g</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Y Acceleration +/- 2g</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Z Acceleration +/- 2g</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Z Acceleration +/- 2g (Offset by 1g)</string>
+                    </property>
+                   </item>
+                  </widget>
+                 </item>
+                 <item row="0" column="4" colspan="2">
+                  <widget class="QLabel" name="label_35">
+                   <property name="text">
+                    <string>Channel</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="5" column="1" colspan="2">
+                  <widget class="QLabel" name="label_43">
+                   <property name="text">
+                    <string>Gain (us/volt)</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="3" column="0" rowspan="2" colspan="7">
+                  <widget class="Line" name="line_2">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="8" column="1" colspan="2">
+                  <widget class="QDoubleSpinBox" name="spnA7Gain"/>
+                 </item>
+                 <item row="6" column="3" colspan="2">
+                  <widget class="QSpinBox" name="spnA6Off">
+                   <property name="maximum">
+                    <number>1024</number>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="1" colspan="3">
+                  <widget class="QComboBox" name="comboBox">
+                   <item>
+                    <property name="text">
+                     <string>X Gyrometer +/- 1000deg/s</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Y Gyrometer +/- 1000deg/s</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Z Gyrometer +/- 1000deg/s</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>X Acceleration +/- 2g</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Y Acceleration +/- 2g</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Z Acceleration +/- 2g</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Z Acceleration +/- 2g (Offset by 1g)</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Bluetooth RSSI</string>
+                    </property>
+                   </item>
+                  </widget>
+                 </item>
+                 <item row="8" column="5" colspan="2">
+                  <widget class="QComboBox" name="cmbA7Ch">
+                   <item>
+                    <property name="text">
+                     <string>Off</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>1</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>2</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>3</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>4</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>5</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>6</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>7</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>8</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>9</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>10</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>11</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>12</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>13</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>14</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>15</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>16</string>
+                    </property>
+                   </item>
+                  </widget>
+                 </item>
+                 <item row="5" column="5" colspan="2">
+                  <widget class="QLabel" name="label_42">
+                   <property name="text">
+                    <string>Channel</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="6" column="1" rowspan="2" colspan="2">
+                  <widget class="QDoubleSpinBox" name="spnA6Gain"/>
+                 </item>
+                 <item row="2" column="4" colspan="3">
+                  <widget class="QComboBox" name="cmbtiltchn_3">
+                   <item>
+                    <property name="text">
+                     <string>Off</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>1</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>2</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>3</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>4</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>5</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>6</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>7</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>8</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>9</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>10</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>11</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>12</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>13</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>14</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>15</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>16</string>
+                    </property>
+                   </item>
+                  </widget>
+                 </item>
+                 <item row="2" column="0">
+                  <widget class="QLabel" name="label_34">
+                   <property name="text">
+                    <string>Aux function 2</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="7" column="0" rowspan="3">
+                  <widget class="QLabel" name="label_41">
+                   <property name="text">
+                    <string>Analog A7</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="0">
+                  <widget class="QLabel" name="label_33">
+                   <property name="text">
+                    <string>Aux function 1</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="6" column="0">
+                  <widget class="QLabel" name="label_36">
+                   <property name="text">
+                    <string>Analog A6</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="10" column="1">
+                  <spacer name="verticalSpacer_10">
+                   <property name="orientation">
+                    <enum>Qt::Vertical</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>20</width>
+                     <height>40</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
+                 <item row="8" column="3" colspan="2">
+                  <widget class="QSpinBox" name="spnA7Off">
+                   <property name="maximum">
+                    <number>1024</number>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
               </widget>
              </item>
             </layout>
            </widget>
           </widget>
-         </item>
-         <item>
-          <spacer name="verticalSpacer_4">
-           <property name="orientation">
-            <enum>Qt::Vertical</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>0</width>
-             <height>0</height>
-            </size>
-           </property>
-          </spacer>
          </item>
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -1926,7 +3199,7 @@
       <property name="title">
        <string>Graph</string>
       </property>
-      <layout class="QHBoxLayout" name="horizontalLayout">
+      <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0">
        <item>
         <widget class="Graph" name="graphView" native="true">
          <property name="sizePolicy">
@@ -2006,7 +3279,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>608</width>
+     <width>585</width>
      <height>21</height>
     </rect>
    </property>
@@ -2023,7 +3296,7 @@
     <property name="title">
      <string>Firmware</string>
     </property>
-    <addaction name="actionUpload_Firmware"/>
+    <addaction name="actionFirmware_Wizard"/>
    </widget>
    <widget class="QMenu" name="menu_Diagnostics">
     <property name="title">
@@ -2063,7 +3336,7 @@
     <string>&amp;Calibrate</string>
    </property>
   </action>
-  <action name="actionUpload_Firmware">
+  <action name="action">
    <property name="text">
     <string>Upload Firmware</string>
    </property>
@@ -2076,6 +3349,11 @@
   <action name="actionShow_Serial_Transmissions">
    <property name="text">
     <string>Serial Information</string>
+   </property>
+  </action>
+  <action name="actionFirmware_Wizard">
+   <property name="text">
+    <string>Upload Firmware</string>
    </property>
   </action>
  </widget>

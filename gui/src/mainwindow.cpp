@@ -51,7 +51,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->chkRawData->setVisible(false);
 
     // Firmware loader loader dialog
-    firmwareUploader = new Firmware;
+    firmwareWizard = nullptr;
 
     // Get list of available ports
     findSerialPorts();
@@ -165,7 +165,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->action_Save_to_File,SIGNAL(triggered()),this,SLOT(saveSettings()));
     connect(ui->action_Load,SIGNAL(triggered()),this,SLOT(loadSettings()));
     connect(ui->actionE_xit,SIGNAL(triggered()),this,SLOT(close()));
-    connect(ui->actionUpload_Firmware,SIGNAL(triggered()),this,SLOT(uploadFirmwareClick()));
+    connect(ui->actionFirmware_Wizard,SIGNAL(triggered()),this,SLOT(uploadFirmwareWizard()));
     connect(ui->actionShow_Data,SIGNAL(triggered()),this,SLOT(showDiagsClicked()));
     connect(ui->actionShow_Serial_Transmissions,SIGNAL(triggered()),this,SLOT(showSerialDiagClicked()));
 
@@ -191,7 +191,8 @@ MainWindow::~MainWindow()
 {
     delete serialcon;
     delete nano33ble;
-    delete firmwareUploader;
+    if(firmwareWizard != nullptr)
+        delete firmwareWizard;
     delete serialDebug;
     delete ui;
 }
@@ -763,15 +764,13 @@ bool MainWindow::checkSaved()
     return true;
 }
 
-void MainWindow::uploadFirmwareClick()
+void MainWindow::uploadFirmwareWizard()
 {
-    if(serialcon->isOpen()) {
-        QMessageBox::information(this,"Cannot Upload", "Disconnect before uploading a new firmware");
-    } else {
-        firmwareUploader->show();
-        firmwareUploader->activateWindow();
-        firmwareUploader->raise();
-    }
+    if(firmwareWizard == nullptr)
+        firmwareWizard = new FirmwareWizard;
+    firmwareWizard->show();
+    firmwareWizard->activateWindow();
+    firmwareWizard->raise();
 }
 
 /* requestTimeout()
