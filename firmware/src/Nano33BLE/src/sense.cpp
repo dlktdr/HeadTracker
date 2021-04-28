@@ -33,12 +33,11 @@
 #include "ble.h"
 #include "NXPFusion/Adafruit_AHRS_NXPFusion.h"
 #include "MadgwickAHRS/MadgwickAHRS.h"
-#include "sbus/sbus.h"
+#include "SBUS/uarte_sbus.h"
 
 #ifdef NXP_FILTER
 Adafruit_NXPSensorFusion nxpfilter;
 #endif
-
 
 static float auxdata[10];
 static float raccx=0,raccy=0,raccz=0;
@@ -56,7 +55,7 @@ static float l_panout=0, l_tiltout=0, l_rollout=0;
 
 // Input Channel Data
 static uint16_t ppm_in_chans[16];
-//static uint16_t sbus_in_chans[16];
+static uint16_t sbus_in_chans[16];
 static uint16_t bt_in_chans[BT_CHANNELS];
 
 // Output channel data
@@ -384,14 +383,11 @@ void sense_Thread()
     }
 
     // 11) Set all SBUS output channels
+    uint16_t sbus_data[16];
     for(int i=0;i<16;i++) {
         sbus_data[i] = (static_cast<float>(channel_data[i]) - TrackerSettings::PPM_CENTER) * TrackerSettings::SBUS_SCALE + TrackerSettings::SBUS_CENTER;
     }
-    sbus_tx.tx_channels(sbus_data);
-    sbus_tx.failsafe(false);
-    sbus_tx.lost_frame(false);
-    sbus_tx.ch17(false);
-    sbus_tx.ch18(false);
+    SBUS_TX_BuildData(sbus_data);
 
     // 12) Set PWM Channels
 
@@ -490,6 +486,7 @@ void sense_Thread()
         // PPM Input Values
         trkset.setPPMInValues(ppm_in_chans);
         trkset.setBLEValues(bt_in_chans);
+        trkset.setSBUSValues(sbus_in_chans);
         trkset.setChannelOutValues(channel_data);
 
         // Qauterion Data
@@ -589,6 +586,6 @@ void buildAuxData()
     auxdata[3] = (accx / 2.0f) * pwmrange + TrackerSettings::PPM_CENTER;
     auxdata[4] = (accy / 2.0f) * pwmrange + TrackerSettings::PPM_CENTER;
     auxdata[5] = (accz / 2.0f) * pwmrange + TrackerSettings::PPM_CENTER;
-    auxdata[7] = ((accz -1.0f) / 2.0f) * pwmrange + TrackerSettings::PPM_CENTER;
-    auxdata[8] = static_cast<float>(BLE.central().rssi()) / 127.0 * pwmrange + TrackerSettings::MIN_PWM;
+    auxdata[6] = ((accz -1.0f) / 2.0f) * pwmrange + TrackerSettings::PPM_CENTER;
+    auxdata[7] = static_cast<float>(BLE.central().rssi()) / 127.0 * pwmrange + TrackerSettings::MIN_PWM;
 }

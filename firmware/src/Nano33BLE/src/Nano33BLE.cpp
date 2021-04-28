@@ -33,7 +33,7 @@
 #include "flash.h"
 #include "serial.h"
 #include "main.h"
-#include "SBUS/sbus.h"
+#include "SBUS/uarte_sbus.h"
 
 const char *FW_VERSION = "1.0";
 const char *FW_BOARD = "NANO33BLE";
@@ -78,7 +78,7 @@ void setup()
     sense_Init();
 
     // Start SBUS - sbus.cpp
-    sbus_Init();
+    SBUS_Init(4);
 
     // Load settings from flash - trackersettings.cpp
     trkset.loadFromEEPROM();
@@ -96,7 +96,7 @@ void setup()
     queue.call_in(std::chrono::milliseconds(SERIAL_PERIOD),serial_Thread);
     queue.call_in(std::chrono::milliseconds((int)BT_PERIOD),bt_Thread);
     queue.call_in(std::chrono::milliseconds(DATA_PERIOD),data_Thread);
-    queue.call_in(std::chrono::milliseconds(SBUS_PERIOD),sbus_Thread);
+    queue.call_in(std::chrono::milliseconds(SBUS_PERIOD),SBUS_Thread);
 
     // Start everything
     queue.dispatch_forever();
