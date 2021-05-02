@@ -15,7 +15,7 @@
 #include <QSettings>
 
 const QString localfirmlist = "firmware.ini";
-const QString localfirmware = "online.";
+const QString localfirmware = "online.fmw";
 
 const QByteArray BLE33HEADER_BIN("\x00\x00\x04\x20",4);
 const QByteArray BLE33HEADER_HEX(":020000021000EC",15);
