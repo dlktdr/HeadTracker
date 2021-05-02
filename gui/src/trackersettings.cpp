@@ -8,17 +8,17 @@ TrackerSettings::TrackerSettings(QObject *parent):
     _data["rll_min"] = DEF_MIN_PWM;
     _data["rll_max"] = DEF_MAX_PWM;
     _data["rll_gain"] = DEF_GAIN;
-    _data["rll_cnt"] = DEF_CENTER;
+    _data["rll_cnt"] = PPM_CENTER;
 
     _data["pan_min"] = DEF_MIN_PWM;
     _data["pan_max"] = DEF_MAX_PWM;
     _data["pan_gain"] = DEF_GAIN;
-    _data["pan_cnt"] = DEF_CENTER;
+    _data["pan_cnt"] = PPM_CENTER;
 
     _data["tlt_min"] = DEF_MIN_PWM;
     _data["tlt_max"] = DEF_MAX_PWM;
     _data["tlt_gain"] = DEF_GAIN;
-    _data["tlt_cnt"] = DEF_CENTER;
+    _data["tlt_cnt"] = PPM_CENTER;
 
     _data["panch"] = DEF_PAN_CH;
     _data["tltch"] = DEF_TILT_CH;
@@ -45,7 +45,43 @@ TrackerSettings::TrackerSettings(QObject *parent):
     _data["orient"] = (uint)0;
     _data["rstppm"] = DEF_RST_PPM;
 
+    // PWM defaults
+    _data["pwm0"] = DEF_PWM_A0_CH;
+    _data["pwm1"] = DEF_PWM_A1_CH;
+    _data["pwm2"] = DEF_PWM_A2_CH;
+    _data["pwm3"] = DEF_PWM_A3_CH;
+
+    // Analog defaults
+    _data["an6ch"]  = DEF_ALG_A6_CH;
+    _data["an7ch"] = DEF_ALG_A7_CH;
+    _data["an6gain"] = DEF_ALG_GAIN;
+    _data["an7gain"] = DEF_ALG_GAIN;
+    _data["an6off"] = DEF_ALG_OFFSET;
+    _data["an7off"]  = DEF_ALG_OFFSET;
+
+    // AUX defaults
+    _data["aux0ch"] = DEF_AUX_CH0;
+    _data["aux1ch"] = DEF_AUX_CH1;
+    _data["aux0func"] = DEF_AUX_FUNC;
+    _data["aux1func"] = DEF_AUX_FUNC;
+
+    _data["rotx"] = DEF_BOARD_ROT_X;
+    _data["roty"] = DEF_BOARD_ROT_Y;
+    _data["rotz"] = DEF_BOARD_ROT_Z;
+
     _live["btaddr"] = QString("00:00:00:00:00:00");
+
+    // Add All Realtime data Items to Map
+    #define DV(DT, NAME, DIV, ROUND) _realtimedata[ #NAME ] = false;
+        DATA_VARS
+    #undef DV
+    #define DA(DT, NAME, SIZE, DIV) _realtimedata[ #NAME ] = false;
+        DATA_ARRAYS
+    #undef DA
+    _devicerealtimedata = _realtimedata;
+
+
+
 }
 
 int TrackerSettings::Rll_min() const
@@ -399,14 +435,19 @@ void TrackerSettings::setResetCntPPM(int value)
         _data["rstppm"] = value;
 }
 
-uint TrackerSettings::orientation()
+void TrackerSettings::orientation(int &x,int &y,int &z)
 {
-    return _data["orient"].toUInt();
+    x = _data["rotx"].toInt();
+    y = _data["roty"].toInt();
+    z = _data["rotz"].toInt();
+    return;
 }
 
-void TrackerSettings::setOrientation(uint val)
+void TrackerSettings::setOrientation(int x,int y,int z)
 {
-    _data["orient"] = val;
+    _data["rotx"] = x;
+    _data["roty"] = y;
+    _data["rotz"] = z;
 }
 
 void TrackerSettings::gyroOffset(float &x, float &y, float &z)
@@ -448,6 +489,16 @@ void TrackerSettings::setMagOffset(float x, float y, float z)
     _data["magxoff"]=QString::number(x,'g',3);
     _data["magyoff"]=QString::number(y,'g',3);
     _data["magzoff"]=QString::number(z,'g',3);
+}
+
+void TrackerSettings::setAnalog6Gain(float gain)
+{
+    _data["an6gain"]=QString::number(gain,'g',4);
+}
+
+void TrackerSettings::setAnalog7Gain(float gain)
+{
+    _data["an7gain"] = QString::number(gain,'g',4);
 }
 
 void TrackerSettings::setAxisRemap(uint value)
@@ -596,6 +647,9 @@ void TrackerSettings::setLiveDataMap(const QVariantMap &livelist,bool reset)
             ppm = true;
         }
     }
+
+    // Notify data has changed
+    emit liveDataChanged();
 }
 
 void TrackerSettings::setHardware(QString vers, QString hard)
@@ -612,4 +666,50 @@ void TrackerSettings::setSoftIronOffsets(float soo[3][3])
             _data[element] = QString::number(soo[i][j],'g',3);
         }
     }
+}
+
+// Sets all data items to diabled
+void TrackerSettings::clearDataItems()
+{
+    QMapIterator<QString, bool> i(_realtimedata);
+    while (i.hasNext()) {
+        i.next();
+        _realtimedata[i.key()] = false;
+    }
+    setDataItemsMatched();
+}
+
+// Add/remove a single item to be sent
+void TrackerSettings::setDataItemSend(const QString &itm, const bool &enabled)
+{
+    if(_realtimedata.contains(itm)) {
+        if(_realtimedata[itm] != enabled) {
+            _realtimedata[itm] = enabled;
+            emit requestedDataItemChanged();
+        }
+    }
+}
+
+// Add/remove multiple items
+void TrackerSettings::setDataItemSend(QMap<QString, bool> items)
+{
+    QMap<QString, bool>::iterator i;
+    for(i = items.begin(); i != items.end(); ++i) {
+        setDataItemSend(i.key(),i.value());
+    }
+}
+
+// Returns the differences between currently sending data items
+// and items which need to be sent/removed
+QMap<QString, bool> TrackerSettings::getDataItemsDiff()
+{
+    QMap<QString, bool> diffs;
+    QMapIterator<QString, bool> i(_realtimedata);
+    while (i.hasNext()) {
+        i.next();
+        if(_devicerealtimedata[i.key()] != i.value()) {
+            diffs[i.key()] = i.value();
+        }
+    }
+    return diffs;
 }

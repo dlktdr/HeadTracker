@@ -13,11 +13,63 @@
 #define Y_REV 0x02
 #define Z_REV 0x01
 
+// Variables to be sent back to GUI if enabled
+// Datatype, Name, UpdateDivisor, RoundTo
+#define DATA_VARS\
+    DV(float,magx,      1,100)\
+    DV(float,magy,      1,100)\
+    DV(float,magz,      1,100)\
+    DV(float,gyrox,     1,100)\
+    DV(float,gyroy,     1,100)\
+    DV(float,gyroz,     1,100)\
+    DV(float,accx,      1,100)\
+    DV(float,accy,      1,100)\
+    DV(float,accz,      1,100)\
+    DV(float,off_magx,  5,100)\
+    DV(float,off_magy,  5,100)\
+    DV(float,off_magz,  5,100)\
+    DV(float,off_gyrox, 5,100)\
+    DV(float,off_gyroy, 5,100)\
+    DV(float,off_gyroz, 5,100)\
+    DV(float,off_accx,  5,100)\
+    DV(float,off_accy,  5,100)\
+    DV(float,off_accz,  5,100)\
+    DV(float,tilt,      5,100)\
+    DV(float,roll,      5,100)\
+    DV(float,pan,       5,100)\
+    DV(float,tiltoff,   1,100)\
+    DV(float,rolloff,   1,100)\
+    DV(float,panoff,    1,100)\
+    DV(uint16_t,tiltout,1,-1)\
+    DV(uint16_t,rollout,1,-1)\
+    DV(uint16_t,panout, 1,-1)\
+    DV(bool,isCalibrated,5,-1)\
+    DV(bool,btcon,      10,-1)
+
+// To shorten names, as these are sent to the GUI for decoding
+#define u8  uint8_t
+#define u16 uint16_t
+#define s16 int16_t
+#define u32 uint32_t
+#define s32 int32_t
+#define flt float
+#define chr char
+
+// Arrays to be sent back to GUI if enabled
+#define DATA_ARRAYS\
+    DA(u16, chout, 16, 1)\
+    DA(u16, btch, BT_CHANNELS, 1)\
+    DA(u16, ppmch, 16, 1)\
+    DA(u16, sbusch, 16, 1)\
+    DA(flt, quat,4, 1)\
+    DA(chr, btaddr,18, 20)
+
+
 class TrackerSettings : public QObject
 {    
     Q_OBJECT
 public:
-    enum {BTDISABLE,BTMASTER,BTREMOTE};
+    enum {BTDISABLE,BTPARAHEAD,BTPARARMT};
 
     static constexpr int MIN_PWM=988;
     static constexpr int MAX_PWM=2012;
@@ -30,27 +82,43 @@ public:
     static constexpr int HT_ROLL_REVERSE_BIT  = 0x02;
     static constexpr int HT_PAN_REVERSE_BIT   = 0x04;
     static constexpr int DEF_PPM_CHANNELS = 8;
-    static constexpr int DEF_BUTTON_IN = 2; // Chosen because it's beside ground
-    static constexpr int DEF_PPM_OUT = 10; // Random choice
     static constexpr uint16_t DEF_PPM_FRAME = 22500;
     static constexpr uint16_t PPM_MAX_FRAME = 40000;
     static constexpr uint16_t PPM_MIN_FRAME = 12500;
     static constexpr uint16_t PPM_MIN_FRAMESYNC = 4000; // Not adjustable
-    static constexpr int DEF_PPM_SYNC=300;
+    static constexpr int DEF_PPM_SYNC=350;
     static constexpr int PPM_MAX_SYNC=800;
     static constexpr int PPM_MIN_SYNC=100;
+    static constexpr int DEF_BOARD_ROT_X=0;
+    static constexpr int DEF_BOARD_ROT_Y=0;
+    static constexpr int DEF_BOARD_ROT_Z=0;
+    static constexpr int DEF_BUTTON_IN = 2; // Chosen because it's beside ground
+    static constexpr int DEF_PPM_OUT = 10; // Random choice
     static constexpr int DEF_PPM_IN = -1;
-    static constexpr int DEF_CENTER = 1500;
+    static constexpr int PPM_CENTER = 1500;
+    static constexpr int SBUS_CENTER = 992;
+    static constexpr float SBUS_SCALE = 1.6f;
     static constexpr float MIN_GAIN= 0.0;
     static constexpr float MAX_GAIN= 35.0;
     static constexpr float DEF_GAIN= 5.0;
     static constexpr int DEF_BT_MODE= BTDISABLE; // Bluetooth Disabled
     static constexpr int DEF_RST_PPM = -1;
-    static constexpr int DEF_TILT_CH = 6;
-    static constexpr int DEF_ROLL_CH = 7;
-    static constexpr int DEF_PAN_CH = 8;
+    static constexpr int DEF_TILT_CH = 1;
+    static constexpr int DEF_ROLL_CH = 2;
+    static constexpr int DEF_PAN_CH = 3;
     static constexpr int DEF_LP_PAN = 75;
     static constexpr int DEF_LP_TLTRLL = 75;
+    static constexpr int DEF_PWM_A0_CH = -1;
+    static constexpr int DEF_PWM_A1_CH = -1;
+    static constexpr int DEF_PWM_A2_CH = -1;
+    static constexpr int DEF_PWM_A3_CH = -1;
+    static constexpr int DEF_ALG_A6_CH = -1;
+    static constexpr int DEF_ALG_A7_CH = -1;
+    static constexpr float DEF_ALG_GAIN = 303.3f;
+    static constexpr int DEF_ALG_OFFSET = 0;
+    static constexpr int DEF_AUX_CH0 = -1;
+    static constexpr int DEF_AUX_CH1 = -1;
+    static constexpr int DEF_AUX_FUNC = 0;
 
     TrackerSettings(QObject *parent=nullptr);
 
@@ -150,8 +218,8 @@ public:
     bool resetOnWave() const {return _data["rstonwave"].toBool();}
     void setResetOnWave(bool value) {_data["rstonwave"] = value;}
 
-    uint orientation();
-    void setOrientation(uint value);
+    void orientation(int &x,int &y,int &z);
+    void setOrientation(int x,int y,int z);
 
     void gyroOffset(float &x, float &y, float &z);
     void setGyroOffset(float x,float y, float z);
@@ -161,6 +229,34 @@ public:
 
     void magOffset(float &x, float &y, float &z);
     void setMagOffset(float x,float y, float z);
+
+    // Analogs
+    void setAnalog6Ch(int channel) {_data["an6ch"] = channel;}
+    void setAnalog6Gain(float gain);
+    void setAnalog6Offset(int offset) {_data["an6off"] = offset;}
+    void setAnalog7Ch(int channel) {_data["an7ch"] = channel;}
+    void setAnalog7Gain(float gain);
+    void setAnalog7Offset(int offset) {_data["an7off"] = offset;}
+    int analog6Ch() {return _data["an6ch"].toInt() ;}
+    int analog7Ch() {return _data["an7ch"].toInt();}
+    float analog6Gain() {return _data["an6gain"].toFloat();}
+    float analog7Gain() {return _data["an7gain"].toFloat();}
+    int analog6Offset() {return _data["an6off"].toFloat();}
+    int analog7Offset() {return _data["an7off"].toFloat();}
+
+    // Aux Functions
+    void setAuxFunc0Ch(int channel) {_data["aux0ch"] = channel;}
+    void setAuxFunc1Ch(int channel){_data["aux1ch"] = channel;}
+    void setAuxFunc0(int funct) {_data["aux0func"] = funct;}
+    void setAuxFunc1(int funct) {_data["aux1func"] = funct;}
+    int auxFunc0Ch() {return _data["aux0ch"].toInt();}
+    int auxFunc1Ch() {return _data["aux1ch"].toInt();}
+    int auxFunc0() {return _data["aux0func"].toInt();}
+    int auxFunc1() {return _data["aux1func"].toInt();}
+
+    // PWM Functions
+    int pwmCh(int ch) {return _data[QString("pwm%1").arg(ch)].toInt();}
+    void setPWMCh(int ch, int val) {_data[QString("pwm%1").arg(ch)] = val;}
 
     int count() const {return 22;} //BNO, how many values should there be
 
@@ -175,6 +271,7 @@ public:
     QString blueToothAddress();
     bool blueToothConnected() {return _live["btcon"].toBool();}
     QString PPMInString() {return _live["ppmin"].toString();}
+    QString PPMOutString() {return _live["ppmout"].toString();}
 
     void storeSettings(QSettings *settings);
     void loadSettings(QSettings *settings);
@@ -187,6 +284,7 @@ public:
 
     QVariant liveData(const QString &name);
     void setLiveData(const QString &name, const QVariant &live);
+    void clearLiveData() {_live.clear();}
 
     QVariantMap liveDataMap();
     void setLiveDataMap(const QVariantMap &livelist, bool clear=false);
@@ -199,6 +297,14 @@ public:
 
     void clear() {_data.clear();_live.clear();}
 
+    // Realtime data requested from the board
+    // Keeps track of them in _data2send list
+    void clearDataItems();
+    void setDataItemSend(const QString &itm, const bool &enabled);
+    void setDataItemSend(QMap<QString,bool> items);
+    QMap<QString, bool> getDataItemsDiff();
+    void setDataItemsMatched() {_devicerealtimedata = _realtimedata;}
+
 signals:
     void rawGyroChanged(float x, float y, float z);
     void rawAccelChanged(float x, float y, float z);
@@ -206,11 +312,15 @@ signals:
     void rawOrientChanged(float t, float r, float p);
     void offOrientChanged(float t, float r, float p);
     void ppmOutChanged(int t, int r, int p);
+    void liveDataChanged();
+    void requestedDataItemChanged();
 
 private:
     QVariantMap _data; // Data in GUI
     QVariantMap _devicedata; // Stored Data on Device
-    QVariantMap _live; // Live Data
+    QVariantMap _live; // Live Data (Realtime)
+    QMap<QString, bool> _realtimedata;
+    QMap<QString, bool> _devicerealtimedata;
 };
 
 #endif // TRACKERSETTINGS_H
