@@ -52,10 +52,10 @@ void bt_Thread()
     // Reduces BT Data Rate while UI connected.. Issues with BLE lib
     float btperiod = BT_PERIOD;
     if(trkset.blueToothMode() == BTPARAHEAD) { // Head board
-        if(uiconnected) //Slow down transmission rate while connected to the GLUquadric
-            btperiod *= 5.0;
+        if(uiconnected) //Slow down transmission rate while connected to the GUI
+            btperiod *= 10.0;
     } else if(trkset.blueToothMode() == BTPARARMT) {  // Remote board.. Need to call poll often
-        // Full Speed, 40hz need to go fast as possible
+        // Full Speed need to go fast as possible
         btperiod *= 1.0;
     }
 
@@ -81,21 +81,6 @@ BTFunction::BTFunction()
 BTFunction::~BTFunction()
 {
 
-}
-
-// Common to all classes, sets the channel values
-void BTFunction::setChannel(int channel, uint16_t value)
-{
-    // Allowed 0-7 Channels
-    if(channel >= 0 && channel < BT_CHANNELS)
-        chan_vals[channel] = value;
-}
-
-// Sets channel count
-void BTFunction::setChannelCount(int count)
-{
-    if(count >= 0 && count <= BT_CHANNELS)
-        num_chans = count;
 }
 
 

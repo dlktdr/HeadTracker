@@ -29,7 +29,7 @@ Timer watchdog;
 
 #define WATCHDOG_TIMEOUT 10000
 
-uint16_t chanoverrides=0xFFFF;
+uint16_t chanoverrides=0xFFFF; // Default to all enabled
 bool bleconnected=false;
 
 void fff6Written(BLEDevice central, BLECharacteristic characteristic);
@@ -43,9 +43,10 @@ BTParaRmt::BTParaRmt() : BTFunction()
     BTParaInst = this;
     bleconnected = false;
     chanoverrides = 0xFFFF;
-    // Reset all BT channels to center
+
+    // Reset all BT channels to disabled
     for(int i = 0; i <16; i++)
-        chan_vals[i] = TrackerSettings::PPM_CENTER;
+        chan_vals[i] = 0;
 
     serialWriteln("HT: Starting Remote Para Bluetooth");
 
@@ -67,37 +68,28 @@ BTParaRmt::~BTParaRmt()
     // Disconnect
     BLE.disconnect();}
 
-// Non-overridden bluetooth channels return 0
+// Set channel does nothing on a BT receiver (Remote board)
+void BTParaRmt::setChannel(int channel, const uint16_t value)
+{
+
+}
+
+// If not connected, not valid, or channel isn't overriden return zero (disabled)
 uint16_t BTParaRmt::getChannel(int channel)
 {
-    if(channel >= 0 && channel < BT_CHANNELS && bleconnected) {
-        if((1 << channel) & chanoverrides) {
+    if(channel >= 0 &&
+       channel < BT_CHANNELS &&
+       bleconnected == true &&
+       (1 << channel) & chanoverrides)
             return chan_vals[channel];
-        }
-    }
-
     return 0;
 }
 
 void BTParaRmt::execute()
 {
-
-    if(!bleconnected) {
-        for(int i=0;i < BT_CHANNELS; i++)
-            chan_vals[i] = TrackerSettings::PPM_CENTER;
-
-    // If connected, set all non-overrides to center
-    } else {
-        for(int i=0;i < BT_CHANNELS; i++) {
-            if(!(chanoverrides & (1<<i))) {
-                chan_vals[i] = TrackerSettings::PPM_CENTER;
-            }
-        }
-    }
-
      // Start Scan for PARA Slaves
     if(!BLE.connected() && !scanning) {
-        serialWriteln("BLE: Starting Scan");
+        serialWriteln("BRMT: Starting Scan");
         BLE.scan();
         scanning = true;
         bleconnected = false;
@@ -110,9 +102,9 @@ void BTParaRmt::execute()
         if(peripheral) {
 #ifdef DEBUG
             if (peripheral.address() == "") {
-                serialWrite("BLE:  <no advertised address> ");
+                serialWrite("BRMT:  <no advertised address> ");
             } else {
-                serialWrite("BLE: Advertised Device Address: ");
+                serialWrite("BRMT: Advertised Device Address: ");
                 serialWrite(peripheral.address());
             }
             if (peripheral.localName() == "") {
@@ -130,74 +122,87 @@ void BTParaRmt::execute()
             }
             serialWriteln("");
 #endif
-
             if(peripheral.localName() == "Hello" &&
                peripheral.advertisedServiceUuid() == "fff0") {
 
-                serialWriteln("BLE: Found a PARA device");
 #ifdef DEBUG
-                serialWriteln("BLE: Stopping scan");
+                serialWriteln("BRMT: Found a PARA device");
+                serialWriteln("BRMT: Stopping scan");
 #endif
                 BLE.stopScan();
                 scanning = false;
-                serialWriteln("BLE: Connecting...");
+#ifdef DEBUG
+                serialWriteln("BRMT: Connecting...");
+#endif
                 if(peripheral.connect()) {
-                    serialWriteln("BLE: Connected");
+                    serialWriteln("BRMT: Connected");
                     ThisThread::sleep_for(std::chrono::milliseconds(150));
 #ifdef DEBUG
-                    serialWriteln("BLE: Discovering Attributes");
+                    serialWriteln("BRMT: Discovering Attributes");
 #endif
                     if(peripheral.discoverAttributes()) {
-                        serialWriteln("BLE: Discovered Attributes");
+#ifdef DEBUG
+                        serialWriteln("BRMT: Discovered Attributes");
+#endif
                         fff6 = peripheral.service("fff0").characteristic("fff6");
                         if(fff6) {
 #ifdef DEBUG
-                            serialWriteln("BLE: Attaching Event Handler");
+                            serialWriteln("BRMT: Attaching Event Handler");
 #endif
                             fff6.setEventHandler(BLEWritten, fff6Written);  // Call this function on data received
-                            serialWriteln("BLE: Found channel data characteristic");
+                            serialWriteln("BRMT: Found channel data characteristic");
 #ifdef DEBUG
-                            serialWriteln("BLE: Subscribing...");
+                            serialWriteln("BRMT: Subscribing...");
 #endif
                             ThisThread::sleep_for(std::chrono::milliseconds(150));
                             if(fff6.subscribe()) {
 #ifdef DEBUG
-                                serialWriteln("BLE: Subscribed to data!");
+                                serialWriteln("BRMT: Subscribed to data!");
 #endif
                             } else {
-                                serialWriteln("BLE: Subscribe to data failed");
+                                serialWriteln("BRMT: Subscribe to data failed");
                                 fault = true;
                             }
                         } else  {
-                            serialWriteln("BLE: Couldn't find characteristic");
+#ifdef DEBUG
+                            serialWriteln("BRMT: Couldn't find characteristic");
+#endif
                             fault = true;
                         }
                         // If this is a Headtracker it may have a reset center option
                         butpress = peripheral.service("fff1").characteristic("fff2");
                         if(butpress) {
-                            serialWriteln("BLE: Tracker has ability to remote reset center");
+#ifdef DEBUG
+                            serialWriteln("BRMT: Tracker has ability to remote reset center");
+#endif
                         }
                         overridech = peripheral.service("fff1").characteristic("fff1");
                         if(overridech) {
                             overridech.setEventHandler(BLEWritten, overrideWritten);  // Call this function on data received
                             // Initial read of overridden channels
                             overridech.readValue(chanoverrides);
-                            serialWriteln("BLE: Tracker has sent the channels it wants overriden");
+#ifdef DEBUG
+                            serialWriteln("BRMT: Tracker has sent the channels it wants overriden");
+#endif
                             ThisThread::sleep_for(std::chrono::milliseconds(150));
                             if(overridech.subscribe()) {
-                                serialWriteln("BLE: Subscribed to channel overrides!");
+#ifdef DEBUG
+                                serialWriteln("BRMT: Subscribed to channel overrides!");
+#endif
                             } else {
-                                serialWriteln("BLE: Subscribe to override Failed");
+#ifdef DEBUG
+                                serialWriteln("BRMT: Subscribe to override Failed");
+#endif
                                 fault = true;
                             }
                         } else
                             chanoverrides = 0xFFFF;
                     } else {
-                        serialWriteln("BLE: Attribute Discovery Failed");
+                        serialWriteln("BRMT: Attribute Discovery Failed");
                         fault = true;
                         }
                 } else {
-                    serialWriteln("BLE: Couldn't connect to Para Slave, Rescanning");
+                    serialWriteln("BRMT: Couldn't connect to Para Slave, Rescanning");
                     fault = true;
                 }
             }
@@ -216,7 +221,7 @@ void BTParaRmt::execute()
         // if longer than timeout, disconnect.
         uint32_t wdtime = std::chrono::duration_cast<std::chrono::milliseconds>(watchdog.elapsed_time()).count();
         if(wdtime > WATCHDOG_TIMEOUT) {
-            serialWriteln("***WATCHDOG.. Forcing disconnect. No data received");
+            serialWriteln("BRMT: ***WATCHDOG.. Forcing disconnect. No data received");
             BLE.disconnect();
             bleconnected = false;
         }
@@ -250,13 +255,11 @@ void fff6Written(BLEDevice central, BLECharacteristic characteristic) {
         processTrainerByte(buffer1[i]);
     }
 
-    //
+    // Store all channels
     for(int i=0 ; i < BT_CHANNELS; i++) {
         // Only set the data on channels that are allowed to be overriden
-        if(chanoverrides & (1<<i)) {
-            if(BTParaInst) {
-                BTParaInst->chan_vals[i]  = BtChannelsIn[i];
-            }
+        if(BTParaInst) {
+            BTParaInst->chan_vals[i]  = BtChannelsIn[i];
         }
     }
 

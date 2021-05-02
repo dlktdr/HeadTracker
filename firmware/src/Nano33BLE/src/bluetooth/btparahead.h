@@ -15,7 +15,7 @@ public:
     int mode() {return BTPARAHEAD;}
     bool isConnected() {return bleconnected;}
     uint16_t getChannel(int channel);
-    void setChannel(int channel, uint16_t value);
+    void setChannel(int channel, const uint16_t value);
 
 private:
     void sendTrainer();
@@ -41,6 +41,7 @@ private:
     BLECharacteristic *rbfff3;
 
     char _address[20];
+    uint16_t ovridech = 0;
 };
 
 #endif

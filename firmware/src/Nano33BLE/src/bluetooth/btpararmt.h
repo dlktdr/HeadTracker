@@ -24,8 +24,8 @@ public:
     int mode() {return BTPARARMT;}
     bool isConnected() {return bleconnected;}
     uint16_t getChannel(int chn);
-    void setChannelOverrides(uint16_t ov) {chanoverrides = ov;}
     void sendButtonData(char bd);
+    void setChannel(int channel, const uint16_t value);
 
 private:
     int decodeBLEData(uint8_t *buffer, int len, uint16_t *channelvals);

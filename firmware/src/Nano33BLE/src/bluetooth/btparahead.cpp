@@ -115,12 +115,8 @@ void BTParaHead::execute()
             }
         }
 
-        // Set the bits of the overridden channels, for remote PPM in/out
+        // Set the bits of the overridden channels if changed, for remote PPM in/out
         static uint16_t last_ovridech = 0;
-        uint16_t ovridech = 0;
-        ovridech |= 1 << (trkset.tiltCh()-1);
-        ovridech |= 1 << (trkset.rollCh()-1);
-        ovridech |= 1 << (trkset.panCh()-1);
         if(last_ovridech != ovridech)
             rbfff1->writeValue(ovridech);
         last_ovridech = ovridech;
@@ -136,11 +132,6 @@ void BTParaHead::sendTrainer()
         fff6->writeValue(output,len);
 }
 
-// Head BT does not return BT data
-uint16_t BTParaHead::getChannel(int channel)
-{
-    return 0;
-}
 
 // Part of setTrainer to calculate CRC
 // From OpenTX
@@ -153,6 +144,30 @@ void BTParaHead::pushByte(uint8_t byte)
         byte ^= STUFF_MASK;
     }
     buffer[bufferIndex++] = byte;
+}
+
+void BTParaHead::setChannel(int channel, const uint16_t value)
+{
+    if(channel >= BT_CHANNELS)
+        return;
+
+    // If channel disabled, make a note for overriden characteristic
+    // Actuall send it at center so PARA still works
+    if(value == 0) {
+        ovridech &= ~(1<<channel);
+        chan_vals[channel] = TrackerSettings::PPM_CENTER;
+
+    // Otherwise set the value and set that it is valid
+    } else {
+        ovridech |= 1<<channel;
+        chan_vals[channel] = value;
+    }
+}
+
+// Head BT does not return BT data
+uint16_t BTParaHead::getChannel(int channel)
+{
+    return 0;
 }
 
 /* Builds Trainer Data

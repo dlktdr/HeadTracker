@@ -26,14 +26,11 @@ public:
     virtual void execute()=0;
     virtual bool isConnected()=0;
     virtual uint16_t getChannel(int chno)=0;
+    virtual void setChannel(int channel, const uint16_t value)=0;
     virtual int mode() {return BTDISABLE;}
-    void setChannel(int channel, uint16_t value);
-    void setChannelCount(int count);
-    uint16_t chan_vals[16];
-
+    uint16_t chan_vals[BT_CHANNELS];
 private:
 
-    int num_chans;
 };
 
 #endif
