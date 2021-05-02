@@ -171,8 +171,8 @@ void parseData(DynamicJsonDocument &json)
     } else if (strcmp(command, "IH") == 0) {
         __NOP();
 
-    // Stop All Data Items
-    } else if (strcmp(command, "DataItems") == 0) {
+    // Get a List of All Data Items
+    } else if (strcmp(command, "DatLst") == 0) {
         json.clear();
         trkset.setJSONDataList(json);
         json["Cmd"] = "DataList";
@@ -180,22 +180,18 @@ void parseData(DynamicJsonDocument &json)
 
     // Stop All Data Items
     } else if (strcmp(command, "D--") == 0) {
+        serialWrite("HT: Clearing Data List\r\n");
         trkset.stopAllData();
 
-    // Stop Data Item
-    } else if (strcmp(command, "D-") == 0) {
-        JsonVariant v = json["di"];
-        if(!v.isNull()) {
-            const char *di = v;
-            trkset.setDataItemSend(di,false);
-        }
-
-    // Request Data Item
-    } else if (strcmp(command, "D+") == 0) {
-        JsonVariant v = json["di"];
-        if(!v.isNull()) {
-            const char *di = v;
-            trkset.setDataItemSend(di,true);
+    // Request Data Items
+    } else if (strcmp(command, "RD") == 0) {
+        serialWrite("HT: Data Added/Remove\r\n");
+        // using C++11 syntax (preferred):
+        JsonObject root = json.as<JsonObject>();
+        for (JsonPair kv : root) {
+            if(kv.key() == "Cmd")
+                continue;
+            trkset.setDataItemSend(kv.key().c_str(),kv.value().as<bool>());
         }
 
     // Firmware Reqest
