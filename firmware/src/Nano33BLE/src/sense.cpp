@@ -34,6 +34,7 @@
 #include "NXPFusion/Adafruit_AHRS_NXPFusion.h"
 #include "MadgwickAHRS/MadgwickAHRS.h"
 #include "SBUS/uarte_sbus.h"
+#include "PWM/pmw.h"
 
 #ifdef NXP_FILTER
 Adafruit_NXPSensorFusion nxpfilter;
@@ -63,6 +64,7 @@ static uint16_t channel_data[16];
 
 Madgwick madgwick;
 static Timer runt;
+static Timer blefreq;
 
 static int counter=0;
 static bool blesenseboard=true;
@@ -261,7 +263,10 @@ void sense_Thread()
     uint16_t panout_ui = panout + trkset.Pan_cnt();                    // Apply Center Offset
     panout_ui = MAX(MIN(panout_ui,trkset.Pan_max()),trkset.Pan_min()); // Limit Output
 
-    /* --------------------------------------------
+
+    /* ************************************************************
+     *       Build channel data
+     *
      * Build Channel Data
      *   1) Reset all channels to center
      *   2) Set PPMin channels if available
@@ -275,14 +280,18 @@ void sense_Thread()
      *  10) Output to Bluetooth
      *  11) Output to SBUS
      *  12) Output PWM channels
+     *
+     *  Channels should all be set to zero if they don't have valid data
+     *  Only on the output should a channel be set to center if it's still zero
+     *  Allows the GUI to know which channels are valid
      */
 
-    // 1) Reset all Channels to Center
+    // 1) Reset all Channels to zero which means they have no data
     for(int i=0;i<16;i++)
-        channel_data[i] = TrackerSettings::PPM_CENTER;
+        channel_data[i] = 0;
 
-    // 2) Read all PPM inputs, should return 0 channels if disabled or lost
-    PpmIn_execute(); // Read all PPM inputs
+    // 2) Read all PPM inputs
+    PpmIn_execute();
     for(int i=0;i<16;i++)
         ppm_in_chans[i] = 0;    // Reset all PPM in channels to Zero (Not active)
     int ppm_in_chcnt = PpmIn_getChannels(ppm_in_chans);
@@ -296,26 +305,30 @@ void sense_Thread()
 
     //*** Todo
 
-    // 4) Set all incoming BT values, Only set the ones that are overridden
-    uint32_t btoverride=0; // Valid Channels
+    // 4) Set all incoming BT values
+    // Bluetooth cannot send a zero value for a channel. Radios see this as invalid data.
+    // So, if the data is coming from a BLE head unit it also has a characteristic to nofity which ones are valid
+    // allowing PPM/SBUS pass through on the head or remote boards
+    // If the data is coming from a PARA radio all 8ch's are going to have values, all PPM/SBUS inputs 1-8 will be overridden
+
+    for(int i=0;i<BT_CHANNELS;i++)
+        bt_in_chans[i] = 0;    // Reset all BT in channels to Zero (Not active)
     if(btf != nullptr) {
         for(int i=0;i<BT_CHANNELS;i++) {
-            btoverride <<= 1;
-            bt_in_chans[i] = btf->getChannel(i);
-            if(i > 0) {
-                btoverride |= 1;
+            bt_in_chans[i] = btf->getChannel(i); // Read the BT Data
+            if(bt_in_chans[i] > 0) {
                 channel_data[i] = bt_in_chans[i];
             }
         }
     }
 
-    // 5) If selected PPM input channel went > 1800us reset the center
+    // 5) If selected input channel went > 1800us reset the center
     // wait for it to drop below 1700 before allowing another reset
     int rstppmch = trkset.resetCntPPM() - 1;
     static bool hasrstppm=false;
     if(rstppmch >= 0 && rstppmch < 16) {
         if(channel_data[rstppmch] > 1800 && hasrstppm == false) {
-            serialWrite("HT: Reset Center - PPM Channel ");
+            serialWrite("HT: Reset Center - Input Channel ");
             serialWrite(rstppmch+1);
             serialWriteln(" > 1800us");
             pressButton();
@@ -326,10 +339,10 @@ void sense_Thread()
     }
 
     // 6) Set Auxiliary Functions
+    buildAuxData();
     int aux0ch = trkset.auxFunc0Ch();
     int aux1ch = trkset.auxFunc1Ch();
     if(aux0ch > 0 || aux1ch > 0) {
-        buildAuxData();
         if(aux0ch > 0)
             channel_data[aux0ch - 1] = auxdata[trkset.auxFunc0()];
         if(aux1ch > 0)
@@ -342,14 +355,16 @@ void sense_Thread()
         an6 /= 1241.2f; // Equals 0-3.3V w/High resolution Analog Read
         an6 *= trkset.analog6Gain();
         an6 += trkset.analog6Offset();
+        an6 += TrackerSettings::MIN_PWM;
         an6 = MAX(TrackerSettings::MIN_PWM,MIN(TrackerSettings::MAX_PWM,an6));
         channel_data[trkset.analog6Ch()-1] = an6;
     }
     if(trkset.analog7Ch() > 0) {
         float an7 = analogRead(7);
         an7 /= 1241.2f; // Equals 0-3.3V w/High resolution Analog Read
-        an7 *= trkset.analog6Gain();
-        an7 += trkset.analog6Offset();
+        an7 *= trkset.analog7Gain();
+        an7 += trkset.analog7Offset();
+        an7 += TrackerSettings::MIN_PWM;
         an7 = MAX(TrackerSettings::MIN_PWM,MIN(TrackerSettings::MAX_PWM,an7));
         channel_data[trkset.analog7Ch()-1] = an7;
     }
@@ -367,35 +382,57 @@ void sense_Thread()
 
     // 9) Set the PPM Outputs
     for(int i=0;i<PpmOut_getChnCount();i++) {
-        PpmOut_setChannel(i,channel_data[i]);
+        uint16_t ppmout = channel_data[i];
+        if(ppmout == 0)
+            ppmout = TrackerSettings::PPM_CENTER;
+        PpmOut_setChannel(i,ppmout);
     }
 
-    // 10) Set all the BT Channels
+    // 10) Set all the BT Channels, send the zeros.
     bool bleconnected=false;
     BTFunction *bt = trkset.getBTFunc();
     if(bt != nullptr) {
         bleconnected = bt->isConnected();
         trkset.setBLEAddress(bt->address());
-
-        for(int i=0;i<16;i++) {
+        for(int i=0;i < BT_CHANNELS;i++) {
             bt->setChannel(i,channel_data[i]);
         }
     }
 
-    // 11) Set all SBUS output channels
+    // 11) Set all SBUS output channels, if disabled set to center
     uint16_t sbus_data[16];
     for(int i=0;i<16;i++) {
-        sbus_data[i] = (static_cast<float>(channel_data[i]) - TrackerSettings::PPM_CENTER) * TrackerSettings::SBUS_SCALE + TrackerSettings::SBUS_CENTER;
+        uint16_t sbusout = channel_data[i];
+        if(sbusout == 0)
+            sbusout = TrackerSettings::PPM_CENTER;
+        sbus_data[i] = (static_cast<float>(sbusout) - TrackerSettings::PPM_CENTER) * TrackerSettings::SBUS_SCALE + TrackerSettings::SBUS_CENTER;
     }
     SBUS_TX_BuildData(sbus_data);
 
     // 12) Set PWM Channels
+    for(int i=0;i<4;i++) {
+        int pwmch = trkset.PWMCh(i)-1;
+        if(pwmch >= 0 && pwmch < 16) {
+            uint16_t pwmout = channel_data[pwmch];
+            if(pwmout == 0)
+                pwmout = TrackerSettings::PPM_CENTER;
+            setPWMValue(i,pwmout);
+        }
+    }
 
-    // *** TODO
+    /* ************************************************************
+     * Sensor Reading Below, done after channels for timing reasons
+     *    as below code can vary wildly. So delayed by one sample
+     ************************************************************/
 
-    // Get new data from sensors..
-    //  FIX MEE I2C is hogging 40% of processor just waiting! UGG Needs to be changed to non-blocking
+    // If not using any of the tilt roll or pan outputs
+    // Don't bother wasting time calculating the tilt/roll/pan outputs
+    // If ui connected, do it so you can still see the outputs.
 
+    if(tltch < 0 && panch < 0 && rllch < 0 && uiconnected == false)
+        counter = -1;
+
+    // Oversampling.
     if(++counter == SENSEUPDATE) {
         counter = 0;
 
@@ -585,7 +622,7 @@ void buildAuxData()
     auxdata[2] = (gyrz / 1000) * pwmrange + TrackerSettings::PPM_CENTER;
     auxdata[3] = (accx / 2.0f) * pwmrange + TrackerSettings::PPM_CENTER;
     auxdata[4] = (accy / 2.0f) * pwmrange + TrackerSettings::PPM_CENTER;
-    auxdata[5] = (accz / 2.0f) * pwmrange + TrackerSettings::PPM_CENTER;
+    auxdata[5] = (accz / 1.0f) * pwmrange + TrackerSettings::PPM_CENTER;
     auxdata[6] = ((accz -1.0f) / 2.0f) * pwmrange + TrackerSettings::PPM_CENTER;
     auxdata[7] = static_cast<float>(BLE.central().rssi()) / 127.0 * pwmrange + TrackerSettings::MIN_PWM;
 }
