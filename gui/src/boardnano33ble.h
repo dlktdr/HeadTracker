@@ -38,6 +38,7 @@ public:
     void requestParameters();
     void startCalibration();
     void startData();
+    void stopData();
     void allowAccessChanged(bool acc);
 
 private:
@@ -59,6 +60,7 @@ private:
     QTimer imheretimout;
     QTimer updatesettingstmr;
     QTimer rxParamsTimer;
+    QTimer reqDataItemsChanged;
 
     CalibrateBLE *bleCalibratorDialog;
 
@@ -67,10 +69,25 @@ private:
     uint16_t escapeCRC(uint16_t crc);
     void nakError();
 
+    template<class T>
+    class ArrayType {
+        ArrayType() {}
+    public:
+        static const T *getData(const QByteArray &ba, int &len) {
+            T* array = (T*)ba.constData();
+            len = ba.size() / sizeof(T);
+            return array;
+        }
+    };
+
 private slots:
 
     void ihTimeout();
     void rxParamsTimeout();
+    void changeDataItems();
+    void reqDataItemChanged();
 };
+
+
 
 #endif // BOARDNANO33BLE_H

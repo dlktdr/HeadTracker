@@ -9,6 +9,10 @@ BoardNano33BLE::BoardNano33BLE(TrackerSettings *ts)
     connect(&rxParamsTimer,SIGNAL(timeout()),this,SLOT(rxParamsTimeout()));
     rxParamsTimer.setSingleShot(true);
     connect(bleCalibratorDialog,&CalibrateBLE::calibrationSave,this,&BoardNano33BLE::saveToRAM);
+    connect(trkset,SIGNAL(requestedDataItemChanged()),this,SLOT(reqDataItemChanged()));
+    reqDataItemsChanged.setSingleShot(true);
+    reqDataItemsChanged.setInterval(200);
+    connect(&reqDataItemsChanged,SIGNAL(timeout()),this,SLOT(changeDataItems()));
 }
 
 BoardNano33BLE::~BoardNano33BLE()
@@ -24,6 +28,7 @@ void BoardNano33BLE::dataIn(QByteArray &data)
         //uint16_t crc = crcs[0] << 8 | crcs[1];
 
         QByteArray stripped = data.mid(1,data.length()-4);
+        qDebug() << "JSONIn" << stripped;
         //uint crc2 = escapeCRC(uCRC16Lib::calculate(stripped.data(), stripped.length()));
         /*if(crc != crc2) {
             qDebug() << "CRC Fault" << crc << crc2;
@@ -139,8 +144,41 @@ void BoardNano33BLE::rxParamsTimeout()
     }
 }
 
+// Function calls a timer, so if multiple emits in short order it only
+// causes a single write.
+void BoardNano33BLE::reqDataItemChanged()
+{
+    reqDataItemsChanged.stop();
+    reqDataItemsChanged.start();
+}
+
+// Add/Remove data items to be received from the board
+void BoardNano33BLE::changeDataItems()
+{
+    QMap<QString,bool> toChange = trkset->getDataItemsDiff();
+
+    QVariantMap di;
+    QMapIterator<QString, bool> i(toChange);
+    while (i.hasNext()) {
+        i.next();
+        di[i.key()] = i.value();
+    }
+    sendSerialJSON("RD",di);
+
+    // Notify the tracker settings that we have updated the board
+    trkset->setDataItemsMatched();
+}
+
 void BoardNano33BLE::startCalibration()
 {
+    QMap<QString, bool> dat;
+    dat["magx"] = true;
+    dat["magy"] = true;
+    dat["magz"] = true;
+    dat["gyrox"] = true;
+    dat["gyroy"] = true;
+    dat["gyroz"] = true;
+    trkset->setDataItemSend(dat);
     bleCalibratorDialog->show();
 }
 
@@ -149,6 +187,12 @@ void BoardNano33BLE::startData()
     jsonqueue.clear();
     jsonfaults = 0;
     ihTimeout();
+}
+
+void BoardNano33BLE::stopData()
+{
+    // Used on boot to reset data
+    sendSerialJSON("D--"); // Stop all Data
 }
 
 void BoardNano33BLE::allowAccessChanged(bool acc)
@@ -197,6 +241,7 @@ void BoardNano33BLE::sendSerialJSON(QString command, QVariantMap map)
     uint16_t CRC = escapeCRC(uCRC16Lib::calculate(json.toUtf8().data(),json.length()));
 
     lastjson = (char)0x02 + json.toLatin1() + QByteArray::fromRawData((char*)&CRC,2) + (char)0x03 + "\r\n";
+    qDebug() << "JSONout" << lastjson;
 
     // If there is data that didn't make it there yet push this data to the queue
     // to be sent later
@@ -229,12 +274,60 @@ void BoardNano33BLE::parseIncomingJSON(const QVariantMap &map)
 
     // Data sent, Update the graph / servo sliders / calibration
     } else if (map["Cmd"].toString() == "Data") {
-        // Add all the data to the settings
-        trkset->setLiveDataMap(map);
+        QVariantMap cmap = map;
+
+
+        // Decode Base64 encoded arrays
+        int arrlength=0;
+        for (QVariantMap::const_iterator it = cmap.cbegin(), end = cmap.cend(); it != end; ++it) {
+            if(it.key().startsWith('6')) {
+                QByteArray arr = QByteArray::fromBase64(it.value().toByteArray());                
+                if(it.key().endsWith("u16")) {
+                    const uint16_t *darray = ArrayType<uint16_t>::getData(arr,arrlength);
+                    for(int i=0;i< arrlength;i++) {
+                        trkset->setLiveData(it.key().mid(1,it.key().length()-4) + "[" +QString::number(i) + "]",darray[i]);
+                    }
+                } else if(it.key().endsWith("chr")) {
+                    const char *darray = ArrayType<char>::getData(arr,arrlength);
+                    trkset->setLiveData(it.key().mid(1,it.key().length()-4),darray);
+                } else if(it.key().endsWith("u8")) {
+                    const uint8_t *darray = ArrayType<uint8_t>::getData(arr,arrlength);
+                    for(int i=0;i< arrlength;i++) {
+                        trkset->setLiveData(it.key().mid(1,it.key().length()-3) + QString("[%1]").arg(i),darray[i]);
+                    }
+                } else if(it.key().endsWith("s16")) {
+                    const int16_t *darray = ArrayType<int16_t>::getData(arr,arrlength);
+                    for(int i=0;i< arrlength;i++) {
+                        qDebug() << darray[i];
+                    }
+                } else if(it.key().endsWith("u32")) {
+                    const uint32_t *darray = ArrayType<uint32_t>::getData(arr,arrlength);
+                    for(int i=0;i< arrlength;i++) {
+                        qDebug() << darray[i];
+                    }
+                } else if(it.key().endsWith("s32")) {
+                    const int32_t *darray = ArrayType<int32_t>::getData(arr,arrlength);
+                    for(int i=0;i< arrlength;i++) {
+                        qDebug() << darray[i];
+                    }
+                } else if(it.key().endsWith("flt")) {
+                    const float *darray = ArrayType<float>::getData(arr,arrlength);
+                    for(int i=0;i< arrlength;i++) {
+                        trkset->setLiveData(it.key().mid(1,it.key().length()-4) + QString("[%1]").arg(i),darray[i]);
+                    }
+                }                
+
+                // Don't add it as encoded
+                cmap.remove(it.key());
+            }
+        }
+
+        // Add all the non array live data
+        trkset->setLiveDataMap(cmap);
 
         // Remind user to calibrate
-        if(map.contains("magcal")) {
-            if(map["magcal"].toBool() == false && calmsgshowed == false) {
+        if(cmap.contains("magcal")) {
+            if(cmap["magcal"].toBool() == false && calmsgshowed == false) {
                 emit needsCalibration();
                 calmsgshowed = true;
             }

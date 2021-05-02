@@ -33,6 +33,7 @@ public:
     void requestParameters();
     void startCalibration();
     void startData();
+    void stopData() {}
     void allowAccessChanged(bool acc);
 
 private:
