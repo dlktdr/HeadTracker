@@ -71,6 +71,75 @@ void SBUS_TX_Start()
     NRF_UARTE1->TASKS_STARTTX = 1;
 }
 
+void SBUS_Init(int txPin, int invTxPin)
+{
+    isSBUSInit = false;
+
+    // Disable UART1 + Interrupt & IRQ controller
+    NRF_UARTE1->ENABLE = UARTE_ENABLE_ENABLE_Disabled << UARTE_ENABLE_ENABLE_Pos;
+    NRF_UARTE1->EVENTS_ENDTX = 0;
+    NVIC_DisableIRQ(UARTE1_IRQn);
+    NRF_UARTE1->INTENCLR = UARTE_INTENSET_ENDTX_Msk;
+
+    // Baud 100000, 8E2
+    // 25 Byte Data Send Length
+    NRF_UARTE1->BAUDRATE = BAUD100000;
+    NRF_UARTE1->CONFIG = CONF8E2;
+    sbusTXD.PTR = (uint32_t)sbusDMATx;
+    sbusTXD.MAXCNT = SBUS_FRAME_LEN;
+    sbusTXD.AMOUNT = 0;
+    NRF_UARTE1->TXD = sbusTXD;
+
+    int dpintopin[]  = {3,10,11,12,15,13,14,23,21,27,2,1,8,13};
+    int dpintoport[] = {1,1,1 ,1 ,1 ,1 ,1 ,0 ,0 ,0 ,1,1,1,0 };
+
+    int tpin = dpintopin[txPin];
+    int tport = dpintoport[txPin];
+    int invtxpin = dpintopin[invTxPin];
+    int invtxport = dpintoport[invTxPin];
+
+    // Only Enable TX Pin
+    NRF_UARTE1->PSEL.TXD = (tpin << UARTE_PSEL_TXD_PIN_Pos) | (tport << UARTE_PSEL_TXD_PORT_Pos);
+    NRF_UARTE1->PSEL.RXD = UARTE_PSEL_RXD_CONNECT_Disconnected << UARTE_PSEL_RXD_CONNECT_Pos;
+    NRF_UARTE1->PSEL.CTS = UARTE_PSEL_CTS_CONNECT_Disconnected << UARTE_PSEL_CTS_CONNECT_Pos;
+    NRF_UARTE1->PSEL.RTS = UARTE_PSEL_RTS_CONNECT_Disconnected << UARTE_PSEL_RTS_CONNECT_Pos;
+
+    // Below uses two GPIOTE's to read the TX pin and cause it to be inverted on the RX pin
+
+    // Setup as an input, when TX pin toggles state state causes the event to trigger and through
+    // PPI toggle the output pin on next GPIOTE
+
+    NRF_GPIOTE->CONFIG[4] = (GPIOTE_CONFIG_MODE_Event << GPIOTE_CONFIG_MODE_Pos) |
+            (GPIOTE_CONFIG_POLARITY_Toggle << GPIOTE_CONFIG_POLARITY_Pos) |
+            (tpin <<  GPIOTE_CONFIG_PSEL_Pos) |
+            (tport << GPIOTE_CONFIG_PORT_Pos);
+
+    NRF_GPIOTE->CONFIG[5] = (GPIOTE_CONFIG_MODE_Task << GPIOTE_CONFIG_MODE_Pos) |
+            (GPIOTE_CONFIG_POLARITY_Toggle << GPIOTE_CONFIG_POLARITY_Pos) |
+            (invtxpin <<  GPIOTE_CONFIG_PSEL_Pos) |
+            (invtxport << GPIOTE_CONFIG_PORT_Pos);// |
+            //(1 << GPIOTE_CONFIG_OUTINIT_Pos);            // Initial value of pin low
+
+    // On Compare equals Value, Toggle IO Pin
+    NRF_PPI->CH[11].EEP = (uint32_t)&NRF_GPIOTE->EVENTS_IN[4];
+    NRF_PPI->CH[11].TEP = (uint32_t)&NRF_GPIOTE->TASKS_OUT[5];
+
+    // Enable PPI 11
+    NRF_PPI->CHEN |= (PPI_CHEN_CH11_Enabled << PPI_CHEN_CH11_Pos);
+
+    // Enable the interrupt vector in IRQ Controller
+    NVIC_SetVector(UARTE1_IRQn,(uint32_t)&SBUS_TX_Complete_Interrupt);
+    NVIC_EnableIRQ(UARTE1_IRQn);
+
+    // Enable interupt in peripheral
+    NRF_UARTE1->INTENSET = UARTE_INTENSET_ENDTX_Msk;
+
+    // Enable UART1
+    NRF_UARTE1->ENABLE = UARTE_ENABLE_ENABLE_Enabled << UARTE_ENABLE_ENABLE_Pos;
+    isSBUSInit = true;
+}
+
+
 // Build Channel Data
 
 /*  FROM -----
@@ -125,45 +194,3 @@ void SBUS_TX_BuildData(uint16_t ch_[16])
     buf_[24] = FOOTER_;
 }
 
-void SBUS_Init(int pinNum)
-{
-    isSBUSInit = false;
-
-    // Disable UART1 + Interrupt & IRQ controller
-    NRF_UARTE1->ENABLE = UARTE_ENABLE_ENABLE_Disabled << UARTE_ENABLE_ENABLE_Pos;
-    NRF_UARTE1->EVENTS_ENDTX = 0;
-    NVIC_DisableIRQ(UARTE1_IRQn);
-    NRF_UARTE1->INTENCLR = UARTE_INTENSET_ENDTX_Msk;
-
-    // Baud 100000, 8E2
-    // DMA max transfer always 25 bytes
-    NRF_UARTE1->BAUDRATE = BAUD100000;
-    NRF_UARTE1->CONFIG = CONF8E2;
-    sbusTXD.PTR = (uint32_t)sbusDMATx;
-    sbusTXD.MAXCNT = SBUS_FRAME_LEN;
-    sbusTXD.AMOUNT = 0;
-    NRF_UARTE1->TXD = sbusTXD;
-
-    int dpintopin[]  = {0,0,11,12,15,13,14,23,21,27,2,1,8,13};
-    int dpintoport[] = {0,0,1 ,1 ,1 ,1 ,1 ,0 ,0 ,0 ,1,1,1,0 };
-
-    int pin = dpintopin[pinNum];
-    int port = dpintoport[pinNum];
-
-    // Only Enable TX Pin
-    NRF_UARTE1->PSEL.TXD = (pin << UARTE_PSEL_TXD_PIN_Pos) | (port << UARTE_PSEL_TXD_PORT_Pos);
-    NRF_UARTE1->PSEL.RXD = UARTE_PSEL_RXD_CONNECT_Disconnected << UARTE_PSEL_RXD_CONNECT_Pos;
-    NRF_UARTE1->PSEL.CTS = UARTE_PSEL_CTS_CONNECT_Disconnected << UARTE_PSEL_CTS_CONNECT_Pos;
-    NRF_UARTE1->PSEL.RTS = UARTE_PSEL_RTS_CONNECT_Disconnected << UARTE_PSEL_RTS_CONNECT_Pos;
-
-    // Enable the interrupt vector in IRQ Controller
-    NVIC_SetVector(UARTE1_IRQn,(uint32_t)&SBUS_TX_Complete_Interrupt);
-    NVIC_EnableIRQ(UARTE1_IRQn);
-
-    // Enable interupt in peripheral
-    NRF_UARTE1->INTENSET = UARTE_INTENSET_ENDTX_Msk;
-
-    // Enable UART1
-    NRF_UARTE1->ENABLE = UARTE_ENABLE_ENABLE_Enabled << UARTE_ENABLE_ENABLE_Pos;
-    isSBUSInit = true;
-}
