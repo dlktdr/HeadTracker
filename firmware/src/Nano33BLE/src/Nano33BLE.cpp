@@ -34,6 +34,7 @@
 #include "serial.h"
 #include "main.h"
 #include "SBUS/uarte_sbus.h"
+#include "PWM/pmw.h"
 
 const char *FW_VERSION = "1.0";
 const char *FW_BOARD = "NANO33BLE";
@@ -77,8 +78,13 @@ void setup()
     // Actual Calculations - sense.cpp
     sense_Init();
 
-    // Start SBUS - sbus.cpp
-    SBUS_Init(4);
+    // ********************* !!!
+    // set, #define SERIAL_HOWMANY		0 in pins_arduino.h to disable _UART1 on TX/RX pins first
+    // Start SBUS - SBUS/uarte_sbus.cpp (Pins D0/TX, D1/RX)
+    SBUS_Init(0,1);
+
+    // PWM Outputs - Fixed to A0-A3
+    PWM_Init(50); // Start PWM at 100 Hz update rate
 
     // Load settings from flash - trackersettings.cpp
     trkset.loadFromEEPROM();
