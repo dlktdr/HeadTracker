@@ -28,8 +28,9 @@ SOURCES += \
     calibrate/rawdata.cpp \
     calibrateble.cpp \
     calibratebno.cpp \
+    channelviewer.cpp \
     diagnosticdisplay.cpp \
-    firmware.cpp \
+    firmwarewizard.cpp \
     gainslider.cpp \
     magcalwidget.cpp \
     main.cpp \
@@ -50,8 +51,9 @@ HEADERS += \
     calibrate/imuread.h \
     calibrateble.h \
     calibratebno.h \
+    channelviewer.h \
     diagnosticdisplay.h \
-    firmware.h \
+    firmwarewizard.h \
     gainslider.h \
     magcalwidget.h \
     mainwindow.h \
@@ -66,8 +68,9 @@ HEADERS += \
 FORMS += \
     calibrateble.ui \
     calibratebno.ui \
+    channelviewer.ui \
     diagnosticdisplay.ui \
-    firmware.ui \
+    firmwarewizard.ui \
     mainwindow.ui
 
 # Default rules for deployment.
