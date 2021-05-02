@@ -68,18 +68,20 @@ TrackerSettings::TrackerSettings()
     magsioff[6] = 0; magsioff[7] = 0; magsioff[8] = 1;
 
     // Define Data Variables from X Macro
-    #define DV(DT, NAME) NAME = 0;
+    #define DV(DT, NAME, DIV, ROUND) NAME = 0;
         DATA_VARS
     #undef DV
 
     // Fill all arrays to zero
-    #define DA(DT, NAME, SIZE) memset(NAME, 0, sizeof(DT)*SIZE);
+    #define DA(DT, NAME, SIZE, DIV) memset(NAME, 0, sizeof(DT)*SIZE);
         DATA_ARRAYS
     #undef DA
 
     // Default data outputs, Pan,Tilt,Roll outputs and Inputs for Graph and Output bars
-    senddatavars = 0b11111111000000000000000000000;
-    senddataarry = 0b1;
+    senddatavars = 0;
+    senddataarray = 0;
+    //senddatavars = 0b11111111000000000000000000000;
+    //senddataarray = 0b1;
 
     // PPM Defaults
     ppmoutpin = DEF_PPM_OUT;
@@ -93,10 +95,10 @@ TrackerSettings::TrackerSettings()
     rstppm = DEF_RST_PPM;
 
     // PWM defaults
-    pwm0 = DEF_PWM_A0_CH;
-    pwm1 = DEF_PWM_A1_CH;
-    pwm2 = DEF_PWM_A2_CH;
-    pwm3 = DEF_PWM_A3_CH;
+    pwm[0] = DEF_PWM_A0_CH;
+    pwm[1] = DEF_PWM_A1_CH;
+    pwm[2] = DEF_PWM_A2_CH;
+    pwm[3] = DEF_PWM_A3_CH;
 
     // Analog defaults
     an6ch = DEF_ALG_A6_CH;
@@ -120,7 +122,9 @@ TrackerSettings::TrackerSettings()
     // Features defaults
     rstonwave = false;
     isCalibrated = false;
-    orient = 0;
+    rotx = DEF_BOARD_ROT_X;
+    roty = DEF_BOARD_ROT_Y;
+    rotz = DEF_BOARD_ROT_Z;
 
     // Setup button input & ppm output pins, bluetooth
     setButtonPin(buttonpin);
@@ -467,10 +471,11 @@ void TrackerSettings::setResetOnWave(bool value)
     rstonwave = value;
 }
 
-void TrackerSettings::setPWMCh(int pwmno, int &pwmch)
+void TrackerSettings::setPWMCh(int pwmno, int pwmch)
 {
-    if((pwmno > 0 && pwmno <= 16) || pwmno == -1) {
-        pwmch = pwmno;
+    if(pwmno >= 0 && pwmno <= 3) {
+        if(pwmch > 0 && pwmch <= 16)
+            pwm[pwmno] = pwmch;
     }
 }
 
@@ -490,13 +495,13 @@ void TrackerSettings::setAuxFunc1Ch(int channel)
 
 void TrackerSettings::setAuxFunc0(int funct)
 {
-    if((funct >= AUX_GYRX && funct <= AUX_ACCELZO) || funct == -1)
+    if((funct >= AUX_GYRX && funct <= BT_RSSI) || funct == -1)
         aux0func = funct;
 }
 
 void TrackerSettings::setAuxFunc1(int funct)
 {
-    if((funct >= AUX_GYRX && funct <= AUX_ACCELZO) || funct == -1)
+    if((funct >= AUX_GYRX && funct <= BT_RSSI) || funct == -1)
         aux1func = funct;
 }
 
@@ -584,7 +589,7 @@ void TrackerSettings::setBlueToothMode(int mode)
     if(_btf == nullptr) {
         // Disabled
         if(mode == BTDISABLE) {
-            sprintf(bleaddress,"00:00:00:00:00:00");
+            sprintf(btaddr,"00:00:00:00:00:00");
 
         // PARA FRSky Mode Transmitter (Slave)
         } else if(mode == BTPARAHEAD) {
@@ -604,55 +609,27 @@ void TrackerSettings::setBLEValues(uint16_t vals[BT_CHANNELS])
 //----------------------------------------------------------------
 // Orentation
 
-int TrackerSettings::orientation()
+void TrackerSettings::setOrientation(int rx, int ry, int rz)
 {
-    return orient;
-}
-
-void TrackerSettings::setOrientation(int ori)
-{
-    if(ori >= 0 && ori <= 6) {
-        orient = ori;
-        reset_fusion();
-    }
+    rotx = rx;
+    roty = ry;
+    rotz = rz;
+    reset_fusion(); // Cause imu to reset
 }
 
 void TrackerSettings::orientRotations(float rot[3])
 {
-    switch(orient) {
-        case 0: // Default
-            rot[0] = 0; rot[1] = 0; rot[2] = 0;
-            break;
-        case 1: // Tilt 90
-            rot[0] = 90; rot[1] = 0; rot[2] = 0;
-            break;
-        case 2: // Tilt -90
-            rot[0] = -90; rot[1] = 0; rot[2] = 0;
-            break;
-        case 3: // Tilt 180
-            rot[0] = 180; rot[1] = 0; rot[2] = 0;
-            break;
-        case 4: // Roll 90
-            rot[0] = 0; rot[1] = 90; rot[2] = 0;
-            break;
-        case 5: // Roll -90
-            rot[0] = 0; rot[1] = 90; rot[2] = 0;
-            break;
-        case 6: // Tilt 90, Pan 90
-            rot[0] = 90; rot[1] = 0; rot[2] = 90;
-            break;
-        default:
-            rot[0] = 0; rot[1] = 0; rot[2] = 0;
-    }
+    rot[0] = rotx;
+    rot[1] = roty;
+    rot[2] = rotz;
 }
-
 
 //----------------------------------------------------------------------------------------
 // Data sent the PC, for calibration and info
 
 void TrackerSettings::setBLEAddress(const char *addr)
 {
-    strcpy(bleaddress,addr);
+    strcpy(btaddr, addr);
 }
 
 void TrackerSettings::setPPMInValues(uint16_t vals[16])
@@ -784,7 +761,10 @@ void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
     v = json["btmode"]; if(!v.isNull()) setBlueToothMode(v);
 
 // Orientation
-   v = json["orient"]; if(!v.isNull()) setOrientation(v);
+   v = json["rotx"]; if(!v.isNull()) setOrientation(v,roty,rotz);
+   v = json["roty"]; if(!v.isNull()) setOrientation(rotx,v,rotz);
+   v = json["rotz"]; if(!v.isNull()) setOrientation(rotx,roty,v);
+
 
 // Reset On Wave
     v = json["rstonwave"]; if(!v.isNull()) setResetOnWave(v);
@@ -829,10 +809,10 @@ void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
     v = json["ppmsync"]; if(!v.isNull()) setPPMSync(v);
 
 // PWM Settings
-    v = json["pwm0"]; if(!v.isNull()) setPWMCh(0,pwm0);
-    v = json["pwm1"]; if(!v.isNull()) setPWMCh(1,pwm1);
-    v = json["pwm2"]; if(!v.isNull()) setPWMCh(2,pwm2);
-    v = json["pwm3"]; if(!v.isNull()) setPWMCh(3,pwm3);
+    v = json["pwm0"]; if(!v.isNull()) setPWMCh(0,v);
+    v = json["pwm1"]; if(!v.isNull()) setPWMCh(1,v);
+    v = json["pwm2"]; if(!v.isNull()) setPWMCh(2,v);
+    v = json["pwm3"]; if(!v.isNull()) setPWMCh(3,v);
 
 // Analog Settings
     v = json["an6ch"]; if(!v.isNull()) setAnalog6Ch(v);
@@ -937,10 +917,10 @@ void TrackerSettings::setJSONSettings(DynamicJsonDocument &json)
     json["rstppm"] = rstppm;
 
 // PWM Settings
-    json["pwm0"] = pwm0;
-    json["pwm1"] = pwm1;
-    json["pwm2"] = pwm2;
-    json["pwm3"] = pwm3;
+    json["pwm0"] = pwm[0];
+    json["pwm1"] = pwm[1];
+    json["pwm2"] = pwm[2];
+    json["pwm3"] = pwm[3];
 
 // Analog Settings
     json["an6ch"] = an6ch;
@@ -963,7 +943,9 @@ void TrackerSettings::setJSONSettings(DynamicJsonDocument &json)
     json["rstonwave"] = rstonwave;
 
 // Orientation
-    json["orient"] = orient;
+    json["rotx"] = rotx;
+    json["roty"] = roty;
+    json["rotz"] = rotz;
 
 // Calibration Values
     json["accxoff"] = accxoff;
@@ -1034,7 +1016,7 @@ void TrackerSettings::setDataItemSend(const char *var, bool enabled)
     int id=0;
 
     // Macro Expansion for Data Variables + Arrays
-    #define DV(DT, NAME)\
+    #define DV(DT, NAME, DIV, ROUND)\
     if(strcmp(var,#NAME)==0)\
     {\
         enabled==true?senddatavars|=1<<id:senddatavars&=~(1<<id);\
@@ -1044,10 +1026,12 @@ void TrackerSettings::setDataItemSend(const char *var, bool enabled)
         DATA_VARS
     #undef DV
 
-    #define DA(DT, NAME, SIZE)\
+    id=0;
+
+    #define DA(DT, NAME, SIZE, DIV)\
     if(strcmp(var,#NAME)==0)\
     {\
-        enabled==true?senddataarry|=1<<id:senddataarry&=~(1<<id);\
+        enabled==true?senddataarray|=1<<id:senddataarray&=~(1<<id);\
         return;\
     }\
     id++;
@@ -1061,7 +1045,7 @@ void TrackerSettings::setDataItemSend(const char *var, bool enabled)
 void TrackerSettings::stopAllData()
 {
     senddatavars = 0;
-    senddataarry = 0;
+    senddataarray = 0;
 }
 
 /* Returns a list of all the Data Variables available in json
@@ -1069,52 +1053,66 @@ void TrackerSettings::stopAllData()
 
 void TrackerSettings::setJSONDataList(DynamicJsonDocument &json)
 {
-    JsonArray array;
+    JsonArray array = json.createNestedArray();
 
     // Macro Expansion for Data Variables + Arrays
-    #define DV(DT, NAME)\
+    #define DV(DT, NAME, DIV, ROUND)\
         array.add(#NAME);
         DATA_VARS
     #undef DV
 
-    #define DA(DT, NAME, SIZE)\
+    #define DA(DT, NAME, SIZE, DIV)\
         array.add(#NAME);
         DATA_ARRAYS
     #undef DA
-
-    // Append All Variables in a JSON Array
-    json["ditems"] = array;
 }
 
 // Used to transmit raw data back to the GUI
 void TrackerSettings::setJSONData(DynamicJsonDocument &json)
 {
+    static int counter=0;
     // Macro Expansion for Data Variables + Arrays
 
     // Sends only requested data items
+    // Updates only as often as specified, 1 = every cycle
     // Two Decimals is most precision of any data item req as of now.
     // For most items ends up less bytes than base64 encoding everything
     int id=0;
-    #define DV(DT, NAME)\
-    if(senddatavars & 1<<id) {\
-        json[#NAME] = roundf((float)NAME*100)/100;\
+    int itemcount=0;
+    #define DV(DT, NAME, DIV, ROUND)\
+    if(senddatavars & 1<<id && counter % DIV == 0) {\
+        if(ROUND == -1)\
+            json[#NAME] = NAME;\
+        else\
+            json[#NAME] = roundf(((float)NAME * ROUND)) / ROUND;\
+        itemcount++;\
     }\
     id++;
         DATA_VARS
     #undef DV
 
-    // Send only requested data arrays, arrays are base64 encoded for reduced data transfer
-    // Variable names prepended by 64 to so GUI can decode them
-    // Also sends the orig data type for decoding
+
+
+    // Send only requested data arrays, arrays are base64 encoded
+    // Variable names prepended by 6 so GUI knows to decode them
+    // Suffixed with the 3 character data type
+    // Length can be determined with above info
+
     id=0;
     char b64array[500];
-    #define DA(DT, NAME, SIZE)\
-    if(senddataarry & 1<<id) {\
+
+    #define DA(DT, NAME, SIZE, DIV)\
+    if(senddataarray & 1<<id && counter % DIV == 0) {\
         encode_base64((unsigned char*)NAME, sizeof(DT)*SIZE,(unsigned char*)b64array);\
-        json["64"#NAME] = b64array;\
-        json["dt"] = #DT;\
+        json["6" #NAME #DT] = b64array;\
     }\
     id++;
         DATA_ARRAYS
     #undef DA
+
+    // Used for reduced data divisor
+    counter++;
+    if(counter > 100) {
+        counter = 0;
+    }
 }

@@ -10,46 +10,56 @@
 #include "config.h"
 #include "serial.h"
 
-
 // Variables to be sent back to GUI if enabled
+// Datatype, Name, UpdateDivisor, RoundTo
 #define DATA_VARS\
-    DV(float,magx)\
-    DV(float,magy)\
-    DV(float,magz)\
-    DV(float,gyrox)\
-    DV(float,gyroy)\
-    DV(float,gyroz)\
-    DV(float,accx)\
-    DV(float,accy)\
-    DV(float,accz)\
-    DV(float,off_magx)\
-    DV(float,off_magy)\
-    DV(float,off_magz)\
-    DV(float,off_gyrox)\
-    DV(float,off_gyroy)\
-    DV(float,off_gyroz)\
-    DV(float,off_accx)\
-    DV(float,off_accy)\
-    DV(float,off_accz)\
-    DV(float,tilt)\
-    DV(float,roll)\
-    DV(float,pan)\
-    DV(float,tiltoff)\
-    DV(float,rolloff)\
-    DV(float,panoff)\
-    DV(uint16_t,tiltout)\
-    DV(uint16_t,rollout)\
-    DV(uint16_t,panout)\
-    DV(bool,isCalibrated)\
-    DV(bool,btcon)
+    DV(float,magx,      1,100)\
+    DV(float,magy,      1,100)\
+    DV(float,magz,      1,100)\
+    DV(float,gyrox,     1,100)\
+    DV(float,gyroy,     1,100)\
+    DV(float,gyroz,     1,100)\
+    DV(float,accx,      1,100)\
+    DV(float,accy,      1,100)\
+    DV(float,accz,      1,100)\
+    DV(float,off_magx,  5,100)\
+    DV(float,off_magy,  5,100)\
+    DV(float,off_magz,  5,100)\
+    DV(float,off_gyrox, 5,100)\
+    DV(float,off_gyroy, 5,100)\
+    DV(float,off_gyroz, 5,100)\
+    DV(float,off_accx,  5,100)\
+    DV(float,off_accy,  5,100)\
+    DV(float,off_accz,  5,100)\
+    DV(float,tilt,      5,100)\
+    DV(float,roll,      5,100)\
+    DV(float,pan,       5,100)\
+    DV(float,tiltoff,   1,100)\
+    DV(float,rolloff,   1,100)\
+    DV(float,panoff,    1,100)\
+    DV(uint16_t,tiltout,1,-1)\
+    DV(uint16_t,rollout,1,-1)\
+    DV(uint16_t,panout, 1,-1)\
+    DV(bool,isCalibrated,5,-1)\
+    DV(bool,btcon,      10,-1)
 
-// Arrays to be sent back to GUI if enabled
+// To shorten names, as these are sent to the GUI for decoding
+#define u8  uint8_t
+#define u16 uint16_t
+#define s16 int16_t
+#define u32 uint32_t
+#define s32 int32_t
+#define flt float
+#define chr char
+
+// Arrays to be sent back to GUI if enabled, Base64 Encoded
 #define DATA_ARRAYS\
-    DA(uint16_t, chout, 16)\
-    DA(uint16_t, btch, BT_CHANNELS)\
-    DA(uint16_t, ppmch, 16)\
-    DA(uint16_t, sbusch, 16)\
-    DA(float,quat,4)
+    DA(u16, chout, 16, 1)\
+    DA(u16, btch, BT_CHANNELS, 1)\
+    DA(u16, ppmch, 16, 1)\
+    DA(u16, sbusch, 16, 1)\
+    DA(flt, quat,4, 1)\
+    DA(chr, btaddr,18, 20)
 
 // Global Config Values
 class TrackerSettings
@@ -62,7 +72,8 @@ public:
         AUX_ACCELX, // 3
         AUX_ACCELY, // 4
         AUX_ACCELZ, // 5
-        AUX_ACCELZO}; // 6
+        AUX_ACCELZO, // 6
+        BT_RSSI}; // 7
 
     static constexpr int MIN_PWM=988;
     static constexpr int MAX_PWM=2012;
@@ -79,9 +90,12 @@ public:
     static constexpr uint16_t PPM_MAX_FRAME = 40000;
     static constexpr uint16_t PPM_MIN_FRAME = 12500;
     static constexpr uint16_t PPM_MIN_FRAMESYNC = 4000; // Not adjustable
-    static constexpr int DEF_PPM_SYNC=300;
+    static constexpr int DEF_PPM_SYNC=350;
     static constexpr int PPM_MAX_SYNC=800;
     static constexpr int PPM_MIN_SYNC=100;
+    static constexpr int DEF_BOARD_ROT_X=0;
+    static constexpr int DEF_BOARD_ROT_Y=0;
+    static constexpr int DEF_BOARD_ROT_Z=0;
     static constexpr int DEF_BUTTON_IN = 2; // Chosen because it's beside ground
     static constexpr int DEF_PPM_OUT = 10; // Random choice
     static constexpr int DEF_PPM_IN = -1;
@@ -108,35 +122,9 @@ public:
     static constexpr int DEF_ALG_OFFSET = 0;
     static constexpr int DEF_AUX_CH0 = -1;
     static constexpr int DEF_AUX_CH1 = -1;
-    static constexpr int DEF_AUX_FUNC = -1;
+    static constexpr int DEF_AUX_FUNC = 0;
     static constexpr int MAX_DATA_VARS = 30;
-    const char CHAN_DATA_STR[28][12] = {"TILT", //0
-                                        "ROLL",
-                                        "PAN",
-                                        "BT_IN_1", //3
-                                        "BT_IN_2",
-                                        "BT_IN_3",
-                                        "BT_IN_4",
-                                        "BT_IN_5",
-                                        "BT_IN_6",
-                                        "BT_IN_7",
-                                        "BT_IN_8",
-                                        "PWM_IN_1", // 11
-                                        "PWM_IN_2",
-                                        "PWM_IN_3",
-                                        "PWM_IN_4",
-                                        "PWM_IN_5",
-                                        "PWM_IN_6",
-                                        "PWM_IN_7",
-                                        "PWM_IN_8",
-                                        "PWM_IN_9",
-                                        "PWM_IN_10",
-                                        "PWM_IN_11",
-                                        "PWM_IN_12",
-                                        "PWM_IN_13",
-                                        "PWM_IN_14",
-                                        "PWM_IN_15",
-                                        "PWM_IN_16"};
+
     TrackerSettings();
 
     int Rll_min() const;
@@ -243,16 +231,15 @@ public:
     bool isBlueToothConnected() {return btcon;}
     void setBlueToothConnected(bool con) {btcon = con;}
 
-    int orientation();
-    void setOrientation(int ori);
+    void setOrientation(int rx, int ry, int rz);
     void orientRotations(float rot[3]);
 
     void magSiOffset(float v[]) {memcpy(v,magsioff,9*sizeof(float));}
     void setMagSiOffset(float v[]) {memcpy(magsioff,v,9*sizeof(float));}
 
 // PWM Channels
-    void setPWMCh(int pwmno, int &pwmch);
-    int PWMCh(int pwmno);
+    void setPWMCh(int pwmno, int pwmch);
+    int PWMCh(int pwmno) { return pwm[pwmno];}
 
 // Analogs
     void setAnalog6Ch(int channel);
@@ -321,6 +308,9 @@ private:
     float accxoff, accyoff, acczoff;
     float gyrxoff, gyryoff, gyrzoff;
 
+    // Board Rotation
+    int rotx,roty,rotz;
+
     int servoreverse;
     int lppan,lptiltroll;
     int buttonpin,ppmoutpin,ppminpin;
@@ -331,13 +321,12 @@ private:
 
     bool rstonwave;
     bool freshProgram;
-    int orient;
     int rstppm;
     uint16_t ppmfrm;   // PPM Frame Len
     uint16_t ppmsync;  // Sync Setting
     uint16_t ppmchcnt; // Channel Count
 
-    int pwm0,pwm1,pwm2,pwm3; // PWM Output Pins
+    int pwm[4]; // PWM Output Pins
     int an6ch,an7ch; // Analog Channels
     float an6gain,an7gain; // Analog Gains
     float an6off,an7off; // Analog Offsets
@@ -346,19 +335,17 @@ private:
 
     // Bit map of data to send to GUI, max 64 items
     uint64_t senddatavars;
-    uint32_t senddataarry;
+    uint32_t senddataarray;
 
     // Define Data Variables from X Macro
-    #define DV(DT, NAME) DT NAME;
+    #define DV(DT, NAME, DIV, ROUND) DT NAME;
         DATA_VARS
     #undef DV
 
     // Define Data Arrays from X Macro
-    #define DA(DT, NAME, SIZE) DT NAME[SIZE];
+    #define DA(DT, NAME, SIZE, DIV) DT NAME[SIZE];
         DATA_ARRAYS
     #undef DA
-
-    char bleaddress[20];
     };
 
 #endif
