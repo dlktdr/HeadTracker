@@ -34,10 +34,10 @@ void io_Init()
     digitalWrite(LEDB,HIGH);
 
     // Pins used to check timing
-    pinMode(A0, OUTPUT); // Sensor thread
-    pinMode(A1, OUTPUT); //
-    pinMode(A2, OUTPUT); //
-    pinMode(A3, OUTPUT); //
+    /*pinMode(A0, OUTPUT);//    PWM 0
+    pinMode(A1, OUTPUT);  //    PWM 1
+    pinMode(A2, OUTPUT);  //    PWM 2
+    pinMode(A3, OUTPUT); //     PWM 3 */
     pinMode(A4, OUTPUT); //
     pinMode(A5, OUTPUT); //
     pinMode(A6, INPUT); // Analog input
