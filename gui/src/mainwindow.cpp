@@ -29,7 +29,7 @@ MainWindow::MainWindow(QWidget *parent)
     // Once correct board is discovered this will be set to one of the above boards
     currentboard = nullptr;
 
-    setWindowTitle(windowTitle() + " " + version);
+    setWindowTitle(windowTitle() + " " + version + " " + versionsuffix);
 
     // Serial Connection
     serialcon = new QSerialPort;
@@ -39,6 +39,7 @@ MainWindow::MainWindow(QWidget *parent)
     serialDebug = new QTextEdit();
     serialDebug->setWindowTitle("Serial Information");
     serialDebug->resize(600,300);
+    channelviewer = new ChannelViewer(&trkset);
 
 #ifdef DEBUG_HT
     serialDebug->show();
@@ -113,6 +114,13 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->spnLPTiltRoll2,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->spnPPMSync,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->spnPPMFrameLen,SIGNAL(valueChanged(double)),this,SLOT(updateFromUI()));
+    connect(ui->spnA6Gain,SIGNAL(valueChanged(double)),this,SLOT(updateFromUI()));
+    connect(ui->spnA6Off,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->spnA7Gain,SIGNAL(valueChanged(double)),this,SLOT(updateFromUI()));
+    connect(ui->spnA7Off,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->spnRotX,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->spnRotY,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->spnRotZ,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
 
     // Gain Sliders
     connect(ui->til_gain,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
@@ -137,6 +145,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(&trkset,&TrackerSettings::rawOrientChanged,this,&MainWindow::offOrientChanged);
     connect(&trkset,&TrackerSettings::offOrientChanged,this,&MainWindow::offOrientChanged);
     connect(&trkset,&TrackerSettings::ppmOutChanged,this,&MainWindow::ppmOutChanged);
+    connect(&trkset,&TrackerSettings::liveDataChanged,this,&MainWindow::liveDataChanged);
 
     // Combo Boxes
         // Add Remap Choices + The corresponding values
@@ -156,10 +165,19 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->cmbButtonPin,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbPpmInPin,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbPpmOutPin,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->cmbBtMode,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->cmbOrientation,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->cmbBtMode,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));    
     connect(ui->cmbResetOnPPM,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbPPMChCount,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->cmbA6Ch,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->cmbA7Ch,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->cmbAuxFn0,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->cmbAuxFn1,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->cmbAuxFn0Ch,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->cmbAuxFn1Ch,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->cmbPWM0,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->cmbPWM1,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->cmbPWM2,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->cmbPWM3,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
 
     // Menu Actions
     connect(ui->action_Save_to_File,SIGNAL(triggered()),this,SLOT(saveSettings()));
@@ -168,6 +186,10 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->actionFirmware_Wizard,SIGNAL(triggered()),this,SLOT(uploadFirmwareWizard()));
     connect(ui->actionShow_Data,SIGNAL(triggered()),this,SLOT(showDiagsClicked()));
     connect(ui->actionShow_Serial_Transmissions,SIGNAL(triggered()),this,SLOT(showSerialDiagClicked()));
+    connect(ui->actionChannel_Viewer,SIGNAL(triggered()),this,SLOT(showChannelViewerClicked()));
+
+    // Tab Widget
+    connect(ui->tabBLE,&QTabWidget::currentChanged,this,&MainWindow::BLE33tabChanged);
 
     // Timers    
     connect(&rxledtimer,SIGNAL(timeout()),this,SLOT(rxledtimeout()));
@@ -286,6 +308,9 @@ void MainWindow::serialDisconnect()
     requestParamsTimer.stop();
     waitingOnParameters = false;
     serialData.clear();
+    channelviewer->setBoard(nullptr);
+    channelviewer->hide();
+    trkset.clearDataItems();
 
     // Notify all boards we have disconnected
 }
@@ -295,6 +320,7 @@ void MainWindow::serialError(QSerialPort::SerialPortError err)
     switch(err) {
     // Issue with connection - device unplugged
     case QSerialPort::ResourceError: {
+        addToLog(tr("Connection lost"));
         serialcon->close();
         serialDisconnect();
         break;
@@ -438,8 +464,7 @@ void MainWindow::updateToUI()
     ui->spnPPMSync->blockSignals(true);
     ui->cmbPpmInPin->blockSignals(true);
     ui->cmbButtonPin->blockSignals(true);
-    ui->cmbBtMode->blockSignals(true);
-    ui->cmbOrientation->blockSignals(true);
+    ui->cmbBtMode->blockSignals(true);    
     ui->cmbResetOnPPM->blockSignals(true);
     ui->spnLPPan->blockSignals(true);
     ui->spnLPTiltRoll->blockSignals(true);
@@ -448,32 +473,79 @@ void MainWindow::updateToUI()
     ui->til_gain->blockSignals(true);
     ui->rll_gain->blockSignals(true);
     ui->pan_gain->blockSignals(true);
-
+    ui->cmbA6Ch->blockSignals(true);
+    ui->cmbA7Ch->blockSignals(true);   
+    ui->spnA6Gain->blockSignals(true);
+    ui->spnA7Gain->blockSignals(true);
+    ui->spnA6Off->blockSignals(true);
+    ui->spnA7Off->blockSignals(true);
+    ui->cmbAuxFn0->blockSignals(true);
+    ui->cmbAuxFn1->blockSignals(true);
+    ui->cmbAuxFn0Ch->blockSignals(true);
+    ui->cmbAuxFn1Ch->blockSignals(true);
+    ui->cmbPWM0->blockSignals(true);
+    ui->cmbPWM1->blockSignals(true);
+    ui->cmbPWM2->blockSignals(true);
+    ui->cmbPWM3->blockSignals(true);
+    ui->spnRotX->blockSignals(true);
+    ui->spnRotY->blockSignals(true);
+    ui->spnRotZ->blockSignals(true);
 
     ui->spnLPTiltRoll->setValue(trkset.lpTiltRoll());
     ui->spnLPPan->setValue(trkset.lpPan());
     ui->spnLPTiltRoll2->setValue(trkset.lpTiltRoll());
     ui->spnLPPan2->setValue(trkset.lpPan());
-
+    ui->spnA6Gain->setValue(trkset.analog6Gain());
+    ui->spnA7Gain->setValue(trkset.analog7Gain());
+    ui->spnA6Off->setValue(trkset.analog6Offset());
+    ui->spnA7Off->setValue(trkset.analog7Offset());
 
     int panCh = trkset.panCh();
     int rllCh = trkset.rollCh();
     int tltCh = trkset.tiltCh();
+    int a6Ch = trkset.analog6Ch();
+    int a7Ch = trkset.analog7Ch();
+    int auxF0Ch = trkset.auxFunc0Ch();
+    int auxF1Ch = trkset.auxFunc1Ch();
+    int pwm0Ch = trkset.pwmCh(0);
+    int pwm1Ch = trkset.pwmCh(1);
+    int pwm2Ch = trkset.pwmCh(2);
+    int pwm3Ch = trkset.pwmCh(3);
+
+    // Tilt/Rll/Pan Ch
     ui->cmbpanchn->setCurrentIndex(panCh==-1?0:panCh);
     ui->cmbrllchn->setCurrentIndex(rllCh==-1?0:rllCh);
     ui->cmbtiltchn->setCurrentIndex(tltCh==-1?0:tltCh);
+    // Analog CH
+    ui->cmbA6Ch->setCurrentIndex(a6Ch==-1?0:a6Ch);
+    ui->cmbA7Ch->setCurrentIndex(a7Ch==-1?0:a7Ch);
+    // Aux Funcs
+    ui->cmbAuxFn0Ch->setCurrentIndex(auxF0Ch==-1?0:auxF0Ch);
+    ui->cmbAuxFn1Ch->setCurrentIndex(auxF1Ch==-1?0:auxF1Ch);
+    ui->cmbAuxFn0->setCurrentIndex(trkset.auxFunc0());
+    ui->cmbAuxFn1->setCurrentIndex(trkset.auxFunc1());
+    // PWM Chs
+    ui->cmbPWM0->setCurrentIndex(pwm0Ch==-1?0:pwm0Ch);
+    ui->cmbPWM1->setCurrentIndex(pwm1Ch==-1?0:pwm1Ch);
+    ui->cmbPWM2->setCurrentIndex(pwm2Ch==-1?0:pwm2Ch);
+    ui->cmbPWM3->setCurrentIndex(pwm3Ch==-1?0:pwm3Ch);
 
     ui->cmbRemap->setCurrentIndex(ui->cmbRemap->findData(trkset.axisRemap()));
     ui->cmbSigns->setCurrentIndex(trkset.axisSign());
-    ui->cmbBtMode->setCurrentIndex(trkset.blueToothMode());    
-    ui->cmbOrientation->setCurrentIndex(trkset.orientation());
+    ui->cmbBtMode->setCurrentIndex(trkset.blueToothMode());
+    int rot[3];
+    trkset.orientation(rot[0],rot[1],rot[2]);
+    ui->spnRotX->setValue(rot[0]);
+    ui->spnRotY->setValue(rot[1]);
+    ui->spnRotZ->setValue(rot[2]);
+
     ui->til_gain->setValue(trkset.Tlt_gain()*10);
     ui->pan_gain->setValue(trkset.Pan_gain()*10);
     ui->rll_gain->setValue(trkset.Rll_gain()*10);
 
     int ppout_index = trkset.ppmOutPin()-1;
     int ppin_index = trkset.ppmInPin()-1;
-    int but_index = trkset.buttonPin()-1;
+    int but_index = trkset.buttonPin()-1;    
     int resppm_index = trkset.resetCntPPM();
     ui->cmbPpmOutPin->setCurrentIndex(ppout_index < 1 ? 0 : ppout_index);
     ui->cmbPpmInPin->setCurrentIndex(ppin_index < 1 ? 0 : ppin_index);
@@ -503,8 +575,7 @@ void MainWindow::updateToUI()
     ui->spnPPMSync->blockSignals(false);
     ui->cmbPpmInPin->blockSignals(false);
     ui->cmbButtonPin->blockSignals(false);
-    ui->cmbBtMode->blockSignals(false);
-    ui->cmbOrientation->blockSignals(false);
+    ui->cmbBtMode->blockSignals(false);    
     ui->cmbResetOnPPM->blockSignals(false);
     ui->spnLPPan->blockSignals(false);
     ui->spnLPTiltRoll->blockSignals(false);
@@ -513,6 +584,25 @@ void MainWindow::updateToUI()
     ui->til_gain->blockSignals(false);
     ui->rll_gain->blockSignals(false);
     ui->pan_gain->blockSignals(false);
+    ui->cmbA6Ch->blockSignals(false);
+    ui->cmbA7Ch->blockSignals(false);
+    ui->spnA6Gain->blockSignals(false);
+    ui->spnA7Gain->blockSignals(false);
+    ui->spnA6Off->blockSignals(false);
+    ui->spnA7Off->blockSignals(false);
+    ui->cmbAuxFn0->blockSignals(false);
+    ui->cmbAuxFn1->blockSignals(false);
+    ui->cmbAuxFn0Ch->blockSignals(false);
+    ui->cmbAuxFn1Ch->blockSignals(false);
+    ui->cmbPWM0->blockSignals(false);
+    ui->cmbPWM1->blockSignals(false);
+    ui->cmbPWM2->blockSignals(false);
+    ui->cmbPWM3->blockSignals(false);
+    ui->spnRotX->blockSignals(false);
+    ui->spnRotY->blockSignals(false);
+    ui->spnRotZ->blockSignals(false);
+
+
 }
 
 // Update the Settings Class from the UI Data
@@ -551,12 +641,37 @@ void MainWindow::updateFromUI()
     trkset.setPanReversed(ui->chkpanrev->isChecked());
     trkset.setTiltReversed(ui->chktltrev->isChecked());
 
+    trkset.setAnalog6Gain(ui->spnA6Gain->value());
+    trkset.setAnalog7Gain(ui->spnA7Gain->value());
+    trkset.setAnalog6Offset(ui->spnA6Off->value());
+    trkset.setAnalog7Offset(ui->spnA7Off->value());
+    int an6Ch = ui->cmbA6Ch->currentIndex();
+    int an7Ch = ui->cmbA7Ch->currentIndex();
+    trkset.setAnalog6Ch(an6Ch==0?-1:an6Ch);
+    trkset.setAnalog7Ch(an7Ch==0?-1:an7Ch);
+
+    int auxF0Ch = ui->cmbAuxFn0Ch->currentIndex();
+    int auxF1Ch = ui->cmbAuxFn1Ch->currentIndex();
+    trkset.setAuxFunc0Ch(auxF0Ch==0?-1:auxF0Ch);
+    trkset.setAuxFunc1Ch(auxF1Ch==0?-1:auxF1Ch);
+    trkset.setAuxFunc0(ui->cmbAuxFn0->currentIndex());
+    trkset.setAuxFunc1(ui->cmbAuxFn1->currentIndex());
+
     int panCh = ui->cmbpanchn->currentIndex();
     int rllCh = ui->cmbrllchn->currentIndex();
     int tltCh = ui->cmbtiltchn->currentIndex();
     trkset.setPanCh(panCh==0?-1:panCh);
     trkset.setRollCh(rllCh==0?-1:rllCh);
     trkset.setTiltCh(tltCh==0?-1:tltCh);
+
+    int pwmCh0 = ui->cmbPWM0->currentIndex();
+    int pwmCh1 = ui->cmbPWM1->currentIndex();
+    int pwmCh2 = ui->cmbPWM2->currentIndex();
+    int pwmCh3 = ui->cmbPWM3->currentIndex();
+    trkset.setPWMCh(0,pwmCh0==0?-1:pwmCh0);
+    trkset.setPWMCh(1,pwmCh1==0?-1:pwmCh1);
+    trkset.setPWMCh(2,pwmCh2==0?-1:pwmCh2);
+    trkset.setPWMCh(3,pwmCh3==0?-1:pwmCh3);
 
     trkset.setAxisRemap(ui->cmbRemap->currentData().toUInt());
     trkset.setAxisSign(ui->cmbSigns->currentIndex());
@@ -604,7 +719,10 @@ void MainWindow::updateFromUI()
     trkset.setResetCntPPM(rstppm_index==0?-1:rstppm_index);
 
     trkset.setBlueToothMode(ui->cmbBtMode->currentIndex());
-    trkset.setOrientation(ui->cmbOrientation->currentIndex());
+
+    trkset.setOrientation(ui->spnRotX->value(),
+                          ui->spnRotY->value(),
+                          ui->spnRotZ->value());
 
     trkset.setInvertedPpmOut(ui->chkInvertedPPM->isChecked());
     trkset.setInvertedPpmIn(ui->chkInvertedPPMIn->isChecked());
@@ -687,10 +805,11 @@ void MainWindow::ppmOutChanged(int t,int r,int p)
     ui->servoPan->setShowActualPosition(true);
     ui->servoTilt->setShowActualPosition(true);
     ui->servoRoll->setShowActualPosition(true);
+}
 
-    // Good enough spot to update these values...
+void MainWindow::liveDataChanged()
+{
     ui->lblBLEAddress->setText(trkset.blueToothAddress());
-    ui->lblPPMin->setText("<b>PPM Input:</b>\n" + trkset.PPMInString());
     ui->btLed->setState(trkset.blueToothConnected());
     if(trkset.blueToothConnected())
         ui->lblBTConnected->setText("Connected");
@@ -887,6 +1006,56 @@ void MainWindow::showSerialDiagClicked()
     serialDebug->raise();
 }
 
+void MainWindow::showChannelViewerClicked()
+{
+    channelviewer->show();
+    channelviewer->activateWindow();
+    channelviewer->raise();
+}
+
+void MainWindow::BLE33tabChanged()
+{
+    if(currentboard == nullptr)
+        return;
+
+    QMap<QString,bool> dataitms;
+    dataitms["tiltoff"] = true;
+    dataitms["rolloff"] = true;
+    dataitms["panoff"] = true;
+    dataitms["tiltout"] = true;
+    dataitms["rollout"] = true;
+    dataitms["panout"] = true;
+    dataitms["btcon"] = false;
+    dataitms["btaddr"] = false;
+
+    switch(ui->tabBLE->currentIndex()) {
+    case 0: { // General
+        break;
+    }
+    case 1: { // Output
+        break;
+    }
+    case 2: { // PPM In
+        break;
+    }
+    case 3: { // Bluetooth
+        dataitms["btcon"] = true;
+        dataitms["btaddr"] = true;
+        break;
+    }
+    case 4: { // PWM
+        break;
+    }
+    case 5: { // Extras
+        break;
+    }
+    default:
+        break;
+    }
+
+    trkset.setDataItemSend(dataitms);
+}
+
 void MainWindow::paramSendStart()
 {
     statusMessage("Starting parameter send",3000);
@@ -917,6 +1086,7 @@ void MainWindow::paramReceiveComplete()
     statusMessage("Parameters Request Complete",5000);
     waitingOnParameters = false;
     updateToUI();
+    BLE33tabChanged(); // Request Data to be sent
 }
 
 void MainWindow::paramReceiveFailure(int)
@@ -972,7 +1142,7 @@ void MainWindow::boardDiscovered(BoardType *brd)
         ui->cmdSend->setEnabled(true);
         ui->cmdSaveNVM->setEnabled(true);
         ui->cmdCalibrate->setEnabled(true);
-        ui->stackedWidget->setCurrentIndex(3);       
+        ui->stackedWidget->setCurrentIndex(3);
         ui->tabBLE->setCurrentIndex(0);
 
         // Check Firmware Version is Compatible
@@ -997,7 +1167,7 @@ void MainWindow::boardDiscovered(BoardType *brd)
             msgbox->setWindowTitle("Firmware Version Mismatch");
             msgbox->show();
         }
-
+        channelviewer->setBoard(currentboard);
     } else if (brd->boardName() == "BNO055") {
         addToLog("Connected to a " + brd->boardName() + "\n");
         ui->cmdStartGraph->setVisible(true);

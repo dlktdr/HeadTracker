@@ -14,16 +14,15 @@
 #include <QQueue>
 #include <QTextEdit>
 #include "trackersettings.h"
-#include "firmware.h"
-#include "calibratebno.h"
-#include "calibrateble.h"
+#include "firmwarewizard.h"
+#include "channelviewer.h"
 #include "diagnosticdisplay.h"
 #include "boardnano33ble.h"
 #include "boardbno055.h"
 
 const int MAX_LOG_LENGTH=6000; // How many bytes to keep of log data in the gui
-const QString version="0.90"; // Current Version Number
-const QString fwversion="09"; // Which suffix on firmware file to use from GITHUB
+const QString version="1.00"; // Current Version Number
+const QString versionsuffix="RC1"; // Version Suffix
 const QStringList firmwares={"BNO055","NANO33BLE"}; // Allowable hardware types
 
 const int IMHERETIME=8000; // milliseconds before sending another I'm Here Message to keep communication open
@@ -62,8 +61,10 @@ private:
     int boardRequestIndex;
 
     QString logd;
-    Firmware *firmwareUploader;
+    //Firmware *firmwareUploader;
+    FirmwareWizard *firmwareWizard;
     DiagnosticDisplay *diagnostic;
+    ChannelViewer *channelviewer;
     QMessageBox *msgbox;
     QTextEdit *serialDebug;
 
@@ -92,6 +93,7 @@ private slots:
     void updateToUI();
     void offOrientChanged(float,float,float);
     void ppmOutChanged(int,int,int);
+    void liveDataChanged();
     void serialReadReady();
     void manualSend();
     void storeToNVM();
@@ -101,11 +103,14 @@ private slots:
     void txledtimeout();
     void saveSettings();
     void loadSettings();
-    void uploadFirmwareClick();
+    void uploadFirmwareWizard();
     void startCalibration();
     void startData();
     void showDiagsClicked();
     void showSerialDiagClicked();
+    void showChannelViewerClicked();
+    void BLE33tabChanged();
+
 
     // Board Connections
     void paramSendStart();
