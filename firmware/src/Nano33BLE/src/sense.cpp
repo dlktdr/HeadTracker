@@ -35,6 +35,7 @@
 #include "MadgwickAHRS/MadgwickAHRS.h"
 #include "SBUS/uarte_sbus.h"
 #include "PWM/pmw.h"
+#include "filters.h"
 
 #ifdef NXP_FILTER
 Adafruit_NXPSensorFusion nxpfilter;
@@ -57,7 +58,8 @@ static float l_panout=0, l_tiltout=0, l_rollout=0;
 // Input Channel Data
 static uint16_t ppm_in_chans[16];
 static uint16_t sbus_in_chans[16];
-static uint16_t bt_in_chans[BT_CHANNELS];
+static uint16_t bt_chans[BT_CHANNELS];
+static float bt_chansf[BT_CHANNELS];
 
 // Output channel data
 static uint16_t channel_data[16];
@@ -101,6 +103,10 @@ int sense_Init()
     // Initalize Gesture Sensor
     if(!APDS.begin())
         blesenseboard = false;
+
+    for(int i = 0; i< BT_CHANNELS; i++) {
+        bt_chansf[i] = 0;
+    }
 
     return 0;
 }
@@ -243,32 +249,27 @@ void sense_Thread()
     // Tilt output
     float tiltout = (tilt - tiltoffset) * trkset.Tlt_gain() * (trkset.isTiltReversed()?-1.0:1.0);
     float beta = (float)trkset.lpTiltRoll() / 100;                        // LP Beta
-    tiltout = beta * tiltout + (1.0 - beta) * l_tiltout;                  // Low Pass
-    l_tiltout = tiltout;
+    filter_expAverage(&tiltout, beta, &l_tiltout);
     uint16_t tiltout_ui = tiltout + trkset.Tlt_cnt();                     // Apply Center Offset
     tiltout_ui = MAX(MIN(tiltout_ui,trkset.Tlt_max()),trkset.Tlt_min());  // Limit Output
 
     // Roll output
     float rollout = (roll - rolloffset) * trkset.Rll_gain() * (trkset.isRollReversed()? -1.0:1.0);
-    rollout = beta * rollout + (1.0 - beta) * l_rollout;                  // Low Pass
-    l_rollout = rollout;
+    filter_expAverage(&rollout, beta, &l_rollout);
     uint16_t rollout_ui = rollout + trkset.Rll_cnt();                     // Apply Center Offset
     rollout_ui = MAX(MIN(rollout_ui,trkset.Rll_max()),trkset.Rll_min());  // Limit Output
 
     // Pan output, Normalize to +/- 180 Degrees
     float panout = normalize((pan-panoffset),-180,180)  * trkset.Pan_gain() * (trkset.isPanReversed()? -1.0:1.0);
-    beta = (float)trkset.lpPan() / 100;                                // LP Beta
-    panout = beta * panout + (1.0 - beta) * l_panout;                  // Low Pass
-    l_panout = panout;
+    filter_expAverage(&panout, (float)trkset.lpPan() / 100, &l_panout);
     uint16_t panout_ui = panout + trkset.Pan_cnt();                    // Apply Center Offset
     panout_ui = MAX(MIN(panout_ui,trkset.Pan_max()),trkset.Pan_min()); // Limit Output
-
 
     /* ************************************************************
      *       Build channel data
      *
      * Build Channel Data
-     *   1) Reset all channels to center
+     *   1) Reset all channels to disabled
      *   2) Set PPMin channels if available
      *   3) Set SBUSin channels if available
      *   4) Set received BT channels if available
@@ -311,13 +312,16 @@ void sense_Thread()
     // allowing PPM/SBUS pass through on the head or remote boards
     // If the data is coming from a PARA radio all 8ch's are going to have values, all PPM/SBUS inputs 1-8 will be overridden
 
+    float btbeta = 0.1; // Found by tests to be suitable value
     for(int i=0;i<BT_CHANNELS;i++)
-        bt_in_chans[i] = 0;    // Reset all BT in channels to Zero (Not active)
+        bt_chans[i] = 0;    // Reset all BT in channels to Zero (Not active)
     if(btf != nullptr) {
         for(int i=0;i<BT_CHANNELS;i++) {
-            bt_in_chans[i] = btf->getChannel(i); // Read the BT Data
-            if(bt_in_chans[i] > 0) {
-                channel_data[i] = bt_in_chans[i];
+            float btvalue = btf->getChannel(i); // Read the BT Data
+            if(btvalue > 0) {
+                filter_lowPass(btvalue, bt_chansf + i, btbeta);
+                bt_chans[i] = bt_chansf[i];
+                channel_data[i] = bt_chans[i];
             }
         }
     }
@@ -522,7 +526,7 @@ void sense_Thread()
 
         // PPM Input Values
         trkset.setPPMInValues(ppm_in_chans);
-        trkset.setBLEValues(bt_in_chans);
+        trkset.setBLEValues(bt_chans);
         trkset.setSBUSValues(sbus_in_chans);
         trkset.setChannelOutValues(channel_data);
 
