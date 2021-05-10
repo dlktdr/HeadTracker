@@ -40,7 +40,7 @@
     DV(uint16_t,tiltout,1,-1)\
     DV(uint16_t,rollout,1,-1)\
     DV(uint16_t,panout, 1,-1)\
-    DV(bool,isCalibrated,5,-1)\
+    DV(bool,isCalibrated,2,-1)\
     DV(bool,btcon,      10,-1)
 
 // To shorten names, as these are sent to the GUI for decoding
@@ -53,13 +53,15 @@
 #define chr char
 
 // Arrays to be sent back to GUI if enabled, Base64 Encoded
+// Datatype, Name, Size, UpdateDivisor
 #define DATA_ARRAYS\
     DA(u16, chout, 16, 1)\
     DA(u16, btch, BT_CHANNELS, 1)\
     DA(u16, ppmch, 16, 1)\
     DA(u16, sbusch, 16, 1)\
     DA(flt, quat,4, 1)\
-    DA(chr, btaddr,18, 20)
+    DA(chr, btaddr,18, 20)\
+    DA(chr, btrmt,18, -1)
 
 // Global Config Values
 class TrackerSettings
@@ -118,7 +120,7 @@ public:
     static constexpr int DEF_PWM_A3_CH = -1;
     static constexpr int DEF_ALG_A6_CH = -1;
     static constexpr int DEF_ALG_A7_CH = -1;
-    static constexpr float DEF_ALG_GAIN = 303.3f;
+    static constexpr float DEF_ALG_GAIN = 310.0f;
     static constexpr int DEF_ALG_OFFSET = 0;
     static constexpr int DEF_AUX_CH0 = -1;
     static constexpr int DEF_AUX_CH1 = -1;
@@ -283,6 +285,7 @@ public:
     void setPPMOut(uint16_t t, uint16_t r, uint16_t p);
     void setJSONData(DynamicJsonDocument &json);
     void setBLEAddress(const char *addr);
+    void setDiscoveredBTHead(const char* addr);
     void setBLEValues(uint16_t vals[BT_CHANNELS]);
     void setSBUSValues(uint16_t vals[16]);
     void setPPMInValues(uint16_t vals[16]);
@@ -291,6 +294,7 @@ public:
     void setDataItemSend(const char *var, bool enabled);
     void stopAllData();
     void setJSONDataList(DynamicJsonDocument &json);
+
 
     BTFunction *getBTFunc() {return _btf;}
 
@@ -346,6 +350,12 @@ private:
     #define DA(DT, NAME, SIZE, DIV) DT NAME[SIZE];
         DATA_ARRAYS
     #undef DA
-    };
+
+    // Define Last Arrays from X Macro
+    #define DA(DT, NAME, SIZE, DIV) DT last ## NAME [SIZE];
+        DATA_ARRAYS
+    #undef DA
+};
+
 
 #endif

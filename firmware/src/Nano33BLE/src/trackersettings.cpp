@@ -80,8 +80,6 @@ TrackerSettings::TrackerSettings()
     // Default data outputs, Pan,Tilt,Roll outputs and Inputs for Graph and Output bars
     senddatavars = 0;
     senddataarray = 0;
-    //senddatavars = 0b11111111000000000000000000000;
-    //senddataarray = 0b1;
 
     // PPM Defaults
     ppmoutpin = DEF_PPM_OUT;
@@ -632,6 +630,11 @@ void TrackerSettings::setBLEAddress(const char *addr)
     strcpy(btaddr, addr);
 }
 
+void TrackerSettings::setDiscoveredBTHead(const char *addr)
+{
+    strcpy(btrmt, addr);
+}
+
 void TrackerSettings::setPPMInValues(uint16_t vals[16])
 {
     for(int i=0;i<16;i++)
@@ -1091,20 +1094,29 @@ void TrackerSettings::setJSONData(DynamicJsonDocument &json)
         DATA_VARS
     #undef DV
 
-
-
     // Send only requested data arrays, arrays are base64 encoded
     // Variable names prepended by 6 so GUI knows to decode them
     // Suffixed with the 3 character data type
     // Length can be determined with above info
 
+    // If DIVisor set to negative one only transmits if different from last value
+
     id=0;
     char b64array[500];
+    bool sendit=false;
 
     #define DA(DT, NAME, SIZE, DIV)\
-    if(senddataarray & 1<<id && counter % DIV == 0) {\
-        encode_base64((unsigned char*)NAME, sizeof(DT)*SIZE,(unsigned char*)b64array);\
-        json["6" #NAME #DT] = b64array;\
+    sendit=false;\
+    if(senddataarray & 1<<id) {\
+        if(DIV == -1 && memcmp(last ## NAME, NAME, SIZE * sizeof(DT)) != 0)\
+            sendit = true;\
+        else if(counter % DIV == 0)\
+            sendit = true;\
+        if(sendit) {\
+            encode_base64((unsigned char*)NAME, sizeof(DT)*SIZE,(unsigned char*)b64array);\
+            json["6" #NAME #DT] = b64array;\
+            memcpy(last ## NAME, NAME, SIZE * sizeof(DT));\
+        }\
     }\
     id++;
         DATA_ARRAYS
