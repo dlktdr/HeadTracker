@@ -10,10 +10,10 @@ using namespace mbed;
 using namespace events;
 
 #define DATA_PERIOD 130
-#define BT_PERIOD 25.0      // Bluetooth update rate
-#define SERIAL_PERIOD 20  // Serial processing
+#define BT_PERIOD 40.0    // Bluetooth update rate
+#define SERIAL_PERIOD 30  // Serial processing
 #define IO_PERIOD 20      // milliseconds
-#define SENSE_PERIOD 9000 //100hz Update Rate
+#define SENSE_PERIOD 9000 // 100hz Update Rate
 #define SBUS_PERIOD 20
 
 // Globals
