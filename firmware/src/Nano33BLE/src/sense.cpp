@@ -123,6 +123,8 @@ void sense_Thread()
     runt.reset();
     runt.start();
 
+    digitalWrite(A5,1);
+
     // Run this first to keep most accurate timing
 #ifdef NXP_FILTER
     // NXP
@@ -363,6 +365,7 @@ void sense_Thread()
         an6 = MAX(TrackerSettings::MIN_PWM,MIN(TrackerSettings::MAX_PWM,an6));
         channel_data[trkset.analog6Ch()-1] = an6;
     }
+
     if(trkset.analog7Ch() > 0) {
         float an7 = analogRead(7);
         an7 /= 1241.2f; // Equals 0-3.3V w/High resolution Analog Read
@@ -423,6 +426,9 @@ void sense_Thread()
             setPWMValue(i,pwmout);
         }
     }
+
+    digitalWrite(A5,0);
+
 
     /* ************************************************************
      * Sensor Reading Below, done after channels for timing reasons

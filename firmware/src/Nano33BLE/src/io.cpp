@@ -38,8 +38,8 @@ void io_Init()
     pinMode(A1, OUTPUT);  //    PWM 1
     pinMode(A2, OUTPUT);  //    PWM 2
     pinMode(A3, OUTPUT); //     PWM 3 */
-    pinMode(A4, OUTPUT); //
-    pinMode(A5, OUTPUT); //
+    pinMode(A4, OUTPUT); // Timing Check 1
+    pinMode(A5, OUTPUT); // Timing Check 2
     pinMode(A6, INPUT); // Analog input
     pinMode(A7, INPUT); // Analog input
 
