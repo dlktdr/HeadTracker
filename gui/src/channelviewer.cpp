@@ -90,7 +90,10 @@ void ChannelViewer::chDataUpdated()
     switch(ui->tabWidget->currentIndex()) {
     case 0: { // Channel Outputs
         for(int i=0;i<CHANNELS;i++) {
-            outbars[i]->setValue(trkset->liveData(QString("chout[%1]").arg(i)).toInt());
+            int value = trkset->liveData(QString("chout[%1]").arg(i)).toInt();
+            if(value == 0)
+                value = TrackerSettings::PPM_CENTER;
+            outbars[i]->setValue(value);
         }
         break;
     }
@@ -160,11 +163,16 @@ void ChannelViewer::noDataTimeout()
 
 void ChannelViewer::addBars()
 {
-    QString stylesheet = "QProgressBar::chunk {background-color: %1;\
-                          border-top-right-radius: 7px;\
-                          border-top-left-radius: 7px;\
-                          border-bottom-right-radius: 7px;\
-                          border-bottom-left-radius: 7px;}";
+    QString stylesheet = "QProgressBar {"
+            "background-color: #dbdbdb;"
+            "border-width: 2px;"
+            "border-radius: 7px;}"
+        "QProgressBar::chunk {"
+            "border-top-right-radius: 7px;"
+            "border-top-left-radius: 7px;"
+            "border-bottom-right-radius: 7px;"
+            "border-bottom-left-radius: 7px;"
+            "background-color: %1;}";
 
     colors[0] = new QColor(255,0,0);
     colors[1] = new QColor(0,255,0);
@@ -178,9 +186,9 @@ void ChannelViewer::addBars()
     colors[9] = new QColor(235, 231, 26);
     colors[10] = new QColor(45, 173, 19);
     colors[11] = new QColor(19, 127, 173);
-    colors[12] = new QColor(19, 73, 173);
+    colors[12] = new QColor(56, 126, 255);
     colors[13] = new QColor(153, 42, 222);
-    colors[14] = new QColor(153, 42, 222);
+    colors[14] = new QColor(86, 209, 199);
     colors[15] = new QColor(209, 112, 33);
 
     // Channel Outputs
