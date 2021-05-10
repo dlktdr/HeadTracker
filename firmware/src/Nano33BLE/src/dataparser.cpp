@@ -75,8 +75,8 @@ void data_Thread()
                     serialWrite("HT: DeserializeJson() Failed - Invalid Input\r\n");
                 else if(de == DeserializationError::NoMemory)
                     serialWrite("HT: DeserializeJson() Failed - NoMemory\r\n");
-                else if(de == DeserializationError::NotSupported)
-                    serialWrite("HT: DeserializeJson() Failed - NotSupported\r\n");
+                else if(de == DeserializationError::EmptyInput)
+                    serialWrite("HT: DeserializeJson() Failed - Empty Input\r\n");
                 else if(de == DeserializationError::TooDeep)
                     serialWrite("HT: DeserializeJson() Failed - TooDeep\r\n");
                 else
