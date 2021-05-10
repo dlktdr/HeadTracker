@@ -74,7 +74,7 @@ void setup()
     // Setup Event Queue
     queue.call_in(std::chrono::milliseconds(10),sense_Thread);
     queue.call_in(std::chrono::milliseconds(SERIAL_PERIOD),serial_Thread);
-    queue.call_in(std::chrono::milliseconds(BT_PERIOD),bt_Thread);
+    queue.call_in(std::chrono::milliseconds((int)BT_PERIOD),bt_Thread);
     queue.call_in(std::chrono::milliseconds(DATA_PERIOD),data_Thread);
 
     // Start everything

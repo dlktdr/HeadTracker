@@ -34,12 +34,13 @@ void bt_Thread()
 
     digitalWrite(LEDB,HIGH);
 
-    // Slow down bluetooth when UI connected. Trying to prevent disconnects.
-    if(uiconnected)
-        queue.call_in(std::chrono::milliseconds(BT_PERIOD*5),bt_Thread);
-    else
-        queue.call_in(std::chrono::milliseconds(BT_PERIOD),bt_Thread);
-
+    // Reduces BT Data Rate while UI connected.. Issues with BLE lib
+    float btperiod = BT_PERIOD;
+    if(trkset.blueToothMode() == BTPARA) { // Head board
+        if(uiconnected) //Slow down transmission rate while connected to the GUI
+            btperiod *= 10.0;
+    }
+    queue.call_in(std::chrono::milliseconds((int)btperiod),bt_Thread);
 }
 
 void bt_Init()

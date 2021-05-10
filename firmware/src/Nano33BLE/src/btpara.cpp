@@ -57,9 +57,9 @@ BTPara::BTPara() : BTFunction()
     fff2->writeValue(0x02);*/
 
     // Remote Slave board Returned Information
-    rmbrd->addCharacteristic(*rbfff1);
-    rmbrd->addCharacteristic(*rbfff2);
-    BLE.addService(*rmbrd);
+    //rmbrd->addCharacteristic(*rbfff1);
+    //rmbrd->addCharacteristic(*rbfff2);
+    //BLE.addService(*rmbrd);
     rbfff1->writeValue((uint16_t)0); // Channels overridden
 
     BLE.advertise();
@@ -131,6 +131,7 @@ void BTPara::execute()
             }
         }
 
+        /*
         // Set the bits of the overridden channels, for remote PPM in/out
         static uint16_t last_ovridech = 0;
         uint16_t ovridech = 0;
@@ -139,7 +140,7 @@ void BTPara::execute()
         ovridech |= 1 << (trkset.panCh()-1);
         if(last_ovridech != ovridech)
             rbfff1->writeValue(ovridech);
-        last_ovridech = ovridech;
+        last_ovridech = ovridech;*/
     }
 }
 
