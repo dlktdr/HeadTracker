@@ -68,12 +68,16 @@ private:
     QMessageBox *msgbox;
     QTextEdit *serialDebug;
 
+    QQueue<QByteArray> serialDataOut;
+    volatile bool sending;
+
     BoardNano33BLE *nano33ble;
     BoardBNO055 *bno055;
     BoardType *currentboard;
 
     void parseSerialData();
     void sendSerialData(QByteArray data);
+    void slowSerialSend();
     bool checkSaved();
 
 protected:

@@ -300,6 +300,7 @@ void MainWindow::serialDisconnect()
     ui->servoTilt->setShowActualPosition(false);
     ui->servoRoll->setShowActualPosition(false);
 
+    sending = false;
     currentboard = nullptr;
     boardRequestIndex=0;
     connectTimer.stop();
@@ -359,8 +360,10 @@ void MainWindow::sendSerialData(QByteArray data)
            break;  // No New line found
 
         // Strip data up the the CR LF \r\n
-        QByteArray sdata = data.left(nlindex);
-        serialcon->write(sdata + "\r\n");
+        QByteArray sdata = data.left(nlindex) + "\r\n";
+
+        serialDataOut.enqueue(sdata);
+        slowSerialSend();
 
         // Skip nuisance I'm here message
         if(QString(sdata).contains("{\"Cmd\":\"IH\"}"))
@@ -372,6 +375,29 @@ void MainWindow::sendSerialData(QByteArray data)
 
     ui->txled->setState(true);
     txledtimer.start();
+}
+
+void MainWindow::slowSerialSend()
+{
+    if(sending)
+        return;
+
+    sending = true;
+
+    while(serialDataOut.length()) {
+        QByteArray sdata = serialDataOut.dequeue();
+        // Delay sends more tha 64 bytes
+        int pos=0;
+        while(pos<sdata.length()) {
+            serialcon->write(sdata.mid(pos,64));
+            pos +=64;
+            QTime dieTime= QTime::currentTime().addMSecs(5);
+            while (QTime::currentTime() < dieTime)
+                QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+        }
+    }
+
+    sending = false;
 }
 
 /* addToLog()
@@ -1027,6 +1053,7 @@ void MainWindow::BLE33tabChanged()
     dataitms["panout"] = true;
     dataitms["btcon"] = false;
     dataitms["btaddr"] = false;
+    dataitms["btrmt"] = false;    
 
     switch(ui->tabBLE->currentIndex()) {
     case 0: { // General
@@ -1040,6 +1067,7 @@ void MainWindow::BLE33tabChanged()
     }
     case 3: { // Bluetooth
         dataitms["btcon"] = true;
+        dataitms["btrmt"] = true;
         dataitms["btaddr"] = true;
         break;
     }
@@ -1087,6 +1115,7 @@ void MainWindow::paramReceiveComplete()
     waitingOnParameters = false;
     updateToUI();
     BLE33tabChanged(); // Request Data to be sent
+    trkset.setDataItemSend("isCalibrated",true);
 }
 
 void MainWindow::paramReceiveFailure(int)
