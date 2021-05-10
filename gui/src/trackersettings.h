@@ -114,7 +114,7 @@ public:
     static constexpr int DEF_PWM_A3_CH = -1;
     static constexpr int DEF_ALG_A6_CH = -1;
     static constexpr int DEF_ALG_A7_CH = -1;
-    static constexpr float DEF_ALG_GAIN = 303.3f;
+    static constexpr float DEF_ALG_GAIN = 310.00f;
     static constexpr int DEF_ALG_OFFSET = 0;
     static constexpr int DEF_AUX_CH0 = -1;
     static constexpr int DEF_AUX_CH1 = -1;
