@@ -339,10 +339,10 @@ void sense_Thread()
     }
 
     // 6) Set Auxiliary Functions
-    buildAuxData();
     int aux0ch = trkset.auxFunc0Ch();
     int aux1ch = trkset.auxFunc1Ch();
     if(aux0ch > 0 || aux1ch > 0) {
+        buildAuxData();
         if(aux0ch > 0)
             channel_data[aux0ch - 1] = auxdata[trkset.auxFunc0()];
         if(aux1ch > 0)
@@ -527,8 +527,8 @@ void sense_Thread()
         trkset.setChannelOutValues(channel_data);
 
         // Qauterion Data
-        float *qd = madgwick.getQuat();
-        trkset.setQuaternion(qd);
+        //float *qd = madgwick.getQuat();
+        //trkset.setQuaternion(qd);
 
         // Bluetooth connected
         trkset.setBlueToothConnected(bleconnected);
@@ -580,22 +580,28 @@ void rotate(float pn[3], const float rotation[3])
     float out[3];
 
     // X Rotation
-    out[0] = pn[0] * 1 + pn[1] * 0            + pn[2] * 0;
-    out[1] = pn[0] * 0 + pn[1] * cos(rot[0])  - pn[2] * sin(rot[0]);
-    out[2] = pn[0] * 0 + pn[1] * sin(rot[0])  + pn[2] * cos(rot[0]);
-    memcpy(pn,out,sizeof(out[0])*3);
+    if(rotation[0] != 0) {
+        out[0] = pn[0] * 1 + pn[1] * 0            + pn[2] * 0;
+        out[1] = pn[0] * 0 + pn[1] * cos(rot[0])  - pn[2] * sin(rot[0]);
+        out[2] = pn[0] * 0 + pn[1] * sin(rot[0])  + pn[2] * cos(rot[0]);
+        memcpy(pn,out,sizeof(out[0])*3);
+    }
 
     // Y Rotation
-    out[0] =  pn[0] * cos(rot[1]) - pn[1] * 0 + pn[2] * sin(rot[1]);
-    out[1] =  pn[0] * 0           + pn[1] * 1 + pn[2] * 0;
-    out[2] = -pn[0] * sin(rot[1]) + pn[1] * 0 + pn[2] * cos(rot[1]);
-    memcpy(pn,out,sizeof(out[0])*3);
+    if(rotation[1] != 0) {
+        out[0] =  pn[0] * cos(rot[1]) - pn[1] * 0 + pn[2] * sin(rot[1]);
+        out[1] =  pn[0] * 0           + pn[1] * 1 + pn[2] * 0;
+        out[2] = -pn[0] * sin(rot[1]) + pn[1] * 0 + pn[2] * cos(rot[1]);
+        memcpy(pn,out,sizeof(out[0])*3);
+    }
 
     // Z Rotation
-    out[0] = pn[0] * cos(rot[2]) - pn[1] * sin(rot[2]) + pn[2] * 0;
-    out[1] = pn[0] * sin(rot[2]) + pn[1] * cos(rot[2]) + pn[2] * 0;
-    out[2] = pn[0] * 0           + pn[1] * 0           + pn[2] * 1;
-    memcpy(pn,out,sizeof(out[0])*3);
+    if(rotation[2] != 0) {
+        out[0] = pn[0] * cos(rot[2]) - pn[1] * sin(rot[2]) + pn[2] * 0;
+        out[1] = pn[0] * sin(rot[2]) + pn[1] * cos(rot[2]) + pn[2] * 0;
+        out[2] = pn[0] * 0           + pn[1] * 0           + pn[2] * 1;
+        memcpy(pn,out,sizeof(out[0])*3);
+    }
 }
 
 /* reset_fusion()
