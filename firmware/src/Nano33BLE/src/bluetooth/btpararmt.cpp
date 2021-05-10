@@ -90,7 +90,7 @@ void BTParaRmt::execute()
      // Start Scan for PARA Slaves
     if(!BLE.connected() && !scanning) {
         serialWriteln("BRMT: Starting Scan");
-        BLE.scan();
+        BLE.scan(1);
         scanning = true;
         bleconnected = false;
     }
@@ -129,6 +129,7 @@ void BTParaRmt::execute()
                 serialWriteln("BRMT: Found a PARA device");
                 serialWriteln("BRMT: Stopping scan");
 #endif
+                trkset.setDiscoveredBTHead(peripheral.address().c_str());
                 BLE.stopScan();
                 scanning = false;
 #ifdef DEBUG
@@ -210,7 +211,7 @@ void BTParaRmt::execute()
         // On any faults, disconnect and start scanning again
         if(fault) {
             peripheral.disconnect();
-            BLE.scan();
+            BLE.scan(1);
             scanning = true;
         }
     }
