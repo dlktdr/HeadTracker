@@ -26,3 +26,12 @@ GUI Version revisions
 0.9  - Added PPM output configuration options
      - Fix error dialog loop
      - Fix if save or restore open too long loss of connection
+1.0  - Added Channel Viewer
+     - Head/Remote Integrated into single firmware
+     - Added analog inputs
+     - Added PWM outputs A0-A4
+     - Added Aux Options
+     - Changed units on gain settings
+     - Default sync set to 350us
+     - Default channels set to disabled
+     -
