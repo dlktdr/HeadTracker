@@ -471,7 +471,7 @@
                 <bool>false</bool>
                </property>
                <property name="currentIndex">
-                <number>0</number>
+                <number>3</number>
                </property>
                <widget class="QWidget" name="tabGeneral">
                 <attribute name="title">
@@ -1285,19 +1285,6 @@
                    </property>
                   </widget>
                  </item>
-                 <item row="4" column="1">
-                  <spacer name="verticalSpacer_7">
-                   <property name="orientation">
-                    <enum>Qt::Vertical</enum>
-                   </property>
-                   <property name="sizeHint" stdset="0">
-                    <size>
-                     <width>20</width>
-                     <height>40</height>
-                    </size>
-                   </property>
-                  </spacer>
-                 </item>
                  <item row="0" column="1" colspan="2">
                   <widget class="QComboBox" name="cmbBtMode">
                    <property name="enabled">
@@ -1318,26 +1305,6 @@
                      <string>FrSky - PARA Wireless Receiver (Remote)</string>
                     </property>
                    </item>
-                  </widget>
-                 </item>
-                 <item row="3" column="0" colspan="3">
-                  <widget class="QLabel" name="label_30">
-                   <property name="text">
-                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:10pt; font-weight:600;&quot;&gt;Bluetooth supports 8 channels&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;Any channels that are set higher than 8 won't be sent/received.&lt;br/&gt;&lt;br/&gt;*** If set as a receiver board, be sure to leave other channels in the GUI off so they won't be overriden ***&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                   </property>
-                   <property name="wordWrap">
-                    <bool>true</bool>
-                   </property>
-                   <property name="margin">
-                    <number>10</number>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="0">
-                  <widget class="QLabel" name="label_5">
-                   <property name="text">
-                    <string>Mode</string>
-                   </property>
                   </widget>
                  </item>
                  <item row="1" column="1">
@@ -1380,10 +1347,43 @@
                    </property>
                   </widget>
                  </item>
+                 <item row="0" column="0">
+                  <widget class="QLabel" name="label_5">
+                   <property name="text">
+                    <string>Mode</string>
+                   </property>
+                  </widget>
+                 </item>
                  <item row="2" column="0">
                   <widget class="QLabel" name="label">
                    <property name="text">
                     <string>Address</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="4" column="1">
+                  <spacer name="verticalSpacer_7">
+                   <property name="orientation">
+                    <enum>Qt::Vertical</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>20</width>
+                     <height>40</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
+                 <item row="3" column="0" colspan="3">
+                  <widget class="QLabel" name="label_30">
+                   <property name="text">
+                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:10pt; font-weight:600;&quot;&gt;Bluetooth supports 8 channels&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;Any channels that are set higher than 8 won't be sent/received.&lt;br/&gt;&lt;br/&gt;*** If set as a receiver board, be sure to leave other channels in the GUI off so the incoming bt channels won't be overriden ***&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:11pt; font-weight:600;&quot;&gt;NOTE:&lt;/span&gt; Update rate is very slow while connected to the GUI&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   </property>
+                   <property name="wordWrap">
+                    <bool>true</bool>
+                   </property>
+                   <property name="margin">
+                    <number>10</number>
                    </property>
                   </widget>
                  </item>
@@ -2098,7 +2098,7 @@
                  <item row="8" column="1" colspan="2">
                   <widget class="QDoubleSpinBox" name="spnA7Gain">
                    <property name="decimals">
-                    <number>1</number>
+                    <number>2</number>
                    </property>
                    <property name="maximum">
                     <double>3000.000000000000000</double>
@@ -2255,7 +2255,7 @@
                  <item row="6" column="1" rowspan="2" colspan="2">
                   <widget class="QDoubleSpinBox" name="spnA6Gain">
                    <property name="decimals">
-                    <number>1</number>
+                    <number>2</number>
                    </property>
                    <property name="maximum">
                     <double>3000.000000000000000</double>
