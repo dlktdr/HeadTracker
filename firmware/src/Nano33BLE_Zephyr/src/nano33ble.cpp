@@ -3,7 +3,7 @@
 #include "dataparser.h"
 #include "sense.h"
 #include "io.h"
-#include "flash.h"
+#include "soc_flash.h"
 #include "serial.h"
 #include "bluetooth/ble.h"
 #include "PPM/PPMOut.h"
@@ -26,9 +26,6 @@ void start(void)
     // Setup Pins - io.cpp
     io_Init();
 
-    // Read the Settings from Flash - flash.cpp
-    flash_Init();
-
     // Start the BT Thread, Higher Prority than data. - bt.cpp
     bt_Init();
 
@@ -43,10 +40,11 @@ void start(void)
     // PWM Outputs - Fixed to A0-A3
     PWM_Init(50); // Start PWM 50hz
 
+    // USB Joystick
     joystick_init();
 
     // Load settings from flash - trackersettings.cpp
-//    trkset.loadFromEEPROM();
+    trkset.loadFromEEPROM();
 
 
     // Main blinky light

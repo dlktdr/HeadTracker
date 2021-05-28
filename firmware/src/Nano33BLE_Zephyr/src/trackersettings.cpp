@@ -19,7 +19,7 @@
 #include <math.h>
 #include <string.h>
 
-#include "flash.h"
+#include "soc_flash.h"
 #include "io.h"
 #include "sense.h"
 #include "base64.h"
@@ -979,10 +979,10 @@ void TrackerSettings::saveToEEPROM()
     setJSONSettings(json);
     int len = serializeJson(json,buffer,TX_RNGBUF_SIZE);
 
-    if(writeFlash(buffer,len)) {
+    if(socWriteFlash(buffer,len)) {
         serialWriteln("HT: Flash Write Failed");
     } else {
-        serialWriteln("HT: Saved to EEPROM");
+        serialWriteln("HT: Saved to Flash");
     }
 }
 
@@ -993,7 +993,7 @@ void TrackerSettings::loadFromEEPROM()
     // Load Settings
     DynamicJsonDocument json(JSON_BUF_SIZE);
     DeserializationError de;
-    de = deserializeJson(json, flashSpace);
+    de = deserializeJson(json, get_flashSpace());
 
     if(de != DeserializationError::Ok)
         serialWriteln("HT: Invalid JSON Data");

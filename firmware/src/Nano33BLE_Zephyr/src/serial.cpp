@@ -29,6 +29,7 @@
 #include "dataparser.h"
 #include "io.h"
 #include "log.h"
+#include "soc_flash.h"
 
 // Wait for serial connection before starting..
 //#define WAITFOR_DTR
@@ -267,6 +268,11 @@ void parseData(DynamicJsonDocument &json)
         serialWrite("HT: Saving to Flash\r\n");
         trkset.saveToEEPROM();
 
+    // Erase
+    } else if (strcmp(command, "Erase") == 0) {
+        serialWrite("HT: Clearing Flash\r\n");
+        socClearFlash();
+
     // Get settings
     } else if (strcmp(command, "Get") == 0) {
         serialWrite("HT: Sending Settings\r\n");
@@ -398,8 +404,10 @@ void serialWriteln(const char *data)
 void serialWriteF(const char *c, ...)
 {
     char buffer[256];
-    va_list args;
-    snprintf(buffer, 256, c, args);
+    va_list argptr;
+    va_start(argptr, c);
+    snprintf(buffer, 256, c, argptr);
+    va_end(argptr);
     serialWrite(buffer);
 }
 
