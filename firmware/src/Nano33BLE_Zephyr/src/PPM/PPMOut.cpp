@@ -22,13 +22,7 @@
 #include "trackersettings.h"
 #include "serial.h"
 #include "defines.h"
-
-
-#define PPMOUT_TIMER_CH 3
-#define PPMOUT_PPICH 10
-#define PPMOUT_GPIOTE 7
-#define PPMOUT_TMRCOMP_CH 0
-
+#include "io.h"
 
 #define PPMOUT_PPICH_MSK CONCAT(CONCAT(PPI_CHENSET_CH, PPMOUT_PPICH), _Msk )
 #define PPMOUT_TIMER CONCAT(NRF_TIMER, PPMOUT_TIMER_CH )
@@ -145,10 +139,6 @@ void PpmOut_setPin(int pinNum)
         resetChannels();
         buildChannels();
     }
-
-    // THIS MUST BE DEFINED SOMEWHERE... I COULDN'T FIND IT!
-    int dpintopin[]  = {0,0,11,12,15,13,14,23,21,27,2,1,8,13};
-    int dpintoport[] = {0,0,1 ,1 ,1 ,1 ,1 ,0 ,0 ,0 ,1,1,1,0 };
 
     int pin = dpintopin[pinNum];
     int port = dpintoport[pinNum];
