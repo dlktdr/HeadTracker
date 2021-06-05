@@ -19,10 +19,16 @@
 #include <string.h>
 #include <nrfx.h>
 #include "uarte_sbus.h"
+#include "defines.h"
+#include "io.h"
 
-#define BAUD100000                   0x0198EF80
-#define CONF8E2                      0x0000001E
-#define SBUS_FRAME_LEN 25
+#define BAUD100000       0x0198EF80
+#define CONF8E2          0x0000001E
+#define SBUS_FRAME_LEN   25
+
+#define SBUSOUT_PPICH_MSK CONCAT(CONCAT(PPI_CHENSET_CH, SBUSOUT_PPICH), _Msk )
+#define SBUSOUT_UARTE CONCAT(NRF_UARTE, SBUSOUT_UARTE_CH)
+#define SBUSOUT_UARTE_IRQ CONCAT(CONCAT(UARTE, SBUSOUT_UARTE_CH),_IRQn)
 
 static constexpr uint8_t HEADER_ = 0x0F;
 static constexpr uint8_t FOOTER_ = 0x00;
@@ -40,6 +46,9 @@ uint8_t localTXBuffer[SBUS_FRAME_LEN]; // Local Buffer
 volatile bool isTransmitting=false;
 volatile bool isSBUSInit=false;
 
+int invtxpin=0;
+int invtxport=0;
+
 void SBUS_Thread()
 {
     while(1) {
@@ -53,11 +62,27 @@ ISR_DIRECT_DECLARE(SBUS_TX_Complete_Interrupt)
 {
     ISR_DIRECT_HEADER();
     // Clear Event
-    NRF_UARTE1->EVENTS_ENDTX = 0;
+    SBUSOUT_UARTE->EVENTS_ENDTX = 0;
     isTransmitting = false;
 
+    // Below is done to be sure every cycle invert pin is cycled
+    // UARTE should be done transmitting here and pin should be high
+
     // Disable PPI 11
-    NRF_PPI->CHEN |= (PPI_CHEN_CH11_Enabled << PPI_CHEN_CH11_Pos);
+    NRF_PPI->CHENCLR = SBUSOUT_PPICH_MSK;
+
+    // Disable GPIOTE2 - Output (Cause pin to go low)
+    NRF_GPIOTE->CONFIG[SBUS_GPIOTE2] = 0;
+
+    // Enable GPIOTE2 - Output
+    NRF_GPIOTE->CONFIG[SBUS_GPIOTE2] = (GPIOTE_CONFIG_MODE_Task << GPIOTE_CONFIG_MODE_Pos) |
+            (GPIOTE_CONFIG_POLARITY_Toggle << GPIOTE_CONFIG_POLARITY_Pos) |
+            (invtxpin <<  GPIOTE_CONFIG_PSEL_Pos) |
+            (invtxport << GPIOTE_CONFIG_PORT_Pos);            // Initial value of pin low
+
+    // Enable PPI 11
+    NRF_PPI->CHENSET = SBUSOUT_PPICH_MSK;
+
     ISR_DIRECT_FOOTER(1);
     return 0;
 }
@@ -73,7 +98,7 @@ void SBUS_TX_Start()
 
     // Initiate the transfer
     isTransmitting = true;
-    NRF_UARTE1->TASKS_STARTTX = 1;
+    SBUSOUT_UARTE->TASKS_STARTTX = 1;
 }
 
 void SBUS_Init(int txPin, int invTxPin)
@@ -81,67 +106,66 @@ void SBUS_Init(int txPin, int invTxPin)
     isSBUSInit = false;
 
     // Disable UART1 + Interrupt & IRQ controller
-    NRF_UARTE1->ENABLE = UARTE_ENABLE_ENABLE_Disabled << UARTE_ENABLE_ENABLE_Pos;
-    NRF_UARTE1->EVENTS_ENDTX = 0;
-    irq_disable(UARTE1_IRQn);
-    NRF_UARTE1->INTENCLR = UARTE_INTENSET_ENDTX_Msk;
+    SBUSOUT_UARTE->ENABLE = UARTE_ENABLE_ENABLE_Disabled << UARTE_ENABLE_ENABLE_Pos;
+    SBUSOUT_UARTE->EVENTS_ENDTX = 0;
+    irq_disable(SBUSOUT_UARTE_IRQ);
+    SBUSOUT_UARTE->INTENCLR = UARTE_INTENSET_ENDTX_Msk;
 
     // Baud 100000, 8E2
     // 25 Byte Data Send Length
-    NRF_UARTE1->BAUDRATE = BAUD100000;
-    NRF_UARTE1->CONFIG = CONF8E2;
+    SBUSOUT_UARTE->BAUDRATE = BAUD100000;
+    SBUSOUT_UARTE->CONFIG = CONF8E2;
 
     // DMA Access space for SBUS output
-    NRF_UARTE1->TXD.PTR = (uint32_t)sbusDMATx;
-    NRF_UARTE1->TXD.MAXCNT =SBUS_FRAME_LEN;
-
-    int dpintopin[]  = {3,10,11,12,15,13,14,23,21,27,2,1,8,13};
-    int dpintoport[] = {1,1,1 ,1 ,1 ,1 ,1 ,0 ,0 ,0 ,1,1,1,0 };
+    SBUSOUT_UARTE->TXD.PTR = (uint32_t)sbusDMATx;
+    SBUSOUT_UARTE->TXD.MAXCNT =SBUS_FRAME_LEN;
 
     int tpin = dpintopin[txPin];
     int tport = dpintoport[txPin];
-    int invtxpin = dpintopin[invTxPin];
-    int invtxport = dpintoport[invTxPin];
+
+    invtxpin = dpintopin[invTxPin];
+    invtxport = dpintoport[invTxPin];
 
     // Only Enable TX Pin
-    NRF_UARTE1->PSEL.TXD = (tpin << UARTE_PSEL_TXD_PIN_Pos) | (tport << UARTE_PSEL_TXD_PORT_Pos);
-    NRF_UARTE1->PSEL.RXD = UARTE_PSEL_RXD_CONNECT_Disconnected << UARTE_PSEL_RXD_CONNECT_Pos;
-    NRF_UARTE1->PSEL.CTS = UARTE_PSEL_CTS_CONNECT_Disconnected << UARTE_PSEL_CTS_CONNECT_Pos;
-    NRF_UARTE1->PSEL.RTS = UARTE_PSEL_RTS_CONNECT_Disconnected << UARTE_PSEL_RTS_CONNECT_Pos;
+    SBUSOUT_UARTE->PSEL.TXD = (tpin << UARTE_PSEL_TXD_PIN_Pos) | (tport << UARTE_PSEL_TXD_PORT_Pos);
+    SBUSOUT_UARTE->PSEL.RXD = UARTE_PSEL_RXD_CONNECT_Disconnected << UARTE_PSEL_RXD_CONNECT_Pos;
+    SBUSOUT_UARTE->PSEL.CTS = UARTE_PSEL_CTS_CONNECT_Disconnected << UARTE_PSEL_CTS_CONNECT_Pos;
+    SBUSOUT_UARTE->PSEL.RTS = UARTE_PSEL_RTS_CONNECT_Disconnected << UARTE_PSEL_RTS_CONNECT_Pos;
 
     // Below uses two GPIOTE's to read the TX pin and cause it to be inverted on the RX pin
 
     // Setup as an input, when TX pin toggles state state causes the event to trigger and through
     // PPI toggle the output pin on next GPIOTE
 
-    NRF_GPIOTE->CONFIG[4] = (GPIOTE_CONFIG_MODE_Event << GPIOTE_CONFIG_MODE_Pos) |
+    NRF_GPIOTE->CONFIG[SBUS_GPIOTE1] = (GPIOTE_CONFIG_MODE_Event << GPIOTE_CONFIG_MODE_Pos) |
             (GPIOTE_CONFIG_POLARITY_Toggle << GPIOTE_CONFIG_POLARITY_Pos) |
             (tpin <<  GPIOTE_CONFIG_PSEL_Pos) |
             (tport << GPIOTE_CONFIG_PORT_Pos);
 
-    NRF_GPIOTE->CONFIG[5] = (GPIOTE_CONFIG_MODE_Task << GPIOTE_CONFIG_MODE_Pos) |
+    NRF_GPIOTE->CONFIG[SBUS_GPIOTE2] = (GPIOTE_CONFIG_MODE_Task << GPIOTE_CONFIG_MODE_Pos) |
             (GPIOTE_CONFIG_POLARITY_Toggle << GPIOTE_CONFIG_POLARITY_Pos) |
             (invtxpin <<  GPIOTE_CONFIG_PSEL_Pos) |
-            (invtxport << GPIOTE_CONFIG_PORT_Pos);// |
-            //(1 << GPIOTE_CONFIG_OUTINIT_Pos);            // Initial value of pin low
+            (invtxport << GPIOTE_CONFIG_PORT_Pos) |
+            (1 << GPIOTE_CONFIG_OUTINIT_Pos);            // Initial value of pin low
 
     // On Compare equals Value, Toggle IO Pin
-    NRF_PPI->CH[11].EEP = (uint32_t)&NRF_GPIOTE->EVENTS_IN[4];
-    NRF_PPI->CH[11].TEP = (uint32_t)&NRF_GPIOTE->TASKS_OUT[5];
+    NRF_PPI->CH[SBUSOUT_PPICH].EEP = (uint32_t)&NRF_GPIOTE->EVENTS_IN[SBUS_GPIOTE1];
+    NRF_PPI->CH[SBUSOUT_PPICH].TEP = (uint32_t)&NRF_GPIOTE->TASKS_OUT[SBUS_GPIOTE2];
+
 
     // Enable PPI 11
-    NRF_PPI->CHEN |= (PPI_CHEN_CH11_Enabled << PPI_CHEN_CH11_Pos);
+    NRF_PPI->CHENSET = SBUSOUT_PPICH_MSK;
 
     // Enable the interrupt vector in IRQ Controller
     //NVIC_SetVector(UARTE1_IRQn,(uint32_t)&SBUS_TX_Complete_Interrupt);
-    IRQ_DIRECT_CONNECT(UARTE1_IRQn,0,SBUS_TX_Complete_Interrupt,0);
-    irq_enable(UARTE1_IRQn);
+    IRQ_DIRECT_CONNECT(SBUSOUT_UARTE_IRQ,1,SBUS_TX_Complete_Interrupt,0);
+    irq_enable(SBUSOUT_UARTE_IRQ);
 
-    // Enable interupt in peripheral
-    NRF_UARTE1->INTENSET = UARTE_INTENSET_ENDTX_Msk;
+    // Enable interupt in peripheral on end of transmission
+    SBUSOUT_UARTE->INTENSET = UARTE_INTENSET_ENDTX_Msk;
 
     // Enable UART1
-    NRF_UARTE1->ENABLE = UARTE_ENABLE_ENABLE_Enabled << UARTE_ENABLE_ENABLE_Pos;
+    SBUSOUT_UARTE->ENABLE = UARTE_ENABLE_ENABLE_Enabled << UARTE_ENABLE_ENABLE_Pos;
     isSBUSInit = true;
 }
 
