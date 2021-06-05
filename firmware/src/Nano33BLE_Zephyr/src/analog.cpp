@@ -11,8 +11,8 @@
 #define ADC_DEVICE_NAME		"ADC_0"
 #define ADC_RESOLUTION		10
 #define ADC_GAIN			ADC_GAIN_1
-#define ADC_REFERENCE		ADC_REF_INTERNAL
-#define ADC_ACQUISITION_TIME	ADC_ACQ_TIME(ADC_ACQ_TIME_MICROSECONDS, 40)
+#define ADC_REFERENCE		ADC_REF_VDD_1
+#define ADC_ACQUISITION_TIME	ADC_ACQ_TIME(ADC_ACQ_TIME_MICROSECONDS, 100)
 #define BUFFER_SIZE			6
 
 static bool _IsInitialized = false;
@@ -112,31 +112,5 @@ float analogRead(int channel)
 	{
 		return sv;
 	}
-
-	// Convert the result to voltage
-	// Result = [V(p) - V(n)] * GAIN/REFERENCE / 2^(RESOLUTION)
-
-	int multip = 256;
-	// find 2**adc_resolution
-	switch(ADC_RESOLUTION)
-
-	{
-		default :
-		case 8 :
-			multip = 256;
-			break;
-		case 10 :
-			multip = 1024;
-			break;
-		case 12 :
-			multip = 4096;
-			break;
-		case 14 :
-			multip = 16384;
-			break;
-	}
-
-	// the 3.6 relates to the voltage divider being used in my circuit
-	float fout = (sv * 3.6 / multip);
-	return fout;
+    return sv;
 }
