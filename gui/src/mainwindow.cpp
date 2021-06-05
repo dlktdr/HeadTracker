@@ -149,6 +149,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(&trkset,&TrackerSettings::offOrientChanged,this,&MainWindow::offOrientChanged);
     connect(&trkset,&TrackerSettings::ppmOutChanged,this,&MainWindow::ppmOutChanged);
     connect(&trkset,&TrackerSettings::liveDataChanged,this,&MainWindow::liveDataChanged);
+    connect(&trkset,&TrackerSettings::bleAddressDiscovered,this,&MainWindow::bleAddressDiscovered);
 
     // Combo Boxes
         // Add Remap Choices + The corresponding values
@@ -168,7 +169,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->cmbButtonPin,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbPpmInPin,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbPpmOutPin,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->cmbBtMode,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));    
+    connect(ui->cmbBtMode,SIGNAL(currentIndexChanged(int)),this,SLOT(BTModeChanged()));
     connect(ui->cmbResetOnPPM,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbPPMChCount,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbA6Ch,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
@@ -836,6 +837,18 @@ void MainWindow::ppmOutChanged(int t,int r,int p)
     ui->servoRoll->setShowActualPosition(true);
 }
 
+void MainWindow::bleAddressDiscovered(QString str)
+{
+    // Add BLE address to discovered list
+    static QStringList bleaddrs;
+    if(bleaddrs.contains(str))
+        return;
+    bleaddrs.append(str);
+
+    // Add all ble address
+    ui->cmbBTRmtMode->addItem(str);
+}
+
 void MainWindow::liveDataChanged()
 {
     ui->lblBLEAddress->setText(trkset.blueToothAddress());
@@ -1085,6 +1098,14 @@ void MainWindow::BLE33tabChanged()
     }
 
     trkset.setDataItemSend(dataitms);
+}
+
+void MainWindow::BTModeChanged()
+{
+    updateFromUI();
+    msgbox->setText("BT Mode Changed\nPlease Save to NVM and Reset");
+    msgbox->setWindowTitle("Reset Required");
+    msgbox->show();
 }
 
 void MainWindow::paramSendStart()

@@ -44,7 +44,8 @@
     DV(uint16_t,rollout,1,-1)\
     DV(uint16_t,panout, 1,-1)\
     DV(bool,isCalibrated,5,-1)\
-    DV(bool,btcon,      10,-1)
+    DV(bool,btcon,      10,-1)\
+    DV(uint8_t, cpuuse, 1,-1)
 
 // To shorten names, as these are sent to the GUI for decoding
 #define u8  uint8_t
@@ -62,8 +63,8 @@
     DA(u16, ppmch, 16, 1)\
     DA(u16, sbusch, 16, 1)\
     DA(flt, quat,4, 1)\
-    DA(chr, btaddr,18, 20)
-
+    DA(chr, btaddr,18, 20) \
+    DA(chr, btrmt,18, 10)
 
 class TrackerSettings : public QObject
 {    
@@ -311,6 +312,7 @@ signals:
     void rawMagChanged(float x, float y, float z);
     void rawOrientChanged(float t, float r, float p);
     void offOrientChanged(float t, float r, float p);
+    void bleAddressDiscovered(QString);
     void ppmOutChanged(int t, int r, int p);
     void liveDataChanged();
     void requestedDataItemChanged();
@@ -321,6 +323,7 @@ private:
     QVariantMap _live; // Live Data (Realtime)
     QMap<QString, bool> _realtimedata;
     QMap<QString, bool> _devicerealtimedata;
+    QStringList bleAddresses;
 };
 
 #endif // TRACKERSETTINGS_H

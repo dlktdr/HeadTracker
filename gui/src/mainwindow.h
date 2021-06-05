@@ -97,6 +97,7 @@ private slots:
     void updateToUI();
     void offOrientChanged(float,float,float);
     void ppmOutChanged(int,int,int);
+    void bleAddressDiscovered(QString str);
     void liveDataChanged();
     void serialReadReady();
     void manualSend();
@@ -114,6 +115,7 @@ private slots:
     void showSerialDiagClicked();
     void showChannelViewerClicked();
     void BLE33tabChanged();
+    void BTModeChanged();
 
 
     // Board Connections

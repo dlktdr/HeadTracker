@@ -80,8 +80,6 @@ TrackerSettings::TrackerSettings(QObject *parent):
     #undef DA
     _devicerealtimedata = _realtimedata;
 
-
-
 }
 
 int TrackerSettings::Rll_min() const
@@ -517,7 +515,7 @@ int TrackerSettings::blueToothMode()
 }
 
 void TrackerSettings::setBlueToothMode(int mode) {
-    if(mode >= 0 && mode <= 2)
+    if(mode >= 0 && mode <= 3)
         _data["btmode"] = mode;
 }
 
@@ -610,41 +608,46 @@ void TrackerSettings::setLiveDataMap(const QVariantMap &livelist,bool reset)
     QMapIterator<QString, QVariant> i(livelist);
     while (i.hasNext()) {
         i.next();        
-        if((i.key() == "gyrox" || i.key() == "gyroy" || i.key() == "gyroz") && !ge) {
+        QString key = i.key();
+        if((key == "gyrox" || key == "gyroy" || key == "gyroz") && !ge) {
             emit(rawGyroChanged(_live["gyrox"].toFloat(),
                                 _live["gyroy"].toFloat(),
                                 _live["gyroz"].toFloat()));
             ge = true;
         }
-        if((i.key() == "accx" || i.key() == "accy" || i.key() == "accz") && !ae) {
+        if((key == "accx" || key == "accy" || key == "accz") && !ae) {
             emit(rawAccelChanged(_live["gyrox"].toFloat(),
                                 _live["gyroy"].toFloat(),
                                 _live["gyroz"].toFloat()));
             ae = true;
         }
-        if((i.key() == "magx" || i.key() == "magy" || i.key() == "magz") && !me) {
+        if((key == "magx" || key == "magy" || key == "magz") && !me) {
             emit(rawMagChanged(_live["magx"].toFloat(),
                                 _live["magy"].toFloat(),
                                 _live["magz"].toFloat()));
             me = true;
         }
-        if((i.key() == "tilt" || i.key() == "roll" || i.key() == "pan") && !oe) {
+        if((key == "tilt" || key == "roll" || key == "pan") && !oe) {
             emit(rawOrientChanged(_live["tilt"].toFloat(),
                                 _live["roll"].toFloat(),
                                 _live["pan"].toFloat()));
             oe = true;
         }
-        if((i.key() == "tiltoff" || i.key() == "rolloff" || i.key() == "panoff") && !ooe) {
+        if((key == "tiltoff" || key == "rolloff" || key == "panoff") && !ooe) {
             emit(offOrientChanged(_live["tiltoff"].toFloat(),
                                 _live["rolloff"].toFloat(),
                                 _live["panoff"].toFloat()));
             ooe = true;
         }
-        if((i.key() == "panout" || i.key() == "tiltout" || i.key() == "rollout") && !ppm) {
+        if((key == "panout" || key == "tiltout" || key == "rollout") && !ppm) {
             emit(ppmOutChanged(_live["tiltout"].toUInt(),
                                 _live["rollout"].toUInt(),
                                 _live["panout"].toUInt()));
             ppm = true;
+        }
+        if(key == "btrmt") {
+            if(_live["btrmt"] != "")
+                emit(bleAddressDiscovered(_live["btrmt"].toString()));
         }
     }
 
