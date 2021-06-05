@@ -52,7 +52,7 @@ private:
     bool savedToRAM;
     bool paramTXErrorSent;
     bool paramRXErrorSent;
-    int jsonfaults;
+    int jsonwaitingack;
     int rxparamfaults;
     QByteArray serialDataOut;
     QByteArray lastjson;

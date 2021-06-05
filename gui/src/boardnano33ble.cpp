@@ -29,7 +29,7 @@ void BoardNano33BLE::dataIn(QByteArray &data)
         //uint16_t crc = crcs[0] << 8 | crcs[1];
 
         QByteArray stripped = data.mid(1,data.length()-4);
-        qDebug() << "JSONIn" << stripped;
+       // qDebug() << "JSONIn" << stripped;
         //uint crc2 = escapeCRC(uCRC16Lib::calculate(stripped.data(), stripped.length()));
         /*if(crc != crc2) {
             qDebug() << "CRC Fault" << crc << crc2;
@@ -40,13 +40,13 @@ void BoardNano33BLE::dataIn(QByteArray &data)
         //  Found the acknowldege Character, data was received without error
     } else if(data.left(1)[0] == (char)0x06) {
         // Clear the fault counter
-        jsonfaults = 0;
+        jsonwaitingack = 0;
 
         // If more data in queue, send it and wait for another ack char.
         if(!jsonqueue.isEmpty()) {
             serialDataOut += jsonqueue.dequeue();
-            emit serialTxReady();
-            jsonfaults = 1;
+            jsonwaitingack = 1;
+            emit serialTxReady();            
         }
 
         // Found a not-acknowldege character, resend data
@@ -201,7 +201,7 @@ void BoardNano33BLE::startCalibration()
 void BoardNano33BLE::startData()
 {
     jsonqueue.clear();
-    jsonfaults = 0;
+    jsonwaitingack = 0;
     ihTimeout();
 }
 
@@ -223,7 +223,7 @@ void BoardNano33BLE::allowAccessChanged(bool acc)
     paramTXErrorSent=false;
     paramRXErrorSent=false;
     serialDataOut.clear();
-    jsonfaults =0;
+    jsonwaitingack =0;
     rxparamfaults=0;
     jsonqueue.clear();
     lastjson.clear();
@@ -257,22 +257,19 @@ void BoardNano33BLE::sendSerialJSON(QString command, QVariantMap map)
     uint16_t CRC = escapeCRC(uCRC16Lib::calculate(json.toUtf8().data(),json.length()));
 
     lastjson = (char)0x02 + json.toLatin1() + QByteArray::fromRawData((char*)&CRC,2) + (char)0x03 + "\r\n";
-    qDebug() << "JSONout" << lastjson;
+    //qDebug() << "JSONout" << lastjson;
 
-    // If there is data that didn't make it there yet push this data to the queue
-    // to be sent later
-    if(jsonfaults != 0) {
+    // If still waiting for an ack, add to the queue
+    if(jsonwaitingack != 0) {
         jsonqueue.enqueue(lastjson);
-        emit serialTxReady();
         return;
     }
 
     // Add serial data to the TX buffer, emit a signal it's ready
-    serialDataOut += lastjson;
-    emit serialTxReady();
+    serialDataOut += lastjson;    
+    jsonwaitingack = 1; // Set as faulted until ACK returned
 
-    // Set as faulted until ACK returned
-    jsonfaults = 1;
+    emit serialTxReady();
 
     // Reset Ack Timer
     imheretimout.stop();
@@ -380,7 +377,7 @@ uint16_t BoardNano33BLE::escapeCRC(uint16_t crc)
 void BoardNano33BLE::nakError()
 {
     // If too many faults, disconnect.
-    if(jsonfaults > MAX_TX_FAULTS) {
+    if(jsonwaitingack > MAX_TX_FAULTS) {
         if(!paramTXErrorSent) {
             emit addToLog("\r\nERROR: Critical - " + QString(MAX_TX_FAULTS)+ " transmission faults, disconnecting\r\n");
             emit paramSendFailure(1);
@@ -396,7 +393,7 @@ void BoardNano33BLE::nakError()
         emit addToLog("ERROR: CRC Fault - Re-sending data\r\nGUI: " +  lastjson + "\r\n");
 
         // Increment fault counter
-        jsonfaults++;
+        jsonwaitingack++;
     }
 }
 
