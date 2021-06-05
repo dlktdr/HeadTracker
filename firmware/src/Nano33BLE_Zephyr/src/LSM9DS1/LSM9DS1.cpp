@@ -68,14 +68,12 @@ int LSM9DS1Class::begin()
 {
     i2c_dev = device_get_binding("I2C_1");
 	if (!i2c_dev) {
-		serialWriteF("HT: Could not get device binding for I2C\r\n");
+		serialWrite("HT: Could not get device binding for I2C\r\n");
 		return 0;
 	}
 
     i2c_configure(i2c_dev, I2C_SPEED_SET(I2C_SPEED_FAST)|I2C_MODE_MASTER);
 
-
-    serialWriteF("HT: Found I2C\r\n");
 
     storedAccelFS = false;
     storedGyroFS = false;
@@ -135,18 +133,6 @@ void LSM9DS1Class::end()
   writeRegister(LSM9DS1_ADDRESS_M, LSM9DS1_CTRL_REG3_M, 0x03);
   writeRegister(LSM9DS1_ADDRESS, LSM9DS1_CTRL_REG1_G, 0x00);
   writeRegister(LSM9DS1_ADDRESS, LSM9DS1_CTRL_REG6_XL, 0x00);
-
-//  _wire->end();
-
- // There has been a problem with the power usage of the Arduino Nano BLE boards.
- // Due to a switch in pinnumbers the pull-ups keep drawing current after the call to IMU.end();
- // This shortens battery life. Most likely future updates solve the problem.
- // see https://forum.arduino.cc/index.php?topic=691488.15
- // code for if the old value is used
-#if defined(ARDUINO_ARDUINO_NANO33BLE) && PIN_ENABLE_SENSORS_3V3 == 32
-  pinMode(PIN_ENABLE_I2C_PULLUP, GPIO_INPUT);    // this restores the energy usage to very low power
-  digitalWrite(PIN_ENABLE_I2C_PULLUP, HIGH);
-#endif
 }
 
 //************************************      Acceleration      *****************************************
