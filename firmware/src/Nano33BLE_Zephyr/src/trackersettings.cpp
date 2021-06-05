@@ -113,7 +113,7 @@ TrackerSettings::TrackerSettings()
     // Bluetooth defaults
     btmode = 0;
     btcon = false;
-    //_btf = nullptr;
+    btpairedaddress[0] = 0;
 
     // Features defaults
     rstonwave = false;
@@ -565,39 +565,27 @@ int TrackerSettings::blueToothMode() const
 
 void TrackerSettings::setBlueToothMode(int mode)
 {
-    if(mode < BTDISABLE || mode > BTPARARMT)
+    if(mode < BTDISABLE || mode > BTSCANONLY)
         return;
 
-    // Delete old bluetooth if changing
-    if(_btf != nullptr) {
-        if(mode != btmode) {
-            delete _btf;
-            _btf = nullptr;
-        }
-    }
-
-    // Save new mode
+    BTSetMode(btmodet(mode));
     btmode = mode;
-
-    // Create new bluetooth
-    if(_btf == nullptr) {
-        // Disabled
-        if(mode == BTDISABLE) {
-            sprintf(btaddr,"00:00:00:00:00:00");
-
-        // PARA FRSky Mode Transmitter (Slave)
-        } else if(mode == BTPARAHEAD) {
-            _btf = new BTParaHead();
-        // PARA FRSky Mode Receiver (Master)
-        } else if(mode == BTPARARMT) {
-            _btf = new BTParaRmt();
-        }
-    }
 }
 
 void TrackerSettings::setBLEValues(uint16_t vals[BT_CHANNELS])
 {
     memcpy(btch,vals,sizeof(uint16_t)*BT_CHANNELS);
+}
+
+void TrackerSettings::setPairedBTAddress(const char *ha)
+{
+    // set to "" for pair to first available
+    strncpy(btpairedaddress, ha, sizeof(btpairedaddress));
+}
+
+const char * TrackerSettings::pairedBTAddress()
+{
+    return btpairedaddress;
 }
 
 //----------------------------------------------------------------
@@ -756,14 +744,14 @@ void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
     v = json["lppan"];              if(!v.isNull()) setLPPan(v);
     v = json["lptiltroll"];         if(!v.isNull()) setLPTiltRoll(v);
 
-// Bluetooth Mode
+// Bluetooth
     v = json["btmode"]; if(!v.isNull()) setBlueToothMode(v);
+    v = json["btpair"]; if(!v.isNull()) setPairedBTAddress(v);
 
 // Orientation
    v = json["rotx"]; if(!v.isNull()) setOrientation(v,roty,rotz);
    v = json["roty"]; if(!v.isNull()) setOrientation(rotx,v,rotz);
    v = json["rotz"]; if(!v.isNull()) setOrientation(rotx,roty,v);
-
 
 // Reset On Wave
     v = json["rstonwave"]; if(!v.isNull()) setResetOnWave(v);
@@ -897,8 +885,10 @@ void TrackerSettings::setJSONSettings(DynamicJsonDocument &json)
     json["panch"] = panch;
     json["tltch"] = tltch;
 
+// Servo Reverse Channels
     json["servoreverse"] = servoreverse;
 
+// Gains
     json["lppan"] = lppan;
     json["lptiltroll"] = lptiltroll;
 
@@ -937,6 +927,7 @@ void TrackerSettings::setJSONSettings(DynamicJsonDocument &json)
 
 // Bluetooth Settings
     json["btmode"] = btmode;
+    json["btpair"] = btpairedaddress;
 
 // Proximity Setting
     json["rstonwave"] = rstonwave;
@@ -1074,7 +1065,7 @@ void TrackerSettings::setJSONData(DynamicJsonDocument &json)
 
     // Sends only requested data items
     // Updates only as often as specified, 1 = every cycle
-    // Two Decimals is most precision of any data item req as of now.
+    // Three Decimals is most precision of any data item req as of now.
     // For most items ends up less bytes than base64 encoding everything
     int id=0;
     int itemcount=0;
@@ -1082,7 +1073,7 @@ void TrackerSettings::setJSONData(DynamicJsonDocument &json)
     if(senddatavars & 1<<id && counter % DIV == 0) {\
         if(ROUND == -1)\
             json[#NAME] = NAME;\
-        else\
+        else \
             json[#NAME] = roundf(((float)NAME * ROUND)) / ROUND;\
         itemcount++;\
     }\
@@ -1095,7 +1086,8 @@ void TrackerSettings::setJSONData(DynamicJsonDocument &json)
     // Suffixed with the 3 character data type
     // Length can be determined with above info
 
-    // If DIVisor set to negative one only transmits if different from last value
+    // If DIVisor less than zero only send on change.
+    // If less than -1 update on cycle count or change
 
     id=0;
     char b64array[500];
@@ -1104,14 +1096,19 @@ void TrackerSettings::setJSONData(DynamicJsonDocument &json)
     #define DA(DT, NAME, SIZE, DIV)\
     sendit=false;\
     if(senddataarray & 1<<id) {\
-        if(DIV == -1 && memcmp(last ## NAME, NAME, SIZE * sizeof(DT)) != 0)\
-            sendit = true;\
-        else if(counter % DIV == 0)\
-            sendit = true;\
+        if(DIV < 0) { \
+            if(memcmp(last ## NAME, NAME, sizeof(NAME)) != 0)\
+                sendit = true;\
+            else if(DIV != -1 && counter % abs(DIV) == 0)\
+                sendit = true;\
+        } else { \
+            if(counter % DIV == 0)\
+                sendit = true;\
+        }\
         if(sendit) {\
             encode_base64((unsigned char*)NAME, sizeof(DT)*SIZE,(unsigned char*)b64array);\
             json["6" #NAME #DT] = b64array;\
-            memcpy(last ## NAME, NAME, SIZE * sizeof(DT));\
+            memcpy(last ## NAME, NAME, sizeof(NAME));\
         }\
     }\
     id++;
@@ -1120,7 +1117,7 @@ void TrackerSettings::setJSONData(DynamicJsonDocument &json)
 
     // Used for reduced data divisor
     counter++;
-    if(counter > 100) {
+    if(counter > 500) {
         counter = 0;
     }
 }

@@ -15,6 +15,15 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <zephyr.h>
+
+#include <bluetooth/bluetooth.h>
+#include <bluetooth/hci.h>
+#include <bluetooth/conn.h>
+#include <bluetooth/uuid.h>
+#include <bluetooth/gatt.h>
+#include <sys/byteorder.h>
+
 #include "serial.h"
 #include "io.h"
 #include "nano33ble.h"
@@ -22,57 +31,252 @@
 #include "opentxbt.h"
 #include "btpararmt.h"
 
-//Timer watchdog;
-
-#define WATCHDOG_TIMEOUT 10000
-
+static uint16_t chan_vals[BT_CHANNELS];
 uint16_t chanoverrides=0xFFFF; // Default to all enabled
 
-/*void fff6Written(BLEDevice central, BLECharacteristic characteristic);
-void overrideWritten(BLEDevice central, BLECharacteristic characteristic);*/
+static void start_scan(void);
 
-// Should be safe, never should be more than one instance of this
-BTParaRmt *BTParaInst = nullptr;
+static struct bt_conn *pararmtconn = NULL;
 
-BTParaRmt::BTParaRmt() : BTFunction()
+struct bt_le_scan_param scnparams = {
+    .type = BT_LE_SCAN_TYPE_PASSIVE,
+    .options = BT_LE_SCAN_OPT_NONE,
+    .interval = BT_GAP_SCAN_FAST_INTERVAL,
+    .window = BT_GAP_SCAN_FAST_WINDOW,
+};
+
+struct bt_le_conn_param *rmtconparms = BT_LE_CONN_PARAM(6, 8, 0, 100); // Faster Connection Interval
+
+static bool eir_found(struct bt_data *data, void *user_data)
 {
-    BTParaInst = this;
+	bt_addr_le_t *addr = (bt_addr_le_t *)user_data;
+	int i;
+
+	/*serialWrite("[AD]: ");
+    serialWrite(data->type);
+    serialWrite(" data_len ");
+    serialWrite(data->data_len);
+    serialWriteln("");*/
+
+	switch (data->type) {
+    case BT_DATA_FLAGS:
+        //serialWriteln("Flags Found");
+        break;
+    case BT_DATA_NAME_SHORTENED:
+    case BT_DATA_NAME_COMPLETE:   // *** DOESN'T WORK, MISSING DATA IN ADVERTISE???
+        //serialWrite("Device Name ");
+        //serialWriteln();
+        //serialWrite((char*)data->data,data->data_len);
+        break;
+	case BT_DATA_UUID16_SOME:
+	case BT_DATA_UUID16_ALL:
+		if (data->data_len % sizeof(uint16_t) != 0U) {
+			serialWriteln("HT: AD malformed");
+			return true;
+		}
+
+        // Find all advertised UUID16 services
+		for (i = 0; i < data->data_len; i += sizeof(uint16_t)) {
+
+			uint16_t u16v;
+            memcpy(&u16v, &data->data[i], sizeof(u16));
+
+			if (u16v != 0xFFF0) {
+				continue;
+			}
+
+	        char addrstr[BT_ADDR_LE_STR_LEN];
+        	bt_addr_le_to_str(addr, addrstr, sizeof(addrstr));
+
+            /*serialWrite("HT: Has a FrSky Service on ");
+            serialWrite(addrstr);
+            serialWriteln();*/
+
+            // Notify GUI that a valid BT device was discovered
+            trkset.setDiscoveredBTHead(addrstr);
+
+            // Scan only Mode, don't connect
+            if(btscanonly)
+                continue;
+
+            // Only connect to a specific device?
+            bool okaytocon = false;
+            if(strlen(trkset.pairedBTAddress()) > 0) {
+               if(strcmp(addrstr, trkset.pairedBTAddress()) == 0) {
+                    okaytocon = true;
+                    serialWriteln("HT: Not connecting to found device, not the paired device");
+               }
+            } else
+                okaytocon = true;
+
+
+            if(!okaytocon)
+                continue;
+
+            serialWriteln("HT: Connecting to device...");
+
+			int err = bt_le_scan_stop();
+			if (err) {
+				serialWrite("HT: Stop LE scan failed (err ");
+                serialWrite(err);
+                serialWriteln(")");
+				continue;
+			}
+
+            struct bt_conn_le_create_param btconparm = {
+                .options = (BT_CONN_LE_OPT_NONE),
+                .interval = (0x0060),
+                .window = (0x0060),
+                .interval_coded = 0,
+                .window_coded = 0,
+                .timeout = 0, };
+
+			err = bt_conn_le_create(addr, &btconparm,
+						rmtconparms, &pararmtconn);
+			if (err) {
+				serialWrite("HT: Create conn failed (err ");
+                serialWrite(err);
+                serialWriteln(")");
+
+                // Re-start Scanning
+                start_scan();
+			}
+
+			return false; // Stop parsing ad data
+        }
+        break;
+    }
+
+	return true; // Keep parsing ad data
+}
+
+static void device_found(const bt_addr_le_t *addr, int8_t rssi, uint8_t type, struct net_buf_simple *ad)
+{
+	if (pararmtconn) {
+		return;
+	}
+
+	/* We're only interested in connectable events */
+	if (type != BT_GAP_ADV_TYPE_ADV_IND &&
+	    type != BT_GAP_ADV_TYPE_ADV_DIRECT_IND) {
+		return;
+	}
+
+    bt_data_parse(ad, eir_found, (void *)addr);
+}
+
+static void start_scan(void)
+{
+	int err;
+
+	/* This demo doesn't require active scan */
+	err = bt_le_scan_start(&scnparams, device_found);
+	if (err) {
+		serialWrite("HT: Scanning failed to start (err ");
+        serialWrite(err);
+        serialWriteln(")");
+		return;
+	}
+
+	serialWriteln("HT: Scanning successfully started");
+}
+
+static void rmtconnected(struct bt_conn *conn, uint8_t err)
+{
+	char addr[BT_ADDR_LE_STR_LEN];
+
+	bt_addr_le_to_str(bt_conn_get_dst(conn), addr, sizeof(addr));
+
+	if (err) {
+		serialWrite("HT: Failed to connect to ");
+        serialWrite(addr);
+        serialWrite(" (");
+        serialWrite(err);
+        serialWrite(")\r\n");
+
+		bt_conn_unref(pararmtconn);
+		pararmtconn = NULL;
+
+		start_scan();
+		return;
+	}
+
+	if (conn != pararmtconn) {
+		return;
+	}
+
+	serialWrite("HT: Connected: ");
+    serialWrite(addr);
+    serialWriteln("");
+
+    bleconnected = true;
+
+    // Subscribe to FFF6 on Service FFF0
+
+}
+
+static void rmtdisconnected(struct bt_conn *conn, uint8_t reason)
+{
+	char addr[BT_ADDR_LE_STR_LEN];
+
+	bt_addr_le_to_str(bt_conn_get_dst(conn), addr, sizeof(addr));
+
+	serialWrite("HT: Disconnected: ");
+    serialWrite(addr);
+    serialWriteln("");
+
+	bt_conn_unref(pararmtconn);
+	pararmtconn = NULL;
+
+	start_scan();
+    bleconnected = false;
+}
+
+static struct bt_conn_cb rmtconn_callbacks = {
+		.connected = rmtconnected,
+		.disconnected = rmtdisconnected,
+};
+
+void BTRmtStart()
+{
     bleconnected = false;
     chanoverrides = 0xFFFF;
 
     // Reset all BT channels to disabled
-    for(int i = 0; i <BT_CHANNELS; i++)
+    for(int i = 0; i < BT_CHANNELS; i++)
         chan_vals[i] = 0;
 
     serialWriteln("HT: Starting Remote Para Bluetooth");
 
-    // Save Local Address
-    //strcpy(_address,BLE.address().c_str());
+    bt_conn_cb_register(&rmtconn_callbacks);
 
-    //watchdog.start();
+	start_scan();
 }
 
-BTParaRmt::~BTParaRmt()
+
+void BTRmtStop()
 {
-    BTParaInst = nullptr;
+    bt_le_scan_stop();
+
+    if(pararmtconn) {
+        bt_conn_disconnect(pararmtconn, BT_HCI_ERR_REMOTE_USER_TERM_CONN);
+    }
+
     // Reset all BT channels to center
     for(int i = 0; i <BT_CHANNELS; i++)
         chan_vals[i] = TrackerSettings::PPM_CENTER;
 
     serialWriteln("HT: Stopping Remote Para Bluetooth");
 
-    // Disconnect
-    //BLE.disconnect();
+    bt_conn_cb_register(NULL);
 }
 
-// Set channel does nothing on a BT receiver (Remote board)
-void BTParaRmt::setChannel(int channel, const uint16_t value)
+void BTRmtSetChannel(int channel, const uint16_t value)
 {
 
 }
 
-// If not connected, not valid, or channel isn't overriden return zero (disabled)
-uint16_t BTParaRmt::getChannel(int channel)
+uint16_t BTRmtGetChannel(int channel)
 {
     if(channel >= 0 &&
        channel < BT_CHANNELS &&
@@ -82,7 +286,18 @@ uint16_t BTParaRmt::getChannel(int channel)
     return 0;
 }
 
-void BTParaRmt::execute()
+const char * BTRmtGetAddress()
+{
+    return "";
+}
+
+void BTRmtSendButtonData(char bd)
+{
+    /*if(butpress)
+        butpress.writeValue((uint8_t)bd);*/
+}
+
+void BTRmtExecute()
 {
      /*// Start Scan for PARA Slaves
     if(!BLE.connected() && !scanning) {
@@ -229,10 +444,10 @@ void BTParaRmt::execute()
         watchdog.reset();
     }
 
-    BLE.poll();*/
+    BLE.poll();
 }
 
-/*void overrideWritten(BLEDevice central, BLECharacteristic characteristic)
+void overrideWritten(BLEDevice central, BLECharacteristic characteristic)
 {
     characteristic.readValue(chanoverrides);
 }
@@ -269,11 +484,7 @@ void fff6Written(BLEDevice central, BLECharacteristic characteristic) {
         Serial.print("Ch");Serial.print(i+1);Serial.print(":");Serial.print(ppmChannels[i]);Serial.print(" ");
     }
     Serial.println("");
-#endif
+#endif*/
 }
-*/
-void BTParaRmt::sendButtonData(char bd)
-{
-    /*if(butpress)
-        butpress.writeValue((uint8_t)bd);*/
-}
+
+

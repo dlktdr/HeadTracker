@@ -4,6 +4,15 @@
 
 extern uint16_t chanoverrides;
 
+void BTRmtStop();
+void BTRmtStart();
+void BTRmtExecute();
+void BTRmtSetChannel(int channel, const uint16_t value);
+uint16_t BTRmtGetChannel(int channel);
+const char * BTRmtGetAddress();
+void BTRmtSendButtonData(char bd);
+
+/*
 class BTParaRmt : public BTFunction {
 public:
     //static void fff6Written(BLEDevice central, BLECharacteristic characteristic);
@@ -28,9 +37,7 @@ private:
     BLECharacteristic fff6;
     BLECharacteristic butpress;
     BLECharacteristic overridech;
-*/
-    /*Timer sbusupdate;
-    Ticker ioTick;*/
 
     char _address[20];
 };
+*/

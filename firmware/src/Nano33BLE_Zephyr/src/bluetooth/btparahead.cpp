@@ -28,37 +28,31 @@
 #include "io.h"
 #include "nano33ble.h"
 
+
+// Bluetooth module Type
+//#define BT_MOD_CC2650_PARA
+#define BT_MOD_CC2540
+
+void sendTrainer();
+int setTrainer(uint8_t *addr);
+void pushByte(uint8_t byte);
+static void disconnected(struct bt_conn *conn, uint8_t reason);
+static void connected(struct bt_conn *conn, uint8_t err);
+static void security_changed(struct bt_conn*conn, bt_security_t level, enum bt_security_err err);
+static ssize_t write_ct(struct bt_conn *conn, const struct bt_gatt_attr *attr, const void *buf, uint16_t len, uint16_t offset, uint8_t flags);
+static ssize_t read_ct(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf, uint16_t len, uint16_t offset);
+static void ct_ccc_cfg_changed(const struct bt_gatt_attr *attr, uint16_t value);
+
+static constexpr uint8_t START_STOP = 0x7E;
+static constexpr uint8_t BYTE_STUFF = 0x7D;
+static constexpr uint8_t STUFF_MASK = 0x20;
+static uint8_t buffer[BLUETOOTH_LINE_LENGTH+1];
+static uint16_t chan_vals[BT_CHANNELS];
+static uint8_t bufferIndex;
+static uint8_t crc;
 static uint8_t ct[40];
-
-static void ct_ccc_cfg_changed(const struct bt_gatt_attr *attr, uint16_t value)
-{
-	/* TODO: Handle value */
-}
-
-static ssize_t read_ct(struct bt_conn *conn, const struct bt_gatt_attr *attr,
-		       void *buf, uint16_t len, uint16_t offset)
-{
-	char *value = (char*)attr->user_data;
-
-	return bt_gatt_attr_read(conn, attr, buf, len, offset, value,
-				 sizeof(ct));
-}
-
-static ssize_t write_ct(struct bt_conn *conn, const struct bt_gatt_attr *attr,
-			const void *buf, uint16_t len, uint16_t offset,
-			uint8_t flags)
-{
-	/*uint8_t *value = (char*)attr->user_data;
-
-	if (offset + len > sizeof(ct)) {
-		return BT_GATT_ERR(BT_ATT_ERR_INVALID_OFFSET);
-	}
-
-	memcpy(value + offset, buf, len);
-	ct_update = 1U;
-*/
-	return len;
-}
+static char _address[] = "00:00:00:00:00:00";
+uint16_t ovridech = 0;
 
 // Service UUID
 static struct bt_uuid_128 btparaserv = BT_UUID_INIT_128(
@@ -71,161 +65,107 @@ static struct bt_uuid_16 btparachar = BT_UUID_INIT_16(0xfff6);
 BT_GATT_SERVICE_DEFINE(bt_srv,
     BT_GATT_PRIMARY_SERVICE(&btparaserv),
     BT_GATT_CHARACTERISTIC(&btparachar.uuid,
-                           BT_GATT_CHRC_BROADCAST | BT_GATT_CHRC_READ | BT_GATT_CHRC_WRITE_WITHOUT_RESP | BT_GATT_CHRC_NOTIFY,
-                           //BT_GATT_CHRC_BROADCAST| BT_GATT_CHRC_NOTIFY,
-                           BT_GATT_PERM_READ | BT_GATT_PERM_WRITE,
-                           read_ct,write_ct,ct),
-    BT_GATT_CCC(ct_ccc_cfg_changed, BT_GATT_PERM_READ_ENCRYPT | BT_GATT_PERM_WRITE_ENCRYPT),
+                           BT_GATT_CHRC_READ | BT_GATT_CHRC_WRITE_WITHOUT_RESP | BT_GATT_CHRC_NOTIFY,
+                           BT_GATT_PERM_READ | BT_GATT_PERM_WRITE, read_ct,write_ct,ct),
+    BT_GATT_CCC(ct_ccc_cfg_changed, BT_GATT_PERM_READ | BT_GATT_PERM_WRITE),
     );
 
 static const struct bt_data ad[] = {
 	BT_DATA_BYTES(BT_DATA_FLAGS, (BT_LE_AD_GENERAL | BT_LE_AD_NO_BREDR)),
 	BT_DATA_BYTES(BT_DATA_UUID16_SOME, BT_UUID_16_ENCODE(0xFFF0)),
+#if defined(BT_MOD_CC2540)
     BT_DATA_BYTES(0x12, 0x00, 0x60, 0x00, 0x60),
-    BT_DATA_BYTES(BT_DATA_TX_POWER, 0x00),
+#endif
 };
 
 static struct bt_le_adv_param my_param = {
         .id = BT_ID_DEFAULT, \
         .sid = 0, \
         .secondary_max_skip = 0, \
-        .options = (BT_LE_ADV_OPT_CONNECTABLE | BT_LE_ADV_OPT_USE_NAME), \
+        .options = (BT_LE_ADV_OPT_CONNECTABLE | BT_LE_ADV_OPT_USE_NAME | BT_LE_ADV_OPT_USE_IDENTITY), \
         .interval_min = (BT_GAP_ADV_FAST_INT_MIN_2), \
         .interval_max = (BT_GAP_ADV_FAST_INT_MAX_2), \
         .peer = (NULL), \
     };
 
 struct bt_conn *curconn = NULL;
-
-static void connected(struct bt_conn *conn, uint8_t err)
-{
-	if (err) {
-		serialWriteF("HT: Bluetooth Connection failed (err 0x%02x)\r\n", err);
-	} else {
-		serialWriteln("HT: Bluetooth connected :)");
-	}
-    bt_le_adv_stop();
-
-    curconn = conn;
-
-    bleconnected = true;
-}
-
-static void disconnected(struct bt_conn *conn, uint8_t reason)
-{
-    serialWriteF("HT: Bluetooth disconnected (reason 0x%02x)\r\n", reason);
-
-    // Start advertising
-    int err = bt_le_adv_start(&my_param, ad, ARRAY_SIZE(ad), NULL, 0);
-	if (err) {
-		serialWriteln("Advertising failed to start (err %d)");
-		return;
-	}
-
-    curconn = NULL;
-
-
-    bleconnected = false;
-}
-
-static void auth_passkey_display(struct bt_conn *conn, unsigned int passkey)
-{
-	char addr[BT_ADDR_LE_STR_LEN];
-
-	bt_addr_le_to_str(bt_conn_get_dst(conn), addr, sizeof(addr));
-    serialWriteF("Passkey for %s: %06u\r\n", addr, passkey);
-}
-
-static void auth_cancel(struct bt_conn *conn)
-{
-	char addr[BT_ADDR_LE_STR_LEN];
-
-	bt_addr_le_to_str(bt_conn_get_dst(conn), addr, sizeof(addr));
-	serialWriteF("Pairing cancelled: %s\r\n", addr);
-}
+struct bt_le_conn_param *conparms = BT_LE_CONN_PARAM(6, 8, 0, 100); // Faster Connection Interval
 
 static struct bt_conn_cb conn_callbacks = {
 	.connected = connected,
 	.disconnected = disconnected,
+    .security_changed = security_changed,
 };
 
-static struct bt_conn_auth_cb auth_cb_display = {
-	.passkey_display = auth_passkey_display,
-	.passkey_entry = NULL,
-	.cancel = auth_cancel,
-};
-
-BTParaHead::BTParaHead() : BTFunction()
+void BTHeadStart()
 {
+
     bleconnected = false;
 
-    serialWriteln("HT: Starting Head Para Bluetooth");
+    // Center all Channels
+    for(int i=0;i < BT_CHANNELS;i++) {
+        chan_vals[i] = TrackerSettings::PPM_CENTER;
+    }
 
+    serialWriteln("HT: BLE Starting Head Bluetooth");
 
     // Start Advertising
     int err = bt_le_adv_start(&my_param, ad, ARRAY_SIZE(ad), NULL, 0);
 	if (err) {
-		serialWriteln("Advertising failed to start (err %d)");
+		serialWriteln("HT: Advertising failed to start (err %d)");
 		return;
 	}
 
+    serialWriteln("HT: BLE Started Advertising");
+
+
+
     bt_conn_cb_register(&conn_callbacks);
-	bt_conn_auth_cb_register(&auth_cb_display);
 
     crc = 0;
     bufferIndex = 0;
 }
 
-BTParaHead::~BTParaHead()
+void BTHeadStop()
 {
-    serialWriteln("HT: Stopping Head Para Bluetooth");
+    serialWriteln("HT: BLE Stopping Head Bluetooth");
+
     // Stop Advertising
-    bt_le_adv_stop();
-    if(curconn)
+    int rv = bt_le_adv_stop();
+    if(rv) {
+        serialWrite("HT: BLE Unable to Stop advertising");
+    } else {
+        serialWriteln("HT: BLE Stopped Advertising");
+    }
+
+    if(curconn){
+        serialWriteln("HT: BLE Disconnecting Active Connection");
         bt_conn_disconnect(curconn,0);
+        bt_conn_unref(curconn);
+    }
+    curconn = NULL;
+
+    bleconnected = false;
 }
 
-void BTParaHead::execute()
+void BTHeadExecute()
 {
-    static int ch1val=1000;
-    static int ch2val=2000;
     if(bleconnected) {
-        setChannel(0,ch1val);
-        setChannel(1,ch2val);
-        ch1val += 4;
-        ch2val -= 4;
-        if(ch1val> 2001)
-            ch1val = 1000;
-
-        if(ch2val < 999)
-            ch2val = 2000;
-
         sendTrainer();
     }
 }
 
-void BTParaHead::sendTrainer()
+const char * BTHeadGetAddress()
 {
-    uint8_t output[BLUETOOTH_LINE_LENGTH+1];
-    int len;
-    len = setTrainer(output);
-    bt_gatt_notify(NULL, &bt_srv.attrs[1], output, len);
+    return _address;
 }
 
-// Part of setTrainer to calculate CRC
-// From OpenTX
-
-void BTParaHead::pushByte(uint8_t byte)
+bool BTHeadGetConnected()
 {
-    crc ^= byte;
-    if (byte == START_STOP || byte == BYTE_STUFF) {
-        buffer[bufferIndex++] = BYTE_STUFF;
-        byte ^= STUFF_MASK;
-    }
-    buffer[bufferIndex++] = byte;
+    return(bleconnected);
 }
 
-void BTParaHead::setChannel(int channel, const uint16_t value)
+void BTHeadSetChannel(int channel, const uint16_t value)
 {
     if(channel >= BT_CHANNELS)
         return;
@@ -244,16 +184,151 @@ void BTParaHead::setChannel(int channel, const uint16_t value)
 }
 
 // Head BT does not return BT data
-uint16_t BTParaHead::getChannel(int channel)
+uint16_t BTHeadGetChannel(int channel)
 {
     return 0;
+}
+
+
+static void ct_ccc_cfg_changed(const struct bt_gatt_attr *attr, uint16_t value)
+{
+    serialWrite("CCC Values Changed (");
+    serialWrite(value);
+    serialWrite(")\r\n");
+}
+
+static ssize_t read_ct(struct bt_conn *conn, const struct bt_gatt_attr *attr,
+		       void *buf, uint16_t len, uint16_t offset)
+{
+	char *value = (char*)attr->user_data;
+
+	return bt_gatt_attr_read(conn, attr, buf, len, offset, value,
+				 sizeof(ct));
+}
+
+static ssize_t write_ct(struct bt_conn *conn, const struct bt_gatt_attr *attr,
+			const void *buf, uint16_t len, uint16_t offset,
+			uint8_t flags)
+{
+
+
+	return len;
+}
+
+
+static void security_changed(struct bt_conn*conn, bt_security_t level, enum bt_security_err err)
+{
+    serialWrite("Secutity Changed (");
+    serialWrite(level);
+    serialWrite(")\r\n");
+}
+
+void hasSecurityChangedTimer(struct k_timer *tmr)
+{
+    k_timer_stop(tmr);
+
+    if(!curconn)
+        return;
+
+    bt_security_t sl = bt_conn_get_security(curconn);
+
+    // If a CC2540 device, is should have changed the security level to 2 by now
+    // If you force the notify subscription on a CC2540 right away it won't send data
+    if(sl == BT_SECURITY_L1) {
+        uint8_t ccv = BT_GATT_CCC_NOTIFY;
+        bt_gatt_attr_write_ccc(curconn, &bt_srv.attrs[3], &ccv, 1 , 0, 0);
+        serialWriteln("Detected a CC2650 Chip (PARA Wireless)");
+    }
+    else
+        serialWriteln("Detected a CC2540 Chip (non-PARA)");
+}
+
+K_TIMER_DEFINE(my_timer, hasSecurityChangedTimer, NULL);
+
+static void connected(struct bt_conn *conn, uint8_t err)
+{
+	if (err) {
+		serialWrite("HT: Bluetooth Connection failed ");
+        serialWrite(err);
+        serialWrite("\r\n");
+	} else {
+		serialWriteln("HT: Bluetooth connected :)");
+	}
+
+    // Stop Advertising
+    bt_le_adv_stop();
+
+    curconn = bt_conn_ref(conn);
+
+    struct bt_conn_info info;
+    bt_conn_get_info(conn, &info);
+
+    char addr_str[50];
+    bt_addr_le_to_str(info.le.dst, addr_str, sizeof(addr_str));
+
+    serialWrite("HT: Connected to Address ");
+    serialWrite(addr_str);
+    serialWrite("\r\n");
+
+    // Set Connection Parameters
+    // Decrease minimum connection time, update rate improvement
+    bt_conn_le_param_update(curconn,conparms);
+
+    // Start a Timer, If we don't see a Security Change within this time
+    // e.g. a CC2540 chip then force a subscription for the PARA chip
+    k_timer_start(&my_timer, K_SECONDS(2), K_SECONDS(0));
+
+    bleconnected = true;
+}
+
+static void disconnected(struct bt_conn *conn, uint8_t reason)
+{
+    serialWrite("HT: Bluetooth disconnected (reason ");
+    serialWrite(reason);
+    serialWriteln("");
+
+    // Start advertising
+    int err = bt_le_adv_start(&my_param, ad, ARRAY_SIZE(ad), NULL, 0);
+	if (err) {
+		serialWriteln("Advertising failed to start (err %d)");
+		return;
+	}
+
+
+    if(curconn)
+        bt_conn_unref(curconn);
+
+    curconn = NULL;
+    bleconnected = false;
+}
+
+void sendTrainer()
+{
+    uint8_t output[BLUETOOTH_LINE_LENGTH+1];
+    int len;
+    len = setTrainer(output);
+
+    bt_gatt_notify(NULL, &bt_srv.attrs[1], output, len);
+}
+
+// Part of setTrainer to calculate CRC
+// From OpenTX
+
+void pushByte(uint8_t byte)
+{
+    crc ^= byte;
+    if (byte == START_STOP || byte == BYTE_STUFF) {
+        buffer[bufferIndex++] = BYTE_STUFF;
+        byte ^= STUFF_MASK;
+    }
+    buffer[bufferIndex++] = byte;
 }
 
 /* Builds Trainer Data
 *     Returns the length of the encoded PPM + CRC
 *     Data saved into addr pointer
 */
-int BTParaHead::setTrainer(uint8_t *addr)
+int setTrainer(uint8_t *addr)
 {
     // Allocate Channel Mappings, Set Default to all Center
     uint8_t * cur = buffer;
