@@ -41,11 +41,10 @@ void start(void)
     PWM_Init(50); // Start PWM 50hz
 
     // USB Joystick
-    joystick_init();
+    //joystick_init();
 
     // Load settings from flash - trackersettings.cpp
     trkset.loadFromEEPROM();
-
 
     // Main blinky light
 	while (1) {
@@ -57,14 +56,11 @@ void start(void)
 	}
 }
 
-#define PRIORITY_LOW 4
-#define PRIORITY_MED 8
-#define PRIORITY_HIGH 16
-#define PRIORITY_RT 32
-
+// Threads
 K_THREAD_DEFINE(io_Thread_id, 256, io_Thread, NULL, NULL, NULL, PRIORITY_LOW, 0, 0);
 K_THREAD_DEFINE(serial_Thread_id, 8192, serial_Thread, NULL, NULL, NULL, PRIORITY_LOW, K_FP_REGS, 0);
-K_THREAD_DEFINE(data_Thread_id, 2048, data_Thread, NULL, NULL, NULL, PRIORITY_LOW-2, K_FP_REGS, 0);
+K_THREAD_DEFINE(data_Thread_id, 2048, data_Thread, NULL, NULL, NULL, PRIORITY_LOW, K_FP_REGS, 0);
 K_THREAD_DEFINE(bt_Thread_id, 4096, bt_Thread, NULL, NULL, NULL, PRIORITY_HIGH, 0, 0);
-K_THREAD_DEFINE(sense_Thread_id, 4096, sense_Thread, NULL, NULL, NULL, PRIORITY_HIGH, K_FP_REGS, 2000);
-K_THREAD_DEFINE(SBUS_Thread_id, 1024, SBUS_Thread, NULL, NULL, NULL, PRIORITY_RT, 0, 0);
+K_THREAD_DEFINE(sensor_Thread_id, 2048, sensor_Thread, NULL, NULL, NULL, PRIORITY_MED, K_FP_REGS, 0);
+K_THREAD_DEFINE(calculate_Thread_id, 4096, calculate_Thread, NULL, NULL, NULL, PRIORITY_HIGH, K_FP_REGS, 0);
+K_THREAD_DEFINE(SBUS_Thread_id, 1024, SBUS_Thread, NULL, NULL, NULL, PRIORITY_MED-1, 0, 0);

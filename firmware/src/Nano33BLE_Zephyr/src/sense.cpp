@@ -15,12 +15,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-//#include <Arduino_APDS9960.h>
-
-// Pick a Filter
-//#define NXP_FILTER
-#define MADGWICK  // My Choice, seems to work well and not a ton of CPU used
-
 #include "trackersettings.h"
 #include "sense.h"
 #include "nano33ble.h"
@@ -62,14 +56,12 @@ static uint16_t channel_data[16];
 Madgwick madgwick;
 
 uint32_t ustocalculate;
-//static Timer runt;
-//static Timer blefreq;
 
 static int counter=0;
 static bool blesenseboard=true;
 static bool lastproximity=false;
 
-void MagCalc();
+K_MUTEX_DEFINE(sensor_mutex);
 
 LSM9DS1Class IMU;
 
@@ -80,7 +72,7 @@ LSM9DS1Class IMU;
 #define MADGINIT_READY (MADGINIT_ACCEL|MADGINIT_MAG)
 static int madgreads=0;
 static uint8_t madgsensbits=0;
-static bool firstrun=true;
+static volatile bool firstrun=true;
 static float aacc[3]={0,0,0};
 static float amag[3]={0,0,0};
 
@@ -92,15 +84,11 @@ int sense_Init()
     }
 
 /*
-#ifdef NXP_FILTER
-    nxpfilter.begin(125); // Frequency discovered by oscilliscope
-#else
-#endif
-
     // Initalize Gesture Sensor
     if(!APDS.begin())
         blesenseboard = false;
 */
+
     for(int i = 0; i< BT_CHANNELS; i++) {
         bt_chansf[i] = 0;
     }
@@ -109,33 +97,21 @@ int sense_Init()
 }
 
 // Read all IMU data and do the calculations,
-void sense_Thread()
+void calculate_Thread()
 {
     while(1) {
+        k_usleep(CALCULATE_PERIOD);
 
         // Store current time to adjust sleep period for a consitent period
         ustocalculate = micros();
 
         digitalWrite(A5,1);
 
-        // Run this first to keep most accurate timing
-    #ifdef NXP_FILTER
-        // NXP
-        nxpfilter.update(gyrx, gyry, gyrz, accx, accy, accz, magx, magy, magz);
-        roll = nxpfilter.getPitch();
-        tilt = nxpfilter.getRoll();
-        pan = nxpfilter.getYaw();
-        if(madgreads == 10)
-            nxpfilter.reset(); // 10 samples, then reset
-        else if(madgreads < 1500)
-            panoffset = pan; // Latch output at zero
-        else if(madgreads > 1500) // Prevent loop
-            madgreads = 1500;
-        madgreads++;
-
-    #else
         // Period Between Samples
         float deltat = madgwick.deltatUpdate();
+
+        // Use a mutex so sensor data can't be updated part way
+        k_mutex_lock(&sensor_mutex, K_FOREVER);
 
         // Only do this update after the first mag and accel data have been read.
         if(madgreads == 0) {
@@ -179,9 +155,12 @@ void sense_Thread()
                 firstrun = false;
             }
         }
-    #endif
+
+        // Free Mutex Lock, Allow sensor updates
+        k_mutex_unlock(&sensor_mutex);
 
         // Reset Center on Proximity, Don't need to update this often
+        /*
         static int sensecount=0;
         static int minproximity=100; // Keeps smallest proximity read.
         static int maxproximity=0; // Keeps largest proximity value read.
@@ -189,7 +168,7 @@ void sense_Thread()
             sensecount = 0;
             if (trkset.resetOnWave()) {
                 // Reset on Proximity
-                /*if(APDS.proximityAvailable()) {
+                if(APDS.proximityAvailable()) {
                     int proximity = APDS.readProximity();
 
                     // Store High and Low Values, Generate reset thresholds
@@ -209,12 +188,9 @@ void sense_Thread()
                             lastproximity = false;
                         }
                     }
-                }*/
+                }
             }
-        }
-
-        // Get the current Bluetooth Function
-        BTFunction *btf = trkset.getBTFunc();
+        }*/
 
         // Zero button was pressed, adjust all values to zero
         bool butdnw = false;
@@ -227,17 +203,14 @@ void sense_Thread()
 
         // If button was pressed and this is a remote bluetooth send the button press back
         static bool btbtnupdated=false;
-        if(btf != nullptr) {
-            if(btf->mode() == BTPARARMT) {
-                BTParaRmt *rmt = static_cast<BTParaRmt*>(btf);
-                if(butdnw && btbtnupdated == false) {
-                    rmt->sendButtonData('R');
-                    btbtnupdated = true;
-                }
-                else if(btbtnupdated == true) {
-                    rmt->sendButtonData(0);
-                    btbtnupdated = false;
-                }
+        if(BTGetMode() == BTPARARMT) {
+            if(butdnw && btbtnupdated == false) {
+                BTRmtSendButtonData('R');
+                btbtnupdated = true;
+            }
+            else if(btbtnupdated == true) {
+                BTRmtSendButtonData(0);
+                btbtnupdated = false;
             }
         }
 
@@ -265,10 +238,10 @@ void sense_Thread()
         *
         * Build Channel Data
         *   1) Reset all channels to disabled
-        *   2) Set PPMin channels if available
-        *   3) Set SBUSin channels if available
-        *   4) Set received BT channels if available
-        *   5) Reset Center on PPM channel if enabled
+        *   2) Set PPMin channels
+        *   3) Set SBUSin channels
+        *   4) Set received BT channels
+        *   5) Reset Center on PPM channel
         *   6) Set auxiliary functions
         *   7) Set analog channels
         *   8) Override desired channels with pan/tilt/roll
@@ -311,14 +284,12 @@ void sense_Thread()
         float btbeta = 0.1; // Found by tests to be suitable value
         for(int i=0;i<BT_CHANNELS;i++)
             bt_chans[i] = 0;    // Reset all BT in channels to Zero (Not active)
-        if(btf != nullptr) {
-            for(int i=0;i<BT_CHANNELS;i++) {
-                float btvalue = btf->getChannel(i); // Read the BT Data
-                if(btvalue > 0) {
-                    filter_lowPass(btvalue, bt_chansf + i, btbeta);
-                    bt_chans[i] = bt_chansf[i];
-                    channel_data[i] = bt_chans[i];
-                }
+        for(int i=0;i<BT_CHANNELS;i++) {
+            float btvalue = BTGetChannel(i); // Read the BT Data
+            if(btvalue > 0) {
+                filter_lowPass(btvalue, bt_chansf + i, btbeta);
+                bt_chans[i] = bt_chansf[i];
+                channel_data[i] = bt_chans[i];
             }
         }
 
@@ -351,7 +322,7 @@ void sense_Thread()
 
         // 7) Set Analog Channels
         if(trkset.analog6Ch() > 0) {
-            float an6 = analogRead(6);
+            float an6 = analogRead(AN6);
             an6 /= 1241.2f; // Equals 0-3.3V w/High resolution Analog Read
             an6 *= trkset.analog6Gain();
             an6 += trkset.analog6Offset();
@@ -361,7 +332,7 @@ void sense_Thread()
         }
 
         if(trkset.analog7Ch() > 0) {
-            float an7 = analogRead(7);
+            float an7 = analogRead(AN7);
             an7 /= 1241.2f; // Equals 0-3.3V w/High resolution Analog Read
             an7 *= trkset.analog7Gain();
             an7 += trkset.analog7Offset();
@@ -389,15 +360,11 @@ void sense_Thread()
             PpmOut_setChannel(i,ppmout);
         }
 
-        // 10) Set all the BT Channels, send the zeros.
-        bool bleconnected=false;
-        BTFunction *bt = trkset.getBTFunc();
-        if(bt != nullptr) {
-            bleconnected = bt->isConnected();
-            trkset.setBLEAddress(bt->address());
-            for(int i=0;i < BT_CHANNELS;i++) {
-                bt->setChannel(i,channel_data[i]);
-            }
+        // 10) Set all the BT Channels, send the zeros don't center
+        bool bleconnected=BTGetConnected();
+        trkset.setBLEAddress(BTGetAddress());
+        for(int i=0;i < BT_CHANNELS;i++) {
+            BTSetChannel(i,channel_data[i]);
         }
 
         // 11) Set all SBUS output channels, if disabled set to center
@@ -423,90 +390,6 @@ void sense_Thread()
 
         // 13 Set USB Joystick Channels, Only 8 channels
         set_JoystickChannels(channel_data);
-
-        /* ************************************************************
-        * Sensor Reading Below, done after channels for timing reasons
-        *    as below code can vary wildly.
-        ************************************************************/
-
-        // If not using any of the tilt roll or pan outputs
-        // Don't bother wasting time calculating the tilt/roll/pan outputs
-        // If ui connected, do it so you can still see the outputs.
-        if(tltch < 0 && panch < 0 && rllch < 0 && uiconnected == false)
-            counter = -1;
-
-        // Oversampling.
-        if(++counter == SENSEUPDATE) {
-            counter = 0;
-
-            // Setup Rotations
-            float rotation[3];
-            trkset.orientRotations(rotation);
-
-            // Accelerometer
-            if(IMU.accelerationAvailable()) {
-                IMU.readRawAccel(raccx, raccy, raccz);
-                raccx *= -1.0; // Flip X to make classic cartesian (+X Right, +Y Up, +Z Vert)
-                trkset.accOffset(accxoff,accyoff,acczoff);
-
-                accx = raccx - accxoff;
-                accy = raccy - accyoff;
-                accz = raccz - acczoff;
-
-                // Apply Rotation
-                float tmpacc[3] = {accx,accy,accz};
-                rotate(tmpacc,rotation);
-                accx = tmpacc[0]; accy = tmpacc[1]; accz = tmpacc[2];
-
-                // For intial orientation setup
-                madgsensbits |= MADGINIT_ACCEL;
-            }
-
-            // Gyrometer
-            if(IMU.gyroscopeAvailable()) {
-                IMU.readRawGyro(rgyrx,rgyry,rgyrz);
-                rgyrx *= -1.0; // Flip X to match other sensors
-                trkset.gyroOffset(gyrxoff,gyryoff,gyrzoff);
-                gyrx = rgyrx - gyrxoff;
-                gyry = rgyry - gyryoff;
-                gyrz = rgyrz - gyrzoff;
-
-                // Apply Rotation
-                float tmpgyr[3] = {gyrx,gyry,gyrz};
-                rotate(tmpgyr,rotation);
-                gyrx = tmpgyr[0]; gyry = tmpgyr[1]; gyrz = tmpgyr[2];
-            }
-
-            // Magnetometer
-            if(IMU.magneticFieldAvailable()) {
-                IMU.readRawMagnet(rmagx,rmagy,rmagz);
-                // On first read set the min/max values to this reading
-                // Get Offsets and Apply them
-                trkset.magOffset(magxoff,magyoff,magzoff);
-
-                // Calibrate Hard Iron Offsets
-                magx = rmagx - magxoff;
-                magy = rmagy - magyoff;
-                magz = rmagz - magzoff;
-
-                // Calibrate soft iron offsets
-                float magsioff[9];
-                trkset.magSiOffset(magsioff);
-                magx = (magx * magsioff[0]) + (magy * magsioff[1]) + (magz * magsioff[2]);
-                magy = (magx * magsioff[3]) + (magy * magsioff[4]) + (magz * magsioff[5]);
-                magz = (magx * magsioff[6]) + (magy * magsioff[7]) + (magz * magsioff[8]);
-
-                // Apply Rotation
-                float tmpmag[3] = {magx,magy,magz};
-                rotate(tmpmag, rotation);
-                magx = tmpmag[0]; magy = tmpmag[1]; magz = tmpmag[2];
-
-                // For inital orientation setup
-                madgsensbits |= MADGINIT_MAG;
-            }
-        }
-
-
 
         // Update the settings for the GUI
         // Both data and sensor threads will use this data. If data thread has it locked skip this reading.
@@ -544,14 +427,103 @@ void sense_Thread()
 
         // Find out how long the above calculations took
         // then sleep to achieve a consistent period
-        int32_t timetosleep = (int32_t)SENSE_PERIOD - ((int32_t)micros() - (int32_t)ustocalculate);
+     /*   int32_t timetosleep = (int32_t)SENSE_PERIOD - ((int32_t)micros() - (int32_t)ustocalculate);
         if(timetosleep < 5000)
-            timetosleep = 5000;
-
-        k_usleep(timetosleep);
+            timetosleep = 5000;*/
     }
 }
 
+void sensor_Thread()
+{
+    while(1) {
+        k_usleep(SENSOR_PERIOD);
+
+        // Setup Rotations
+        float rotation[3];
+        trkset.orientRotations(rotation);
+
+        // If not using any of the tilt roll or pan outputs
+        // Don't bother wasting time calculating the tilt/roll/pan outputs
+        // If ui connected, do it so you can still see the outputs.
+        //if(tltch < 0 && panch < 0 && rllch < 0 && uiconnected == false)
+        //    counter = -1;
+
+        // Accelerometer
+        if(IMU.accelerationAvailable()) {
+            IMU.readRawAccel(raccx, raccy, raccz);
+            raccx *= -1.0; // Flip X to make classic cartesian (+X Right, +Y Up, +Z Vert)
+            trkset.accOffset(accxoff,accyoff,acczoff);
+
+            k_mutex_lock(&sensor_mutex, K_FOREVER);
+
+            accx = raccx - accxoff;
+            accy = raccy - accyoff;
+            accz = raccz - acczoff;
+
+            // Apply Rotation
+            float tmpacc[3] = {accx,accy,accz};
+            rotate(tmpacc,rotation);
+            accx = tmpacc[0]; accy = tmpacc[1]; accz = tmpacc[2];
+
+            // For intial orientation setup
+            madgsensbits |= MADGINIT_ACCEL;
+
+            k_mutex_unlock(&sensor_mutex);
+        }
+
+        // Gyrometer
+        if(IMU.gyroscopeAvailable()) {
+            IMU.readRawGyro(rgyrx,rgyry,rgyrz);
+            rgyrx *= -1.0; // Flip X to match other sensors
+            trkset.gyroOffset(gyrxoff,gyryoff,gyrzoff);
+
+            k_mutex_lock(&sensor_mutex, K_FOREVER);
+
+            gyrx = rgyrx - gyrxoff;
+            gyry = rgyry - gyryoff;
+            gyrz = rgyrz - gyrzoff;
+
+            // Apply Rotation
+            float tmpgyr[3] = {gyrx,gyry,gyrz};
+            rotate(tmpgyr,rotation);
+            gyrx = tmpgyr[0]; gyry = tmpgyr[1]; gyrz = tmpgyr[2];
+
+            k_mutex_unlock(&sensor_mutex);
+        }
+
+        // Magnetometer
+        if(IMU.magneticFieldAvailable()) {
+            IMU.readRawMagnet(rmagx,rmagy,rmagz);
+            // On first read set the min/max values to this reading
+            // Get Offsets and Apply them
+            trkset.magOffset(magxoff,magyoff,magzoff);
+
+            k_mutex_lock(&sensor_mutex, K_FOREVER);
+
+            // Calibrate Hard Iron Offsets
+            magx = rmagx - magxoff;
+            magy = rmagy - magyoff;
+            magz = rmagz - magzoff;
+
+            // Calibrate soft iron offsets
+            float magsioff[9];
+            trkset.magSiOffset(magsioff);
+            magx = (magx * magsioff[0]) + (magy * magsioff[1]) + (magz * magsioff[2]);
+            magy = (magx * magsioff[3]) + (magy * magsioff[4]) + (magz * magsioff[5]);
+            magz = (magx * magsioff[6]) + (magy * magsioff[7]) + (magz * magsioff[8]);
+
+            // Apply Rotation
+            float tmpmag[3] = {magx,magy,magz};
+            rotate(tmpmag, rotation);
+            magx = tmpmag[0]; magy = tmpmag[1]; magz = tmpmag[2];
+
+            // For inital orientation setup
+            madgsensbits |= MADGINIT_MAG;
+
+            k_mutex_unlock(&sensor_mutex);
+        }
+    } // END THREAD
+}
 
 // FROM https://stackoverflow.com/questions/1628386/normalise-orientation-between-0-and-360
 // Normalizes any number to an arbitrary range
@@ -631,5 +603,7 @@ void buildAuxData()
     auxdata[5] = (accz / 1.0f) * pwmrange + TrackerSettings::PPM_CENTER;
     auxdata[6] = ((accz -1.0f) / 2.0f) * pwmrange + TrackerSettings::PPM_CENTER;
     auxdata[6] = TrackerSettings::MIN_PWM;
+
+    // *** FIXME
   //  auxdata[7] = static_cast<float>(BLE.central().rssi()) / 127.0 * pwmrange + TrackerSettings::MIN_PWM;
 }
