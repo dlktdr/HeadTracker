@@ -325,7 +325,7 @@ void MainWindow::serialError(QSerialPort::SerialPortError err)
     switch(err) {
     // Issue with connection - device unplugged
     case QSerialPort::ResourceError: {
-        addToLog(tr("Connection lost"));
+        addToLog(tr("Connection lost"),2);
         serialcon->close();
         serialDisconnect();
         break;
@@ -390,9 +390,10 @@ void MainWindow::slowSerialSend()
 
     while(serialDataOut.length()) {
         QByteArray sdata = serialDataOut.dequeue();
-        // Delay sends more tha 64 bytes
+        // Delay sends no more tha 64 bytes at a time
         int pos=0;
         while(pos<sdata.length()) {
+            qDebug() << "Serial Out:" << sdata.mid(pos,64);
             serialcon->write(sdata.mid(pos,64));
             pos +=64;
             QTime dieTime= QTime::currentTime().addMSecs(5);
@@ -795,6 +796,7 @@ void MainWindow::serialReadReady()
 
         // Strip data up the the CR LF \r\n
         QByteArray data = serialData.left(nlindex);
+        qDebug() << "Serial In:" << data;
 
         // Return if only a \r\n, no data.
         if(data.length() < 1) {
@@ -859,6 +861,7 @@ void MainWindow::liveDataChanged()
         ui->lblBTConnected->setText("Not connected");
     if(trkset.blueToothMode() == TrackerSettings::BTDISABLE)
         ui->lblBTConnected->setText("Disabled");
+
 }
 
 
