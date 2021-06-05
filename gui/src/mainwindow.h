@@ -21,8 +21,8 @@
 #include "boardbno055.h"
 
 const int MAX_LOG_LENGTH=6000; // How many bytes to keep of log data in the gui
-const QString version="1.00"; // Current Version Number
-const QString versionsuffix="RC1"; // Version Suffix
+const QString version="2.00"; // Current Version Number
+const QString versionsuffix=""; // Version Suffix
 const QStringList firmwares={"BNO055","NANO33BLE"}; // Allowable hardware types
 
 const int IMHERETIME=8000; // milliseconds before sending another I'm Here Message to keep communication open
