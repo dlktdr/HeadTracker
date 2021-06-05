@@ -35,11 +35,14 @@ MainWindow::MainWindow(QWidget *parent)
     serialcon = new QSerialPort;
 
     // Diagnostic Display + Serial Debug
-    diagnostic = new DiagnosticDisplay(&trkset);
-    serialDebug = new QTextEdit();
+    diagnostic = new DiagnosticDisplay(&trkset,this);
+    diagnostic->setWindowFlags(Qt::Window);
+    serialDebug = new QTextEdit(this);
+    serialDebug->setWindowFlags(Qt::Window);
     serialDebug->setWindowTitle("Serial Information");
     serialDebug->resize(600,300);
-    channelviewer = new ChannelViewer(&trkset);
+    channelviewer = new ChannelViewer(&trkset, this);
+    channelviewer->setWindowFlags(Qt::Window);
 
 #ifdef DEBUG_HT
     serialDebug->show();
