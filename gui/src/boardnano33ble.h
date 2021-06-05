@@ -86,6 +86,7 @@ private slots:
     void rxParamsTimeout();
     void changeDataItems();
     void reqDataItemChanged();
+    void calibrationCancel();
 };
 
 

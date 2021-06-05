@@ -51,6 +51,7 @@ private slots:
                     float soo[3][3]);
 signals:
     void calibrationSave();
+    void calibrationCancel();
 };
 
 #endif // CALIBRATEBLE_H

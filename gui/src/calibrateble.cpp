@@ -106,6 +106,7 @@ void CalibrateBLE::prevClicked()
     switch (step) {
     // Gyrometer - If clicked here close
     case GYROCAL: {
+        emit calibrationCancel();
         hide();
         break;
     }

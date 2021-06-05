@@ -9,6 +9,7 @@ BoardNano33BLE::BoardNano33BLE(TrackerSettings *ts)
     connect(&rxParamsTimer,SIGNAL(timeout()),this,SLOT(rxParamsTimeout()));
     rxParamsTimer.setSingleShot(true);
     connect(bleCalibratorDialog,&CalibrateBLE::calibrationSave,this,&BoardNano33BLE::saveToRAM);
+    connect(bleCalibratorDialog,&CalibrateBLE::calibrationCancel,this, &BoardNano33BLE::calibrationCancel);
     connect(trkset,SIGNAL(requestedDataItemChanged()),this,SLOT(reqDataItemChanged()));
     reqDataItemsChanged.setSingleShot(true);
     reqDataItemsChanged.setInterval(200);
@@ -150,6 +151,21 @@ void BoardNano33BLE::reqDataItemChanged()
 {
     reqDataItemsChanged.stop();
     reqDataItemsChanged.start();
+}
+
+// Calibration Wizard not completed, remove calibration items
+
+void BoardNano33BLE::calibrationCancel()
+{
+    QMap<QString, bool> dat;
+    dat["magx"] = false;
+    dat["magy"] = false;
+    dat["magz"] = false;
+    dat["gyrox"] = false;
+    dat["gyroy"] = false;
+    dat["gyroz"] = false;
+    trkset->setDataItemSend(dat);
+    emit calibrationFailure();
 }
 
 // Add/Remove data items to be received from the board
