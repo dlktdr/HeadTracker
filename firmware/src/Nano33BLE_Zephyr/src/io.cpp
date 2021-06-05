@@ -5,7 +5,8 @@
 volatile bool buttonpressed=false;
 volatile int butpin;
 
-
+int dpintopin[]  = {3,10,11,12,15,13,14,23,21,27,2,1,8,13};
+int dpintoport[] = {1,1,1 ,1 ,1 ,1 ,1 ,0 ,0 ,0 ,1,1,1,0 };
 
 // Reset Button Pressed Flag on Read
 bool wasButtonPressed()
@@ -26,12 +27,15 @@ void pressButton()
 void io_Thread()
 {
     while(1) {
+        butpin = trkset.buttonPin();
+
         // Make sure button pin is enabled
         if(butpin < 1 || butpin > 13 )
             return;
 
-        // Check button inputs, set flag, could make this an ISR but button for sure will be down for at least 1ms, also debounces
-        if(digitalRead(butpin) != 0)
+        // Convert from D pin to IO Pin #
+        int pin = (dpintoport[butpin] * 32) + dpintopin[butpin];
+        if(digitalRead(pin) == 0)
             buttonpressed = true;
 
         k_msleep(IO_PERIOD);
@@ -65,7 +69,5 @@ void io_Init()
     pinMode(ARDUINO_A7, GPIO_INPUT); // Analog input
 
     digitalWrite(ARDUINO_A4, HIGH);
-    digitalWrite(ARDUINO_A5, HIGH);
-
-    butpin = trkset.buttonPin();
+    digitalWrite(ARDUINO_A5, HIGH); // Used as the analog source voltage..
 }
