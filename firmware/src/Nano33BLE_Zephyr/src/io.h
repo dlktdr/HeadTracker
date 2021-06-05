@@ -13,6 +13,9 @@ extern struct arduino_gpio_t S_gpios;
 
 #define ANALOG_RESOLUTION 12
 
+extern int dpintopin[];
+extern int dpintoport[];
+
 // Make Arduino functions work in zypher
 #define LEDR ARDUINO_LEDR
 #define LEDG ARDUINO_LEDG
@@ -33,5 +36,13 @@ extern struct arduino_gpio_t S_gpios;
 #define A6 ARDUINO_A6
 #define A7 ARDUINO_A7
 
-
+// Mapping Analogs to Arduino Pins
+#define AN0 2
+#define AN1 3
+#define AN2 6
+#define AN3 5
+#define AN4 7
+#define AN5 0
+#define AN6 4
+#define AN7 1
 
