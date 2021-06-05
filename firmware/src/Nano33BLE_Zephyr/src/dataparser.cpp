@@ -15,6 +15,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#define ARDUINOJSON_USE_DOUBLE 0
 #include <ArduinoJson.h>
 #include <zephyr.h>
 #include <chrono>
