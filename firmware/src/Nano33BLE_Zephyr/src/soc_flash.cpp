@@ -24,18 +24,8 @@
 #include "serial.h"
 #include "soc_flash.h"
 
-// Keep this storage space free for saving data later.
-// This will be wiped every time the device is programmed tho
-
-
-#define FLASH_ADDR FLASH_AREA_OFFSET(datapt)
-#define FLASH_SPACE FLASH_AREA_SIZE(datapt)
-
-//#define FLASH_ADDR 0xEC000
-//#define FLASH_SPACE 0x1000
-
-#define FLASH_TEST_OFFSET FLASH_AREA_OFFSET(datapt)
-#define FLASH_PAGE_SIZE   4096
+#define FLASH_OFFSET FLASH_AREA_OFFSET(datapt)
+#define FLASH_PAGE_SIZE   4096 // Can grow up to 0x4000
 #define TEST_DATA_WORD_0  0x1122
 #define TEST_DATA_WORD_1  0xaabb
 #define TEST_DATA_WORD_2  0xabcd
@@ -43,7 +33,7 @@
 
 const char *get_flashSpace()
 {
-    const char *addr = (const char *)FLASH_ADDR;
+    const char *addr = (const char *)FLASH_OFFSET;
     if(*addr == 0xFF) // Blank Flash
         return "{\"UUID\":837727}";
     return addr;
@@ -56,16 +46,16 @@ void socClearFlash()
     flash_dev = device_get_binding(DT_CHOSEN_ZEPHYR_FLASH_CONTROLLER_LABEL);
 
 	if (!flash_dev) {
-		serialWriteF("HT: Nordic nRF5 flash driver was not found!\r\n");
+		serialWrite("HT: Nordic nRF5 flash driver was not found!\r\n");
 		return;
 	}
 
-	if (flash_erase(flash_dev, FLASH_TEST_OFFSET, FLASH_PAGE_SIZE) != 0) {
-		serialWriteF("HT: Flash erase Failure\r\n");
+	if (flash_erase(flash_dev, FLASH_OFFSET, FLASH_PAGE_SIZE) != 0) {
+		serialWrite("HT: Flash erase Failure\r\n");
         return;
     }
 
-    serialWriteF("HT: Flash erase succeeded\r\n");
+    serialWrite("HT: Flash erase succeeded\r\n");
 }
 
 int socWriteFlash(const char *datain, int len)
@@ -75,19 +65,19 @@ int socWriteFlash(const char *datain, int len)
     flash_dev = device_get_binding(DT_CHOSEN_ZEPHYR_FLASH_CONTROLLER_LABEL);
 
 	if (!flash_dev) {
-		serialWriteF("HT: Nordic nRF5 flash driver was not found!\r\n");
+		serialWrite("HT: Nordic nRF5 flash driver was not found!\r\n");
 		return -1;
 	}
 
-	if (flash_erase(flash_dev, FLASH_TEST_OFFSET, FLASH_PAGE_SIZE) != 0) {
-		serialWriteF("HT: Flash erase Failure\r\n");
+	if (flash_erase(flash_dev, FLASH_OFFSET, FLASH_PAGE_SIZE) != 0) {
+		serialWrite("HT: Flash erase Failure\r\n");
         return -1;
     }
 
-    serialWriteF("HT: Flash erase succeeded\r\n");
+    serialWrite("HT: Flash erase succeeded\r\n");
 
-    if (flash_write(flash_dev, FLASH_TEST_OFFSET, (const void *)datain, FLASH_PAGE_SIZE) != 0) {
-        serialWriteF("   Flash write failed!\r\n");
+    if (flash_write(flash_dev, FLASH_OFFSET, (const void *)datain, FLASH_PAGE_SIZE) != 0) {
+        serialWrite("   Flash write failed!\r\n");
         return -1;
     }
 

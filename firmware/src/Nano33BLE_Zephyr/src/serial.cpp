@@ -401,17 +401,35 @@ void serialWriteln(const char *data)
     irq_unlock(key);
 }
 
-void serialWriteF(const char *c, ...)
+/*int serialWriteF(const char *c, ...)
 {
-    char buffer[256];
+    char bff[256] = "Uknonen";
+    int len=-1;
+
     va_list argptr;
     va_start(argptr, c);
-    snprintf(buffer, 256, c, argptr);
+    //len = vsnprintk(bff, sizeof(bff), c, argptr);
     va_end(argptr);
-    serialWrite(buffer);
-}
+    serialWrite(bff,len);
+    return len;
+}*/
 
-K_MUTEX_DEFINE(sjsonmutex);
+void serialWriteHex(const uint8_t *data, int len)
+{
+    for(int i=0; i < len; i++) {
+        uint8_t nib1 = (*data >> 4) & 0x0F;
+        uint8_t nib2 = *data++ & 0x0F;
+        if(nib1 > 9)
+            serialWrite((char)('A' + nib1-10));
+        else
+            serialWrite((char)('0' + nib1));
+        if(nib2 > 9)
+            serialWrite((char)('A' + nib2-10));
+        else
+            serialWrite((char)('0' + nib2));
+        serialWrite(' ');
+    }
+}
 
 // FIX Me to Not use as Much Stack.
 void serialWriteJSON(DynamicJsonDocument &json)
