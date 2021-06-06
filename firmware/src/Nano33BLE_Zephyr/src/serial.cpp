@@ -21,6 +21,7 @@
 #include <sys/ring_buffer.h>
 #include <stdlib.h>
 #include <zephyr.h>
+#include <power/reboot.h>
 #include <math.h>
 #include "dataparser.h"
 #include "serial.h"
@@ -272,6 +273,10 @@ void parseData(DynamicJsonDocument &json)
     } else if (strcmp(command, "Erase") == 0) {
         serialWrite("HT: Clearing Flash\r\n");
         socClearFlash();
+
+    // Reboot
+    } else if (strcmp(command, "Reboot") == 0) {
+        sys_reboot(SYS_REBOOT_COLD);
 
     // Get settings
     } else if (strcmp(command, "Get") == 0) {
