@@ -35,28 +35,142 @@ static uint16_t chan_vals[BT_CHANNELS];
 uint16_t chanoverrides=0xFFFF; // Default to all enabled
 
 static void start_scan(void);
+volatile bool isscanning=false;
 
 static struct bt_conn *pararmtconn = NULL;
 
 struct bt_le_scan_param scnparams = {
-    .type = BT_LE_SCAN_TYPE_PASSIVE,
+    .type = BT_LE_SCAN_TYPE_ACTIVE,
     .options = BT_LE_SCAN_OPT_NONE,
     .interval = BT_GAP_SCAN_FAST_INTERVAL,
     .window = BT_GAP_SCAN_FAST_WINDOW,
 };
 
-struct bt_le_conn_param *rmtconparms = BT_LE_CONN_PARAM(6, 8, 0, 100); // Faster Connection Interval
+// UUID's
+// CCCD UUID
+struct bt_uuid_16 ccc = BT_UUID_INIT_16(0x2902);
+
+// FrSky service and channel data characteristic
+static struct bt_uuid_16 frskyserv = BT_UUID_INIT_16(0xFFF0);
+static struct bt_uuid_16 frskychar = BT_UUID_INIT_16(0xFFF6);
+
+// Head tracker specific data, remote button press, valid channels
+static struct bt_uuid_16 htserv = BT_UUID_INIT_16(0xFFF1);
+static struct bt_uuid_16 htvldchs = BT_UUID_INIT_16(0xFFF1);
+static struct bt_uuid_16 htbutton = BT_UUID_INIT_16(0xFFF2);
+
+static struct bt_gatt_discover_params discover_params;
+static struct bt_gatt_subscribe_params subscribefff6; // Channel Data
+static struct bt_gatt_subscribe_params subscribefff1; //
+
+struct bt_le_conn_param *rmtconparms = BT_LE_CONN_PARAM(16, 16, 0, 200); // Faster Connection Interval
+
+// Characteristic UUID
+static struct bt_uuid_16 uuid = BT_UUID_INIT_16(0);
+
+static uint8_t notify_func(struct bt_conn *conn,
+			   struct bt_gatt_subscribe_params *params,
+			   const void *data, uint16_t length)
+{
+	if (!data) {
+		printf("[UNSUBSCRIBED]\n");
+		params->value_handle = 0U;
+		return BT_GATT_ITER_STOP;
+	}
+
+    // Simulate sending byte by byte like opentx uses, stores in global
+    for(int i=0;i<length;i++) {
+        processTrainerByte(((uint8_t *)data)[i]);
+    }
+
+    // Store all channels
+    for(int i=0 ; i < BT_CHANNELS; i++) {
+        // Only set the data on channels that are allowed to be overriden
+            chan_vals[i]  = BtChannelsIn[i];
+    }
+
+
+	return BT_GATT_ITER_CONTINUE;
+}
+
+static uint8_t discover_func(struct bt_conn *conn,
+			     const struct bt_gatt_attr *attr,
+			     struct bt_gatt_discover_params *params)
+{
+	int err;
+
+	if (!attr) {
+		serialWrite("Discover complete\r\n");
+		(void)memset(params, 0, sizeof(*params));
+		return BT_GATT_ITER_STOP;
+	}
+
+/*    char str[30];
+    bt_uuid_to_str(discover_params.uuid,str,sizeof(str));
+
+    serialWrite("Discovered UUID ");
+    serialWrite(str);
+    serialWriteln();
+*/
+
+    // Found the FRSky FFF0 Service?
+	if (!bt_uuid_cmp(discover_params.uuid, &frskyserv.uuid)) {
+
+        // Setup next discovery
+		memcpy(&uuid, &frskychar.uuid, sizeof(uuid));
+		discover_params.uuid = &uuid.uuid;
+		discover_params.start_handle = attr->handle + 1;
+		discover_params.type = BT_GATT_DISCOVER_CHARACTERISTIC;
+
+		err = bt_gatt_discover(conn, &discover_params);
+		if (err) {
+           	serialWrite("Discover failed (err ");
+            serialWrite(err);
+            serialWrite(")\r\n");
+	    }
+
+    // Found the Frsky FFF6 Characteristic, Get the CCCD for it & subscribe
+    } else if (!bt_uuid_cmp(discover_params.uuid, &frskychar.uuid)) {
+
+        // Setup next discovery
+        memcpy(&uuid, &ccc.uuid, sizeof(uuid));
+		discover_params.uuid = &uuid.uuid;
+		discover_params.start_handle = attr->handle + 2;
+		discover_params.type = BT_GATT_DISCOVER_DESCRIPTOR;
+		subscribefff6.value_handle = attr->handle + 1;
+
+		err = bt_gatt_discover(conn, &discover_params);
+		if (err) {
+           	serialWrite("Discover failed (err ");
+            serialWrite(err);
+            serialWrite(")\r\n");
+		}
+
+    // Found the FFF6 CCCD descriptor, subscribe to notifications
+	} else if (!bt_uuid_cmp(discover_params.uuid, &ccc.uuid)){
+		subscribefff6.notify = notify_func;
+		subscribefff6.value = BT_GATT_CCC_NOTIFY;
+		subscribefff6.ccc_handle = attr->handle;
+
+		err = bt_gatt_subscribe(conn, &subscribefff6);
+		if (err && err != -EALREADY) {
+            serialWrite("Subscribe failed (err ");
+            serialWrite(err);
+            serialWrite(")\r\n");
+		} else {
+			serialWrite("[SUBSCRIBED]\r\n");
+		}
+
+		return BT_GATT_ITER_STOP;
+	}
+
+	return BT_GATT_ITER_STOP;
+}
 
 static bool eir_found(struct bt_data *data, void *user_data)
 {
 	bt_addr_le_t *addr = (bt_addr_le_t *)user_data;
 	int i;
-
-	/*serialWrite("[AD]: ");
-    serialWrite(data->type);
-    serialWrite(" data_len ");
-    serialWrite(data->data_len);
-    serialWriteln("");*/
 
 	switch (data->type) {
     case BT_DATA_FLAGS:
@@ -87,6 +201,7 @@ static bool eir_found(struct bt_data *data, void *user_data)
 
 	        char addrstr[BT_ADDR_LE_STR_LEN];
         	bt_addr_le_to_str(addr, addrstr, sizeof(addrstr));
+            addrstr[17] = 0;
 
             /*serialWrite("HT: Has a FrSky Service on ");
             serialWrite(addrstr);
@@ -104,7 +219,9 @@ static bool eir_found(struct bt_data *data, void *user_data)
             if(strlen(trkset.pairedBTAddress()) > 0) {
                if(strcmp(addrstr, trkset.pairedBTAddress()) == 0) {
                     okaytocon = true;
-                    serialWriteln("HT: Not connecting to found device, not the paired device");
+               }
+               else {
+                   serialWriteln("HT: FRSky device found. Not connecting. Incorrect Address");
                }
             } else
                 okaytocon = true;
@@ -113,15 +230,11 @@ static bool eir_found(struct bt_data *data, void *user_data)
             if(!okaytocon)
                 continue;
 
-            serialWriteln("HT: Connecting to device...");
+            // Stop Scanning
+            if(isscanning)
+                bt_le_scan_stop();
 
-			int err = bt_le_scan_stop();
-			if (err) {
-				serialWrite("HT: Stop LE scan failed (err ");
-                serialWrite(err);
-                serialWriteln(")");
-				continue;
-			}
+            serialWriteln("HT: Connecting to device...");
 
             struct bt_conn_le_create_param btconparm = {
                 .options = (BT_CONN_LE_OPT_NONE),
@@ -131,15 +244,16 @@ static bool eir_found(struct bt_data *data, void *user_data)
                 .window_coded = 0,
                 .timeout = 0, };
 
-			err = bt_conn_le_create(addr, &btconparm,
+		    int	err = bt_conn_le_create(addr, &btconparm,
 						rmtconparms, &pararmtconn);
 			if (err) {
-				serialWrite("HT: Create conn failed (err ");
-                serialWrite(err);
+				serialWrite("HT: Create conn failed (Error ");
+                serialWriteHex((uint8_t *)&err,1);
                 serialWriteln(")");
 
                 // Re-start Scanning
                 start_scan();
+                return true;
 			}
 
 			return false; // Stop parsing ad data
@@ -167,10 +281,7 @@ static void device_found(const bt_addr_le_t *addr, int8_t rssi, uint8_t type, st
 
 static void start_scan(void)
 {
-	int err;
-
-	/* This demo doesn't require active scan */
-	err = bt_le_scan_start(&scnparams, device_found);
+    int err = bt_le_scan_start(&scnparams, device_found);
 	if (err) {
 		serialWrite("HT: Scanning failed to start (err ");
         serialWrite(err);
@@ -178,6 +289,7 @@ static void start_scan(void)
 		return;
 	}
 
+    isscanning = true;
 	serialWriteln("HT: Scanning successfully started");
 }
 
@@ -211,8 +323,23 @@ static void rmtconnected(struct bt_conn *conn, uint8_t err)
 
     bleconnected = true;
 
-    // Subscribe to FFF6 on Service FFF0
+        // Subscribe to FFF6 on Service FFF0
+	if (conn == pararmtconn) {
+		memcpy(&uuid, &frskyserv.uuid, sizeof(uuid));
+		discover_params.uuid = &uuid.uuid;
+		discover_params.func = discover_func;
+		discover_params.start_handle = 0x0001;
+		discover_params.end_handle = 0xffff;
+		discover_params.type = BT_GATT_DISCOVER_PRIMARY;
 
+		err = bt_gatt_discover(pararmtconn, &discover_params);
+		if (err) {
+            serialWrite("Discover failed (err ");
+            serialWrite(err);
+            serialWrite(")\r\n");
+			return;
+		}
+	}
 }
 
 static void rmtdisconnected(struct bt_conn *conn, uint8_t reason)
@@ -253,27 +380,32 @@ void BTRmtStart()
 	start_scan();
 }
 
+// Close All Connections, Foreach Callback
+void closeConnection(bt_conn *conn, void *data)
+{
+    bt_conn_disconnect(conn,BT_HCI_ERR_REMOTE_USER_TERM_CONN);
+}
 
 void BTRmtStop()
 {
     bt_le_scan_stop();
+    isscanning = false;
 
-    if(pararmtconn) {
-        bt_conn_disconnect(pararmtconn, BT_HCI_ERR_REMOTE_USER_TERM_CONN);
-    }
+    serialWriteln("HT: Stopping Remote Para Bluetooth");
+
+    // Close all Connections, Callback to above func
+    bt_conn_foreach(BT_CONN_TYPE_ALL, closeConnection, NULL);
 
     // Reset all BT channels to center
     for(int i = 0; i <BT_CHANNELS; i++)
         chan_vals[i] = TrackerSettings::PPM_CENTER;
-
-    serialWriteln("HT: Stopping Remote Para Bluetooth");
 
     bt_conn_cb_register(NULL);
 }
 
 void BTRmtSetChannel(int channel, const uint16_t value)
 {
-
+    // Only Receive, nothing here
 }
 
 uint16_t BTRmtGetChannel(int channel)
@@ -299,192 +431,7 @@ void BTRmtSendButtonData(char bd)
 
 void BTRmtExecute()
 {
-     /*// Start Scan for PARA Slaves
-    if(!BLE.connected() && !scanning) {
-        serialWriteln("BRMT: Starting Scan");
-        BLE.scan(1);
-        scanning = true;
-        bleconnected = false;
-    }
-
-    // If scanning see if there is a BLE device available
-    if(!BLE.connected() && scanning) {
-        bool fault = false;
-        peripheral = BLE.available();
-        if(peripheral) {
-#ifdef DEBUG
-            if (peripheral.address() == "") {
-                serialWrite("BRMT:  <no advertised address> ");
-            } else {
-                serialWrite("BRMT: Advertised Device Address: ");
-                serialWrite(peripheral.address());
-            }
-            if (peripheral.localName() == "") {
-                serialWrite(" <no advertised local name> ");
-            } else {
-                serialWrite(" Local Name: ");
-                serialWrite(peripheral.localName());
-            }
-
-            if (peripheral.advertisedServiceUuid() == "") {
-                serialWrite(" <no advertised service UUID> ");
-            } else {
-                serialWrite(" Advertised Service UUID ");
-                serialWrite(peripheral.advertisedServiceUuid());
-            }
-            serialWriteln("");
-#endif
-            if(peripheral.localName() == "Hello" &&
-               peripheral.advertisedServiceUuid() == "fff0") {
-
-#ifdef DEBUG
-                serialWriteln("BRMT: Found a PARA device");
-                serialWriteln("BRMT: Stopping scan");
-#endif
-                trkset.setDiscoveredBTHead(peripheral.address().c_str());
-                BLE.stopScan();
-                scanning = false;
-#ifdef DEBUG
-                serialWriteln("BRMT: Connecting...");
-#endif
-                if(peripheral.connect()) {
-                    serialWriteln("BRMT: Connected");
-                    ThisThread::sleep_for(std::chrono::milliseconds(150));
-#ifdef DEBUG
-                    serialWriteln("BRMT: Discovering Attributes");
-#endif
-                    if(peripheral.discoverAttributes()) {
-#ifdef DEBUG
-                        serialWriteln("BRMT: Discovered Attributes");
-#endif
-                        fff6 = peripheral.service("fff0").characteristic("fff6");
-                        if(fff6) {
-#ifdef DEBUG
-                            serialWriteln("BRMT: Attaching Event Handler");
-#endif
-                            fff6.setEventHandler(BLEWritten, fff6Written);  // Call this function on data received
-                            serialWriteln("BRMT: Found channel data characteristic");
-#ifdef DEBUG
-                            serialWriteln("BRMT: Subscribing...");
-#endif
-                            ThisThread::sleep_for(std::chrono::milliseconds(150));
-                            if(fff6.subscribe()) {
-#ifdef DEBUG
-                                serialWriteln("BRMT: Subscribed to data!");
-#endif
-                            } else {
-                                serialWriteln("BRMT: Subscribe to data failed");
-                                fault = true;
-                            }
-                        } else  {
-#ifdef DEBUG
-                            serialWriteln("BRMT: Couldn't find characteristic");
-#endif
-                            fault = true;
-                        }
-                        // If this is a Headtracker it may have a reset center option
-                        butpress = peripheral.service("fff1").characteristic("fff2");
-                        if(butpress) {
-#ifdef DEBUG
-                            serialWriteln("BRMT: Tracker has ability to remote reset center");
-#endif
-                        }
-                        overridech = peripheral.service("fff1").characteristic("fff1");
-                        if(overridech) {
-                            overridech.setEventHandler(BLEWritten, overrideWritten);  // Call this function on data received
-                            // Initial read of overridden channels
-                            overridech.readValue(chanoverrides);
-#ifdef DEBUG
-                            serialWriteln("BRMT: Tracker has sent the channels it wants overriden");
-#endif
-                            ThisThread::sleep_for(std::chrono::milliseconds(150));
-                            if(overridech.subscribe()) {
-#ifdef DEBUG
-                                serialWriteln("BRMT: Subscribed to channel overrides!");
-#endif
-                            } else {
-#ifdef DEBUG
-                                serialWriteln("BRMT: Subscribe to override Failed");
-#endif
-                                fault = true;
-                            }
-                        } else
-                            chanoverrides = 0xFFFF;
-                    } else {
-                        serialWriteln("BRMT: Attribute Discovery Failed");
-                        fault = true;
-                        }
-                } else {
-                    serialWriteln("BRMT: Couldn't connect to Para Slave, Rescanning");
-                    fault = true;
-                }
-            }
-        }
-        // On any faults, disconnect and start scanning again
-        if(fault) {
-            peripheral.disconnect();
-            BLE.scan(1);
-            scanning = true;
-        }
-    }
-
-    // Connected
-    if(BLE.connected()) {
-        // Check how long we have been connected but haven't received any data
-        // if longer than timeout, disconnect.
-        uint32_t wdtime = std::chrono::duration_cast<std::chrono::milliseconds>(watchdog.elapsed_time()).count();
-        if(wdtime > WATCHDOG_TIMEOUT) {
-            serialWriteln("BRMT: ***WATCHDOG.. Forcing disconnect. No data received");
-            BLE.disconnect();
-            bleconnected = false;
-        }
-    // Not Connected
-    } else {
-        bleconnected = false;
-        watchdog.reset();
-    }
-
-    BLE.poll();
-}
-
-void overrideWritten(BLEDevice central, BLECharacteristic characteristic)
-{
-    characteristic.readValue(chanoverrides);
-}
-
-// Called when Radio Outputs new Data
-void fff6Written(BLEDevice central, BLECharacteristic characteristic) {
-    // Got Data Must Be Connected
-    bleconnected = true;
-
-    // Got some data clear the watchdog timer
-    watchdog.reset();
-
-    uint8_t buffer1[BLUETOOTH_LINE_LENGTH+1];
-    int len = characteristic.readValue(buffer1,32);
-
-    // Simulate sending byte by byte like opentx uses, stores in global
-    for(int i=0;i<len;i++) {
-        processTrainerByte(buffer1[i]);
-    }
-
-    // Store all channels
-    for(int i=0 ; i < BT_CHANNELS; i++) {
-        // Only set the data on channels that are allowed to be overriden
-        if(BTParaInst) {
-            BTParaInst->chan_vals[i]  = BtChannelsIn[i];
-        }
-    }
-
-#ifdef DEBUG
-    Serial.print("OR: ");
-    printHex(chanoverrides);
-    Serial.print("|");
-    for(int i=0;i<CHANNEL_COUNT;i++) {
-        Serial.print("Ch");Serial.print(i+1);Serial.print(":");Serial.print(ppmChannels[i]);Serial.print(" ");
-    }
-    Serial.println("");
-#endif*/
+    // All Async.. Nothing Here
 }
 
 
