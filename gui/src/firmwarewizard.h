@@ -17,7 +17,8 @@
 const QString localfirmlist = "firmware.ini";
 const QString localfirmware = "online.fmw";
 
-const QByteArray BLE33HEADER_BIN("\x00\x00\x04\x20",4);
+const QByteArray BLE33HEADER_BIN_MBED("\x00\x00\x04\x20",4);
+const QByteArray BLE33HEADER_BIN_ZEPHER("\x80\xfd\x00\x20",4);
 const QByteArray BLE33HEADER_HEX(":020000021000EC",15);
 const QByteArray NANOHEADER_HEX(":100000000C94",13);
 
@@ -35,6 +36,8 @@ public:
 
 private:
     Ui::firmwarewizard *ui;
+
+    int waitingprogram;
 
     typedef enum {
         PRG_IDLE,

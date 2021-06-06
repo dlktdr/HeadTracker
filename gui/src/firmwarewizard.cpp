@@ -123,7 +123,8 @@ void FirmwareWizard::startPortDiscovery(const QString &filename)
 
     addToLog("Determining what type of file this is...");
 
-    if(data.startsWith(BLE33HEADER_BIN)) {
+    if(data.startsWith(BLE33HEADER_BIN_MBED) ||
+       data.startsWith(BLE33HEADER_BIN_ZEPHER)) {
         addToLog("  Firmware is for the Arduino Nano BLE 33 in bin format");
         boardType = BRD_NANO33BLE;
         programmercommand = "bossac.exe";        
@@ -135,7 +136,7 @@ void FirmwareWizard::startPortDiscovery(const QString &filename)
         setState(PRG_WAIT4PORT);
     }
     else if(data.startsWith(BLE33HEADER_HEX)) {
-            addToLog("  Firmware is for the Arduino Nano BLE 33 in bin format");
+            addToLog("  Firmware is for the Arduino Nano BLE 33 in hex format");
             boardType = BRD_NANO33BLE;
             programmercommand = "bossac.exe";
             arguments.clear();
@@ -312,10 +313,11 @@ void FirmwareWizard::setState(FirmwareWizard::prgstate state)
     case PRG_SETBOOTLOAD:
         ui->ledWaitPort->setState(true);
         ui->ledBootloader->setBlink(true);
+        waitingprogram=0;
         break;
     case PRG_WAIT4NEWPORT:
         ui->ledBootloader->setState(true);
-        ui->ledWait4NewPort->setBlink(true);
+        ui->ledWait4NewPort->setBlink(true);        
         break;
     case PRG_PROGRAM_START:
         ui->ledWait4NewPort->setState(true);        
@@ -357,7 +359,7 @@ void FirmwareWizard::setBootloader()
                 ui->stkWidget->setCurrentIndex(0);
                 return;
             }
-            port.write(" ",1);
+            port.write("WRITE_SOMETHING",15);
             port.flush();
             port.close();
             setState(PRG_WAIT4NEWPORT);
@@ -548,9 +550,20 @@ void FirmwareWizard::programmerFinished(int exitCode, QProcess::ExitStatus exitS
 
 void FirmwareWizard::discoverTimeout()
 {
-    if(programmerState == PRG_WAIT4PORT ||
-       programmerState == PRG_WAIT4NEWPORT)
+    if(programmerState == PRG_WAIT4PORT)
         discoverPorts();
+    else if (programmerState == PRG_WAIT4NEWPORT) {
+        waitingprogram++;
+        if(waitingprogram > 80) {
+            // Waited too long, try the orig port, maybe it's already in bootloader mode?
+            addToLog("Wasn't able to set bootloader mode, trying first port found");
+            setState(PRG_PROGRAM_START);
+            ui->lblERR->setText("Couldn't enter bootloader, trying original port");
+            startProgramming();
+        }
+        else
+            discoverPorts();
+    }
 }
 
 void FirmwareWizard::discoverPorts(bool init)
