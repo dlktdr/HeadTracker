@@ -89,7 +89,7 @@ static struct bt_le_adv_param my_param = {
     };
 
 struct bt_conn *curconn = NULL;
-struct bt_le_conn_param *conparms = BT_LE_CONN_PARAM(6, 8, 0, 100); // Faster Connection Interval
+struct bt_le_conn_param *conparms = BT_LE_CONN_PARAM(16, 16, 0, 100); // Faster Connection Interval
 
 static struct bt_conn_cb conn_callbacks = {
 	.connected = connected,
@@ -151,7 +151,12 @@ void BTHeadStop()
 void BTHeadExecute()
 {
     if(bleconnected) {
-        sendTrainer();
+        // Send Trainer Data
+        uint8_t output[BLUETOOTH_LINE_LENGTH+1];
+        int len;
+        len = setTrainer(output);
+
+        bt_gatt_notify(NULL, &bt_srv.attrs[1], output, len);
     }
 }
 
@@ -294,7 +299,6 @@ static void disconnected(struct bt_conn *conn, uint8_t reason)
 		return;
 	}
 
-
     if(curconn)
         bt_conn_unref(curconn);
 
@@ -304,11 +308,7 @@ static void disconnected(struct bt_conn *conn, uint8_t reason)
 
 void sendTrainer()
 {
-    uint8_t output[BLUETOOTH_LINE_LENGTH+1];
-    int len;
-    len = setTrainer(output);
 
-    bt_gatt_notify(NULL, &bt_srv.attrs[1], output, len);
 }
 
 // Part of setTrainer to calculate CRC
