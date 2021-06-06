@@ -36,6 +36,9 @@ signals:
   #include <GL/gl.h>
   #include <GL/glu.h>
   #define random() rand()
+  #ifndef M_PI
+    #define M_PI 3.14159265358979323846
+  #endif
 #elif defined(MACOSX)
   #include <termios.h>
   #include <unistd.h>
