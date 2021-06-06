@@ -67,6 +67,15 @@ static void interrupt_handler(const struct device *dev, void *user_data)
 {
 	ARG_UNUSED(user_data);
 
+    // Force bootloader if baud set to 1200bps
+    uint32_t baud=0;
+    uart_line_ctrl_get(dev,UART_LINE_CTRL_BAUD_RATE, &baud);
+    if(baud == 1200) {
+        // Force Bootloader, Set Magic Number & Reset
+        (*((volatile uint32_t *) 0x20007FFCul)) = 0x07738135;
+        NVIC_SystemReset();
+    }
+
 	while (uart_irq_update(dev) && uart_irq_is_pending(dev)) {
 		if (uart_irq_rx_ready(dev)) {
 			int recv_len, rb_len;
@@ -84,7 +93,6 @@ static void interrupt_handler(const struct device *dev, void *user_data)
 
 void serial_Init()
 {
-	uint32_t baudrate;
 	int ret;
 
 	dev = device_get_binding("CDC_ACM_0");
@@ -122,8 +130,6 @@ void serial_Init()
 	/* Wait 1 sec for the host to do all settings */
 	k_busy_wait(1000000);
 
-	ret = uart_line_ctrl_get(dev, UART_LINE_CTRL_BAUD_RATE, &baudrate);
-
 	uart_irq_callback_set(dev, interrupt_handler);
 
 	/* Enable rx interrupts */
@@ -147,18 +153,13 @@ void serial_Thread()
 
         digitalWrite(LEDG,LOW);
 
-        /*uint32_t dtr;
-        uart_line_ctrl_get(dev, UART_LINE_CTRL_DTR, &dtr);
-		if (!dtr) {
-            ring_buf_reset(&ringbuf_tx);
-        }*/
-
         // If serial not open, abort all transfers, clear buffer
         uint32_t dtr = 0;
 		uart_line_ctrl_get(dev, UART_LINE_CTRL_DTR, &dtr);
 		if (!dtr) {
             ring_buf_reset(&ringbuf_tx);
             uart_tx_abort(dev);
+
 
         // Port is open, send data
         } else {
