@@ -109,6 +109,11 @@ void BoardNano33BLE::saveToNVM()
     savedToNVM = true;
 }
 
+void BoardNano33BLE::reboot()
+{
+    sendSerialJSON("Reboot");
+}
+
 
 // Parameters requested from the board
 

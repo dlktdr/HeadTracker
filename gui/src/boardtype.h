@@ -37,6 +37,7 @@ public:
     ALWACCESS(void,resetCenter,,)
     ALWACCESS(void,saveToRAM,,)
     ALWACCESS(void,saveToNVM,,)
+    ALWACCESS(void,reboot,,)
     ALWACCESS(void,requestHardware,,)
     ALWACCESS(void,requestParameters,,)
     ALWACCESS(void,startCalibration,,)

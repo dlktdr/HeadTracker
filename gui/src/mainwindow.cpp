@@ -28,6 +28,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Once correct board is discovered this will be set to one of the above boards
     currentboard = nullptr;
+    ui->tabBLE->setCurrentIndex(0);
 
     setWindowTitle(windowTitle() + " " + version + " " + versionsuffix);
 
@@ -98,6 +99,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->cmdResetCenter,SIGNAL(clicked()),this, SLOT(resetCenter()));
     connect(ui->cmdCalibrate,SIGNAL(clicked()),this, SLOT(startCalibration()));
     connect(ui->cmdSaveNVM,SIGNAL(clicked()),this,SLOT(storeToNVM()));
+    connect(ui->cmdReboot,SIGNAL(clicked()),this,SLOT(reboot()));
     //***
     connect(ui->cmdRefresh,&QPushButton::clicked,this,&MainWindow::findSerialPorts);
 
@@ -182,6 +184,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->cmbPWM1,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbPWM2,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbPWM3,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->cmbBTRmtMode,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
 
     // Menu Actions
     connect(ui->action_Save_to_File,SIGNAL(triggered()),this,SLOT(saveSettings()));
@@ -260,7 +263,7 @@ void MainWindow::serialConnect()
 
     ui->stackedWidget->setCurrentIndex(1);
 
-    serialcon->setDataTerminalReady(true);
+    serialcon->setDataTerminalReady(true);   
 
     requestTimer.stop();
     requestTimer.start(4000);
@@ -293,12 +296,13 @@ void MainWindow::serialDisconnect()
     ui->cmdStopGraph->setEnabled(false);
     ui->cmdStartGraph->setEnabled(false);
     ui->cmdSaveNVM->setEnabled(false);
+    ui->cmdReboot->setEnabled(false);
     ui->cmdStore->setEnabled(false);
     ui->servoPan->setShowActualPosition(true);
     ui->servoTilt->setShowActualPosition(true);
     ui->servoRoll->setShowActualPosition(true);
     ui->cmdSend->setEnabled(false);
-    ui->cmdCalibrate->setEnabled(false);
+    ui->cmdCalibrate->setEnabled(false);    
     ui->stackedWidget->setCurrentIndex(0);
     ui->servoPan->setShowActualPosition(false);
     ui->servoTilt->setShowActualPosition(false);
@@ -496,6 +500,7 @@ void MainWindow::updateToUI()
     ui->cmbPpmInPin->blockSignals(true);
     ui->cmbButtonPin->blockSignals(true);
     ui->cmbBtMode->blockSignals(true);    
+    ui->cmbBTRmtMode->blockSignals(true);
     ui->cmbResetOnPPM->blockSignals(true);
     ui->spnLPPan->blockSignals(true);
     ui->spnLPTiltRoll->blockSignals(true);
@@ -517,7 +522,7 @@ void MainWindow::updateToUI()
     ui->cmbPWM0->blockSignals(true);
     ui->cmbPWM1->blockSignals(true);
     ui->cmbPWM2->blockSignals(true);
-    ui->cmbPWM3->blockSignals(true);
+    ui->cmbPWM3->blockSignals(true);    
     ui->spnRotX->blockSignals(true);
     ui->spnRotY->blockSignals(true);
     ui->spnRotZ->blockSignals(true);
@@ -596,6 +601,13 @@ void MainWindow::updateToUI()
         ui->lblPPMOut->setText("PPM data will fit in frame. Refresh rate: " + QString::number(1/(static_cast<float>(setframelen)/1000000.0),'f',2) + " Hz");
     }
 
+    // BT Pair Address
+    if(trkset.pairedBTAddress().isEmpty()) {
+        ui->cmbBTRmtMode->setCurrentIndex(0);
+    } else {
+        ui->cmbBTRmtMode->setCurrentText(trkset.pairedBTAddress());
+    }
+
     ui->cmbpanchn->blockSignals(false);
     ui->cmbrllchn->blockSignals(false);
     ui->cmbtiltchn->blockSignals(false);
@@ -607,6 +619,7 @@ void MainWindow::updateToUI()
     ui->cmbPpmInPin->blockSignals(false);
     ui->cmbButtonPin->blockSignals(false);
     ui->cmbBtMode->blockSignals(false);    
+    ui->cmbBTRmtMode->blockSignals(false);
     ui->cmbResetOnPPM->blockSignals(false);
     ui->spnLPPan->blockSignals(false);
     ui->spnLPTiltRoll->blockSignals(false);
@@ -751,6 +764,12 @@ void MainWindow::updateFromUI()
 
     trkset.setBlueToothMode(ui->cmbBtMode->currentIndex());
 
+    if(ui->cmbBTRmtMode->currentIndex() == 0) {
+        trkset.setPairedBTAddress();
+    } else {
+        trkset.setPairedBTAddress(ui->cmbBTRmtMode->currentText().simplified());
+    }
+
     trkset.setOrientation(ui->spnRotX->value(),
                           ui->spnRotY->value(),
                           ui->spnRotZ->value());
@@ -760,7 +779,16 @@ void MainWindow::updateFromUI()
     trkset.setResetOnWave(ui->chkResetCenterWave->isChecked());
 
     ui->cmdStore->setEnabled(true);
-    ui->cmdSaveNVM->setEnabled(true);
+    ui->cmdSaveNVM->setEnabled(true);    
+
+    if(ui->cmbBtMode->currentIndex() > 1) // Remote or Scanner Mode
+    {
+        ui->lblPairWith->setVisible(true);
+        ui->cmbBTRmtMode->setVisible(true);
+    } else {
+        ui->lblPairWith->setVisible(false);
+        ui->cmbBTRmtMode->setVisible(false);
+    }
 
     // Use timer to prevent too many writes while drags, etc.. happen
     saveToRAMTimer.start(500);
@@ -1106,9 +1134,32 @@ void MainWindow::BLE33tabChanged()
 void MainWindow::BTModeChanged()
 {
     updateFromUI();
-    msgbox->setText("BT Mode Changed\nPlease Save to NVM and Reset");
-    msgbox->setWindowTitle("Reset Required");
-    msgbox->show();
+
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::question(this, "Reboot Required",
+                                  "Bluetooth mode change requires reboot.\n"
+                                  "Save and reboot now?",
+                                  QMessageBox::Yes | QMessageBox::No);
+    if(reply == QMessageBox::Yes) {
+        storeToNVM();
+        QTime dieTime= QTime::currentTime().addMSecs(800);
+        while (QTime::currentTime() < dieTime)
+            QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+        reboot();
+    }
+}
+
+void MainWindow::reboot()
+{
+    foreach(BoardType *brd, boards) {
+        brd->_reboot();
+    }
+
+    QTime dieTime= QTime::currentTime().addMSecs(1500);
+    while (QTime::currentTime() < dieTime)
+        QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+
+    serialConnect();
 }
 
 void MainWindow::paramSendStart()
@@ -1198,8 +1249,9 @@ void MainWindow::boardDiscovered(BoardType *brd)
         ui->cmdSend->setEnabled(true);
         ui->cmdSaveNVM->setEnabled(true);
         ui->cmdCalibrate->setEnabled(true);
+        ui->cmdReboot->setEnabled(true);
         ui->stackedWidget->setCurrentIndex(3);
-        ui->tabBLE->setCurrentIndex(0);
+
 
         // Check Firmware Version is Compatible
 

@@ -116,6 +116,7 @@ private slots:
     void showChannelViewerClicked();
     void BLE33tabChanged();
     void BTModeChanged();
+    void reboot();
 
 
     // Board Connections

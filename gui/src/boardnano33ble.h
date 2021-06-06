@@ -34,6 +34,7 @@ public:
     void resetCenter();
     void saveToRAM();
     void saveToNVM();
+    void reboot();
     void requestHardware();
     void requestParameters();
     void startCalibration();

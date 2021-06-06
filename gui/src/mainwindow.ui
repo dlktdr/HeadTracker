@@ -32,16 +32,10 @@
      <layout class="QHBoxLayout" name="horizontalLayout_4">
       <item>
        <layout class="QGridLayout" name="gridLayout_4">
-        <item row="4" column="0" colspan="2">
-         <widget class="QPushButton" name="cmdStore">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
+        <item row="7" column="0" colspan="2">
+         <widget class="QPushButton" name="cmdCalibrate">
           <property name="text">
-           <string>&amp;Send Changes</string>
+           <string>Calibrate</string>
           </property>
          </widget>
         </item>
@@ -61,22 +55,8 @@
           </property>
          </widget>
         </item>
-        <item row="1" column="1">
-         <widget class="QPushButton" name="cmdRefresh">
-          <property name="toolTip">
-           <string>Refresh Available Serial Ports</string>
-          </property>
-          <property name="text">
-           <string/>
-          </property>
-          <property name="icon">
-           <iconset resource="Resources.qrc">
-            <normaloff>:/Icons/refresh.svg</normaloff>:/Icons/refresh.svg</iconset>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="0" colspan="2">
-         <widget class="QPushButton" name="cmdConnect">
+        <item row="3" column="0" colspan="2">
+         <widget class="QPushButton" name="cmdDisconnect">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -84,11 +64,21 @@
            </sizepolicy>
           </property>
           <property name="text">
-           <string>&amp;Connect</string>
+           <string>&amp;Disconnect</string>
           </property>
          </widget>
         </item>
-        <item row="7" column="0" colspan="2">
+        <item row="5" column="0" colspan="2">
+         <widget class="QPushButton" name="cmdSaveNVM">
+          <property name="toolTip">
+           <string>Permanently save the settings on the headtracker</string>
+          </property>
+          <property name="text">
+           <string>Save to NVM</string>
+          </property>
+         </widget>
+        </item>
+        <item row="9" column="0" colspan="2">
          <spacer name="verticalSpacer">
           <property name="orientation">
            <enum>Qt::Vertical</enum>
@@ -103,36 +93,6 @@
            </size>
           </property>
          </spacer>
-        </item>
-        <item row="3" column="0" colspan="2">
-         <widget class="QPushButton" name="cmdDisconnect">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>&amp;Disconnect</string>
-          </property>
-         </widget>
-        </item>
-        <item row="6" column="0" colspan="2">
-         <widget class="QPushButton" name="cmdCalibrate">
-          <property name="text">
-           <string>Calibrate</string>
-          </property>
-         </widget>
-        </item>
-        <item row="5" column="0" colspan="2">
-         <widget class="QPushButton" name="cmdSaveNVM">
-          <property name="toolTip">
-           <string>Permanently save the settings on the headtracker</string>
-          </property>
-          <property name="text">
-           <string>Save to NVM</string>
-          </property>
-         </widget>
         </item>
         <item row="0" column="0" colspan="2">
          <layout class="QGridLayout" name="gridLayout_3">
@@ -195,6 +155,53 @@
            </widget>
           </item>
          </layout>
+        </item>
+        <item row="1" column="1">
+         <widget class="QPushButton" name="cmdRefresh">
+          <property name="toolTip">
+           <string>Refresh Available Serial Ports</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="Resources.qrc">
+            <normaloff>:/Icons/refresh.svg</normaloff>:/Icons/refresh.svg</iconset>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0" colspan="2">
+         <widget class="QPushButton" name="cmdConnect">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>&amp;Connect</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="0" colspan="2">
+         <widget class="QPushButton" name="cmdStore">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>&amp;Send Changes</string>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="0" colspan="2">
+         <widget class="QPushButton" name="cmdReboot">
+          <property name="text">
+           <string>Reboot</string>
+          </property>
+         </widget>
         </item>
        </layout>
       </item>

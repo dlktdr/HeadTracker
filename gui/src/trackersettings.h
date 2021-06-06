@@ -271,6 +271,10 @@ public:
     void setBlueToothMode(int mode);
     QString blueToothAddress();
     bool blueToothConnected() {return _live["btcon"].toBool();}
+
+    void setPairedBTAddress(QString addr="") {_data["btpair"] = addr;}
+    QString pairedBTAddress() {return _data["btpair"].toString();}
+
     QString PPMInString() {return _live["ppmin"].toString();}
     QString PPMOutString() {return _live["ppmout"].toString();}
 
