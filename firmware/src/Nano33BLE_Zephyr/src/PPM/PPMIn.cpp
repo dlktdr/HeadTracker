@@ -188,11 +188,13 @@ void PpmIn_setInverted(bool inv)
     }
 }
 
-
+static int cyclescount=0; // Count this many cycles before showing data
+#define cyclesbeforeppm 20
 
 void PpmIn_execute()
 {
     static bool sentconn=false;
+
     uint32_t micros = micros() - runtime;
     if(micros > 60000) {
         if(sentconn == false) {
@@ -200,10 +202,15 @@ void PpmIn_execute()
             sentconn = true;
             ch_count = 0;
         }
+        cyclescount = 0; // No Data
     } else {
-        if(sentconn == true && ch_count >= 4 && ch_count <= 16) {
-            serialWriteln("HT: PPM Input Data Received");
-            sentconn = false;
+        if(cyclescount < cyclesbeforeppm)
+            cyclescount++;
+        else {
+            if(sentconn == true && ch_count >= 4 && ch_count <= 16) {
+                serialWriteln("HT: PPM Input Data Received");
+                sentconn = false;
+            }
         }
     }
 }
@@ -211,7 +218,7 @@ void PpmIn_execute()
 // Returns number of channels read
 int PpmIn_getChannels(uint16_t *ch)
 {
-    if(!ppminstarted)
+    if(!ppminstarted || cyclescount < cyclesbeforeppm)
         return 0;
 
     __disable_irq();
