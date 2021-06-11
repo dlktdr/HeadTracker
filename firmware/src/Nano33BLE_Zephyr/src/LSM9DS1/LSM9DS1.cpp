@@ -565,24 +565,6 @@ int LSM9DS1Class::readRegisters(uint8_t slaveAddress, uint8_t address, uint8_t* 
     if(i2c_write_read(i2c_dev, slaveAddress, &address, 1, data, length))
         return -1;
     return 1;
-
-
-  /*_wire->beginTransmission(slaveAddress);
-  _wire->write(0x80 | address);
-  if (_wire->endTransmission(false) != 0) {
-    return -1;
-  }
-
-  if (_wire->requestFrom(slaveAddress, length) != length) {
-    return 0;
-  }
-
-  for (size_t i = 0; i < length; i++) {
-    *data++ = _wire->read();
-  }
-
-  return 1;
-  */
 }
 
 int LSM9DS1Class::writeRegister(uint8_t slaveAddress, uint8_t address, uint8_t value)

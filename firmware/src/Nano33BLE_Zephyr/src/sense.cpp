@@ -60,7 +60,6 @@ Madgwick madgwick;
 
 uint32_t ustocalculate;
 
-static int counter=0;
 static bool blesenseboard=true;
 static bool lastproximity=false;
 
@@ -86,12 +85,9 @@ int sense_Init()
         return -1;
     }
 
-/*
     // Initalize Gesture Sensor
-    if(!APDS.begin())
     if(!APDS.begin()) {
         blesenseboard = false;
-*/
         trkset.setSenseboard(true);
     } else
         trkset.setSenseboard(false);
