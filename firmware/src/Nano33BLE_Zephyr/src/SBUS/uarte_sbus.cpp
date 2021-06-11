@@ -21,6 +21,8 @@
 #include "uarte_sbus.h"
 #include "defines.h"
 #include "io.h"
+#include <nrfx.h>
+#include <nrfx_uarte.h>
 
 #define BAUD100000       0x0198EF80
 #define CONF8E2          0x0000001E
@@ -40,14 +42,17 @@ static constexpr uint8_t LOST_FRAME_ = 0x04;
 static constexpr uint8_t FAILSAFE_ = 0x08;
 static bool failsafe_ = false, lost_frame_ = false, ch17_ = false, ch18_ = false;
 
-uint8_t sbusDMATx[SBUS_FRAME_LEN]; // DMA Access Buffer
+uint8_t sbusDMATx[SBUS_FRAME_LEN]; // DMA Access Buffer Write
+uint8_t sbusDMARx[SBUS_FRAME_LEN]; // DMA Access Buffer Read
 uint8_t localTXBuffer[SBUS_FRAME_LEN]; // Local Buffer
 
 volatile bool isTransmitting=false;
 volatile bool isSBUSInit=false;
 
-int invtxpin=0;
-int invtxport=0;
+static int tpin;
+static int tport;
+static int invtxpin=0;
+static int invtxport=0;
 
 void SBUS_Thread()
 {
@@ -58,9 +63,10 @@ void SBUS_Thread()
     }
 }
 
-ISR_DIRECT_DECLARE(SBUS_TX_Complete_Interrupt)
+void SBUS_TX_Complete_Interrupt(void *arg)
 {
-    ISR_DIRECT_HEADER();
+
+    //ISR_DIRECT_HEADER();
     // Clear Event
     SBUSOUT_UARTE->EVENTS_ENDTX = 0;
     isTransmitting = false;
@@ -83,8 +89,8 @@ ISR_DIRECT_DECLARE(SBUS_TX_Complete_Interrupt)
     // Enable PPI 11
     NRF_PPI->CHENSET = SBUSOUT_PPICH_MSK;
 
-    ISR_DIRECT_FOOTER(1);
-    return 0;
+  //  ISR_DIRECT_FOOTER(1);
+//    return 1;
 }
 
 void SBUS_TX_Start()
@@ -101,14 +107,36 @@ void SBUS_TX_Start()
     SBUSOUT_UARTE->TASKS_STARTTX = 1;
 }
 
+void m_uart_context_callback()
+{
+
+}
+
 void SBUS_Init(int txPin, int invTxPin)
 {
+    tpin = dpintopin[txPin];
+    tport = dpintoport[txPin];
+
+    invtxpin = dpintopin[invTxPin];
+    invtxport = dpintoport[invTxPin];
+
     isSBUSInit = false;
 
-    // Disable UART1 + Interrupt & IRQ controller
-    SBUSOUT_UARTE->ENABLE = UARTE_ENABLE_ENABLE_Disabled << UARTE_ENABLE_ENABLE_Pos;
-    SBUSOUT_UARTE->EVENTS_ENDTX = 0;
+    // Bootloader? leaves the UART connected.. disconnect it first.
+    NRF_UART0->ENABLE = 0;
+    NRF_UART0->CONFIG = 0;
+    NRF_UART0->PSEL.TXD = UART_PSEL_TXD_CONNECT_Disconnected << UART_PSEL_TXD_CONNECT_Pos;
+    NRF_UART0->PSEL.RXD = UART_PSEL_RXD_CONNECT_Disconnected << UART_PSEL_RXD_CONNECT_Pos;
+    NRF_UART0->PSEL.CTS = UART_PSEL_CTS_CONNECT_Disconnected << UART_PSEL_CTS_CONNECT_Pos;
+    NRF_UART0->PSEL.RTS = UART_PSEL_RTS_CONNECT_Disconnected << UART_PSEL_RTS_CONNECT_Pos;
+    NRF_UART0->INTENCLR = 0xFFFF;
+
     irq_disable(SBUSOUT_UARTE_IRQ);
+
+    // Disable UART1 + Interrupt & IRQ controller
+    SBUSOUT_UARTE->EVENTS_ENDTX = 0;
+    SBUSOUT_UARTE->ENABLE = UARTE_ENABLE_ENABLE_Disabled << UARTE_ENABLE_ENABLE_Pos;
+
     SBUSOUT_UARTE->INTENCLR = UARTE_INTENSET_ENDTX_Msk;
 
     // Baud 100000, 8E2
@@ -119,12 +147,6 @@ void SBUS_Init(int txPin, int invTxPin)
     // DMA Access space for SBUS output
     SBUSOUT_UARTE->TXD.PTR = (uint32_t)sbusDMATx;
     SBUSOUT_UARTE->TXD.MAXCNT =SBUS_FRAME_LEN;
-
-    int tpin = dpintopin[txPin];
-    int tport = dpintoport[txPin];
-
-    invtxpin = dpintopin[invTxPin];
-    invtxport = dpintoport[invTxPin];
 
     // Only Enable TX Pin
     SBUSOUT_UARTE->PSEL.TXD = (tpin << UARTE_PSEL_TXD_PIN_Pos) | (tport << UARTE_PSEL_TXD_PORT_Pos);
@@ -152,13 +174,13 @@ void SBUS_Init(int txPin, int invTxPin)
     NRF_PPI->CH[SBUSOUT_PPICH].EEP = (uint32_t)&NRF_GPIOTE->EVENTS_IN[SBUS_GPIOTE1];
     NRF_PPI->CH[SBUSOUT_PPICH].TEP = (uint32_t)&NRF_GPIOTE->TASKS_OUT[SBUS_GPIOTE2];
 
-
     // Enable PPI 11
     NRF_PPI->CHENSET = SBUSOUT_PPICH_MSK;
 
     // Enable the interrupt vector in IRQ Controller
     //NVIC_SetVector(UARTE1_IRQn,(uint32_t)&SBUS_TX_Complete_Interrupt);
-    IRQ_DIRECT_CONNECT(SBUSOUT_UARTE_IRQ,1,SBUS_TX_Complete_Interrupt,0);
+    //IRQ_DIRECT_CONNECT(SBUSOUT_UARTE_IRQ,1,SBUS_TX_Complete_Interrupt,0);
+    IRQ_CONNECT(UARTE1_IRQn, 2, SBUS_TX_Complete_Interrupt, NULL, 0);
     irq_enable(SBUSOUT_UARTE_IRQ);
 
     // Enable interupt in peripheral on end of transmission
@@ -167,6 +189,9 @@ void SBUS_Init(int txPin, int invTxPin)
     // Enable UART1
     SBUSOUT_UARTE->ENABLE = UARTE_ENABLE_ENABLE_Enabled << UARTE_ENABLE_ENABLE_Pos;
     isSBUSInit = true;
+
+    // Initiate a transfer
+    SBUSOUT_UARTE->TASKS_STARTTX = 1;
 }
 
 
