@@ -41,6 +41,7 @@
     DV(uint16_t,panout, 1,-1)\
     DV(bool,isCalibrated,2,-1)\
     DV(bool,btcon,      10,-1)\
+    DV(bool,isSense,      10,-1)\
     DV(uint8_t, cpuuse, 1,-1)
 
 // To shorten names, as these are sent to the GUI for decoding
@@ -290,6 +291,7 @@ public:
     void setBLEAddress(const char *addr);
     void setDiscoveredBTHead(const char* addr);
     void setBLEValues(uint16_t vals[BT_CHANNELS]);
+    void setSenseboard(bool sense);
     void setSBUSValues(uint16_t vals[16]);
     void setPPMInValues(uint16_t vals[16]);
     void setChannelOutValues(uint16_t vals[16]);

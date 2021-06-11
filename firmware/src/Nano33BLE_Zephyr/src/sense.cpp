@@ -15,6 +15,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <zephyr.h>
+#include <device.h>
 #include "trackersettings.h"
 #include "sense.h"
 #include "nano33ble.h"
@@ -23,6 +25,7 @@
 #include "bluetooth/ble.h"
 #include "MadgwickAHRS/MadgwickAHRS.h"
 #include "SBUS/uarte_sbus.h"
+#include "APDS9960/APDS9960.h"
 #include "PWM/pmw.h"
 #include "LSM9DS1/LSM9DS1.h"
 #include "filters.h"
@@ -86,8 +89,12 @@ int sense_Init()
 /*
     // Initalize Gesture Sensor
     if(!APDS.begin())
+    if(!APDS.begin()) {
         blesenseboard = false;
 */
+        trkset.setSenseboard(true);
+    } else
+        trkset.setSenseboard(false);
 
     for(int i = 0; i< BT_CHANNELS; i++) {
         bt_chansf[i] = 0;
@@ -96,7 +103,10 @@ int sense_Init()
     return 0;
 }
 
-// Read all IMU data and do the calculations,
+//----------------------------------------------------------------------
+// Calculations and Main Channel Thread
+//----------------------------------------------------------------------
+
 void calculate_Thread()
 {
     while(1) {
@@ -158,39 +168,6 @@ void calculate_Thread()
 
         // Free Mutex Lock, Allow sensor updates
         k_mutex_unlock(&sensor_mutex);
-
-        // Reset Center on Proximity, Don't need to update this often
-        /*
-        static int sensecount=0;
-        static int minproximity=100; // Keeps smallest proximity read.
-        static int maxproximity=0; // Keeps largest proximity value read.
-        if(blesenseboard && sensecount++ >= 50) {
-            sensecount = 0;
-            if (trkset.resetOnWave()) {
-                // Reset on Proximity
-                if(APDS.proximityAvailable()) {
-                    int proximity = APDS.readProximity();
-
-                    // Store High and Low Values, Generate reset thresholds
-                    maxproximity = MAX(proximity, maxproximity);
-                    minproximity = MIN(proximity, minproximity);
-                    int lowthreshold = minproximity + APDS_HYSTERISIS;
-                    int highthreshold = maxproximity - APDS_HYSTERISIS;
-
-                    // Don't allow reset if high and low thresholds are too close
-                    if(highthreshold - lowthreshold > APDS_HYSTERISIS*2) {
-                        if (proximity < lowthreshold && lastproximity == false) {
-                            pressButton();
-                            serialWriteln("HT: Reset center from a close proximity");
-                            lastproximity = true;
-                        } else if(proximity > highthreshold) {
-                            // Clear flag on proximity clear
-                            lastproximity = false;
-                        }
-                    }
-                }
-            }
-        }*/
 
         // Zero button was pressed, adjust all values to zero
         bool butdnw = false;
@@ -433,10 +410,51 @@ void calculate_Thread()
     }
 }
 
+
+//----------------------------------------------------------------------
+// Sensor Reading Thread
+//----------------------------------------------------------------------
+
 void sensor_Thread()
 {
     while(1) {
         k_usleep(SENSOR_PERIOD);
+
+        static int sensecount=0;
+        static int minproximity=100; // Keeps smallest proximity read.
+        static int maxproximity=0; // Keeps largest proximity value read.
+        if(blesenseboard && sensecount++ == 10) {
+            sensecount = 0;
+            if (trkset.resetOnWave()) {
+                // Reset on Proximity
+                if(APDS.proximityAvailable()) {
+                    int proximity = APDS.readProximity();
+
+                    /*serialWrite("HT: Prox=");
+                    serialWrite(proximity);
+                    serialWriteln();*/
+
+
+                    // Store High and Low Values, Generate reset thresholds
+                    maxproximity = MAX(proximity, maxproximity);
+                    minproximity = MIN(proximity, minproximity);
+                    int lowthreshold = minproximity + APDS_HYSTERISIS;
+                    int highthreshold = maxproximity - APDS_HYSTERISIS;
+
+                    // Don't allow reset if high and low thresholds are too close
+                    if(highthreshold - lowthreshold > APDS_HYSTERISIS*2) {
+                        if (proximity < lowthreshold && lastproximity == false) {
+                            pressButton();
+                            serialWriteln("HT: Reset center from a close proximity");
+                            lastproximity = true;
+                        } else if(proximity > highthreshold) {
+                            // Clear flag on proximity clear
+                            lastproximity = false;
+                        }
+                    }
+                }
+            }
+        }
 
         // Setup Rotations
         float rotation[3];

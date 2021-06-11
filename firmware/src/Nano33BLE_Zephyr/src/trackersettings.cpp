@@ -577,6 +577,11 @@ void TrackerSettings::setBLEValues(uint16_t vals[BT_CHANNELS])
     memcpy(btch,vals,sizeof(uint16_t)*BT_CHANNELS);
 }
 
+void TrackerSettings::setSenseboard(bool sense)
+{
+    isSense = sense;
+}
+
 void TrackerSettings::setPairedBTAddress(const char *ha)
 {
     // set to "" for pair to first available
@@ -1073,7 +1078,7 @@ void TrackerSettings::setJSONData(DynamicJsonDocument &json)
     if(senddatavars & 1<<id && counter % DIV == 0) {\
         if(ROUND == -1)\
             json[#NAME] = NAME;\
-        else \
+        else\
             json[#NAME] = roundf(((float)NAME * ROUND)) / ROUND;\
         itemcount++;\
     }\
