@@ -6,13 +6,18 @@
 
 // Thread Periods
 #define IO_PERIOD 20            // (ms) IO Period (button reading)
-#define DATA_PERIOD 100         // (ms) GUI update rate
-#define BT_PERIOD 18            // (ms) Bluetooth update rate 50hz
+#define DATA_PERIOD 85         // (ms) GUI update rate
+#define BT_PERIOD 20            // (ms) Bluetooth update rate 50hz
 #define SERIAL_PERIOD 30        // (ms) Serial processing
-#define SENSOR_PERIOD 20000     // (us) 50hz Read Sensors
+#define SENSOR_PERIOD 1666      // (us) 6z0hz Read Sensors
 #define CALCULATE_PERIOD 6666   // (us) 150hz IMU calculations
 #define SBUS_PERIOD 20          // (ms) SBUS 50hz
 #define UIRESPONSIVE_TIME 10000 // (ms) 10Seconds without an ack data will stop;
+
+// Bluetooth
+#define BT_MIN_CONN_INTER 13  // 6 Is lowest BLE can do. Looking for a constant rate here
+#define BT_MAX_CONN_INTER 13 // 1.25 * 15 = 18.75ms (Slightly faster than 20ms update rate)
+#define BT_CONN_LOST_TIME 400 // 400 * 10ms = 4seconds
 
 // Thread Priorities
 #define PRIORITY_LOW 4
