@@ -11,15 +11,17 @@
 #include <usb/class/usb_hid.h>
 #include "io.h"
 
-static const struct device *hdev;
-
 static uint16_t channeldata[8];
 static void send_report(struct k_work *work);
 
 void set_JoystickChannels(uint16_t chans[16])
 {
+#ifndef CONFIG_USB_DEVICE_HID
+    return;
+#endif
     memcpy(channeldata, chans, sizeof(channeldata));
     //send_report(NULL);
+
 }
 
 #define REPORT_TIMEOUT K_SECONDS(2)
@@ -255,24 +257,6 @@ static void send_report(struct k_work *work)
     //gpio_pin_set()
 
 
-    	int ret, wrote;
-
-	if (!atomic_test_and_set_bit(hid_ep_in_busy, HID_EP_BUSY_FLAG)) {
-		ret = hid_int_ep_write(hdev, (uint8_t *)&report_1,
-				       sizeof(report_1), &wrote);
-		if (ret != 0) {
-			/*
-			 * Do nothing and wait until host has reset the device
-			 * and hid_ep_in_busy is cleared.
-			 */
-			LOG_ERR("Failed to submit report");
-		} else {
-			LOG_DBG("Report submitted");
-		}
-	} else {
-		LOG_DBG("HID IN endpoint busy");
-	}
-
     report[MOUSE_BTN_REPORT_POS] = status[MOUSE_BTN_REPORT_POS];
     report[MOUSE_X_REPORT_POS] = 10;
     status[MOUSE_X_REPORT_POS] = 0U;
@@ -302,9 +286,9 @@ static void on_idle_cb(const struct device *dev, uint16_t report_id)
 
 static void report_event_handler(struct k_timer *dummy)
 {
-	/* Increment reported data */
-	report_1.value++;
-	k_work_submit(&report_send);
+/*
+	/*report_1.value++;
+	k_work_submit(&report_send);*/
 }
 
 static void protocol_cb(const struct device *dev, uint8_t protocol)
@@ -341,7 +325,11 @@ static void status_cb(enum usb_dc_status_code status, const uint8_t *param)
 
 void joystick_init(void)
 {
-	ret = usb_enable(status_cb);
+#ifndef CONFIG_USB_DEVICE_HID
+    return;
+#endif
+
+    int ret = usb_enable(status_cb);
 	if (ret != 0) {
 		LOG_ERR("Failed to enable USB");
 		return;
@@ -352,6 +340,10 @@ void joystick_init(void)
 
 static int composite_pre_init(const struct device *dev)
 {
+#ifndef CONFIG_USB_DEVICE_HID
+    return 0;
+#endif
+
 	hdev = device_get_binding("HID_0");
 	if (hdev == NULL) {
 		return -ENODEV;
@@ -360,8 +352,8 @@ static int composite_pre_init(const struct device *dev)
 	usb_hid_register_device(hdev, hid_report_desc, sizeof(hid_report_desc),
 				NULL);
 
-	atomic_set_bit(hid_ep_in_busy, HID_EP_BUSY_FLAG);
-	k_timer_start(&event_timer, REPORT_PERIOD, REPORT_PERIOD);
+//	atomic_set_bit(hid_ep_in_busy, HID_EP_BUSY_FLAG);
+	//k_timer_start(&event_timer, REPORT_PERIOD, REPORT_PERIOD);
 
     int a  = usb_hid_init(hdev);
 	return a;
