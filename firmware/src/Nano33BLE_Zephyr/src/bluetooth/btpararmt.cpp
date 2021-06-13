@@ -63,7 +63,6 @@ static struct bt_gatt_subscribe_params subscribefff6; // Channel Data
 
 // Head Board Specific Items
 static struct bt_gatt_subscribe_params subscribeaff1; // Override Data
-static struct bt_gatt_subscribe_params subscribeaff2; // Button Press
 static bool contoheadboard = false;
 uint32_t buttonhandle =0;
 static const struct bt_gatt_attr *buttonattr=NULL;
@@ -72,8 +71,6 @@ struct bt_le_conn_param *rmtconparms = BT_LE_CONN_PARAM(BT_MIN_CONN_INTER, BT_MA
 
 // Characteristic UUID
 static struct bt_uuid_16 uuid = BT_UUID_INIT_16(0);
-
-
 
 /* Nofify function when bluetooth channel data has been sent
  */
@@ -97,6 +94,22 @@ static uint8_t notify_func(struct bt_conn *conn,
             chan_vals[i]  = BtChannelsIn[i];
     }
 
+	return BT_GATT_ITER_CONTINUE;
+}
+
+/* Notify function when channel overrides have changed
+ */
+
+static uint8_t over_notify_func(struct bt_conn *conn,
+			   struct bt_gatt_subscribe_params *params,
+			   const void *data, uint16_t length)
+{
+	if (!data) {
+		return BT_GATT_ITER_CONTINUE;
+	}
+
+    // Store Overrides
+    memcpy(&chanoverrides, data, sizeof(chanoverrides));
 
 	return BT_GATT_ITER_CONTINUE;
 }
@@ -190,6 +203,51 @@ static uint8_t discover_func(struct bt_conn *conn,
         contoheadboard = true;
         buttonhandle = attr->handle;
         buttonattr = attr;
+
+        // Setup next discovery (HT Override Characteristic)
+        memcpy(&uuid, &htvldchs.uuid, sizeof(uuid));
+		discover_params.uuid = &uuid.uuid;
+		discover_params.start_handle = attr->handle + 4;
+		discover_params.type = BT_GATT_DISCOVER_DESCRIPTOR;
+        err = bt_gatt_discover(conn, &discover_params);
+		if (err) {
+           	serialWrite("HT: Discover failed (err ");
+            serialWrite(err);
+            serialWrite(")\r\n");
+	    }
+
+    // Found the HT Override Characteristic
+	} else if (!bt_uuid_cmp(discover_params.uuid, &htvldchs.uuid)) {
+        serialWriteln("HT: Found Override Characteristic");
+        // Setup next discovery (HT Override CCC)
+        memcpy(&uuid, &ccc.uuid, sizeof(uuid));
+		discover_params.uuid = &uuid.uuid;
+		discover_params.start_handle = attr->handle + 5;
+		discover_params.type = BT_GATT_DISCOVER_DESCRIPTOR;
+        subscribeaff1.value_handle = attr->handle + 4;
+        err = bt_gatt_discover(conn, &discover_params);
+		if (err) {
+           	serialWrite("HT: Discover failed (err ");
+            serialWrite(err);
+            serialWrite(")\r\n");
+	    }
+
+	// Found the HT Override CCC Value, Subscribe to it
+	} else if (!bt_uuid_cmp(discover_params.uuid, &ccc.uuid)) {
+        serialWriteln("HT: Found Override CCC");
+        subscribeaff1.notify = over_notify_func;
+		subscribeaff1.value = BT_GATT_CCC_NOTIFY;
+		subscribeaff1.ccc_handle = attr->handle;
+
+		err = bt_gatt_subscribe(conn, &subscribeaff1);
+		if (err && err != -EALREADY) {
+            serialWrite("HT: Subscribe failed (err ");
+            serialWrite(err);
+            serialWrite(")\r\n");
+		} else {
+			serialWrite("HT: Subscribed to Overrides\r\n");
+		}
+
 	}
 
 	return BT_GATT_ITER_STOP;
