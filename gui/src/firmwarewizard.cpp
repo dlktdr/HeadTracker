@@ -124,7 +124,8 @@ void FirmwareWizard::startPortDiscovery(const QString &filename)
     addToLog("Determining what type of file this is...");
 
     if(data.startsWith(BLE33HEADER_BIN_MBED) ||
-       data.startsWith(BLE33HEADER_BIN_ZEPHER)) {
+       data.startsWith(BLE33HEADER_BIN_ZEPHER1) ||
+       data.startsWith(BLE33HEADER_BIN_ZEPHER2)) {
         addToLog("  Firmware is for the Arduino Nano BLE 33 in bin format");
         boardType = BRD_NANO33BLE;
         programmercommand = "bossac.exe";        
@@ -350,7 +351,7 @@ void FirmwareWizard::setBootloader()
             // Open and close port at 1200BPS to set bootloader mode
             QSerialPort port(lastFoundPort);
             port.setBaudRate(1200);
-            if(!port.open(QIODevice::ReadOnly)) {
+            if(!port.open(QIODevice::ReadWrite)) {
                 QMessageBox::critical(this,"Error", "Unable to set bootloader, could not open port " + lastFoundPort + " at 1200baud");
                 addToLog("Unable to set bootloader - " + port.errorString());
 
@@ -359,7 +360,10 @@ void FirmwareWizard::setBootloader()
                 ui->stkWidget->setCurrentIndex(0);
                 return;
             }
-            port.write("WRITE_SOMETHING",15);
+            port.setRequestToSend(true);
+            port.setDataTerminalReady(false);
+            QByteArray bootcmd = "\x02{\"Cmd\":\"Boot\"}\xDA\f\x03\r\n";
+            port.write(bootcmd,bootcmd.length());
             port.flush();
             port.close();
             setState(PRG_WAIT4NEWPORT);
@@ -548,13 +552,15 @@ void FirmwareWizard::programmerFinished(int exitCode, QProcess::ExitStatus exitS
     }
 }
 
+// Main event timer detecting when to proceed to next state
+
 void FirmwareWizard::discoverTimeout()
 {
     if(programmerState == PRG_WAIT4PORT)
         discoverPorts();
     else if (programmerState == PRG_WAIT4NEWPORT) {
         waitingprogram++;
-        if(waitingprogram > 80) {
+        if(waitingprogram > 50) {
             // Waited too long, try the orig port, maybe it's already in bootloader mode?
             addToLog("Wasn't able to set bootloader mode, trying first port found");
             setState(PRG_PROGRAM_START);
