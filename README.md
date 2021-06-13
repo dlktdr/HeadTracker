@@ -2,10 +2,10 @@
 [![Join the Discord chat](https://img.shields.io/discord/827622724565467196?style=flat-square)](https://discord.gg/ux5hEaNSPQ)
 
 # RC HeadTracker
-If your an RC enthusiast like myself with a FPV headset at some point you thought wouldn't it be cool if I could turn my head and the camera would follow. That is the intention of this project.
+If you're an RC enthusiast with a FPV headset, at some point you might have thought wouldn't it be cool if you could turn your head and the camera would follow. That is the intention of this project.
 
 # [Wiki](https://github.com/dlktdr/HeadTracker/wiki)
-* See the Wiki for how to build one
+* See the Wiki for how to build one.
 
 ### Screenshot
 ![alt text](https://github.com/dlktdr/HeadTracker/raw/master/docs/ScreenCapture1016.png)
