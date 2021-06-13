@@ -87,12 +87,13 @@ int sense_Init()
     }
 
     // Initalize Gesture Sensor
-    /*if(!APDS.begin()) {
+    if(!APDS.begin()) {
         blesenseboard = false;
+        trkset.setSenseboard(false);
+    } else {
+        blesenseboard = true;
         trkset.setSenseboard(true);
-    } else
-        trkset.setSenseboard(false);*/
-
+    }
 
     for(int i = 0; i< BT_CHANNELS; i++) {
         bt_chansf[i] = 0;
@@ -430,7 +431,6 @@ void sensor_Thread()
                     /*serialWrite("HT: Prox=");
                     serialWrite(proximity);
                     serialWriteln();*/
-
 
                     // Store High and Low Values, Generate reset thresholds
                     maxproximity = MAX(proximity, maxproximity);
