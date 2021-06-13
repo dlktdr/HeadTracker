@@ -62,6 +62,7 @@ private:
     QTimer updatesettingstmr;
     QTimer rxParamsTimer;
     QTimer reqDataItemsChanged;
+    QMap<QString, bool> cursendingdataitems;
 
     CalibrateBLE *bleCalibratorDialog;
 
@@ -88,6 +89,7 @@ private slots:
     void changeDataItems();
     void reqDataItemChanged();
     void calibrationCancel();
+    void calibrationComplete();
 };
 
 

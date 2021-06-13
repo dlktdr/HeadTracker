@@ -8,7 +8,7 @@ BoardNano33BLE::BoardNano33BLE(TrackerSettings *ts)
     connect(&imheretimout,SIGNAL(timeout()),this,SLOT(ihTimeout()));
     connect(&rxParamsTimer,SIGNAL(timeout()),this,SLOT(rxParamsTimeout()));
     rxParamsTimer.setSingleShot(true);
-    connect(bleCalibratorDialog,&CalibrateBLE::calibrationSave,this,&BoardNano33BLE::saveToRAM);
+    connect(bleCalibratorDialog,&CalibrateBLE::calibrationSave,this,&BoardNano33BLE::calibrationComplete);
     connect(bleCalibratorDialog,&CalibrateBLE::calibrationCancel,this, &BoardNano33BLE::calibrationCancel);
     connect(trkset,SIGNAL(requestedDataItemChanged()),this,SLOT(reqDataItemChanged()));
     reqDataItemsChanged.setSingleShot(true);
@@ -162,15 +162,26 @@ void BoardNano33BLE::reqDataItemChanged()
 
 void BoardNano33BLE::calibrationCancel()
 {
-    QMap<QString, bool> dat;
-    dat["magx"] = false;
-    dat["magy"] = false;
-    dat["magz"] = false;
-    dat["gyrox"] = false;
-    dat["gyroy"] = false;
-    dat["gyroz"] = false;
-    trkset->setDataItemSend(dat);
+    // Remove all items
+    trkset->clearDataItems();
+    stopData();
+
+    // Only request the ones that were active on calibration start
+    trkset->setDataItemSend(cursendingdataitems);
+
+    // Emit Calibration Fail
     emit calibrationFailure();
+}
+
+void BoardNano33BLE::calibrationComplete()
+{
+    // Remove all items
+    trkset->clearDataItems();
+    stopData();
+
+    // Only request the ones that were active on calibration start
+    trkset->setDataItemSend(cursendingdataitems);
+    saveToRAM();
 }
 
 // Add/Remove data items to be received from the board
@@ -192,6 +203,15 @@ void BoardNano33BLE::changeDataItems()
 
 void BoardNano33BLE::startCalibration()
 {
+    // Save a list if the currently sending data items
+    //  to be restored on calibration completed/canceled
+    cursendingdataitems = trkset->getDataItems();
+
+    // Stop sending all data items
+    trkset->clearDataItems();
+    stopData();
+
+    // Request just calibration items
     QMap<QString, bool> dat;
     dat["magx"] = true;
     dat["magy"] = true;
