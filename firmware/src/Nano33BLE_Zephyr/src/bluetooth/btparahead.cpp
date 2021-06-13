@@ -27,11 +27,7 @@
 #include "serial.h"
 #include "io.h"
 #include "nano33ble.h"
-
-
-// Bluetooth module Type
-//#define BT_MOD_CC2650_PARA
-#define BT_MOD_CC2540
+#include "defines.h"
 
 void sendTrainer();
 int setTrainer(uint8_t *addr);
@@ -41,6 +37,8 @@ static void connected(struct bt_conn *conn, uint8_t err);
 static void security_changed(struct bt_conn*conn, bt_security_t level, enum bt_security_err err);
 static ssize_t write_ct(struct bt_conn *conn, const struct bt_gatt_attr *attr, const void *buf, uint16_t len, uint16_t offset, uint8_t flags);
 static ssize_t read_ct(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf, uint16_t len, uint16_t offset);
+static ssize_t write_but(struct bt_conn *conn, const struct bt_gatt_attr *attr, const void *buf, uint16_t len, uint16_t offset, uint8_t flags);
+static ssize_t read_over(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf, uint16_t len, uint16_t offset);
 static void ct_ccc_cfg_changed(const struct bt_gatt_attr *attr, uint16_t value);
 
 static constexpr uint8_t START_STOP = 0x7E;
@@ -51,7 +49,9 @@ static uint16_t chan_vals[BT_CHANNELS];
 static uint8_t bufferIndex;
 static uint8_t crc;
 static uint8_t ct[40];
-static char _address[] = "00:00:00:00:00:00";
+static uint8_t overdata[2];
+//static char _address[] = "00:00:00:00:00:00"; // *** FIXME
+static char _address[] =   "Known issue here."; // *** FIXME
 uint16_t ovridech = 0;
 
 // Service UUID
@@ -60,14 +60,30 @@ static struct bt_uuid_128 btparaserv = BT_UUID_INIT_128(
     0x00, 0x10,	0x00, 0x00, 0xf0, 0xff, 0x00, 0x00);
 
 // Characteristic UUID
-static struct bt_uuid_16 btparachar = BT_UUID_INIT_16(0xfff6);
+static struct bt_uuid_16 btparachar = BT_UUID_INIT_16(0xFFF6);
+static struct bt_uuid_16 btoverride = BT_UUID_INIT_16(0xAFF1);
+static struct bt_uuid_16 btbutton = BT_UUID_INIT_16(0xAFF2);
 
 BT_GATT_SERVICE_DEFINE(bt_srv,
     BT_GATT_PRIMARY_SERVICE(&btparaserv),
+
+    // Data output Characteristic
     BT_GATT_CHARACTERISTIC(&btparachar.uuid,
-                           BT_GATT_CHRC_READ | BT_GATT_CHRC_WRITE_WITHOUT_RESP | BT_GATT_CHRC_NOTIFY,
-                           BT_GATT_PERM_READ | BT_GATT_PERM_WRITE, read_ct,write_ct,ct),
+                           BT_GATT_CHRC_READ | BT_GATT_CHRC_WRITE_WITHOUT_RESP |  BT_GATT_CHRC_NOTIFY,
+                           BT_GATT_PERM_READ | BT_GATT_PERM_WRITE, read_ct, write_ct, ct),
     BT_GATT_CCC(ct_ccc_cfg_changed, BT_GATT_PERM_READ | BT_GATT_PERM_WRITE),
+
+    // Overridden Channel Outputs
+    BT_GATT_CHARACTERISTIC(&btoverride.uuid,
+                           BT_GATT_CHRC_READ |BT_GATT_CHRC_NOTIFY,
+                           BT_GATT_PERM_READ | BT_GATT_PERM_WRITE, read_over, NULL, overdata),
+    BT_GATT_CCC(NULL, BT_GATT_PERM_READ | BT_GATT_PERM_WRITE),
+
+    // Remote Button Press Characteristic, Indicate
+    BT_GATT_CHARACTERISTIC(&btbutton.uuid,
+                           BT_GATT_CHRC_WRITE,
+                           BT_GATT_PERM_READ | BT_GATT_PERM_WRITE, NULL, write_but, NULL),
+
     );
 
 static const struct bt_data ad[] = {
@@ -89,17 +105,19 @@ static struct bt_le_adv_param my_param = {
     };
 
 struct bt_conn *curconn = NULL;
-struct bt_le_conn_param *conparms = BT_LE_CONN_PARAM(16, 16, 0, 100); // Faster Connection Interval
+struct bt_le_conn_param *conparms = BT_LE_CONN_PARAM(BT_MIN_CONN_INTER,
+                                                     BT_MAX_CONN_INTER,
+                                                     0,
+                                                     BT_CONN_LOST_TIME);
 
 static struct bt_conn_cb conn_callbacks = {
 	.connected = connected,
 	.disconnected = disconnected,
-    .security_changed = security_changed,
+//    .security_changed = security_changed,
 };
 
 void BTHeadStart()
 {
-
     bleconnected = false;
 
     // Center all Channels
@@ -117,8 +135,6 @@ void BTHeadStart()
 	}
 
     serialWriteln("HT: BLE Started Advertising");
-
-
 
     bt_conn_cb_register(&conn_callbacks);
 
@@ -172,6 +188,8 @@ bool BTHeadGetConnected()
 
 void BTHeadSetChannel(int channel, const uint16_t value)
 {
+    static uint16_t lovch = 0xFFFF;
+
     if(channel >= BT_CHANNELS)
         return;
 
@@ -186,6 +204,12 @@ void BTHeadSetChannel(int channel, const uint16_t value)
         ovridech |= 1<<channel;
         chan_vals[channel] = value;
     }
+
+    // Send notify if override ch's have changed
+    if(lovch != ovridech) {
+        bt_gatt_notify(NULL, &bt_srv.attrs[4], &ovridech, 2);
+    }
+    lovch = ovridech;
 }
 
 // Head BT does not return BT data
@@ -194,12 +218,11 @@ uint16_t BTHeadGetChannel(int channel)
     return 0;
 }
 
-
 static void ct_ccc_cfg_changed(const struct bt_gatt_attr *attr, uint16_t value)
 {
-    serialWrite("CCC Values Changed (");
+    /*serialWrite("CCC Values Changed (");
     serialWrite(value);
-    serialWrite(")\r\n");
+    serialWrite(")\r\n");*/
 }
 
 static ssize_t read_ct(struct bt_conn *conn, const struct bt_gatt_attr *attr,
@@ -216,17 +239,43 @@ static ssize_t write_ct(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 			uint8_t flags)
 {
 
-
 	return len;
 }
 
+static ssize_t read_over(struct bt_conn *conn, const struct bt_gatt_attr *attr,
+		       void *buf, uint16_t len, uint16_t offset)
+{
+	char *value = (char*)attr->user_data;
 
+    serialWriteln("Override Ch's Read");
+    memcpy(overdata, (void*)&ovridech, sizeof(ovridech));
+
+	return bt_gatt_attr_read(conn, attr, buf, len, offset, value,
+				 sizeof(overdata));
+}
+
+static ssize_t write_but(struct bt_conn *conn, const struct bt_gatt_attr *attr,
+			const void *buf, uint16_t len, uint16_t offset,
+			uint8_t flags)
+{
+    if(len == 1) {
+        char ccenet = ((const char*)buf)[0];
+        if(ccenet == 'R') {
+            serialWriteln("HT: Remote BT Button Pressed");
+            pressButton();
+        }
+    }
+	return len;
+}
+
+/*
 static void security_changed(struct bt_conn*conn, bt_security_t level, enum bt_security_err err)
 {
     serialWrite("Secutity Changed (");
     serialWrite(level);
     serialWrite(")\r\n");
 }
+*/
 
 void hasSecurityChangedTimer(struct k_timer *tmr)
 {
@@ -242,10 +291,10 @@ void hasSecurityChangedTimer(struct k_timer *tmr)
     if(sl == BT_SECURITY_L1) {
         uint8_t ccv = BT_GATT_CCC_NOTIFY;
         bt_gatt_attr_write_ccc(curconn, &bt_srv.attrs[3], &ccv, 1 , 0, 0);
-        serialWriteln("Detected a CC2650 Chip (PARA Wireless)");
+        serialWriteln("HT: Detected a CC2650 Chip (PARA Wireless)");
     }
     else
-        serialWriteln("Detected a CC2540 Chip (non-PARA)");
+        serialWriteln("HT: Detected a CC2540 Chip (non-PARA)");
 }
 
 K_TIMER_DEFINE(my_timer, hasSecurityChangedTimer, NULL);
@@ -295,7 +344,7 @@ static void disconnected(struct bt_conn *conn, uint8_t reason)
     // Start advertising
     int err = bt_le_adv_start(&my_param, ad, ARRAY_SIZE(ad), NULL, 0);
 	if (err) {
-		serialWriteln("Advertising failed to start (err %d)");
+		serialWriteln("HT: Advertising failed to start (err %d)");
 		return;
 	}
 
@@ -304,11 +353,6 @@ static void disconnected(struct bt_conn *conn, uint8_t reason)
 
     curconn = NULL;
     bleconnected = false;
-}
-
-void sendTrainer()
-{
-
 }
 
 // Part of setTrainer to calculate CRC

@@ -55,27 +55,35 @@ static struct bt_uuid_16 frskyserv = BT_UUID_INIT_16(0xFFF0);
 static struct bt_uuid_16 frskychar = BT_UUID_INIT_16(0xFFF6);
 
 // Head tracker specific data, remote button press, valid channels
-static struct bt_uuid_16 htserv = BT_UUID_INIT_16(0xFFF1);
-static struct bt_uuid_16 htvldchs = BT_UUID_INIT_16(0xFFF1);
-static struct bt_uuid_16 htbutton = BT_UUID_INIT_16(0xFFF2);
+static struct bt_uuid_16 htvldchs = BT_UUID_INIT_16(0xAFF1);
+static struct bt_uuid_16 htbutton = BT_UUID_INIT_16(0xAFF2);
 
 static struct bt_gatt_discover_params discover_params;
 static struct bt_gatt_subscribe_params subscribefff6; // Channel Data
-static struct bt_gatt_subscribe_params subscribefff1; //
 
-struct bt_le_conn_param *rmtconparms = BT_LE_CONN_PARAM(16, 16, 0, 200); // Faster Connection Interval
+// Head Board Specific Items
+static struct bt_gatt_subscribe_params subscribeaff1; // Override Data
+static struct bt_gatt_subscribe_params subscribeaff2; // Button Press
+static bool contoheadboard = false;
+uint32_t buttonhandle =0;
+static const struct bt_gatt_attr *buttonattr=NULL;
+
+struct bt_le_conn_param *rmtconparms = BT_LE_CONN_PARAM(BT_MIN_CONN_INTER, BT_MAX_CONN_INTER, 0, BT_CONN_LOST_TIME); // Faster Connection Interval
 
 // Characteristic UUID
 static struct bt_uuid_16 uuid = BT_UUID_INIT_16(0);
+
+
+
+/* Nofify function when bluetooth channel data has been sent
+ */
 
 static uint8_t notify_func(struct bt_conn *conn,
 			   struct bt_gatt_subscribe_params *params,
 			   const void *data, uint16_t length)
 {
 	if (!data) {
-		printf("[UNSUBSCRIBED]\n");
-		params->value_handle = 0U;
-		return BT_GATT_ITER_STOP;
+		return BT_GATT_ITER_CONTINUE;
 	}
 
     // Simulate sending byte by byte like opentx uses, stores in global
@@ -92,6 +100,8 @@ static uint8_t notify_func(struct bt_conn *conn,
 
 	return BT_GATT_ITER_CONTINUE;
 }
+
+// Discover Service Characteristics
 
 static uint8_t discover_func(struct bt_conn *conn,
 			     const struct bt_gatt_attr *attr,
@@ -124,7 +134,7 @@ static uint8_t discover_func(struct bt_conn *conn,
 
 		err = bt_gatt_discover(conn, &discover_params);
 		if (err) {
-           	serialWrite("Discover failed (err ");
+           	serialWrite("HT: Discover failed (err ");
             serialWrite(err);
             serialWrite(")\r\n");
 	    }
@@ -141,7 +151,7 @@ static uint8_t discover_func(struct bt_conn *conn,
 
 		err = bt_gatt_discover(conn, &discover_params);
 		if (err) {
-           	serialWrite("Discover failed (err ");
+           	serialWrite("HT: Discover failed (err ");
             serialWrite(err);
             serialWrite(")\r\n");
 		}
@@ -154,18 +164,38 @@ static uint8_t discover_func(struct bt_conn *conn,
 
 		err = bt_gatt_subscribe(conn, &subscribefff6);
 		if (err && err != -EALREADY) {
-            serialWrite("Subscribe failed (err ");
+            serialWrite("HT: Subscribe failed (err ");
             serialWrite(err);
             serialWrite(")\r\n");
 		} else {
-			serialWrite("[SUBSCRIBED]\r\n");
+			serialWrite("HT: Subscribed to Data\r\n");
 		}
 
-		return BT_GATT_ITER_STOP;
+        // Setup next discovery (HT Reset Button Characteristic)
+        memcpy(&uuid, &htbutton.uuid, sizeof(uuid));
+		discover_params.uuid = &uuid.uuid;
+		discover_params.start_handle = attr->handle + 3;
+		discover_params.type = BT_GATT_DISCOVER_DESCRIPTOR;
+        err = bt_gatt_discover(conn, &discover_params);
+		if (err) {
+           	serialWrite("HT: Discover failed (err ");
+            serialWrite(err);
+            serialWrite(")\r\n");
+	    }
+
+	// Found the HT Button Reset Characteristic
+	} else if (!bt_uuid_cmp(discover_params.uuid, &htbutton.uuid)) {
+        serialWriteln("HT: Found headboard connection");
+        serialWriteln("HT: Enabling button indication forwarding");
+        contoheadboard = true;
+        buttonhandle = attr->handle;
+        buttonattr = attr;
 	}
 
 	return BT_GATT_ITER_STOP;
 }
+
+// Advertised Data Decoder
 
 static bool eir_found(struct bt_data *data, void *user_data)
 {
@@ -323,7 +353,7 @@ static void rmtconnected(struct bt_conn *conn, uint8_t err)
 
     bleconnected = true;
 
-        // Subscribe to FFF6 on Service FFF0
+    // Subscribe to FFF6 on Service FFF0
 	if (conn == pararmtconn) {
 		memcpy(&uuid, &frskyserv.uuid, sizeof(uuid));
 		discover_params.uuid = &uuid.uuid;
@@ -357,6 +387,8 @@ static void rmtdisconnected(struct bt_conn *conn, uint8_t reason)
 
 	start_scan();
     bleconnected = false;
+    contoheadboard = false;
+    buttonattr = NULL;
 }
 
 static struct bt_conn_cb rmtconn_callbacks = {
@@ -423,15 +455,37 @@ const char * BTRmtGetAddress()
     return "";
 }
 
-void BTRmtSendButtonData(char bd)
+static volatile bool sendbutton=false;
+
+void BTRmtSendButtonPress()
 {
-    /*if(butpress)
-        butpress.writeValue((uint8_t)bd);*/
+    if(!buttonattr)
+        return;
+
+    sendbutton = true;
 }
+
+static struct bt_gatt_write_params wp = {
+    .func = NULL,
+    .handle = buttonhandle,
+    .offset = 0,
+    .data = (char*)"R",
+    .length = 1,
+};
 
 void BTRmtExecute()
 {
-    // All Async.. Nothing Here
+    if(sendbutton) {
+        if(!buttonattr)
+            return;
+
+        wp.handle = buttonattr->handle;
+
+        serialWriteln("Sending Button Press to Head Board");
+        //bt_gatt_write(pararmtconn,&wp); /// *** FIXME
+        sendbutton = false;
+    }
+
 }
 
 
