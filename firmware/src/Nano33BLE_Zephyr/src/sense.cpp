@@ -16,6 +16,7 @@
  */
 
 #include <zephyr.h>
+#include <drivers/sensor.h>
 #include <device.h>
 #include "trackersettings.h"
 #include "sense.h"
@@ -60,7 +61,7 @@ Madgwick madgwick;
 
 uint32_t ustocalculate;
 
-static bool blesenseboard=true;
+static bool blesenseboard=false;
 static bool lastproximity=false;
 
 K_MUTEX_DEFINE(sensor_mutex);
@@ -86,11 +87,12 @@ int sense_Init()
     }
 
     // Initalize Gesture Sensor
-    if(!APDS.begin()) {
+    /*if(!APDS.begin()) {
         blesenseboard = false;
         trkset.setSenseboard(true);
     } else
-        trkset.setSenseboard(false);
+        trkset.setSenseboard(false);*/
+
 
     for(int i = 0; i< BT_CHANNELS; i++) {
         bt_chansf[i] = 0;
@@ -174,15 +176,14 @@ void calculate_Thread()
             butdnw = true;
         }
 
-        // If button was pressed and this is a remote bluetooth send the button press back
+        // If button was pressed and this is a remote bluetooth boart send the button press back
         static bool btbtnupdated=false;
         if(BTGetMode() == BTPARARMT) {
             if(butdnw && btbtnupdated == false) {
-                BTRmtSendButtonData('R');
+                BTRmtSendButtonPress();
                 btbtnupdated = true;
             }
             else if(btbtnupdated == true) {
-                BTRmtSendButtonData(0);
                 btbtnupdated = false;
             }
         }
@@ -249,20 +250,18 @@ void calculate_Thread()
         //*** Todo
 
         // 4) Set all incoming BT values
-        // Bluetooth cannot send a zero value for a channel. Radios see this as invalid data.
-        // So, if the data is coming from a BLE head unit it also has a characteristic to nofity which ones are valid
-        // allowing PPM/SBUS pass through on the head or remote boards
+        // Bluetooth cannot send a zero value for a channel with PARA. Radios see this as invalid data.
+        // So, if the data is coming from a BLE head unit it also has a characteristic to nofity which
+        // ones are valid alloww PPM/SBUS pass through on the head or remote boards on ch 1-8
         // If the data is coming from a PARA radio all 8ch's are going to have values, all PPM/SBUS inputs 1-8 will be overridden
 
-        float btbeta = 0.1; // Found by tests to be suitable value
         for(int i=0;i<BT_CHANNELS;i++)
             bt_chans[i] = 0;    // Reset all BT in channels to Zero (Not active)
         for(int i=0;i<BT_CHANNELS;i++) {
-            float btvalue = BTGetChannel(i); // Read the BT Data
+            uint16_t btvalue = BTGetChannel(i);
             if(btvalue > 0) {
-                filter_lowPass(btvalue, bt_chansf + i, btbeta);
-                bt_chans[i] = bt_chansf[i];
-                channel_data[i] = bt_chans[i];
+                bt_chans[i] = btvalue;
+                channel_data[i] = btvalue;
             }
         }
 
@@ -413,9 +412,11 @@ void calculate_Thread()
 
 void sensor_Thread()
 {
+    k_msleep(1000);
     while(1) {
         k_usleep(SENSOR_PERIOD);
 
+        // Reset Center on Proximity, Don't need to update this often
         static int sensecount=0;
         static int minproximity=100; // Keeps smallest proximity read.
         static int maxproximity=0; // Keeps largest proximity value read.
