@@ -18,6 +18,10 @@
 #include <stdio.h>
 #include <device.h>
 #include <drivers/uart.h>
+#include <soc.h>
+#include <drivers/uart/cdc_acm.h>
+#include <drivers/usb/usb_dc.h>
+#include <usb/class/usb_cdc.h>
 #include <sys/ring_buffer.h>
 #include <stdlib.h>
 #include <zephyr.h>
@@ -41,6 +45,7 @@ char* getJSONBuffer();
 void parseData(DynamicJsonDocument &json);
 uint16_t escapeCRC(uint16_t crc);
 int buffersFilled();
+
 
 // Ring Buffers
 uint8_t ring_buffer_tx[TX_RNGBUF_SIZE]; // transmit buffer
@@ -71,9 +76,7 @@ static void interrupt_handler(const struct device *dev, void *user_data)
     uint32_t baud=0;
     uart_line_ctrl_get(dev,UART_LINE_CTRL_BAUD_RATE, &baud);
     if(baud == 1200) {
-        // Force Bootloader, Set Magic Number & Reset
-        (*((volatile uint32_t *) 0x20007FFCul)) = 0x07738135;
-        NVIC_SystemReset();
+
     }
 
 	while (uart_irq_update(dev) && uart_irq_is_pending(dev)) {
@@ -278,6 +281,11 @@ void parseData(DynamicJsonDocument &json)
     // Reboot
     } else if (strcmp(command, "Reboot") == 0) {
         sys_reboot(SYS_REBOOT_COLD);
+
+    // Force Bootloader
+    } else if (strcmp(command, "Boot") == 0) {
+        (*((volatile uint32_t *) 0x20007FFCul)) = 0x07738135;
+        NVIC_SystemReset();
 
     // Get settings
     } else if (strcmp(command, "Get") == 0) {
