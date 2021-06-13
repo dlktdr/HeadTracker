@@ -6,8 +6,8 @@
 
 // Thread Periods
 #define IO_PERIOD 20            // (ms) IO Period (button reading)
-#define DATA_PERIOD 85         // (ms) GUI update rate
-#define BT_PERIOD 20            // (ms) Bluetooth update rate 50hz
+#define DATA_PERIOD 90         // (ms) GUI update rate
+#define BT_PERIOD 16            // (ms) Bluetooth update rate
 #define SERIAL_PERIOD 30        // (ms) Serial processing
 #define SENSOR_PERIOD 1666      // (us) 6z0hz Read Sensors
 #define CALCULATE_PERIOD 6666   // (us) 150hz IMU calculations
@@ -15,15 +15,24 @@
 #define UIRESPONSIVE_TIME 10000 // (ms) 10Seconds without an ack data will stop;
 
 // Bluetooth
-#define BT_MIN_CONN_INTER 13  // 6 Is lowest BLE can do. Looking for a constant rate here
-#define BT_MAX_CONN_INTER 13 // 1.25 * 15 = 18.75ms (Slightly faster than 20ms update rate)
+#define BT_MIN_CONN_INTER 6  // 6 Is lowest BLE can do. Actual Rate = Var * 1.25ms
+#define BT_MAX_CONN_INTER 10
 #define BT_CONN_LOST_TIME 400 // 400 * 10ms = 4seconds
 
-// Thread Priorities
+// Thread Priority Definitions
 #define PRIORITY_LOW 4
 #define PRIORITY_MED 8
 #define PRIORITY_HIGH 16
 #define PRIORITY_RT 32
+
+// Thread Periods, Negative values mean cannot be pre-empted
+#define IO_THREAD_PRIO PRIORITY_LOW
+#define SERIAL_THREAD_PRIO PRIORITY_LOW
+#define DATA_THREAD_PRIO PRIORITY_LOW
+#define BT_THREAD_PRIO -PRIORITY_RT
+#define SENSOR_THREAD_PRIO PRIORITY_MED
+#define CALCULATE_THREAD_PRIO PRIORITY_HIGH
+#define SBUS_THREAD_PRIO PRIORITY_MED-1
 
 // Perepherial Channels Used, Make sure no dupilcates here
 // and can't be used by Zephyr
