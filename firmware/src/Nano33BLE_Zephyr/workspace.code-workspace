@@ -13,7 +13,8 @@
             "init.h": "c",
             "devicetree.h": "c",
             "zephyr.h": "c",
-            "kernel.h": "c"
+            "kernel.h": "c",
+            "serial.h": "c"
         },
         "editor.find.addExtraSpaceOnTop": false
     }
