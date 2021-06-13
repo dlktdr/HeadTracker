@@ -716,3 +716,11 @@ QMap<QString, bool> TrackerSettings::getDataItemsDiff()
     }
     return diffs;
 }
+
+// Returns the differences between currently sending data items
+// and items which need to be sent/removed
+QMap<QString, bool> TrackerSettings::getDataItems()
+{
+    return _realtimedata;
+}
+

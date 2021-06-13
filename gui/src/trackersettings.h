@@ -309,6 +309,8 @@ public:
     void setDataItemSend(QMap<QString,bool> items);
     QMap<QString, bool> getDataItemsDiff();
     void setDataItemsMatched() {_devicerealtimedata = _realtimedata;}
+    // Gets all currently sending data items
+    QMap<QString, bool> getDataItems();
 
 signals:
     void rawGyroChanged(float x, float y, float z);
