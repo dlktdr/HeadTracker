@@ -608,6 +608,15 @@ void MainWindow::updateToUI()
         ui->cmbBTRmtMode->setCurrentText(trkset.pairedBTAddress());
     }
 
+    if(ui->cmbBtMode->currentIndex() > 1) // Remote or Scanner Mode
+    {
+        ui->lblPairWith->setVisible(true);
+        ui->cmbBTRmtMode->setVisible(true);
+    } else {
+        ui->lblPairWith->setVisible(false);
+        ui->cmbBTRmtMode->setVisible(false);
+    }
+
     ui->cmbpanchn->blockSignals(false);
     ui->cmbrllchn->blockSignals(false);
     ui->cmbtiltchn->blockSignals(false);
@@ -781,14 +790,7 @@ void MainWindow::updateFromUI()
     ui->cmdStore->setEnabled(true);
     ui->cmdSaveNVM->setEnabled(true);    
 
-    if(ui->cmbBtMode->currentIndex() > 1) // Remote or Scanner Mode
-    {
-        ui->lblPairWith->setVisible(true);
-        ui->cmbBTRmtMode->setVisible(true);
-    } else {
-        ui->lblPairWith->setVisible(false);
-        ui->cmbBTRmtMode->setVisible(false);
-    }
+
 
     // Use timer to prevent too many writes while drags, etc.. happen
     saveToRAMTimer.start(500);
