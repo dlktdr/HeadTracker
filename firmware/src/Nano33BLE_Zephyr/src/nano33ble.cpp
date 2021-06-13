@@ -18,6 +18,7 @@ bool led_is_on = false;
 
 TrackerSettings trkset;
 
+
 void start(void)
 {
    // Setup Serial
@@ -57,10 +58,10 @@ void start(void)
 }
 
 // Threads
-K_THREAD_DEFINE(io_Thread_id, 256, io_Thread, NULL, NULL, NULL, PRIORITY_LOW, 0, 0);
-K_THREAD_DEFINE(serial_Thread_id, 8192, serial_Thread, NULL, NULL, NULL, PRIORITY_LOW, K_FP_REGS, 0);
-K_THREAD_DEFINE(data_Thread_id, 2048, data_Thread, NULL, NULL, NULL, PRIORITY_LOW, K_FP_REGS, 0);
-K_THREAD_DEFINE(bt_Thread_id, 4096, bt_Thread, NULL, NULL, NULL, PRIORITY_HIGH, 0, 0);
-K_THREAD_DEFINE(sensor_Thread_id, 2048, sensor_Thread, NULL, NULL, NULL, PRIORITY_MED, K_FP_REGS, 0);
-K_THREAD_DEFINE(calculate_Thread_id, 4096, calculate_Thread, NULL, NULL, NULL, PRIORITY_HIGH, K_FP_REGS, 0);
-K_THREAD_DEFINE(SBUS_Thread_id, 1024, SBUS_Thread, NULL, NULL, NULL, PRIORITY_MED-1, 0, 0);
+K_THREAD_DEFINE(io_Thread_id, 256, io_Thread, NULL, NULL, NULL, IO_THREAD_PRIO, 0, 1000);
+K_THREAD_DEFINE(serial_Thread_id, 8192, serial_Thread, NULL, NULL, NULL, SERIAL_THREAD_PRIO, K_FP_REGS, 1000);
+K_THREAD_DEFINE(data_Thread_id, 2048, data_Thread, NULL, NULL, NULL, DATA_THREAD_PRIO, K_FP_REGS, 1000);
+K_THREAD_DEFINE(bt_Thread_id, 4096, bt_Thread, NULL, NULL, NULL, BT_THREAD_PRIO, 0, 000);
+K_THREAD_DEFINE(sensor_Thread_id, 2048, sensor_Thread, NULL, NULL, NULL, SENSOR_THREAD_PRIO, K_FP_REGS, 0);
+K_THREAD_DEFINE(calculate_Thread_id, 4096, calculate_Thread, NULL, NULL, NULL, CALCULATE_THREAD_PRIO, K_FP_REGS, 1000);
+K_THREAD_DEFINE(SBUS_Thread_id, 1024, SBUS_Thread, NULL, NULL, NULL, SBUS_THREAD_PRIO, 0, 1000);
