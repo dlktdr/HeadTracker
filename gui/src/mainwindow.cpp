@@ -1157,7 +1157,7 @@ void MainWindow::reboot()
         brd->_reboot();
     }
 
-    QTime dieTime= QTime::currentTime().addMSecs(1500);
+    QTime dieTime= QTime::currentTime().addMSecs(RECONNECT_AFT_REBT);
     while (QTime::currentTime() < dieTime)
         QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
 
