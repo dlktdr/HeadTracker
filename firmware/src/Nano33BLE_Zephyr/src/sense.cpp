@@ -296,7 +296,6 @@ void calculate_Thread()
         // 7) Set Analog Channels
         if(trkset.analog6Ch() > 0) {
             float an6 = analogRead(AN6);
-            an6 /= 1241.2f; // Equals 0-3.3V w/High resolution Analog Read
             an6 *= trkset.analog6Gain();
             an6 += trkset.analog6Offset();
             an6 += TrackerSettings::MIN_PWM;
@@ -306,7 +305,6 @@ void calculate_Thread()
 
         if(trkset.analog7Ch() > 0) {
             float an7 = analogRead(AN7);
-            an7 /= 1241.2f; // Equals 0-3.3V w/High resolution Analog Read
             an7 *= trkset.analog7Gain();
             an7 += trkset.analog7Offset();
             an7 += TrackerSettings::MIN_PWM;
