@@ -184,30 +184,10 @@ static uint8_t discover_func(struct bt_conn *conn,
 			serialWrite("HT: Subscribed to Data\r\n");
 		}
 
-        // Setup next discovery (HT Reset Button Characteristic)
-        memcpy(&uuid, &htbutton.uuid, sizeof(uuid));
-		discover_params.uuid = &uuid.uuid;
-		discover_params.start_handle = attr->handle + 3;
-		discover_params.type = BT_GATT_DISCOVER_DESCRIPTOR;
-        err = bt_gatt_discover(conn, &discover_params);
-		if (err) {
-           	serialWrite("HT: Discover failed (err ");
-            serialWrite(err);
-            serialWrite(")\r\n");
-	    }
-
-	// Found the HT Button Reset Characteristic
-	} else if (!bt_uuid_cmp(discover_params.uuid, &htbutton.uuid)) {
-        serialWriteln("HT: Found headboard connection");
-        serialWriteln("HT: Enabling button indication forwarding");
-        contoheadboard = true;
-        buttonhandle = attr->handle;
-        buttonattr = attr;
-
         // Setup next discovery (HT Override Characteristic)
         memcpy(&uuid, &htvldchs.uuid, sizeof(uuid));
 		discover_params.uuid = &uuid.uuid;
-		discover_params.start_handle = attr->handle + 4;
+		discover_params.start_handle = attr->handle + 3;
 		discover_params.type = BT_GATT_DISCOVER_DESCRIPTOR;
         err = bt_gatt_discover(conn, &discover_params);
 		if (err) {
@@ -222,9 +202,9 @@ static uint8_t discover_func(struct bt_conn *conn,
         // Setup next discovery (HT Override CCC)
         memcpy(&uuid, &ccc.uuid, sizeof(uuid));
 		discover_params.uuid = &uuid.uuid;
-		discover_params.start_handle = attr->handle + 5;
+		discover_params.start_handle = attr->handle + 4;
 		discover_params.type = BT_GATT_DISCOVER_DESCRIPTOR;
-        subscribeaff1.value_handle = attr->handle + 4;
+        subscribeaff1.value_handle = attr->handle + 3;
         err = bt_gatt_discover(conn, &discover_params);
 		if (err) {
            	serialWrite("HT: Discover failed (err ");
@@ -248,6 +228,25 @@ static uint8_t discover_func(struct bt_conn *conn,
 			serialWrite("HT: Subscribed to Overrides\r\n");
 		}
 
+        // Setup next discovery (HT Reset Button Characteristic)
+        memcpy(&uuid, &htbutton.uuid, sizeof(uuid));
+		discover_params.uuid = &uuid.uuid;
+		discover_params.start_handle = attr->handle + 5;
+		discover_params.type = BT_GATT_DISCOVER_DESCRIPTOR;
+        err = bt_gatt_discover(conn, &discover_params);
+		if (err) {
+           	serialWrite("HT: Discover failed (err ");
+            serialWrite(err);
+            serialWrite(")\r\n");
+	    }
+
+	// Found the HT Button Reset Characteristic
+	} else if (!bt_uuid_cmp(discover_params.uuid, &htbutton.uuid)) {
+        serialWriteln("HT: Found headboard connection");
+        serialWriteln("HT: Enabling button indication forwarding");
+        contoheadboard = true;
+        buttonhandle = attr->handle;
+        buttonattr = attr;
 	}
 
 	return BT_GATT_ITER_STOP;
