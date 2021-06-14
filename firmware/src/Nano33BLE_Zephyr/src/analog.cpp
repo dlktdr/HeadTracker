@@ -1,6 +1,8 @@
+#include <zephyr.h>
 #include "analog.h"
 #include <drivers/adc.h>
 #include <string.h>
+#include "serial.h"
 
 // Simple analog input method
 // this just reads a sample then waits then returns it
@@ -8,11 +10,11 @@
 // ADC Sampling Settings
 // doc says that impedance of 800K == 40usec sample time
 
-#define ADC_DEVICE_NAME		"ADC_0"
+#define ADC_DEVICE_NAME		DT_LABEL(DT_ALIAS(adcctrl))
 #define ADC_RESOLUTION		10
-#define ADC_GAIN			ADC_GAIN_1
-#define ADC_REFERENCE		ADC_REF_VDD_1
-#define ADC_ACQUISITION_TIME	ADC_ACQ_TIME(ADC_ACQ_TIME_MICROSECONDS, 100)
+#define ADC_GAIN			ADC_GAIN_1_6
+#define ADC_REFERENCE		ADC_REF_INTERNAL
+#define ADC_ACQUISITION_TIME	ADC_ACQ_TIME(ADC_ACQ_TIME_MICROSECONDS, 40)
 #define BUFFER_SIZE			6
 
 static bool _IsInitialized = false;
@@ -31,17 +33,11 @@ static struct adc_channel_cfg m_1st_channel_cfg = {
 #endif
 };
 
-// return device* for the adc
-static const struct device* getAdcDevice(void)
-{
-	return device_get_binding(ADC_DEVICE_NAME);
-}
-
 // initialize the adc channel
 static const struct device* init_adc(int channel)
 {
 	int ret;
-	const struct device *adc_dev = getAdcDevice();
+	const struct device *adc_dev = device_get_binding(ADC_DEVICE_NAME);
 	if(_LastChannel != channel)
 	{
 		_IsInitialized = false;
@@ -53,12 +49,13 @@ static const struct device* init_adc(int channel)
 		// strangely channel_id gets the channel id and input_positive gets id+1
 		m_1st_channel_cfg.channel_id = channel;
 #if CONFIG_ADC_CONFIGURABLE_INPUTS
-        m_1st_channel_cfg.input_positive = channel+1,
+        m_1st_channel_cfg.input_positive = channel+1;
 #endif
+
 		ret = adc_channel_setup(adc_dev, &m_1st_channel_cfg);
+
 		if(ret != 0)
 		{
-			//LOG_INF("Setting up of the first channel failed with code %d", ret);
 			adc_dev = NULL;
 		}
 		else
@@ -106,11 +103,10 @@ static int16_t readOneChannel(int channel)
 // ------------------------------------------------
 float analogRead(int channel)
 {
-
 	int16_t sv = readOneChannel(channel);
 	if(sv == BAD_ANALOG_READ)
 	{
 		return sv;
 	}
-    return sv;
+    return (float)sv / 287.0;
 }
