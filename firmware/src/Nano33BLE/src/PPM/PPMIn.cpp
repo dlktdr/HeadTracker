@@ -1,3 +1,20 @@
+/*
+ * This file is part of the Head Tracker distribution (https://github.com/dlktdr/headtracker)
+ * Copyright (c) 2021 Cliff Blackburn
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include <Arduino.h>
 #include <mbed.h>
 #include <rtos.h>
@@ -75,6 +92,8 @@ void PpmIn_setPin(int pinNum)
     if(pinNum == setPin)
         return;
 
+
+
     // THIS MUST BE DEFINED SOMEWHERE... CAN'T FIND IT!
     int dpintopin[]  = {0,0,11,12,15,13,14,23,21,27,2,1,8,13};
     int dpintoport[] = {0,0,1 ,1 ,1 ,1 ,1 ,0 ,0 ,0 ,1,1,1,0 };
@@ -111,6 +130,7 @@ void PpmIn_setPin(int pinNum)
 
     } else {
         setPin = pinNum;
+        pinMode(pinNum,INPUT_PULLUP); // Turn on Internal Pull Up
         __disable_irq();
 
         // Disable Interrupt, Clear event

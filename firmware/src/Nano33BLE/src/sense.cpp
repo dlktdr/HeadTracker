@@ -1,3 +1,20 @@
+/*
+ * This file is part of the Head Tracker distribution (https://github.com/dlktdr/headtracker)
+ * Copyright (c) 2021 Cliff Blackburn
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include <Arduino.h>
 #include <Arduino_APDS9960.h>
 
@@ -16,11 +33,15 @@
 #include "ble.h"
 #include "NXPFusion/Adafruit_AHRS_NXPFusion.h"
 #include "MadgwickAHRS/MadgwickAHRS.h"
+#include "SBUS/uarte_sbus.h"
+#include "PWM/pmw.h"
+#include "filters.h"
 
 #ifdef NXP_FILTER
 Adafruit_NXPSensorFusion nxpfilter;
 #endif
 
+static float auxdata[10];
 static float raccx=0,raccy=0,raccz=0;
 static float rmagx=0,rmagy=0,rmagz=0;
 static float rgyrx=0,rgyry=0,rgyrz=0;
@@ -34,11 +55,18 @@ static float accxoff=0, accyoff=0, acczoff=0;
 static float gyrxoff=0, gyryoff=0, gyrzoff=0;
 static float l_panout=0, l_tiltout=0, l_rollout=0;
 
-uint16_t zaccelout=1500;
+// Input Channel Data
+static uint16_t ppm_in_chans[16];
+static uint16_t sbus_in_chans[16];
+static uint16_t bt_chans[BT_CHANNELS];
+static float bt_chansf[BT_CHANNELS];
 
-static uint16_t ppmchans[16];
+// Output channel data
+static uint16_t channel_data[16];
+
 Madgwick madgwick;
 static Timer runt;
+static Timer blefreq;
 
 static int counter=0;
 static bool blesenseboard=true;
@@ -76,11 +104,14 @@ int sense_Init()
     if(!APDS.begin())
         blesenseboard = false;
 
+    for(int i = 0; i< BT_CHANNELS; i++) {
+        bt_chansf[i] = 0;
+    }
+
     return 0;
 }
 
 // Read all IMU data and do the calculations,
-// This is run as a Thread at Real Time Priority
 void sense_Thread()
 {
     if(pauseThreads) {
@@ -92,7 +123,7 @@ void sense_Thread()
     runt.reset();
     runt.start();
 
-    digitalWrite(A0,HIGH);
+    digitalWrite(A5,1);
 
     // Run this first to keep most accurate timing
 #ifdef NXP_FILTER
@@ -140,6 +171,7 @@ void sense_Thread()
         madgreads = MADGSTART_SAMPLES;
     }
 
+    // Apply initial orientation
     if(madgreads == MADGSTART_SAMPLES) {
         madgwick.update(gyrx * DEG_TO_RAD, gyry * DEG_TO_RAD, gyrz * DEG_TO_RAD,
                         accx, accy, accz,
@@ -160,7 +192,7 @@ void sense_Thread()
     static int sensecount=0;
     static int minproximity=100; // Keeps smallest proximity read.
     static int maxproximity=0; // Keeps largest proximity value read.
-    if(blesenseboard && sensecount++ == 50) {
+    if(blesenseboard && sensecount++ >= 50) {
         sensecount = 0;
         if (trkset.resetOnWave()) {
             // Reset on Proximity
@@ -188,108 +220,229 @@ void sense_Thread()
         }
     }
 
+    // Get the current Bluetooth Function
+    BTFunction *btf = trkset.getBTFunc();
+
     // Zero button was pressed, adjust all values to zero
+    bool butdnw = false;
     if(wasButtonPressed()) {
         rolloffset = roll;
         panoffset = pan;
         tiltoffset = tilt;
+        butdnw = true;
+    }
+
+    // If button was pressed and this is a remote bluetooth send the button press back
+    static bool btbtnupdated=false;
+    if(btf != nullptr) {
+        if(btf->mode() == BTPARARMT) {
+            BTParaRmt *rmt = static_cast<BTParaRmt*>(btf);
+            if(butdnw && btbtnupdated == false) {
+                rmt->sendButtonData('R');
+                btbtnupdated = true;
+            }
+            else if(btbtnupdated == true) {
+                rmt->sendButtonData(0);
+                btbtnupdated = false;
+            }
+        }
     }
 
     // Tilt output
     float tiltout = (tilt - tiltoffset) * trkset.Tlt_gain() * (trkset.isTiltReversed()?-1.0:1.0);
     float beta = (float)trkset.lpTiltRoll() / 100;                        // LP Beta
-    tiltout = beta * tiltout + (1.0 - beta) * l_tiltout;                  // Low Pass
-    l_tiltout = tiltout;
+    filter_expAverage(&tiltout, beta, &l_tiltout);
     uint16_t tiltout_ui = tiltout + trkset.Tlt_cnt();                     // Apply Center Offset
     tiltout_ui = MAX(MIN(tiltout_ui,trkset.Tlt_max()),trkset.Tlt_min());  // Limit Output
 
     // Roll output
     float rollout = (roll - rolloffset) * trkset.Rll_gain() * (trkset.isRollReversed()? -1.0:1.0);
-    rollout = beta * rollout + (1.0 - beta) * l_rollout;                  // Low Pass
-    l_rollout = rollout;
+    filter_expAverage(&rollout, beta, &l_rollout);
     uint16_t rollout_ui = rollout + trkset.Rll_cnt();                     // Apply Center Offset
     rollout_ui = MAX(MIN(rollout_ui,trkset.Rll_max()),trkset.Rll_min());  // Limit Output
 
     // Pan output, Normalize to +/- 180 Degrees
     float panout = normalize((pan-panoffset),-180,180)  * trkset.Pan_gain() * (trkset.isPanReversed()? -1.0:1.0);
-    beta = (float)trkset.lpPan() / 100;                                // LP Beta
-    panout = beta * panout + (1.0 - beta) * l_panout;                  // Low Pass
-    l_panout = panout;
+    filter_expAverage(&panout, (float)trkset.lpPan() / 100, &l_panout);
     uint16_t panout_ui = panout + trkset.Pan_cnt();                    // Apply Center Offset
     panout_ui = MAX(MIN(panout_ui,trkset.Pan_max()),trkset.Pan_min()); // Limit Output
 
-    // Reset all PPM Channels to Center
-    for(int i=0;i<16;i++)
-        ppmchans[i] = TrackerSettings::DEF_CENTER;
+    /* ************************************************************
+     *       Build channel data
+     *
+     * Build Channel Data
+     *   1) Reset all channels to disabled
+     *   2) Set PPMin channels if available
+     *   3) Set SBUSin channels if available
+     *   4) Set received BT channels if available
+     *   5) Reset Center on PPM channel if enabled
+     *   6) Set auxiliary functions
+     *   7) Set analog channels
+     *   8) Override desired channels with pan/tilt/roll
+     *   9) Output to PPMout
+     *  10) Output to Bluetooth
+     *  11) Output to SBUS
+     *  12) Output PWM channels
+     *
+     *  Channels should all be set to zero if they don't have valid data
+     *  Only on the output should a channel be set to center if it's still zero
+     *  Allows the GUI to know which channels are valid
+     */
 
-    // Read all PPM inputs, should return 0 channels if disabled or lost
+    // 1) Reset all Channels to zero which means they have no data
+    for(int i=0;i<16;i++)
+        channel_data[i] = 0;
+
+    // 2) Read all PPM inputs
     PpmIn_execute();
-    uint16_t ppminchans[16];
-    int ppmi_chcnt = PpmIn_getChannels(ppminchans);
-    if(ppmi_chcnt >= 4 && ppmi_chcnt <= 16) {
-        for(int i=0;i<MIN(ppmi_chcnt,16);i++) {
-            ppmchans[i] = ppminchans[i];
+    for(int i=0;i<16;i++)
+        ppm_in_chans[i] = 0;    // Reset all PPM in channels to Zero (Not active)
+    int ppm_in_chcnt = PpmIn_getChannels(ppm_in_chans);
+    if(ppm_in_chcnt >= 4 && ppm_in_chcnt <= 16) {
+        for(int i=0;i<MIN(ppm_in_chcnt,16);i++) {
+            channel_data[i] = ppm_in_chans[i];
         }
-    } else {
-        ppmi_chcnt = 0; // Not within range set to zero
     }
 
-    // If selected PPM input channel went > 1800us reset the center
+    // 3) Set all incoming SBUS values
+
+    //*** Todo
+
+    // 4) Set all incoming BT values
+    // Bluetooth cannot send a zero value for a channel. Radios see this as invalid data.
+    // So, if the data is coming from a BLE head unit it also has a characteristic to nofity which ones are valid
+    // allowing PPM/SBUS pass through on the head or remote boards
+    // If the data is coming from a PARA radio all 8ch's are going to have values, all PPM/SBUS inputs 1-8 will be overridden
+
+    float btbeta = 0.1; // Found by tests to be suitable value
+    for(int i=0;i<BT_CHANNELS;i++)
+        bt_chans[i] = 0;    // Reset all BT in channels to Zero (Not active)
+    if(btf != nullptr) {
+        for(int i=0;i<BT_CHANNELS;i++) {
+            float btvalue = btf->getChannel(i); // Read the BT Data
+            if(btvalue > 0) {
+                filter_lowPass(btvalue, bt_chansf + i, btbeta);
+                bt_chans[i] = bt_chansf[i];
+                channel_data[i] = bt_chans[i];
+            }
+        }
+    }
+
+    // 5) If selected input channel went > 1800us reset the center
     // wait for it to drop below 1700 before allowing another reset
     int rstppmch = trkset.resetCntPPM() - 1;
     static bool hasrstppm=false;
     if(rstppmch >= 0 && rstppmch < 16) {
-        if(ppmchans[rstppmch] > 1800 && hasrstppm == false) {
-            serialWrite("HT: Reset Center - PPM Channel ");
+        if(channel_data[rstppmch] > 1800 && hasrstppm == false) {
+            serialWrite("HT: Reset Center - Input Channel ");
             serialWrite(rstppmch+1);
             serialWriteln(" > 1800us");
             pressButton();
             hasrstppm = true;
-        } else if (ppmchans[rstppmch] < 1700 && hasrstppm == true) {
+        } else if (channel_data[rstppmch] < 1700 && hasrstppm == true) {
             hasrstppm = false;
         }
     }
 
-    // Set PPM Channel Values if enabled
+    // 6) Set Auxiliary Functions
+    int aux0ch = trkset.auxFunc0Ch();
+    int aux1ch = trkset.auxFunc1Ch();
+    if(aux0ch > 0 || aux1ch > 0) {
+        buildAuxData();
+        if(aux0ch > 0)
+            channel_data[aux0ch - 1] = auxdata[trkset.auxFunc0()];
+        if(aux1ch > 0)
+            channel_data[aux1ch - 1] = auxdata[trkset.auxFunc1()];
+    }
+
+    // 7) Set Analog Channels
+    if(trkset.analog6Ch() > 0) {
+        float an6 = analogRead(6);
+        an6 /= 1241.2f; // Equals 0-3.3V w/High resolution Analog Read
+        an6 *= trkset.analog6Gain();
+        an6 += trkset.analog6Offset();
+        an6 += TrackerSettings::MIN_PWM;
+        an6 = MAX(TrackerSettings::MIN_PWM,MIN(TrackerSettings::MAX_PWM,an6));
+        channel_data[trkset.analog6Ch()-1] = an6;
+    }
+
+    if(trkset.analog7Ch() > 0) {
+        float an7 = analogRead(7);
+        an7 /= 1241.2f; // Equals 0-3.3V w/High resolution Analog Read
+        an7 *= trkset.analog7Gain();
+        an7 += trkset.analog7Offset();
+        an7 += TrackerSettings::MIN_PWM;
+        an7 = MAX(TrackerSettings::MIN_PWM,MIN(TrackerSettings::MAX_PWM,an7));
+        channel_data[trkset.analog7Ch()-1] = an7;
+    }
+
+    // 8) Set PPM Channel Values if enabled
     int tltch = trkset.tiltCh();
     int rllch = trkset.rollCh();
     int panch = trkset.panCh();
     if(tltch > 0)
-        ppmchans[tltch - 1] = tiltout_ui; // Channel 1 = Index 0
+        channel_data[tltch - 1] = tiltout_ui; // Channel 1 = Index 0
     if(rllch > 0)
-        ppmchans[rllch - 1] = rollout_ui;
+        channel_data[rllch - 1] = rollout_ui;
     if(panch > 0)
-        ppmchans[panch - 1] = panout_ui;
+        channel_data[panch - 1] = panout_ui;
 
-    // Z Acceleration output on channel 4
-    //ppmchans[3] = MIN(MAX((((raccz  - 1.0) / 2) * 1000)+1500,TrackerSettings::MIN_PWM),TrackerSettings::MAX_PWM);
-    //zaccelout = ppmchans[3];
-
-    // Set the PPM Outputs
+    // 9) Set the PPM Outputs
     for(int i=0;i<PpmOut_getChnCount();i++) {
-        PpmOut_setChannel(i,ppmchans[i]);
+        uint16_t ppmout = channel_data[i];
+        if(ppmout == 0)
+            ppmout = TrackerSettings::PPM_CENTER;
+        PpmOut_setChannel(i,ppmout);
     }
 
-    // Set all the BT Channels
+    // 10) Set all the BT Channels, send the zeros.
     bool bleconnected=false;
     BTFunction *bt = trkset.getBTFunc();
     if(bt != nullptr) {
         bleconnected = bt->isConnected();
         trkset.setBLEAddress(bt->address());
-
-        for(int i=0;i<16;i++) {
-            bt->setChannel(i,ppmchans[i]);
+        for(int i=0;i < BT_CHANNELS;i++) {
+            bt->setChannel(i,channel_data[i]);
         }
     }
 
-    trkset.setBlueToothConnected(bleconnected);
+    // 11) Set all SBUS output channels, if disabled set to center
+    uint16_t sbus_data[16];
+    for(int i=0;i<16;i++) {
+        uint16_t sbusout = channel_data[i];
+        if(sbusout == 0)
+            sbusout = TrackerSettings::PPM_CENTER;
+        sbus_data[i] = (static_cast<float>(sbusout) - TrackerSettings::PPM_CENTER) * TrackerSettings::SBUS_SCALE + TrackerSettings::SBUS_CENTER;
+    }
+    SBUS_TX_BuildData(sbus_data);
 
-    digitalWrite(A0,LOW); // Pin for timing check
-    digitalWrite(A1,HIGH);
+    // 12) Set PWM Channels
+    for(int i=0;i<4;i++) {
+        int pwmch = trkset.PWMCh(i)-1;
+        if(pwmch >= 0 && pwmch < 16) {
+            uint16_t pwmout = channel_data[pwmch];
+            if(pwmout == 0)
+                pwmout = TrackerSettings::PPM_CENTER;
+            setPWMValue(i,pwmout);
+        }
+    }
 
-    // Get new data from sensors..
-    //  FIX MEE I2C is hogging 40% of processor just waiting!!! UGG Needs to be changed to non-blocking
+    digitalWrite(A5,0);
 
+
+    /* ************************************************************
+     * Sensor Reading Below, done after channels for timing reasons
+     *    as below code can vary wildly. So delayed by one sample
+     ************************************************************/
+
+    // If not using any of the tilt roll or pan outputs
+    // Don't bother wasting time calculating the tilt/roll/pan outputs
+    // If ui connected, do it so you can still see the outputs.
+
+    if(tltch < 0 && panch < 0 && rllch < 0 && uiconnected == false)
+        counter = -1;
+
+    // Oversampling.
     if(++counter == SENSEUPDATE) {
         counter = 0;
 
@@ -324,10 +477,6 @@ void sense_Thread()
             gyrx = rgyrx - gyrxoff;
             gyry = rgyry - gyryoff;
             gyrz = rgyrz - gyrzoff;
-
-            // Deadband on GyroZ
-            if(fabs(gyrz) < GYRO_DEADBAND)
-                gyrz = 0;
 
             // Apply Rotation
             float tmpgyr[3] = {gyrx,gyry,gyrz};
@@ -364,7 +513,7 @@ void sense_Thread()
         }
     }
 
-    // Update the settings
+    // Update the settings for the GUI
     // Both data and sensor threads will use this data. If data thread has it locked skip this reading.
     if(dataMutex.trylock()) {
         // Raw values for calibration
@@ -382,16 +531,20 @@ void sense_Thread()
         trkset.setPPMOut(tiltout_ui,rollout_ui,panout_ui);
 
         // PPM Input Values
-        trkset.setPPMInValues(ppminchans,ppmi_chcnt);
+        trkset.setPPMInValues(ppm_in_chans);
+        trkset.setBLEValues(bt_chans);
+        trkset.setSBUSValues(sbus_in_chans);
+        trkset.setChannelOutValues(channel_data);
 
         // Qauterion Data
-        float *qd = madgwick.getQuat();
-        trkset.setQuaternion(qd);
+        //float *qd = madgwick.getQuat();
+        //trkset.setQuaternion(qd);
+
+        // Bluetooth connected
+        trkset.setBlueToothConnected(bleconnected);
 
         dataMutex.unlock();
     }
-
-    digitalWrite(A1,HIGH);
 
 
     // Use this time to determine how long to sleep for, save in microseconds in sleepyt
@@ -437,22 +590,28 @@ void rotate(float pn[3], const float rotation[3])
     float out[3];
 
     // X Rotation
-    out[0] = pn[0] * 1 + pn[1] * 0            + pn[2] * 0;
-    out[1] = pn[0] * 0 + pn[1] * cos(rot[0])  - pn[2] * sin(rot[0]);
-    out[2] = pn[0] * 0 + pn[1] * sin(rot[0])  + pn[2] * cos(rot[0]);
-    memcpy(pn,out,sizeof(out[0])*3);
+    if(rotation[0] != 0) {
+        out[0] = pn[0] * 1 + pn[1] * 0            + pn[2] * 0;
+        out[1] = pn[0] * 0 + pn[1] * cos(rot[0])  - pn[2] * sin(rot[0]);
+        out[2] = pn[0] * 0 + pn[1] * sin(rot[0])  + pn[2] * cos(rot[0]);
+        memcpy(pn,out,sizeof(out[0])*3);
+    }
 
     // Y Rotation
-    out[0] =  pn[0] * cos(rot[1]) - pn[1] * 0 + pn[2] * sin(rot[1]);
-    out[1] =  pn[0] * 0           + pn[1] * 1 + pn[2] * 0;
-    out[2] = -pn[0] * sin(rot[1]) + pn[1] * 0 + pn[2] * cos(rot[1]);
-    memcpy(pn,out,sizeof(out[0])*3);
+    if(rotation[1] != 0) {
+        out[0] =  pn[0] * cos(rot[1]) - pn[1] * 0 + pn[2] * sin(rot[1]);
+        out[1] =  pn[0] * 0           + pn[1] * 1 + pn[2] * 0;
+        out[2] = -pn[0] * sin(rot[1]) + pn[1] * 0 + pn[2] * cos(rot[1]);
+        memcpy(pn,out,sizeof(out[0])*3);
+    }
 
     // Z Rotation
-    out[0] = pn[0] * cos(rot[2]) - pn[1] * sin(rot[2]) + pn[2] * 0;
-    out[1] = pn[0] * sin(rot[2]) + pn[1] * cos(rot[2]) + pn[2] * 0;
-    out[2] = pn[0] * 0           + pn[1] * 0           + pn[2] * 1;
-    memcpy(pn,out,sizeof(out[0])*3);
+    if(rotation[2] != 0) {
+        out[0] = pn[0] * cos(rot[2]) - pn[1] * sin(rot[2]) + pn[2] * 0;
+        out[1] = pn[0] * sin(rot[2]) + pn[1] * cos(rot[2]) + pn[2] * 0;
+        out[2] = pn[0] * 0           + pn[1] * 0           + pn[2] * 1;
+        memcpy(pn,out,sizeof(out[0])*3);
+    }
 }
 
 /* reset_fusion()
@@ -466,4 +625,21 @@ void reset_fusion()
     firstrun = true;
     aacc[0] = 0; aacc[1] = 0; aacc[2] = 0;
     amag[0] = 0; amag[1] = 0; amag[2] = 0;
+}
+
+/* Builds data for auxiliary functions
+*/
+
+void buildAuxData()
+{
+    float pwmrange = (TrackerSettings::MAX_PWM - TrackerSettings::MIN_PWM);
+    auxdata[0] = (gyrx / 1000) * pwmrange + TrackerSettings::PPM_CENTER;
+    auxdata[1] = (gyry / 1000) * pwmrange + TrackerSettings::PPM_CENTER;
+    auxdata[2] = (gyrz / 1000) * pwmrange + TrackerSettings::PPM_CENTER;
+    auxdata[3] = (accx / 2.0f) * pwmrange + TrackerSettings::PPM_CENTER;
+    auxdata[4] = (accy / 2.0f) * pwmrange + TrackerSettings::PPM_CENTER;
+    auxdata[5] = (accz / 1.0f) * pwmrange + TrackerSettings::PPM_CENTER;
+    auxdata[6] = ((accz -1.0f) / 2.0f) * pwmrange + TrackerSettings::PPM_CENTER;
+    auxdata[7] = TrackerSettings::MIN_PWM;
+  //  auxdata[7] = static_cast<float>(BLE.central().rssi()) / 127.0 * pwmrange + TrackerSettings::MIN_PWM;
 }

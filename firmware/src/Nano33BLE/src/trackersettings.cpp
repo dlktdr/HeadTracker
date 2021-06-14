@@ -1,3 +1,19 @@
+/*
+ * This file is part of the Head Tracker distribution (https://github.com/dlktdr/headtracker)
+ * Copyright (c) 2021 Cliff Blackburn
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include <stdio.h>
 #include <string.h>
@@ -6,6 +22,7 @@
 #include "flash.h"
 #include "io.h"
 #include "sense.h"
+#include "base64.h"
 
 #include "trackersettings.h"
 
@@ -13,28 +30,30 @@ using namespace mbed;
 
 TrackerSettings::TrackerSettings()
 {
-    // Defaults
+    // Tilt, Roll, Pan Defaults
     rll_min = DEF_MIN_PWM;
     rll_max = DEF_MAX_PWM;
     rll_gain =  DEF_GAIN;
-    rll_cnt = DEF_CENTER;
+    rll_cnt = PPM_CENTER;
 
     pan_min = DEF_MIN_PWM;
     pan_max = DEF_MAX_PWM;
     pan_gain =  DEF_GAIN;
-    pan_cnt = DEF_CENTER;
+    pan_cnt = PPM_CENTER;
 
     tlt_min = DEF_MIN_PWM;
     tlt_max = DEF_MAX_PWM;
     tlt_gain =  DEF_GAIN;
-    tlt_cnt = DEF_CENTER;
+    tlt_cnt = PPM_CENTER;
 
     tltch = DEF_TILT_CH;
     rllch = DEF_ROLL_CH;
     panch = DEF_PAN_CH;
 
+    // Servo Reversed bits
     servoreverse = 0x00;
 
+    // Low Pass Filter
     lppan = DEF_LP_PAN;
     lptiltroll = DEF_LP_TLTRLL;
 
@@ -48,12 +67,19 @@ TrackerSettings::TrackerSettings()
     magsioff[3] = 0; magsioff[4] = 1; magsioff[5] = 0;
     magsioff[6] = 0; magsioff[7] = 0; magsioff[8] = 1;
 
-    // Output values
-    gyrox=0;gyroy=0;gyroz=0;
-    accx=0;accy=0;accz=0;
-    magx=0,magy=0,magz=0;
-    tilt=0,roll=0,pan=0;
-    panout=0,tiltout=0,rollout=0;
+    // Define Data Variables from X Macro
+    #define DV(DT, NAME, DIV, ROUND) NAME = 0;
+        DATA_VARS
+    #undef DV
+
+    // Fill all arrays to zero
+    #define DA(DT, NAME, SIZE, DIV) memset(NAME, 0, sizeof(DT)*SIZE);
+        DATA_ARRAYS
+    #undef DA
+
+    // Default data outputs, Pan,Tilt,Roll outputs and Inputs for Graph and Output bars
+    senddatavars = 0;
+    senddataarray = 0;
 
     // PPM Defaults
     ppmoutpin = DEF_PPM_OUT;
@@ -66,6 +92,26 @@ TrackerSettings::TrackerSettings()
     ppmininvert = false;
     rstppm = DEF_RST_PPM;
 
+    // PWM defaults
+    pwm[0] = DEF_PWM_A0_CH;
+    pwm[1] = DEF_PWM_A1_CH;
+    pwm[2] = DEF_PWM_A2_CH;
+    pwm[3] = DEF_PWM_A3_CH;
+
+    // Analog defaults
+    an6ch = DEF_ALG_A6_CH;
+    an7ch = DEF_ALG_A7_CH;
+    an6gain = DEF_ALG_GAIN;
+    an7gain = DEF_ALG_GAIN;
+    an6off = DEF_ALG_OFFSET;
+    an7off = DEF_ALG_OFFSET;
+
+    // AUX defaults
+    aux0ch = DEF_AUX_CH0;
+    aux1ch = DEF_AUX_CH1;
+    aux0func = DEF_AUX_FUNC;
+    aux1func = DEF_AUX_FUNC;
+
     // Bluetooth defaults
     btmode = 0;
     btcon = false;
@@ -74,7 +120,9 @@ TrackerSettings::TrackerSettings()
     // Features defaults
     rstonwave = false;
     isCalibrated = false;
-    orient = 0;
+    rotx = DEF_BOARD_ROT_X;
+    roty = DEF_BOARD_ROT_Y;
+    rotz = DEF_BOARD_ROT_Z;
 
     // Setup button input & ppm output pins, bluetooth
     setButtonPin(buttonpin);
@@ -421,6 +469,52 @@ void TrackerSettings::setResetOnWave(bool value)
     rstonwave = value;
 }
 
+void TrackerSettings::setPWMCh(int pwmno, int pwmch)
+{
+    if(pwmno >= 0 && pwmno <= 3) {
+        if(pwmch > 0 && pwmch <= 16)
+            pwm[pwmno] = pwmch;
+    }
+}
+
+void TrackerSettings::setAuxFunc0Ch(int channel)
+{
+    if((channel > 0 && channel <= 16) || channel == -1) {
+        aux0ch = channel;
+    }
+}
+
+void TrackerSettings::setAuxFunc1Ch(int channel)
+{
+    if((channel > 0 && channel <= 16) || channel == -1) {
+        aux1ch = channel;
+    }
+}
+
+void TrackerSettings::setAuxFunc0(int funct)
+{
+    if((funct >= AUX_GYRX && funct <= BT_RSSI) || funct == -1)
+        aux0func = funct;
+}
+
+void TrackerSettings::setAuxFunc1(int funct)
+{
+    if((funct >= AUX_GYRX && funct <= BT_RSSI) || funct == -1)
+        aux1func = funct;
+}
+
+void TrackerSettings::setAnalog6Ch(int channel)
+{
+    if((channel > 0 && channel <= 16) || channel == -1)
+        an6ch = channel;
+}
+
+void TrackerSettings::setAnalog7Ch(int channel)
+{
+    if((channel > 0 && channel <= 16) || channel == -1)
+        an7ch = channel;
+}
+
 void TrackerSettings::gyroOffset(float &x, float &y, float &z) const
 {
     x=gyrxoff;y=gyryoff;z=gyrzoff;
@@ -475,7 +569,7 @@ int TrackerSettings::blueToothMode() const
 
 void TrackerSettings::setBlueToothMode(int mode)
 {
-    if(mode < BTDISABLE || mode > BTHM10)
+    if(mode < BTDISABLE || mode > BTPARARMT)
         return;
 
     // Delete old bluetooth if changing
@@ -493,81 +587,70 @@ void TrackerSettings::setBlueToothMode(int mode)
     if(_btf == nullptr) {
         // Disabled
         if(mode == BTDISABLE) {
-            sprintf(bleaddress,"00:00:00:00:00:00");
+            sprintf(btaddr,"00:00:00:00:00:00");
 
-        // PARA FRSky Mode
-        } else if(mode == BTPARA) {
-            _btf = new BTPara();
-        // BTHM10 PPM Output
-        } else if(mode == BTHM10) {
-            //_btf = new BTHm10();
+        // PARA FRSky Mode Transmitter (Slave)
+        } else if(mode == BTPARAHEAD) {
+            _btf = new BTParaHead();
+        // PARA FRSky Mode Receiver (Master)
+        } else if(mode == BTPARARMT) {
+            _btf = new BTParaRmt();
         }
     }
+}
+
+void TrackerSettings::setBLEValues(uint16_t vals[BT_CHANNELS])
+{
+    memcpy(btch,vals,sizeof(uint16_t)*BT_CHANNELS);
 }
 
 //----------------------------------------------------------------
 // Orentation
 
-int TrackerSettings::orientation()
+void TrackerSettings::setOrientation(int rx, int ry, int rz)
 {
-    return orient;
-}
-
-void TrackerSettings::setOrientation(int ori)
-{
-    if(ori >= 0 && ori <= 6) {
-        orient = ori;
-        reset_fusion();
-    }
+    rotx = rx;
+    roty = ry;
+    rotz = rz;
+    reset_fusion(); // Cause imu to reset
 }
 
 void TrackerSettings::orientRotations(float rot[3])
 {
-    switch(orient) {
-        case 0: // Default
-            rot[0] = 0; rot[1] = 0; rot[2] = 0;
-            break;
-        case 1: // Tilt 90
-            rot[0] = 90; rot[1] = 0; rot[2] = 0;
-            break;
-        case 2: // Tilt -90
-            rot[0] = -90; rot[1] = 0; rot[2] = 0;
-            break;
-        case 3: // Tilt 180
-            rot[0] = 180; rot[1] = 0; rot[2] = 0;
-            break;
-        case 4: // Roll 90
-            rot[0] = 0; rot[1] = 90; rot[2] = 0;
-            break;
-        case 5: // Roll -90
-            rot[0] = 0; rot[1] = -90; rot[2] = 0;
-            break;
-        case 6: // Tilt 90, Pan 90
-            rot[0] = 90; rot[1] = 0; rot[2] = 90;
-            break;
-        default:
-            rot[0] = 0; rot[1] = 0; rot[2] = 0;
-    }
+    rot[0] = rotx;
+    rot[1] = roty;
+    rot[2] = rotz;
 }
-
 
 //----------------------------------------------------------------------------------------
 // Data sent the PC, for calibration and info
 
 void TrackerSettings::setBLEAddress(const char *addr)
 {
-    strcpy(bleaddress,addr);
+    strcpy(btaddr, addr);
 }
 
-void TrackerSettings::setPPMInValues(uint16_t *vals, int chans)
+void TrackerSettings::setDiscoveredBTHead(const char *addr)
 {
-    if(chans > 16)
-        return;
+    strcpy(btrmt, addr);
+}
 
-    for(int i=0;i<chans;i++)
-        ppminvals[i] = vals[i];
+void TrackerSettings::setPPMInValues(uint16_t vals[16])
+{
+    for(int i=0;i<16;i++)
+        ppmch[i] = vals[i];
+}
 
-    ppminchans = chans;
+void TrackerSettings::setSBUSValues(uint16_t vals[16])
+{
+    for(int i=0;i<16;i++)
+        sbusch[i] = vals[i];
+}
+
+void TrackerSettings::setChannelOutValues(uint16_t vals[16])
+{
+    for(int i=0;i<16;i++)
+        chout[i] = vals[i];
 }
 
 void TrackerSettings::setRawGyro(float x, float y, float z)
@@ -681,7 +764,10 @@ void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
     v = json["btmode"]; if(!v.isNull()) setBlueToothMode(v);
 
 // Orientation
-   v = json["orient"]; if(!v.isNull()) setOrientation(v);
+   v = json["rotx"]; if(!v.isNull()) setOrientation(v,roty,rotz);
+   v = json["roty"]; if(!v.isNull()) setOrientation(rotx,v,rotz);
+   v = json["rotz"]; if(!v.isNull()) setOrientation(rotx,roty,v);
+
 
 // Reset On Wave
     v = json["rstonwave"]; if(!v.isNull()) setResetOnWave(v);
@@ -721,9 +807,29 @@ void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
     v = json["rstppm"]; if(!v.isNull()) setResetCntPPM(v);
 
 // PPM Data
-   v = json["ppmfrm"]; if(!v.isNull()) setPPMFrame(v);
-   v = json["ppmchcnt"]; if(!v.isNull()) setPpmChCount(v);
-   v = json["ppmsync"]; if(!v.isNull()) setPPMSync(v);
+    v = json["ppmfrm"]; if(!v.isNull()) setPPMFrame(v);
+    v = json["ppmchcnt"]; if(!v.isNull()) setPpmChCount(v);
+    v = json["ppmsync"]; if(!v.isNull()) setPPMSync(v);
+
+// PWM Settings
+    v = json["pwm0"]; if(!v.isNull()) setPWMCh(0,v);
+    v = json["pwm1"]; if(!v.isNull()) setPWMCh(1,v);
+    v = json["pwm2"]; if(!v.isNull()) setPWMCh(2,v);
+    v = json["pwm3"]; if(!v.isNull()) setPWMCh(3,v);
+
+// Analog Settings
+    v = json["an6ch"]; if(!v.isNull()) setAnalog6Ch(v);
+    v = json["an6off"]; if(!v.isNull()) setAnalog6Offset(v);
+    v = json["an6gain"]; if(!v.isNull()) setAnalog6Gain(v);
+    v = json["an7ch"]; if(!v.isNull()) setAnalog7Ch(v);
+    v = json["an7off"]; if(!v.isNull()) setAnalog7Offset(v);
+    v = json["an7gain"]; if(!v.isNull()) setAnalog7Gain(v);
+
+// AUX Settings
+    v = json["aux0func"]; if(!v.isNull()) setAuxFunc0(v);
+    v = json["aux0ch"]; if(!v.isNull()) setAuxFunc0Ch(v);
+    v = json["aux1func"]; if(!v.isNull()) setAuxFunc1(v);
+    v = json["aux1ch"]; if(!v.isNull()) setAuxFunc1Ch(v);
 
 // Calibrarion Values
     v = json["magxoff"];
@@ -813,6 +919,26 @@ void TrackerSettings::setJSONSettings(DynamicJsonDocument &json)
     json["ppmininvert"] = ppmininvert;
     json["rstppm"] = rstppm;
 
+// PWM Settings
+    json["pwm0"] = pwm[0];
+    json["pwm1"] = pwm[1];
+    json["pwm2"] = pwm[2];
+    json["pwm3"] = pwm[3];
+
+// Analog Settings
+    json["an6ch"] = an6ch;
+    json["an6off"] = an6off;
+    json["an6gain"] = an6gain;
+    json["an7ch"] = an7ch;
+    json["an7off"] = an7off;
+    json["an7gain"] = an7gain;
+
+// AUX Settings
+    json["aux0func"] = aux0func;
+    json["aux0ch"] = aux0ch;
+    json["aux1func"] = aux1func;
+    json["aux1ch"] = aux1ch;
+
 // Bluetooth Settings
     json["btmode"] = btmode;
 
@@ -820,7 +946,9 @@ void TrackerSettings::setJSONSettings(DynamicJsonDocument &json)
     json["rstonwave"] = rstonwave;
 
 // Orientation
-    json["orient"] = orient;
+    json["rotx"] = rotx;
+    json["roty"] = roty;
+    json["rotz"] = rotz;
 
 // Calibration Values
     json["accxoff"] = accxoff;
@@ -883,70 +1011,120 @@ void TrackerSettings::loadFromEEPROM()
     }
 }
 
-extern uint16_t zaccelout;
+/* Sets if a data item should be included while in data to GUI
+ */
+
+void TrackerSettings::setDataItemSend(const char *var, bool enabled)
+{
+    int id=0;
+
+    // Macro Expansion for Data Variables + Arrays
+    #define DV(DT, NAME, DIV, ROUND)\
+    if(strcmp(var,#NAME)==0)\
+    {\
+        enabled==true?senddatavars|=1<<id:senddatavars&=~(1<<id);\
+        return;\
+    }\
+    id++;
+        DATA_VARS
+    #undef DV
+
+    id=0;
+
+    #define DA(DT, NAME, SIZE, DIV)\
+    if(strcmp(var,#NAME)==0)\
+    {\
+        enabled==true?senddataarray|=1<<id:senddataarray&=~(1<<id);\
+        return;\
+    }\
+    id++;
+        DATA_ARRAYS
+    #undef DA
+}
+
+/* Stops all Data Items from Sending
+ */
+
+void TrackerSettings::stopAllData()
+{
+    senddatavars = 0;
+    senddataarray = 0;
+}
+
+/* Returns a list of all the Data Variables available in json
+ */
+
+void TrackerSettings::setJSONDataList(DynamicJsonDocument &json)
+{
+    JsonArray array = json.createNestedArray();
+
+    // Macro Expansion for Data Variables + Arrays
+    #define DV(DT, NAME, DIV, ROUND)\
+        array.add(#NAME);
+        DATA_VARS
+    #undef DV
+
+    #define DA(DT, NAME, SIZE, DIV)\
+        array.add(#NAME);
+        DATA_ARRAYS
+    #undef DA
+}
 
 // Used to transmit raw data back to the GUI
 void TrackerSettings::setJSONData(DynamicJsonDocument &json)
 {
-    json["magx"] = roundf(magx*1000)/1000;
-    json["magy"] = roundf(magy*1000)/1000;
-    json["magz"] = roundf(magz*1000)/1000;
+    static int counter=0;
+    // Macro Expansion for Data Variables + Arrays
 
-    json["gyrox"] = roundf(gyrox*1000)/1000;
-    json["gyroy"] = roundf(gyroy*1000)/1000;
-    json["gyroz"] = roundf(gyroz*1000)/1000;
+    // Sends only requested data items
+    // Updates only as often as specified, 1 = every cycle
+    // Two Decimals is most precision of any data item req as of now.
+    // For most items ends up less bytes than base64 encoding everything
+    int id=0;
+    int itemcount=0;
+    #define DV(DT, NAME, DIV, ROUND)\
+    if(senddatavars & 1<<id && counter % DIV == 0) {\
+        if(ROUND == -1)\
+            json[#NAME] = NAME;\
+        else\
+            json[#NAME] = roundf(((float)NAME * ROUND)) / ROUND;\
+        itemcount++;\
+    }\
+    id++;
+        DATA_VARS
+    #undef DV
 
-    json["panoff"] = roundf(panoff*1000)/1000;
-    json["tiltoff"] = roundf(tiltoff*1000)/1000;
-    json["rolloff"] = roundf(rolloff*1000)/1000;
+    // Send only requested data arrays, arrays are base64 encoded
+    // Variable names prepended by 6 so GUI knows to decode them
+    // Suffixed with the 3 character data type
+    // Length can be determined with above info
 
-    json["panout"] = panout;
-    json["tiltout"] = tiltout;
-    json["rollout"] = rollout;
+    // If DIVisor set to negative one only transmits if different from last value
 
-    // Create string for PpmIn Chans
-    char pstr[120];
-    sprintf(pstr,"#CH=%d ",ppminchans);
-    for(int i=0;i<ppminchans; i++) {
-        sprintf(pstr,"%s %d",pstr,ppminvals[i]);
+    id=0;
+    char b64array[500];
+    bool sendit=false;
+
+    #define DA(DT, NAME, SIZE, DIV)\
+    sendit=false;\
+    if(senddataarray & 1<<id) {\
+        if(DIV == -1 && memcmp(last ## NAME, NAME, SIZE * sizeof(DT)) != 0)\
+            sendit = true;\
+        else if(counter % DIV == 0)\
+            sendit = true;\
+        if(sendit) {\
+            encode_base64((unsigned char*)NAME, sizeof(DT)*SIZE,(unsigned char*)b64array);\
+            json["6" #NAME #DT] = b64array;\
+            memcpy(last ## NAME, NAME, SIZE * sizeof(DT));\
+        }\
+    }\
+    id++;
+        DATA_ARRAYS
+    #undef DA
+
+    // Used for reduced data divisor
+    counter++;
+    if(counter > 100) {
+        counter = 0;
     }
-    json["ppmin"] = pstr;
-
-    // Items that don't need to be updated often
-    static uint16_t slowrate=0;
-    if(slowrate++ > 25) {
-        json["btaddr"] = bleaddress;
-        json["btcon"] = btcon;
-        json["magcal"] = isCalibrated;
-        slowrate = 0;
-    }
-
-    // Custom Output Option
-    //json["heave"] = roundf(zaccelout * 1000)/1000;
-
-// Live Values for Debugging.
-    /*json["accx"] = roundf(accx*1000)/1000;
-    json["accy"] = roundf(accy*1000)/1000;
-    json["accz"] = roundf(accz*1000)/1000;
-
-    json["offmagx"] = roundf(off_magx*1000)/1000;
-    json["offmagy"] = roundf(off_magy*1000)/1000;
-    json["offmagz"] = roundf(off_magz*1000)/1000;
-
-    json["offgyrox"] = roundf(off_gyrox*1000)/1000;
-    json["offgyroy"] = roundf(off_gyroy*1000)/1000;
-    json["offgyroz"] = roundf(off_gyroz*1000)/1000;
-
-    json["offaccx"] = roundf(accx*1000)/1000;
-    json["offaccy"] = roundf(accy*1000)/1000;
-    json["offaccz"] = roundf(accz*1000)/1000;
-
-    json["tiltraw"] = roundf(tilt*1000)/1000;
-    json["rollraw"] = roundf(roll*1000)/1000;
-    json["panraw"] = roundf(pan*1000)/1000;
-
-    json["quat0"] = roundf(quat[0]*1000)/1000;
-    json["quat1"] = roundf(quat[1]*1000)/1000;
-    json["quat2"] = roundf(quat[2]*1000)/1000;
-    json["quat3"] = roundf(quat[3]*1000)/1000; */
 }

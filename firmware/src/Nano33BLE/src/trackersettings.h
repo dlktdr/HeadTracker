@@ -5,15 +5,78 @@
 #include <ArduinoJson.h>
 #include "PPM/PPMOut.h"
 #include "PPM/PPMIn.h"
+#include "bluetooth/btparahead.h"
+#include "bluetooth/btpararmt.h"
 #include "config.h"
 #include "serial.h"
-#include "btpara.h"
+
+// Variables to be sent back to GUI if enabled
+// Datatype, Name, UpdateDivisor, RoundTo
+#define DATA_VARS\
+    DV(float,magx,      1,100)\
+    DV(float,magy,      1,100)\
+    DV(float,magz,      1,100)\
+    DV(float,gyrox,     1,100)\
+    DV(float,gyroy,     1,100)\
+    DV(float,gyroz,     1,100)\
+    DV(float,accx,      1,100)\
+    DV(float,accy,      1,100)\
+    DV(float,accz,      1,100)\
+    DV(float,off_magx,  5,100)\
+    DV(float,off_magy,  5,100)\
+    DV(float,off_magz,  5,100)\
+    DV(float,off_gyrox, 5,100)\
+    DV(float,off_gyroy, 5,100)\
+    DV(float,off_gyroz, 5,100)\
+    DV(float,off_accx,  5,100)\
+    DV(float,off_accy,  5,100)\
+    DV(float,off_accz,  5,100)\
+    DV(float,tilt,      5,100)\
+    DV(float,roll,      5,100)\
+    DV(float,pan,       5,100)\
+    DV(float,tiltoff,   1,100)\
+    DV(float,rolloff,   1,100)\
+    DV(float,panoff,    1,100)\
+    DV(uint16_t,tiltout,1,-1)\
+    DV(uint16_t,rollout,1,-1)\
+    DV(uint16_t,panout, 1,-1)\
+    DV(bool,isCalibrated,2,-1)\
+    DV(bool,btcon,      10,-1)
+
+// To shorten names, as these are sent to the GUI for decoding
+#define u8  uint8_t
+#define u16 uint16_t
+#define s16 int16_t
+#define u32 uint32_t
+#define s32 int32_t
+#define flt float
+#define chr char
+
+// Arrays to be sent back to GUI if enabled, Base64 Encoded
+// Datatype, Name, Size, UpdateDivisor
+#define DATA_ARRAYS\
+    DA(u16, chout, 16, 1)\
+    DA(u16, btch, BT_CHANNELS, 1)\
+    DA(u16, ppmch, 16, 1)\
+    DA(u16, sbusch, 16, 1)\
+    DA(flt, quat,4, 1)\
+    DA(chr, btaddr,18, 20)\
+    DA(chr, btrmt,18, -1)
 
 // Global Config Values
-
 class TrackerSettings
 {
 public:
+    enum {AUX_DISABLE=-1,
+        AUX_GYRX, // 0
+        AUX_GYRY, // 1
+        AUX_GYRZ, // 2
+        AUX_ACCELX, // 3
+        AUX_ACCELY, // 4
+        AUX_ACCELZ, // 5
+        AUX_ACCELZO, // 6
+        BT_RSSI}; // 7
+
     static constexpr int MIN_PWM=988;
     static constexpr int MAX_PWM=2012;
     static constexpr int DEF_MIN_PWM=1050;
@@ -29,23 +92,40 @@ public:
     static constexpr uint16_t PPM_MAX_FRAME = 40000;
     static constexpr uint16_t PPM_MIN_FRAME = 12500;
     static constexpr uint16_t PPM_MIN_FRAMESYNC = 4000; // Not adjustable
-    static constexpr int DEF_PPM_SYNC=300;
+    static constexpr int DEF_PPM_SYNC=350;
     static constexpr int PPM_MAX_SYNC=800;
     static constexpr int PPM_MIN_SYNC=100;
+    static constexpr int DEF_BOARD_ROT_X=0;
+    static constexpr int DEF_BOARD_ROT_Y=0;
+    static constexpr int DEF_BOARD_ROT_Z=0;
     static constexpr int DEF_BUTTON_IN = 2; // Chosen because it's beside ground
     static constexpr int DEF_PPM_OUT = 10; // Random choice
     static constexpr int DEF_PPM_IN = -1;
-    static constexpr int DEF_CENTER = 1500;
+    static constexpr int PPM_CENTER = 1500;
+    static constexpr int SBUS_CENTER = 992;
+    static constexpr float SBUS_SCALE = 1.6f;
     static constexpr float MIN_GAIN= 0.0;
     static constexpr float MAX_GAIN= 35.0;
     static constexpr float DEF_GAIN= 5.0;
     static constexpr int DEF_BT_MODE= BTDISABLE; // Bluetooth Disabled
     static constexpr int DEF_RST_PPM = -1;
-    static constexpr int DEF_TILT_CH = 6;
-    static constexpr int DEF_ROLL_CH = 7;
-    static constexpr int DEF_PAN_CH = 8;
+    static constexpr int DEF_TILT_CH = -1;
+    static constexpr int DEF_ROLL_CH = -1;
+    static constexpr int DEF_PAN_CH = -1;
     static constexpr int DEF_LP_PAN = 75;
     static constexpr int DEF_LP_TLTRLL = 75;
+    static constexpr int DEF_PWM_A0_CH = -1;
+    static constexpr int DEF_PWM_A1_CH = -1;
+    static constexpr int DEF_PWM_A2_CH = -1;
+    static constexpr int DEF_PWM_A3_CH = -1;
+    static constexpr int DEF_ALG_A6_CH = -1;
+    static constexpr int DEF_ALG_A7_CH = -1;
+    static constexpr float DEF_ALG_GAIN = 310.0f;
+    static constexpr int DEF_ALG_OFFSET = 0;
+    static constexpr int DEF_AUX_CH0 = -1;
+    static constexpr int DEF_AUX_CH1 = -1;
+    static constexpr int DEF_AUX_FUNC = 0;
+    static constexpr int MAX_DATA_VARS = 30;
 
     TrackerSettings();
 
@@ -153,12 +233,39 @@ public:
     bool isBlueToothConnected() {return btcon;}
     void setBlueToothConnected(bool con) {btcon = con;}
 
-    int orientation();
-    void setOrientation(int ori);
+    void setOrientation(int rx, int ry, int rz);
     void orientRotations(float rot[3]);
 
     void magSiOffset(float v[]) {memcpy(v,magsioff,9*sizeof(float));}
     void setMagSiOffset(float v[]) {memcpy(magsioff,v,9*sizeof(float));}
+
+// PWM Channels
+    void setPWMCh(int pwmno, int pwmch);
+    int PWMCh(int pwmno) { return pwm[pwmno];}
+
+// Analogs
+    void setAnalog6Ch(int channel);
+    void setAnalog6Gain(float gain) {an6gain=gain;}
+    void setAnalog6Offset(int offset) {an6off = offset;}
+    void setAnalog7Ch(int channel);
+    void setAnalog7Gain(float gain) { an7gain = gain;}
+    void setAnalog7Offset(int offset) {an7off = offset;}
+    int analog6Ch() {return an6ch;}
+    int analog7Ch() {return an7ch;}
+    float analog6Gain() {return an6gain;}
+    float analog7Gain() {return an7gain;}
+    int analog6Offset() {return an6off;}
+    int analog7Offset() {return an7off;}
+
+// Aux Func
+    void setAuxFunc0Ch(int channel);
+    void setAuxFunc1Ch(int channel);
+    void setAuxFunc0(int funct);
+    void setAuxFunc1(int funct);
+    int auxFunc0Ch() {return aux0ch;}
+    int auxFunc1Ch() {return aux1ch;}
+    int auxFunc0() {return aux0func;}
+    int auxFunc1() {return aux1func;}
 
     void loadJSONSettings(DynamicJsonDocument &json);
     void setJSONSettings(DynamicJsonDocument &json);
@@ -166,7 +273,7 @@ public:
     void saveToEEPROM();
     void loadFromEEPROM();
 
-// Setting of data to be returned to the PC
+// Setting of data to be returned to the GUI
     void setRawGyro(float x, float y, float z);
     void setRawAccel(float x, float y, float z);
     void setRawMag(float x, float y, float z);
@@ -178,8 +285,16 @@ public:
     void setPPMOut(uint16_t t, uint16_t r, uint16_t p);
     void setJSONData(DynamicJsonDocument &json);
     void setBLEAddress(const char *addr);
-    void setPPMInValues(uint16_t *vals, int chans);
+    void setDiscoveredBTHead(const char* addr);
+    void setBLEValues(uint16_t vals[BT_CHANNELS]);
+    void setSBUSValues(uint16_t vals[16]);
+    void setPPMInValues(uint16_t vals[16]);
+    void setChannelOutValues(uint16_t vals[16]);
     void setQuaternion(float q[4]);
+    void setDataItemSend(const char *var, bool enabled);
+    void stopAllData();
+    void setJSONDataList(DynamicJsonDocument &json);
+
 
     BTFunction *getBTFunc() {return _btf;}
 
@@ -197,6 +312,9 @@ private:
     float accxoff, accyoff, acczoff;
     float gyrxoff, gyryoff, gyrzoff;
 
+    // Board Rotation
+    int rotx,roty,rotz;
+
     int servoreverse;
     int lppan,lptiltroll;
     int buttonpin,ppmoutpin,ppminpin;
@@ -204,30 +322,40 @@ private:
     bool ppmininvert;
     BTFunction *_btf; // Blue tooth Function
     int btmode;
-    bool btcon;
+
     bool rstonwave;
     bool freshProgram;
-    int orient;
     int rstppm;
-    uint16_t ppmfrm;
-    uint16_t ppmsync;
-    uint16_t ppmchcnt;
+    uint16_t ppmfrm;   // PPM Frame Len
+    uint16_t ppmsync;  // Sync Setting
+    uint16_t ppmchcnt; // Channel Count
 
-    // Data
-    float gyrox,gyroy,gyroz;
-    float accx,accy,accz;
-    float magx,magy,magz;
-    float off_gyrox,off_gyroy,off_gyroz;
-    float off_accx,off_accy,off_accz;
-    float off_magx,off_magy,off_magz;
-    float tilt,roll,pan;
-    float tiltoff,rolloff,panoff;
-    float quat[4];
-    uint16_t panout,tiltout,rollout;
-    uint16_t ppminvals[16];
-    int ppminchans;
-    char bleaddress[20];
-    bool isCalibrated;
+    int pwm[4]; // PWM Output Pins
+    int an6ch,an7ch; // Analog Channels
+    float an6gain,an7gain; // Analog Gains
+    float an6off,an7off; // Analog Offsets
+    int aux0ch,aux1ch; // Auxiliary Function Channels
+    int aux0func,aux1func; // Auxiliary Functions
+
+    // Bit map of data to send to GUI, max 64 items
+    uint64_t senddatavars;
+    uint32_t senddataarray;
+
+    // Define Data Variables from X Macro
+    #define DV(DT, NAME, DIV, ROUND) DT NAME;
+        DATA_VARS
+    #undef DV
+
+    // Define Data Arrays from X Macro
+    #define DA(DT, NAME, SIZE, DIV) DT NAME[SIZE];
+        DATA_ARRAYS
+    #undef DA
+
+    // Define Last Arrays from X Macro
+    #define DA(DT, NAME, SIZE, DIV) DT last ## NAME [SIZE];
+        DATA_ARRAYS
+    #undef DA
 };
+
 
 #endif

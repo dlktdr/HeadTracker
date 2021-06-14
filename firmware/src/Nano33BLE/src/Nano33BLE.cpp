@@ -1,3 +1,20 @@
+/*
+ * This file is part of the Head Tracker distribution (https://github.com/dlktdr/headtracker)
+ * Copyright (c) 2021 Cliff Blackburn
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include <Arduino.h>
 #include <mbed.h>
 #include <rtos.h>
@@ -10,15 +27,16 @@
 #include "PPM/PPMIn.h"
 #include "dataparser.h"
 #include "trackersettings.h"
-#include "Wire.h"
 #include "sense.h"
 #include "ble.h"
 #include "io.h"
 #include "flash.h"
 #include "serial.h"
 #include "main.h"
+#include "SBUS/uarte_sbus.h"
+#include "PWM/pmw.h"
 
-const char *FW_VERSION = "0.91";
+const char *FW_VERSION = "1.0";
 const char *FW_BOARD = "NANO33BLE";
 
 using namespace rtos;
@@ -33,7 +51,7 @@ Ticker ioTick;
 TrackerSettings trkset;
 Mutex dataMutex;
 Mutex eepromWait;
-//ConditionVariable eepromWriting(eepromWait);
+
 volatile bool pauseThreads=false;
 volatile bool dataready=false;
 
@@ -60,6 +78,14 @@ void setup()
     // Actual Calculations - sense.cpp
     sense_Init();
 
+    // ********************* !!!
+    // set, #define SERIAL_HOWMANY		0 in pins_arduino.h to disable _UART1 on TX/RX pins first
+    // Start SBUS - SBUS/uarte_sbus.cpp (Pins D0/TX, D1/RX)
+    SBUS_Init(0,1);
+
+    // PWM Outputs - Fixed to A0-A3
+    PWM_Init(50); // Start PWM at 100 Hz update rate
+
     // Load settings from flash - trackersettings.cpp
     trkset.loadFromEEPROM();
 
@@ -76,6 +102,7 @@ void setup()
     queue.call_in(std::chrono::milliseconds(SERIAL_PERIOD),serial_Thread);
     queue.call_in(std::chrono::milliseconds((int)BT_PERIOD),bt_Thread);
     queue.call_in(std::chrono::milliseconds(DATA_PERIOD),data_Thread);
+    queue.call_in(std::chrono::milliseconds(SBUS_PERIOD),SBUS_Thread);
 
     // Start everything
     queue.dispatch_forever();
@@ -84,4 +111,5 @@ void setup()
 // Not Used
 void loop()
 {
+    ThisThread::sleep_for(std::chrono::milliseconds(100000));
 }

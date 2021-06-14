@@ -1,3 +1,20 @@
+/*
+ * This file is part of the Head Tracker distribution (https://github.com/dlktdr/headtracker)
+ * Copyright (c) 2021 Cliff Blackburn
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include <Arduino.h>
 #include <mbed.h>
 
@@ -58,8 +75,8 @@ void data_Thread()
                     serialWrite("HT: DeserializeJson() Failed - Invalid Input\r\n");
                 else if(de == DeserializationError::NoMemory)
                     serialWrite("HT: DeserializeJson() Failed - NoMemory\r\n");
-                else if(de == DeserializationError::NotSupported)
-                    serialWrite("HT: DeserializeJson() Failed - NotSupported\r\n");
+                else if(de == DeserializationError::EmptyInput)
+                    serialWrite("HT: DeserializeJson() Failed - Empty Input\r\n");
                 else if(de == DeserializationError::TooDeep)
                     serialWrite("HT: DeserializeJson() Failed - TooDeep\r\n");
                 else
@@ -131,19 +148,16 @@ void parseData(DynamicJsonDocument &json)
     if(strcmp(command,"RstCnt") == 0) {
         serialWrite("HT: Resetting Center\r\n");
         pressButton();
-        uiResponsive = Kernel::Clock::now() + std::chrono::milliseconds(UIRESPONSIVE_TIME);
 
     // Settings Sent from UI
     } else if (strcmp(command, "Set") == 0) {
         trkset.loadJSONSettings(json);
-        serialWrite("HT: Saving Settings\r\n");
-        uiResponsive = Kernel::Clock::now() + std::chrono::milliseconds(UIRESPONSIVE_TIME);
+        serialWrite("HT: Storing Settings\r\n");
 
     // Save to Flash
     } else if (strcmp(command, "Flash") == 0) {
-        serialWrite("HT: Saving Settings\r\n");
+        serialWrite("HT: Saving to Flash\r\n");
         trkset.saveToEEPROM();
-        uiResponsive = Kernel::Clock::now() + std::chrono::milliseconds(UIRESPONSIVE_TIME);
 
     // Get settings
     } else if (strcmp(command, "Get") == 0) {
@@ -152,11 +166,33 @@ void parseData(DynamicJsonDocument &json)
         trkset.setJSONSettings(json);
         json["Cmd"] = "Set";
         serialWriteJSON(json);
-        uiResponsive = Kernel::Clock::now() + std::chrono::milliseconds(UIRESPONSIVE_TIME);
 
-    // Im Here Received, Means the GUI is running, keep sending it data
+    // Im Here Received, Means the GUI is running
     } else if (strcmp(command, "IH") == 0) {
-        uiResponsive = Kernel::Clock::now() + std::chrono::milliseconds(UIRESPONSIVE_TIME);
+        __NOP();
+
+    // Get a List of All Data Items
+    } else if (strcmp(command, "DatLst") == 0) {
+        json.clear();
+        trkset.setJSONDataList(json);
+        json["Cmd"] = "DataList";
+        serialWriteJSON(json);
+
+    // Stop All Data Items
+    } else if (strcmp(command, "D--") == 0) {
+        serialWrite("HT: Clearing Data List\r\n");
+        trkset.stopAllData();
+
+    // Request Data Items
+    } else if (strcmp(command, "RD") == 0) {
+        serialWrite("HT: Data Added/Remove\r\n");
+        // using C++11 syntax (preferred):
+        JsonObject root = json.as<JsonObject>();
+        for (JsonPair kv : root) {
+            if(kv.key() == "Cmd")
+                continue;
+            trkset.setDataItemSend(kv.key().c_str(),kv.value().as<bool>());
+        }
 
     // Firmware Reqest
     } else if (strcmp(command, "FW") == 0) {
@@ -166,16 +202,18 @@ void parseData(DynamicJsonDocument &json)
       json["Vers"] = FW_VERSION;
       json["Hard"] = FW_BOARD;
       serialWriteJSON(json);
-      uiResponsive = Kernel::Clock::now() + std::chrono::milliseconds(UIRESPONSIVE_TIME);
 
     // Unknown Command
     } else {
         serialWrite("HT: Unknown Command\r\n");
+        return;
     }
+
+    // Valid Command, update last gui connected time
+    uiResponsive = Kernel::Clock::now() + std::chrono::milliseconds(UIRESPONSIVE_TIME);
 }
 
 // Remove any of the escape characters
-
 uint16_t escapeCRC(uint16_t crc)
 {
     // Characters to escape out
