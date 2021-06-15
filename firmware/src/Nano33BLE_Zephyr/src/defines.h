@@ -5,7 +5,7 @@
 #define FW_BOARD "NANO33BLE"
 
 // Thread Periods
-#define IO_PERIOD 20            // (ms) IO Period (button reading)
+#define IO_PERIOD 100           // (ms) IO Period (button reading)
 #define DATA_PERIOD 90          // (ms) GUI update rate
 #define BT_PERIOD 16            // (ms) Bluetooth update rate
 #define SERIAL_PERIOD 30        // (ms) Serial processing
