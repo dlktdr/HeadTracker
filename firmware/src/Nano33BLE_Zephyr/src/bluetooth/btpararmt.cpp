@@ -115,7 +115,6 @@ static uint8_t over_notify_func(struct bt_conn *conn,
 }
 
 // Discover Service Characteristics
-
 static uint8_t discover_func(struct bt_conn *conn,
 			     const struct bt_gatt_attr *attr,
 			     struct bt_gatt_discover_params *params)
@@ -128,7 +127,8 @@ static uint8_t discover_func(struct bt_conn *conn,
 		return BT_GATT_ITER_STOP;
 	}
 
-/*    char str[30];
+/*
+    char str[30];
     bt_uuid_to_str(discover_params.uuid,str,sizeof(str));
 
     serialWrite("Discovered UUID ");
@@ -184,10 +184,10 @@ static uint8_t discover_func(struct bt_conn *conn,
 			serialWrite("HT: Subscribed to Data\r\n");
 		}
 
-        // Setup next discovery (HT Reset Button Characteristic)
+    // Setup next discovery (HT Reset Button Characteristic)1
         memcpy(&uuid, &htbutton.uuid, sizeof(uuid));
 		discover_params.uuid = &uuid.uuid;
-		discover_params.start_handle = attr->handle + 3;
+		discover_params.start_handle = attr->handle + 1;
 		discover_params.type = BT_GATT_DISCOVER_DESCRIPTOR;
         err = bt_gatt_discover(conn, &discover_params);
 		if (err) {
@@ -204,10 +204,11 @@ static uint8_t discover_func(struct bt_conn *conn,
         buttonhandle = attr->handle;
         buttonattr = attr;
 
+
         // Setup next discovery (HT Override Characteristic)
         memcpy(&uuid, &htvldchs.uuid, sizeof(uuid));
 		discover_params.uuid = &uuid.uuid;
-		discover_params.start_handle = attr->handle + 4;
+		discover_params.start_handle = attr->handle + 1;
 		discover_params.type = BT_GATT_DISCOVER_DESCRIPTOR;
         err = bt_gatt_discover(conn, &discover_params);
 		if (err) {
@@ -222,9 +223,9 @@ static uint8_t discover_func(struct bt_conn *conn,
         // Setup next discovery (HT Override CCC)
         memcpy(&uuid, &ccc.uuid, sizeof(uuid));
 		discover_params.uuid = &uuid.uuid;
-		discover_params.start_handle = attr->handle + 5;
+		discover_params.start_handle = attr->handle + 1;
 		discover_params.type = BT_GATT_DISCOVER_DESCRIPTOR;
-        subscribeaff1.value_handle = attr->handle + 4;
+        subscribeaff1.value_handle = attr->handle + 1;
         err = bt_gatt_discover(conn, &discover_params);
 		if (err) {
            	serialWrite("HT: Discover failed (err ");
@@ -247,8 +248,8 @@ static uint8_t discover_func(struct bt_conn *conn,
 		} else {
 			serialWrite("HT: Subscribed to Overrides\r\n");
 		}
+    }
 
-	}
 
 	return BT_GATT_ITER_STOP;
 }
@@ -513,37 +514,35 @@ const char * BTRmtGetAddress()
     return "";
 }
 
-static volatile bool sendbutton=false;
+static struct bt_gatt_write_params write_params;
+
+char rstdata[1] = {'R'};
+
+static void write_rsp(struct bt_conn *conn, uint8_t err, struct bt_gatt_write_params *params)
+{}
 
 void BTRmtSendButtonPress()
 {
     if(!buttonattr)
         return;
 
-    sendbutton = true;
+    serialWriteln("HT: Sending Button Press to Head Board");
+
+    write_params.handle = sys_le16_to_cpu(buttonhandle);
+    write_params.func = write_rsp;
+    write_params.offset = 0U;
+    write_params.data = (void *)rstdata;
+    write_params.length = sys_le16_to_cpu(1);
+
+    if(bt_gatt_write(pararmtconn,&write_params) < 0)
+        serialWriteln("HT: Failed to send button press");
 }
 
-static struct bt_gatt_write_params wp = {
-    .func = NULL,
-    .handle = buttonhandle,
-    .offset = 0,
-    .data = (char*)"R",
-    .length = 1,
-};
+
 
 void BTRmtExecute()
 {
-    if(sendbutton) {
-        if(!buttonattr)
-            return;
-
-        wp.handle = buttonattr->handle;
-
-        serialWriteln("Sending Button Press to Head Board");
-        //bt_gatt_write(pararmtconn,&wp); /// *** FIXME
-        sendbutton = false;
-    }
-
+    // All Async, Nothing Here
 }
 
 
