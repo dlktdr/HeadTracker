@@ -8,4 +8,4 @@ If you're an RC enthusiast with a FPV headset, at some point you might have thou
 * See the Wiki for how to build one.
 
 ### Screenshot
-![alt text](https://github.com/dlktdr/HeadTracker/raw/master/docs/ScreenCapture1016.png)
+<img src="https://raw.githubusercontent.com/wiki/dlktdr/HeadTracker/media/gui/ScreenCapture1016.png">
