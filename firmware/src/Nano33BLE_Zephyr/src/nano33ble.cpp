@@ -10,14 +10,13 @@
 #include "PPM/PPMIn.h"
 #include "SBUS/uarte_sbus.h"
 #include "PWM/pmw.h"
+#include "Joystick/joystick.h"
 #include "log.h"
-#include "analog.h"
-#include "joystick.h"
+#include "Analog/analog.h"
 
 bool led_is_on = false;
 
 TrackerSettings trkset;
-
 
 void start(void)
 {
@@ -42,7 +41,7 @@ void start(void)
     PWM_Init(50); // Start PWM 50hz
 
     // USB Joystick
-    //joystick_init();
+    joystick_init();
 
     // Load settings from flash - trackersettings.cpp
     trkset.loadFromEEPROM();

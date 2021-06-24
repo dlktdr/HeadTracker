@@ -21,7 +21,7 @@
  *    */
 
 #include "trackersettings.h"
-#include "PWM/pmw.h"
+#include "pmw.h"
 
 static uint16_t pwmvals[4];
 static constexpr uint16_t countertop = 5000; // 5000uS per period, before end delay
