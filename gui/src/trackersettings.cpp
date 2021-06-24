@@ -52,11 +52,16 @@ TrackerSettings::TrackerSettings(QObject *parent):
     _data["pwm3"] = DEF_PWM_A3_CH;
 
     // Analog defaults
+    _data["an5ch"]  = DEF_ALG_A5_CH;
+    _data["an5gain"] = DEF_ALG_GAIN;
+    _data["an5off"] = DEF_ALG_OFFSET;
+
     _data["an6ch"]  = DEF_ALG_A6_CH;
-    _data["an7ch"] = DEF_ALG_A7_CH;
     _data["an6gain"] = DEF_ALG_GAIN;
-    _data["an7gain"] = DEF_ALG_GAIN;
     _data["an6off"] = DEF_ALG_OFFSET;
+
+    _data["an7ch"] = DEF_ALG_A7_CH;
+    _data["an7gain"] = DEF_ALG_GAIN;
     _data["an7off"]  = DEF_ALG_OFFSET;
 
     // AUX defaults
@@ -487,6 +492,11 @@ void TrackerSettings::setMagOffset(float x, float y, float z)
     _data["magxoff"]=QString::number(x,'g',3);
     _data["magyoff"]=QString::number(y,'g',3);
     _data["magzoff"]=QString::number(z,'g',3);
+}
+
+void TrackerSettings::setAnalog5Gain(float gain)
+{
+    _data["an5gain"]=QString::number(gain,'g',4);
 }
 
 void TrackerSettings::setAnalog6Gain(float gain)

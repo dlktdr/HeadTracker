@@ -113,6 +113,7 @@ public:
     static constexpr int DEF_PWM_A1_CH = -1;
     static constexpr int DEF_PWM_A2_CH = -1;
     static constexpr int DEF_PWM_A3_CH = -1;
+    static constexpr int DEF_ALG_A5_CH = -1;
     static constexpr int DEF_ALG_A6_CH = -1;
     static constexpr int DEF_ALG_A7_CH = -1;
     static constexpr float DEF_ALG_GAIN = 310.00f;
@@ -232,17 +233,25 @@ public:
     void setMagOffset(float x,float y, float z);
 
     // Analogs
+    void setAnalog5Ch(int channel) {_data["an5ch"] = channel;}
+    void setAnalog5Gain(float gain);
+    void setAnalog5Offset(int offset) {_data["an5off"] = offset;}
+    int analog5Ch() {return _data["an5ch"].toInt() ;}
+    float analog5Gain() {return _data["an5gain"].toFloat();}
+    int analog5Offset() {return _data["an5off"].toFloat();}
+
     void setAnalog6Ch(int channel) {_data["an6ch"] = channel;}
     void setAnalog6Gain(float gain);
     void setAnalog6Offset(int offset) {_data["an6off"] = offset;}
+    int analog6Ch() {return _data["an6ch"].toInt() ;}
+    float analog6Gain() {return _data["an6gain"].toFloat();}
+    int analog6Offset() {return _data["an6off"].toFloat();}
+
     void setAnalog7Ch(int channel) {_data["an7ch"] = channel;}
     void setAnalog7Gain(float gain);
     void setAnalog7Offset(int offset) {_data["an7off"] = offset;}
-    int analog6Ch() {return _data["an6ch"].toInt() ;}
     int analog7Ch() {return _data["an7ch"].toInt();}
-    float analog6Gain() {return _data["an6gain"].toFloat();}
     float analog7Gain() {return _data["an7gain"].toFloat();}
-    int analog6Offset() {return _data["an6off"].toFloat();}
     int analog7Offset() {return _data["an7off"].toFloat();}
 
     // Aux Functions

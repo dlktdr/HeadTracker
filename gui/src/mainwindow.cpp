@@ -509,11 +509,14 @@ void MainWindow::updateToUI()
     ui->til_gain->blockSignals(true);
     ui->rll_gain->blockSignals(true);
     ui->pan_gain->blockSignals(true);
+    ui->cmbA5Ch->blockSignals(true);
+    ui->spnA5Gain->blockSignals(true);
+    ui->spnA5Off->blockSignals(true);
     ui->cmbA6Ch->blockSignals(true);
-    ui->cmbA7Ch->blockSignals(true);   
     ui->spnA6Gain->blockSignals(true);
-    ui->spnA7Gain->blockSignals(true);
     ui->spnA6Off->blockSignals(true);
+    ui->cmbA7Ch->blockSignals(true);
+    ui->spnA7Gain->blockSignals(true);
     ui->spnA7Off->blockSignals(true);
     ui->cmbAuxFn0->blockSignals(true);
     ui->cmbAuxFn1->blockSignals(true);
@@ -531,14 +534,17 @@ void MainWindow::updateToUI()
     ui->spnLPPan->setValue(trkset.lpPan());
     ui->spnLPTiltRoll2->setValue(trkset.lpTiltRoll());
     ui->spnLPPan2->setValue(trkset.lpPan());
+    ui->spnA5Gain->setValue(trkset.analog5Gain());
+    ui->spnA5Off->setValue(trkset.analog5Offset());
     ui->spnA6Gain->setValue(trkset.analog6Gain());
-    ui->spnA7Gain->setValue(trkset.analog7Gain());
     ui->spnA6Off->setValue(trkset.analog6Offset());
     ui->spnA7Off->setValue(trkset.analog7Offset());
+    ui->spnA7Gain->setValue(trkset.analog7Gain());
 
     int panCh = trkset.panCh();
     int rllCh = trkset.rollCh();
     int tltCh = trkset.tiltCh();
+    int a5Ch = trkset.analog5Ch();
     int a6Ch = trkset.analog6Ch();
     int a7Ch = trkset.analog7Ch();
     int auxF0Ch = trkset.auxFunc0Ch();
@@ -553,6 +559,7 @@ void MainWindow::updateToUI()
     ui->cmbrllchn->setCurrentIndex(rllCh==-1?0:rllCh);
     ui->cmbtiltchn->setCurrentIndex(tltCh==-1?0:tltCh);
     // Analog CH
+    ui->cmbA5Ch->setCurrentIndex(a5Ch==-1?0:a5Ch);
     ui->cmbA6Ch->setCurrentIndex(a6Ch==-1?0:a6Ch);
     ui->cmbA7Ch->setCurrentIndex(a7Ch==-1?0:a7Ch);
     // Aux Funcs
@@ -637,11 +644,14 @@ void MainWindow::updateToUI()
     ui->til_gain->blockSignals(false);
     ui->rll_gain->blockSignals(false);
     ui->pan_gain->blockSignals(false);
+    ui->cmbA5Ch->blockSignals(false);
+    ui->spnA5Gain->blockSignals(false);
+    ui->spnA5Off->blockSignals(false);
     ui->cmbA6Ch->blockSignals(false);
-    ui->cmbA7Ch->blockSignals(false);
     ui->spnA6Gain->blockSignals(false);
-    ui->spnA7Gain->blockSignals(false);
     ui->spnA6Off->blockSignals(false);
+    ui->cmbA7Ch->blockSignals(false);
+    ui->spnA7Gain->blockSignals(false);
     ui->spnA7Off->blockSignals(false);
     ui->cmbAuxFn0->blockSignals(false);
     ui->cmbAuxFn1->blockSignals(false);
@@ -694,12 +704,18 @@ void MainWindow::updateFromUI()
     trkset.setPanReversed(ui->chkpanrev->isChecked());
     trkset.setTiltReversed(ui->chktltrev->isChecked());
 
-    trkset.setAnalog6Gain(ui->spnA6Gain->value());
-    trkset.setAnalog7Gain(ui->spnA7Gain->value());
+    trkset.setAnalog5Gain(ui->spnA5Gain->value());
+    trkset.setAnalog5Offset(ui->spnA5Off->value());
+
+    trkset.setAnalog6Gain(ui->spnA6Gain->value());    
     trkset.setAnalog6Offset(ui->spnA6Off->value());
+
+    trkset.setAnalog7Gain(ui->spnA7Gain->value());
     trkset.setAnalog7Offset(ui->spnA7Off->value());
+    int an5Ch = ui->cmbA5Ch->currentIndex();
     int an6Ch = ui->cmbA6Ch->currentIndex();
     int an7Ch = ui->cmbA7Ch->currentIndex();
+    trkset.setAnalog5Ch(an5Ch==0?-1:an5Ch);
     trkset.setAnalog6Ch(an6Ch==0?-1:an6Ch);
     trkset.setAnalog7Ch(an7Ch==0?-1:an7Ch);
 

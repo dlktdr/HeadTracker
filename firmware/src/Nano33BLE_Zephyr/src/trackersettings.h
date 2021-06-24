@@ -119,6 +119,7 @@ public:
     static constexpr int DEF_PWM_A1_CH = -1;
     static constexpr int DEF_PWM_A2_CH = -1;
     static constexpr int DEF_PWM_A3_CH = -1;
+    static constexpr int DEF_ALG_A5_CH = -1;
     static constexpr int DEF_ALG_A6_CH = -1;
     static constexpr int DEF_ALG_A7_CH = -1;
     static constexpr float DEF_ALG_GAIN = 310.0f;
@@ -248,17 +249,23 @@ public:
     int PWMCh(int pwmno) { return pwm[pwmno];}
 
 // Analogs
+    void setAnalog5Ch(int channel);
+    void setAnalog5Gain(float gain) {an5gain=gain;}
+    void setAnalog5Offset(int offset) {an5off = offset;}
     void setAnalog6Ch(int channel);
     void setAnalog6Gain(float gain) {an6gain=gain;}
     void setAnalog6Offset(int offset) {an6off = offset;}
     void setAnalog7Ch(int channel);
     void setAnalog7Gain(float gain) { an7gain = gain;}
     void setAnalog7Offset(int offset) {an7off = offset;}
+    int analog5Ch() {return an5ch;}
+    float analog5Gain() {return an5gain;}
+    int analog5Offset() {return an5off;}
     int analog6Ch() {return an6ch;}
-    int analog7Ch() {return an7ch;}
     float analog6Gain() {return an6gain;}
-    float analog7Gain() {return an7gain;}
     int analog6Offset() {return an6off;}
+    int analog7Ch() {return an7ch;}
+    float analog7Gain() {return an7gain;}
     int analog7Offset() {return an7off;}
 
 // Aux Func
@@ -332,9 +339,9 @@ private:
     uint16_t ppmchcnt; // Channel Count
 
     int pwm[4]; // PWM Output Pins
-    int an6ch,an7ch; // Analog Channels
-    float an6gain,an7gain; // Analog Gains
-    float an6off,an7off; // Analog Offsets
+    int an5ch,an6ch,an7ch; // Analog Channels
+    float an5gain,an6gain,an7gain; // Analog Gains
+    float an5off, an6off,an7off; // Analog Offsets
     int aux0ch,aux1ch; // Auxiliary Function Channels
     int aux0func,aux1func; // Auxiliary Functions
 

@@ -97,11 +97,14 @@ TrackerSettings::TrackerSettings()
     pwm[3] = DEF_PWM_A3_CH;
 
     // Analog defaults
+    an5ch = DEF_ALG_A5_CH;
+    an5gain = DEF_ALG_GAIN;
+    an5off = DEF_ALG_OFFSET;
     an6ch = DEF_ALG_A6_CH;
-    an7ch = DEF_ALG_A7_CH;
     an6gain = DEF_ALG_GAIN;
-    an7gain = DEF_ALG_GAIN;
     an6off = DEF_ALG_OFFSET;
+    an7ch = DEF_ALG_A7_CH;
+    an7gain = DEF_ALG_GAIN;
     an7off = DEF_ALG_OFFSET;
 
     // AUX defaults
@@ -499,6 +502,12 @@ void TrackerSettings::setAuxFunc1(int funct)
         aux1func = funct;
 }
 
+void TrackerSettings::setAnalog5Ch(int channel)
+{
+    if((channel > 0 && channel <= 16) || channel == -1)
+        an5ch = channel;
+}
+
 void TrackerSettings::setAnalog6Ch(int channel)
 {
     if((channel > 0 && channel <= 16) || channel == -1)
@@ -807,6 +816,9 @@ void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
     v = json["pwm3"]; if(!v.isNull()) setPWMCh(3,v);
 
 // Analog Settings
+    v = json["an5ch"]; if(!v.isNull()) setAnalog5Ch(v);
+    v = json["an5off"]; if(!v.isNull()) setAnalog5Offset(v);
+    v = json["an5gain"]; if(!v.isNull()) setAnalog5Gain(v);
     v = json["an6ch"]; if(!v.isNull()) setAnalog6Ch(v);
     v = json["an6off"]; if(!v.isNull()) setAnalog6Offset(v);
     v = json["an6gain"]; if(!v.isNull()) setAnalog6Gain(v);
@@ -917,6 +929,9 @@ void TrackerSettings::setJSONSettings(DynamicJsonDocument &json)
     json["pwm3"] = pwm[3];
 
 // Analog Settings
+    json["an5ch"] = an5ch;
+    json["an5off"] = an5off;
+    json["an5gain"] = an5gain;
     json["an6ch"] = an6ch;
     json["an6off"] = an6off;
     json["an6gain"] = an6gain;

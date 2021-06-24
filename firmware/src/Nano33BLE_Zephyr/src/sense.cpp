@@ -29,10 +29,11 @@
 #include "APDS9960/APDS9960.h"
 #include "PWM/pmw.h"
 #include "LSM9DS1/LSM9DS1.h"
+#include "Joystick/joystick.h"
 #include "filters.h"
 #include "io.h"
-#include "analog.h"
-#include "joystick.h"
+#include "Analog/analog.h"
+
 
 static float auxdata[10];
 static float raccx=0,raccy=0,raccz=0;
@@ -294,6 +295,15 @@ void calculate_Thread()
         }
 
         // 7) Set Analog Channels
+        if(trkset.analog5Ch() > 0) {
+            float an5 = analogRead(AN5);
+            an5 *= trkset.analog5Gain();
+            an5 += trkset.analog5Offset();
+            an5 += TrackerSettings::MIN_PWM;
+            an5 = MAX(TrackerSettings::MIN_PWM,MIN(TrackerSettings::MAX_PWM,an5));
+            channel_data[trkset.analog5Ch()-1] = an5;
+        }
+
         if(trkset.analog6Ch() > 0) {
             float an6 = analogRead(AN6);
             an6 *= trkset.analog6Gain();
