@@ -100,7 +100,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->cmdCalibrate,SIGNAL(clicked()),this, SLOT(startCalibration()));
     connect(ui->cmdSaveNVM,SIGNAL(clicked()),this,SLOT(storeToNVM()));
     connect(ui->cmdReboot,SIGNAL(clicked()),this,SLOT(reboot()));
-    //***
+    connect(ui->cmdChannelViewer,SIGNAL(clicked()),ui->actionChannel_Viewer, SLOT(trigger()));
     connect(ui->cmdRefresh,&QPushButton::clicked,this,&MainWindow::findSerialPorts);
 
     // Check Boxes
@@ -258,6 +258,7 @@ void MainWindow::serialConnect()
 
     ui->cmdDisconnect->setEnabled(true);
     ui->cmdConnect->setEnabled(false);
+    ui->cmdChannelViewer->setEnabled(false);
     addToLog("Connected to " + serialcon->portName());
     statusMessage(tr("Connected to ") + serialcon->portName());
 
@@ -292,6 +293,7 @@ void MainWindow::serialDisconnect()
 
     statusMessage(tr("Disconnected"));
     ui->cmdDisconnect->setEnabled(false);
+    ui->cmdChannelViewer->setEnabled(false);
     ui->cmdConnect->setEnabled(true);
     ui->cmdStopGraph->setEnabled(false);
     ui->cmdStartGraph->setEnabled(false);
@@ -1170,14 +1172,25 @@ void MainWindow::BTModeChanged()
 void MainWindow::reboot()
 {
     foreach(BoardType *brd, boards) {
-        brd->_reboot();
+        bool reboot=true;
+        if(!brd->isAccessAllowed())
+            continue;
+        if(!brd->_isBoardSavedToNVM()) {
+            QMessageBox::StandardButton rval = QMessageBox::question(this,"Changes not saved","Are you sure you want to reboot?\n"\
+                                  "Changes haven't been saved\nClick \"Save to NVM\" first",QMessageBox::Yes|QMessageBox::No);
+            if(rval != QMessageBox::Yes) {
+                reboot = false;
+            }
+        }
+        if(reboot) {
+            brd->_reboot();
+            QTime dieTime= QTime::currentTime().addMSecs(RECONNECT_AFT_REBT);
+            while (QTime::currentTime() < dieTime)
+                QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+
+            serialConnect();
+        }
     }
-
-    QTime dieTime= QTime::currentTime().addMSecs(RECONNECT_AFT_REBT);
-    while (QTime::currentTime() < dieTime)
-        QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
-
-    serialConnect();
 }
 
 void MainWindow::paramSendStart()
@@ -1269,7 +1282,7 @@ void MainWindow::boardDiscovered(BoardType *brd)
         ui->cmdCalibrate->setEnabled(true);
         ui->cmdReboot->setEnabled(true);
         ui->stackedWidget->setCurrentIndex(3);
-
+        ui->cmdChannelViewer->setEnabled(true);
 
         // Check Firmware Version is Compatible
 
