@@ -11,6 +11,7 @@
 #include <usb/class/usb_hid.h>
 #include "io.h"
 
+static enum usb_dc_status_code usb_status;
 static uint16_t channeldata[8];
 static void send_report(struct k_work *work);
 
@@ -20,8 +21,7 @@ void set_JoystickChannels(uint16_t chans[16])
     return;
 #endif
     memcpy(channeldata, chans, sizeof(channeldata));
-    //send_report(NULL);
-
+    send_report(NULL);
 }
 
 #define REPORT_TIMEOUT K_SECONDS(2)
@@ -173,10 +173,11 @@ static volatile uint8_t status[4];
 #define LOG_LEVEL LOG_LEVEL_INF
 LOG_MODULE_REGISTER(main);
 
-static bool configured;
 static const struct device *hdev;
 static struct k_work report_send;
 static ATOMIC_DEFINE(hid_ep_in_busy, 1);
+
+uint8_t report[4] = { 0x00 };
 
 static void send_report(struct k_work *work)
 {
@@ -252,7 +253,7 @@ static void send_report(struct k_work *work)
     uint32_t wrote;
 
 	//ret = hid_int_ep_write(hdev, report.data, report.length, &wrote);*/
-    uint8_t report[4] = { 0x00 };
+
 
     //gpio_pin_set()
 
@@ -284,13 +285,6 @@ static void on_idle_cb(const struct device *dev, uint16_t report_id)
 	k_work_submit(&report_send);
 }
 
-static void report_event_handler(struct k_timer *dummy)
-{
-/*
-	/*report_1.value++;
-	k_work_submit(&report_send);*/
-}
-
 static void protocol_cb(const struct device *dev, uint8_t protocol)
 {
 	LOG_INF("New protocol: %s", protocol == HID_PROTOCOL_BOOT ?
@@ -305,7 +299,8 @@ static const struct hid_ops ops = {
 
 static void status_cb(enum usb_dc_status_code status, const uint8_t *param)
 {
-	switch (status) {
+    usb_status = status;
+	/*switch (status) {
 	case USB_DC_RESET:
 		configured = false;
 		break;
@@ -320,7 +315,7 @@ static void status_cb(enum usb_dc_status_code status, const uint8_t *param)
 	default:
 		LOG_DBG("status %u unhandled", status);
 		break;
-	}
+	}*/
 }
 
 void joystick_init(void)
@@ -334,8 +329,6 @@ void joystick_init(void)
 		LOG_ERR("Failed to enable USB");
 		return;
 	}
-
-	k_work_init(&report_send, send_report);
 }
 
 static int composite_pre_init(const struct device *dev)
