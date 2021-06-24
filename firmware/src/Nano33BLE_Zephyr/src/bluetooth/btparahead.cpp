@@ -34,7 +34,6 @@ int setTrainer(uint8_t *addr);
 void pushByte(uint8_t byte);
 static void disconnected(struct bt_conn *conn, uint8_t reason);
 static void connected(struct bt_conn *conn, uint8_t err);
-static void security_changed(struct bt_conn*conn, bt_security_t level, enum bt_security_err err);
 static ssize_t write_ct(struct bt_conn *conn, const struct bt_gatt_attr *attr, const void *buf, uint16_t len, uint16_t offset, uint8_t flags);
 static ssize_t read_ct(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf, uint16_t len, uint16_t offset);
 static ssize_t write_but(struct bt_conn *conn, const struct bt_gatt_attr *attr, const void *buf, uint16_t len, uint16_t offset, uint8_t flags);
@@ -83,7 +82,6 @@ BT_GATT_SERVICE_DEFINE(bt_srv,
     BT_GATT_CHARACTERISTIC(&btbutton.uuid,
                            BT_GATT_CHRC_WRITE,
                            BT_GATT_PERM_READ | BT_GATT_PERM_WRITE, NULL, write_but, NULL),
-
     );
 
 static const struct bt_data ad[] = {
@@ -267,15 +265,6 @@ static ssize_t write_but(struct bt_conn *conn, const struct bt_gatt_attr *attr,
     }
 	return len;
 }
-
-/*
-static void security_changed(struct bt_conn*conn, bt_security_t level, enum bt_security_err err)
-{
-    serialWrite("Secutity Changed (");
-    serialWrite(level);
-    serialWrite(")\r\n");
-}
-*/
 
 void hasSecurityChangedTimer(struct k_timer *tmr)
 {

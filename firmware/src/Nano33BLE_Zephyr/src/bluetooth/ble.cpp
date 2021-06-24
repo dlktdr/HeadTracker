@@ -19,7 +19,6 @@
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/conn.h>
 
-#include "PPM/PPMOut.h"
 #include "serial.h"
 #include "io.h"
 #include "nano33ble.h"
