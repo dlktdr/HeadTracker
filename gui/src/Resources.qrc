@@ -5,5 +5,13 @@
         <file>IconFile.ico</file>
         <file>check.svg</file>
         <file>x.svg</file>
+        <file>chviewico.svg</file>
+        <file>calibrate.svg</file>
+        <file>connect.svg</file>
+        <file>disconnect.svg</file>
+        <file>download.svg</file>
+        <file>reboot.svg</file>
+        <file>save.svg</file>
+        <file>send.svg</file>
     </qresource>
 </RCC>

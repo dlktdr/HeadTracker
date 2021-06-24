@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Creator: CorelDRAW Home & Student X8 -->
+<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="1500px" height="1040px" version="1.1" style="shape-rendering:geometricPrecision; text-rendering:geometricPrecision; image-rendering:optimizeQuality; fill-rule:evenodd; clip-rule:evenodd"
+viewBox="0 0 1500 1040"
+ xmlns:xlink="http://www.w3.org/1999/xlink"
+ xmlns:dc="http://purl.org/dc/elements/1.1/"
+ xmlns:cc="http://creativecommons.org/ns#"
+ xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+ xmlns:svg="http://www.w3.org/2000/svg"
+ xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+ xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape">
+ <defs>
+  <style type="text/css">
+   <![CDATA[
+    .fil0 {fill:black}
+   ]]>
+  </style>
+ </defs>
+ <g id="Layer_x0020_1">
+  <metadata id="CorelCorpID_0Corel-Layer"/>
+  <svg:g>
+   <svg:path style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:medium;line-height:normal;font-family:sans-serif;font-variant-ligatures:normal;font-variant-position:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-alternates:normal;font-feature-settings:normal;text-indent:0;text-align:start;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;text-orientation:mixed;dominant-baseline:auto;baseline-shift:baseline;text-anchor:start;white-space:normal;shape-padding:0;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;vector-effect:none;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.52916664;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate" d="m 2.9054106,1.3020157 a 0.26460979,0.26460979 0 0 0 -0.2459805,0.332279 l 0.5798106,2.171961 2.7905286,0.42633 -2.7910445,0.427881 -0.5792947,2.170927 a 0.26460979,0.26460979 0 0 0 0.3751713,0.304891 l 5.3319758,-2.665987 a 0.26460979,0.26460979 0 0 0 0,-0.474907 L 3.0346014,1.3294037 a 0.26460979,0.26460979 0 0 0 -0.1291908,-0.02739 z m -2.29856767,0.865063 a 0.264842,0.264842 0 1 0 0,0.529684 H 2.0501662 a 0.264842,0.264842 0 1 0 0,-0.529684 z m -0.40824414,1.800924 a 0.26495282,0.26495282 0 0 0 0.0253233,0.529167 H 2.5793328 a 0.2646485,0.2646485 0 1 0 0,-0.529167 H 0.22392206 a 0.26460987,0.26460987 0 0 0 -0.0253233,0 z m 0.40824414,1.798857 a 0.2646485,0.2646485 0 1 0 0,0.529166 H 2.0501662 a 0.2646485,0.2646485 0 1 0 0,-0.529166 z"/>
+  </svg:g>
+  <g id="_751281744">
+   <path class="fil0" d="M470 40c0,39 40,167 50,207 5,16 9,32 13,49 4,17 8,33 13,50l26 99c9,0 21,3 29,4l91 14c29,5 345,54 363,54l0 5c-19,0 -42,5 -60,8 -97,17 -202,30 -301,46l-91 14c-9,1 -21,5 -31,5l-91 344c-6,24 -24,66 3,89 32,26 61,3 97,-15l863 -432c66,-33 55,-18 55,-86 0,-14 -95,-57 -115,-67 -42,-21 -82,-40 -124,-61 -83,-42 -163,-82 -246,-124l-370 -185c-25,-12 -108,-58 -129,-58 -24,0 -45,21 -45,40z"/>
+   <path class="fil0" d="M0 495l0 50c0,11 24,22 37,22l418 0c18,0 27,-4 36,-14 0,0 1,-1 1,-1 28,-30 7,-80 -32,-80l-428 0c-10,0 -32,13 -32,23z"/>
+   <path class="fil0" d="M60 830c0,27 9,55 42,55l270 0c47,0 62,-95 -15,-95l-245 0c-24,0 -52,17 -52,40z"/>
+   <path class="fil0" d="M60 200c0,28 23,47 40,47l270 0c49,0 62,-95 -13,-95l-245 0c-29,0 -52,19 -52,48z"/>
+  </g>
+ </g>
+</svg>
