@@ -1,2 +1,0 @@
-# Serial Bus \(SBUS\)
-

@@ -1,2 +1,0 @@
-# Pulse Position Modulation \(PPM\)
-
