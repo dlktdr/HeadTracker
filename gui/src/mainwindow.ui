@@ -555,7 +555,7 @@
                 <bool>false</bool>
                </property>
                <property name="currentIndex">
-                <number>1</number>
+                <number>2</number>
                </property>
                <widget class="QWidget" name="tabGeneral">
                 <attribute name="title">
@@ -1259,7 +1259,7 @@
                  <item row="11" column="0" colspan="3">
                   <widget class="QLabel" name="label_51">
                    <property name="text">
-                    <string>Sbus output pin is on TX (P1.03)</string>
+                    <string>Sbus output pin - TX (P1.03)</string>
                    </property>
                   </widget>
                  </item>
@@ -1415,7 +1415,7 @@
                  <item row="5" column="0">
                   <widget class="QLabel" name="label_54">
                    <property name="text">
-                    <string>Sbus input pin on RX (P1.10)</string>
+                    <string>Sbus input pin - RX (P1.10)</string>
                    </property>
                   </widget>
                  </item>
@@ -1484,7 +1484,7 @@
                  <item row="5" column="0" colspan="3">
                   <widget class="QLabel" name="label_30">
                    <property name="text">
-                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:10pt; font-weight:600;&quot;&gt;Bluetooth supports 8 channels&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Change the BT mode, Save to NVM and Reset for this to take effect&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;Any channels that are set higher than 8 won't be sent/received.&lt;br/&gt;&lt;br/&gt;*** If set as a receiver board, be sure to leave other channels in the GUI off so the incoming bt channels won't be overriden ***&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;&lt;br/&gt;&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:10pt; font-weight:600;&quot;&gt;Bluetooth supports 8 channels&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Change the BT mode, Save to NVM and Reset for this to take effect&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;Any channels that are set higher than 8 won't be sent/received.&lt;br/&gt;&lt;br/&gt;If set as a receiver you will usually want to leave all the channels set OFF allowing the remote bluetooth channels to pass through.&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;&lt;br/&gt;&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                    </property>
                    <property name="wordWrap">
                     <bool>true</bool>
@@ -1553,124 +1553,8 @@
                  <string>PWM</string>
                 </attribute>
                 <layout class="QGridLayout" name="gridLayout_9">
-                 <item row="0" column="0" colspan="2">
-                  <widget class="QLabel" name="label_32">
-                   <property name="text">
-                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;PWM Output Pins&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="0">
-                  <widget class="QLabel" name="label_37">
-                   <property name="text">
-                    <string>A0</string>
-                   </property>
-                  </widget>
-                 </item>
                  <item row="1" column="1">
                   <widget class="QComboBox" name="cmbPWM0">
-                   <property name="minimumSize">
-                    <size>
-                     <width>100</width>
-                     <height>0</height>
-                    </size>
-                   </property>
-                   <item>
-                    <property name="text">
-                     <string>Disable</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>Channel 1</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>Channel 2</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>Channel 3</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>Channel 4</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>Channel 5</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>Channel 6</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>Channel 7</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>Channel 8</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>Channel 9</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>Channel 10</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>Channel 11</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>Channel 12</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>Channel 13</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>Channel 14</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>Channel 15</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>Channel 16</string>
-                    </property>
-                   </item>
-                  </widget>
-                 </item>
-                 <item row="2" column="0">
-                  <widget class="QLabel" name="label_38">
-                   <property name="text">
-                    <string>A1</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="2" column="1">
-                  <widget class="QComboBox" name="cmbPWM1">
                    <property name="minimumSize">
                     <size>
                      <width>100</width>
@@ -1780,15 +1664,8 @@
                    </property>
                   </spacer>
                  </item>
-                 <item row="3" column="0">
-                  <widget class="QLabel" name="label_39">
-                   <property name="text">
-                    <string>A2</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="3" column="1">
-                  <widget class="QComboBox" name="cmbPWM2">
+                 <item row="4" column="1">
+                  <widget class="QComboBox" name="cmbPWM3">
                    <property name="minimumSize">
                     <size>
                      <width>100</width>
@@ -1889,8 +1766,29 @@
                    </property>
                   </widget>
                  </item>
-                 <item row="4" column="1">
-                  <widget class="QComboBox" name="cmbPWM3">
+                 <item row="3" column="0">
+                  <widget class="QLabel" name="label_39">
+                   <property name="text">
+                    <string>A2</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="0">
+                  <widget class="QLabel" name="label_37">
+                   <property name="text">
+                    <string>A0</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="0">
+                  <widget class="QLabel" name="label_38">
+                   <property name="text">
+                    <string>A1</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="3" column="1">
+                  <widget class="QComboBox" name="cmbPWM2">
                    <property name="minimumSize">
                     <size>
                      <width>100</width>
@@ -1984,7 +1882,14 @@
                    </item>
                   </widget>
                  </item>
-                 <item row="5" column="1">
+                 <item row="0" column="0" colspan="2">
+                  <widget class="QLabel" name="label_32">
+                   <property name="text">
+                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;PWM Output Pins&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="6" column="1">
                   <spacer name="verticalSpacer_9">
                    <property name="orientation">
                     <enum>Qt::Vertical</enum>
@@ -1997,6 +1902,108 @@
                    </property>
                   </spacer>
                  </item>
+                 <item row="2" column="1">
+                  <widget class="QComboBox" name="cmbPWM1">
+                   <property name="minimumSize">
+                    <size>
+                     <width>100</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <item>
+                    <property name="text">
+                     <string>Disable</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Channel 1</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Channel 2</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Channel 3</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Channel 4</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Channel 5</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Channel 6</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Channel 7</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Channel 8</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Channel 9</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Channel 10</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Channel 11</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Channel 12</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Channel 13</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Channel 14</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Channel 15</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Channel 16</string>
+                    </property>
+                   </item>
+                  </widget>
+                 </item>
+                 <item row="5" column="0" colspan="3">
+                  <widget class="QLabel" name="label_55">
+                   <property name="text">
+                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;PWM output is 3.3V, some servos may not respond properly.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   </property>
+                  </widget>
+                 </item>
                 </layout>
                </widget>
                <widget class="QWidget" name="tabExtras">
@@ -2004,8 +2011,15 @@
                  <string>Analog + Aux</string>
                 </attribute>
                 <layout class="QGridLayout" name="gridLayout_11">
-                 <item row="1" column="4" colspan="3">
-                  <widget class="QComboBox" name="cmbAuxFn0Ch">
+                 <item row="1" column="0">
+                  <widget class="QLabel" name="label_33">
+                   <property name="text">
+                    <string>Aux function 1</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="4" colspan="3">
+                  <widget class="QComboBox" name="cmbAuxFn1Ch">
                    <item>
                     <property name="text">
                      <string>Off</string>
@@ -2089,6 +2103,91 @@
                    <item>
                     <property name="text">
                      <string>16</string>
+                    </property>
+                   </item>
+                  </widget>
+                 </item>
+                 <item row="5" column="5" colspan="2">
+                  <widget class="QLabel" name="label_42">
+                   <property name="text">
+                    <string>Channel</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="5" column="1" colspan="2">
+                  <widget class="QLabel" name="label_43">
+                   <property name="text">
+                    <string>Gain (us/volt)</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="0">
+                  <widget class="QLabel" name="label_34">
+                   <property name="text">
+                    <string>Aux function 2</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="6" column="3" colspan="2">
+                  <widget class="QSpinBox" name="spnA5Off">
+                   <property name="minimum">
+                    <number>-2048</number>
+                   </property>
+                   <property name="maximum">
+                    <number>2048</number>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="6" column="1" colspan="2">
+                  <widget class="QDoubleSpinBox" name="spnA5Gain">
+                   <property name="minimum">
+                    <double>-3000.000000000000000</double>
+                   </property>
+                   <property name="maximum">
+                    <double>3000.000000000000000</double>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="1" colspan="3">
+                  <widget class="QComboBox" name="cmbAuxFn0">
+                   <item>
+                    <property name="text">
+                     <string>X Gyrometer +/- 1000deg/s</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Y Gyrometer +/- 1000deg/s</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Z Gyrometer +/- 1000deg/s</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>X Acceleration +/- 2g</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Y Acceleration +/- 2g</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Z Acceleration +/- 2g</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Z Acceleration +/- 2g (Offset by 1g)</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Bluetooth RSSI</string>
                     </property>
                    </item>
                   </widget>
@@ -2182,418 +2281,10 @@
                    </item>
                   </widget>
                  </item>
-                 <item row="7" column="1" colspan="2">
-                  <widget class="QDoubleSpinBox" name="spnA6Gain">
-                   <property name="decimals">
-                    <number>2</number>
-                   </property>
-                   <property name="minimum">
-                    <double>-3000.000000000000000</double>
-                   </property>
-                   <property name="maximum">
-                    <double>3000.000000000000000</double>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="5" column="5" colspan="2">
-                  <widget class="QLabel" name="label_42">
-                   <property name="text">
-                    <string>Channel</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="5" column="1" colspan="2">
-                  <widget class="QLabel" name="label_43">
-                   <property name="text">
-                    <string>Gain (us/volt)</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="11" column="1">
-                  <spacer name="verticalSpacer_10">
-                   <property name="orientation">
-                    <enum>Qt::Vertical</enum>
-                   </property>
-                   <property name="sizeHint" stdset="0">
-                    <size>
-                     <width>20</width>
-                     <height>40</height>
-                    </size>
-                   </property>
-                  </spacer>
-                 </item>
-                 <item row="7" column="5" colspan="2">
-                  <widget class="QComboBox" name="cmbA6Ch">
-                   <item>
-                    <property name="text">
-                     <string>Off</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>1</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>2</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>3</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>4</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>5</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>6</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>7</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>8</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>9</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>10</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>11</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>12</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>13</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>14</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>15</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>16</string>
-                    </property>
-                   </item>
-                  </widget>
-                 </item>
-                 <item row="3" column="0" rowspan="2" colspan="7">
-                  <widget class="Line" name="line_2">
-                   <property name="orientation">
-                    <enum>Qt::Horizontal</enum>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="2" column="4" colspan="3">
-                  <widget class="QComboBox" name="cmbAuxFn1Ch">
-                   <item>
-                    <property name="text">
-                     <string>Off</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>1</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>2</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>3</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>4</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>5</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>6</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>7</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>8</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>9</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>10</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>11</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>12</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>13</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>14</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>15</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>16</string>
-                    </property>
-                   </item>
-                  </widget>
-                 </item>
-                 <item row="5" column="3">
-                  <widget class="QLabel" name="label_44">
-                   <property name="text">
-                    <string>Offset (us)</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="8" column="1" colspan="2">
-                  <widget class="QDoubleSpinBox" name="spnA7Gain">
-                   <property name="decimals">
-                    <number>2</number>
-                   </property>
-                   <property name="minimum">
-                    <double>-3000.000000000000000</double>
-                   </property>
-                   <property name="maximum">
-                    <double>3000.000000000000000</double>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="2" column="0">
-                  <widget class="QLabel" name="label_34">
-                   <property name="text">
-                    <string>Aux function 2</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="1" colspan="3">
-                  <widget class="QComboBox" name="cmbAuxFn0">
-                   <item>
-                    <property name="text">
-                     <string>X Gyrometer +/- 1000deg/s</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>Y Gyrometer +/- 1000deg/s</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>Z Gyrometer +/- 1000deg/s</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>X Acceleration +/- 2g</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>Y Acceleration +/- 2g</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>Z Acceleration +/- 2g</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>Z Acceleration +/- 2g (Offset by 1g)</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>Bluetooth RSSI</string>
-                    </property>
-                   </item>
-                  </widget>
-                 </item>
-                 <item row="7" column="3" colspan="2">
-                  <widget class="QSpinBox" name="spnA6Off">
-                   <property name="minimum">
-                    <number>-2012</number>
-                   </property>
-                   <property name="maximum">
-                    <number>2012</number>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="4" colspan="2">
-                  <widget class="QLabel" name="label_35">
-                   <property name="text">
-                    <string>Channel</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="6" column="0">
-                  <widget class="QLabel" name="label_49">
-                   <property name="text">
-                    <string>Analog A5</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="2" column="1" colspan="3">
-                  <widget class="QComboBox" name="cmbAuxFn1">
-                   <item>
-                    <property name="text">
-                     <string>X Gyrometer +/- 1000deg/s</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>Y Gyrometer +/- 1000deg/s</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>Z Gyrometer +/- 1000deg/s</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>X Acceleration +/- 2g</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>Y Acceleration +/- 2g</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>Z Acceleration +/- 2g</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>Z Acceleration +/- 2g (Offset by 1g)</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>Bluetooth RSSI</string>
-                    </property>
-                   </item>
-                  </widget>
-                 </item>
-                 <item row="8" column="3" colspan="2">
-                  <widget class="QSpinBox" name="spnA7Off">
-                   <property name="minimum">
-                    <number>-2012</number>
-                   </property>
-                   <property name="maximum">
-                    <number>2012</number>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="0">
-                  <widget class="QLabel" name="label_33">
-                   <property name="text">
-                    <string>Aux function 1</string>
-                   </property>
-                  </widget>
-                 </item>
                  <item row="7" column="0">
                   <widget class="QLabel" name="label_36">
                    <property name="text">
                     <string>Analog A6</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="8" column="0">
-                  <widget class="QLabel" name="label_41">
-                   <property name="text">
-                    <string>Analog A7</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="6" column="1" colspan="2">
-                  <widget class="QDoubleSpinBox" name="spnA5Gain">
-                   <property name="minimum">
-                    <double>-3000.000000000000000</double>
-                   </property>
-                   <property name="maximum">
-                    <double>3000.000000000000000</double>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="6" column="3" colspan="2">
-                  <widget class="QSpinBox" name="spnA5Off">
-                   <property name="minimum">
-                    <number>-2048</number>
-                   </property>
-                   <property name="maximum">
-                    <number>2048</number>
                    </property>
                   </widget>
                  </item>
@@ -2686,6 +2377,322 @@
                    </item>
                   </widget>
                  </item>
+                 <item row="2" column="1" colspan="3">
+                  <widget class="QComboBox" name="cmbAuxFn1">
+                   <item>
+                    <property name="text">
+                     <string>X Gyrometer +/- 1000deg/s</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Y Gyrometer +/- 1000deg/s</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Z Gyrometer +/- 1000deg/s</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>X Acceleration +/- 2g</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Y Acceleration +/- 2g</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Z Acceleration +/- 2g</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Z Acceleration +/- 2g (Offset by 1g)</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Bluetooth RSSI</string>
+                    </property>
+                   </item>
+                  </widget>
+                 </item>
+                 <item row="7" column="5" colspan="2">
+                  <widget class="QComboBox" name="cmbA6Ch">
+                   <item>
+                    <property name="text">
+                     <string>Off</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>1</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>2</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>3</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>4</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>5</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>6</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>7</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>8</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>9</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>10</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>11</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>12</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>13</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>14</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>15</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>16</string>
+                    </property>
+                   </item>
+                  </widget>
+                 </item>
+                 <item row="0" column="4" colspan="2">
+                  <widget class="QLabel" name="label_35">
+                   <property name="text">
+                    <string>Channel</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="11" column="1">
+                  <spacer name="verticalSpacer_10">
+                   <property name="orientation">
+                    <enum>Qt::Vertical</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>20</width>
+                     <height>40</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
+                 <item row="1" column="4" colspan="3">
+                  <widget class="QComboBox" name="cmbAuxFn0Ch">
+                   <item>
+                    <property name="text">
+                     <string>Off</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>1</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>2</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>3</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>4</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>5</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>6</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>7</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>8</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>9</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>10</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>11</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>12</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>13</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>14</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>15</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>16</string>
+                    </property>
+                   </item>
+                  </widget>
+                 </item>
+                 <item row="6" column="0">
+                  <widget class="QLabel" name="label_49">
+                   <property name="text">
+                    <string>Analog A5</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="7" column="3" colspan="2">
+                  <widget class="QSpinBox" name="spnA6Off">
+                   <property name="minimum">
+                    <number>-2012</number>
+                   </property>
+                   <property name="maximum">
+                    <number>2012</number>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="8" column="3" colspan="2">
+                  <widget class="QSpinBox" name="spnA7Off">
+                   <property name="minimum">
+                    <number>-2012</number>
+                   </property>
+                   <property name="maximum">
+                    <number>2012</number>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="8" column="1" colspan="2">
+                  <widget class="QDoubleSpinBox" name="spnA7Gain">
+                   <property name="decimals">
+                    <number>2</number>
+                   </property>
+                   <property name="minimum">
+                    <double>-3000.000000000000000</double>
+                   </property>
+                   <property name="maximum">
+                    <double>3000.000000000000000</double>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="8" column="0">
+                  <widget class="QLabel" name="label_41">
+                   <property name="text">
+                    <string>Analog A7</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="7" column="1" colspan="2">
+                  <widget class="QDoubleSpinBox" name="spnA6Gain">
+                   <property name="decimals">
+                    <number>2</number>
+                   </property>
+                   <property name="minimum">
+                    <double>-3000.000000000000000</double>
+                   </property>
+                   <property name="maximum">
+                    <double>3000.000000000000000</double>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="5" column="3">
+                  <widget class="QLabel" name="label_44">
+                   <property name="text">
+                    <string>Offset (us)</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="3" column="0" rowspan="2" colspan="7">
+                  <widget class="Line" name="line_2">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                  </widget>
+                 </item>
                 </layout>
                </widget>
               </widget>
@@ -2735,7 +2742,7 @@
        </sizepolicy>
       </property>
       <property name="title">
-       <string>Servo Output</string>
+       <string>Servo Output - Local Board</string>
       </property>
       <layout class="QGridLayout" name="gridLayout_5">
        <property name="leftMargin">
@@ -3282,7 +3289,7 @@
        </sizepolicy>
       </property>
       <property name="title">
-       <string>Graph</string>
+       <string>Graph - Local Board</string>
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0">
        <item>

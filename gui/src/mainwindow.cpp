@@ -110,6 +110,9 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->chkInvertedPPM,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
     connect(ui->chkInvertedPPMIn,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
     connect(ui->chkResetCenterWave,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
+    connect(ui->chkSbusInInv,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
+    connect(ui->chkSbusOutInv,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
+
     //connect(ui->chkRawData,SIGNAL(clicked(bool)),this,SLOT(setDataMode(bool)));
 
     // Spin Boxes
@@ -489,6 +492,8 @@ void MainWindow::updateToUI()
     ui->chkInvertedPPM->setChecked(trkset.invertedPpmOut());
     ui->chkInvertedPPMIn->setChecked(trkset.invertedPpmIn());
     ui->chkResetCenterWave->setChecked(trkset.resetOnWave());
+    ui->chkSbusInInv->setChecked(trkset.invertedSBUSIn());
+    ui->chkSbusOutInv->setChecked(trkset.invertedSBUSOut());
 
     // Prevents signals from these items causing another update
     ui->cmbpanchn->blockSignals(true);
@@ -804,6 +809,8 @@ void MainWindow::updateFromUI()
     trkset.setInvertedPpmOut(ui->chkInvertedPPM->isChecked());
     trkset.setInvertedPpmIn(ui->chkInvertedPPMIn->isChecked());
     trkset.setResetOnWave(ui->chkResetCenterWave->isChecked());
+    trkset.setInvertedSBUSIn(ui->chkSbusInInv->isChecked());
+    trkset.setInvertedSBUSOut(ui->chkSbusOutInv->isChecked());
 
     ui->cmdStore->setEnabled(true);
     ui->cmdSaveNVM->setEnabled(true);    

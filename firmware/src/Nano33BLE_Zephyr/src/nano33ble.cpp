@@ -35,7 +35,7 @@ void start(void)
     }
 
     // Start SBUS - SBUS/uarte_sbus.cpp (Pins D0/TX, D1/RX)
-    SBUS_Init(0,1);
+    SBUS_Init();
 
     // PWM Outputs - Fixed to A0-A3
     PWM_Init(50); // Start PWM 50hz

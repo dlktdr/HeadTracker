@@ -21,5 +21,5 @@
 
 void SBUS_TX_BuildData(uint16_t ch_[16]);
 void SBUS_TX_Start();
-void SBUS_Init(int txPin, int invTxPin);
+void SBUS_Init();
 void SBUS_Thread();

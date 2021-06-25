@@ -51,6 +51,10 @@ TrackerSettings::TrackerSettings(QObject *parent):
     _data["pwm2"] = DEF_PWM_A2_CH;
     _data["pwm3"] = DEF_PWM_A3_CH;
 
+    // SBUS Defaults
+    _data["sbininv"] = DEF_SBUS_IN_INV;
+    _data["sboutinv"] = DEF_SBUS_OUT_INV;
+
     // Analog defaults
     _data["an5ch"]  = DEF_ALG_A5_CH;
     _data["an5gain"] = DEF_ALG_GAIN;

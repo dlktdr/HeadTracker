@@ -119,6 +119,8 @@ public:
     static constexpr int DEF_PWM_A1_CH = -1;
     static constexpr int DEF_PWM_A2_CH = -1;
     static constexpr int DEF_PWM_A3_CH = -1;
+    static constexpr bool DEF_SBUS_IN_INV = false;
+    static constexpr bool DEF_SBUS_OUT_INV = false;
     static constexpr int DEF_ALG_A5_CH = -1;
     static constexpr int DEF_ALG_A6_CH = -1;
     static constexpr int DEF_ALG_A7_CH = -1;
@@ -248,6 +250,12 @@ public:
     void setPWMCh(int pwmno, int pwmch);
     int PWMCh(int pwmno) { return pwm[pwmno];}
 
+// SBUS
+    void setInvertedSBUSIn(bool v) {sbininv = v;}
+    bool invertedSBUSIn() {return sbininv;}
+    void setInvertedSBUSOut(bool v) {sboutinv = v;}
+    bool invertedSBUSOut() {return sboutinv;}
+
 // Analogs
     void setAnalog5Ch(int channel);
     void setAnalog5Gain(float gain) {an5gain=gain;}
@@ -344,6 +352,9 @@ private:
     float an5off, an6off,an7off; // Analog Offsets
     int aux0ch,aux1ch; // Auxiliary Function Channels
     int aux0func,aux1func; // Auxiliary Functions
+
+    bool sboutinv;
+    bool sbininv;
 
     // Bit map of data to send to GUI, max 64 items
     uint64_t senddatavars;

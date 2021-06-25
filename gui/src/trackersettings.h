@@ -113,6 +113,8 @@ public:
     static constexpr int DEF_PWM_A1_CH = -1;
     static constexpr int DEF_PWM_A2_CH = -1;
     static constexpr int DEF_PWM_A3_CH = -1;
+    static constexpr bool DEF_SBUS_IN_INV = false;
+    static constexpr bool DEF_SBUS_OUT_INV = false;
     static constexpr int DEF_ALG_A5_CH = -1;
     static constexpr int DEF_ALG_A6_CH = -1;
     static constexpr int DEF_ALG_A7_CH = -1;
@@ -211,6 +213,12 @@ public:
     bool invertedPpmIn() const;
     void setInvertedPpmIn(bool value);
 
+    void setInvertedSBUSIn(bool v) {_data["sbininv"] = v;}
+    bool invertedSBUSIn() {return _data["sbininv"].toBool();}
+
+    void setInvertedSBUSOut(bool v) {_data["sboutinv"] = v;}
+    bool invertedSBUSOut() {return _data["sboutinv"].toBool();}
+
     int buttonPin() const;
     void setButtonPin(int value);
 
@@ -271,7 +279,7 @@ public:
     int count() const {return 22;} //BNO, how many values should there be
 
     uint axisRemap() const {return _data["axisremap"].toUInt();}
-    void setAxisRemap(uint value);
+    void setAxisRemap(uint value);        
 
     uint axisSign() const {return _data["axissign"].toUInt();}
     void setAxisSign(uint value);

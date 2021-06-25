@@ -96,6 +96,10 @@ TrackerSettings::TrackerSettings()
     pwm[2] = DEF_PWM_A2_CH;
     pwm[3] = DEF_PWM_A3_CH;
 
+    // SBUS Defaults
+    sbininv = DEF_SBUS_IN_INV;
+    sboutinv = DEF_SBUS_OUT_INV;
+
     // Analog defaults
     an5ch = DEF_ALG_A5_CH;
     an5gain = DEF_ALG_GAIN;
@@ -815,6 +819,10 @@ void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
     v = json["pwm2"]; if(!v.isNull()) setPWMCh(2,v);
     v = json["pwm3"]; if(!v.isNull()) setPWMCh(3,v);
 
+// SBUS Settings
+    v = json["sbininv"]; if(!v.isNull()) setInvertedSBUSIn(v);
+    v = json["sboutinv"]; if(!v.isNull()) setInvertedSBUSOut(v);
+
 // Analog Settings
     v = json["an5ch"]; if(!v.isNull()) setAnalog5Ch(v);
     v = json["an5off"]; if(!v.isNull()) setAnalog5Offset(v);
@@ -927,6 +935,10 @@ void TrackerSettings::setJSONSettings(DynamicJsonDocument &json)
     json["pwm1"] = pwm[1];
     json["pwm2"] = pwm[2];
     json["pwm3"] = pwm[3];
+
+// SBUS Settings
+    json["sbininv"] = sbininv;
+    json["sboutinb"] = sboutinv;
 
 // Analog Settings
     json["an5ch"] = an5ch;
