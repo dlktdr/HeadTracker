@@ -21,7 +21,7 @@
 #include "boardbno055.h"
 
 const int MAX_LOG_LENGTH=6000; // How many bytes to keep of log data in the gui
-const QString version="2.00"; // Current Version Number
+const QString version="2.10"; // Current Version Number
 const QString versionsuffix="Z"; // Version Suffix
 const QStringList firmwares={"BNO055","NANO33BLE"}; // Allowable hardware types
 

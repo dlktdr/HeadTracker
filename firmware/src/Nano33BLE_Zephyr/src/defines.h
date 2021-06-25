@@ -1,7 +1,7 @@
 #pragma once
 
 // Version
-#define FW_VERSION "2.01"
+#define FW_VERSION "2.10"
 #define FW_BOARD "NANO33BLE"
 
 // Thread Periods
