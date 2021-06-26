@@ -167,7 +167,7 @@ void set_JoystickChannels(uint16_t chans[16])
 typedef struct {
 } packetchdata;
 
-static const uint8_t hid_report_desc[] = HID_MOUSE_REPORT_DESC(2);
+static const uint8_t hid_report_desc[] = "";//HID_MOUSE_REPORT_DESC(2);
 static volatile uint8_t status[4];
 
 #define LOG_LEVEL LOG_LEVEL_INF
