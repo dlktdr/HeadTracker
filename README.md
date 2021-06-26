@@ -7,5 +7,8 @@ If you're an RC enthusiast with a FPV headset, at some point you might have thou
 # [Wiki](https://github.com/dlktdr/HeadTracker/wiki/Nano33BLE-Build-Instructions)
 * See the Wiki for how to build one.
 
+# [GitBook Docs](https://headtracker.gitbook.io/head-tracker/)
+* Moving documentation to Gitbook, it has a easier to follow and edit interface
+
 ### Screenshot
 <img src="https://raw.githubusercontent.com/wiki/dlktdr/HeadTracker/media/gui/ScreenCapture1016.png">
