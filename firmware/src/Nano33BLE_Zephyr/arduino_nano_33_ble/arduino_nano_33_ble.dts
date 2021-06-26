@@ -33,6 +33,7 @@
 	aliases {
 		led0 = &led0;
 		spi = &spi2;
+        adcctrl = &adc;
 	};
 };
 
@@ -85,6 +86,7 @@
 	sda-pin = <31>; //P0.31
 	scl-pin = <2>; //P0.02
 };
+
 &i2c1 {
 	compatible = "nordic,nrf-twim";
 	status = "okay";
