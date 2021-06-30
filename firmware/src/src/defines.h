@@ -17,7 +17,7 @@
 // Bluetooth
 #define BT_MIN_CONN_INTER 6  // 6 Is lowest BLE can do. Actual Rate = Var * 1.25ms
 #define BT_MAX_CONN_INTER 10
-#define BT_CONN_LOST_TIME 400 // 400 * 10ms = 4seconds
+#define BT_CONN_LOST_TIME 200 // 100 * 10ms = 2seconds
 
 // Thread Priority Definitions
 #define PRIORITY_LOW 4
@@ -38,6 +38,7 @@
 // and can't be used by Zephyr
 // Cannot use GPIOTE interrupt as I override the interrupt handler in PPMIN
 
+#define SBUSIN_PPICH 15
 #define SBUSOUT_PPICH 16
 #define PPMIN_PPICH1 17
 #define PPMIN_PPICH2 18
@@ -45,8 +46,11 @@
 
 #define SBUSOUT_UARTE_CH 1
 
-#define SBUS_GPIOTE1 4 // Input GPIOTE
-#define SBUS_GPIOTE2 5 // Output GPIOTE (Inverted)
+// GPIOTE
+#define SBUS_GPIOTE1 2 // SBUSOut (UARTE Tx)
+#define SBUS_GPIOTE2 3 // SBUSOut (Output Pin)
+#define SBUS_GPIOTE3 4 // SBUSIn (Input Pin)
+#define SBUS_GPIOTE4 5 // SBUSIn (Output to UARTE RX)
 #define PPMIN_GPIOTE 6
 #define PPMOUT_GPIOTE 7
 

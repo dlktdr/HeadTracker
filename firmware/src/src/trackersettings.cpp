@@ -938,7 +938,7 @@ void TrackerSettings::setJSONSettings(DynamicJsonDocument &json)
 
 // SBUS Settings
     json["sbininv"] = sbininv;
-    json["sboutinb"] = sboutinv;
+    json["sboutinv"] = sboutinv;
 
 // Analog Settings
     json["an5ch"] = an5ch;

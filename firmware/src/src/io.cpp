@@ -65,11 +65,8 @@ void io_Init()
     pinMode(ARDUINO_A1, GPIO_OUTPUT); // PWM 1
     pinMode(ARDUINO_A2, GPIO_OUTPUT); // PWM 2
     pinMode(ARDUINO_A3, GPIO_OUTPUT); // PWM 3
-/*    pinMode(ARDUINO_A4, GPIO_OUTPUT); // Timing Output
-    pinMode(ARDUINO_A5, GPIO_OUTPUT); // Timing Output*/
+/*    pinMode(ARDUINO_A4, GPIO_OUTPUT); // Unused */
+    pinMode(ARDUINO_A5, GPIO_INPUT); // Analog input
     pinMode(ARDUINO_A6, GPIO_INPUT); // Analog input
     pinMode(ARDUINO_A7, GPIO_INPUT); // Analog input
-
-    digitalWrite(ARDUINO_A4, HIGH);
-    digitalWrite(ARDUINO_A5, HIGH); // Used as the analog source voltage..
 }
