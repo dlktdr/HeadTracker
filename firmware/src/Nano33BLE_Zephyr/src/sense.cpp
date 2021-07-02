@@ -613,9 +613,9 @@ void buildAuxData()
     auxdata[2] = (gyrz / 1000) * pwmrange + TrackerSettings::PPM_CENTER;
     auxdata[3] = (accx / 2.0f) * pwmrange + TrackerSettings::PPM_CENTER;
     auxdata[4] = (accy / 2.0f) * pwmrange + TrackerSettings::PPM_CENTER;
-    auxdata[5] = (accz / 1.0f) * pwmrange + TrackerSettings::PPM_CENTER;
+    auxdata[5] = (accz / 2.0f) * pwmrange + TrackerSettings::PPM_CENTER;
     auxdata[6] = ((accz -1.0f) / 2.0f) * pwmrange + TrackerSettings::PPM_CENTER;
-    auxdata[6] = TrackerSettings::MIN_PWM;
+    auxdata[7] = TrackerSettings::MIN_PWM;
 
     // *** FIXME
   //  auxdata[7] = static_cast<float>(BLE.central().rssi()) / 127.0 * pwmrange + TrackerSettings::MIN_PWM;
