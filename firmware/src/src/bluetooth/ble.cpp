@@ -179,3 +179,20 @@ const char *BTGetAddress()
     return "BT_DISABLED";
 }
 
+int8_t BTGetRSSI()
+{
+    switch(curmode) {
+    case BTPARAHEAD:
+        return BTHeadGetRSSI();
+    case BTPARARMT:
+        return BTRmtGetRSSI();
+        break;
+    case BTSCANONLY:
+        break;
+    default:
+        break;
+    }
+
+    return -1;
+}
+

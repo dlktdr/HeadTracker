@@ -27,3 +27,4 @@ uint16_t BTGetChannel(int chno);
 void BTSetChannel(int channel, const uint16_t value);
 bool BTGetConnected();
 const char *BTGetAddress();
+int8_t BTGetRSSI();

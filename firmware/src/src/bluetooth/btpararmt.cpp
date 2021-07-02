@@ -514,6 +514,13 @@ const char * BTRmtGetAddress()
     return "";
 }
 
+int8_t BTRmtGetRSSI()
+{
+    // *** Implement
+    return -1;
+}
+
+
 static struct bt_gatt_write_params write_params;
 
 char rstdata[1] = {'R'};

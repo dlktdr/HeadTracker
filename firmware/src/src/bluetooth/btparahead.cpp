@@ -216,6 +216,12 @@ uint16_t BTHeadGetChannel(int channel)
     return 0;
 }
 
+int8_t BTHeadGetRSSI()
+{
+    // *** Implement
+    return -1;
+}
+
 static void ct_ccc_cfg_changed(const struct bt_gatt_attr *attr, uint16_t value)
 {
     /*serialWrite("CCC Values Changed (");
