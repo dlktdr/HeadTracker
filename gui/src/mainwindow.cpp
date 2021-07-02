@@ -122,6 +122,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->spnLPTiltRoll2,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->spnPPMSync,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->spnPPMFrameLen,SIGNAL(valueChanged(double)),this,SLOT(updateFromUI()));
+    connect(ui->spnA5Gain,SIGNAL(valueChanged(double)),this,SLOT(updateFromUI()));
+    connect(ui->spnA5Off,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->spnA6Gain,SIGNAL(valueChanged(double)),this,SLOT(updateFromUI()));
     connect(ui->spnA6Off,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->spnA7Gain,SIGNAL(valueChanged(double)),this,SLOT(updateFromUI()));
