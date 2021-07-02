@@ -251,7 +251,7 @@ public:
     int PWMCh(int pwmno) { return pwm[pwmno];}
 
 // SBUS
-    void setInvertedSBUSIn(bool v) {sbininv = v;}
+    void setInvertedSBUSIn(bool v);
     bool invertedSBUSIn() {return sbininv;}
     void setInvertedSBUSOut(bool v) {sboutinv = v;}
     bool invertedSBUSOut() {return sboutinv;}

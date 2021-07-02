@@ -23,6 +23,7 @@
 #include "io.h"
 #include "sense.h"
 #include "base64.h"
+#include "SBUS/uarte_sbus.h"
 
 #include "trackersettings.h"
 
@@ -478,6 +479,12 @@ void TrackerSettings::setPWMCh(int pwmno, int pwmch)
         if(pwmch > 0 && pwmch <= 16)
             pwm[pwmno] = pwmch;
     }
+}
+
+void TrackerSettings::setInvertedSBUSIn(bool v)
+{
+    sbininv = v;
+    SBUSIn_SetInverted(v);
 }
 
 void TrackerSettings::setAuxFunc0Ch(int channel)
