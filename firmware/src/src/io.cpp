@@ -11,23 +11,24 @@ int dpintoport[] = {1,1,1 ,1 ,1 ,1 ,1 ,0 ,0 ,0 ,1,1,1,0 };
 // Reset Button Pressed Flag on Read
 bool wasButtonPressed()
 {
-  if(buttonpressed) {
-    buttonpressed = false;
-    return true;
-  }
-  return false;
+    if(buttonpressed) {
+        buttonpressed = false;
+        return true;
+    }
+    return false;
 }
 
 // Reset Center
 
 void pressButton()
 {
-  buttonpressed = true;
+    buttonpressed = true;
 }
 
 // Any IO Related Tasks, e.g. button
 void io_Thread()
 {
+    int pressedtime=0;
     while(1) {
         butpin = trkset.buttonPin();
 
@@ -37,8 +38,14 @@ void io_Thread()
 
         // Convert from D pin to IO Pin #
         int pin = (dpintoport[butpin] * 32) + dpintopin[butpin];
-        if(digitalRead(pin) == 0)
-            buttonpressed = true;
+        if(digitalRead(pin) == 0) {
+            if(pressedtime >= BUTTON_HOLD_TIME / IO_PERIOD)
+                buttonpressed = true;
+            else
+                pressedtime += IO_PERIOD;
+        } else {
+            pressedtime = 0;
+        }
 
         k_msleep(IO_PERIOD);
     }
