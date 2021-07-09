@@ -6,16 +6,6 @@
 		}
 	],
     "settings": {
-        "files.associations": {
-            "gpio.h": "c",
-            "arduino_nano_33_ble.h": "c",
-            "arduino_nano_33_ble_pins.h": "c",
-            "init.h": "c",
-            "devicetree.h": "c",
-            "zephyr.h": "c",
-            "kernel.h": "c",
-            "serial.h": "c"
-        },
         "editor.find.addExtraSpaceOnTop": false
     }
 }
