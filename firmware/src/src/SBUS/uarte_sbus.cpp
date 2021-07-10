@@ -77,7 +77,6 @@ volatile bool sbusininv=false;
 
 void SBUS_Thread()
 {
-    bool setinverted=false;
     while(1) {
         if(isSBUSInit) {
             sbusoutinv = !trkset.invertedSBUSOut();
@@ -116,7 +115,6 @@ void SBUS_RX_SignalEnd()
 void SBUS_TX_Complete_Interrupt(void *arg)
 {
     SBUS_UARTE->EVENTS_ENDTX = 0;
-    SBUS_UARTE.eve
     isTransmitting = false;
 
     // Below is done to be sure every cycle invert pin is at the correct level
