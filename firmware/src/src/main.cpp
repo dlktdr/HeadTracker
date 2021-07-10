@@ -15,7 +15,7 @@
 
 struct arduino_gpio_t S_gpios;
 
-void main(void)
+extern "C" void main(void)
 {
     start(); // Call Our C++ Main
 }

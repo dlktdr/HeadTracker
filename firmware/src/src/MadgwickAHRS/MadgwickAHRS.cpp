@@ -28,6 +28,7 @@
 #include "MadgwickAHRS.h"
 
 #include <math.h>
+#include <string.h>
 
 //-------------------------------------------------------------------------------------------
 // Definitions
@@ -269,9 +270,11 @@ void Madgwick::updateIMU(float gx, float gy, float gz, float ax, float ay, float
 float Madgwick::invSqrt(float x) {
 	float halfx = 0.5f * x;
 	float y = x;
-	long i = *(long*)&y;
+	uint32_t i;
+    static_assert(sizeof(x) == sizeof(i));
+    memcpy(&i, &x, sizeof(i));
 	i = 0x5f3759df - (i>>1);
-	y = *(float*)&i;
+    memcpy(&y,&i,sizeof(y));
 	y = y * (1.5f - (halfx * y * y));
 	y = y * (1.5f - (halfx * y * y));
 	return y;
