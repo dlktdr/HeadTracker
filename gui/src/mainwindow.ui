@@ -3398,9 +3398,16 @@
     <addaction name="actionShow_Serial_Transmissions"/>
     <addaction name="actionChannel_Viewer"/>
    </widget>
+   <widget class="QMenu" name="menu_Help">
+    <property name="title">
+     <string>&amp;Help</string>
+    </property>
+    <addaction name="actionOnline_Help"/>
+   </widget>
    <addaction name="menu_File"/>
    <addaction name="menuUpdate_Firmware"/>
    <addaction name="menu_Diagnostics"/>
+   <addaction name="menu_Help"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="action_Save_to_File">
@@ -3457,6 +3464,11 @@
   <action name="actionClear_Flash">
    <property name="text">
     <string>Clear Flash</string>
+   </property>
+  </action>
+  <action name="actionOnline_Help">
+   <property name="text">
+    <string>Online Help</string>
    </property>
   </action>
  </widget>

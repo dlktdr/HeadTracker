@@ -2,6 +2,7 @@
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QJsonObject>
+#include <QDesktopServices>
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -199,6 +200,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->actionShow_Data,SIGNAL(triggered()),this,SLOT(showDiagsClicked()));
     connect(ui->actionShow_Serial_Transmissions,SIGNAL(triggered()),this,SLOT(showSerialDiagClicked()));
     connect(ui->actionChannel_Viewer,SIGNAL(triggered()),this,SLOT(showChannelViewerClicked()));
+    connect(ui->actionOnline_Help, SIGNAL(triggered()),this, SLOT(openHelp()));
 
     // Tab Widget
     connect(ui->tabBLE,&QTabWidget::currentChanged,this,&MainWindow::BLE33tabChanged);
@@ -1200,6 +1202,11 @@ void MainWindow::reboot()
             serialConnect();
         }
     }
+}
+
+void MainWindow::openHelp()
+{
+     QDesktopServices::openUrl(helpurl);
 }
 
 void MainWindow::paramSendStart()
