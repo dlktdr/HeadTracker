@@ -555,7 +555,7 @@
                 <bool>false</bool>
                </property>
                <property name="currentIndex">
-                <number>2</number>
+                <number>1</number>
                </property>
                <widget class="QWidget" name="tabGeneral">
                 <attribute name="title">
@@ -1119,7 +1119,7 @@
                  <item row="1" column="1">
                   <widget class="QLabel" name="label_28">
                    <property name="text">
-                    <string># Channels</string>
+                    <string>Number of channels to output</string>
                    </property>
                   </widget>
                  </item>
