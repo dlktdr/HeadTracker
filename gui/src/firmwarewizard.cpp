@@ -80,8 +80,8 @@ void FirmwareWizard::initalize()
 }
 
 void FirmwareWizard::addToLog(QString l)
-{
-    programmerlog->appendPlainText(l);
+{   
+    programmerlog->appendPlainText(l.simplified());
     programmerlog->verticalScrollBar()->setValue(programmerlog->verticalScrollBar()->maximum());
 }
 
