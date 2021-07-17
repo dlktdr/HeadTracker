@@ -39,8 +39,8 @@ void io_Thread()
         // Convert from D pin to IO Pin #
         int pin = (dpintoport[butpin] * 32) + dpintopin[butpin];
         if(digitalRead(pin) == 0) {
-            if(pressedtime >= BUTTON_HOLD_TIME / IO_PERIOD)
-                buttonpressed = true;
+            if(pressedtime >= BUTTON_HOLD_TIME)
+                pressButton();
             else
                 pressedtime += IO_PERIOD;
         } else {
