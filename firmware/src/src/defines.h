@@ -1,7 +1,8 @@
 #pragma once
 
-// Version
-#define FW_VERSION "2.10"
+// Maj + Min + Rev Defined in Platformio.ini
+#define VERSION FW_MAJ.CONCAT(FW_MIN,FW_REV)
+#define FW_VERSION STRINGIFY(VERSION)
 #define FW_BOARD "NANO33BLE"
 
 // Button Down Time
@@ -16,10 +17,15 @@
 #define DATA_PERIOD 90          // (ms) GUI update rate
 #define BT_PERIOD 16            // (ms) Bluetooth update rate
 #define SERIAL_PERIOD 30        // (ms) Serial processing
-#define SENSOR_PERIOD 1666      // (us) 60hz Read Sensors
+#define SENSOR_PERIOD 16666     // (us) 60hz Read Sensors
 #define CALCULATE_PERIOD 6666   // (us) 150hz IMU calculations
 #define SBUS_PERIOD 20          // (ms) SBUS 50hz
 #define UIRESPONSIVE_TIME 10000 // (ms) 10Seconds without an ack data will stop;
+
+#define SBUSIN_PIN 10 // RX Pin
+#define SBUSIN_PORT 1
+#define SBUSOUT_PIN 3
+#define SBUSOUT_PORT 1
 
 // Bluetooth
 #define BT_MIN_CONN_INTER 6  // 6 Is lowest BLE can do. Actual Rate = Var * 1.25ms
