@@ -14,6 +14,14 @@
 #include "analog.h"
 #include "joystick.h"
 
+#include <drivers/clock_control.h>
+#include <drivers/clock_control/nrf_clock_control.h>
+#include <drivers/counter.h>
+#include <nrfx_clock.h>
+
+#define CLOCK_NODE DT_INST(0, nordic_nrf_clock)
+static const struct device *clock0;
+
 bool led_is_on = false;
 
 TrackerSettings trkset;
@@ -21,7 +29,15 @@ TrackerSettings trkset;
 
 void start(void)
 {
-   // Setup Serial
+    // Force High Accuracy Clock
+    const char *clock_label = DT_LABEL(CLOCK_NODE);
+	clock0 = device_get_binding(clock_label);
+	if (clock0 == NULL) {
+		printk("Failed to fetch clock %s\n", clock_label);
+	}
+    clock_control_on(clock0,CLOCK_CONTROL_NRF_SUBSYS_HF);
+
+    // Setup Serial
     serial_Init();
 
     // Setup Pins - io.cpp

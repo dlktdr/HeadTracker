@@ -1,7 +1,7 @@
 #pragma once
 
 // Version
-#define FW_VERSION "2.02"
+#define FW_VERSION "2.03"
 #define FW_BOARD "NANO33BLE"
 
 // Thread Periods
@@ -9,7 +9,7 @@
 #define DATA_PERIOD 90          // (ms) GUI update rate
 #define BT_PERIOD 16            // (ms) Bluetooth update rate
 #define SERIAL_PERIOD 30        // (ms) Serial processing
-#define SENSOR_PERIOD 1666      // (us) 60hz Read Sensors
+#define SENSOR_PERIOD 16666     // (us) 60hz Read Sensors
 #define CALCULATE_PERIOD 6666   // (us) 150hz IMU calculations
 #define SBUS_PERIOD 20          // (ms) SBUS 50hz
 #define UIRESPONSIVE_TIME 10000 // (ms) 10Seconds without an ack data will stop;
@@ -20,19 +20,19 @@
 #define BT_CONN_LOST_TIME 400 // 400 * 10ms = 4seconds
 
 // Thread Priority Definitions
-#define PRIORITY_LOW 4
-#define PRIORITY_MED 8
-#define PRIORITY_HIGH 16
-#define PRIORITY_RT 32
+#define PRIORITY_LOW 12
+#define PRIORITY_MED 9
+#define PRIORITY_HIGH 6
+#define PRIORITY_RT 3
 
 // Thread Periods, Negative values mean cannot be pre-empted
 #define IO_THREAD_PRIO PRIORITY_LOW
 #define SERIAL_THREAD_PRIO PRIORITY_LOW
 #define DATA_THREAD_PRIO PRIORITY_LOW
-#define BT_THREAD_PRIO -PRIORITY_RT
+#define BT_THREAD_PRIO -5
 #define SENSOR_THREAD_PRIO PRIORITY_MED
 #define CALCULATE_THREAD_PRIO PRIORITY_HIGH
-#define SBUS_THREAD_PRIO PRIORITY_MED-1
+#define SBUS_THREAD_PRIO PRIORITY_MED + 1
 
 // Perepherial Channels Used, Make sure no dupilcates here
 // and can't be used by Zephyr

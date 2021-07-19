@@ -32,7 +32,7 @@
 volatile bool interrupt=false;
 
 static volatile bool ppmoutstarted=false;
-static bool ppmoutinverted=false;
+static volatile bool ppmoutinverted=false;
 static int setPin=-1;
 
 // Used in ISR
