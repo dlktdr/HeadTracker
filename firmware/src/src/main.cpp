@@ -7,6 +7,7 @@
 #include <sys/printk.h>
 #include <sys/util.h>
 #include <string.h>
+#include <power/power.h>
 #include <nrfx_rtc.h>
 #include <usb/usb_device.h>
 #include <drivers/uart.h>
@@ -14,6 +15,26 @@
 #include "../include/arduino_nano_33_ble.h"
 
 struct arduino_gpio_t S_gpios;
+
+#ifdef DISABLE_SLEEP_STATES
+
+static int disable_ds_1(const struct device *dev)
+{
+	ARG_UNUSED(dev);
+
+    // Disable all power states
+	pm_ctrl_disable_state(PM_STATE_SOFT_OFF);
+    pm_ctrl_disable_state(PM_STATE_SUSPEND_TO_RAM);
+    pm_ctrl_disable_state(PM_STATE_SUSPEND_TO_IDLE);
+    pm_ctrl_disable_state(PM_STATE_SUSPEND_TO_DISK);
+    pm_ctrl_disable_state(PM_STATE_RUNTIME_IDLE);
+    pm_ctrl_disable_state(PM_STATE_STANDBY);
+
+	return 0;
+}
+SYS_INIT(disable_ds_1, PRE_KERNEL_2, 0);
+
+#endif
 
 extern "C" void main(void)
 {
@@ -37,5 +58,8 @@ static int board_internal_sensors_init(const struct device *dev)
 
 	return 0;
 }
+
+
+
 
 SYS_INIT(board_internal_sensors_init, PRE_KERNEL_1, 32);
