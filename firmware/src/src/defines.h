@@ -22,6 +22,7 @@
 #define SBUS_PERIOD 20          // (ms) SBUS 50hz
 #define UIRESPONSIVE_TIME 10000 // (ms) 10Seconds without an ack data will stop;
 
+// SBUS
 #define SBUSIN_PIN 10 // RX Pin
 #define SBUSIN_PORT 1
 #define SBUSOUT_PIN 3
@@ -33,19 +34,19 @@
 #define BT_CONN_LOST_TIME 70 // 100 * 10ms = 0.7seconds
 
 // Thread Priority Definitions
-#define PRIORITY_LOW 4
-#define PRIORITY_MED 8
-#define PRIORITY_HIGH 16
-#define PRIORITY_RT 32
+#define PRIORITY_LOW 12
+#define PRIORITY_MED 9
+#define PRIORITY_HIGH 6
+#define PRIORITY_RT 3
 
 // Thread Periods, Negative values mean cannot be pre-empted
 #define IO_THREAD_PRIO PRIORITY_LOW
 #define SERIAL_THREAD_PRIO PRIORITY_LOW
 #define DATA_THREAD_PRIO PRIORITY_LOW
-#define BT_THREAD_PRIO -PRIORITY_RT
+#define BT_THREAD_PRIO -5
 #define SENSOR_THREAD_PRIO PRIORITY_MED
 #define CALCULATE_THREAD_PRIO PRIORITY_HIGH
-#define SBUS_THREAD_PRIO PRIORITY_MED-1
+#define SBUS_THREAD_PRIO PRIORITY_MED + 1
 
 // Perepherial Channels Used, Make sure no dupilcates here
 // and can't be used by Zephyr
