@@ -94,6 +94,7 @@ void BTSetMode(btmodet mode)
     case BTSCANONLY:
         BTRmtStop();
         btscanonly = false;
+        break;
     default:
         break;
     }
@@ -167,15 +168,11 @@ const char *BTGetAddress()
     case BTPARAHEAD:
         return BTHeadGetAddress();
     case BTPARARMT:
-        return BTRmtGetAddress();
-        break;
     case BTSCANONLY:
         return BTRmtGetAddress();
-        break;
     default:
         break;
     }
-
     return "BT_DISABLED";
 }
 
@@ -186,8 +183,6 @@ int8_t BTGetRSSI()
         return BTHeadGetRSSI();
     case BTPARARMT:
         return BTRmtGetRSSI();
-        break;
-    case BTSCANONLY:
         break;
     default:
         break;

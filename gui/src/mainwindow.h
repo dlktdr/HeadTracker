@@ -30,7 +30,7 @@ const int IMHERETIME=8000; // milliseconds before sending another I'm Here Messa
 const int MAX_TX_FAULTS=8; // Number of times to try re-sending data
 const int TX_FAULT_PAUSE=750; // milliseconds wait before trying another send
 const int ACKNAK_TIMEOUT=500; // milliseconds without an ack/nak is a fault
-const int RECONNECT_AFT_REBT=2000; // (ms) time after a reboot to try to reconnect.
+const int RECONNECT_AFT_REBT=3000; // (ms) time after a reboot to try to reconnect.
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -47,8 +47,9 @@ public:
 protected:
     void closeEvent(QCloseEvent *event);
 
-private:    
+private:
     Ui::MainWindow *ui;
+    QWidget *pinView;
     QList<BoardType*> boards;
     QSerialPort *serialcon;
     TrackerSettings trkset;
@@ -120,6 +121,7 @@ private slots:
     void BTModeChanged();
     void reboot();
     void openHelp();
+    void showPinView();
 
 
     // Board Connections
