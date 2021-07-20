@@ -54,7 +54,7 @@ void start(void)
     SBUS_Init();
 
     // PWM Outputs - Fixed to A0-A3
-    PWM_Init(50); // Start PWM 50hz
+    PWM_Init(PWM_PERIOD);
 
     // USB Joystick
     joystick_init();

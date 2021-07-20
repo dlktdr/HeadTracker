@@ -20,6 +20,7 @@
 #define SENSOR_PERIOD 16666     // (us) 60hz Read Sensors
 #define CALCULATE_PERIOD 6666   // (us) 150hz IMU calculations
 #define SBUS_PERIOD 20          // (ms) SBUS 50hz
+#define PWM_PERIOD 50           // (ms) PWM Period
 #define UIRESPONSIVE_TIME 10000 // (ms) 10Seconds without an ack data will stop;
 
 // SBUS
