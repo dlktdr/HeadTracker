@@ -115,6 +115,7 @@ public:
     static constexpr int DEF_PWM_A3_CH = -1;
     static constexpr bool DEF_SBUS_IN_INV = false;
     static constexpr bool DEF_SBUS_OUT_INV = false;
+    static constexpr int DEF_ALG_A4_CH = -1;
     static constexpr int DEF_ALG_A5_CH = -1;
     static constexpr int DEF_ALG_A6_CH = -1;
     static constexpr int DEF_ALG_A7_CH = -1;
@@ -240,7 +241,14 @@ public:
     void magOffset(float &x, float &y, float &z);
     void setMagOffset(float x,float y, float z);
 
-    // Analogs
+    // Analogs    
+    void setAnalog4Ch(int channel) {_data["an4ch"] = channel;}
+    void setAnalog4Gain(float gain);
+    void setAnalog4Offset(int offset) {_data["an4off"] = offset;}
+    int analog4Ch() {return _data["an4ch"].toInt() ;}
+    float analog4Gain() {return _data["an4gain"].toFloat();}
+    int analog4Offset() {return _data["an4off"].toFloat();}
+
     void setAnalog5Ch(int channel) {_data["an5ch"] = channel;}
     void setAnalog5Gain(float gain);
     void setAnalog5Offset(int offset) {_data["an5off"] = offset;}

@@ -294,7 +294,15 @@ void calculate_Thread()
                 channel_data[aux1ch - 1] = auxdata[trkset.auxFunc1()];
         }
 
-        // 7) Set Analog Channels
+        // 7) Set Analog Channels       
+        if(trkset.analog4Ch() > 0) {
+            float an4 = analogRead(AN4);
+            an4 *= trkset.analog4Gain();
+            an4 += trkset.analog4Offset();
+            an4 += TrackerSettings::MIN_PWM;
+            an4 = MAX(TrackerSettings::MIN_PWM,MIN(TrackerSettings::MAX_PWM,an4));
+            channel_data[trkset.analog4Ch()-1] = an4;
+        }
         if(trkset.analog5Ch() > 0) {
             float an5 = analogRead(AN5);
             an5 *= trkset.analog5Gain();
@@ -303,7 +311,6 @@ void calculate_Thread()
             an5 = MAX(TrackerSettings::MIN_PWM,MIN(TrackerSettings::MAX_PWM,an5));
             channel_data[trkset.analog5Ch()-1] = an5;
         }
-
         if(trkset.analog6Ch() > 0) {
             float an6 = analogRead(AN6);
             an6 *= trkset.analog6Gain();
@@ -312,7 +319,6 @@ void calculate_Thread()
             an6 = MAX(TrackerSettings::MIN_PWM,MIN(TrackerSettings::MAX_PWM,an6));
             channel_data[trkset.analog6Ch()-1] = an6;
         }
-
         if(trkset.analog7Ch() > 0) {
             float an7 = analogRead(AN7);
             an7 *= trkset.analog7Gain();

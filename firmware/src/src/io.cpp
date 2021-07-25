@@ -73,7 +73,7 @@ void io_Init()
     pinMode(ARDUINO_A1, GPIO_OUTPUT); // PWM 1
     pinMode(ARDUINO_A2, GPIO_OUTPUT); // PWM 2
     pinMode(ARDUINO_A3, GPIO_OUTPUT); // PWM 3
-/*    pinMode(ARDUINO_A4, GPIO_OUTPUT); // Unused */
+    pinMode(ARDUINO_A4, GPIO_INPUT); // Analog input
     pinMode(ARDUINO_A5, GPIO_INPUT); // Analog input
     pinMode(ARDUINO_A6, GPIO_INPUT); // Analog input
     pinMode(ARDUINO_A7, GPIO_INPUT); // Analog input

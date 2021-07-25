@@ -56,6 +56,10 @@ TrackerSettings::TrackerSettings(QObject *parent):
     _data["sboutinv"] = DEF_SBUS_OUT_INV;
 
     // Analog defaults
+    _data["an4ch"]  = DEF_ALG_A4_CH;
+    _data["an4gain"] = DEF_ALG_GAIN;
+    _data["an4off"] = DEF_ALG_OFFSET;
+
     _data["an5ch"]  = DEF_ALG_A5_CH;
     _data["an5gain"] = DEF_ALG_GAIN;
     _data["an5off"] = DEF_ALG_OFFSET;
@@ -496,6 +500,11 @@ void TrackerSettings::setMagOffset(float x, float y, float z)
     _data["magxoff"]=QString::number(x,'g',3);
     _data["magyoff"]=QString::number(y,'g',3);
     _data["magzoff"]=QString::number(z,'g',3);
+}
+
+void TrackerSettings::setAnalog4Gain(float gain)
+{
+    _data["an5gain"]=QString::number(gain,'g',4);
 }
 
 void TrackerSettings::setAnalog5Gain(float gain)

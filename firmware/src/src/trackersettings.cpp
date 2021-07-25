@@ -102,6 +102,9 @@ TrackerSettings::TrackerSettings()
     sboutinv = DEF_SBUS_OUT_INV;
 
     // Analog defaults
+    an4ch = DEF_ALG_A4_CH;
+    an4gain = DEF_ALG_GAIN;
+    an4off = DEF_ALG_OFFSET;
     an5ch = DEF_ALG_A5_CH;
     an5gain = DEF_ALG_GAIN;
     an5off = DEF_ALG_OFFSET;
@@ -513,6 +516,12 @@ void TrackerSettings::setAuxFunc1(int funct)
         aux1func = funct;
 }
 
+void TrackerSettings::setAnalog4Ch(int channel)
+{
+    if((channel > 0 && channel <= 16) || channel == -1)
+        an5ch = channel;
+}
+
 void TrackerSettings::setAnalog5Ch(int channel)
 {
     if((channel > 0 && channel <= 16) || channel == -1)
@@ -831,6 +840,9 @@ void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
     v = json["sboutinv"]; if(!v.isNull()) setInvertedSBUSOut(v);
 
 // Analog Settings
+    v = json["an4ch"]; if(!v.isNull()) setAnalog4Ch(v);
+    v = json["an4off"]; if(!v.isNull()) setAnalog4Offset(v);
+    v = json["an4gain"]; if(!v.isNull()) setAnalog4Gain(v);
     v = json["an5ch"]; if(!v.isNull()) setAnalog5Ch(v);
     v = json["an5off"]; if(!v.isNull()) setAnalog5Offset(v);
     v = json["an5gain"]; if(!v.isNull()) setAnalog5Gain(v);
@@ -948,6 +960,9 @@ void TrackerSettings::setJSONSettings(DynamicJsonDocument &json)
     json["sboutinv"] = sboutinv;
 
 // Analog Settings
+    json["an4ch"] = an4ch;
+    json["an4off"] = an4off;
+    json["an4gain"] = an4gain;
     json["an5ch"] = an5ch;
     json["an5off"] = an5off;
     json["an5gain"] = an5gain;

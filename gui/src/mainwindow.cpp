@@ -545,6 +545,8 @@ void MainWindow::updateToUI()
     ui->spnLPPan->setValue(trkset.lpPan());
     ui->spnLPTiltRoll2->setValue(trkset.lpTiltRoll());
     ui->spnLPPan2->setValue(trkset.lpPan());
+    ui->spnA4Gain->setValue(trkset.analog4Gain());
+    ui->spnA4Off->setValue(trkset.analog4Offset());
     ui->spnA5Gain->setValue(trkset.analog5Gain());
     ui->spnA5Off->setValue(trkset.analog5Offset());
     ui->spnA6Gain->setValue(trkset.analog6Gain());
@@ -555,6 +557,7 @@ void MainWindow::updateToUI()
     int panCh = trkset.panCh();
     int rllCh = trkset.rollCh();
     int tltCh = trkset.tiltCh();
+    int a4Ch = trkset.analog4Ch();
     int a5Ch = trkset.analog5Ch();
     int a6Ch = trkset.analog6Ch();
     int a7Ch = trkset.analog7Ch();
@@ -570,6 +573,7 @@ void MainWindow::updateToUI()
     ui->cmbrllchn->setCurrentIndex(rllCh==-1?0:rllCh);
     ui->cmbtiltchn->setCurrentIndex(tltCh==-1?0:tltCh);
     // Analog CH
+    ui->cmbA4Ch->setCurrentIndex(a5Ch==-1?0:a4Ch);
     ui->cmbA5Ch->setCurrentIndex(a5Ch==-1?0:a5Ch);
     ui->cmbA6Ch->setCurrentIndex(a6Ch==-1?0:a6Ch);
     ui->cmbA7Ch->setCurrentIndex(a7Ch==-1?0:a7Ch);
@@ -715,6 +719,9 @@ void MainWindow::updateFromUI()
     trkset.setPanReversed(ui->chkpanrev->isChecked());
     trkset.setTiltReversed(ui->chktltrev->isChecked());
 
+    // Analog
+    trkset.setAnalog4Gain(ui->spnA4Gain->value());
+    trkset.setAnalog4Offset(ui->spnA4Off->value());
     trkset.setAnalog5Gain(ui->spnA5Gain->value());
     trkset.setAnalog5Offset(ui->spnA5Off->value());
 
@@ -723,9 +730,11 @@ void MainWindow::updateFromUI()
 
     trkset.setAnalog7Gain(ui->spnA7Gain->value());
     trkset.setAnalog7Offset(ui->spnA7Off->value());
+    int an4Ch = ui->cmbA4Ch->currentIndex();
     int an5Ch = ui->cmbA5Ch->currentIndex();
     int an6Ch = ui->cmbA6Ch->currentIndex();
     int an7Ch = ui->cmbA7Ch->currentIndex();
+    trkset.setAnalog5Ch(an4Ch==0?-1:an4Ch);
     trkset.setAnalog5Ch(an5Ch==0?-1:an5Ch);
     trkset.setAnalog6Ch(an6Ch==0?-1:an6Ch);
     trkset.setAnalog7Ch(an7Ch==0?-1:an7Ch);
