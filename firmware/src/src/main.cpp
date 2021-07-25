@@ -12,7 +12,7 @@
 #include <usb/usb_device.h>
 #include <drivers/uart.h>
 #include "nano33ble.h"
-#include "../include/arduino_nano_33_ble.h"
+#include "include/arduino_nano_33_ble.h"
 
 struct arduino_gpio_t S_gpios;
 

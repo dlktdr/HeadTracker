@@ -1,7 +1,7 @@
 #pragma once
 
 #include <zephyr.h>
-#include "../include/arduino_nano_33_ble.h"
+#include "include/arduino_nano_33_ble.h"
 
 extern bool wasButtonPressed();
 extern void pressButton();
