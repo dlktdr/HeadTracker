@@ -5,8 +5,9 @@
 volatile bool buttonpressed=false;
 volatile int butpin;
 
-int dpintopin[]  = {3,10,11,12,15,13,14,23,21,27,2,1,8,13};
-int dpintoport[] = {1,1,1 ,1 ,1 ,1 ,1 ,0 ,0 ,0 ,1,1,1,0 };
+//                  0 1  2  3  4  5  6  7  8  9  10 11 12 13
+int dpintoport[] = {1,1, 1 ,1 ,1 ,1 ,1 ,0 ,0 ,0 ,1 ,1 ,1 ,0 };
+int dpintopin[]  = {3,10,11,12,15,13,14,23,21,27,2 ,1 ,8 ,13};
 
 // Reset Button Pressed Flag on Read
 bool wasButtonPressed()
