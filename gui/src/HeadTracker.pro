@@ -87,7 +87,7 @@ COPIES += stylesheets
 stylesheets.files = $$files("css/*.*")
 stylesheets.path = $$OUT_PWD
 
-RC_ICONS = IconFile.ico
+RC_ICONS = images/IconFile.ico
 
 # Add Correct OpenSSL Libraries to the output dir
 CONFIG(debug, debug|release) {

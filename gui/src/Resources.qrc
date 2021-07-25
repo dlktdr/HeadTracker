@@ -1,17 +1,18 @@
 <RCC>
     <qresource prefix="/Icons">
-        <file>refresh.svg</file>
-        <file>Icon256.png</file>
-        <file>IconFile.ico</file>
-        <file>check.svg</file>
-        <file>x.svg</file>
-        <file>chviewico.svg</file>
-        <file>calibrate.svg</file>
-        <file>connect.svg</file>
-        <file>disconnect.svg</file>
-        <file>download.svg</file>
-        <file>reboot.svg</file>
-        <file>save.svg</file>
-        <file>send.svg</file>
+        <file>images/refresh.svg</file>
+        <file>images/Icon256.png</file>
+        <file>images/IconFile.ico</file>
+        <file>images/check.svg</file>
+        <file>images/x.svg</file>
+        <file>images/chviewico.svg</file>
+        <file>images/calibrate.svg</file>
+        <file>images/connect.svg</file>
+        <file>images/disconnect.svg</file>
+        <file>images/download.svg</file>
+        <file>images/reboot.svg</file>
+        <file>images/save.svg</file>
+        <file>images/send.svg</file>
+        <file>images/Pinout.png</file>
     </qresource>
 </RCC>
