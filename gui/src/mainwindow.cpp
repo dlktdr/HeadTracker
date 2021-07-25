@@ -19,6 +19,18 @@ MainWindow::MainWindow(QWidget *parent)
     waitingOnParameters = false;
     msgbox = new QMessageBox(this);
 
+    // Pin Viewer
+    pinView = new QWidget;
+    QLayout *layout = new QHBoxLayout;
+    pinView->setLayout(layout);
+    QLabel *lbl = new QLabel;
+    layout->addWidget(lbl);
+
+    QPixmap pm(":/Icons/Pinout.png");
+    lbl->setPixmap(pm);
+    lbl->setScaledContents(true);
+    pinView->setMaximumWidth(1000);
+
     // Start the board interface
     nano33ble = new BoardNano33BLE(&trkset);
     bno055 = new BoardBNO055(&trkset);
@@ -41,7 +53,7 @@ MainWindow::MainWindow(QWidget *parent)
     diagnostic->setWindowFlags(Qt::Window);
     serialDebug = new QTextEdit(this);
     serialDebug->setWindowFlags(Qt::Window);
-    serialDebug->setWindowTitle("Serial Information");
+    serialDebug->setWindowTitle(tr("Serial Information"));
     serialDebug->resize(600,300);
     channelviewer = new ChannelViewer(&trkset, this);
     channelviewer->setWindowFlags(Qt::Window);
@@ -201,6 +213,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->actionShow_Serial_Transmissions,SIGNAL(triggered()),this,SLOT(showSerialDiagClicked()));
     connect(ui->actionChannel_Viewer,SIGNAL(triggered()),this,SLOT(showChannelViewerClicked()));
     connect(ui->actionOnline_Help, SIGNAL(triggered()),this, SLOT(openHelp()));
+    connect(ui->actionPinout, SIGNAL(triggered()),this, SLOT(showPinView()));
 
     // Tab Widget
     connect(ui->tabBLE,&QTabWidget::currentChanged,this,&MainWindow::BLE33tabChanged);
@@ -254,7 +267,7 @@ void MainWindow::serialConnect()
     serialcon->setFlowControl(QSerialPort::NoFlowControl);
 
     if(!serialcon->open(QIODevice::ReadWrite)) {
-        QMessageBox::critical(this,"Error",tr("Could not open Com ") + serialcon->portName());
+        QMessageBox::critical(this,tr("Error"),tr("Could not open Com ") + serialcon->portName());
         addToLog("Could not open " + serialcon->portName(),2);
         return;
     }
@@ -266,7 +279,7 @@ void MainWindow::serialConnect()
     ui->cmdDisconnect->setEnabled(true);
     ui->cmdConnect->setEnabled(false);
     ui->cmdChannelViewer->setEnabled(false);
-    addToLog("Connected to " + serialcon->portName());
+    addToLog(tr("Connected to ") + serialcon->portName());
     statusMessage(tr("Connected to ") + serialcon->portName());
 
     ui->stackedWidget->setCurrentIndex(1);
@@ -287,7 +300,7 @@ void MainWindow::serialDisconnect()
         if(!checkSaved())
             return;
 
-        addToLog("Disconnecting from " + serialcon->portName());
+        addToLog(tr("Disconnecting from ") + serialcon->portName());
 
         serialcon->flush();
         serialcon->close();
@@ -356,7 +369,7 @@ void MainWindow::serialError(QSerialPort::SerialPortError err)
 void MainWindow::connectTimeout()
 {
     if(currentboard != nullptr && serialcon->isOpen()) {
-        QMessageBox::information(this,"Error", "No valid board detected\nPlease check COM port or flash proper code");
+        QMessageBox::information(this,tr("Error"), tr("No valid board detected\nPlease check COM port or flash proper code"));
         serialDisconnect();
     }
 }
@@ -406,7 +419,7 @@ void MainWindow::slowSerialSend()
         // Delay sends no more tha 64 bytes at a time
         int pos=0;
         while(pos<sdata.length()) {
-            qDebug() << "Serial Out:" << sdata.mid(pos,64);
+            qDebug() << tr("Serial Out:") << sdata.mid(pos,64);
             serialcon->write(sdata.mid(pos,64));
             pos +=64;
             QTime dieTime= QTime::currentTime().addMSecs(5);
@@ -478,6 +491,21 @@ void MainWindow::updateToUI()
     if(waitingOnParameters)
         return;
 
+    // Disable signals on all Comboboxes, SpinBoxes, Sliders
+    // Prevents signals from these items causing another update
+    QList<QComboBox *> comboWidgets = ui->centralwidget->findChildren<QComboBox*>();
+    foreach(QComboBox *wid, comboWidgets)
+        wid->blockSignals(true);
+    QList<QSpinBox *> spinWidgets = ui->centralwidget->findChildren<QSpinBox*>();
+    foreach(QSpinBox *wid, spinWidgets)
+        wid->blockSignals(true);
+    QList<QDoubleSpinBox *> spindWidgets = ui->centralwidget->findChildren<QDoubleSpinBox*>();
+    foreach(QDoubleSpinBox *wid, spindWidgets)
+        wid->blockSignals(true);
+    QList<GainSlider *> sliderWidgets = ui->centralwidget->findChildren<GainSlider*>();
+    foreach(GainSlider *wid, sliderWidgets)
+        wid->blockSignals(true);
+
     ui->servoTilt->setCenter(trkset.Tlt_cnt());
     ui->servoTilt->setMaximum(trkset.Tlt_max());
     ui->servoTilt->setMinimum(trkset.Tlt_min());
@@ -498,48 +526,6 @@ void MainWindow::updateToUI()
     ui->chkResetCenterWave->setChecked(trkset.resetOnWave());
     ui->chkSbusInInv->setChecked(trkset.invertedSBUSIn());
     ui->chkSbusOutInv->setChecked(trkset.invertedSBUSOut());
-
-    // Prevents signals from these items causing another update
-    ui->cmbpanchn->blockSignals(true);
-    ui->cmbrllchn->blockSignals(true);
-    ui->cmbtiltchn->blockSignals(true);
-    ui->cmbRemap->blockSignals(true);
-    ui->cmbPpmOutPin->blockSignals(true);
-    ui->spnPPMFrameLen->blockSignals(true);
-    ui->cmbPPMChCount->blockSignals(true);
-    ui->spnPPMSync->blockSignals(true);
-    ui->cmbPpmInPin->blockSignals(true);
-    ui->cmbButtonPin->blockSignals(true);
-    ui->cmbBtMode->blockSignals(true);    
-    ui->cmbBTRmtMode->blockSignals(true);
-    ui->cmbResetOnPPM->blockSignals(true);
-    ui->spnLPPan->blockSignals(true);
-    ui->spnLPTiltRoll->blockSignals(true);
-    ui->spnLPPan2->blockSignals(true);
-    ui->spnLPTiltRoll2->blockSignals(true);
-    ui->til_gain->blockSignals(true);
-    ui->rll_gain->blockSignals(true);
-    ui->pan_gain->blockSignals(true);
-    ui->cmbA5Ch->blockSignals(true);
-    ui->spnA5Gain->blockSignals(true);
-    ui->spnA5Off->blockSignals(true);
-    ui->cmbA6Ch->blockSignals(true);
-    ui->spnA6Gain->blockSignals(true);
-    ui->spnA6Off->blockSignals(true);
-    ui->cmbA7Ch->blockSignals(true);
-    ui->spnA7Gain->blockSignals(true);
-    ui->spnA7Off->blockSignals(true);
-    ui->cmbAuxFn0->blockSignals(true);
-    ui->cmbAuxFn1->blockSignals(true);
-    ui->cmbAuxFn0Ch->blockSignals(true);
-    ui->cmbAuxFn1Ch->blockSignals(true);
-    ui->cmbPWM0->blockSignals(true);
-    ui->cmbPWM1->blockSignals(true);
-    ui->cmbPWM2->blockSignals(true);
-    ui->cmbPWM3->blockSignals(true);    
-    ui->spnRotX->blockSignals(true);
-    ui->spnRotY->blockSignals(true);
-    ui->spnRotZ->blockSignals(true);
 
     ui->spnLPTiltRoll->setValue(trkset.lpTiltRoll());
     ui->spnLPPan->setValue(trkset.lpPan());
@@ -618,9 +604,9 @@ void MainWindow::updateToUI()
     ui->spnPPMSync->setValue(trkset.ppmSync());
     uint32_t maxframelen = TrackerSettings::PPM_MIN_FRAMESYNC + (channels * TrackerSettings::MAX_PWM);
     if(maxframelen > setframelen) {
-        ui->lblPPMOut->setText("<b>Warning!</b> PPM Frame length possibly too short to support channel data");
+        ui->lblPPMOut->setText(tr("<b>Warning!</b> PPM Frame length possibly too short to support channel data"));
     } else {
-        ui->lblPPMOut->setText("PPM data will fit in frame. Refresh rate: " + QString::number(1/(static_cast<float>(setframelen)/1000000.0),'f',2) + " Hz");
+        ui->lblPPMOut->setText(tr("PPM data will fit in frame. Refresh rate: ") + QString::number(1/(static_cast<float>(setframelen)/1000000.0),'f',2) + " Hz");
     }
 
     // BT Pair Address
@@ -639,48 +625,19 @@ void MainWindow::updateToUI()
         ui->cmbBTRmtMode->setVisible(false);
     }
 
-    ui->cmbpanchn->blockSignals(false);
-    ui->cmbrllchn->blockSignals(false);
-    ui->cmbtiltchn->blockSignals(false);
-    ui->cmbRemap->blockSignals(false);
-    ui->cmbPpmOutPin->blockSignals(false);
-    ui->spnPPMFrameLen->blockSignals(false);
-    ui->cmbPPMChCount->blockSignals(false);
-    ui->spnPPMSync->blockSignals(false);
-    ui->cmbPpmInPin->blockSignals(false);
-    ui->cmbButtonPin->blockSignals(false);
-    ui->cmbBtMode->blockSignals(false);    
-    ui->cmbBTRmtMode->blockSignals(false);
-    ui->cmbResetOnPPM->blockSignals(false);
-    ui->spnLPPan->blockSignals(false);
-    ui->spnLPTiltRoll->blockSignals(false);
-    ui->spnLPPan2->blockSignals(false);
-    ui->spnLPTiltRoll2->blockSignals(false);
-    ui->til_gain->blockSignals(false);
-    ui->rll_gain->blockSignals(false);
-    ui->pan_gain->blockSignals(false);
-    ui->cmbA5Ch->blockSignals(false);
-    ui->spnA5Gain->blockSignals(false);
-    ui->spnA5Off->blockSignals(false);
-    ui->cmbA6Ch->blockSignals(false);
-    ui->spnA6Gain->blockSignals(false);
-    ui->spnA6Off->blockSignals(false);
-    ui->cmbA7Ch->blockSignals(false);
-    ui->spnA7Gain->blockSignals(false);
-    ui->spnA7Off->blockSignals(false);
-    ui->cmbAuxFn0->blockSignals(false);
-    ui->cmbAuxFn1->blockSignals(false);
-    ui->cmbAuxFn0Ch->blockSignals(false);
-    ui->cmbAuxFn1Ch->blockSignals(false);
-    ui->cmbPWM0->blockSignals(false);
-    ui->cmbPWM1->blockSignals(false);
-    ui->cmbPWM2->blockSignals(false);
-    ui->cmbPWM3->blockSignals(false);
-    ui->spnRotX->blockSignals(false);
-    ui->spnRotY->blockSignals(false);
-    ui->spnRotZ->blockSignals(false);
-
-
+    // Allow signals again
+    comboWidgets = ui->centralwidget->findChildren<QComboBox*>();
+    foreach(QComboBox *wid, comboWidgets)
+        wid->blockSignals(false);
+    spinWidgets = ui->centralwidget->findChildren<QSpinBox*>();
+    foreach(QSpinBox *wid, spinWidgets)
+        wid->blockSignals(false);
+    spindWidgets = ui->centralwidget->findChildren<QDoubleSpinBox*>();
+    foreach(QDoubleSpinBox *wid, spindWidgets)
+        wid->blockSignals(false);
+    sliderWidgets = ui->centralwidget->findChildren<GainSlider*>();
+    foreach(GainSlider *wid, sliderWidgets)
+        wid->blockSignals(false);
 }
 
 // Update the Settings Class from the UI Data
@@ -689,45 +646,45 @@ void MainWindow::updateFromUI()
     if(!serialcon->isOpen()) // Don't update anything if not connected
         return;
 
+    // Pan Tilt Roll
+    int panCh = ui->cmbpanchn->currentIndex();
+    int rllCh = ui->cmbrllchn->currentIndex();
+    int tltCh = ui->cmbtiltchn->currentIndex();
+    trkset.setPanCh(panCh==0?-1:panCh);
+    trkset.setRollCh(rllCh==0?-1:rllCh);
+    trkset.setTiltCh(tltCh==0?-1:tltCh);
+    trkset.setRollReversed(ui->chkrllrev->isChecked());
+    trkset.setPanReversed(ui->chkpanrev->isChecked());
+    trkset.setTiltReversed(ui->chktltrev->isChecked());
     trkset.setPan_cnt(ui->servoPan->centerValue());
     trkset.setPan_min(ui->servoPan->minimumValue());
     trkset.setPan_max(ui->servoPan->maximumValue());
     trkset.setPan_gain(static_cast<float>(ui->pan_gain->value())/10.0f);
-
     trkset.setTlt_cnt(ui->servoTilt->centerValue());
     trkset.setTlt_min(ui->servoTilt->minimumValue());
     trkset.setTlt_max(ui->servoTilt->maximumValue());
     trkset.setTlt_gain(static_cast<float>(ui->til_gain->value())/10.0f);
-
     trkset.setRll_cnt(ui->servoRoll->centerValue());
     trkset.setRll_min(ui->servoRoll->minimumValue());
     trkset.setRll_max(ui->servoRoll->maximumValue());
     trkset.setRll_gain(static_cast<float>(ui->rll_gain->value())/10.0f);
 
+    // Filters
     if(trkset.hardware() == "NANO33BLE") {
         trkset.setLPTiltRoll(ui->spnLPTiltRoll->value());
         trkset.setLPPan(ui->spnLPPan->value());
     } else if (trkset.hardware() == "BNO055") {
         trkset.setLPTiltRoll(ui->spnLPTiltRoll2->value());
         trkset.setLPPan(ui->spnLPPan2->value());
-    }
-
-    trkset.setLPTiltRoll(ui->spnLPTiltRoll->value());
-    trkset.setLPPan(ui->spnLPPan->value());
-
-    trkset.setRollReversed(ui->chkrllrev->isChecked());
-    trkset.setPanReversed(ui->chkpanrev->isChecked());
-    trkset.setTiltReversed(ui->chktltrev->isChecked());
+    }   
 
     // Analog
     trkset.setAnalog4Gain(ui->spnA4Gain->value());
     trkset.setAnalog4Offset(ui->spnA4Off->value());
     trkset.setAnalog5Gain(ui->spnA5Gain->value());
     trkset.setAnalog5Offset(ui->spnA5Off->value());
-
     trkset.setAnalog6Gain(ui->spnA6Gain->value());    
     trkset.setAnalog6Offset(ui->spnA6Off->value());
-
     trkset.setAnalog7Gain(ui->spnA7Gain->value());
     trkset.setAnalog7Offset(ui->spnA7Off->value());
     int an4Ch = ui->cmbA4Ch->currentIndex();
@@ -739,6 +696,7 @@ void MainWindow::updateFromUI()
     trkset.setAnalog6Ch(an6Ch==0?-1:an6Ch);
     trkset.setAnalog7Ch(an7Ch==0?-1:an7Ch);
 
+    // Aux
     int auxF0Ch = ui->cmbAuxFn0Ch->currentIndex();
     int auxF1Ch = ui->cmbAuxFn1Ch->currentIndex();
     trkset.setAuxFunc0Ch(auxF0Ch==0?-1:auxF0Ch);
@@ -746,13 +704,7 @@ void MainWindow::updateFromUI()
     trkset.setAuxFunc0(ui->cmbAuxFn0->currentIndex());
     trkset.setAuxFunc1(ui->cmbAuxFn1->currentIndex());
 
-    int panCh = ui->cmbpanchn->currentIndex();
-    int rllCh = ui->cmbrllchn->currentIndex();
-    int tltCh = ui->cmbtiltchn->currentIndex();
-    trkset.setPanCh(panCh==0?-1:panCh);
-    trkset.setRollCh(rllCh==0?-1:rllCh);
-    trkset.setTiltCh(tltCh==0?-1:tltCh);
-
+    // PWM
     int pwmCh0 = ui->cmbPWM0->currentIndex();
     int pwmCh1 = ui->cmbPWM1->currentIndex();
     int pwmCh2 = ui->cmbPWM2->currentIndex();
@@ -762,6 +714,7 @@ void MainWindow::updateFromUI()
     trkset.setPWMCh(2,pwmCh2==0?-1:pwmCh2);
     trkset.setPWMCh(3,pwmCh3==0?-1:pwmCh3);
 
+    // BNO Axis Remapping
     trkset.setAxisRemap(ui->cmbRemap->currentData().toUInt());
     trkset.setAxisSign(ui->cmbSigns->currentIndex());
 
@@ -777,7 +730,7 @@ void MainWindow::updateFromUI()
     if((but_index   > 0 && (but_index == ppin_index || but_index == ppout_index)) ||
        (ppin_index > 0 && (ppin_index == but_index || ppin_index == ppout_index)) ||
        (ppout_index > 0 && (ppout_index == but_index || ppout_index == ppin_index))) {
-        QMessageBox::information(this,"Error", "Cannot pick dulplicate pins");
+        QMessageBox::information(this,tr("Error"), tr("Cannot pick dulplicate pins"));
 
         // Reset gui to old values
         ppout_index = trkset.ppmOutPin()-1;
@@ -799,9 +752,9 @@ void MainWindow::updateFromUI()
     trkset.setPpmChCount(channels);
     uint32_t maxframelen = TrackerSettings::PPM_MIN_FRAMESYNC + (channels * TrackerSettings::MAX_PWM);
     if(maxframelen > setframelen) {
-        ui->lblPPMOut->setText("<b>Warning!</b> PPM Frame length possibly too short to support channel data");
+        ui->lblPPMOut->setText(tr("<b>Warning!</b> PPM Frame length possibly too short to support channel data"));
     } else {
-        ui->lblPPMOut->setText("PPM data will fit in frame. Refresh rate: " + QString::number(1/(static_cast<float>(setframelen)/1000000.0),'f',2) + " Hz");
+        ui->lblPPMOut->setText(tr("PPM data will fit in frame. Refresh rate: ") + QString::number(1/(static_cast<float>(setframelen)/1000000.0),'f',2) + " Hz");
     }
 
     int rstppm_index = ui->cmbResetOnPPM->currentIndex();
@@ -827,8 +780,6 @@ void MainWindow::updateFromUI()
 
     ui->cmdStore->setEnabled(true);
     ui->cmdSaveNVM->setEnabled(true);    
-
-
 
     // Use timer to prevent too many writes while drags, etc.. happen
     saveToRAMTimer.start(500);
@@ -924,9 +875,9 @@ void MainWindow::liveDataChanged()
     ui->lblBLEAddress->setText(trkset.blueToothAddress());
     ui->btLed->setState(trkset.blueToothConnected());
     if(trkset.blueToothConnected())
-        ui->lblBTConnected->setText("Connected");
+        ui->lblBTConnected->setText(tr("Connected"));
     else
-        ui->lblBTConnected->setText("Not connected");
+        ui->lblBTConnected->setText(tr("Not connected"));
     if(trkset.blueToothMode() == TrackerSettings::BTDISABLE)
         ui->lblBTConnected->setText("Disabled");
 
@@ -958,11 +909,11 @@ void MainWindow::saveSettings()
 void MainWindow::loadSettings()
 {
     if(!serialcon->isOpen()) {
-        QMessageBox::information(this, "Info","Please connect before restoring a saved file");
+        QMessageBox::information(this, tr("Info"),tr("Please connect before restoring a saved file"));
         return;
     }
 
-    QString filename = QFileDialog::getOpenFileName(this,tr("Open File"),QString(),"Config Files (*.ini)");
+    QString filename = QFileDialog::getOpenFileName(this,tr("Open File"),QString(),tr("Config Files (*.ini)"));
 
     // Re-enable data if window was open too long
     startData();
@@ -981,14 +932,14 @@ bool MainWindow::checkSaved()
         if(!brd->isAccessAllowed())
             continue;
         if(!brd->_isBoardSavedToRAM()) {
-            QMessageBox::StandardButton rval = QMessageBox::question(this,"Changes not sent","Are you sure you want to disconnect?\n"\
-                                  "Changes haven't been sent to the headtracker\nClick \"Send Changes\" first",QMessageBox::Yes|QMessageBox::No);
+            QMessageBox::StandardButton rval = QMessageBox::question(this,tr("Changes not sent"),tr("Are you sure you want to disconnect?\n"\
+                                  "Changes haven't been sent to the headtracker\nClick \"Send Changes\" first"),QMessageBox::Yes|QMessageBox::No);
             if(rval != QMessageBox::Yes)
                 return false;
 
         } else if (!brd->_isBoardSavedToNVM()) {
-            QMessageBox::StandardButton rval = QMessageBox::question(this,"Changes not saved on tracker","Are you sure you want to disconnect?\n"\
-                                  "Changes haven't been permanently stored on headtracker\nClick \"Save to NVM\" (Non-Volatile Memory) first",QMessageBox::Yes|QMessageBox::No);
+            QMessageBox::StandardButton rval = QMessageBox::question(this,tr("Changes not saved on tracker","Are you sure you want to disconnect?\n"\
+                                  "Changes haven't been permanently stored on headtracker\nClick \"Save to NVM\" (Non-Volatile Memory) first"),QMessageBox::Yes|QMessageBox::No);
             if(rval != QMessageBox::Yes)
                 return false;
         }
@@ -1020,10 +971,10 @@ void MainWindow::requestTimeout()
 
     // Otherwise increment to the next board and try again
     if(boardRequestIndex == boards.length()) {
-        msgbox->setText("Was unable to determine the board type");
+        msgbox->setText(tr("Was unable to determine the board type"));
         msgbox->setWindowTitle("Error");
         msgbox->show();
-        statusMessage("Board discovery failed");
+        statusMessage(tr("Board discovery failed"));
         serialDisconnect();
         return;
     }
@@ -1033,7 +984,7 @@ void MainWindow::requestTimeout()
         boards[boardRequestIndex-1]->allowAccess(false);
 
     // Request hardware information from the new board
-    addToLog("Trying to connect to " + boards[boardRequestIndex]->boardName() + "\n");
+    addToLog(tr("Trying to connect to ") + boards[boardRequestIndex]->boardName() + "\n");
     boards[boardRequestIndex]->allowAccess(true);
     boards[boardRequestIndex]->requestHardware();
     requestTimer.start(200);
@@ -1065,7 +1016,7 @@ void MainWindow::requestParamsTimeout()
 void MainWindow::startCalibration()
 {
     if(!serialcon->isOpen()) {
-        QMessageBox::information(this,"Not Connected", "Connect before trying to calibrate");
+        QMessageBox::information(this,tr("Not Connected"), tr("Connect before trying to calibrate"));
         return;
     }
 
@@ -1087,7 +1038,7 @@ void MainWindow::storeToNVM()
     foreach(BoardType *brd, boards) {
         brd->_saveToNVM();
     }
-    statusMessage("Storing Parameters to non-volatile memory");
+    statusMessage(tr("Storing Parameters to non-volatile memory"));
     ui->cmdSaveNVM->setEnabled(false);
 }
 
@@ -1176,9 +1127,9 @@ void MainWindow::BTModeChanged()
     updateFromUI();
 
     QMessageBox::StandardButton reply;
-    reply = QMessageBox::question(this, "Reboot Required",
-                                  "Bluetooth mode change requires reboot.\n"
-                                  "Save and reboot now?",
+    reply = QMessageBox::question(this, tr("Reboot Required"),
+                                  tr("Bluetooth mode change requires reboot.\n"
+                                  "Save and reboot now?"),
                                   QMessageBox::Yes | QMessageBox::No);
     if(reply == QMessageBox::Yes) {
         storeToNVM();
@@ -1196,8 +1147,8 @@ void MainWindow::reboot()
         if(!brd->isAccessAllowed())
             continue;
         if(!brd->_isBoardSavedToNVM()) {
-            QMessageBox::StandardButton rval = QMessageBox::question(this,"Changes not saved","Are you sure you want to reboot?\n"\
-                                  "Changes haven't been saved\nClick \"Save to NVM\" first",QMessageBox::Yes|QMessageBox::No);
+            QMessageBox::StandardButton rval = QMessageBox::question(this,tr("Changes not saved"),tr("Are you sure you want to reboot?\n"\
+                                  "Changes haven't been saved\nClick \"Save to NVM\" first"),QMessageBox::Yes|QMessageBox::No);
             if(rval != QMessageBox::Yes) {
                 reboot = false;
             }
@@ -1215,37 +1166,42 @@ void MainWindow::reboot()
 
 void MainWindow::openHelp()
 {
-     QDesktopServices::openUrl(helpurl);
+    QDesktopServices::openUrl(helpurl);
+}
+
+void MainWindow::showPinView()
+{
+    pinView->show();
 }
 
 void MainWindow::paramSendStart()
 {
-    statusMessage("Starting parameter send",3000);
+    statusMessage(tr("Starting parameter send"),3000);
 }
 
 void MainWindow::paramSendComplete()
 {
-    statusMessage("Parameter(s) saved", 5000);
+    statusMessage(tr("Parameter(s) saved"), 5000);
     ui->cmdStore->setEnabled(false);
 }
 
 void MainWindow::paramSendFailure(int)
 {
-    msgbox->setText("Unable to upload the parameter(s)");
-    msgbox->setWindowTitle("Error");
+    msgbox->setText(tr("Unable to upload the parameter(s))");
+    msgbox->setWindowTitle(tr("Error"));
     msgbox->show();
-    statusMessage("Parameters Send Failure");
+    statusMessage(tr("Parameters Send Failure"));
     serialDisconnect();
 }
 
 void MainWindow::paramReceiveStart()
 {
-    statusMessage("Parameters Request Started",5000);
+    statusMessage(tr("Parameters Request Started"),5000);
 }
 
 void MainWindow::paramReceiveComplete()
 {
-    statusMessage("Parameters Request Complete",5000);
+    statusMessage(tr("Parameters Request Complete"),5000);
     waitingOnParameters = false;
     updateToUI();
     BLE33tabChanged(); // Request Data to be sent
@@ -1254,7 +1210,7 @@ void MainWindow::paramReceiveComplete()
 
 void MainWindow::paramReceiveFailure(int)
 {
-    msgbox->setText("Unable to receive the parameters");
+    msgbox->setText(tr("Unable to receive the parameters"));
     msgbox->setWindowTitle("Error");
     msgbox->show();
     statusMessage("Parameter Received Failure");
@@ -1263,12 +1219,12 @@ void MainWindow::paramReceiveFailure(int)
 
 void MainWindow::calibrationSuccess()
 {
-    statusMessage("Calibration Success",5000);
+    statusMessage(tr("Calibration Success"),5000);
 }
 
 void MainWindow::calibrationFailure()
 {
-    statusMessage("Calibration Failure",5000);
+    statusMessage(tr("Calibration Failure"),5000);
 }
 
 void MainWindow::serialTxReady()
@@ -1280,8 +1236,8 @@ void MainWindow::serialTxReady()
 
 void MainWindow::needsCalibration()
 {
-    msgbox->setText("Calibration has not been performed.\nPlease calibrate or restore from a saved file");
-    msgbox->setWindowTitle("Calibrate");
+    msgbox->setText(tr("Calibration has not been performed.\nPlease calibrate or restore from a saved file"));
+    msgbox->setWindowTitle(tr("Calibrate"));
     msgbox->show();
 }
 
@@ -1292,7 +1248,7 @@ void MainWindow::boardDiscovered(BoardType *brd)
 
     // Stack widget changes to hide some info depending on board
     if(brd->boardName() == "NANO33BLE") {
-        addToLog("Connected to a " + brd->boardName() + "\n");
+        addToLog(tr("Connected to a ") + brd->boardName() + "\n");
         ui->cmdStartGraph->setVisible(false);
         ui->cmdStopGraph->setVisible(false);
         ui->chkRawData->setVisible(false);
@@ -1321,14 +1277,14 @@ void MainWindow::boardDiscovered(BoardType *brd)
 
         // Firmware is too old
         if(lmajver > rmajver) {
-            msgbox->setText("Firmware is outdated. Upload a firmware of " + QString::number((float)lmajver/10,'f',1) + "x for this GUI");
-            msgbox->setWindowTitle("Firmware Version Mismatch");
+            msgbox->setText(tr("Firmware is outdated. Upload a firmware of ") + QString::number((float)lmajver/10,'f',1) + "x for this GUI");
+            msgbox->setWindowTitle(tr("Firmware Version Mismatch"));
             msgbox->show();
 
         // Firmware is too new
         } else if (lmajver < rmajver) {
-            msgbox->setText("Firmware is newer than supported by this GUI. Download " + QString::number((float)rmajver/10,'f',1) +"x \n\nfrom www.github.com/dlktdr/headtracker");
-            msgbox->setWindowTitle("Firmware Version Mismatch");
+            msgbox->setText(tr("Firmware is newer than supported by this GUI. Download ") + QString::number((float)rmajver/10,'f',1) +"x \n\nfrom www.github.com/dlktdr/headtracker");
+            msgbox->setWindowTitle(tr"Firmware Version Mismatch"));
             msgbox->show();
         }
         channelviewer->setBoard(currentboard);
@@ -1349,13 +1305,13 @@ void MainWindow::boardDiscovered(BoardType *brd)
         ui->stackedWidget->setCurrentIndex(2);
 
     } else if (brd->boardName() == "NANO33REMOTE") {
-        addToLog("Connected to a " + brd->boardName() + "\n");
+        addToLog(tr"Connected to a ") + brd->boardName() + "\n");
 
     } else {
-        msgbox->setText("Unknown board type");
+        msgbox->setText(tr("Unknown board type"));
         msgbox->setWindowTitle("Error");
         msgbox->show();
-        statusMessage("Unknown board type");
+        statusMessage(tr("Unknown board type"));
         serialDisconnect();
     }
 
