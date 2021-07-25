@@ -164,6 +164,14 @@ void PpmOut_setPin(int pinNum)
     // Disable PPI 10
     NRF_PPI->CHENCLR = PPMOUT_PPICH_MSK;
 
+    // Set current pin back to low drive  , if enabled
+    if(setPin > 0 ) {
+        if(dpintoport[setPin] == 0) 
+            NRF_P0->PIN_CNF[dpintopin[setPin]] |= GPIO_PIN_CNF_DRIVE_S0S1 << GPIO_PIN_CNF_DRIVE_Pos;
+        else if(dpintoport[setPin] == 1) 
+            NRF_P1->PIN_CNF[dpintopin[setPin]] |= GPIO_PIN_CNF_DRIVE_S0S1 << GPIO_PIN_CNF_DRIVE_Pos;        
+    }
+
     // If we want to enable it....
     if(pinNum > 0) {
         // Setup GPOITE[7] to toggle output on every timer capture
@@ -171,6 +179,12 @@ void PpmOut_setPin(int pinNum)
             (GPIOTE_CONFIG_POLARITY_Toggle << GPIOTE_CONFIG_POLARITY_Pos) |
             (pin <<  GPIOTE_CONFIG_PSEL_Pos) |
             (port << GPIOTE_CONFIG_PORT_Pos);
+        
+        // High Drive PPM Output Pin
+        if(port == 0) 
+            NRF_P0->PIN_CNF[pin] |= GPIO_PIN_CNF_DRIVE_H0H1 << GPIO_PIN_CNF_DRIVE_Pos;
+        else if(port == 1) 
+            NRF_P1->PIN_CNF[pin] |= GPIO_PIN_CNF_DRIVE_H0H1 << GPIO_PIN_CNF_DRIVE_Pos;        
 
         // Start Timers, they can stay running all the time.
         PPMOUT_TIMER->PRESCALER = 4; // 16Mhz/2^(4) = 1Mhz = 1us Resolution, 1.048s Max@32bit
@@ -193,6 +207,7 @@ void PpmOut_setPin(int pinNum)
         curstep = 0;
         PPMOUT_TIMER->TASKS_CLEAR = 1;
         PPMOUT_TIMER->TASKS_START = 1;
+        
 
         irq_enable(PPMOUT_TIMER_IRQNO);
 
