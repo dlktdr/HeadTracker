@@ -7,6 +7,7 @@
 
 class GainSlider : public QSlider
 {
+    Q_OBJECT
 public:
     GainSlider(QWidget *parent = nullptr);
     ~GainSlider();
