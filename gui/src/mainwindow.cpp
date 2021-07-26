@@ -948,8 +948,10 @@ bool MainWindow::checkSaved()
 
 void MainWindow::uploadFirmwareWizard()
 {
-    if(firmwareWizard == nullptr)
-        firmwareWizard = new FirmwareWizard;
+    if(firmwareWizard == nullptr) {
+        firmwareWizard = new FirmwareWizard(this);
+        firmwareWizard->setWindowFlags(Qt::Window);
+    }
     firmwareWizard->show();
     firmwareWizard->activateWindow();
     firmwareWizard->raise();
