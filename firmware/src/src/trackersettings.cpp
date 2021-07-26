@@ -519,7 +519,7 @@ void TrackerSettings::setAuxFunc1(int funct)
 void TrackerSettings::setAnalog4Ch(int channel)
 {
     if((channel > 0 && channel <= 16) || channel == -1)
-        an5ch = channel;
+        an4ch = channel;
 }
 
 void TrackerSettings::setAnalog5Ch(int channel)

@@ -504,7 +504,7 @@ void TrackerSettings::setMagOffset(float x, float y, float z)
 
 void TrackerSettings::setAnalog4Gain(float gain)
 {
-    _data["an5gain"]=QString::number(gain,'g',4);
+    _data["an4gain"]=QString::number(gain,'g',4);
 }
 
 void TrackerSettings::setAnalog5Gain(float gain)

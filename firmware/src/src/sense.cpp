@@ -33,7 +33,7 @@
 #include "filters.h"
 #include "io.h"
 #include "Analog/analog.h"
-
+#include "filters/SF1eFilter.h"
 
 static float auxdata[10];
 static float raccx=0,raccy=0,raccz=0;
@@ -80,6 +80,9 @@ static volatile bool firstrun=true;
 static float aacc[3]={0,0,0};
 static float amag[3]={0,0,0};
 
+// Analog Filters
+SF1eFilter *anFilter[AN_CH_CNT];
+
 int sense_Init()
 {
     if (!IMU.begin()) {
@@ -98,6 +101,12 @@ int sense_Init()
 
     for(int i = 0; i< BT_CHANNELS; i++) {
         bt_chansf[i] = 0;
+    }
+
+    // Create analog filters
+    for(int i=0; i < AN_CH_CNT; i++) {
+        anFilter[i] = SF1eFilterCreate(AN_FILT_FREQ, AN_FILT_MINCO, AN_FILT_SLOPE, AN_FILT_DERCO);
+        SF1eFilterInit(anFilter[i]);
     }
 
     return 0;
@@ -294,9 +303,9 @@ void calculate_Thread()
                 channel_data[aux1ch - 1] = auxdata[trkset.auxFunc1()];
         }
 
-        // 7) Set Analog Channels       
+        // 7) Set Analog Channels
         if(trkset.analog4Ch() > 0) {
-            float an4 = analogRead(AN4);
+            float an4 = SF1eFilterDo(anFilter[0], analogRead(AN4));
             an4 *= trkset.analog4Gain();
             an4 += trkset.analog4Offset();
             an4 += TrackerSettings::MIN_PWM;
@@ -304,7 +313,7 @@ void calculate_Thread()
             channel_data[trkset.analog4Ch()-1] = an4;
         }
         if(trkset.analog5Ch() > 0) {
-            float an5 = analogRead(AN5);
+            float an5 = SF1eFilterDo(anFilter[1], analogRead(AN5));
             an5 *= trkset.analog5Gain();
             an5 += trkset.analog5Offset();
             an5 += TrackerSettings::MIN_PWM;
@@ -312,7 +321,7 @@ void calculate_Thread()
             channel_data[trkset.analog5Ch()-1] = an5;
         }
         if(trkset.analog6Ch() > 0) {
-            float an6 = analogRead(AN6);
+	        float an6 = SF1eFilterDo(anFilter[2], analogRead(AN6));
             an6 *= trkset.analog6Gain();
             an6 += trkset.analog6Offset();
             an6 += TrackerSettings::MIN_PWM;
@@ -320,7 +329,7 @@ void calculate_Thread()
             channel_data[trkset.analog6Ch()-1] = an6;
         }
         if(trkset.analog7Ch() > 0) {
-            float an7 = analogRead(AN7);
+            float an7 = SF1eFilterDo(anFilter[3], analogRead(AN7));
             an7 *= trkset.analog7Gain();
             an7 += trkset.analog7Offset();
             an7 += TrackerSettings::MIN_PWM;

@@ -23,6 +23,13 @@
 #define PWM_PERIOD 50           // (ms) PWM Period
 #define UIRESPONSIVE_TIME 10000 // (ms) 10Seconds without an ack data will stop;
 
+// Analog Filters 1 Euro Filter
+#define AN_CH_CNT 4
+#define AN_FILT_FREQ 150
+#define AN_FILT_MINCO 0.02
+#define AN_FILT_SLOPE 6
+#define AN_FILT_DERCO 1
+
 // SBUS
 #define SBUSIN_PIN 10 // RX Pin
 #define SBUSIN_PORT 1
