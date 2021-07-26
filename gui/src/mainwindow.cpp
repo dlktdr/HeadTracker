@@ -186,7 +186,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->cmbPpmInPin,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbPpmOutPin,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbBtMode,SIGNAL(currentIndexChanged(int)),this,SLOT(BTModeChanged()));
-    connect(ui->cmbResetOnPPM,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
+    //connect(ui->cmbResetOnPPM,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbPPMChCount,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbA6Ch,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbA7Ch,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
@@ -586,11 +586,11 @@ void MainWindow::updateToUI()
     int ppout_index = trkset.ppmOutPin()-1;
     int ppin_index = trkset.ppmInPin()-1;
     int but_index = trkset.buttonPin()-1;    
-    int resppm_index = trkset.resetCntPPM();
+    //int resppm_index = trkset.resetCntPPM();
     ui->cmbPpmOutPin->setCurrentIndex(ppout_index < 1 ? 0 : ppout_index);
     ui->cmbPpmInPin->setCurrentIndex(ppin_index < 1 ? 0 : ppin_index);
     ui->cmbButtonPin->setCurrentIndex(but_index < 1 ? 0 : but_index);
-    ui->cmbResetOnPPM->setCurrentIndex(resppm_index < 0 ? 0: resppm_index);
+    //ui->cmbResetOnPPM->setCurrentIndex(resppm_index < 0 ? 0: resppm_index);
 
     // PPM Output Settings
     int channels = trkset.ppmChCount();
@@ -753,8 +753,8 @@ void MainWindow::updateFromUI()
         ui->lblPPMOut->setText(tr("PPM data will fit in frame. Refresh rate: ") + QString::number(1/(static_cast<float>(setframelen)/1000000.0),'f',2) + " Hz");
     }
 
-    int rstppm_index = ui->cmbResetOnPPM->currentIndex();
-    trkset.setResetCntPPM(rstppm_index==0?-1:rstppm_index);
+    //int rstppm_index = ui->cmbResetOnPPM->currentIndex();
+  //  trkset.setResetCntPPM(rstppm_index==0?-1:rstppm_index);
 
     trkset.setBlueToothMode(ui->cmbBtMode->currentIndex());
 
