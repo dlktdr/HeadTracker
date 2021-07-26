@@ -76,6 +76,7 @@ void FirmwareWizard::initalize()
     ui->cmdProgram->setEnabled(false);
     ui->cmdProgram->setText("Program");
     ui->progressBar->setValue(0);
+    ui->stkWidget->setCurrentIndex(0);
     boardType = BRD_UNKNOWN;
 }
 
