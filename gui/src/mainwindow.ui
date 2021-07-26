@@ -555,7 +555,7 @@
                 <bool>false</bool>
                </property>
                <property name="currentIndex">
-                <number>5</number>
+                <number>2</number>
                </property>
                <widget class="QWidget" name="tabGeneral">
                 <attribute name="title">
@@ -1297,10 +1297,16 @@
                    </property>
                   </widget>
                  </item>
-                 <item row="5" column="0">
+                 <item row="5" column="0" colspan="3">
                   <widget class="QLabel" name="label_54">
                    <property name="text">
-                    <string>Sbus input pin - RX (P1.10)</string>
+                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sbus input pin - RX (P1.10)&lt;/p&gt;&lt;p&gt;Due to a hardware constraint inverting an incoming SBUS signal requires two external pins to be jumpered together. You will need to connect D5 to D6. Please see online documentation page for more details.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+                   </property>
+                   <property name="wordWrap">
+                    <bool>true</bool>
                    </property>
                   </widget>
                  </item>

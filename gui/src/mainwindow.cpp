@@ -717,32 +717,62 @@ void MainWindow::updateFromUI()
     trkset.setAxisRemap(ui->cmbRemap->currentData().toUInt());
     trkset.setAxisSign(ui->cmbSigns->currentIndex());
 
+
+    // Check all pins for duplicates
+
     // Shift the index of the disabled choice to -1 in settings
+    enum {PIN_PPMIN,PIN_PPMOUT,PIN_BUTRESET,PIN_SBUSIN1,PIN_SBUSIN2};
+    int pins[5] {-1,-1,-1,-1,-1};
+
     int ppout_index = ui->cmbPpmOutPin->currentIndex()+1;
-    ppout_index = ppout_index==1?-1:ppout_index;
+    pins[PIN_PPMOUT] = ppout_index==1?-1:ppout_index;
     int ppin_index = ui->cmbPpmInPin->currentIndex()+1;
-    ppin_index = ppin_index==1?-1:ppin_index;
+    pins[PIN_PPMIN] = ppin_index==1?-1:ppin_index;
     int but_index = ui->cmbButtonPin->currentIndex()+1;
-    but_index = but_index==1?-1:but_index;
+    pins[PIN_BUTRESET] = but_index==1?-1:but_index;
+
+    bool sbusinchecked = ui->chkSbusInInv->isChecked();
+    if(sbusinchecked) {
+        pins[PIN_SBUSIN1] = 5;
+        pins[PIN_SBUSIN2] = 6;
+    }
+
+    // Loop through all possibilites checking for duplicates
+    bool duplicates=false;
+    for(int i=0; i < 4; i++) {
+        for(int y=i+1; y < 5; y++) {
+            if(pins[i] > 0 && pins[y] > 0 && pins[i] == pins[y]) {
+                duplicates = true;
+                break;
+            }
+        }
+    }
 
     // Check for pin duplicates
-    if((but_index   > 0 && (but_index == ppin_index || but_index == ppout_index)) ||
-       (ppin_index > 0 && (ppin_index == but_index || ppin_index == ppout_index)) ||
-       (ppout_index > 0 && (ppout_index == but_index || ppout_index == ppin_index))) {
-        QMessageBox::information(this,tr("Error"), tr("Cannot pick dulplicate pins"));
+    if(duplicates) {
+        QString message = tr("Cannot pick dulplicate pins");
+        if(sbusinchecked)
+            message += tr("\n  ** SBUS input invert signal needs pins D5 and D6 connected together");
+        QMessageBox::information(this,tr("Error"), message);
 
         // Reset gui to old values
         ppout_index = trkset.ppmOutPin()-1;
         ppin_index = trkset.ppmInPin()-1;
         but_index = trkset.buttonPin()-1;
+        sbusinchecked = trkset.invertedSBUSIn();
         ui->cmbPpmOutPin->setCurrentIndex(ppout_index < 1 ? 0 : ppout_index);
         ui->cmbPpmInPin->setCurrentIndex(ppin_index < 1 ? 0 : ppin_index);
         ui->cmbButtonPin->setCurrentIndex(but_index < 1 ? 0 : but_index);
+        ui->chkSbusInInv->setChecked(sbusinchecked);
+
     } else {
         trkset.setPpmOutPin(ppout_index);
         trkset.setPpmInPin(ppin_index);
         trkset.setButtonPin(but_index);
+        trkset.setInvertedSBUSIn(sbusinchecked);
     }
+
+    trkset.setInvertedSBUSOut(ui->chkSbusOutInv->isChecked());
 
     uint16_t setframelen = ui->spnPPMFrameLen->value() * 1000;
     trkset.setPPMFrame(setframelen);
@@ -774,8 +804,7 @@ void MainWindow::updateFromUI()
     trkset.setInvertedPpmOut(ui->chkInvertedPPM->isChecked());
     trkset.setInvertedPpmIn(ui->chkInvertedPPMIn->isChecked());
     trkset.setResetOnWave(ui->chkResetCenterWave->isChecked());
-    trkset.setInvertedSBUSIn(ui->chkSbusInInv->isChecked());
-    trkset.setInvertedSBUSOut(ui->chkSbusOutInv->isChecked());
+
 
     ui->cmdStore->setEnabled(true);
     ui->cmdSaveNVM->setEnabled(true);    
