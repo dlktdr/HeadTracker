@@ -131,6 +131,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->spnLPTiltRoll2,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->spnPPMSync,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->spnPPMFrameLen,SIGNAL(valueChanged(double)),this,SLOT(updateFromUI()));
+    connect(ui->spnA4Gain,SIGNAL(valueChanged(double)),this,SLOT(updateFromUI()));
+    connect(ui->spnA4Off,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->spnA5Gain,SIGNAL(valueChanged(double)),this,SLOT(updateFromUI()));
     connect(ui->spnA5Off,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->spnA6Gain,SIGNAL(valueChanged(double)),this,SLOT(updateFromUI()));
@@ -188,6 +190,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->cmbBtMode,SIGNAL(currentIndexChanged(int)),this,SLOT(BTModeChanged()));
     //connect(ui->cmbResetOnPPM,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbPPMChCount,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->cmbA4Ch,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->cmbA5Ch,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbA6Ch,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbA7Ch,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbAuxFn0,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
@@ -687,7 +691,7 @@ void MainWindow::updateFromUI()
     int an5Ch = ui->cmbA5Ch->currentIndex();
     int an6Ch = ui->cmbA6Ch->currentIndex();
     int an7Ch = ui->cmbA7Ch->currentIndex();
-    trkset.setAnalog5Ch(an4Ch==0?-1:an4Ch);
+    trkset.setAnalog4Ch(an4Ch==0?-1:an4Ch);
     trkset.setAnalog5Ch(an5Ch==0?-1:an5Ch);
     trkset.setAnalog6Ch(an6Ch==0?-1:an6Ch);
     trkset.setAnalog7Ch(an7Ch==0?-1:an7Ch);
