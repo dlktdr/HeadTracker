@@ -71,7 +71,6 @@ MainWindow::MainWindow(QWidget *parent)
     findSerialPorts();
 
     // Use system default fixed witdh font
-    QFont serifFont("Times", 10, QFont::Bold);
     serialDebug->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
 
     // Update default settings to UI
@@ -938,7 +937,7 @@ bool MainWindow::checkSaved()
                 return false;
 
         } else if (!brd->_isBoardSavedToNVM()) {
-            QMessageBox::StandardButton rval = QMessageBox::question(this,tr("Changes not saved on tracker","Are you sure you want to disconnect?\n"\
+            QMessageBox::StandardButton rval = QMessageBox::question(this,tr("Changes not saved on tracker"),tr("Are you sure you want to disconnect?\n"\
                                   "Changes haven't been permanently stored on headtracker\nClick \"Save to NVM\" (Non-Volatile Memory) first"),QMessageBox::Yes|QMessageBox::No);
             if(rval != QMessageBox::Yes)
                 return false;
@@ -1187,7 +1186,7 @@ void MainWindow::paramSendComplete()
 
 void MainWindow::paramSendFailure(int)
 {
-    msgbox->setText(tr("Unable to upload the parameter(s))");
+    msgbox->setText(tr("Unable to upload the parameter(s))"));
     msgbox->setWindowTitle(tr("Error"));
     msgbox->show();
     statusMessage(tr("Parameters Send Failure"));
@@ -1284,12 +1283,12 @@ void MainWindow::boardDiscovered(BoardType *brd)
         // Firmware is too new
         } else if (lmajver < rmajver) {
             msgbox->setText(tr("Firmware is newer than supported by this GUI. Download ") + QString::number((float)rmajver/10,'f',1) +"x \n\nfrom www.github.com/dlktdr/headtracker");
-            msgbox->setWindowTitle(tr"Firmware Version Mismatch"));
+            msgbox->setWindowTitle(tr("Firmware Version Mismatch"));
             msgbox->show();
         }
         channelviewer->setBoard(currentboard);
     } else if (brd->boardName() == "BNO055") {
-        addToLog("Connected to a " + brd->boardName() + "\n");
+        addToLog(tr("Connected to a ") + brd->boardName() + "\n");
         ui->cmdStartGraph->setVisible(true);
         ui->cmdStopGraph->setVisible(true);
         ui->cmbRemap->setVisible(true);
@@ -1305,11 +1304,11 @@ void MainWindow::boardDiscovered(BoardType *brd)
         ui->stackedWidget->setCurrentIndex(2);
 
     } else if (brd->boardName() == "NANO33REMOTE") {
-        addToLog(tr"Connected to a ") + brd->boardName() + "\n");
+        addToLog(tr("Connected to a ") + brd->boardName() + "\n");
 
     } else {
         msgbox->setText(tr("Unknown board type"));
-        msgbox->setWindowTitle("Error");
+        msgbox->setWindowTitle(tr("Error"));
         msgbox->show();
         statusMessage(tr("Unknown board type"));
         serialDisconnect();
