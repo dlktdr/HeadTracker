@@ -1,4 +1,4 @@
-QT       += core gui serialport network
+QT       += core gui serialport network printsupport
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets opengl
 
@@ -32,6 +32,7 @@ SOURCES += \
     diagnosticdisplay.cpp \
     firmwarewizard.cpp \
     gainslider.cpp \
+    imageviewer/imageviewer.cpp \
     magcalwidget.cpp \
     main.cpp \
     mainwindow.cpp \
@@ -55,6 +56,7 @@ HEADERS += \
     diagnosticdisplay.h \
     firmwarewizard.h \
     gainslider.h \
+    imageviewer/imageviewer.h \
     magcalwidget.h \
     mainwindow.h \
     led.h \

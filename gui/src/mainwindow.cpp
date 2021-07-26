@@ -9,6 +9,7 @@
 #include "servominmax.h"
 #include "ucrc16lib.h"
 
+
 //#define DEBUG_HT
 
 MainWindow::MainWindow(QWidget *parent)
@@ -20,16 +21,11 @@ MainWindow::MainWindow(QWidget *parent)
     msgbox = new QMessageBox(this);
 
     // Pin Viewer
-    pinView = new QWidget;
-    QLayout *layout = new QHBoxLayout;
-    pinView->setLayout(layout);
-    QLabel *lbl = new QLabel;
-    layout->addWidget(lbl);
-
-    QPixmap pm(":/Icons/Pinout.png");
-    lbl->setPixmap(pm);
-    lbl->setScaledContents(true);
-    pinView->setMaximumWidth(1000);
+    imageViewer = new ImageViewer(this);
+    imageViewer->setWindowFlag(Qt::Window);
+    imageViewer->setImage(QPixmap(":/Icons/images/Pinout.png").toImage());
+    imageViewer->setWindowTitle(tr("Pinout"));
+    imageViewer->resize(800,600);
 
     // Start the board interface
     nano33ble = new BoardNano33BLE(&trkset);
@@ -1171,7 +1167,7 @@ void MainWindow::openHelp()
 
 void MainWindow::showPinView()
 {
-    pinView->show();
+    imageViewer->show();
 }
 
 void MainWindow::paramSendStart()
