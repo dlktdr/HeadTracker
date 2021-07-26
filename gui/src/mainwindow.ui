@@ -20,7 +20,7 @@
    <string>Headtracker</string>
   </property>
   <property name="windowIcon">
-   <iconset>
+   <iconset resource="Resources.qrc">
     <normaloff>:/Icons/images/Icon256.png</normaloff>:/Icons/images/Icon256.png</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
@@ -132,7 +132,7 @@
            <string>Calibrate</string>
           </property>
           <property name="icon">
-           <iconset>
+           <iconset resource="Resources.qrc">
             <normaloff>:/Icons/images/calibrate.svg</normaloff>:/Icons/images/calibrate.svg</iconset>
           </property>
           <property name="iconSize">
@@ -152,7 +152,7 @@
            <string/>
           </property>
           <property name="icon">
-           <iconset>
+           <iconset resource="Resources.qrc">
             <normaloff>:/Icons/images/refresh.svg</normaloff>:/Icons/images/refresh.svg</iconset>
           </property>
          </widget>
@@ -163,7 +163,7 @@
            <string>Reboot</string>
           </property>
           <property name="icon">
-           <iconset>
+           <iconset resource="Resources.qrc">
             <normaloff>:/Icons/images/reboot.svg</normaloff>:/Icons/images/reboot.svg</iconset>
           </property>
           <property name="iconSize">
@@ -183,7 +183,7 @@
            <string>Save to NVM</string>
           </property>
           <property name="icon">
-           <iconset>
+           <iconset resource="Resources.qrc">
             <normaloff>:/Icons/images/download.svg</normaloff>:/Icons/images/download.svg</iconset>
           </property>
           <property name="iconSize">
@@ -206,7 +206,7 @@
            <string>&amp;Send Changes</string>
           </property>
           <property name="icon">
-           <iconset>
+           <iconset resource="Resources.qrc">
             <normaloff>:/Icons/images/send.svg</normaloff>:/Icons/images/send.svg</iconset>
           </property>
           <property name="iconSize">
@@ -229,7 +229,7 @@
            <string>&amp;Disconnect</string>
           </property>
           <property name="icon">
-           <iconset>
+           <iconset resource="Resources.qrc">
             <normaloff>:/Icons/images/disconnect.svg</normaloff>:/Icons/images/disconnect.svg</iconset>
           </property>
           <property name="iconSize">
@@ -252,7 +252,7 @@
            <string>&amp;Connect</string>
           </property>
           <property name="icon">
-           <iconset>
+           <iconset resource="Resources.qrc">
             <normaloff>:/Icons/images/connect.svg</normaloff>:/Icons/images/connect.svg</iconset>
           </property>
           <property name="iconSize">
@@ -269,7 +269,7 @@
            <string>Channel Viewer</string>
           </property>
           <property name="icon">
-           <iconset>
+           <iconset resource="Resources.qrc">
             <normaloff>:/Icons/images/chviewico.svg</normaloff>:/Icons/images/chviewico.svg</iconset>
           </property>
           <property name="iconSize">
@@ -555,13 +555,128 @@
                 <bool>false</bool>
                </property>
                <property name="currentIndex">
-                <number>4</number>
+                <number>5</number>
                </property>
                <widget class="QWidget" name="tabGeneral">
                 <attribute name="title">
                  <string>General</string>
                 </attribute>
                 <layout class="QGridLayout" name="gridLayout_12">
+                 <item row="3" column="0">
+                  <widget class="QLabel" name="label_4">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="text">
+                    <string>Low Pass Filter on Pan</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="1">
+                  <widget class="QSpinBox" name="spnLPTiltRoll">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="minimumSize">
+                    <size>
+                     <width>50</width>
+                     <height>25</height>
+                    </size>
+                   </property>
+                   <property name="baseSize">
+                    <size>
+                     <width>8</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <property name="suffix">
+                    <string>%</string>
+                   </property>
+                   <property name="minimum">
+                    <number>1</number>
+                   </property>
+                   <property name="maximum">
+                    <number>100</number>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="1" colspan="2">
+                  <layout class="QGridLayout" name="gridLayout_7">
+                   <item row="0" column="0">
+                    <widget class="QLabel" name="label_45">
+                     <property name="text">
+                      <string>Tilt (X)</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="0" column="1">
+                    <widget class="QLabel" name="label_46">
+                     <property name="text">
+                      <string>Roll (Y)</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="0" column="2">
+                    <widget class="QLabel" name="label_47">
+                     <property name="text">
+                      <string>Pan (Z)</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="1" column="0">
+                    <widget class="QSpinBox" name="spnRotX">
+                     <property name="suffix">
+                      <string>°</string>
+                     </property>
+                     <property name="minimum">
+                      <number>-360</number>
+                     </property>
+                     <property name="maximum">
+                      <number>360</number>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="1" column="1">
+                    <widget class="QSpinBox" name="spnRotY">
+                     <property name="suffix">
+                      <string>°</string>
+                     </property>
+                     <property name="minimum">
+                      <number>-360</number>
+                     </property>
+                     <property name="maximum">
+                      <number>360</number>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="1" column="2">
+                    <widget class="QSpinBox" name="spnRotZ">
+                     <property name="suffix">
+                      <string>°</string>
+                     </property>
+                     <property name="minimum">
+                      <number>-360</number>
+                     </property>
+                     <property name="maximum">
+                      <number>360</number>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </item>
+                 <item row="4" column="0" colspan="2">
+                  <widget class="QCheckBox" name="chkResetCenterWave">
+                   <property name="text">
+                    <string>Center on Proximity Detect (BLE Sense Only)</string>
+                   </property>
+                  </widget>
+                 </item>
                  <item row="0" column="0">
                   <widget class="QLabel" name="label_3">
                    <property name="sizePolicy">
@@ -572,6 +687,50 @@
                    </property>
                    <property name="text">
                     <string>Center Button</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="0">
+                  <widget class="QLabel" name="label_2">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="text">
+                    <string>Low Pass Filter on Tilt/Roll</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="3" column="1">
+                  <widget class="QSpinBox" name="spnLPPan">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="minimumSize">
+                    <size>
+                     <width>50</width>
+                     <height>25</height>
+                    </size>
+                   </property>
+                   <property name="baseSize">
+                    <size>
+                     <width>8</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <property name="suffix">
+                    <string>%</string>
+                   </property>
+                   <property name="minimum">
+                    <number>1</number>
+                   </property>
+                   <property name="maximum">
+                    <number>100</number>
                    </property>
                   </widget>
                  </item>
@@ -657,219 +816,7 @@
                    </property>
                   </widget>
                  </item>
-                 <item row="1" column="1" colspan="2">
-                  <layout class="QGridLayout" name="gridLayout_7">
-                   <item row="0" column="0">
-                    <widget class="QLabel" name="label_45">
-                     <property name="text">
-                      <string>Tilt (X)</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="0" column="1">
-                    <widget class="QLabel" name="label_46">
-                     <property name="text">
-                      <string>Roll (Y)</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="0" column="2">
-                    <widget class="QLabel" name="label_47">
-                     <property name="text">
-                      <string>Pan (Z)</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="1" column="0">
-                    <widget class="QSpinBox" name="spnRotX">
-                     <property name="suffix">
-                      <string>°</string>
-                     </property>
-                     <property name="minimum">
-                      <number>-360</number>
-                     </property>
-                     <property name="maximum">
-                      <number>360</number>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="1" column="1">
-                    <widget class="QSpinBox" name="spnRotY">
-                     <property name="suffix">
-                      <string>°</string>
-                     </property>
-                     <property name="minimum">
-                      <number>-360</number>
-                     </property>
-                     <property name="maximum">
-                      <number>360</number>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="1" column="2">
-                    <widget class="QSpinBox" name="spnRotZ">
-                     <property name="suffix">
-                      <string>°</string>
-                     </property>
-                     <property name="minimum">
-                      <number>-360</number>
-                     </property>
-                     <property name="maximum">
-                      <number>360</number>
-                     </property>
-                    </widget>
-                   </item>
-                  </layout>
-                 </item>
-                 <item row="2" column="0">
-                  <widget class="QLabel" name="label_2">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="text">
-                    <string>Low Pass Filter on Tilt/Roll</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="3" column="0">
-                  <widget class="QLabel" name="label_4">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="text">
-                    <string>Low Pass Filter on Pan</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="4" column="0">
-                  <widget class="QLabel" name="label_16">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="text">
-                    <string>Reset Center on Ch #</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="4" column="1">
-                  <widget class="QComboBox" name="cmbResetOnPPM">
-                   <property name="toolTip">
-                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Will reset center if CH&amp;lt;x&amp;gt; goes above 1800us.&lt;/p&gt;&lt;p&gt;Channel must go below 1700us to reset&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                   </property>
-                   <item>
-                    <property name="text">
-                     <string>Disabled</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>1</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>2</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>3</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>4</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>5</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>6</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>7</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>8</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>9</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>10</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>11</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>12</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>13</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>14</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>15</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>16</string>
-                    </property>
-                   </item>
-                  </widget>
-                 </item>
-                 <item row="4" column="2">
-                  <widget class="QLabel" name="label_22">
-                   <property name="toolTip">
-                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Will reset center if CH&amp;lt;x&amp;gt; goes above 1800us.&lt;/p&gt;&lt;p&gt;Channel must go below 1700us to reset&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                   </property>
-                   <property name="text">
-                    <string>If &gt; 1800us</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="5" column="0" colspan="2">
-                  <widget class="QCheckBox" name="chkResetCenterWave">
-                   <property name="text">
-                    <string>Center on Proximity Detect (BLE Sense Only)</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="6" column="0">
+                 <item row="5" column="0">
                   <spacer name="verticalSpacer_6">
                    <property name="orientation">
                     <enum>Qt::Vertical</enum>
@@ -881,68 +828,6 @@
                     </size>
                    </property>
                   </spacer>
-                 </item>
-                 <item row="2" column="1">
-                  <widget class="QSpinBox" name="spnLPTiltRoll">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="minimumSize">
-                    <size>
-                     <width>50</width>
-                     <height>25</height>
-                    </size>
-                   </property>
-                   <property name="baseSize">
-                    <size>
-                     <width>8</width>
-                     <height>0</height>
-                    </size>
-                   </property>
-                   <property name="suffix">
-                    <string>%</string>
-                   </property>
-                   <property name="minimum">
-                    <number>1</number>
-                   </property>
-                   <property name="maximum">
-                    <number>100</number>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="3" column="1">
-                  <widget class="QSpinBox" name="spnLPPan">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="minimumSize">
-                    <size>
-                     <width>50</width>
-                     <height>25</height>
-                    </size>
-                   </property>
-                   <property name="baseSize">
-                    <size>
-                     <width>8</width>
-                     <height>0</height>
-                    </size>
-                   </property>
-                   <property name="suffix">
-                    <string>%</string>
-                   </property>
-                   <property name="minimum">
-                    <number>1</number>
-                   </property>
-                   <property name="maximum">
-                    <number>100</number>
-                   </property>
-                  </widget>
                  </item>
                 </layout>
                </widget>
@@ -3707,7 +3592,6 @@
   <tabstop>spnRotX</tabstop>
   <tabstop>spnRotY</tabstop>
   <tabstop>spnRotZ</tabstop>
-  <tabstop>cmbResetOnPPM</tabstop>
   <tabstop>chkResetCenterWave</tabstop>
   <tabstop>spnLPTiltRoll</tabstop>
   <tabstop>spnLPPan</tabstop>
@@ -3742,7 +3626,9 @@
   <tabstop>cmdStopGraph</tabstop>
   <tabstop>chkRawData</tabstop>
  </tabstops>
- <resources/>
+ <resources>
+  <include location="Resources.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>actionE_xit</sender>

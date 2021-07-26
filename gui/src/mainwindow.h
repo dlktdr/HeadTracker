@@ -19,12 +19,13 @@
 #include "diagnosticdisplay.h"
 #include "boardnano33ble.h"
 #include "boardbno055.h"
+#include "imageviewer/imageviewer.h"
 
 const int MAX_LOG_LENGTH=6000; // How many bytes to keep of log data in the gui
 const QString version="2.10"; // Current Version Number
 const QString versionsuffix="Z"; // Version Suffix
 const QStringList firmwares={"BNO055","NANO33BLE"}; // Allowable hardware types
-const QUrl helpurl("https://headtracker.gitbook.io/head-tracker/");
+const QUrl helpurl("https://headtracker.gitbook.io/head-tracker/settings/gui-settings");
 
 const int IMHERETIME=8000; // milliseconds before sending another I'm Here Message to keep communication open
 const int MAX_TX_FAULTS=8; // Number of times to try re-sending data
@@ -49,7 +50,6 @@ protected:
 
 private:
     Ui::MainWindow *ui;
-    QWidget *pinView;
     QList<BoardType*> boards;
     QSerialPort *serialcon;
     TrackerSettings trkset;
@@ -63,13 +63,13 @@ private:
     bool waitingOnParameters;
     int boardRequestIndex;
 
-    QString logd;
-    //Firmware *firmwareUploader;
+    QString logd;    
     FirmwareWizard *firmwareWizard;
     DiagnosticDisplay *diagnostic;
     ChannelViewer *channelviewer;
     QMessageBox *msgbox;
     QTextEdit *serialDebug;
+    ImageViewer *imageViewer;
 
     QQueue<QByteArray> serialDataOut;
     volatile bool sending;
