@@ -959,7 +959,7 @@ void MainWindow::uploadFirmwareWizard()
 /* requestTimeout()
  *      This timeout is called after waiting for the board to boot
  * it requests the hardware and version from the board, gives each board
- * 250ms to respond before trying the next one. Sets the allowAccess so
+ * 300ms to respond before trying the next one. Sets the allowAccess so
  * other boards won't respond on the serial line at the same time.
  */
 
@@ -987,7 +987,7 @@ void MainWindow::requestTimeout()
     addToLog(tr("Trying to connect to ") + boards[boardRequestIndex]->boardName() + "\n");
     boards[boardRequestIndex]->allowAccess(true);
     boards[boardRequestIndex]->requestHardware();
-    requestTimer.start(200);
+    requestTimer.start(300);
 
     // Move to next board
     boardRequestIndex++;
