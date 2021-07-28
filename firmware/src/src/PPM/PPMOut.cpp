@@ -140,8 +140,8 @@ void PpmOut_setPin(int pinNum)
         buildChannels();
     }
 
-    int pin = dpintopin[pinNum];
-    int port = dpintoport[pinNum];
+    int pin = D_TO_PIN(pinNum);
+    int port = D_TO_PORT(pinNum);
 
     // Start by disabling
 
@@ -166,11 +166,11 @@ void PpmOut_setPin(int pinNum)
 
     // Set current pin back to low drive  , if enabled
     if(setPin > 0 ) {
-        if(dpintoport[setPin] == 0) 
-            NRF_P0->PIN_CNF[dpintopin[setPin]] = (NRF_P0->PIN_CNF[dpintopin[setPin]] & ~GPIO_PIN_CNF_DRIVE_Msk) |
+        if(D_TO_PORT(setPin) == 0)
+            NRF_P0->PIN_CNF[D_TO_PIN(setPin)] = (NRF_P0->PIN_CNF[D_TO_PIN(setPin)] & ~GPIO_PIN_CNF_DRIVE_Msk) |
                                                  GPIO_PIN_CNF_DRIVE_S0S1 << GPIO_PIN_CNF_DRIVE_Pos;
-        else if(dpintoport[setPin] == 1) 
-            NRF_P1->PIN_CNF[dpintopin[setPin]] = (NRF_P1->PIN_CNF[dpintopin[setPin]] & ~GPIO_PIN_CNF_DRIVE_Msk) |
+        else if(D_TO_PORT(setPin) == 1)
+            NRF_P1->PIN_CNF[D_TO_PIN(setPin)] = (NRF_P1->PIN_CNF[D_TO_PIN(setPin)] & ~GPIO_PIN_CNF_DRIVE_Msk) |
                                                  GPIO_PIN_CNF_DRIVE_S0S1 << GPIO_PIN_CNF_DRIVE_Pos;
     }
 
@@ -181,12 +181,12 @@ void PpmOut_setPin(int pinNum)
             (GPIOTE_CONFIG_POLARITY_Toggle << GPIOTE_CONFIG_POLARITY_Pos) |
             (pin <<  GPIOTE_CONFIG_PSEL_Pos) |
             (port << GPIOTE_CONFIG_PORT_Pos);
-        
+
         // High Drive PPM Output Pin
-        if(port == 0) 
+        if(port == 0)
             NRF_P0->PIN_CNF[pin] = (NRF_P0->PIN_CNF[pin] & ~GPIO_PIN_CNF_DRIVE_Msk) |
                                     GPIO_PIN_CNF_DRIVE_H0H1 << GPIO_PIN_CNF_DRIVE_Pos;
-        else if(port == 1) 
+        else if(port == 1)
             NRF_P1->PIN_CNF[pin] = (NRF_P1->PIN_CNF[pin] & ~GPIO_PIN_CNF_DRIVE_Msk) |
                                     GPIO_PIN_CNF_DRIVE_H0H1 << GPIO_PIN_CNF_DRIVE_Pos;
 
@@ -211,7 +211,7 @@ void PpmOut_setPin(int pinNum)
         curstep = 0;
         PPMOUT_TIMER->TASKS_CLEAR = 1;
         PPMOUT_TIMER->TASKS_START = 1;
-        
+
 
         irq_enable(PPMOUT_TIMER_IRQNO);
 

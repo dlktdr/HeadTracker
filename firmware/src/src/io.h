@@ -16,6 +16,10 @@ extern struct arduino_gpio_t S_gpios;
 extern int dpintopin[];
 extern int dpintoport[];
 
+#define D_TO_PIN(x) (dpintopin[x])
+#define D_TO_PORT(x) (dpintoport[x])
+#define D_TO_32X_PIN(x) ((D_TO_PORT(x) * 32) + D_TO_PIN(x))
+
 // Make Arduino functions work in zypher
 #define LEDR ARDUINO_LEDR
 #define LEDG ARDUINO_LEDG

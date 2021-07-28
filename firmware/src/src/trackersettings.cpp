@@ -422,14 +422,14 @@ void TrackerSettings::setButtonPin(int value)
 {
     if(value > 1 && value < 14) {
         if(buttonpin > 0)
-            pinMode((dpintoport[buttonpin] * 32) + dpintopin[buttonpin],GPIO_INPUT); // Disable old button pin
-        pinMode((dpintoport[value] * 32) + dpintopin[value],INPUT_PULLUP);    // Button as Input
+            pinMode(D_TO_32X_PIN(buttonpin),GPIO_INPUT); // Disable old button pin
+        pinMode(D_TO_32X_PIN(value),INPUT_PULLUP);    // Button as Input
         buttonpin = value; // Save
 
     // Disable the Button Pin
     } else if (value < 0) {
         if(buttonpin > 0)
-            pinMode((dpintoport[buttonpin] * 32) + dpintopin[buttonpin],GPIO_INPUT); // Disable old button pin
+            pinMode(D_TO_32X_PIN(buttonpin),GPIO_INPUT); // Disable old button pin
         buttonpin = -1;
     }
 }

@@ -95,8 +95,8 @@ void PpmIn_setPin(int pinNum)
     if(pinNum == setPin)
         return;
 
-    int pin = dpintopin[pinNum];
-    int port = dpintoport[pinNum];
+    int pin = D_TO_PIN(pinNum);
+    int port = D_TO_PORT(pinNum);
 
     // Stop Interrupts
     uint32_t key = irq_lock();
@@ -116,11 +116,11 @@ void PpmIn_setPin(int pinNum)
         irq_disable(GPIOTE_IRQn);
 
         // Set current pin back floating
-        if(dpintoport[setPin] == 0) 
-            NRF_P0->PIN_CNF[dpintopin[setPin]] = (NRF_P0->PIN_CNF[dpintopin[setPin]] & ~GPIO_PIN_CNF_PULL_Msk) |
+        if(D_TO_PORT(setPin) == 0)
+            NRF_P0->PIN_CNF[D_TO_PIN(setPin)] = (NRF_P0->PIN_CNF[D_TO_PIN(setPin)] & ~GPIO_PIN_CNF_PULL_Msk) |
                                                  GPIO_PIN_CNF_PULL_Disabled << GPIO_PIN_CNF_PULL_Pos;
-        else if(dpintoport[setPin] == 1) 
-            NRF_P1->PIN_CNF[dpintopin[setPin]] = (NRF_P1->PIN_CNF[dpintopin[setPin]] & ~GPIO_PIN_CNF_PULL_Msk) |
+        else if(D_TO_PORT(setPin) == 1)
+            NRF_P1->PIN_CNF[D_TO_PIN(setPin)] = (NRF_P1->PIN_CNF[D_TO_PIN(setPin)] & ~GPIO_PIN_CNF_PULL_Msk) |
                                                  GPIO_PIN_CNF_PULL_Disabled << GPIO_PIN_CNF_PULL_Pos;
 
         // Set pin num and started flag
@@ -135,10 +135,10 @@ void PpmIn_setPin(int pinNum)
         NRF_GPIOTE->EVENTS_IN[PPMIN_GPIOTE] = 0;
 
         // Set pin pull up enabled
-        if(port == 0) 
+        if(port == 0)
             NRF_P0->PIN_CNF[pin] = (NRF_P0->PIN_CNF[pin] & ~GPIO_PIN_CNF_PULL_Msk) |
                                                  GPIO_PIN_CNF_PULL_Pullup << GPIO_PIN_CNF_PULL_Pos;
-        else if(port == 1) 
+        else if(port == 1)
             NRF_P1->PIN_CNF[pin] = (NRF_P1->PIN_CNF[pin] & ~GPIO_PIN_CNF_PULL_Msk) |
                                                  GPIO_PIN_CNF_PULL_Pullup << GPIO_PIN_CNF_PULL_Pos;
 
