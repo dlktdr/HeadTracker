@@ -54,6 +54,7 @@ TrackerSettings::TrackerSettings(QObject *parent):
     // SBUS Defaults
     _data["sbininv"] = DEF_SBUS_IN_INV;
     _data["sboutinv"] = DEF_SBUS_OUT_INV;
+    _data["sbrate"] = DEF_SBUS_RATE;
 
     // Analog defaults
     _data["an4ch"]  = DEF_ALG_A4_CH;

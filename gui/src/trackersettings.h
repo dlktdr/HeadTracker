@@ -115,6 +115,7 @@ public:
     static constexpr int DEF_PWM_A3_CH = -1;
     static constexpr bool DEF_SBUS_IN_INV = false;
     static constexpr bool DEF_SBUS_OUT_INV = false;
+    static constexpr int DEF_SBUS_RATE = 60;
     static constexpr int DEF_ALG_A4_CH = -1;
     static constexpr int DEF_ALG_A5_CH = -1;
     static constexpr int DEF_ALG_A6_CH = -1;
@@ -124,6 +125,7 @@ public:
     static constexpr int DEF_AUX_CH0 = -1;
     static constexpr int DEF_AUX_CH1 = -1;
     static constexpr int DEF_AUX_FUNC = 0;
+
 
     TrackerSettings(QObject *parent=nullptr);
 
@@ -219,6 +221,9 @@ public:
 
     void setInvertedSBUSOut(bool v) {_data["sboutinv"] = v;}
     bool invertedSBUSOut() {return _data["sboutinv"].toBool();}
+
+    void setSBUSRate(uint rate) {_data["sbrate"] = rate;}
+    uint SBUSRate() { return _data["sbrate"].toUInt();}
 
     int buttonPin() const;
     void setButtonPin(int value);

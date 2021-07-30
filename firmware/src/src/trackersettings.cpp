@@ -100,6 +100,7 @@ TrackerSettings::TrackerSettings()
     // SBUS Defaults
     sbininv = DEF_SBUS_IN_INV;
     sboutinv = DEF_SBUS_OUT_INV;
+    sbrate = DEF_SBUS_RATE;
 
     // Analog defaults
     an4ch = DEF_ALG_A4_CH;
@@ -838,6 +839,7 @@ void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
 // SBUS Settings
     v = json["sbininv"]; if(!v.isNull()) setInvertedSBUSIn(v);
     v = json["sboutinv"]; if(!v.isNull()) setInvertedSBUSOut(v);
+    v = json["sbrate"]; if(!v.isNull()) setSBUSRate(v);
 
 // Analog Settings
     v = json["an4ch"]; if(!v.isNull()) setAnalog4Ch(v);
@@ -958,6 +960,7 @@ void TrackerSettings::setJSONSettings(DynamicJsonDocument &json)
 // SBUS Settings
     json["sbininv"] = sbininv;
     json["sboutinv"] = sboutinv;
+    json["sbrate"] = sbrate;
 
 // Analog Settings
     json["an4ch"] = an4ch;

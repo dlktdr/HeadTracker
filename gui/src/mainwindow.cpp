@@ -141,6 +141,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->spnRotX,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->spnRotY,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->spnRotZ,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->spnSBUSRate,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
 
     // Gain Sliders
     connect(ui->til_gain,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
@@ -538,6 +539,7 @@ void MainWindow::updateToUI()
     ui->spnA6Off->setValue(trkset.analog6Offset());
     ui->spnA7Off->setValue(trkset.analog7Offset());
     ui->spnA7Gain->setValue(trkset.analog7Gain());
+    ui->spnSBUSRate->setValue(trkset.SBUSRate());
 
     int panCh = trkset.panCh();
     int rllCh = trkset.rollCh();
@@ -773,6 +775,7 @@ void MainWindow::updateFromUI()
     }
 
     trkset.setInvertedSBUSOut(ui->chkSbusOutInv->isChecked());
+    trkset.setSBUSRate(ui->spnSBUSRate->value());
 
     uint16_t setframelen = ui->spnPPMFrameLen->value() * 1000;
     trkset.setPPMFrame(setframelen);

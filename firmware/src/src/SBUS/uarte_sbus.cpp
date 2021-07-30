@@ -84,7 +84,7 @@ void SBUS_Thread()
             SBUS_TX_Start();
             SBUSIn_Process();
         }
-        k_msleep(SBUS_PERIOD);
+        k_usleep((1.0/(float)trkset.SBUSRate()) * 1.0e6);
     }
 }
 
