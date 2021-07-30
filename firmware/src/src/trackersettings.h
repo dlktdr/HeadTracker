@@ -121,6 +121,7 @@ public:
     static constexpr int DEF_PWM_A3_CH = -1;
     static constexpr bool DEF_SBUS_IN_INV = false;
     static constexpr bool DEF_SBUS_OUT_INV = false;
+    static constexpr int DEF_SBUS_RATE = 60;
     static constexpr int DEF_ALG_A4_CH = -1;
     static constexpr int DEF_ALG_A5_CH = -1;
     static constexpr int DEF_ALG_A6_CH = -1;
@@ -256,6 +257,8 @@ public:
     bool invertedSBUSIn() {return sbininv;}
     void setInvertedSBUSOut(bool v) {sboutinv = v;}
     bool invertedSBUSOut() {return sboutinv;}
+    void setSBUSRate(uint8_t rate) { if(rate>=30 && rate<=150) sbrate = rate; }
+    uint8_t SBUSRate() { return sbrate ;}
 
 // Analogs
     void setAnalog4Ch(int channel);
@@ -362,6 +365,7 @@ private:
 
     bool sboutinv;
     bool sbininv;
+    uint8_t sbrate;
 
     // Bit map of data to send to GUI, max 64 items
     uint64_t senddatavars;
