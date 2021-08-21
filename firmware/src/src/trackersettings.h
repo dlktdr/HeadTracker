@@ -1,7 +1,7 @@
 #pragma once
 
 #define ARDUINOJSON_USE_DOUBLE 0
-#include <ArduinoJson.h>
+#include <include/arduinojsonwrp.h>
 #include <zephyr.h>
 #include "PPM/PPMOut.h"
 #include "PPM/PPMIn.h"

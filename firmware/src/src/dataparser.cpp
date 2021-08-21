@@ -16,7 +16,7 @@
  */
 
 #define ARDUINOJSON_USE_DOUBLE 0
-#include <ArduinoJson.h>
+#include <include/arduinojsonwrp.h>
 #include <zephyr.h>
 #include <chrono>
 #include "io.h"
