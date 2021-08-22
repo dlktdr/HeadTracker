@@ -388,7 +388,11 @@ void calculate_Thread()
         }
 
         // 13 Set USB Joystick Channels, Only 8 channels
-        set_JoystickChannels(channel_data);
+        static int joycnt=0;
+        if(joycnt++ == 1) {
+            set_JoystickChannels(channel_data);
+            joycnt=0;
+        }
 
         // Update the settings for the GUI
         // Both data and sensor threads will use this data. If data thread has it locked skip this reading.

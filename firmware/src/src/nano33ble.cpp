@@ -36,6 +36,9 @@ void start(void)
 	}
     clock_control_on(clock0,CLOCK_CONTROL_NRF_SUBSYS_HF);
 
+    // USB Joystick
+    joystick_init();
+
     // Setup Serial
     serial_Init();
 
@@ -55,9 +58,6 @@ void start(void)
 
     // PWM Outputs - Fixed to A0-A3
     PWM_Init(PWM_PERIOD);
-
-    // USB Joystick
-    joystick_init();
 
     // Load settings from flash - trackersettings.cpp
     trkset.loadFromEEPROM();
