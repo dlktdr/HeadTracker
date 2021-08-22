@@ -295,12 +295,15 @@ void calculate_Thread()
         // 6) Set Auxiliary Functions
         int aux0ch = trkset.auxFunc0Ch();
         int aux1ch = trkset.auxFunc1Ch();
+        int aux2ch = trkset.auxFunc2Ch();
         if(aux0ch > 0 || aux1ch > 0) {
             buildAuxData();
             if(aux0ch > 0)
                 channel_data[aux0ch - 1] = auxdata[trkset.auxFunc0()];
             if(aux1ch > 0)
                 channel_data[aux1ch - 1] = auxdata[trkset.auxFunc1()];
+            if(aux2ch > 0)
+                channel_data[aux2ch - 1] = auxdata[trkset.auxFunc2()];
         }
 
         // 7) Set Analog Channels
