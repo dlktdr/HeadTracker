@@ -62,13 +62,16 @@ void start(void)
     // Load settings from flash - trackersettings.cpp
     trkset.loadFromEEPROM();
 
-    // Main blinky light
+    // Main I'm running blinky light
 	while (1) {
         digitalWrite(LED_BUILTIN,led_is_on);
 
         //serialWriteln("HT: MAIN");
 		led_is_on = !led_is_on;
-		k_msleep(100);
+		if(led_is_on)
+            k_msleep(200);
+        else
+            k_msleep(20); // Reduce power, short flash
 	}
 }
 
