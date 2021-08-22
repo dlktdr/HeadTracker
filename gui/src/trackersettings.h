@@ -124,6 +124,7 @@ public:
     static constexpr int DEF_ALG_OFFSET = 0;
     static constexpr int DEF_AUX_CH0 = -1;
     static constexpr int DEF_AUX_CH1 = -1;
+    static constexpr int DEF_AUX_CH2 = -1;
     static constexpr int DEF_AUX_FUNC = 0;
 
 
@@ -278,12 +279,16 @@ public:
     // Aux Functions
     void setAuxFunc0Ch(int channel) {_data["aux0ch"] = channel;}
     void setAuxFunc1Ch(int channel){_data["aux1ch"] = channel;}
+    void setAuxFunc2Ch(int channel){_data["aux2ch"] = channel;}
     void setAuxFunc0(int funct) {_data["aux0func"] = funct;}
     void setAuxFunc1(int funct) {_data["aux1func"] = funct;}
+    void setAuxFunc2(int funct) {_data["aux2func"] = funct;}
     int auxFunc0Ch() {return _data["aux0ch"].toInt();}
     int auxFunc1Ch() {return _data["aux1ch"].toInt();}
+    int auxFunc2Ch() {return _data["aux2ch"].toInt();}
     int auxFunc0() {return _data["aux0func"].toInt();}
     int auxFunc1() {return _data["aux1func"].toInt();}
+    int auxFunc2() {return _data["aux2func"].toInt();}
 
     // PWM Functions
     int pwmCh(int ch) {return _data[QString("pwm%1").arg(ch)].toInt();}

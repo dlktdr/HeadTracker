@@ -196,8 +196,10 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->cmbA7Ch,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbAuxFn0,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbAuxFn1,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->cmbAuxFn2,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbAuxFn0Ch,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbAuxFn1Ch,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->cmbAuxFn2Ch,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbPWM0,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbPWM1,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbPWM2,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
@@ -550,6 +552,7 @@ void MainWindow::updateToUI()
     int a7Ch = trkset.analog7Ch();
     int auxF0Ch = trkset.auxFunc0Ch();
     int auxF1Ch = trkset.auxFunc1Ch();
+    int auxF2Ch = trkset.auxFunc2Ch();
     int pwm0Ch = trkset.pwmCh(0);
     int pwm1Ch = trkset.pwmCh(1);
     int pwm2Ch = trkset.pwmCh(2);
@@ -567,8 +570,11 @@ void MainWindow::updateToUI()
     // Aux Funcs
     ui->cmbAuxFn0Ch->setCurrentIndex(auxF0Ch==-1?0:auxF0Ch);
     ui->cmbAuxFn1Ch->setCurrentIndex(auxF1Ch==-1?0:auxF1Ch);
+    ui->cmbAuxFn2Ch->setCurrentIndex(auxF2Ch==-1?0:auxF2Ch);
     ui->cmbAuxFn0->setCurrentIndex(trkset.auxFunc0());
     ui->cmbAuxFn1->setCurrentIndex(trkset.auxFunc1());
+    ui->cmbAuxFn2->setCurrentIndex(trkset.auxFunc2());
+
     // PWM Chs
     ui->cmbPWM0->setCurrentIndex(pwm0Ch==-1?0:pwm0Ch);
     ui->cmbPWM1->setCurrentIndex(pwm1Ch==-1?0:pwm1Ch);
@@ -700,10 +706,13 @@ void MainWindow::updateFromUI()
     // Aux
     int auxF0Ch = ui->cmbAuxFn0Ch->currentIndex();
     int auxF1Ch = ui->cmbAuxFn1Ch->currentIndex();
+    int auxF2Ch = ui->cmbAuxFn2Ch->currentIndex();
     trkset.setAuxFunc0Ch(auxF0Ch==0?-1:auxF0Ch);
     trkset.setAuxFunc1Ch(auxF1Ch==0?-1:auxF1Ch);
+    trkset.setAuxFunc2Ch(auxF1Ch==0?-1:auxF2Ch);
     trkset.setAuxFunc0(ui->cmbAuxFn0->currentIndex());
     trkset.setAuxFunc1(ui->cmbAuxFn1->currentIndex());
+    trkset.setAuxFunc2(ui->cmbAuxFn2->currentIndex());
 
     // PWM
     int pwmCh0 = ui->cmbPWM0->currentIndex();

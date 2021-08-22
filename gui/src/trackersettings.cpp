@@ -76,8 +76,10 @@ TrackerSettings::TrackerSettings(QObject *parent):
     // AUX defaults
     _data["aux0ch"] = DEF_AUX_CH0;
     _data["aux1ch"] = DEF_AUX_CH1;
+    _data["aux2ch"] = DEF_AUX_CH2;
     _data["aux0func"] = DEF_AUX_FUNC;
     _data["aux1func"] = DEF_AUX_FUNC;
+    _data["aux3func"] = DEF_AUX_FUNC;
 
     _data["rotx"] = DEF_BOARD_ROT_X;
     _data["roty"] = DEF_BOARD_ROT_Y;
