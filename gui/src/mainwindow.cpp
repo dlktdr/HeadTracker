@@ -252,7 +252,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::serialConnect()
 {
-    QString port = ui->cmbPort->currentText();
+    QString port = ui->cmbPort->itemData(0).toString();
     if(port.isEmpty())
         return;
 
@@ -479,10 +479,22 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 // Finds available serial ports
 void MainWindow::findSerialPorts()
 {
+    int devfound=-1;
     ui->cmbPort->clear();
     QList<QSerialPortInfo> ports = QSerialPortInfo::availablePorts();
-    foreach(QSerialPortInfo port,ports) {
-        ui->cmbPort->addItem(port.portName(),port.serialNumber());
+    int i=0;
+    foreach(QSerialPortInfo port,ports) {        
+        QString additional;
+        if(port.vendorIdentifier() == 0x2341 &&
+           port.productIdentifier() == 0x805A) { // NANO 33 BLE
+            devfound = i;
+            additional = " NanoBLE";
+        }
+        ui->cmbPort->addItem(port.portName() + additional, port.portName());
+        i++;
+    }
+    if(devfound >= 0) {
+        ui->cmbPort->setCurrentIndex(devfound);
     }
 }
 
