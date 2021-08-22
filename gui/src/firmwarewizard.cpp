@@ -125,8 +125,8 @@ void FirmwareWizard::startPortDiscovery(const QString &filename)
     addToLog("Determining what type of file this is...");
 
     if(data.startsWith(BLE33HEADER_BIN_MBED) ||
-       data.startsWith(BLE33HEADER_BIN_ZEPHER1) ||
-       data.startsWith(BLE33HEADER_BIN_ZEPHER2)) {
+       QFileInfo(file).fileName().startsWith("BLE") ||
+       data.mid(2,2) == BLE33HEADER_BIN_ZEPHER) {
         addToLog("  Firmware is for the Arduino Nano BLE 33 in bin format");
         boardType = BRD_NANO33BLE;
         programmercommand = "bossac.exe";        

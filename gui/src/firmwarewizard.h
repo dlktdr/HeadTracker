@@ -17,11 +17,8 @@
 const QString localfirmlist = "firmware.ini";
 const QString localfirmware = "online.fmw";
 
-// ** FIX ME, find a better way to determine file type.
 const QByteArray BLE33HEADER_BIN_MBED("\x00\x00\x04\x20",4);
-const QByteArray BLE33HEADER_BIN_ZEPHER1("\x00\xfd\x00\x20",4);
-const QByteArray BLE33HEADER_BIN_ZEPHER2("\x80\xfd\x00\x20",4);
-const QByteArray BLE33HEADER_BIN_ZEPHER3("\x00\xfe\x00\x20",4);
+const QByteArray BLE33HEADER_BIN_ZEPHER("\x00\x20",2);
 const QByteArray BLE33HEADER_HEX(":020000021000EC",15);
 const QByteArray NANOHEADER_HEX(":100000000C94",13);
 
