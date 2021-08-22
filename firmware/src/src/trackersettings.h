@@ -130,6 +130,7 @@ public:
     static constexpr int DEF_ALG_OFFSET = 0;
     static constexpr int DEF_AUX_CH0 = -1;
     static constexpr int DEF_AUX_CH1 = -1;
+    static constexpr int DEF_AUX_CH2 = -1;
     static constexpr int DEF_AUX_FUNC = 0;
     static constexpr int MAX_DATA_VARS = 30;
 
@@ -289,12 +290,16 @@ public:
 // Aux Func
     void setAuxFunc0Ch(int channel);
     void setAuxFunc1Ch(int channel);
+    void setAuxFunc2Ch(int channel);
     void setAuxFunc0(int funct);
     void setAuxFunc1(int funct);
+    void setAuxFunc2(int funct);
     int auxFunc0Ch() {return aux0ch;}
     int auxFunc1Ch() {return aux1ch;}
+    int auxFunc2Ch() {return aux2ch;}
     int auxFunc0() {return aux0func;}
     int auxFunc1() {return aux1func;}
+    int auxFunc2() {return aux2func;}
 
     void loadJSONSettings(DynamicJsonDocument &json);
     void setJSONSettings(DynamicJsonDocument &json);
@@ -360,8 +365,8 @@ private:
     int an4ch,an5ch,an6ch,an7ch; // Analog Channels
     float an4gain,an5gain,an6gain,an7gain; // Analog Gains
     float an4off, an5off, an6off, an7off; // Analog Offsets
-    int aux0ch,aux1ch; // Auxiliary Function Channels
-    int aux0func,aux1func; // Auxiliary Functions
+    int aux0ch,aux1ch,aux2ch; // Auxiliary Function Channels
+    int aux0func,aux1func,aux2func; // Auxiliary Functions
 
     bool sboutinv;
     bool sbininv;

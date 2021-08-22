@@ -119,8 +119,10 @@ TrackerSettings::TrackerSettings()
     // AUX defaults
     aux0ch = DEF_AUX_CH0;
     aux1ch = DEF_AUX_CH1;
+    aux2ch = DEF_AUX_CH2;
     aux0func = DEF_AUX_FUNC;
     aux1func = DEF_AUX_FUNC;
+    aux2func = DEF_AUX_FUNC;
 
     // Bluetooth defaults
     btmode = 0;
@@ -505,6 +507,13 @@ void TrackerSettings::setAuxFunc1Ch(int channel)
     }
 }
 
+void TrackerSettings::setAuxFunc2Ch(int channel)
+{
+    if((channel > 0 && channel <= 16) || channel == -1) {
+        aux2ch = channel;
+    }
+}
+
 void TrackerSettings::setAuxFunc0(int funct)
 {
     if((funct >= AUX_GYRX && funct <= BT_RSSI) || funct == -1)
@@ -515,6 +524,12 @@ void TrackerSettings::setAuxFunc1(int funct)
 {
     if((funct >= AUX_GYRX && funct <= BT_RSSI) || funct == -1)
         aux1func = funct;
+}
+
+void TrackerSettings::setAuxFunc2(int funct)
+{
+    if((funct >= AUX_GYRX && funct <= BT_RSSI) || funct == -1)
+        aux2func = funct;
 }
 
 void TrackerSettings::setAnalog4Ch(int channel)
@@ -860,6 +875,8 @@ void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
     v = json["aux0ch"]; if(!v.isNull()) setAuxFunc0Ch(v);
     v = json["aux1func"]; if(!v.isNull()) setAuxFunc1(v);
     v = json["aux1ch"]; if(!v.isNull()) setAuxFunc1Ch(v);
+    v = json["aux2func"]; if(!v.isNull()) setAuxFunc2(v);
+    v = json["aux2ch"]; if(!v.isNull()) setAuxFunc2Ch(v);
 
 // Calibrarion Values
     v = json["magxoff"];
@@ -981,6 +998,8 @@ void TrackerSettings::setJSONSettings(DynamicJsonDocument &json)
     json["aux0ch"] = aux0ch;
     json["aux1func"] = aux1func;
     json["aux1ch"] = aux1ch;
+    json["aux2func"] = aux2func;
+    json["aux2ch"] = aux2ch;
 
 // Bluetooth Settings
     json["btmode"] = btmode;
