@@ -2032,6 +2032,9 @@
                  </item>
                  <item row="2" column="1">
                   <widget class="QDoubleSpinBox" name="spnA5Gain">
+                   <property name="decimals">
+                    <number>1</number>
+                   </property>
                    <property name="minimum">
                     <double>-3000.000000000000000</double>
                    </property>
@@ -2243,7 +2246,7 @@
                  <item row="3" column="1">
                   <widget class="QDoubleSpinBox" name="spnA6Gain">
                    <property name="decimals">
-                    <number>2</number>
+                    <number>1</number>
                    </property>
                    <property name="minimum">
                     <double>-3000.000000000000000</double>
@@ -2289,7 +2292,7 @@
                  <item row="4" column="1">
                   <widget class="QDoubleSpinBox" name="spnA7Gain">
                    <property name="decimals">
-                    <number>2</number>
+                    <number>1</number>
                    </property>
                    <property name="minimum">
                     <double>-3000.000000000000000</double>
@@ -2462,6 +2465,9 @@
                  </item>
                  <item row="1" column="1">
                   <widget class="QDoubleSpinBox" name="spnA4Gain">
+                   <property name="decimals">
+                    <number>1</number>
+                   </property>
                    <property name="minimum">
                     <double>-3000.000000000000000</double>
                    </property>
@@ -2987,7 +2993,7 @@
        </sizepolicy>
       </property>
       <property name="title">
-       <string>Servo Output - Local Board</string>
+       <string>IMU Output - Local Board</string>
       </property>
       <layout class="QGridLayout" name="gridLayout_5">
        <property name="leftMargin">
