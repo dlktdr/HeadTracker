@@ -124,8 +124,6 @@ void calculate_Thread()
         // Store current time to adjust sleep period for a consitent period
         ustocalculate = micros();
 
-        digitalWrite(A5,1);
-
         // Period Between Samples
         float deltat = madgwick.deltatUpdate();
 
@@ -425,14 +423,6 @@ void calculate_Thread()
             trkset.setBlueToothConnected(bleconnected);
             k_mutex_unlock(&data_mutex);
         }
-
-        digitalWrite(A5,0);
-
-        // Find out how long the above calculations took
-        // then sleep to achieve a consistent period
-     /*   int32_t timetosleep = (int32_t)SENSE_PERIOD - ((int32_t)micros() - (int32_t)ustocalculate);
-        if(timetosleep < 5000)
-            timetosleep = 5000;*/
     }
 }
 
