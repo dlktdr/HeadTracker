@@ -789,9 +789,9 @@ void MainWindow::updateFromUI()
         ui->chkSbusInInv->setChecked(sbusinchecked);
 
     } else {
-        trkset.setPpmOutPin(ppout_index);
-        trkset.setPpmInPin(ppin_index);
-        trkset.setButtonPin(but_index);
+        trkset.setPpmOutPin(pins[PIN_PPMOUT]);
+        trkset.setPpmInPin(pins[PIN_PPMIN]);
+        trkset.setButtonPin(pins[PIN_BUTRESET]);
         trkset.setInvertedSBUSIn(sbusinchecked);
     }
 
