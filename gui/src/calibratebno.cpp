@@ -1,5 +1,5 @@
-#include "CalibrateBNO.h"
-#include "ui_CalibrateBNO.h"
+#include "calibratebno.h"
+#include "ui_calibratebno.h"
 
 CalibrateBNO::CalibrateBNO(QWidget *parent) :
     QDialog(parent),
