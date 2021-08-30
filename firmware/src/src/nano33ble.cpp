@@ -57,7 +57,7 @@ void start(void)
     SBUS_Init();
 
     // PWM Outputs - Fixed to A0-A3
-    PWM_Init(PWM_PERIOD);
+    PWM_Init(PWM_FREQUENCY);
 
     // Load settings from flash - trackersettings.cpp
     trkset.loadFromEEPROM();
