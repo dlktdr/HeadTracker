@@ -16,11 +16,13 @@ static const struct device *hdev;
 static enum usb_dc_status_code usb_status;
 static uint16_t channeldata[16];
 
-//#define JOYSTICK_BUTTONS *** TO DO, Doesn't work
+#define JOYSTICK_BUTTONS
+#define JOYSTICK_BUTTON_HIGH 1750
+#define JOYSTICK_BUTTON_LOW 1250
 
 struct {
 #ifdef JOYSTICK_BUTTONS
-    uint8_t but;
+    uint8_t but[2];
 #endif
     uint16_t channels[8];
 } report;
@@ -28,8 +30,10 @@ struct {
 void set_JoystickChannels(uint16_t chans[16])
 {
     memcpy(report.channels, chans, sizeof(report.channels));
+
 #ifdef JOYSTICK_BUTTONS
-    report.but = 0;
+    report.but[0] = 0;
+    report.but[1] = 0;
 #endif
 
     for(int i=0; i < 8 ; i++) {
@@ -37,8 +41,18 @@ void set_JoystickChannels(uint16_t chans[16])
             report.channels[i] = 1500;
 
 #ifdef JOYSTICK_BUTTONS
-        if(report.channels[i] > 1600) {
-            report.but |= 1<<i;
+        if(report.channels[i] >= JOYSTICK_BUTTON_HIGH) {
+            if(i < 4)
+                report.but[0] |= 1<<i * 2;
+            else
+                report.but[1] |= 1<<(i - 4) * 2;
+        }
+
+        if(report.channels[i] <= JOYSTICK_BUTTON_LOW) {
+            if(i < 4)
+                report.but[0] |= 1<<(i * 2) + 1;
+            else
+                report.but[1] |= 1<<(i - 4) * 2 + 1;
         }
 #endif
 
@@ -56,10 +70,10 @@ static const uint8_t hid_report_desc[] = {
 #ifdef JOYSTICK_BUTTONS
     0x05, 0x09,                    //         USAGE_PAGE (Button)
     0x19, 0x01,                    //         USAGE_MINIMUM (Button 1)
-    0x29, 0x08,                    //         USAGE_MAXIMUM (Button 8)
+    0x29, 0x10,                    //         USAGE_MAXIMUM (Button 8)
     0x15, 0x00,                    //         LOGICAL_MINIMUM (0)
     0x25, 0x01,                    //         LOGICAL_MAXIMUM (1)
-    0x95, 0x08,                    //         REPORT_COUNT (8)
+    0x95, 0x10,                    //         REPORT_COUNT (8)
     0x75, 0x01,                    //         REPORT_SIZE (1)
     0x81, 0x02,                    //         INPUT (Data,Var,Abs)
 #endif
@@ -102,7 +116,7 @@ void joystick_init(void)
 	usb_hid_register_device(hdev, hid_report_desc, sizeof(hid_report_desc),
 				NULL);
 
-    int a  = usb_hid_init(hdev);
+    usb_hid_init(hdev);
 
     // USB enabled in serial.cpp
 }
