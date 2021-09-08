@@ -100,6 +100,7 @@ public:
     static constexpr int DEF_BOARD_ROT_Y=0;
     static constexpr int DEF_BOARD_ROT_Z=0;
     static constexpr int DEF_BUTTON_IN = 2; // Chosen because it's beside ground
+    static constexpr bool DEF_BUTTON_LONG_PRESS = false;
     static constexpr int DEF_PPM_OUT = 10; // Random choice
     static constexpr int DEF_PPM_IN = -1;
     static constexpr int PPM_CENTER = 1500;
@@ -219,6 +220,8 @@ public:
 
     int buttonPin() const;
     void setButtonPin(int value);
+
+    bool buttonPressMode() {return butlngps;}
 
     int resetCntPPM() const;
     void setResetCntPPM(int value);
@@ -350,6 +353,7 @@ private:
     int servoreverse;
     int lppan,lptiltroll;
     int buttonpin,ppmoutpin,ppminpin;
+    bool butlngps;
     bool ppmoutinvert;
     bool ppmininvert;
     int btmode;

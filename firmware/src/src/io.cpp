@@ -3,6 +3,7 @@
 #include "io.h"
 
 volatile bool buttonpressed=false;
+volatile bool longpressedbutton=false;
 volatile int butpin;
 
 //                  0 1  2  3  4  5  6  7  8  9  10 11 12 13
@@ -19,11 +20,25 @@ bool wasButtonPressed()
     return false;
 }
 
-// Reset Center
+// Reset Button Pressed Flag on Read
+bool wasButtonLongPressed()
+{
+    if(longpressedbutton) {
+        longpressedbutton = false;
+        return true;
+    }
+    return false;
+}
 
+// Reset Center
 void pressButton()
 {
     buttonpressed = true;
+}
+
+void longPressButton()
+{
+    longpressedbutton = true;
 }
 
 // Any IO Related Tasks, e.g. button
@@ -31,24 +46,34 @@ void io_Thread()
 {
     int pressedtime=0;
     while(1) {
+        k_msleep(IO_PERIOD);
+
+        static bool lastButtonDown=false;
         butpin = trkset.buttonPin();
 
         // Make sure button pin is enabled
         if(butpin < 1 || butpin > 13 )
             return;
 
-        // Convert from D pin to IO Pin #
-        int pin = (dpintoport[butpin] * 32) + dpintopin[butpin];
-        if(digitalRead(pin) == 0) {
-            if(pressedtime >= BUTTON_HOLD_TIME)
-                pressButton();
-            else
-                pressedtime += IO_PERIOD;
-        } else {
-            pressedtime = 0;
-        }
+        bool buttonDown = digitalRead(D_TO_32X_PIN(butpin)) == 0;
 
-        k_msleep(IO_PERIOD);
+        // Button pressed down
+        if(buttonDown && !lastButtonDown) {
+            pressedtime = 0;
+
+        // Increment count if held down
+        } else if (buttonDown && lastButtonDown) {
+            pressedtime += IO_PERIOD;
+
+        // Just Released
+        } else if(!buttonDown && lastButtonDown) {
+            if(pressedtime > BUTTON_LONG_PRESS_TIME && trkset.buttonPressMode()) {
+                longPressButton();
+            } else if (pressedtime > BUTTON_HOLD_TIME) {
+                pressButton();
+            }
+        }
+        lastButtonDown = buttonDown;
     }
 }
 

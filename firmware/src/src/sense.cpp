@@ -48,6 +48,7 @@ static float magxoff=0, magyoff=0, magzoff=0;
 static float accxoff=0, accyoff=0, acczoff=0;
 static float gyrxoff=0, gyryoff=0, gyrzoff=0;
 static float l_panout=0, l_tiltout=0, l_rollout=0;
+static bool trpOutputEnabled = false;
 
 // Input Channel Data
 static uint16_t ppm_in_chans[16];
@@ -175,6 +176,10 @@ void calculate_Thread()
 
         // Free Mutex Lock, Allow sensor updates
         k_mutex_unlock(&sensor_mutex);
+
+        // Toggles output on and off if long pressed
+        if(wasButtonLongPressed())
+            trpOutputEnabled = !trpOutputEnabled;
 
         // Zero button was pressed, adjust all values to zero
         bool butdnw = false;
@@ -338,16 +343,20 @@ void calculate_Thread()
             channel_data[trkset.analog7Ch()-1] = an7;
         }
 
-        // 8) Set PPM Channel Values if enabled
-        int tltch = trkset.tiltCh();
-        int rllch = trkset.rollCh();
-        int panch = trkset.panCh();
-        if(tltch > 0)
-            channel_data[tltch - 1] = tiltout_ui; // Channel 1 = Index 0
-        if(rllch > 0)
-            channel_data[rllch - 1] = rollout_ui;
-        if(panch > 0)
-            channel_data[panch - 1] = panout_ui;
+        // 8) Set Tilt/Roll/Pan Channel Values
+        // Only set these outputs if button press mode is set to off
+        if(trkset.buttonPressMode() == false ||
+           (trkset.buttonPressMode() == true && trpOutputEnabled == true)) {
+            int tltch = trkset.tiltCh();
+            int rllch = trkset.rollCh();
+            int panch = trkset.panCh();
+            if(tltch > 0)
+                channel_data[tltch - 1] = tiltout_ui; // Channel 1 = Index 0
+            if(rllch > 0)
+                channel_data[rllch - 1] = rollout_ui;
+            if(panch > 0)
+                channel_data[panch - 1] = panout_ui;
+        }
 
         // 9) Set the PPM Outputs
         for(int i=0;i<PpmOut_getChnCount();i++) {

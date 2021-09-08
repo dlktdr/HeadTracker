@@ -9,8 +9,9 @@
 #ifdef FLIGHT_STICK
 #define BUTTON_HOLD_TIME 5000  // 5sec (Reset on hold for 5sec)
 #else
-#define BUTTON_HOLD_TIME 1  // 1ms (Instant)
+#define BUTTON_HOLD_TIME 5  // 5ms (Allow for a bit of debounce)
 #endif
+#define BUTTON_LONG_PRESS_TIME 1000  // 1 second, Enable/Disables Tilt/Roll/Pan
 
 // Thread Periods
 #define IO_PERIOD 100           // (ms) IO Period (button reading)
