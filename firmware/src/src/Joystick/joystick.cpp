@@ -42,16 +42,12 @@ void set_JoystickChannels(uint16_t chans[16])
 
 #ifdef JOYSTICK_BUTTONS
         if(report.channels[i] >= JOYSTICK_BUTTON_HIGH) {
-            if(i < 4)
                 report.but[0] |= 1<<i * 2;
-            else
                 report.but[1] |= 1<<(i - 4) * 2;
         }
 
         if(report.channels[i] <= JOYSTICK_BUTTON_LOW) {
-            if(i < 4)
                 report.but[0] |= 1<<(i * 2) + 1;
-            else
                 report.but[1] |= 1<<(i - 4) * 2 + 1;
         }
 #endif
