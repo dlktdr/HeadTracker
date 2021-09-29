@@ -20,6 +20,7 @@
 #include "boardnano33ble.h"
 #include "boardbno055.h"
 #include "imageviewer/imageviewer.h"
+#include "manualsend.h"
 
 const int MAX_LOG_LENGTH=6000; // How many bytes to keep of log data in the gui
 const QString version="2.10"; // Current Version Number
@@ -77,6 +78,7 @@ private:
     BoardNano33BLE *nano33ble;
     BoardBNO055 *bno055;
     BoardType *currentboard;
+    ManualSend *manSend;
 
     void parseSerialData();
     void sendSerialData(QByteArray data);

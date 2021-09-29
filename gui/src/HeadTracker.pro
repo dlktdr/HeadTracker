@@ -38,6 +38,7 @@ SOURCES += \
     mainwindow.cpp \
     led.cpp \
     graph.cpp \
+    manualsend.cpp \
     popupslider.cpp \
     servominmax.cpp \
     signalbars.cpp \    
@@ -61,6 +62,7 @@ HEADERS += \
     mainwindow.h \
     led.h \
     graph.h \
+    manualsend.h \
     popupslider.h \
     servominmax.h \
     signalbars.h \
@@ -73,7 +75,8 @@ FORMS += \
     channelviewer.ui \
     diagnosticdisplay.ui \
     firmwarewizard.ui \
-    mainwindow.ui
+    mainwindow.ui \
+    manualsend.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

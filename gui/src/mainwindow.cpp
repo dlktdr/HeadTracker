@@ -31,6 +31,9 @@ MainWindow::MainWindow(QWidget *parent)
     nano33ble = new BoardNano33BLE(&trkset);
     bno055 = new BoardBNO055(&trkset);
 
+    // Manual Debug Control
+    manSend = new ManualSend(nullptr, &trkset);
+
     // Add it to the list of available boards
     boards.append(nano33ble);
     boards.append(bno055);
@@ -43,6 +46,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Serial Connection
     serialcon = new QSerialPort;
+    manSend->setSerialPort(serialcon);
 
     // Diagnostic Display + Serial Debug
     diagnostic = new DiagnosticDisplay(&trkset,this);
@@ -466,12 +470,17 @@ void MainWindow::addToLog(QString log, int ll)
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
     if(event->type() == QKeyEvent::KeyPress) {
-        if((event->modifiers() & Qt::ControlModifier) &&
-           (event->key() & Qt::Key_D)) {
-            // Ctrl - D Pressed
-            diagnostic->show();
-            diagnostic->activateWindow();
-            diagnostic->raise();
+        if(event->modifiers() & Qt::ControlModifier) {
+            if(event->key() == Qt::Key_D) {
+                // Ctrl - D Pressed
+                diagnostic->show();
+                diagnostic->activateWindow();
+                diagnostic->raise();
+            } else if (event->key() == Qt::Key_S) {
+                manSend->show();
+                manSend->activateWindow();
+                manSend->raise();
+            }
         }
     }
 }

@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ManualSend</class>
+ <widget class="QWidget" name="ManualSend">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="4" column="3">
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="0" column="0" colspan="4">
+    <widget class="QLabel" name="label_3">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;Manual Parameter Send&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="2">
+    <widget class="QLabel" name="label_2">
+     <property name="text">
+      <string>Value</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="1">
+    <widget class="QComboBox" name="cmbParam">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>Param</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0" colspan="4">
+    <widget class="QPushButton" name="cmdSend">
+     <property name="text">
+      <string>&amp;Send</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="3">
+    <widget class="QLineEdit" name="txtVal"/>
+   </item>
+   <item row="1" column="1">
+    <widget class="QComboBox" name="cmbCommand">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <item>
+      <property name="text">
+       <string>RstCnt</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Set</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Flash</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Erase</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Reboot</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Boot</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Get</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>IH</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>DatLst</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>D--</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>RD</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>FW</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QLabel" name="label_4">
+     <property name="text">
+      <string>Command</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
