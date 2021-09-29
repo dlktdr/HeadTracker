@@ -41,6 +41,7 @@ public:
     void startData();
     void stopData();
     void allowAccessChanged(bool acc);
+    static uint16_t escapeCRC(uint16_t crc);
 
 private:
     static const int IMHERETIME=8000; // milliseconds before sending another I'm Here Message to keep communication open
@@ -68,7 +69,7 @@ private:
 
     void sendSerialJSON(QString command, QVariantMap map=QVariantMap());
     void parseIncomingJSON(const QVariantMap &map);
-    uint16_t escapeCRC(uint16_t crc);
+
     void nakError();
 
     template<class T>
