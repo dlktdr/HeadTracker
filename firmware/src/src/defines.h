@@ -39,7 +39,7 @@
 
 // Bluetooth
 #define BT_MIN_CONN_INTER 6  // 6 Is lowest BLE can do. Actual Rate = Var * 1.25ms
-#define BT_MAX_CONN_INTER 10
+#define BT_MAX_CONN_INTER 6
 #define BT_CONN_LOST_TIME 70 // 100 * 10ms = 0.7seconds
 
 // Thread Priority Definitions
@@ -52,7 +52,7 @@
 #define IO_THREAD_PRIO PRIORITY_LOW
 #define SERIAL_THREAD_PRIO PRIORITY_LOW
 #define DATA_THREAD_PRIO PRIORITY_LOW
-#define BT_THREAD_PRIO -5
+#define BT_THREAD_PRIO -15
 #define SENSOR_THREAD_PRIO PRIORITY_MED
 #define CALCULATE_THREAD_PRIO PRIORITY_HIGH
 #define SBUS_THREAD_PRIO PRIORITY_MED + 1
