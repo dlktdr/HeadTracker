@@ -245,15 +245,14 @@ MainWindow::~MainWindow()
     if(firmwareWizard != nullptr)
         delete firmwareWizard;
     delete serialDebug;
-    delete  manSend;
     delete ui;
 }
 
 // Connects to the serial port
 
 void MainWindow::serialConnect()
-{
-    QString port = ui->cmbPort->itemData(0).toString();
+{    
+    QString port = ui->cmbPort->currentData().toString();
     if(port.isEmpty())
         return;
 
