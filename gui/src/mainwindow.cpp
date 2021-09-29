@@ -99,7 +99,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Buttons
     connect(ui->cmdConnect,SIGNAL(clicked()),this,SLOT(serialConnect()));
-    connect(ui->cmdDisconnect,SIGNAL(clicked()),this,SLOT(serialDisconnect()));    
+    connect(ui->cmdDisconnect,SIGNAL(clicked()),this,SLOT(serialDisconnect()));
     connect(ui->cmdStore,SIGNAL(clicked()),this,SLOT(storeToRAM()));
     connect(ui->cmdSend,SIGNAL(clicked()),this,SLOT(manualSend()));
     //connect(ui->cmdStartGraph,SIGNAL(clicked()),this,SLOT(startGraph()));
@@ -220,7 +220,7 @@ MainWindow::MainWindow(QWidget *parent)
     // Tab Widget
     connect(ui->tabBLE,&QTabWidget::currentChanged,this,&MainWindow::BLE33tabChanged);
 
-    // Timers    
+    // Timers
     connect(&rxledtimer,SIGNAL(timeout()),this,SLOT(rxledtimeout()));
     rxledtimer.setInterval(100);
     connect(&txledtimer,SIGNAL(timeout()),this,SLOT(txledtimeout()));
@@ -245,6 +245,7 @@ MainWindow::~MainWindow()
     if(firmwareWizard != nullptr)
         delete firmwareWizard;
     delete serialDebug;
+    delete  manSend;
     delete ui;
 }
 
@@ -286,7 +287,7 @@ void MainWindow::serialConnect()
 
     ui->stackedWidget->setCurrentIndex(1);
 
-    serialcon->setDataTerminalReady(true);   
+    serialcon->setDataTerminalReady(true);
 
     requestTimer.stop();
     requestTimer.start(4000);
@@ -326,7 +327,7 @@ void MainWindow::serialDisconnect()
     ui->servoTilt->setShowActualPosition(true);
     ui->servoRoll->setShowActualPosition(true);
     ui->cmdSend->setEnabled(false);
-    ui->cmdCalibrate->setEnabled(false);    
+    ui->cmdCalibrate->setEnabled(false);
     ui->stackedWidget->setCurrentIndex(0);
     ui->servoPan->setShowActualPosition(false);
     ui->servoTilt->setShowActualPosition(false);
@@ -483,7 +484,7 @@ void MainWindow::findSerialPorts()
     ui->cmbPort->clear();
     QList<QSerialPortInfo> ports = QSerialPortInfo::availablePorts();
     int i=0;
-    foreach(QSerialPortInfo port,ports) {        
+    foreach(QSerialPortInfo port,ports) {
         QString additional;
         if(port.vendorIdentifier() == 0x2341 &&
            port.productIdentifier() == 0x805A) { // NANO 33 BLE
@@ -608,7 +609,7 @@ void MainWindow::updateToUI()
 
     int ppout_index = trkset.ppmOutPin()-1;
     int ppin_index = trkset.ppmInPin()-1;
-    int but_index = trkset.buttonPin()-1;    
+    int but_index = trkset.buttonPin()-1;
     //int resppm_index = trkset.resetCntPPM();
     ui->cmbPpmOutPin->setCurrentIndex(ppout_index < 1 ? 0 : ppout_index);
     ui->cmbPpmInPin->setCurrentIndex(ppin_index < 1 ? 0 : ppin_index);
@@ -695,14 +696,14 @@ void MainWindow::updateFromUI()
     } else if (trkset.hardware() == "BNO055") {
         trkset.setLPTiltRoll(ui->spnLPTiltRoll2->value());
         trkset.setLPPan(ui->spnLPPan2->value());
-    }   
+    }
 
     // Analog
     trkset.setAnalog4Gain(ui->spnA4Gain->value());
     trkset.setAnalog4Offset(ui->spnA4Off->value());
     trkset.setAnalog5Gain(ui->spnA5Gain->value());
     trkset.setAnalog5Offset(ui->spnA5Off->value());
-    trkset.setAnalog6Gain(ui->spnA6Gain->value());    
+    trkset.setAnalog6Gain(ui->spnA6Gain->value());
     trkset.setAnalog6Offset(ui->spnA6Off->value());
     trkset.setAnalog7Gain(ui->spnA7Gain->value());
     trkset.setAnalog7Offset(ui->spnA7Off->value());
@@ -831,7 +832,7 @@ void MainWindow::updateFromUI()
 
 
     ui->cmdStore->setEnabled(true);
-    ui->cmdSaveNVM->setEnabled(true);    
+    ui->cmdSaveNVM->setEnabled(true);
 
     // Use timer to prevent too many writes while drags, etc.. happen
     saveToRAMTimer.start(500);
@@ -851,7 +852,7 @@ void MainWindow::serialReadReady()
 
     int slider = serialDebug->verticalScrollBar()->value();
     if(slider == serialDebug->verticalScrollBar()->maximum())
-        scroll = true; 
+        scroll = true;
 
     // Scroll to bottom
     if(scroll)
@@ -1145,7 +1146,7 @@ void MainWindow::BLE33tabChanged()
     dataitms["panout"] = true;
     dataitms["btcon"] = false;
     dataitms["btaddr"] = false;
-    dataitms["btrmt"] = false;    
+    dataitms["btrmt"] = false;
 
     switch(ui->tabBLE->currentIndex()) {
     case 0: { // General
@@ -1379,7 +1380,7 @@ void MainWindow::statusMessage(QString str, int timeout)
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
-{    
+{
     bool close=checkSaved();
 
     if(close) {
