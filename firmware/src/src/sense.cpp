@@ -48,7 +48,7 @@ static float magxoff=0, magyoff=0, magzoff=0;
 static float accxoff=0, accyoff=0, acczoff=0;
 static float gyrxoff=0, gyryoff=0, gyrzoff=0;
 static float l_panout=0, l_tiltout=0, l_rollout=0;
-static bool trpOutputEnabled = false;
+static bool trpOutputEnabled = false; // Default to disabled T/R/P output
 
 // Input Channel Data
 static uint16_t ppm_in_chans[16];
@@ -356,6 +356,8 @@ void calculate_Thread()
                 channel_data[rllch - 1] = rollout_ui;
             if(panch > 0)
                 channel_data[panch - 1] = panout_ui;
+        } else {
+            trpOutputEnabled = false;
         }
 
         // 9) Set the PPM Outputs
@@ -423,6 +425,7 @@ void calculate_Thread()
             trkset.setBLEValues(bt_chans);
             trkset.setSBUSValues(sbus_in_chans);
             trkset.setChannelOutValues(channel_data);
+            trkset.setTRPEnabled(trpOutputEnabled);
 
             // Qauterion Data
             //float *qd = madgwick.getQuat();

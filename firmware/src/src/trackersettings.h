@@ -42,6 +42,7 @@
     DV(bool,isCalibrated,2,-1)\
     DV(bool,btcon,      10,-1)\
     DV(bool,isSense,      10,-1)\
+    DV(bool,trpenabled,  10,-1)\
     DV(uint8_t, cpuuse, 1,-1)
 
 // To shorten names, as these are sent to the GUI for decoding
@@ -221,7 +222,9 @@ public:
     int buttonPin() const;
     void setButtonPin(int value);
 
+    void setButtonPressMode(bool lngpresmd) {butlngps = lngpresmd;} // True = Enable/Disable output on long press
     bool buttonPressMode() {return butlngps;}
+    void setTRPEnabled(bool v) {trpenabled = v;}
 
     int resetCntPPM() const;
     void setResetCntPPM(int value);

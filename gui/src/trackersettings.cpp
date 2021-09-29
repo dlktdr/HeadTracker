@@ -33,6 +33,7 @@ TrackerSettings::TrackerSettings(QObject *parent):
     _data["axissign"] = (uint)0;
 
     _data["buttonpin"] = DEF_BUTTON_IN;
+    _data["butlngps"] = DEF_BUTTON_LONG_PRESS;
     _data["ppminpin"] = DEF_PPM_IN;
     _data["ppmoutpin"] = DEF_PPM_OUT;
     _data["ppmoutinvert"] = false;

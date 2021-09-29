@@ -45,6 +45,8 @@
     DV(uint16_t,panout, 1,-1)\
     DV(bool,isCalibrated,5,-1)\
     DV(bool,btcon,      10,-1)\
+    DV(bool,isSense,      10,-1)\
+    DV(bool,trpenabled,  10,-1)\
     DV(uint8_t, cpuuse, 1,-1)
 
 // To shorten names, as these are sent to the GUI for decoding
@@ -94,6 +96,7 @@ public:
     static constexpr int DEF_BOARD_ROT_Y=0;
     static constexpr int DEF_BOARD_ROT_Z=0;
     static constexpr int DEF_BUTTON_IN = 2; // Chosen because it's beside ground
+    static constexpr bool DEF_BUTTON_LONG_PRESS = true;
     static constexpr int DEF_PPM_OUT = 10; // Random choice
     static constexpr int DEF_PPM_IN = -1;
     static constexpr int PPM_CENTER = 1500;
@@ -228,6 +231,9 @@ public:
 
     int buttonPin() const;
     void setButtonPin(int value);
+
+    void setButtonPressMode(bool lngpresmd) {_data["butlngps"] = lngpresmd;} // True = Enable/Disable output on long press
+    bool buttonPressMode() {return _data["butlngps"].toBool();}
 
     int resetCntPPM() const;
     void setResetCntPPM(int value);

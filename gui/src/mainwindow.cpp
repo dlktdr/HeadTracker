@@ -120,6 +120,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->chkResetCenterWave,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
     connect(ui->chkSbusInInv,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
     connect(ui->chkSbusOutInv,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
+    connect(ui->chkLngBttnPress,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
 
     //connect(ui->chkRawData,SIGNAL(clicked(bool)),this,SLOT(setDataMode(bool)));
 
@@ -540,6 +541,7 @@ void MainWindow::updateToUI()
     ui->chkResetCenterWave->setChecked(trkset.resetOnWave());
     ui->chkSbusInInv->setChecked(trkset.invertedSBUSIn());
     ui->chkSbusOutInv->setChecked(trkset.invertedSBUSOut());
+    ui->chkLngBttnPress->setChecked(trkset.buttonPressMode());
 
     ui->spnLPTiltRoll->setValue(trkset.lpTiltRoll());
     ui->spnLPPan->setValue(trkset.lpPan());
@@ -794,6 +796,14 @@ void MainWindow::updateFromUI()
         trkset.setButtonPin(pins[PIN_BUTRESET]);
         trkset.setInvertedSBUSIn(sbusinchecked);
     }
+
+    // Button Press Mode - Enable/Disable on long press (Disable if no button pin selected)
+    if(pins[PIN_BUTRESET] > 0)
+        ui->chkLngBttnPress->setEnabled(true);
+    else
+        ui->chkLngBttnPress->setEnabled(false);
+
+    trkset.setButtonPressMode(ui->chkLngBttnPress->isChecked());
 
     trkset.setInvertedSBUSOut(ui->chkSbusOutInv->isChecked());
     trkset.setSBUSRate(ui->spnSBUSRate->value());
