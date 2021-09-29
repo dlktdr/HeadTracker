@@ -53,7 +53,7 @@ void io_Thread()
 
         // Make sure button pin is enabled
         if(butpin < 1 || butpin > 13 )
-            return;
+            continue;
 
         bool buttonDown = digitalRead(D_TO_32X_PIN(butpin)) == 0;
 
