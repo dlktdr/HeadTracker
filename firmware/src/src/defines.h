@@ -16,7 +16,7 @@
 // Thread Periods
 #define IO_PERIOD 50           // (ms) IO Period (button reading)
 #define DATA_PERIOD 90          // (ms) GUI update rate
-#define BT_PERIOD 16            // (ms) Bluetooth update rate
+#define BT_PERIOD 20            // (ms) Bluetooth update rate
 #define SERIAL_PERIOD 30        // (ms) Serial processing
 #define SENSOR_PERIOD 16666     // (us) 60hz Read Sensors
 #define CALCULATE_PERIOD 6666   // (us) 150hz IMU calculations
@@ -38,8 +38,12 @@
 #define SBUSOUT_PORT 1
 
 // Bluetooth
-#define BT_MIN_CONN_INTER 6  // 6 Is lowest BLE can do. Actual Rate = Var * 1.25ms
-#define BT_MAX_CONN_INTER 6
+#define BT_MIN_CONN_INTER_MASTER 16  // When run as para master
+#define BT_MAX_CONN_INTER_MASTER 16
+
+#define BT_MIN_CONN_INTER_PERIF 8  // When run as para slave
+#define BT_MAX_CONN_INTER_PERIF 8
+
 #define BT_CONN_LOST_TIME 70 // 100 * 10ms = 0.7seconds
 
 // Thread Priority Definitions

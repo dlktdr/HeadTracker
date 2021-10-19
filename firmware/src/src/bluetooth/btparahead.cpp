@@ -102,8 +102,8 @@ static struct bt_le_adv_param my_param = {
     };
 
 struct bt_conn *curconn = NULL;
-struct bt_le_conn_param *conparms = BT_LE_CONN_PARAM(BT_MIN_CONN_INTER,
-                                                     BT_MAX_CONN_INTER,
+struct bt_le_conn_param *conparms = BT_LE_CONN_PARAM(BT_MIN_CONN_INTER_PERIF,
+                                                     BT_MAX_CONN_INTER_PERIF,
                                                      0,
                                                      BT_CONN_LOST_TIME);
 

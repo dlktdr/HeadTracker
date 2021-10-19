@@ -67,7 +67,7 @@ static bool contoheadboard = false;
 uint32_t buttonhandle =0;
 static const struct bt_gatt_attr *buttonattr=NULL;
 
-struct bt_le_conn_param *rmtconparms = BT_LE_CONN_PARAM(BT_MIN_CONN_INTER, BT_MAX_CONN_INTER, 0, BT_CONN_LOST_TIME); // Faster Connection Interval
+struct bt_le_conn_param *rmtconparms = BT_LE_CONN_PARAM(BT_MIN_CONN_INTER_MASTER, BT_MAX_CONN_INTER_MASTER, 0, BT_CONN_LOST_TIME); // Faster Connection Interval
 
 // Characteristic UUID
 static struct bt_uuid_16 uuid = BT_UUID_INIT_16(0);
