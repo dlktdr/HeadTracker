@@ -73,7 +73,10 @@ void FirmwareWizard::initalize()
     cmbSourceChanged(0);
     setState(PRG_IDLE);
     ui->cmdBack->setVisible(false);
-    ui->cmdProgram->setEnabled(false);
+    if(QFileInfo::exists(ui->txtFirmFile->text()))
+        ui->cmdProgram->setEnabled(true);
+    else
+        ui->cmdProgram->setEnabled(false);
     ui->cmdProgram->setText("Program");
     ui->progressBar->setValue(0);
     ui->stkWidget->setCurrentIndex(0);
