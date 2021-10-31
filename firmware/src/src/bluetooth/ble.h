@@ -11,6 +11,12 @@
 
 extern volatile bool bleconnected;
 extern volatile bool btscanonly;
+extern struct bt_uuid_16 ccc;
+extern struct bt_uuid_16 frskyserv;
+extern struct bt_uuid_16 frskychar;
+extern struct bt_uuid_16 htoverridech;
+extern struct bt_uuid_16 btbutton;
+
 
 typedef enum {
     BTDISABLE=0,

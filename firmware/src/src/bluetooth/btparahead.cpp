@@ -39,6 +39,7 @@ static ssize_t read_ct(struct bt_conn *conn, const struct bt_gatt_attr *attr, vo
 static ssize_t write_but(struct bt_conn *conn, const struct bt_gatt_attr *attr, const void *buf, uint16_t len, uint16_t offset, uint8_t flags);
 static ssize_t read_over(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf, uint16_t len, uint16_t offset);
 static void ct_ccc_cfg_changed(const struct bt_gatt_attr *attr, uint16_t value);
+static void ct_ccc_cfg_changed_a(const struct bt_gatt_attr *attr, uint16_t value);
 
 static constexpr uint8_t START_STOP = 0x7E;
 static constexpr uint8_t BYTE_STUFF = 0x7D;
@@ -50,33 +51,33 @@ static uint8_t crc;
 static uint8_t ct[40];
 static uint8_t overdata[2];
 static char _address[18] = "00:00:00:00:00:00";
-uint16_t ovridech = 0;
+uint16_t ovridech = 0xFFFF;
 
 // Service UUID
 static struct bt_uuid_128 btparaserv = BT_UUID_INIT_128(
     0xfb, 0x34, 0x9b, 0x5f, 0x80, 0x00, 0x00, 0x80,
     0x00, 0x10,	0x00, 0x00, 0xf0, 0xff, 0x00, 0x00);
 
-// Characteristic UUID
-static struct bt_uuid_16 btparachar = BT_UUID_INIT_16(0xFFF6);
-static struct bt_uuid_16 btoverride = BT_UUID_INIT_16(0xAFF1);
-static struct bt_uuid_16 btbutton = BT_UUID_INIT_16(0xAFF2);
 
 BT_GATT_SERVICE_DEFINE(bt_srv,
+    // ATTRIBUTE 0
     BT_GATT_PRIMARY_SERVICE(&btparaserv),
 
-    // Data output Characteristic
-    BT_GATT_CHARACTERISTIC(&btparachar.uuid,
+    // Data output Characteristic  ATTRIBUTE 1
+    BT_GATT_CHARACTERISTIC(&frskychar.uuid,
                            BT_GATT_CHRC_READ | BT_GATT_CHRC_WRITE_WITHOUT_RESP |  BT_GATT_CHRC_NOTIFY,
                            BT_GATT_PERM_READ | BT_GATT_PERM_WRITE, read_ct, write_ct, ct),
+    // ATTRIBUTE 2
     BT_GATT_CCC(ct_ccc_cfg_changed, BT_GATT_PERM_READ | BT_GATT_PERM_WRITE),
 
-    // Overridden Channel Outputs
-    BT_GATT_CHARACTERISTIC(&btoverride.uuid,
-                           BT_GATT_CHRC_READ |BT_GATT_CHRC_NOTIFY,
-                           BT_GATT_PERM_READ | BT_GATT_PERM_WRITE, read_over, NULL, overdata),
-    BT_GATT_CCC(NULL, BT_GATT_PERM_READ | BT_GATT_PERM_WRITE),
+    // Overridden Channel Outputs ATTRIBUTE 3
+    BT_GATT_CHARACTERISTIC(&htoverridech.uuid,
+                           BT_GATT_CHRC_READ | BT_GATT_CHRC_NOTIFY,
+                           BT_GATT_PERM_READ , read_over, NULL, overdata),
+    // ATTRIBUTE 4
+    BT_GATT_CCC(ct_ccc_cfg_changed_a, BT_GATT_PERM_READ | BT_GATT_PERM_WRITE),
 
+    // ATTRIBUTE 5
     // Remote Button Press Characteristic, Indicate
     BT_GATT_CHARACTERISTIC(&btbutton.uuid,
                            BT_GATT_CHRC_WRITE,
@@ -177,7 +178,7 @@ void BTHeadExecute()
         int len;
         len = setTrainer(output);
 
-        bt_gatt_notify(NULL, &bt_srv.attrs[1], output, len);
+        //bt_gatt_notify(NULL, &bt_srv.attrs[1], output, len);
     }
 }
 
@@ -199,19 +200,20 @@ void BTHeadSetChannel(int channel, const uint16_t value)
         return;
 
     // If channel disabled, make a note for overriden characteristic
-    // Actuall send it at center so PARA still works
+    // Actually send it at center so PARA still works
     if(value == 0) {
-        ovridech &= ~(1<<channel);
+        ovridech &= ~(1u<<channel);
         chan_vals[channel] = TrackerSettings::PPM_CENTER;
 
     // Otherwise set the value and set that it is valid
     } else {
-        ovridech |= 1<<channel;
+        ovridech |= 1u <<channel;
         chan_vals[channel] = value;
     }
 
-    // Send notify if override ch's have changed
+    // Send a notify if override ch's have changed
     if(lovch != ovridech) {
+        serialWriteln("HT: Updating Notify Channels");
         bt_gatt_notify(NULL, &bt_srv.attrs[4], &ovridech, 2);
     }
     lovch = ovridech;
@@ -229,11 +231,18 @@ int8_t BTHeadGetRSSI()
     return -1;
 }
 
+static void ct_ccc_cfg_changed_a(const struct bt_gatt_attr *attr, uint16_t value)
+{
+    serialWrite("CCC Values Changed on Override(");
+    serialWrite(value);
+    serialWrite(")\r\n");
+}
+
 static void ct_ccc_cfg_changed(const struct bt_gatt_attr *attr, uint16_t value)
 {
-    /*serialWrite("CCC Values Changed (");
+    serialWrite("CCC Values Changed (");
     serialWrite(value);
-    serialWrite(")\r\n");*/
+    serialWrite(")\r\n");
 }
 
 static ssize_t read_ct(struct bt_conn *conn, const struct bt_gatt_attr *attr,
@@ -258,7 +267,7 @@ static ssize_t read_over(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 {
 	char *value = (char*)attr->user_data;
 
-    serialWriteln("Override Ch's Read");
+    serialWriteln("HT: Override Ch's Read");
     memcpy(overdata, (void*)&ovridech, sizeof(ovridech));
 
 	return bt_gatt_attr_read(conn, attr, buf, len, offset, value,

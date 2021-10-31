@@ -18,6 +18,7 @@
 #include <zephyr.h>
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/conn.h>
+#include <bluetooth/uuid.h>
 
 #include "serial.h"
 #include "io.h"
@@ -29,6 +30,13 @@
 volatile bool bleconnected=false;
 volatile bool btscanonly = false;
 btmodet curmode = BTDISABLE;
+
+// UUID's
+struct bt_uuid_16 ccc = BT_UUID_INIT_16(0x2902);
+struct bt_uuid_16 frskyserv = BT_UUID_INIT_16(0xFFF0);
+struct bt_uuid_16 frskychar = BT_UUID_INIT_16(0xFFF6);
+struct bt_uuid_16 htoverridech = BT_UUID_INIT_16(0xAFF1);
+struct bt_uuid_16 btbutton = BT_UUID_INIT_16(0xAFF2);
 
 // Switching modes, don't execute
 volatile bool switching = false;

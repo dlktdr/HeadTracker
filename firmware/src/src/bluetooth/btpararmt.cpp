@@ -46,23 +46,11 @@ struct bt_le_scan_param scnparams = {
     .window = BT_GAP_SCAN_FAST_WINDOW,
 };
 
-// UUID's
-// CCCD UUID
-struct bt_uuid_16 ccc = BT_UUID_INIT_16(0x2902);
-
-// FrSky service and channel data characteristic
-static struct bt_uuid_16 frskyserv = BT_UUID_INIT_16(0xFFF0);
-static struct bt_uuid_16 frskychar = BT_UUID_INIT_16(0xFFF6);
-
-// Head tracker specific data, remote button press, valid channels
-static struct bt_uuid_16 htvldchs = BT_UUID_INIT_16(0xAFF1);
-static struct bt_uuid_16 htbutton = BT_UUID_INIT_16(0xAFF2);
 
 static struct bt_gatt_discover_params discover_params;
 static struct bt_gatt_subscribe_params subscribefff6; // Channel Data
-
-// Head Board Specific Items
 static struct bt_gatt_subscribe_params subscribeaff1; // Override Data
+
 static bool contoheadboard = false;
 uint32_t buttonhandle =0;
 static const struct bt_gatt_attr *buttonattr=NULL;
@@ -104,6 +92,7 @@ static uint8_t over_notify_func(struct bt_conn *conn,
 			   struct bt_gatt_subscribe_params *params,
 			   const void *data, uint16_t length)
 {
+    serialWriteln("HT: BT Override Channels Changed");
 	if (!data) {
 		return BT_GATT_ITER_CONTINUE;
 	}
@@ -120,6 +109,7 @@ static uint8_t discover_func(struct bt_conn *conn,
 			     struct bt_gatt_discover_params *params)
 {
 	int err;
+    static int ccclvl=0;
 
 	if (!attr) {
 		serialWrite("Discover complete\r\n");
@@ -127,23 +117,26 @@ static uint8_t discover_func(struct bt_conn *conn,
 		return BT_GATT_ITER_STOP;
 	}
 
-/*
     char str[30];
-    bt_uuid_to_str(discover_params.uuid,str,sizeof(str));
-
+    bt_uuid_to_str(params->uuid,str,sizeof(str));
     serialWrite("Discovered UUID ");
     serialWrite(str);
     serialWriteln();
-*/
+
+    serialWrite("Arribute Handle=");
+    serialWrite(attr->handle);
+    serialWriteln();
 
     // Found the FRSky FFF0 Service?
 	if (!bt_uuid_cmp(discover_params.uuid, &frskyserv.uuid)) {
-
+        serialWriteln("HT: Found FRSky Service 0xFFF0");
+//-----------------------------------------------------------------------------------
+// 0xFFF6
         // Setup next discovery
 		memcpy(&uuid, &frskychar.uuid, sizeof(uuid));
 		discover_params.uuid = &uuid.uuid;
 		discover_params.start_handle = attr->handle + 1;
-		discover_params.type = BT_GATT_DISCOVER_CHARACTERISTIC;
+		discover_params.type = BT_GATT_DISCOVER_DESCRIPTOR;
 
 		err = bt_gatt_discover(conn, &discover_params);
 		if (err) {
@@ -151,16 +144,19 @@ static uint8_t discover_func(struct bt_conn *conn,
             serialWrite(err);
             serialWrite(")\r\n");
 	    }
-
     // Found the Frsky FFF6 Characteristic, Get the CCCD for it & subscribe
     } else if (!bt_uuid_cmp(discover_params.uuid, &frskychar.uuid)) {
+        serialWriteln("HT: Found FRSky Caracteristic 0xFFF6");
 
+//-----------------------------------------------------------------------------------
+// 0xFFF6 (0x2902) - PARA CCC
         // Setup next discovery
+        ccclvl = 0;
         memcpy(&uuid, &ccc.uuid, sizeof(uuid));
 		discover_params.uuid = &uuid.uuid;
-		discover_params.start_handle = attr->handle + 2;
+		discover_params.start_handle = attr->handle + 1;
 		discover_params.type = BT_GATT_DISCOVER_DESCRIPTOR;
-		subscribefff6.value_handle = attr->handle + 1;
+		subscribefff6.value_handle = bt_gatt_attr_value_handle(attr);
 
 		err = bt_gatt_discover(conn, &discover_params);
 		if (err) {
@@ -170,7 +166,9 @@ static uint8_t discover_func(struct bt_conn *conn,
 		}
 
     // Found the FFF6 CCCD descriptor, subscribe to notifications
-	} else if (!bt_uuid_cmp(discover_params.uuid, &ccc.uuid)){
+	} else if (!bt_uuid_cmp(discover_params.uuid, &ccc.uuid) && ccclvl == 0){
+        serialWriteln("HT: Found FRSky CCC");
+
 		subscribefff6.notify = notify_func;
 		subscribefff6.value = BT_GATT_CCC_NOTIFY;
 		subscribefff6.ccc_handle = attr->handle;
@@ -181,11 +179,64 @@ static uint8_t discover_func(struct bt_conn *conn,
             serialWrite(err);
             serialWrite(")\r\n");
 		} else {
-			serialWrite("HT: Subscribed to Data\r\n");
+			serialWrite("HT: Subscribed to Frsky Data\r\n");
 		}
 
-    // Setup next discovery (HT Reset Button Characteristic)1
-        memcpy(&uuid, &htbutton.uuid, sizeof(uuid));
+//-----------------------------------------------------------------------------------
+// 0xAFF1 - Override Channels
+        // Setup next discovery (HT Override Characteristic)
+        memcpy(&uuid, &htoverridech.uuid, sizeof(uuid));
+		discover_params.uuid = &uuid.uuid;
+		discover_params.start_handle = attr->handle + 1;
+		discover_params.type = BT_GATT_DISCOVER_DESCRIPTOR;
+        err = bt_gatt_discover(conn, &discover_params);
+		if (err) {
+           	serialWrite("HT: Discover failed (err ");
+            serialWrite(err);
+            serialWrite(")\r\n");
+	    }
+
+	} else if (!bt_uuid_cmp(discover_params.uuid, &htoverridech.uuid)) {
+        serialWriteln("HT: Found Override Characteristic");
+
+//-----------------------------------------------------------------------------------
+// 0xAFF1(0x2902) - Override's CCC
+
+        // Setup next discovery, CCC for it
+        ccclvl = 1;
+        memcpy(&uuid, &ccc.uuid, sizeof(uuid));
+		discover_params.uuid = &uuid.uuid;
+		discover_params.start_handle = attr->handle + 1;
+		discover_params.type = BT_GATT_DISCOVER_DESCRIPTOR;
+        subscribeaff1.value_handle = attr->handle;
+        err = bt_gatt_discover(conn, &discover_params);
+		if (err) {
+           	serialWrite("HT: Discover failed (err ");
+            serialWrite(err);
+            serialWrite(")\r\n");
+	    }
+
+	} else if (!bt_uuid_cmp(discover_params.uuid, &ccc.uuid) && ccclvl == 1){
+        serialWriteln("HT: Found Override CCC");
+
+        subscribeaff1.notify = over_notify_func;
+		subscribeaff1.value = BT_GATT_CCC_NOTIFY;
+		subscribeaff1.ccc_handle = attr->handle;
+
+		err = bt_gatt_subscribe(conn, &subscribeaff1);
+		if (err && err != -EALREADY) {
+            serialWrite("HT: Subscribe to overrides failed (err ");
+            serialWrite(err);
+            serialWrite(")\r\n");
+		} else {
+			serialWrite("HT: Subscribed to Overrides\r\n");
+		}
+
+        // READ THE OVERRIDES
+
+//-----------------------------------------------------------------------------------
+// 0xAFF2 - Override Button
+        memcpy(&uuid, &btbutton.uuid, sizeof(uuid));
 		discover_params.uuid = &uuid.uuid;
 		discover_params.start_handle = attr->handle + 1;
 		discover_params.type = BT_GATT_DISCOVER_DESCRIPTOR;
@@ -197,59 +248,15 @@ static uint8_t discover_func(struct bt_conn *conn,
 	    }
 
 	// Found the HT Button Reset Characteristic
-	} else if (!bt_uuid_cmp(discover_params.uuid, &htbutton.uuid)) {
+	} else if (!bt_uuid_cmp(discover_params.uuid, &btbutton.uuid)) {
         serialWriteln("HT: Found headboard connection");
         serialWriteln("HT: Enabling button indication forwarding");
         contoheadboard = true;
         buttonhandle = attr->handle;
         buttonattr = attr;
 
-
-        // Setup next discovery (HT Override Characteristic)
-        memcpy(&uuid, &htvldchs.uuid, sizeof(uuid));
-		discover_params.uuid = &uuid.uuid;
-		discover_params.start_handle = attr->handle + 1;
-		discover_params.type = BT_GATT_DISCOVER_DESCRIPTOR;
-        err = bt_gatt_discover(conn, &discover_params);
-		if (err) {
-           	serialWrite("HT: Discover failed (err ");
-            serialWrite(err);
-            serialWrite(")\r\n");
-	    }
-
-    // Found the HT Override Characteristic
-	} else if (!bt_uuid_cmp(discover_params.uuid, &htvldchs.uuid)) {
-        serialWriteln("HT: Found Override Characteristic");
-        // Setup next discovery (HT Override CCC)
-        memcpy(&uuid, &ccc.uuid, sizeof(uuid));
-		discover_params.uuid = &uuid.uuid;
-		discover_params.start_handle = attr->handle + 1;
-		discover_params.type = BT_GATT_DISCOVER_DESCRIPTOR;
-        subscribeaff1.value_handle = attr->handle + 1;
-        err = bt_gatt_discover(conn, &discover_params);
-		if (err) {
-           	serialWrite("HT: Discover failed (err ");
-            serialWrite(err);
-            serialWrite(")\r\n");
-	    }
-
 	// Found the HT Override CCC Value, Subscribe to it
-	} else if (!bt_uuid_cmp(discover_params.uuid, &ccc.uuid)) {
-        serialWriteln("HT: Found Override CCC");
-        subscribeaff1.notify = over_notify_func;
-		subscribeaff1.value = BT_GATT_CCC_NOTIFY;
-		subscribeaff1.ccc_handle = attr->handle;
-
-		err = bt_gatt_subscribe(conn, &subscribeaff1);
-		if (err && err != -EALREADY) {
-            serialWrite("HT: Subscribe failed (err ");
-            serialWrite(err);
-            serialWrite(")\r\n");
-		} else {
-			serialWrite("HT: Subscribed to Overrides\r\n");
-		}
-    }
-
+	}
 
 	return BT_GATT_ITER_STOP;
 }
@@ -412,7 +419,7 @@ static void rmtconnected(struct bt_conn *conn, uint8_t err)
 
     bleconnected = true;
 
-    // Subscribe to FFF6 on Service FFF0
+    // Start Discovery
 	if (conn == pararmtconn) {
 		memcpy(&uuid, &frskyserv.uuid, sizeof(uuid));
 		discover_params.uuid = &uuid.uuid;
