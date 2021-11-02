@@ -92,7 +92,9 @@ static uint8_t over_notify_func(struct bt_conn *conn,
 			   struct bt_gatt_subscribe_params *params,
 			   const void *data, uint16_t length)
 {
-    serialWriteln("HT: BT Override Channels Changed");
+    serialWrite("HT: BT Override Channels Changed (0x");
+    serialWriteHex((uint8_t*)data,2);
+    serialWriteln(")");
 	if (!data) {
 		return BT_GATT_ITER_CONTINUE;
 	}
@@ -117,6 +119,7 @@ static uint8_t discover_func(struct bt_conn *conn,
 		return BT_GATT_ITER_STOP;
 	}
 
+#if defined(DEBUG)
     char str[30];
     bt_uuid_to_str(params->uuid,str,sizeof(str));
     serialWrite("Discovered UUID ");
@@ -126,6 +129,7 @@ static uint8_t discover_func(struct bt_conn *conn,
     serialWrite("Arribute Handle=");
     serialWrite(attr->handle);
     serialWriteln();
+#endif
 
     // Found the FRSky FFF0 Service?
 	if (!bt_uuid_cmp(discover_params.uuid, &frskyserv.uuid)) {
@@ -135,7 +139,7 @@ static uint8_t discover_func(struct bt_conn *conn,
         // Setup next discovery
 		memcpy(&uuid, &frskychar.uuid, sizeof(uuid));
 		discover_params.uuid = &uuid.uuid;
-		discover_params.start_handle = attr->handle + 1;
+		discover_params.start_handle = attr->handle + 2;
 		discover_params.type = BT_GATT_DISCOVER_DESCRIPTOR;
 
 		err = bt_gatt_discover(conn, &discover_params);
@@ -156,7 +160,7 @@ static uint8_t discover_func(struct bt_conn *conn,
 		discover_params.uuid = &uuid.uuid;
 		discover_params.start_handle = attr->handle + 1;
 		discover_params.type = BT_GATT_DISCOVER_DESCRIPTOR;
-		subscribefff6.value_handle = bt_gatt_attr_value_handle(attr);
+		subscribefff6.value_handle = attr->handle;
 
 		err = bt_gatt_discover(conn, &discover_params);
 		if (err) {
@@ -187,7 +191,7 @@ static uint8_t discover_func(struct bt_conn *conn,
         // Setup next discovery (HT Override Characteristic)
         memcpy(&uuid, &htoverridech.uuid, sizeof(uuid));
 		discover_params.uuid = &uuid.uuid;
-		discover_params.start_handle = attr->handle + 1;
+		discover_params.start_handle = attr->handle + 2;
 		discover_params.type = BT_GATT_DISCOVER_DESCRIPTOR;
         err = bt_gatt_discover(conn, &discover_params);
 		if (err) {
@@ -254,8 +258,6 @@ static uint8_t discover_func(struct bt_conn *conn,
         contoheadboard = true;
         buttonhandle = attr->handle;
         buttonattr = attr;
-
-	// Found the HT Override CCC Value, Subscribe to it
 	}
 
 	return BT_GATT_ITER_STOP;
@@ -532,9 +534,6 @@ static struct bt_gatt_write_params write_params;
 
 char rstdata[1] = {'R'};
 
-static void write_rsp(struct bt_conn *conn, uint8_t err, struct bt_gatt_write_params *params)
-{}
-
 void BTRmtSendButtonPress()
 {
     if(!buttonattr)
@@ -543,7 +542,7 @@ void BTRmtSendButtonPress()
     serialWriteln("HT: Sending Button Press to Head Board");
 
     write_params.handle = sys_le16_to_cpu(buttonhandle);
-    write_params.func = write_rsp;
+
     write_params.offset = 0U;
     write_params.data = (void *)rstdata;
     write_params.length = sys_le16_to_cpu(1);
