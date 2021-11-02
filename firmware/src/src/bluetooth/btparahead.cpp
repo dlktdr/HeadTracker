@@ -38,8 +38,8 @@ static ssize_t write_ct(struct bt_conn *conn, const struct bt_gatt_attr *attr, c
 static ssize_t read_ct(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf, uint16_t len, uint16_t offset);
 static ssize_t write_but(struct bt_conn *conn, const struct bt_gatt_attr *attr, const void *buf, uint16_t len, uint16_t offset, uint8_t flags);
 static ssize_t read_over(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf, uint16_t len, uint16_t offset);
-static void ct_ccc_cfg_changed(const struct bt_gatt_attr *attr, uint16_t value);
-static void ct_ccc_cfg_changed_a(const struct bt_gatt_attr *attr, uint16_t value);
+static void ct_ccc_cfg_changed_frsky(const struct bt_gatt_attr *attr, uint16_t value);
+static void ct_ccc_cfg_changed_overr(const struct bt_gatt_attr *attr, uint16_t value);
 
 static constexpr uint8_t START_STOP = 0x7E;
 static constexpr uint8_t BYTE_STUFF = 0x7D;
@@ -63,22 +63,21 @@ BT_GATT_SERVICE_DEFINE(bt_srv,
     // ATTRIBUTE 0
     BT_GATT_PRIMARY_SERVICE(&btparaserv),
 
-    // Data output Characteristic  ATTRIBUTE 1
+    // Data output Characteristic  ATTRIBUTE 1,2
     BT_GATT_CHARACTERISTIC(&frskychar.uuid,
                            BT_GATT_CHRC_READ | BT_GATT_CHRC_WRITE_WITHOUT_RESP |  BT_GATT_CHRC_NOTIFY,
                            BT_GATT_PERM_READ | BT_GATT_PERM_WRITE, read_ct, write_ct, ct),
-    // ATTRIBUTE 2
-    BT_GATT_CCC(ct_ccc_cfg_changed, BT_GATT_PERM_READ | BT_GATT_PERM_WRITE),
+    // ATTRIBUTE 3
+    BT_GATT_CCC(ct_ccc_cfg_changed_frsky, BT_GATT_PERM_READ | BT_GATT_PERM_WRITE),
 
-    // Overridden Channel Outputs ATTRIBUTE 3
+    // Overridden Channel Outputs ATTRIBUTE 4,5
     BT_GATT_CHARACTERISTIC(&htoverridech.uuid,
                            BT_GATT_CHRC_READ | BT_GATT_CHRC_NOTIFY,
                            BT_GATT_PERM_READ , read_over, NULL, overdata),
-    // ATTRIBUTE 4
-    BT_GATT_CCC(ct_ccc_cfg_changed_a, BT_GATT_PERM_READ | BT_GATT_PERM_WRITE),
+    // ATTRIBUTE 6
+    BT_GATT_CCC(ct_ccc_cfg_changed_overr, BT_GATT_PERM_READ | BT_GATT_PERM_WRITE),
 
-    // ATTRIBUTE 5
-    // Remote Button Press Characteristic, Indicate
+    // Remote Button Press Characteristic, Indicate ATTRIBUTE 7
     BT_GATT_CHARACTERISTIC(&btbutton.uuid,
                            BT_GATT_CHRC_WRITE,
                            BT_GATT_PERM_READ | BT_GATT_PERM_WRITE, NULL, write_but, NULL),
@@ -178,7 +177,7 @@ void BTHeadExecute()
         int len;
         len = setTrainer(output);
 
-        //bt_gatt_notify(NULL, &bt_srv.attrs[1], output, len);
+        bt_gatt_notify(NULL, &bt_srv.attrs[1], output, len);
     }
 }
 
@@ -231,16 +230,16 @@ int8_t BTHeadGetRSSI()
     return -1;
 }
 
-static void ct_ccc_cfg_changed_a(const struct bt_gatt_attr *attr, uint16_t value)
+static void ct_ccc_cfg_changed_overr(const struct bt_gatt_attr *attr, uint16_t value)
 {
-    serialWrite("CCC Values Changed on Override(");
+    serialWrite("HT: Override CCC Value Changed (");
     serialWrite(value);
     serialWrite(")\r\n");
 }
 
-static void ct_ccc_cfg_changed(const struct bt_gatt_attr *attr, uint16_t value)
+static void ct_ccc_cfg_changed_frsky(const struct bt_gatt_attr *attr, uint16_t value)
 {
-    serialWrite("CCC Values Changed (");
+    serialWrite("HT: FrSky CCC Value Changed (");
     serialWrite(value);
     serialWrite(")\r\n");
 }
@@ -335,8 +334,7 @@ static void connected(struct bt_conn *conn, uint8_t err)
     serialWrite(addr_str);
     serialWrite("\r\n");
 
-    // Set Connection Parameters
-    // Decrease minimum connection time, update rate improvement
+    // Set Connection Parameters - Request updated rate
     bt_conn_le_param_update(curconn,conparms);
 
     // Start a Timer, If we don't see a Security Change within this time
@@ -350,7 +348,7 @@ static void disconnected(struct bt_conn *conn, uint8_t reason)
 {
     serialWrite("HT: Bluetooth disconnected (reason ");
     serialWrite(reason);
-    serialWriteln("");
+    serialWriteln(")");
 
     // Start advertising
     int err = bt_le_adv_start(&my_param, ad, ARRAY_SIZE(ad), NULL, 0);
