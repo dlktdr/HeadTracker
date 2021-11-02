@@ -36,7 +36,7 @@ uint16_t chanoverrides=0xFFFF; // Default to all enabled
 
 static void start_scan(void);
 volatile bool isscanning=false;
-
+static char _address[18] = "00:00:00:00:00:00";
 static struct bt_conn *pararmtconn = NULL;
 
 struct bt_le_scan_param scnparams = {
@@ -477,6 +477,15 @@ void BTRmtStart()
 
     bt_conn_cb_register(&rmtconn_callbacks);
 
+    bt_addr_le_t addrarry[CONFIG_BT_ID_MAX];
+    size_t addrcnt=1;
+
+    // Discover BT Address
+    bt_id_get(addrarry, &addrcnt);
+    if(addrcnt > 0) {
+        bt_addr_le_to_str(&addrarry[0],_address,sizeof(_address));
+    }
+
 	start_scan();
 }
 
@@ -520,7 +529,7 @@ uint16_t BTRmtGetChannel(int channel)
 
 const char * BTRmtGetAddress()
 {
-    return "";
+    return _address;
 }
 
 int8_t BTRmtGetRSSI()
