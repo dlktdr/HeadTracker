@@ -13,8 +13,6 @@
 #include "io.h"
 
 static const struct device *hdev;
-static enum usb_dc_status_code usb_status;
-static uint16_t channeldata[16];
 
 #define JOYSTICK_BUTTONS
 #define JOYSTICK_BUTTON_HIGH 1750
@@ -47,8 +45,8 @@ void set_JoystickChannels(uint16_t chans[16])
         }
 
         if(report.channels[i] <= JOYSTICK_BUTTON_LOW) {
-                report.but[0] |= 1<<(i * 2) + 1;
-                report.but[1] |= 1<<(i - 4) * 2 + 1;
+                report.but[0] |= (1<<(i * 2)) + 1;
+                report.but[1] |= ((1<<(i - 4)) * 2) + 1;
         }
 #endif
 
@@ -90,13 +88,6 @@ static const uint8_t hid_report_desc[] = {
     0xc0,                          //       END_COLLECTION
     0xc0                           //     END_COLLECTION
 };
-
-
-
-static void status_cb(enum usb_dc_status_code status, const uint8_t *param)
-{
-    usb_status = status;
-}
 
 void joystick_init(void)
 {
