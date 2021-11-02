@@ -57,7 +57,7 @@ void bt_Init()
 void bt_Thread()
 {
     while(1) {
-        k_msleep(BT_PERIOD);
+        k_usleep(BT_PERIOD);
 
         if(switching)
             continue;

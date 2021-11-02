@@ -16,7 +16,7 @@
 // Thread Periods
 #define IO_PERIOD 50           // (ms) IO Period (button reading)
 #define DATA_PERIOD 90          // (ms) GUI update rate
-#define BT_PERIOD 20            // (ms) Bluetooth update rate
+#define BT_PERIOD 12500         // (us) Bluetooth update rate
 #define SERIAL_PERIOD 30        // (ms) Serial processing
 #define SENSOR_PERIOD 16666     // (us) 60hz Read Sensors
 #define CALCULATE_PERIOD 6666   // (us) 150hz IMU calculations
