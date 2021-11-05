@@ -60,6 +60,28 @@ struct bt_le_conn_param *rmtconparms = BT_LE_CONN_PARAM(BT_MIN_CONN_INTER_MASTER
 // Characteristic UUID
 static struct bt_uuid_16 uuid = BT_UUID_INIT_16(0);
 
+
+// Read Override Parameters
+
+uint8_t read_overrides(struct bt_conn *conn, uint8_t err,
+				    struct bt_gatt_read_params *params,
+				    const void *data, uint16_t length)
+{
+    serialWrite("HT: Read Override Data (0x");
+    serialWriteHex((uint8_t*)data,2);
+    serialWriteln(")");
+    if(length == 2) {
+        // Store Overrides
+        memcpy(&chanoverrides, data, sizeof(chanoverrides));
+    }
+
+    return 0;
+}
+
+bt_gatt_read_params rparm = {
+    .func = read_overrides,
+};
+
 /* Nofify function when bluetooth channel data has been sent
  */
 
@@ -114,7 +136,7 @@ static uint8_t discover_func(struct bt_conn *conn,
     static int ccclvl=0;
 
 	if (!attr) {
-		serialWrite("Discover complete\r\n");
+		serialWrite("HT: Discover complete\r\n");
 		(void)memset(params, 0, sizeof(*params));
 		return BT_GATT_ITER_STOP;
 	}
@@ -236,8 +258,6 @@ static uint8_t discover_func(struct bt_conn *conn,
 			serialWrite("HT: Subscribed to Overrides\r\n");
 		}
 
-        // READ THE OVERRIDES
-
 //-----------------------------------------------------------------------------------
 // 0xAFF2 - Override Button
         memcpy(&uuid, &btbutton.uuid, sizeof(uuid));
@@ -258,6 +278,16 @@ static uint8_t discover_func(struct bt_conn *conn,
         contoheadboard = true;
         buttonhandle = attr->handle;
         buttonattr = attr;
+
+
+        serialWriteln("HT: Reading Overrides in Timeout");
+
+        // Do an initial read of the BT override data
+        rparm.handle_count = 1;
+        rparm.single.handle = subscribeaff1.value_handle;
+        rparm.single.offset = 0;
+
+        bt_gatt_read( pararmtconn, &rparm );
 	}
 
 	return BT_GATT_ITER_STOP;
