@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>580</width>
+    <width>584</width>
     <height>697</height>
    </rect>
   </property>
@@ -180,7 +180,7 @@
            <string>Permanently save the settings on the headtracker</string>
           </property>
           <property name="text">
-           <string>Save to NVM</string>
+           <string>Save Settings</string>
           </property>
           <property name="icon">
            <iconset resource="Resources.qrc">
@@ -555,7 +555,7 @@
                 <bool>false</bool>
                </property>
                <property name="currentIndex">
-                <number>0</number>
+                <number>3</number>
                </property>
                <widget class="QWidget" name="tabGeneral">
                 <attribute name="title">
@@ -3632,7 +3632,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>580</width>
+     <width>584</width>
      <height>21</height>
     </rect>
    </property>

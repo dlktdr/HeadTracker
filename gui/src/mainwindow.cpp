@@ -1006,7 +1006,7 @@ bool MainWindow::checkSaved()
 
         } else if (!brd->_isBoardSavedToNVM()) {
             QMessageBox::StandardButton rval = QMessageBox::question(this,tr("Changes not saved on tracker"),tr("Are you sure you want to disconnect?\n"\
-                                  "Changes haven't been permanently stored on headtracker\nClick \"Save to NVM\" (Non-Volatile Memory) first"),QMessageBox::Yes|QMessageBox::No);
+                                  "Changes haven't been permanently stored on headtracker\nClick \"Save settings\" first"),QMessageBox::Yes|QMessageBox::No);
             if(rval != QMessageBox::Yes)
                 return false;
         }
@@ -1107,7 +1107,7 @@ void MainWindow::storeToNVM()
     foreach(BoardType *brd, boards) {
         brd->_saveToNVM();
     }
-    statusMessage(tr("Storing Parameters to non-volatile memory"));
+    statusMessage(tr("Storing Parameters to memory"));
     ui->cmdSaveNVM->setEnabled(false);
 }
 
@@ -1217,7 +1217,7 @@ void MainWindow::reboot()
             continue;
         if(!brd->_isBoardSavedToNVM()) {
             QMessageBox::StandardButton rval = QMessageBox::question(this,tr("Changes not saved"),tr("Are you sure you want to reboot?\n"\
-                                  "Changes haven't been saved\nClick \"Save to NVM\" first"),QMessageBox::Yes|QMessageBox::No);
+                                  "Changes haven't been saved\nClick \"Save Settings\" first"),QMessageBox::Yes|QMessageBox::No);
             if(rval != QMessageBox::Yes) {
                 reboot = false;
             }
