@@ -103,3 +103,5 @@
 #define RAD_TO_DEG 57.29577951308
 
 #define micros() k_cyc_to_us_floor32(k_cycle_get_32())
+#define micros64() k_cyc_to_us_floor64(k_uptime_get())
+#define millis() k_cyc_to_ms_floor32(k_cycle_get_32())

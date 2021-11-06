@@ -211,7 +211,7 @@ void PpmIn_execute()
 {
     static bool sentconn=false;
 
-    uint32_t micros = micros() - runtime;
+    uint64_t micros = micros64() - runtime;
     if(micros > 60000) {
         if(sentconn == false) {
             serialWriteln("HT: PPM Input Data Lost");
