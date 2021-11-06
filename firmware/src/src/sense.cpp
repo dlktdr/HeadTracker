@@ -281,7 +281,7 @@ void calculate_Thread()
 
         // 5) If selected input channel went > 1800us reset the center
         // wait for it to drop below 1700 before allowing another reset
-        int rstppmch = trkset.resetCntPPM() - 1;
+        /*int rstppmch = trkset.resetCntPPM() - 1;
         static bool hasrstppm=false;
         if(rstppmch >= 0 && rstppmch < 16) {
             if(channel_data[rstppmch] > 1800 && hasrstppm == false) {
@@ -293,7 +293,7 @@ void calculate_Thread()
             } else if (channel_data[rstppmch] < 1700 && hasrstppm == true) {
                 hasrstppm = false;
             }
-        }
+        }*/ //REMOVED as of V2.1
 
         // 6) Set Auxiliary Functions
         int aux0ch = trkset.auxFunc0Ch();
