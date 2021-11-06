@@ -162,6 +162,7 @@ void serial_Thread()
 		if (!dtr) {
             ring_buf_reset(&ringbuf_tx);
             uart_tx_abort(dev);
+            uiResponsive = k_uptime_get() - 1;
 
 
         // Port is open, send data
