@@ -1332,12 +1332,12 @@ void MainWindow::boardDiscovered(BoardType *brd)
         // Check Firmware Version is Compatible
 
         // GUI Version
-        float lfver = version.toFloat();
-        int lmajver = roundf(lfver*10);    // Major Version 1.1x == 11
+        QString lfver = version;
+        lfver.remove(1,1);
+        int lmajver = lfver.left(2).toInt();   // Major Version 1.1x == 11
 
         // Remote Version
-        float rfver = trkset.fwVersion().toFloat();
-        int rmajver = roundf(rfver*10);    // Major Version 1.1x == 11
+        int rmajver = trkset.fwVersion().remove(1,1).left(2).toInt();    // Major Version 1.1x == 11
 
         // Firmware is too old
         if(lmajver > rmajver) {
