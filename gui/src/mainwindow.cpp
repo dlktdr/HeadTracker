@@ -343,7 +343,12 @@ void MainWindow::serialDisconnect()
     waitingOnParameters = false;
     serialData.clear();
     channelviewer->setBoard(nullptr);
-    channelviewer->hide();
+    if(channelviewer->isVisible()) {
+        channelViewerOpen = true;
+        channelviewer->hide();
+    } else {
+        channelViewerOpen = false;
+    }
     trkset.clearDataItems();
 
     // Notify all boards we have disconnected
@@ -1352,6 +1357,9 @@ void MainWindow::boardDiscovered(BoardType *brd)
             msgbox->show();
         }
         channelviewer->setBoard(currentboard);
+        if(channelViewerOpen) {
+            channelviewer->show();
+        }
     } else if (brd->boardName() == "BNO055") {
         addToLog(tr("Connected to a ") + brd->boardName() + "\n");
         ui->cmdStartGraph->setVisible(true);

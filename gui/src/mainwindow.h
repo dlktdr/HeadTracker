@@ -77,6 +77,7 @@ private:
     BoardNano33BLE *nano33ble;
     BoardBNO055 *bno055;
     BoardType *currentboard;
+    bool channelViewerOpen=false;
 
     void parseSerialData();
     void sendSerialData(QByteArray data);
