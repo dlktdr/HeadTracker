@@ -241,7 +241,7 @@ void ChannelViewer::addBars()
     layoutsbusin->addWidget(lblSBUSin);
     lblSBUSin->setVisible(false);
     lblSBUSin->setAlignment(Qt::AlignHCenter|Qt::AlignVCenter);
-    lblSBUSin->setText("<b>SBUS In Not Yet Supported...</b>");
+    lblSBUSin->setText("No SBUS input channels detected");
 
     // BT Inputs
     layoutbtin = new QVBoxLayout(ui->tabbtin);
