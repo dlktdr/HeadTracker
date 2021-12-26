@@ -92,7 +92,7 @@ public:
     static constexpr int DEF_PPM_CHANNELS = 8;
     static constexpr uint16_t DEF_PPM_FRAME = 22500;
     static constexpr uint16_t PPM_MAX_FRAME = 40000;
-    static constexpr uint16_t PPM_MIN_FRAME = 12500;
+    static constexpr uint16_t PPM_MIN_FRAME = 6666;
     static constexpr uint16_t PPM_MIN_FRAMESYNC = 4000; // Not adjustable
     static constexpr int DEF_PPM_SYNC=350;
     static constexpr int PPM_MAX_SYNC=800;
@@ -211,7 +211,7 @@ public:
     void setPPMSync(uint16_t v) { if(v >= PPM_MIN_SYNC && v <= PPM_MAX_SYNC) ppmsync = v;}
 
     int ppmChCount() {return ppmchcnt;}
-    void setPpmChCount(int v) { if(v > 3 && v < 17) ppmchcnt = v;}
+    void setPpmChCount(int v) { if(v > 0 && v < 17) ppmchcnt = v;}
 
     int ppmInPin() const;
     void setPpmInPin(int value);
