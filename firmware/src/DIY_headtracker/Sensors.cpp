@@ -264,6 +264,11 @@ void FilterSensorData()
 		channel_value[htChannels[2]] = rollAngleTemp;          
     }
 
+    float an0ch = ((analogRead(A0) + 988) - 400) *2;
+    float an1ch = ((analogRead(A1) + 988) - 400) *2;
+    channel_value[0] = an0ch; // **** ANALOG CHANNELS HERE
+    channel_value[1] = an1ch;
+
     // Calibration
     if(sys == 3 && gyro == 3 && accel == 3 && mag == 3 && doCalibrate) {
       StoreBNOCalibration();
