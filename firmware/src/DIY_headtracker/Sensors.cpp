@@ -266,9 +266,9 @@ void FilterSensorData()
 
     float an0ch = ((analogRead(A0) + 988) - 400) *2;
     float an1ch = ((analogRead(A1) + 988) - 400) *2;
-    channel_value[0] = an0ch; // **** ANALOG CHANNELS HERE
-    channel_value[1] = an1ch;
-
+    channel_value[4] = an0ch;   // Channel 4                           // **** ANALOG CHANNELS HERE
+    channel_value[5] = an1ch;   // Channel 5
+    
     // Calibration
     if(sys == 3 && gyro == 3 && accel == 3 && mag == 3 && doCalibrate) {
       StoreBNOCalibration();
