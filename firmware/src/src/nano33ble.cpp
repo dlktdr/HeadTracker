@@ -1,5 +1,5 @@
 
-#include "Nano33BLE.h"
+#include "nano33ble.h"
 #include "dataparser.h"
 #include "sense.h"
 #include "io.h"
