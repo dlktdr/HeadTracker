@@ -548,6 +548,9 @@ void MainWindow::updateToUI()
     ui->chkSbusOutInv->setChecked(trkset.invertedSBUSOut());
     ui->chkLngBttnPress->setChecked(trkset.buttonPressMode());
 
+    ui->spnPPMFrameLen->setMinimum((double)TrackerSettings::PPM_MIN_FRAME / 1000.0);
+    ui->spnPPMFrameLen->setMaximum((double)TrackerSettings::PPM_MAX_FRAME / 1000.0);
+
     ui->spnLPTiltRoll->setValue(trkset.lpTiltRoll());
     ui->spnLPPan->setValue(trkset.lpPan());
     ui->spnLPTiltRoll2->setValue(trkset.lpTiltRoll());
@@ -624,7 +627,7 @@ void MainWindow::updateToUI()
 
     // PPM Output Settings
     int channels = trkset.ppmChCount();
-    ui->cmbPPMChCount->setCurrentIndex(channels-4);
+    ui->cmbPPMChCount->setCurrentIndex(channels-1);
     uint16_t setframelen = trkset.ppmFrame();
     ui->spnPPMFrameLen->setValue(static_cast<double>(setframelen)/1000.0f);
     ui->spnPPMSync->setValue(trkset.ppmSync());
@@ -816,7 +819,7 @@ void MainWindow::updateFromUI()
     uint16_t setframelen = ui->spnPPMFrameLen->value() * 1000;
     trkset.setPPMFrame(setframelen);
     trkset.setPPMSync(ui->spnPPMSync->value());
-    int channels = ui->cmbPPMChCount->currentIndex()+4;
+    int channels = ui->cmbPPMChCount->currentIndex()+1;
     trkset.setPpmChCount(channels);
     uint32_t maxframelen = TrackerSettings::PPM_MIN_FRAMESYNC + (channels * TrackerSettings::MAX_PWM);
     if(maxframelen > setframelen) {

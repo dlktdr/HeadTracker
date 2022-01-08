@@ -555,7 +555,7 @@
                 <bool>false</bool>
                </property>
                <property name="currentIndex">
-                <number>3</number>
+                <number>1</number>
                </property>
                <widget class="QWidget" name="tabGeneral">
                 <attribute name="title">
@@ -910,10 +910,10 @@
                     <string> ms</string>
                    </property>
                    <property name="decimals">
-                    <number>1</number>
+                    <number>2</number>
                    </property>
                    <property name="minimum">
-                    <double>12.500000000000000</double>
+                    <double>6.660000000000000</double>
                    </property>
                    <property name="maximum">
                     <double>40.000000000000000</double>
@@ -1079,11 +1079,26 @@
                     </size>
                    </property>
                    <property name="currentText">
-                    <string>4</string>
+                    <string>1</string>
                    </property>
                    <property name="currentIndex">
                     <number>0</number>
                    </property>
+                   <item>
+                    <property name="text">
+                     <string>1</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>2</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>3</string>
+                    </property>
+                   </item>
                    <item>
                     <property name="text">
                      <string>4</string>
