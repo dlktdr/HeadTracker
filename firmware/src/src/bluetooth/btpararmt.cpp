@@ -573,6 +573,8 @@ static struct bt_gatt_write_params write_params;
 
 char rstdata[1] = {'R'};
 
+void btwrite_cb(bt_conn *conn, uint8_t err, bt_gatt_write_params *params){}
+
 void BTRmtSendButtonPress()
 {
     if(!buttonattr)
@@ -585,8 +587,9 @@ void BTRmtSendButtonPress()
     write_params.offset = 0U;
     write_params.data = (void *)rstdata;
     write_params.length = sys_le16_to_cpu(1);
+    write_params.func = btwrite_cb;
 
-    if(bt_gatt_write(pararmtconn,&write_params) < 0)
+    if(bt_gatt_write(pararmtconn, &write_params) < 0)
         serialWriteln("HT: Failed to send button press");
 }
 
