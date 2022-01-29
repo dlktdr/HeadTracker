@@ -34,6 +34,7 @@ TrackerSettings::TrackerSettings(QObject *parent):
 
     _data["buttonpin"] = DEF_BUTTON_IN;
     _data["butlngps"] = DEF_BUTTON_LONG_PRESS;
+    _data["rstontlt"] = DEF_RESET_ON_TILT;
     _data["ppminpin"] = DEF_PPM_IN;
     _data["ppmoutpin"] = DEF_PPM_OUT;
     _data["ppmoutinvert"] = false;

@@ -121,6 +121,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->chkSbusInInv,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
     connect(ui->chkSbusOutInv,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
     connect(ui->chkLngBttnPress,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
+    connect(ui->chkRstOnTlt,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
 
     //connect(ui->chkRawData,SIGNAL(clicked(bool)),this,SLOT(setDataMode(bool)));
 
@@ -547,6 +548,7 @@ void MainWindow::updateToUI()
     ui->chkSbusInInv->setChecked(trkset.invertedSBUSIn());
     ui->chkSbusOutInv->setChecked(trkset.invertedSBUSOut());
     ui->chkLngBttnPress->setChecked(trkset.buttonPressMode());
+    ui->chkRstOnTlt->setChecked(trkset.resetOnTiltMode());
 
     ui->spnPPMFrameLen->setMinimum((double)TrackerSettings::PPM_MIN_FRAME / 1000.0);
     ui->spnPPMFrameLen->setMaximum((double)TrackerSettings::PPM_MAX_FRAME / 1000.0);
@@ -812,6 +814,7 @@ void MainWindow::updateFromUI()
         ui->chkLngBttnPress->setEnabled(false);
 
     trkset.setButtonPressMode(ui->chkLngBttnPress->isChecked());
+    trkset.setResetOnTilt(ui->chkRstOnTlt->isChecked());
 
     trkset.setInvertedSBUSOut(ui->chkSbusOutInv->isChecked());
     trkset.setSBUSRate(ui->spnSBUSRate->value());

@@ -102,6 +102,8 @@ public:
     static constexpr int DEF_BOARD_ROT_Z=0;
     static constexpr int DEF_BUTTON_IN = 2; // Chosen because it's beside ground
     static constexpr bool DEF_BUTTON_LONG_PRESS = false;
+    static constexpr bool DEF_RESET_ON_TILT = false;
+    static constexpr float RESET_ON_TILT_TIME = 1.5; // 2.5 Seconds to complete a head tilt
     static constexpr int DEF_PPM_OUT = 10; // Random choice
     static constexpr int DEF_PPM_IN = -1;
     static constexpr int PPM_CENTER = 1500;
@@ -225,6 +227,9 @@ public:
     void setButtonPressMode(bool lngpresmd) {butlngps = lngpresmd;} // True = Enable/Disable output on long press
     bool buttonPressMode() {return butlngps;}
     void setTRPEnabled(bool v) {trpenabled = v;}
+
+    void setResetOnTilt(bool r) {rstontlt = r;}
+    bool resetOnTiltMode() {return rstontlt;}
 
     int resetCntPPM() const;
     void setResetCntPPM(int value);
@@ -357,6 +362,7 @@ private:
     int lppan,lptiltroll;
     int buttonpin,ppmoutpin,ppminpin;
     bool butlngps;
+    bool rstontlt;
     bool ppmoutinvert;
     bool ppmininvert;
     int btmode;

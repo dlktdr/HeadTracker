@@ -555,7 +555,7 @@
                 <bool>false</bool>
                </property>
                <property name="currentIndex">
-                <number>1</number>
+                <number>0</number>
                </property>
                <widget class="QWidget" name="tabGeneral">
                 <attribute name="title">
@@ -608,28 +608,14 @@
                  </item>
                  <item row="2" column="1" colspan="2">
                   <layout class="QGridLayout" name="gridLayout_7">
-                   <item row="0" column="0">
+                   <item row="1" column="0">
                     <widget class="QLabel" name="label_45">
                      <property name="text">
                       <string>Tilt (X)</string>
                      </property>
                     </widget>
                    </item>
-                   <item row="0" column="1">
-                    <widget class="QLabel" name="label_46">
-                     <property name="text">
-                      <string>Roll (Y)</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="0" column="2">
-                    <widget class="QLabel" name="label_47">
-                     <property name="text">
-                      <string>Pan (Z)</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="1" column="0">
+                   <item row="2" column="0">
                     <widget class="QSpinBox" name="spnRotX">
                      <property name="suffix">
                       <string>°</string>
@@ -643,6 +629,13 @@
                     </widget>
                    </item>
                    <item row="1" column="1">
+                    <widget class="QLabel" name="label_46">
+                     <property name="text">
+                      <string>Roll (Y)</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="2" column="1">
                     <widget class="QSpinBox" name="spnRotY">
                      <property name="suffix">
                       <string>°</string>
@@ -655,7 +648,7 @@
                      </property>
                     </widget>
                    </item>
-                   <item row="1" column="2">
+                   <item row="2" column="2">
                     <widget class="QSpinBox" name="spnRotZ">
                      <property name="suffix">
                       <string>°</string>
@@ -665,6 +658,20 @@
                      </property>
                      <property name="maximum">
                       <number>360</number>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="1" column="2">
+                    <widget class="QLabel" name="label_47">
+                     <property name="text">
+                      <string>Pan (Z)</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="0" column="0" colspan="3">
+                    <widget class="QCheckBox" name="chkRstOnTlt">
+                     <property name="text">
+                      <string>Reset Center on Tilt</string>
                      </property>
                     </widget>
                    </item>

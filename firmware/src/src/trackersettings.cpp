@@ -88,6 +88,7 @@ TrackerSettings::TrackerSettings()
     ppminpin = DEF_PPM_IN;
     buttonpin = DEF_BUTTON_IN;
     butlngps = DEF_BUTTON_LONG_PRESS;
+    rstontlt = DEF_RESET_ON_TILT;
     ppmoutinvert = false;
     ppmininvert = false;
     rstppm = DEF_RST_PPM;
@@ -836,6 +837,7 @@ void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
     }
 
     v = json["butlngps"]; if(!v.isNull()) butlngps = v;
+    v = json["rstontlt"]; if(!v.isNull()) rstontlt = v;
 
     v = json["ppmininvert"]; if(!v.isNull()) setInvertedPpmIn(v);
     v = json["ppmoutinvert"]; if(!v.isNull()) setInvertedPpmOut(v);
@@ -965,6 +967,9 @@ void TrackerSettings::setJSONSettings(DynamicJsonDocument &json)
 
 // Button Press Mode
     json["butlngps"] = butlngps;
+
+// Reset on Tilt
+    json["rstontlt"] = rstontlt;
 
 // PPM Settings
     json["ppmoutinvert"] = ppmoutinvert;

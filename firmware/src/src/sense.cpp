@@ -184,7 +184,8 @@ void calculate_Thread()
         // Zero button was pressed, adjust all values to zero
         bool butdnw = false;
         if(wasButtonPressed()) {
-            rolloffset = roll;
+            if(!trkset.resetOnTiltMode())
+                rolloffset = roll;
             panoffset = pan;
             tiltoffset = tilt;
             butdnw = true;
@@ -220,6 +221,49 @@ void calculate_Thread()
         filter_expAverage(&panout, (float)trkset.lpPan() / 100, &l_panout);
         uint16_t panout_ui = panout + trkset.Pan_cnt();                    // Apply Center Offset
         panout_ui = MAX(MIN(panout_ui,trkset.Pan_max()),trkset.Pan_min()); // Limit Output
+
+        // Reset on tilt
+        if(trkset.resetOnTiltMode()) {
+            static bool tiltpeak=false;
+            static float resettime = 0.0f;
+            enum {
+                HITNONE,
+                HITMIN,
+                HITMAX,
+            };
+            static int minmax = HITNONE;
+            if(rollout_ui == trkset.Rll_max()) {
+                if(tiltpeak == false && minmax == HITNONE) {
+                    tiltpeak = true;
+                    minmax = HITMAX;
+                }
+                else if(minmax == HITMIN) {
+                    minmax = HITNONE;
+                    tiltpeak = false;
+                    pressButton();
+                }
+
+            } else if (rollout_ui == trkset.Rll_min()) {
+                if(tiltpeak == false && minmax == HITNONE) {
+                    tiltpeak = true;
+                    minmax = HITMIN;
+                }
+                else if(minmax == HITMAX) {
+                    minmax = HITNONE;
+                    tiltpeak = false;
+                    pressButton();
+                }
+            }
+            // If hit a max/min wait an amount of time and reset it
+            if(tiltpeak == true) {
+                resettime += (float)CALCULATE_PERIOD / 1000000.0;
+                if(resettime > TrackerSettings::RESET_ON_TILT_TIME) {
+                    tiltpeak = false;
+                    minmax = HITNONE;
+                    resettime = 0;
+                }
+            }
+        }
 
         /* ************************************************************
         *       Build channel data
