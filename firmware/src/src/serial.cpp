@@ -94,7 +94,7 @@ static void interrupt_handler(const struct device *dev, void *user_data)
 	}
 }
 
-void serial_Init()
+void serial_init()
 {
 	int ret;
 

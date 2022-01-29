@@ -77,21 +77,12 @@ void io_Thread()
     }
 }
 
-void io_Init()
+void io_init()
 {
     pinMode(ARDUINO_INTERNAL_VDD_ENV_ENABLE, GPIO_OUTPUT);
     pinMode(ARDUINO_INTERNAL_I2C_PULLUP, GPIO_OUTPUT);
-    pinMode(LED_BUILTIN, GPIO_OUTPUT);
-    pinMode(ARDUINO_LEDPWR, GPIO_OUTPUT);
-    pinMode(LEDR, GPIO_OUTPUT);
-    pinMode(LEDG, GPIO_OUTPUT);
-    pinMode(LEDB, GPIO_OUTPUT);
     digitalWrite(ARDUINO_INTERNAL_VDD_ENV_ENABLE, HIGH);
     digitalWrite(ARDUINO_INTERNAL_I2C_PULLUP, HIGH);
-    digitalWrite(ARDUINO_LEDPWR,HIGH);
-    digitalWrite(LEDR,HIGH);
-    digitalWrite(LEDG,HIGH);
-    digitalWrite(LEDB,HIGH);
 
     // Pins used to check timing
     pinMode(ARDUINO_A0, GPIO_OUTPUT); // PWM 0

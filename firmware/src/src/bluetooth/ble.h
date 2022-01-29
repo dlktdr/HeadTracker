@@ -26,7 +26,7 @@ typedef enum {
 } btmodet;
 
 void bt_Thread();
-void bt_Init();
+void bt_init();
 void BTSetMode(btmodet mode);
 btmodet BTGetMode();
 uint16_t BTGetChannel(int chno);

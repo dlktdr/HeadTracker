@@ -76,7 +76,7 @@ uint8_t sbring_buffer[SBUS_RING_BUF]; // receive buffer
 struct ring_buf sbinringbuf;
 void SBUSIn_Process();
 
-void SBUS_Thread()
+void sbus_Thread()
 {
     while(1) {
         if(isSBUSInit) {
@@ -198,7 +198,7 @@ void SBUS_TX_Start()
     SBUS_UARTE->TASKS_STARTTX = 1;
 }
 
-void SBUS_Init()
+void sbus_init()
 {
     // SBUS Output Setup
     //   Sets the UARTE pin to unused P1.04
@@ -229,7 +229,7 @@ void SBUS_Init()
     // Setup as an input, when TX pin toggles state state causes the event to trigger and through
     // PPI toggle the output pin on next GPIOTE
 
-    // P1.04 is unused and not connected onthe BLE    
+    // P1.04 is unused and not connected onthe BLE
     NRF_GPIOTE->CONFIG[SBUSOUT0_GPIOTE] = (GPIOTE_CONFIG_MODE_Event << GPIOTE_CONFIG_MODE_Pos) |
             (GPIOTE_CONFIG_POLARITY_Toggle << GPIOTE_CONFIG_POLARITY_Pos) |
             (SBUSOUT_TPIN <<  GPIOTE_CONFIG_PSEL_Pos) |

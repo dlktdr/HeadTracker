@@ -8,7 +8,7 @@ extern bool wasButtonLongPressed();
 extern void pressButton();
 extern void longPressButton();
 extern void io_Thread();
-extern void io_Init();
+extern void io_init();
 
 extern volatile bool buttonpressed;
 extern struct arduino_gpio_t S_gpios;

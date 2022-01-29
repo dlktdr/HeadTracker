@@ -445,7 +445,6 @@ void calculate_Thread()
 
 void sensor_Thread()
 {
-    k_msleep(1000);
     while(1) {
         k_usleep(SENSOR_PERIOD);
 

@@ -25,6 +25,7 @@
 #include "nano33ble.h"
 #include "dataparser.h"
 #include "ble.h"
+#include "Led/led.h"
 
 // Globals
 volatile bool bleconnected=false;
@@ -41,7 +42,7 @@ struct bt_uuid_16 btbutton = BT_UUID_INIT_16(0xAFF2);
 // Switching modes, don't execute
 volatile bool switching = false;
 
-void bt_Init()
+void bt_init()
 {
     int err = bt_enable(NULL);
 	if (err) {
@@ -76,9 +77,9 @@ void bt_Thread()
         }
 
         if(bleconnected)
-            digitalWrite(LEDB,LOW);
+            setLEDFlag(LED_BTCONNECTED);
         else
-            digitalWrite(LEDB,HIGH);
+            clearLEDFlag(LED_BTCONNECTED);
     }
 }
 

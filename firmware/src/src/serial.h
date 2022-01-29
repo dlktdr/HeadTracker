@@ -4,7 +4,7 @@
 #define ARDUINOJSON_USE_DOUBLE 0
 #include <include/arduinojsonwrp.h>
 
-void serial_Init();
+void serial_init();
 void serial_Thread();
 
 // ONLY use these serial write methods, they are buffered & thread safe

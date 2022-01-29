@@ -21,6 +21,6 @@
 
 void SBUS_TX_BuildData(uint16_t ch_[16]);
 void SBUS_TX_Start();
-void SBUS_Init();
-void SBUS_Thread();
+void sbus_init();
+void sbus_Thread();
 void SBUSIn_SetInverted(bool sbusininv);

@@ -5,12 +5,7 @@
 #define FW_VERSION STRINGIFY(VERSION)
 #define FW_BOARD "NANO33BLE"
 
-// Button Down Time
-#ifdef FLIGHT_STICK
-#define BUTTON_HOLD_TIME 5000  // 5sec (Reset on hold for 5sec)
-#else
 #define BUTTON_HOLD_TIME 1
-#endif
 #define BUTTON_LONG_PRESS_TIME 1000  // 1 second, Enable/Disables Tilt/Roll/Pan
 
 // Thread Periods
@@ -20,6 +15,7 @@
 #define SERIAL_PERIOD 30        // (ms) Serial processing
 #define SENSOR_PERIOD 16666     // (us) 60hz Read Sensors
 #define CALCULATE_PERIOD 6666   // (us) 150hz IMU calculations
+#define LED_PERIOD 20           // (ms) LED update period
 #define SBUS_PERIOD 20          // (ms) SBUS 50hz
 #define PWM_FREQUENCY 50        // (ms) PWM Period
 #define UIRESPONSIVE_TIME 10000 // (ms) 10Seconds without an ack data will stop;
@@ -60,6 +56,7 @@
 #define SENSOR_THREAD_PRIO PRIORITY_MED
 #define CALCULATE_THREAD_PRIO PRIORITY_HIGH
 #define SBUS_THREAD_PRIO PRIORITY_MED + 1
+#define LED_THREAD_PRIO PRIORITY_LOW
 
 // Perepherial Channels Used, Make sure no dupilcates here
 // and can't be used by Zephyr
