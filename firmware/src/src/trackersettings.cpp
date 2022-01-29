@@ -425,7 +425,7 @@ int TrackerSettings::buttonPin() const
 
 void TrackerSettings::setButtonPin(int value)
 {
-    if(value > 1 && value < 14) {
+    if(value > 1 && value < 13) {
         if(buttonpin > 0)
             pinMode(D_TO_32X_PIN(buttonpin),GPIO_INPUT); // Disable old button pin
         pinMode(D_TO_32X_PIN(value),INPUT_PULLUP);    // Button as Input
@@ -446,7 +446,7 @@ int TrackerSettings::ppmOutPin() const
 
 void TrackerSettings::setPpmOutPin(int value)
 {
-    if((value > 1 && value < 14) || value == -1)  {
+    if((value > 1 && value < 13) || value == -1)  {
        PpmOut_setPin(value);
        ppmoutpin = value;
     }
@@ -454,7 +454,7 @@ void TrackerSettings::setPpmOutPin(int value)
 
 void TrackerSettings::setPpmInPin(int value)
 {
-    if((value > 1 && value < 14) || value == -1)  {
+    if((value > 1 && value < 13) || value == -1)  {
         PpmIn_setPin(value);
         ppminpin = value;
     }
