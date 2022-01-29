@@ -555,7 +555,7 @@
                 <bool>false</bool>
                </property>
                <property name="currentIndex">
-                <number>0</number>
+                <number>2</number>
                </property>
                <widget class="QWidget" name="tabGeneral">
                 <attribute name="title">
@@ -770,11 +770,6 @@
                    <item>
                     <property name="text">
                      <string>D12</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>D13</string>
                     </property>
                    </item>
                   </widget>
@@ -1049,11 +1044,6 @@
                      <string>D12</string>
                     </property>
                    </item>
-                   <item>
-                    <property name="text">
-                     <string>D13</string>
-                    </property>
-                   </item>
                   </widget>
                  </item>
                  <item row="13" column="0" colspan="3">
@@ -1322,11 +1312,6 @@
                    <item>
                     <property name="text">
                      <string>D12</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>D13</string>
                     </property>
                    </item>
                   </widget>
