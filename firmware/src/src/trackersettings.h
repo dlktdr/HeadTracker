@@ -136,7 +136,7 @@ public:
     static constexpr int DEF_AUX_CH1 = -1;
     static constexpr int DEF_AUX_CH2 = -1;
     static constexpr int DEF_AUX_FUNC = 0;
-    static constexpr int MAX_DATA_VARS = 30;
+    static constexpr int MAX_DATA_VARS = 40;
 
     TrackerSettings();
 
