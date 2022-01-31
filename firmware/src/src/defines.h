@@ -5,8 +5,8 @@
 #define FW_VERSION STRINGIFY(VERSION)
 #define FW_BOARD "NANO33BLE"
 
-#define BUTTON_HOLD_TIME 1
-#define BUTTON_LONG_PRESS_TIME 1000  // 1 second, Enable/Disables Tilt/Roll/Pan
+#define BUTTON_HOLD_TIME 1 // How long should the button be held for a normal press (ms)
+#define BUTTON_LONG_PRESS_TIME 1000  // How long to hold button Enable/Disables Tilt/Roll/Pan (ms)
 
 // Thread Periods
 #define IO_PERIOD 50            // (ms) IO Period (button reading)

@@ -580,12 +580,14 @@ void BTRmtSendButtonPress(bool longpress)
     if(!buttonattr)
         return;
 
-    if(longpress)
+    if(longpress) {
         rstdata[0] = 'L';
-    else
+        serialWriteln("HT: Sending Long Button Press to Head Board");
+    }
+    else {
         rstdata[0] = 'R';
-
-    serialWriteln("HT: Sending Button Press to Head Board");
+        serialWriteln("HT: Sending Button Press to Head Board");
+    }
 
     write_params.handle = sys_le16_to_cpu(buttonhandle);
 

@@ -67,7 +67,7 @@ void io_Thread()
 
         // Just Released
         } else if(!buttonDown && lastButtonDown) {
-            if(pressedtime > BUTTON_LONG_PRESS_TIME && trkset.buttonPressMode()) {
+            if(pressedtime > BUTTON_LONG_PRESS_TIME) {
                 longPressButton();
             } else if (pressedtime > BUTTON_HOLD_TIME) {
                 pressButton();

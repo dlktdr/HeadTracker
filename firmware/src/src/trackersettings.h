@@ -103,7 +103,7 @@ public:
     static constexpr int DEF_BUTTON_IN = 2; // Chosen because it's beside ground
     static constexpr bool DEF_BUTTON_LONG_PRESS = false;
     static constexpr bool DEF_RESET_ON_TILT = false;
-    static constexpr float RESET_ON_TILT_TIME = 1.5; // 2.5 Seconds to complete a head tilt
+    static constexpr float RESET_ON_TILT_TIME = 1.5; // Seconds to complete a head tilt
     static constexpr int DEF_PPM_OUT = 10; // Random choice
     static constexpr int DEF_PPM_IN = -1;
     static constexpr int PPM_CENTER = 1500;

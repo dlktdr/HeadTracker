@@ -953,7 +953,17 @@ void MainWindow::liveDataChanged()
         ui->lblBTConnected->setText(tr("Not connected"));
     if(trkset.blueToothMode() == TrackerSettings::BTDISABLE)
         ui->lblBTConnected->setText("Disabled");
-
+    if(trkset.tiltRollPanEnabled()) {
+      ui->servoPan->setShowActualPosition(true);
+      ui->servoTilt->setShowActualPosition(true);
+      ui->servoRoll->setShowActualPosition(true);
+      ui->lblRange->setText(tr("Range"));
+    } else {
+      ui->servoPan->setShowActualPosition(false);
+      ui->servoTilt->setShowActualPosition(false);
+      ui->servoRoll->setShowActualPosition(false);
+      ui->lblRange->setText(tr("Range - Output Disabled"));
+    }
 }
 
 
@@ -1281,6 +1291,7 @@ void MainWindow::paramReceiveComplete()
     updateToUI();
     BLE33tabChanged(); // Request Data to be sent
     trkset.setDataItemSend("isCalibrated",true);
+    trkset.setDataItemSend("trpenabled",true);
 }
 
 void MainWindow::paramReceiveFailure(int)
