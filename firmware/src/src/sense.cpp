@@ -237,6 +237,7 @@ void calculate_Thread()
         panout_ui = MAX(MIN(panout_ui,trkset.Pan_max()),trkset.Pan_min()); // Limit Output
 
         // Reset on tilt
+        static bool doresetontilt=false;
         if(trkset.resetOnTiltMode()) {
             static bool tiltpeak=false;
             static float resettime = 0.0f;
@@ -254,7 +255,7 @@ void calculate_Thread()
                 else if(minmax == HITMIN) {
                     minmax = HITNONE;
                     tiltpeak = false;
-                    pressButton();
+                    doresetontilt = true;
                 }
 
             } else if (rollout_ui == trkset.Rll_min()) {
@@ -265,7 +266,7 @@ void calculate_Thread()
                 else if(minmax == HITMAX) {
                     minmax = HITNONE;
                     tiltpeak = false;
-                    pressButton();
+                    doresetontilt = true;
                 }
             }
             // If hit a max/min wait an amount of time and reset it
@@ -277,6 +278,17 @@ void calculate_Thread()
                     resettime = 0;
                 }
             }
+        }
+
+        // Do the actual reset after a delay
+        static float timetoreset=0;
+        if(doresetontilt) {
+            if(timetoreset > TrackerSettings::RESET_ON_TILT_AFTER) {
+                doresetontilt = false;
+                timetoreset = 0;
+                pressButton();
+            }
+            timetoreset += (float)CALCULATE_PERIOD / 1000000.0;
         }
 
         /* ************************************************************
