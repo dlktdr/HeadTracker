@@ -178,8 +178,22 @@ void calculate_Thread()
         k_mutex_unlock(&sensor_mutex);
 
         // Toggles output on and off if long pressed
-        if(wasButtonLongPressed())
+        bool butlngdwn = false;
+        if(wasButtonLongPressed()) {
             trpOutputEnabled = !trpOutputEnabled;
+            butlngdwn = true;
+        }
+
+        static bool btbtnlngupdated=false;
+        if(BTGetMode() == BTPARARMT) {
+            if(butlngdwn && btbtnlngupdated == false) {
+                BTRmtSendButtonPress(true);
+                btbtnlngupdated = true;
+            }
+            else if(btbtnlngupdated == true) {
+                btbtnlngupdated = false;
+            }
+        }
 
         // Zero button was pressed, adjust all values to zero
         bool butdnw = false;
@@ -195,7 +209,7 @@ void calculate_Thread()
         static bool btbtnupdated=false;
         if(BTGetMode() == BTPARARMT) {
             if(butdnw && btbtnupdated == false) {
-                BTRmtSendButtonPress();
+                BTRmtSendButtonPress(false);
                 btbtnupdated = true;
             }
             else if(btbtnupdated == true) {
@@ -389,20 +403,18 @@ void calculate_Thread()
 
         // 8) Set Tilt/Roll/Pan Channel Values
         // Only set these outputs if button press mode is set to off
-        if(trkset.buttonPressMode() == false ||
-           (trkset.buttonPressMode() == true && trpOutputEnabled == true)) {
-            int tltch = trkset.tiltCh();
-            int rllch = trkset.rollCh();
-            int panch = trkset.panCh();
-            if(tltch > 0)
-                channel_data[tltch - 1] = tiltout_ui; // Channel 1 = Index 0
-            if(rllch > 0)
-                channel_data[rllch - 1] = rollout_ui;
-            if(panch > 0)
-                channel_data[panch - 1] = panout_ui;
-        } else {
-            trpOutputEnabled = false;
-        }
+        if(trkset.buttonPressMode() == false)
+            trpOutputEnabled = true;
+
+        int tltch = trkset.tiltCh();
+        int rllch = trkset.rollCh();
+        int panch = trkset.panCh();
+        if(tltch > 0)
+            channel_data[tltch - 1] = trpOutputEnabled == true ? tiltout_ui : trkset.Tlt_cnt();
+        if(rllch > 0)
+            channel_data[rllch - 1] = trpOutputEnabled == true ? rollout_ui : trkset.Rll_cnt();
+        if(panch > 0)
+            channel_data[panch - 1] = trpOutputEnabled == true ? panout_ui : trkset.Pan_cnt();
 
         // 9) Set the PPM Outputs
         for(int i=0;i<PpmOut_getChnCount();i++) {

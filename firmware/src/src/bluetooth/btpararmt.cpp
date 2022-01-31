@@ -575,10 +575,15 @@ char rstdata[1] = {'R'};
 
 void btwrite_cb(bt_conn *conn, uint8_t err, bt_gatt_write_params *params){}
 
-void BTRmtSendButtonPress()
+void BTRmtSendButtonPress(bool longpress)
 {
     if(!buttonattr)
         return;
+
+    if(longpress)
+        rstdata[0] = 'L';
+    else
+        rstdata[0] = 'R';
 
     serialWriteln("HT: Sending Button Press to Head Board");
 

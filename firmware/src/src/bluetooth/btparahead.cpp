@@ -282,6 +282,9 @@ static ssize_t write_but(struct bt_conn *conn, const struct bt_gatt_attr *attr,
         if(ccenet == 'R') {
             serialWriteln("HT: Remote BT Button Pressed");
             pressButton();
+        } else if(ccenet == 'L') {
+            serialWriteln("HT: Remote BT Button Long Pressed");
+            longPressButton();
         }
     }
 	return len;

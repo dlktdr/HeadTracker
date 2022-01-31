@@ -10,5 +10,5 @@ void BTRmtExecute();
 void BTRmtSetChannel(int channel, const uint16_t value);
 uint16_t BTRmtGetChannel(int channel);
 const char * BTRmtGetAddress();
-void BTRmtSendButtonPress();
+void BTRmtSendButtonPress(bool longpress=false);
 int8_t BTRmtGetRSSI();
