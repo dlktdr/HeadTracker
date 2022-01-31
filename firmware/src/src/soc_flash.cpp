@@ -26,10 +26,6 @@
 
 #define FLASH_OFFSET FLASH_AREA_OFFSET(datapt)
 #define FLASH_PAGE_SIZE   4096 // Can grow up to 0x4000
-#define TEST_DATA_WORD_0  0x1122
-#define TEST_DATA_WORD_1  0xaabb
-#define TEST_DATA_WORD_2  0xabcd
-#define TEST_DATA_WORD_3  0x1234
 
 const char *get_flashSpace()
 {
