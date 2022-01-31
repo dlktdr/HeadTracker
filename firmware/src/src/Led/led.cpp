@@ -20,9 +20,9 @@ void led_init()
 
 void led_Thread()
 {
-    bool led_is_on;
-    int led_on_time;
-    int led_off_time;
+    bool led_is_on=false;
+    int led_on_time=0;
+    int led_off_time=0;
 
     uint32_t counter=0;
 	while (1) {
