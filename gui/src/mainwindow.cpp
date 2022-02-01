@@ -218,6 +218,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->actionChannel_Viewer,SIGNAL(triggered()),this,SLOT(showChannelViewerClicked()));
     connect(ui->actionOnline_Help, SIGNAL(triggered()),this, SLOT(openHelp()));
     connect(ui->actionPinout, SIGNAL(triggered()),this, SLOT(showPinView()));
+    connect(ui->actionEraseFlash, SIGNAL(triggered()),this, SLOT(eraseFlash()));
 
     // Tab Widget
     connect(ui->tabBLE,&QTabWidget::currentChanged,this,&MainWindow::BLE33tabChanged);
@@ -283,6 +284,7 @@ void MainWindow::serialConnect()
     ui->cmdDisconnect->setEnabled(true);
     ui->cmdConnect->setEnabled(false);
     ui->cmdChannelViewer->setEnabled(false);
+    ui->actionEraseFlash->setEnabled(true);
     addToLog(tr("Connected to ") + serialcon->portName());
     statusMessage(tr("Connected to ") + serialcon->portName());
 
@@ -333,6 +335,7 @@ void MainWindow::serialDisconnect()
     ui->servoPan->setShowActualPosition(false);
     ui->servoTilt->setShowActualPosition(false);
     ui->servoRoll->setShowActualPosition(false);
+    ui->actionEraseFlash->setEnabled(false);
 
     sending = false;
     currentboard = nullptr;
@@ -1095,6 +1098,24 @@ void MainWindow::requestParamsTimeout()
     foreach(BoardType *brd, boards) {
         brd->_requestParameters();
     }
+}
+
+/**
+ * @brief MainWindow::eraseFlash This function will erase all configuration and reset to default
+ */
+void MainWindow::eraseFlash()
+{
+  if(currentboard && currentboard->boardName() == "NANO33BLE") {
+    if(QMessageBox::question(this, tr("Set Defaults?"), tr("This will erase all settings to defaults\r\nAre you sure?")) == QMessageBox::Yes) {
+      currentboard->_erase();
+      currentboard->_reboot();
+      QTime dieTime= QTime::currentTime().addMSecs(RECONNECT_AFT_REBT);
+      while (QTime::currentTime() < dieTime)
+          QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+
+      serialConnect();
+    }
+  }
 }
 
 // Start the various calibration dialogs

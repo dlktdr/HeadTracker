@@ -555,7 +555,7 @@
                 <bool>false</bool>
                </property>
                <property name="currentIndex">
-                <number>2</number>
+                <number>0</number>
                </property>
                <widget class="QWidget" name="tabGeneral">
                 <attribute name="title">
@@ -3665,6 +3665,7 @@
     <addaction name="actionShow_Data"/>
     <addaction name="actionShow_Serial_Transmissions"/>
     <addaction name="actionChannel_Viewer"/>
+    <addaction name="actionEraseFlash"/>
    </widget>
    <widget class="QMenu" name="menu_Help">
     <property name="title">
@@ -3743,6 +3744,11 @@
   <action name="actionPinout">
    <property name="text">
     <string>Nano 33 BLE Pinout</string>
+   </property>
+  </action>
+  <action name="actionEraseFlash">
+   <property name="text">
+    <string>&amp;Restore Defaults</string>
    </property>
   </action>
  </widget>

@@ -30,6 +30,7 @@ public:
     void saveToRAM();
     void saveToNVM();
     void reboot() {}
+    void erase() {}
     void requestHardware();
     void requestParameters();
     void startCalibration();

@@ -111,7 +111,12 @@ void BoardNano33BLE::saveToNVM()
 
 void BoardNano33BLE::reboot()
 {
-    sendSerialJSON("Reboot");
+  sendSerialJSON("Reboot");
+}
+
+void BoardNano33BLE::erase()
+{
+  sendSerialJSON("Erase");
 }
 
 

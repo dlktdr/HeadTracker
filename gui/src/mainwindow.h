@@ -97,6 +97,7 @@ private slots:
     void requestTimeout();
     void saveToRAMTimeout();
     void requestParamsTimeout();
+    void eraseFlash();
     void updateFromUI();
     void updateToUI();
     void offOrientChanged(float,float,float);
