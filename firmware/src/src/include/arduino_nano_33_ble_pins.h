@@ -32,12 +32,12 @@
 #define ARDUINO_D12_MISO (32 * 1 + 8)                   /* P1.8 */
 #define ARDUINO_D13_SCK (32 * 0 + 13)                   /* P0.13 */
 
-#define ARDUINO_A0 (32 * 0 + 2)                         /* P0.2 */
+#define ARDUINO_A0 (32 * 0 + 4)                         /* P0.4 */
 #define ARDUINO_A1 (32 * 0 + 5)                         /* P0.5 */
 #define ARDUINO_A2 (32 * 0 + 30)                        /* P0.30 */
 #define ARDUINO_A3 (32 * 0 + 29)                        /* P0.29 */
 #define ARDUINO_A4_SDA (32 * 0 + 31)                    /* P0.31 */
-#define ARDUINO_A5_SCL (32 * 0 + 29)                     /* P0.29 */
+#define ARDUINO_A5_SCL (32 * 0 + 2)                     /* P0.2 */
 #define ARDUINO_A4 ARDUINO_A4_SDA
 #define ARDUINO_A5 ARDUINO_A5_SCL
 #define ARDUINO_A6 (32 * 0 + 28)                        /* P0.28 */
