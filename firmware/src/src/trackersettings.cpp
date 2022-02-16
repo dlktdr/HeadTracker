@@ -910,7 +910,8 @@ void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
     v = json["so22"]; if(!v.isNull()) magsioff[8] = v;
 
 // Calibrarion Values
-    v = json["gyrxoff"];
+// Disabled. Now done on boot
+/*    v = json["gyrxoff"];
     v1 =json["gyryoff"];
     v2 =json["gyrzoff"];
 
@@ -918,6 +919,7 @@ void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
     {
         setGyroOffset(v,v1,v2);
     }
+    */
 
 // Calibrarion Values
     v = json["accxoff"];
@@ -1053,7 +1055,6 @@ void TrackerSettings::setJSONSettings(DynamicJsonDocument &json)
 void TrackerSettings::saveToEEPROM()
 {
     char buffer[TX_RNGBUF_SIZE];
-    DynamicJsonDocument json(JSON_BUF_SIZE);
     setJSONSettings(json);
     int len = serializeJson(json,buffer,TX_RNGBUF_SIZE);
 
@@ -1069,7 +1070,6 @@ void TrackerSettings::saveToEEPROM()
 void TrackerSettings::loadFromEEPROM()
 {
     // Load Settings
-    DynamicJsonDocument json(JSON_BUF_SIZE);
     DeserializationError de;
     de = deserializeJson(json, get_flashSpace());
 

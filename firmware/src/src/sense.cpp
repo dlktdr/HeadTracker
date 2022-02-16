@@ -21,7 +21,6 @@
 #include "trackersettings.h"
 #include "sense.h"
 #include "nano33ble.h"
-#include "dataparser.h"
 #include "serial.h"
 #include "bluetooth/ble.h"
 #include "MadgwickAHRS/MadgwickAHRS.h"
@@ -49,6 +48,7 @@ static float accxoff=0, accyoff=0, acczoff=0;
 static float gyrxoff=0, gyryoff=0, gyrzoff=0;
 static float l_panout=0, l_tiltout=0, l_rollout=0;
 static bool trpOutputEnabled = false; // Default to disabled T/R/P output
+volatile bool gyro_calibrated = false;
 
 // Input Channel Data
 static uint16_t ppm_in_chans[16];
@@ -84,6 +84,8 @@ static float amag[3]={0,0,0};
 // Analog Filters
 SF1eFilter *anFilter[AN_CH_CNT];
 
+volatile bool senseTreadRun = false;
+
 int sense_Init()
 {
     if (!IMU.begin()) {
@@ -110,6 +112,11 @@ int sense_Init()
         SF1eFilterInit(anFilter[i]);
     }
 
+    setLEDFlag(LED_GYROCAL);
+
+    gyro_calibrated = false;
+    senseTreadRun = true;
+
     return 0;
 }
 
@@ -120,9 +127,17 @@ int sense_Init()
 void calculate_Thread()
 {
     while(1) {
-        k_usleep(CALCULATE_PERIOD);
+        rt_sleep_us(CALCULATE_PERIOD);
 
-        // Store current time to adjust sleep period for a consitent period
+        if(!senseTreadRun) {
+            continue;
+        }
+
+        if(!gyro_calibrated) {
+            continue;
+        }
+
+        // Store current time to adjust sleep period for a consistent period
         ustocalculate = micros();
 
         // Period Between Samples
@@ -513,8 +528,18 @@ void calculate_Thread()
 
 void sensor_Thread()
 {
+    // Gyro Calibration
+    float avg[3] = {0,0,0};
+    float lavg[3] = {0,0,0};
+    bool initrun = true;
+    int passcount = GYRO_STABLE_SAMPLES;
+
     while(1) {
-        k_usleep(SENSOR_PERIOD);
+        rt_sleep_us(SENSOR_PERIOD);
+
+        if(!senseTreadRun) {
+            continue;
+        }
 
         // Reset Center on Proximity, Don't need to update this often
         static int sensecount=0;
@@ -556,12 +581,6 @@ void sensor_Thread()
         float rotation[3];
         trkset.orientRotations(rotation);
 
-        // If not using any of the tilt roll or pan outputs
-        // Don't bother wasting time calculating the tilt/roll/pan outputs
-        // If ui connected, do it so you can still see the outputs.
-        //if(tltch < 0 && panch < 0 && rllch < 0 && uiconnected == false)
-        //    counter = -1;
-
         // Accelerometer
         if(IMU.accelerationAvailable()) {
             IMU.readRawAccel(raccx, raccy, raccz);
@@ -589,28 +608,68 @@ void sensor_Thread()
         if(IMU.gyroscopeAvailable()) {
             IMU.readRawGyro(rgyrx,rgyry,rgyrz);
             rgyrx *= -1.0; // Flip X to match other sensors
-            trkset.gyroOffset(gyrxoff,gyryoff,gyrzoff);
 
-            k_mutex_lock(&sensor_mutex, K_FOREVER);
+            if(!gyro_calibrated) {
+                if(initrun) { // Preload on first read
+                    initrun = false;
+                    avg[0] = rgyrx; avg[1] = rgyry; avg[2] = rgyrz;
+                    lavg[0] = rgyrx; lavg[1] = rgyry; lavg[2] = rgyrz;
+                } else {
+                    avg[0] = (avg[0] * GYRO_LP_BETA) + (rgyrx * (1.0-GYRO_LP_BETA));
+                    avg[1] = (avg[1] * GYRO_LP_BETA) + (rgyry * (1.0-GYRO_LP_BETA));
+                    avg[2] = (avg[2] * GYRO_LP_BETA) + (rgyrz * (1.0-GYRO_LP_BETA));
 
-            gyrx = rgyrx - gyrxoff;
-            gyry = rgyry - gyryoff;
-            gyrz = rgyrz - gyrzoff;
+                    // Calculate differential of signal
+                    float diff[3];
+                    for(int i=0; i < 3; i++) {
+                        diff[i] = fabs(avg[i] - lavg[i]) / (SENSOR_PERIOD/1000000.0);
+                        lavg[i] = avg[i];
+                    }
+                    // If rate of change low then increment the average
+                    if(diff[0] < GYRO_PASS_DIFF &&
+                       diff[1] < GYRO_PASS_DIFF &&
+                       diff[2] < GYRO_PASS_DIFF)
+                        passcount--;
+                    // Otherwise start over
+                    else {
+                        passcount = GYRO_STABLE_SAMPLES;
+                        initrun = true;
+                    }
 
-            // Apply Rotation
-            float tmpgyr[3] = {gyrx,gyry,gyrz};
-            rotate(tmpgyr,rotation);
-            gyrx = tmpgyr[0]; gyry = tmpgyr[1]; gyrz = tmpgyr[2];
+                    // If enough samples taken at low motion, Success
+                    if(passcount == 0) {
+                        trkset.setGyroOffset(avg[0],avg[1],avg[2]);
+                        clearLEDFlag(LED_GYROCAL);
+                        gyro_calibrated = true;
+                    }
+                }
+            } else {
 
-            k_mutex_unlock(&sensor_mutex);
+                trkset.gyroOffset(gyrxoff,gyryoff,gyrzoff);
+
+                k_mutex_lock(&sensor_mutex, K_FOREVER);
+
+                gyrx = rgyrx - gyrxoff;
+                gyry = rgyry - gyryoff;
+                gyrz = rgyrz - gyrzoff;
+
+                // Apply Rotation
+                float tmpgyr[3] = {gyrx,gyry,gyrz};
+                rotate(tmpgyr,rotation);
+                gyrx = tmpgyr[0]; gyry = tmpgyr[1]; gyrz = tmpgyr[2];
+
+                k_mutex_unlock(&sensor_mutex);
+            }
         }
 
         // Magnetometer
         if(IMU.magneticFieldAvailable()) {
             IMU.readRawMagnet(rmagx,rmagy,rmagz);
             // On first read set the min/max values to this reading
-            // Get Offsets and Apply them
+            // Get Offsets + Soft Iron Offesets
+            float magsioff[9];
             trkset.magOffset(magxoff,magyoff,magzoff);
+            trkset.magSiOffset(magsioff);
 
             k_mutex_lock(&sensor_mutex, K_FOREVER);
 
@@ -619,9 +678,6 @@ void sensor_Thread()
             magy = rmagy - magyoff;
             magz = rmagz - magzoff;
 
-            // Calibrate soft iron offsets
-            float magsioff[9];
-            trkset.magSiOffset(magsioff);
             magx = (magx * magsioff[0]) + (magy * magsioff[1]) + (magz * magsioff[2]);
             magy = (magx * magsioff[3]) + (magy * magsioff[4]) + (magz * magsioff[5]);
             magz = (magx * magsioff[6]) + (magy * magsioff[7]) + (magz * magsioff[8]);

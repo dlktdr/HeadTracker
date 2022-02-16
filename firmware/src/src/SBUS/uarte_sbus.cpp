@@ -67,7 +67,7 @@ uint8_t localTXBuffer[SBUS_FRAME_LEN]; // Local Buffer
 uint8_t localRXBuffer[SBUS_FRAME_LEN]; // Local Buffer
 
 volatile bool isTransmitting=false;
-volatile bool isSBUSInit=false;
+volatile bool sbusTreadRun=false;
 volatile bool sbusoutinv=false;
 volatile bool sbusininv=false;
 volatile bool sbusinsof=false; // Start of Frame
@@ -79,12 +79,15 @@ void SBUSIn_Process();
 void sbus_Thread()
 {
     while(1) {
-        if(isSBUSInit) {
-            sbusoutinv = !trkset.invertedSBUSOut();
-            SBUS_TX_Start();
-            SBUSIn_Process();
+        if(!sbusTreadRun){
+            rt_sleep_ms(50);
+            continue;
         }
-        k_usleep((1.0/(float)trkset.SBUSRate()) * 1.0e6);
+        rt_sleep_us((1.0/(float)trkset.SBUSRate()) * 1.0e6);
+
+        sbusoutinv = !trkset.invertedSBUSOut();
+        SBUS_TX_Start();
+        SBUSIn_Process();
     }
 }
 
@@ -127,7 +130,7 @@ void SBUSIn_Process()
 
 void SBUSIn_SetInverted(bool sbusininv)
 {
-    if(isSBUSInit) {
+    if(sbusTreadRun) {
         // Flip PPI Events to cause inversion
         NRF_PPI->CHENCLR = SBUSIN1_PPICH_MSK | SBUSIN2_PPICH_MSK;
         if(!sbusininv) {
@@ -205,7 +208,7 @@ void sbus_init()
     //   GPIOTE is set to use the TX Pin P1.03
     //   PPI Inverts or Copys P1.04 to P1.03 Depending on the SBUS Out Invert bool in TrackerSettings
 
-    isSBUSInit = false;
+    sbusTreadRun = false;
 
     // Bootloader leaves the UART connected.. disconnect it first.
     NRF_UART0->ENABLE = 0;
@@ -313,7 +316,7 @@ void sbus_init()
 
     // Enable UARTE1
     SBUS_UARTE->ENABLE = UARTE_ENABLE_ENABLE_Enabled << UARTE_ENABLE_ENABLE_Pos;
-    isSBUSInit = true;
+    sbusTreadRun = true;
 
     // Initiate a transfer
     SBUS_UARTE->TASKS_STARTTX = 1;

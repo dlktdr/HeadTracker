@@ -9,14 +9,12 @@
 #define BUTTON_LONG_PRESS_TIME 1000  // How long to hold button Enable/Disables Tilt/Roll/Pan (ms)
 
 // Thread Periods
-#define IO_PERIOD 50            // (ms) IO Period (button reading)
-#define DATA_PERIOD 90          // (ms) GUI update rate
+#define IO_PERIOD 25            // (ms) IO Period (button reading)
 #define BT_PERIOD 12500         // (us) Bluetooth update rate
 #define SERIAL_PERIOD 30        // (ms) Serial processing
+#define DATA_PERIOD 2           // Multiplier of Serial Period (Live Data Transmission Speed)
 #define SENSOR_PERIOD 16666     // (us) 60hz Read Sensors
 #define CALCULATE_PERIOD 6666   // (us) 150hz IMU calculations
-#define LED_PERIOD 20           // (ms) LED update period
-#define SBUS_PERIOD 20          // (ms) SBUS 50hz
 #define PWM_FREQUENCY 50        // (ms) PWM Period
 #define UIRESPONSIVE_TIME 10000 // (ms) 10Seconds without an ack data will stop;
 
@@ -56,7 +54,14 @@
 #define SENSOR_THREAD_PRIO PRIORITY_MED
 #define CALCULATE_THREAD_PRIO PRIORITY_HIGH
 #define SBUS_THREAD_PRIO PRIORITY_MED + 1
-#define LED_THREAD_PRIO PRIORITY_LOW
+
+// Threads initialized flags
+extern volatile bool ioThreadRun;
+extern volatile bool serialThreadRun;
+extern volatile bool btThreadRun;
+extern volatile bool senseTreadRun;
+extern volatile bool sbusTreadRun;
+extern volatile bool gyro_calibrated;
 
 // Perepherial Channels Used, Make sure no dupilcates here
 // and can't be used by Zephyr
@@ -96,9 +101,33 @@
 #define TX_RNGBUF_SIZE 1500
 #define RX_RNGBUF_SIZE 1500
 
+// Math Defines
 #define DEG_TO_RAD 0.017453295199
 #define RAD_TO_DEG 57.29577951308
 
+// Gyro Calibration Defines
+#define GYRO_STABLE_SAMPLES 100 // samples to average of not moving for a success gyro cal
+#define GYRO_PASS_DIFF 4.0 // Differential less than this deg/sec^2 considered stable
+#define GYRO_LP_BETA 0.9 // Gyro Sample Moving Average Beta (0.0-1
+
+// RTOS Options
+
+
+#if defined(RTOS_ZEPHYR)
 #define micros() k_cyc_to_us_floor32(k_cycle_get_32())
 #define micros64() k_cyc_to_us_floor64(k_uptime_get())
 #define millis() k_cyc_to_ms_floor32(k_cycle_get_32())
+#define rt_sleep_ms(x) k_msleep(x)
+#define rt_sleep_us(x) k_usleep(x)
+
+#elif defined(RTOS_FREERTOS)
+#error ("FREE RTOS NOT IMPLEMENTED")
+#define micros()
+#define micros64()
+#define millis()
+#define rt_sleep_s(x)
+#define rt_sleep_ms(x)
+#define rt_sleep_us(x)
+#else
+#error ("NO RTOS DECLARED")
+#endif

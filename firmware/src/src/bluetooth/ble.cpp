@@ -23,9 +23,7 @@
 #include "serial.h"
 #include "io.h"
 #include "nano33ble.h"
-#include "dataparser.h"
 #include "ble.h"
-#include "Led/led.h"
 
 // Globals
 volatile bool bleconnected=false;
@@ -40,7 +38,7 @@ struct bt_uuid_16 htoverridech = BT_UUID_INIT_16(0xAFF1);
 struct bt_uuid_16 btbutton = BT_UUID_INIT_16(0xAFF2);
 
 // Switching modes, don't execute
-volatile bool switching = false;
+volatile bool btThreadRun = false;
 
 void bt_init()
 {
@@ -53,14 +51,15 @@ void bt_init()
 	}
 
     serialWriteln("HT: Bluetooth initialized");
+    btThreadRun = true;
 }
 
 void bt_Thread()
 {
     while(1) {
-        k_usleep(BT_PERIOD);
+        rt_sleep_us(BT_PERIOD);
 
-        if(switching)
+        if(!btThreadRun)
             continue;
 
         switch(curmode) {
@@ -89,7 +88,7 @@ void BTSetMode(btmodet mode)
     if(mode == curmode)
         return;
 
-    switching = true;
+    btThreadRun = false;
 
     // Shut Down
     switch(curmode) {
@@ -124,7 +123,7 @@ void BTSetMode(btmodet mode)
         break;
     }
 
-    switching = false;
+    btThreadRun = true;
 
     curmode = mode;
 }

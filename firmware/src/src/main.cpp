@@ -12,9 +12,7 @@
 #include <usb/usb_device.h>
 #include <drivers/uart.h>
 #include "nano33ble.h"
-#include "include/arduino_nano_33_ble.h"
-
-struct arduino_gpio_t S_gpios;
+#include "io.h"
 
 #ifdef DISABLE_SLEEP_STATES
 
@@ -45,7 +43,7 @@ static int board_internal_sensors_init(const struct device *dev)
 {
 	ARG_UNUSED(dev);
 
-	arduino_gpio_init(&S_gpios);
+	io_init();
 
 	NRF_PWM_Type * PWM[] = {
 		NRF_PWM0, NRF_PWM1, NRF_PWM2, NRF_PWM3
@@ -58,8 +56,6 @@ static int board_internal_sensors_init(const struct device *dev)
 
 	return 0;
 }
-
-
 
 
 SYS_INIT(board_internal_sensors_init, PRE_KERNEL_1, 32);

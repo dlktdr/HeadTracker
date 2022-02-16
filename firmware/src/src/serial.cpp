@@ -27,14 +27,12 @@
 #include <zephyr.h>
 #include <power/reboot.h>
 #include <math.h>
-#include "dataparser.h"
 #include "serial.h"
-#include "defines.h"
 #include "ucrc16lib.h"
-#include "dataparser.h"
 #include "io.h"
 #include "log.h"
 #include "soc_flash.h"
+#include "trackersettings.h"
 
 // Wait for serial connection before starting..
 //#define WAITFOR_DTR
@@ -60,11 +58,15 @@ char jsonbuffer[JSON_BUF_SIZE];
 char *jsonbufptr = jsonbuffer;
 DynamicJsonDocument json(JSON_BUF_SIZE);
 
+// Mutex to protect Sense & Data Writes
+K_MUTEX_DEFINE(data_mutex);
+
 // Flag that serial has been initalized
-static bool serialStarted = false;
+volatile bool serialThreadRun = false;
 
 // Timers, Initially start timed out
 volatile int64_t uiResponsive = k_uptime_get();
+bool uiconnected = false;
 
 const struct device *dev;
 
@@ -120,7 +122,7 @@ void serial_init()
 			break;
 		} else {
 			/* Give CPU resources to low priority threads. */
-			k_sleep(K_MSEC(100));
+			rt_sleep_ms(100);
 		}
 	}
 
@@ -138,19 +140,19 @@ void serial_init()
 	/* Enable rx interrupts */
 	uart_irq_rx_enable(dev);
 
-    serialStarted = true;
+    serialThreadRun = true;
 }
 
 
 void serial_Thread()
 {
     uint8_t buffer[64];
+    static uint32_t datacounter=0;
 
     while(1) {
-        k_msleep(SERIAL_PERIOD);
+        rt_sleep_ms(SERIAL_PERIOD);
 
-        if(!serialStarted) {
-            ring_buf_reset(&ringbuf_tx);
+        if(!serialThreadRun) {
             continue;
         }
 
@@ -179,6 +181,29 @@ void serial_Thread()
         serialrx_Process();
 
         digitalWrite(LEDG,HIGH);
+
+        // Data output
+        if(datacounter++ >= DATA_PERIOD) {
+            datacounter = 0;
+            // Is the UI Still responsive?
+            int64_t curtime = k_uptime_get();
+
+            if(uiResponsive > curtime) {
+                uiconnected = true;
+
+                // If sense thread is writing, wait until complete
+                k_mutex_lock(&data_mutex, K_FOREVER);
+                json.clear();
+                trkset.setJSONData(json);
+                k_mutex_unlock(&data_mutex);
+
+                json["Cmd"] = "Data";
+                serialWriteJSON(json);
+
+            }  else {
+                uiconnected = false;
+            }
+        }
     }
 }
 

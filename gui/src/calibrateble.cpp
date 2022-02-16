@@ -9,7 +9,7 @@ CalibrateBLE::CalibrateBLE(TrackerSettings *ts, QWidget *parent) :
     ui->setupUi(this);
     step = 0;
 
-    connect(trkset,&TrackerSettings::rawGyroChanged,this,&CalibrateBLE::rawGyroChanged);    
+//    connect(trkset,&TrackerSettings::rawGyroChanged,this,&CalibrateBLE::rawGyroChanged);
 
     connect(ui->cmdNext,SIGNAL(clicked()),this,SLOT(nextClicked()));
     connect(ui->cmdPrevious,SIGNAL(clicked()),this,SLOT(prevClicked()));
@@ -26,31 +26,13 @@ CalibrateBLE::~CalibrateBLE()
     delete ui;
 }
 
-void CalibrateBLE::rawGyroChanged(float x, float y, float z)
-{
-    // Raw Values
-    ui->lblGyroX->setText(QString::number(x,'g',3));
-    ui->lblGyroY->setText(QString::number(y,'g',3));
-    ui->lblGyroZ->setText(QString::number(z,'g',3));
-
-    // Moving average
-    double a = MOVING_AVERAGE;
-    gyroff[0] = a*x + (gyroff[0]*(1-a));
-    gyroff[1] = a*y + (gyroff[1]*(1-a));
-    gyroff[2] = a*z + (gyroff[2]*(1-a));
-
-    // Display the values
-    ui->lblGyroXOff->setText(QString::number(gyroff[0],'g',2));
-    ui->lblGyroYOff->setText(QString::number(gyroff[1],'g',2));
-    ui->lblGyroZOff->setText(QString::number(gyroff[2],'g',2));
-}
 
 
 void CalibrateBLE::nextClicked()
 {
     switch (step) {
     // Gyrometer
-    case GYROCAL: {
+    /*case GYROCAL: {
         ui->stackedWidget->setCurrentIndex(1);
         ui->cmdPrevious->setText("Previous");
 
@@ -65,10 +47,10 @@ void CalibrateBLE::nextClicked()
         ui->cmdNext->setDisabled(true);
         ui->magcalwid->resetDataPoints();
         break;
-    }
+    }*/
     // Magnetometer
     case MAGCAL: {
-        ui->stackedWidget->setCurrentIndex(2);
+        ui->stackedWidget->setCurrentIndex(1);
         ui->cmdNext->setText("Save");
          step = ACCELCAL;
 
@@ -78,9 +60,9 @@ void CalibrateBLE::nextClicked()
             ui->cmdNext->setText("Next");
             trkset->setMagOffset(_hoo[0], _hoo[1], _hoo[2]);
             trkset->setSoftIronOffsets(_soo);
-            trkset->setGyroOffset(gyrsaveoff[0],gyrsaveoff[1],gyrsaveoff[2]);
+//            trkset->setGyroOffset(gyrsaveoff[0],gyrsaveoff[1],gyrsaveoff[2]);
             emit calibrationSave();
-            step = GYROCAL;
+            step = MAGCAL;
         //----------------------------------------
 
         break;
@@ -93,7 +75,7 @@ void CalibrateBLE::nextClicked()
         ui->cmdNext->setText("Next");
         trkset->setMagOffset(_hoo[0], _hoo[1], _hoo[2]);
         trkset->setSoftIronOffsets(_soo);
-        trkset->setGyroOffset(gyrsaveoff[0],gyrsaveoff[1],gyrsaveoff[2]);
+        //trkset->setGyroOffset(gyrsaveoff[0],gyrsaveoff[1],gyrsaveoff[2]);
         emit calibrationSave();
         step = 0;
         break;
@@ -105,18 +87,18 @@ void CalibrateBLE::prevClicked()
 {
     switch (step) {
     // Gyrometer - If clicked here close
-    case GYROCAL: {
+/*    case GYROCAL: {
         emit calibrationCancel();
         hide();
         break;
-    }
+    }*/
     // Magnetometer
     case MAGCAL: {
         ui->cmdPrevious->setText("Cancel");
         ui->cmdNext->setText("Next");
         ui->cmdNext->setDisabled(false);
         ui->stackedWidget->setCurrentIndex(0);
-        step = GYROCAL;
+        step = MAGCAL;
         break;
     }
     // Accelerometer

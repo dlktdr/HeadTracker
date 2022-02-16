@@ -66,14 +66,13 @@ LSM9DS1Class::~LSM9DS1Class()
 
 int LSM9DS1Class::begin()
 {
-    i2c_dev = device_get_binding("I2C_1");
+  i2c_dev = device_get_binding("I2C_1");
 	if (!i2c_dev) {
 		serialWrite("HT: Could not get device binding for I2C\r\n");
 		return 0;
 	}
 
     i2c_configure(i2c_dev, I2C_SPEED_SET(I2C_SPEED_FAST)|I2C_MODE_MASTER);
-
 
     storedAccelFS = false;
     storedGyroFS = false;
@@ -83,7 +82,7 @@ int LSM9DS1Class::begin()
     writeRegister(LSM9DS1_ADDRESS, LSM9DS1_CTRL_REG8, 0x05);
     writeRegister(LSM9DS1_ADDRESS_M, LSM9DS1_CTRL_REG2_M, 0x0c);
 
-    k_msleep(10);
+    rt_sleep_ms(10);
 
     if (readRegister(LSM9DS1_ADDRESS, LSM9DS1_WHO_AM_I) != 0x68) {
         end();
@@ -158,7 +157,6 @@ int LSM9DS1Class::readRawAccel(float& x, float& y, float& z)   // return raw unc
   z = scale * data[2];
   return 1;
 }
-
 
 int LSM9DS1Class::accelAvailable()
 {

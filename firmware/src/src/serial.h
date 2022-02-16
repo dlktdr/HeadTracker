@@ -3,6 +3,7 @@
 #include <string>
 #define ARDUINOJSON_USE_DOUBLE 0
 #include <include/arduinojsonwrp.h>
+#include "defines.h"
 
 void serial_init();
 void serial_Thread();
@@ -17,3 +18,6 @@ void serialWriteln(const char *data = "");
 void serialWriteJSON(DynamicJsonDocument &json);
 void serialWriteHex(const uint8_t *data, int len);
 //int serialWriteF(const char *c, ...);
+
+extern struct k_mutex data_mutex;
+extern DynamicJsonDocument json;
