@@ -73,7 +73,7 @@ LSM9DS1Class IMU;
 // Initial Orientation Data+Vars
 #define MADGINIT_ACCEL 0x01
 #define MADGINIT_MAG   0x02
-#define MADGSTART_SAMPLES 10
+
 #define MADGINIT_READY (MADGINIT_ACCEL|MADGINIT_MAG)
 static int madgreads=0;
 static uint8_t madgsensbits=0;
@@ -130,10 +130,6 @@ void calculate_Thread()
         rt_sleep_us(CALCULATE_PERIOD);
 
         if(!senseTreadRun) {
-            continue;
-        }
-
-        if(!gyro_calibrated) {
             continue;
         }
 
@@ -217,6 +213,7 @@ void calculate_Thread()
                 rolloffset = roll;
             panoffset = pan;
             tiltoffset = tilt;
+            reset_fusion();
             butdnw = true;
         }
 

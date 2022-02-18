@@ -110,6 +110,9 @@ extern volatile bool gyro_calibrated;
 #define GYRO_PASS_DIFF 4.0 // Differential less than this deg/sec^2 considered stable
 #define GYRO_LP_BETA 0.9 // Gyro Sample Moving Average Beta (0.0-1
 
+// Magnetometer, Initial Orientation, Samples to average
+#define MADGSTART_SAMPLES 15
+
 // RTOS Options
 
 
