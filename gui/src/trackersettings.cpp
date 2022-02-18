@@ -745,10 +745,28 @@ QMap<QString, bool> TrackerSettings::getDataItemsDiff()
     return diffs;
 }
 
-// Returns the differences between currently sending data items
-// and items which need to be sent/removed
+// Returns the currently sending data items
+
 QMap<QString, bool> TrackerSettings::getDataItems()
 {
-    return _realtimedata;
+  return _realtimedata;
+}
+
+QStringList TrackerSettings::allDataItems()
+{
+  QStringList rv;
+#define DV(DT, NAME, DIV, ROUND) rv.append(#NAME);
+    DATA_VARS
+#undef DV
+
+#define DA(DT, NAME, SIZE, DIV) \
+  for(int i=0; i < SIZE; i++) {\
+    rv.append(QString(#NAME "[%1]").arg(i));\
+  }
+    DATA_ARRAYS
+#undef DA
+
+  return rv;
+
 }
 

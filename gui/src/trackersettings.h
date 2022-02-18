@@ -16,34 +16,34 @@
 // Variables to be sent back to GUI if enabled
 // Datatype, Name, UpdateDivisor, RoundTo
 #define DATA_VARS\
-    DV(float,magx,      1,100)\
-    DV(float,magy,      1,100)\
-    DV(float,magz,      1,100)\
-    DV(float,gyrox,     1,100)\
-    DV(float,gyroy,     1,100)\
-    DV(float,gyroz,     1,100)\
-    DV(float,accx,      1,100)\
-    DV(float,accy,      1,100)\
-    DV(float,accz,      1,100)\
-    DV(float,off_magx,  5,100)\
-    DV(float,off_magy,  5,100)\
-    DV(float,off_magz,  5,100)\
-    DV(float,off_gyrox, 5,100)\
-    DV(float,off_gyroy, 5,100)\
-    DV(float,off_gyroz, 5,100)\
-    DV(float,off_accx,  5,100)\
-    DV(float,off_accy,  5,100)\
-    DV(float,off_accz,  5,100)\
-    DV(float,tilt,      5,100)\
-    DV(float,roll,      5,100)\
-    DV(float,pan,       5,100)\
-    DV(float,tiltoff,   1,100)\
-    DV(float,rolloff,   1,100)\
-    DV(float,panoff,    1,100)\
+    DV(float,magx,      1,1000)\
+    DV(float,magy,      1,1000)\
+    DV(float,magz,      1,1000)\
+    DV(float,gyrox,     1,1000)\
+    DV(float,gyroy,     1,1000)\
+    DV(float,gyroz,     1,1000)\
+    DV(float,accx,      1,1000)\
+    DV(float,accy,      1,1000)\
+    DV(float,accz,      1,1000)\
+    DV(float,off_magx,  5,1000)\
+    DV(float,off_magy,  5,1000)\
+    DV(float,off_magz,  5,1000)\
+    DV(float,off_gyrox, 5,1000)\
+    DV(float,off_gyroy, 5,1000)\
+    DV(float,off_gyroz, 5,1000)\
+    DV(float,off_accx,  5,1000)\
+    DV(float,off_accy,  5,1000)\
+    DV(float,off_accz,  5,1000)\
+    DV(float,tilt,      5,1000)\
+    DV(float,roll,      5,1000)\
+    DV(float,pan,       5,1000)\
+    DV(float,tiltoff,   1,1000)\
+    DV(float,rolloff,   1,1000)\
+    DV(float,panoff,    1,1000)\
     DV(uint16_t,tiltout,1,-1)\
     DV(uint16_t,rollout,1,-1)\
     DV(uint16_t,panout, 1,-1)\
-    DV(bool,isCalibrated,5,-1)\
+    DV(bool,isCalibrated,2,-1)\
     DV(bool,btcon,      10,-1)\
     DV(bool,isSense,      10,-1)\
     DV(bool,trpenabled,  10,-1)\
@@ -61,7 +61,7 @@
 // Arrays to be sent back to GUI if enabled
 #define DATA_ARRAYS\
     DA(u16, chout, 16, 1)\
-    DA(u16, btch, BT_CHANNELS, 1)\
+    DA(u16, btch, 8, 1)\
     DA(u16, ppmch, 16, 1)\
     DA(u16, sbusch, 16, 1)\
     DA(flt, quat,4, 1)\
@@ -356,7 +356,8 @@ public:
     QMap<QString, bool> getDataItemsDiff();
     void setDataItemsMatched() {_devicerealtimedata = _realtimedata;}
     // Gets all currently sending data items
-    QMap<QString, bool> getDataItems();
+    QMap<QString, bool> getDataItems();    
+    QStringList allDataItems();
 
 signals:
     void rawGyroChanged(float x, float y, float z);
