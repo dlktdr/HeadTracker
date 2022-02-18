@@ -36,6 +36,8 @@ static void disconnected(struct bt_conn *conn, uint8_t reason);
 static void connected(struct bt_conn *conn, uint8_t err);
 static ssize_t write_ct(struct bt_conn *conn, const struct bt_gatt_attr *attr, const void *buf, uint16_t len, uint16_t offset, uint8_t flags);
 static ssize_t read_ct(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf, uint16_t len, uint16_t offset);
+static ssize_t write_json(struct bt_conn *conn, const struct bt_gatt_attr *attr, const void *buf, uint16_t len, uint16_t offset, uint8_t flags);
+static ssize_t read_json(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf, uint16_t len, uint16_t offset);
 static ssize_t write_but(struct bt_conn *conn, const struct bt_gatt_attr *attr, const void *buf, uint16_t len, uint16_t offset, uint8_t flags);
 static ssize_t read_over(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf, uint16_t len, uint16_t offset);
 static void ct_ccc_cfg_changed_frsky(const struct bt_gatt_attr *attr, uint16_t value);
@@ -52,6 +54,11 @@ static uint8_t ct[40];
 static uint8_t overdata[2];
 static char _address[18] = "00:00:00:00:00:00";
 uint16_t ovridech = 0xFFFF;
+
+// JSON Ring Buffer Reader
+DynamicJsonDocument blejson(JSON_BUF_SIZE);
+char blejsonbuffer[JSON_BUF_SIZE] = "";
+char *blejsonbufptr = blejsonbuffer;
 
 // Service UUID
 static struct bt_uuid_128 btparaserv = BT_UUID_INIT_128(
@@ -81,6 +88,12 @@ BT_GATT_SERVICE_DEFINE(bt_srv,
     BT_GATT_CHARACTERISTIC(&btbutton.uuid,
                            BT_GATT_CHRC_WRITE,
                            BT_GATT_PERM_READ | BT_GATT_PERM_WRITE, NULL, write_but, NULL),
+
+    // Remote Button Press Characteristic, Indicate ATTRIBUTE 8
+    BT_GATT_CHARACTERISTIC(&jsonuuid.uuid,
+                           BT_GATT_CHRC_READ | BT_GATT_CHRC_WRITE,
+                           BT_GATT_PERM_READ | BT_GATT_PERM_WRITE, read_json, write_json, NULL),
+
     );
 
 static const struct bt_data ad[] = {
@@ -110,7 +123,6 @@ struct bt_le_conn_param *conparms = BT_LE_CONN_PARAM(BT_MIN_CONN_INTER_PERIF,
 static struct bt_conn_cb conn_callbacks = {
 	.connected = connected,
 	.disconnected = disconnected,
-//    .security_changed = security_changed,
 };
 
 bt_addr_le_t addrarry[CONFIG_BT_ID_MAX];
@@ -260,6 +272,72 @@ static ssize_t write_ct(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 
 	return len;
 }
+
+
+
+
+
+static ssize_t read_json(struct bt_conn *conn, const struct bt_gatt_attr *attr,
+		       void *buf, uint16_t len, uint16_t offset)
+{
+    serialWriteln("JSON Read");
+    JsonVariant v,v1,v2;
+	char *value = (char*)attr->user_data;
+
+
+	return bt_gatt_attr_read(conn, attr, buf, len, offset, value,
+				 sizeof(ct));
+}
+
+
+
+static ssize_t write_json(struct bt_conn *conn, const struct bt_gatt_attr *attr,
+			const void *buf, uint16_t len, uint16_t offset,
+			uint8_t flags)
+{
+    char sc=0;
+
+    serialWrite("BLE:");
+    serialWrite((char*)buf, len);
+    serialWriteln();
+
+    for(int i=0; i < len; i++) {
+        sc = *((char*)buf + i);
+        // Start Of Text Character, clear buffer
+        if(sc == 0x02) {
+            // Reset Buffer
+            blejsonbufptr = blejsonbuffer + 1;
+            blejsonbuffer[0] = 0x02; // Save SOT
+
+        // End of Text Characher, parse JSON data
+        } else if (sc == 0x03) {
+            // Make sure it's a complete frame, SOT at beginning
+            if(blejsonbuffer[0] == 0x02) {
+                *blejsonbufptr = 0; // Null terminate
+                serialWrite("BLE Data RX:");
+                serialWrite(blejsonbuffer);
+                serialWriteln();
+                JSON_Process(blejsonbuffer+1);
+            }
+            // Reset Buffer
+            blejsonbufptr = blejsonbuffer;
+            blejsonbuffer[0] = 0;
+        } else {
+            // Check how much free data is in the buffer
+            if(blejsonbufptr >= blejsonbuffer + sizeof(blejsonbuffer) - 3) {
+                serialWriteln("BLE: Error JSON data too long, overflow");
+                blejsonbufptr = blejsonbuffer; // Reset Buffer
+                blejsonbuffer[0] = 0;
+            // Add data to buffer
+            } else {
+                *(blejsonbufptr++) = sc;
+            }
+        }
+    }
+
+	return len;
+}
+
 
 static ssize_t read_over(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 		       void *buf, uint16_t len, uint16_t offset)

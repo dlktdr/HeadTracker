@@ -36,6 +36,7 @@ struct bt_uuid_16 frskyserv = BT_UUID_INIT_16(0xFFF0);
 struct bt_uuid_16 frskychar = BT_UUID_INIT_16(0xFFF6);
 struct bt_uuid_16 htoverridech = BT_UUID_INIT_16(0xAFF1);
 struct bt_uuid_16 btbutton = BT_UUID_INIT_16(0xAFF2);
+struct bt_uuid_16 jsonuuid = BT_UUID_INIT_16(0xAFF3);
 
 // Switching modes, don't execute
 volatile bool btThreadRun = false;

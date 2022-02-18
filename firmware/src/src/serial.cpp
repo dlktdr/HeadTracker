@@ -37,7 +37,6 @@
 // Wait for serial connection before starting..
 //#define WAITFOR_DTR
 
-void JSON_Process();
 void serialrx_Process();
 char* getJSONBuffer();
 void parseData(DynamicJsonDocument &json);
@@ -219,7 +218,7 @@ void serialrx_Process()
 
         } else if (sc == 0x03) { // End of Text Characher, parse JSON data
             *jsonbufptr = 0; // Null terminate
-            JSON_Process();
+            JSON_Process(jsonbuffer);
             jsonbufptr = jsonbuffer; // Reset Buffer
         }
         else {
@@ -236,21 +235,21 @@ void serialrx_Process()
     }
 }
 
-void JSON_Process()
+void JSON_Process(char *jsonbuf)
 {
     // CRC Check Data
-    int len = strlen(jsonbuffer);
+    int len = strlen(jsonbuf);
     if(len > 2) {
-        uint16_t calccrc = escapeCRC(uCRC16Lib::calculate(jsonbuffer,len-sizeof(uint16_t)));
-        if(calccrc != *(uint16_t*)(jsonbuffer+len-sizeof(uint16_t))) {
+        uint16_t calccrc = escapeCRC(uCRC16Lib::calculate(jsonbuf,len-sizeof(uint16_t)));
+        if(calccrc != *(uint16_t*)(jsonbuf+len-sizeof(uint16_t))) {
             serialWrite("\x15\r\n"); // Not-Acknowledged
             return;
         } else {
             serialWrite("\x06\r\n"); // Acknowledged
         }
         // Remove CRC from end of buffer
-        jsonbuffer[len-sizeof(uint16_t)] = 0;
-        DeserializationError de = deserializeJson(json, jsonbuffer);
+        jsonbuf[len-sizeof(uint16_t)] = 0;
+        DeserializationError de = deserializeJson(json, jsonbuf);
         if(de) {
             if(de == DeserializationError::IncompleteInput)
                 serialWrite("HT: DeserializeJson() Failed - Incomplete Input\r\n");

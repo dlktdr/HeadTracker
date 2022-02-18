@@ -19,5 +19,7 @@ void serialWriteJSON(DynamicJsonDocument &json);
 void serialWriteHex(const uint8_t *data, int len);
 //int serialWriteF(const char *c, ...);
 
+void JSON_Process(char *jsonbuf);
+
 extern struct k_mutex data_mutex;
 extern DynamicJsonDocument json;

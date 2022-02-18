@@ -16,7 +16,7 @@ extern struct bt_uuid_16 frskyserv;
 extern struct bt_uuid_16 frskychar;
 extern struct bt_uuid_16 htoverridech;
 extern struct bt_uuid_16 btbutton;
-
+extern struct bt_uuid_16 jsonuuid;
 
 typedef enum {
     BTDISABLE=0,
