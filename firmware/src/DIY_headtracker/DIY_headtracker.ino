@@ -4,7 +4,7 @@
 //
 // Other contributors to this code:
 //  Mark Mansur (Mangus on rcgroups)
-//  
+//
 // Version history:
 // - 0.01 - 0.08 - Dennis Frie - preliminary releases
 // - 1.01 - April 2013 - Mark Mansur - code clean-up and refactoring, comments
@@ -14,6 +14,7 @@
 //-----------------------------------------------------------------------------
 
 #include <Wire.h>
+#include <PinChangeInt.h>
 #include "config.h"
 #include "functions.h"
 #include "sensors.h"
@@ -48,7 +49,7 @@ uint16_t escapeCRC(uint16_t crc);
 //
 int frameNumber = 0;		    // Frame count since last debug serial output
 
-char serial_data[SERIAL_BUFFER_SIZE+1];          // Array for serial-data 
+char serial_data[SERIAL_BUFFER_SIZE+1];          // Array for serial-data
 unsigned char serial_index = 0; // How many bytes have been received?
 bool string_started = false;        // Only saves data if string starts with right byte
 unsigned char channel_mapping[13];
@@ -72,7 +73,7 @@ uint16_t crc_val = 0;
 //
 extern unsigned char PpmIn_PpmOut[13];
 extern char read_sensors;
-extern char resetValues;   
+extern char resetValues;
 extern char tiltInverse;
 extern char rollInverse;
 extern char panInverse;
@@ -83,9 +84,9 @@ extern float tiltRollBeta;
 extern float panBeta;
 extern float gyroWeightTiltRoll;
 extern float GyroWeightPan;
-extern float tiltStart;        
-extern float panStart;                
-extern float rollStart; 
+extern float tiltStart;
+extern float panStart;
+extern float rollStart;
 extern int servoPanCenter;
 extern int servoTiltCenter;
 extern int servoRollCenter;
@@ -96,7 +97,7 @@ extern int tiltMinPulse;
 extern int rollMaxPulse;
 extern int rollMinPulse;
 extern float panFactor;
-extern float tiltFactor;  
+extern float tiltFactor;
 extern float rollFactor;
 extern unsigned char servoReverseMask;
 extern unsigned char htChannels[];
@@ -106,7 +107,7 @@ extern bool graphRaw;
 extern int I2CPresent;
 extern uint8_t sys, gyro, accel, mag;
 
-// End settings   
+// End settings
 
 //--------------------------------------------------------------------------------------
 // Func: setup
@@ -119,28 +120,34 @@ void setup()
 
     pinMode(9,OUTPUT);
     digitalWrite(2,HIGH);
-    digitalWrite(3,HIGH);  
-  
+    digitalWrite(3,HIGH);
+
     // Set all other pins to input, for safety.
     pinMode(0,INPUT);
     pinMode(1,INPUT);
     pinMode(2,INPUT);
     pinMode(3,INPUT);
     pinMode(6,INPUT);
-    pinMode(7,INPUT);  
-    pinMode(8,INPUT);    
+    pinMode(7,INPUT);
+    pinMode(8,INPUT);
+
+    // Add interrupts to pin 2
+    pinMode(2, INPUT); digitalWrite(2, HIGH);
+    pinMode(3, INPUT); digitalWrite(3, HIGH);
+    PCintPort::attachInterrupt(2, &rising, RISING);
+    PCintPort::attachInterrupt(3, &rising, RISING);
 
     // Set button pin to input:
     pinMode(BUTTON_INPUT,INPUT);
-  
-    // Set internal pull-up resistor. 
+
+    // Set internal pull-up resistor.
     digitalWrite(BUTTON_INPUT,HIGH);
-  
+
     digitalWrite(0,LOW); // pull-down resistor
     digitalWrite(1,LOW);
     digitalWrite(2,HIGH);
-    digitalWrite(3,HIGH);  
-  
+    digitalWrite(3,HIGH);
+
     pinMode(ARDUINO_LED,OUTPUT);    // Arduino LED
     digitalWrite(ARDUINO_LED, HIGH);
 
@@ -156,7 +163,7 @@ void setup()
 
     BEEP_OFF();
 
-    InitPWMInterrupt();         // Start PWM interrupt  
+    InitPWMInterrupt();         // Start PWM interrupt
     Wire.begin();               // Start I2C
     delay(200);                 // Short delay before I2C check
     CheckI2CPresent();
@@ -166,16 +173,16 @@ void setup()
     {
 
         Serial.println("New board - saving default values!");
-    
+
         InitSensors();
         SaveSettings();
         }
- 
+
     GetSettings();                // Get settings saved in EEPROM
-    InitSensors();                // Initialize I2C sensors    
+    InitSensors();                // Initialize I2C sensors
     ResetCenter();
     RemapAxes();
-    InitTimerInterrupt();         // Start timer interrupt (for sensors)  
+    InitTimerInterrupt();         // Start timer interrupt (for sensors)
 }
 
 //--------------------------------------------------------------------------------------
@@ -183,17 +190,17 @@ void setup()
 // Desc: Called by the Arduino framework once per frame. Represents main program loop.
 //--------------------------------------------------------------------------------------
 void loop()
-{  
+{
     // Check input button for reset/pause request
     char buttonPressed = (digitalRead(BUTTON_INPUT) == 0);
 
     if ( buttonPressed && lastButtonState == 0)
     {
-        resetValues = 1; 
+        resetValues = 1;
         buttonDownTime = 0;
         lastButtonState = 1;
     }
-    
+
     if ( buttonPressed )
     {
         if ( !pauseToggled && (buttonDownTime > BUTTON_HOLD_PAUSE_THRESH) )
@@ -209,13 +216,13 @@ void loop()
         pauseToggled = 0;
         lastButtonState = 0;
     }
-    
-    // All this is used for communication with GUI 
+
+    // All this is used for communication with GUI
     //
     if (Serial.available())
     {
         char serialchar = Serial.read();
-        
+
         // If no data received, wipe the buffer clean
         if(serial_index == 0)
           memset(serial_data,0,SERIAL_BUFFER_SIZE);
@@ -233,25 +240,25 @@ void loop()
               string_started = false;
               return;
             }
-              
+
             serial_data[serial_index++] = serialchar;
-                      
+
             // Configure headtracker
             if (IsCommand("HE"))
             {
               serial_data[serial_index+1] = 0;
                 // HT parameters are passed in from the PC in this order:
                 //
-                // 0 tiltRollBeta      
-                // 1 panBeta       
-                // 2 gyroWeightTiltRoll    
-                // 3 GyroWeightPan 
-                // 4 tiltFactor        
-                // 5 panFactor          
+                // 0 tiltRollBeta
+                // 1 panBeta
+                // 2 gyroWeightTiltRoll
+                // 3 GyroWeightPan
+                // 4 tiltFactor
+                // 5 panFactor
                 // 6 rollFactor
                 // 7 servoReverseMask
                 // 8 servoPanCenter
-                // 9 panMinPulse 
+                // 9 panMinPulse
                 // 10 panMaxPulse
                 // 11 servoTiltCenter
                 // 12 tiltMinPulse
@@ -259,17 +266,17 @@ void loop()
                 // 14 servoRollCenter
                 // 15 rollMinPulse
                 // 16 rollMaxPulse
-                // 17 htChannels[0]  // pan            
-                // 18 htChannels[1]  // tilt 
-                // 19 htChannels[2]  // roll         
+                // 17 htChannels[0]  // pan
+                // 18 htChannels[1]  // tilt
+                // 19 htChannels[2]  // roll
                 // 20 axis
-             
+
                 // Parameters from the PC client need to be scaled to match our local
                 // expectations
-               
+
                 // Do a CRC Check on the data to insure it's valid data
                 if(serial_index > 4)  {
-                  crc_calc = escapeCRC(uCRC16Lib::calculate(serial_data, serial_index-4)); // Calculate the CRC of the data                  
+                  crc_calc = escapeCRC(uCRC16Lib::calculate(serial_data, serial_index-4)); // Calculate the CRC of the data
                   memcpy(&crc_val,serial_data + serial_index - 4, sizeof(uint16_t));
                 }
                 else {
@@ -281,10 +288,10 @@ void loop()
                     serial_index = 0;
                     string_started = false;
                     return;
-                } else {                    
+                } else {
                     Serial.println("$CRCOK\r\n");
                 }
-           
+
                 int valuesReceived[22] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
                 int comma_index = 0;
 
@@ -299,7 +306,7 @@ void loop()
                     {
                         valuesReceived[comma_index] = valuesReceived[comma_index] * 10 + (serial_data[k] - '0');
                     }
-             
+
 #if (DEBUG)
                     Serial.print(serial_data[k]);
 #endif
@@ -309,33 +316,33 @@ void loop()
                 Serial.println();
                 for (unsigned char k = 0; k < comma_index+1; k++)
                 {
-                    Serial.print(valuesReceived[k]); 
-                    Serial.print(",");           
+                    Serial.print(valuesReceived[k]);
+                    Serial.print(",");
                 }
                 Serial.println();
 #endif
 
-                tiltRollBeta  = (float)valuesReceived[0] / 100;  
+                tiltRollBeta  = (float)valuesReceived[0] / 100;
                 panBeta       = (float)valuesReceived[1] / 100;
                 gyroWeightTiltRoll = (float)valuesReceived[2] / 100;
                 GyroWeightPan = (float)valuesReceived[3] / 100;
-                tiltFactor    = (float)valuesReceived[4] / 10;         
-                panFactor     = (float)valuesReceived[5] / 10;          
-                rollFactor    = (float)valuesReceived[6] / 10;   
+                tiltFactor    = (float)valuesReceived[4] / 10;
+                panFactor     = (float)valuesReceived[5] / 10;
+                rollFactor    = (float)valuesReceived[6] / 10;
 
                 servoReverseMask = (unsigned char)valuesReceived[7];
 
                 tiltInverse = 1;
                 rollInverse = 1;
-                panInverse = 1;           
-                
+                panInverse = 1;
+
                 if ((servoReverseMask & HT_PAN_REVERSE_BIT) != 0)
                 {
                     panInverse = -1;
                 }
                 if ((servoReverseMask & HT_ROLL_REVERSE_BIT) != 0)
                 {
-                    rollInverse = -1; 
+                    rollInverse = -1;
                 }
                 if ((servoReverseMask & HT_TILT_REVERSE_BIT) != 0)
                 {
@@ -344,24 +351,24 @@ void loop()
                 servoPanCenter = (valuesReceived[8] - 400) * 2 ;
                 panMinPulse = (valuesReceived[9] - 400) * 2;
                 panMaxPulse = (valuesReceived[10] - 400) * 2;
-         
+
                 servoTiltCenter = (valuesReceived[11] - 400) * 2;
                 tiltMinPulse = (valuesReceived[12] - 400) * 2;
                 tiltMaxPulse = (valuesReceived[13] - 400) * 2;
 
                 servoRollCenter = (valuesReceived[14] - 400) * 2;
                 rollMinPulse = (valuesReceived[15] - 400) * 2;
-                rollMaxPulse = (valuesReceived[16] - 400) * 2;   
-                    
-                htChannels[0] = valuesReceived[17];                   
-                htChannels[1] = valuesReceived[18];              
-                htChannels[2] = valuesReceived[19];            
+                rollMaxPulse = (valuesReceived[16] - 400) * 2;
 
-                axisRemap = valuesReceived[20];     
+                htChannels[0] = valuesReceived[17];
+                htChannels[1] = valuesReceived[18];
+                htChannels[2] = valuesReceived[19];
+
+                axisRemap = valuesReceived[20];
                 axisSign = valuesReceived[21];
 
                 // Update the BNO055 axis mapping
-                RemapAxes();                
+                RemapAxes();
 
                 // Auto Save to EEPROM
                 SaveSettings();
@@ -369,15 +376,15 @@ void loop()
                 serial_index = 0;
                 string_started = false;
             } // end configure headtracker
-          
+
             // Debug info
             else if (IsCommand("DEBUG"))
-            {  
+            {
                 DebugOutput();
                 serial_index = 0;
-                string_started = false; 
+                string_started = false;
             }
-            
+
             // Firmware version requested
             else if (IsCommand("VERS")) {
                 Serial.print("$VERS");
@@ -402,7 +409,7 @@ void loop()
                 serial_index = 0;
                 string_started = false;
             }
-            
+
             // Clear Offsets via Software
             else if (IsCommand("STO"))
             {
@@ -416,9 +423,9 @@ void loop()
             else if (IsCommand("CLR"))
             {
                 Serial.println("HT: Clearing Offsets");
-                tiltStart = 0;        
-                panStart = 0;                
-                rollStart = 0; 
+                tiltStart = 0;
+                panStart = 0;
+                rollStart = 0;
                 serial_index = 0;
                 string_started = false;
             }
@@ -427,7 +434,7 @@ void loop()
             else if (IsCommand("GRAW"))
             {
                 Serial.println("HT: Showing Raw Sensor Data");
-                graphRaw = 1;        
+                graphRaw = 1;
                 serial_index = 0;
                 string_started = false;
             }
@@ -436,11 +443,11 @@ void loop()
             else if (IsCommand("GOFF"))
             {
                 Serial.println("HT: Showing Offset Sensor Data");
-                graphRaw = 0;        
+                graphRaw = 0;
                 serial_index = 0;
                 string_started = false;
             }
-          
+
             // Stop any data stream commands (leave all aliases for compatibility
             else if (IsCommand("PLEN") ) {
                 outputMagAcc = 0;
@@ -450,26 +457,26 @@ void loop()
                 serial_index = 0;
                 string_started = false;
             }
-           
+
             // Start tracking data stream
             else if (IsCommand("PLST"))
-            {  
+            {
                 outputAcc = 0;
                 outputMagAcc = 0;
                 outputMag = 0;
                 outputTrack = 1;
                 serial_index = 0;
                 string_started = false;
-            }        
+            }
 
             // Save RAM settings to EEPROM
             else if (IsCommand("SAVE"))
-            {  
-                SaveSettings();     
+            {
+                SaveSettings();
                 serial_index = 0;
-                string_started = false; 
-            }          
-          
+                string_started = false;
+            }
+
             // Retrieve settings
             else if(IsCommand("GSET"))
             {
@@ -479,7 +486,7 @@ void loop()
                 SendSettings();
 
                 Serial.println("HT: Settings sent to GUI");
-                
+
                 serial_index = 0;
                 string_started = false;
             }
@@ -490,8 +497,8 @@ void loop()
     if (read_sensors == 1 && ht_paused == 0)
     {
         UpdateSensors();
-        FilterSensorData();    
-               
+        FilterSensorData();
+
         // Only output this data every X frames.
         if (frameNumber++ >= SERIAL_OUTPUT_FRAME_INTERVAL)
         {
@@ -499,16 +506,16 @@ void loop()
             {
                 trackerOutput();
             }
-            frameNumber = 0; 
+            frameNumber = 0;
         }
 
-        // Will first update read_sensors when everything is done.  
+        // Will first update read_sensors when everything is done.
         read_sensors = 0;
     }
 }
 
 //--------------------------------------------------------------------------------------
-// Check if current line ends with specified command 
+// Check if current line ends with specified command
 //--------------------------------------------------------------------------------------
 bool IsCommand(const char *command) {
     // Ensure we read enough characters
@@ -527,10 +534,10 @@ bool IsCommand(const char *command) {
 
 void SendSettings() {
   Serial.print(tiltRollBeta * 100);
-  Serial.print(",");   
+  Serial.print(",");
   Serial.print(panBeta * 100);
   Serial.print(",");
-  Serial.print(gyroWeightTiltRoll * 100);  
+  Serial.print(gyroWeightTiltRoll * 100);
   Serial.print(",");
   Serial.print(GyroWeightPan * 100);
   Serial.print(",");
@@ -568,7 +575,7 @@ void SendSettings() {
   Serial.print(",");
   Serial.print(axisRemap);
   Serial.print(",");
-  Serial.println(axisSign);  
+  Serial.println(axisSign);
 }
 
 //--------------------------------------------------------------------------------------
@@ -576,65 +583,65 @@ void SendSettings() {
 // Desc: Saves device settings to EEPROM for retrieval at boot-up.
 //--------------------------------------------------------------------------------------
 void SaveSettings()
-{  
+{
     EEPROM.write(1, (unsigned char)(tiltRollBeta * 100));
-    EEPROM.write(2, (unsigned char)(panBeta * 100));    
+    EEPROM.write(2, (unsigned char)(panBeta * 100));
     EEPROM.write(5, (unsigned char)servoReverseMask);
-    
+
     // 6 unused
-  
+
     EEPROM.write(7, (unsigned char)servoPanCenter);
-    EEPROM.write(8, (unsigned char)(servoPanCenter >> 8));  
-  
+    EEPROM.write(8, (unsigned char)(servoPanCenter >> 8));
+
     EEPROM.write(9, (unsigned char)(tiltFactor * 10));
-    EEPROM.write(10, (int)((tiltFactor * 10)) >> 8);  
+    EEPROM.write(10, (int)((tiltFactor * 10)) >> 8);
 
     EEPROM.write(11, (unsigned char) (panFactor * 10));
-    EEPROM.write(12, (int)((panFactor * 10)) >> 8);  
+    EEPROM.write(12, (int)((panFactor * 10)) >> 8);
 
     EEPROM.write(13, (unsigned char) (rollFactor * 10));
-    EEPROM.write(14, (int)((rollFactor * 10)) >> 8);  
+    EEPROM.write(14, (int)((rollFactor * 10)) >> 8);
 
     // 15 unused
 
     EEPROM.write(16, (unsigned char)servoTiltCenter);
-    EEPROM.write(17, (unsigned char)(servoTiltCenter >> 8));  
+    EEPROM.write(17, (unsigned char)(servoTiltCenter >> 8));
 
     EEPROM.write(18, (unsigned char)servoRollCenter);
-    EEPROM.write(19, (unsigned char)(servoRollCenter >> 8));  
+    EEPROM.write(19, (unsigned char)(servoRollCenter >> 8));
 
 
     EEPROM.write(20, (unsigned char)panMaxPulse);
-    EEPROM.write(21, (unsigned char)(panMaxPulse >> 8));  
-  
+    EEPROM.write(21, (unsigned char)(panMaxPulse >> 8));
+
     EEPROM.write(22, (unsigned char)panMinPulse);
-    EEPROM.write(23, (unsigned char)(panMinPulse >> 8));    
+    EEPROM.write(23, (unsigned char)(panMinPulse >> 8));
 
     EEPROM.write(24, (unsigned char)tiltMaxPulse);
-    EEPROM.write(25, (unsigned char)(tiltMaxPulse >> 8));    
+    EEPROM.write(25, (unsigned char)(tiltMaxPulse >> 8));
 
     EEPROM.write(26, (unsigned char)tiltMinPulse);
     EEPROM.write(27, (unsigned char)(tiltMinPulse >> 8));
 
     EEPROM.write(28, (unsigned char)rollMaxPulse);
-    EEPROM.write(29, (unsigned char)(rollMaxPulse >> 8));    
+    EEPROM.write(29, (unsigned char)(rollMaxPulse >> 8));
 
     EEPROM.write(30, (unsigned char)rollMinPulse);
-    EEPROM.write(31, (unsigned char)(rollMinPulse >> 8)); 
-  
+    EEPROM.write(31, (unsigned char)(rollMinPulse >> 8));
+
     EEPROM.write(32, (unsigned char)htChannels[0]);
     EEPROM.write(33, (unsigned char)htChannels[1]);
     EEPROM.write(34, (unsigned char)htChannels[2]);
-    
+
     EEPROM.write(35, (unsigned char)axisRemap);
     EEPROM.write(36, (unsigned char)axisSign);
-   
-    
+
+
     // Mark the memory to indicate that it has been
     // written. Used to determine if board is newly flashed
     // or not.
-  
-    EEPROM.write(0,EEPROM_MAGIC_NUMBER); 
+
+    EEPROM.write(0,EEPROM_MAGIC_NUMBER);
 
     Serial.println("HT: Settings saved to EEPROM!");
 }
@@ -644,10 +651,10 @@ void SaveSettings()
 // Desc: Retrieves device settings from EEPROM.
 //--------------------------------------------------------------------------------------
 void GetSettings()
-{  
+{
     tiltRollBeta    = (float)EEPROM.read(1) / 100;
     panBeta         = (float)EEPROM.read(2) / 100;
-  
+
     tiltInverse = 1;
     rollInverse = 1;
     panInverse = 1;
@@ -656,7 +663,7 @@ void GetSettings()
     if ( temp & HT_TILT_REVERSE_BIT )
     {
         tiltInverse = -1;
-    }  
+    }
     if ( temp & HT_ROLL_REVERSE_BIT )
     {
         rollInverse = -1;
@@ -671,25 +678,25 @@ void GetSettings()
     servoPanCenter  = EEPROM.read(7) + (EEPROM.read(8) << 8);
     tiltFactor      = (float)(EEPROM.read(9) + (EEPROM.read(10) << 8)) / 10;
     panFactor       = (float)(EEPROM.read(11) + (EEPROM.read(12) << 8)) / 10;
-    rollFactor       = (float)(EEPROM.read(13) + (EEPROM.read(14) << 8)) / 10;  
+    rollFactor       = (float)(EEPROM.read(13) + (EEPROM.read(14) << 8)) / 10;
 
     // 15 unused
 
     servoTiltCenter = EEPROM.read(16) + (EEPROM.read(17) << 8);
-    servoRollCenter = EEPROM.read(18) + (EEPROM.read(19) << 8);  
-  
-    panMaxPulse   = EEPROM.read(20) + (EEPROM.read(21) << 8);  
-    panMinPulse   = EEPROM.read(22) + (EEPROM.read(23) << 8);    
-  
-    tiltMaxPulse  = EEPROM.read(24) + (EEPROM.read(25) << 8);  
-    tiltMinPulse  = EEPROM.read(26) + (EEPROM.read(27) << 8);      
-  
-    rollMaxPulse  = EEPROM.read(28) + (EEPROM.read(29) << 8);  
-    rollMinPulse  = EEPROM.read(30) + (EEPROM.read(31) << 8);        
-  
-    htChannels[0] = EEPROM.read(32);  
-    htChannels[1] = EEPROM.read(33);  
-    htChannels[2] = EEPROM.read(34);    
+    servoRollCenter = EEPROM.read(18) + (EEPROM.read(19) << 8);
+
+    panMaxPulse   = EEPROM.read(20) + (EEPROM.read(21) << 8);
+    panMinPulse   = EEPROM.read(22) + (EEPROM.read(23) << 8);
+
+    tiltMaxPulse  = EEPROM.read(24) + (EEPROM.read(25) << 8);
+    tiltMinPulse  = EEPROM.read(26) + (EEPROM.read(27) << 8);
+
+    rollMaxPulse  = EEPROM.read(28) + (EEPROM.read(29) << 8);
+    rollMinPulse  = EEPROM.read(30) + (EEPROM.read(31) << 8);
+
+    htChannels[0] = EEPROM.read(32);
+    htChannels[1] = EEPROM.read(33);
+    htChannels[2] = EEPROM.read(34);
 
     axisRemap = EEPROM.read(35);
     axisSign = EEPROM.read(36);
@@ -705,40 +712,40 @@ void GetSettings()
 //--------------------------------------------------------------------------------------
 void DebugOutput()
 {
-    Serial.println();  
+    Serial.println();
     Serial.println();
     Serial.println();
     Serial.println("HT: ------ Debug info------");
 
     Serial.print("FW Version: ");
     Serial.println(FIRMWARE_VERSION_FLOAT, 2);
-    
+
     Serial.print("tiltRollBeta: ");
-    Serial.println(tiltRollBeta); 
+    Serial.println(tiltRollBeta);
 
     Serial.print("panBeta: ");
-    Serial.println(panBeta); 
- 
+    Serial.println(panBeta);
+
     Serial.print("servoPanCenter: ");
-    Serial.println(servoPanCenter); 
- 
+    Serial.println(servoPanCenter);
+
     Serial.print("servoTiltCenter: ");
-    Serial.println(servoTiltCenter); 
+    Serial.println(servoTiltCenter);
 
     Serial.print("servoRollCenter: ");
-    Serial.println(servoRollCenter); 
+    Serial.println(servoRollCenter);
 
     Serial.print("tiltFactor: ");
-    Serial.println(tiltFactor); 
+    Serial.println(tiltFactor);
 
     Serial.print("panFactor: ");
-    Serial.println(panFactor); 
+    Serial.println(panFactor);
 
     Serial.print("axisRemap: ");
-    Serial.println(axisRemap); 
+    Serial.println(axisRemap);
 
     Serial.print("axisSign: ");
-    Serial.println(axisSign); 
+    Serial.println(axisSign);
 
 }
 
@@ -755,3 +762,31 @@ uint16_t escapeCRC(uint16_t crc)
         crchigh ^= 0xFF; //?? why not..
     return (uint16_t)crclow | ((uint16_t)crchigh << 8);
 }
+
+volatile unsigned int ch1_value=0;
+volatile unsigned int ch2_value=0;
+volatile unsigned int pin2_hightime = 0;
+volatile unsigned int pin3_hightime = 0;
+uint8_t latest_interrupted_pin;
+
+void rising()
+{
+    latest_interrupted_pin=PCintPort::arduinoPin;
+    PCintPort::attachInterrupt(latest_interrupted_pin, &falling, FALLING);
+    if(latest_interrupted_pin == 2)
+        pin2_hightime = micros();
+    else
+        pin3_hightime = micros();
+}
+
+void falling()
+{
+    latest_interrupted_pin=PCintPort::arduinoPin;
+    PCintPort::attachInterrupt(latest_interrupted_pin, &rising, RISING);
+    if(latest_interrupted_pin == 2)
+        pin2_hightime = micros()-prev_time;
+    else
+        pin3_hightime = micros();
+    pwm_value = micros()-prev_time;
+}
+

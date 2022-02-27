@@ -1,7 +1,7 @@
 
 /*
  * Cliff Blackburn - Nov 20,2020 - Modified code for use with BMO055 + new GUI
- *                               
+ *
  */
 
 
@@ -26,13 +26,13 @@ extern long channel_value[];
 /* BNO055 */
 byte bno055_address = 0x28;
 
-Adafruit_BNO055 bno; 
+Adafruit_BNO055 bno;
 adafruit_bno055_offsets_t calibrationData;
-sensors_event_t event; 
+sensors_event_t event;
 
 // Local variables
 byte sensorBuffer[10];       // Buffer for bytes read from sensors
-char resetValues = 1;        // Used to reset headtracker/re-center. 
+char resetValues = 1;        // Used to reset headtracker/re-center.
 
 // Final angles for headtracker:
 float tiltAngle = 90;       // Tilt angle
@@ -93,6 +93,10 @@ sensor_t sensor;
 //
 // End settings
 
+// PWM Values
+extern volatile unsigned int ch1_value=0;
+extern volatile unsigned int ch2_value=0;
+
 // Function used to write to I2C:
 void WriteToI2C(int device, byte address, byte val)
 {
@@ -108,73 +112,73 @@ void ReadFromI2C(int device, byte address, char bytesToRead)
     Wire.beginTransmission(device);
     Wire.write(address);
     Wire.endTransmission();
-  
+
     Wire.beginTransmission(device);
     Wire.requestFrom(device, bytesToRead);
-   
-    char i = 0;   
+
+    char i = 0;
     while ( Wire.available() )
     {
         sensorBuffer[i++] = Wire.read();
-    }   
+    }
     Wire.endTransmission();
 }
 
 uint8_t sys=0, gyro=0, accel=0, mag = 0;
 
 void trackerOutput()
-{  
+{
   bno.getCalibration(&sys, &gyro, &accel, &mag);
   Serial.print("$G");
   if(graphRaw) { // Graph Raw Data
     Serial.print(tiltAngle);
     Serial.print(",");
     Serial.print(rollAngle);
-    Serial.print(",");    
+    Serial.print(",");
     Serial.print(panAngle);
-    Serial.print(","); 
+    Serial.print(",");
   } else {  // Graph offset and filtered data
     Serial.print(tiltAngleLP);
     Serial.print(",");
     Serial.print(rollAngleLP);
-    Serial.print(",");    
+    Serial.print(",");
     Serial.print(panAngleLP);
-    Serial.print(",");  
+    Serial.print(",");
   }
   Serial.print(channel_value[htChannels[0]] / 2 + 400);
-  Serial.print(",");    
+  Serial.print(",");
   Serial.print(channel_value[htChannels[1]] / 2 + 400);
-  Serial.print(",");    
+  Serial.print(",");
   Serial.print(channel_value[htChannels[2]] /2 + 400);
-  Serial.print(",");    
+  Serial.print(",");
   Serial.print(sys, DEC);
-  Serial.print(",");    
+  Serial.print(",");
   Serial.print(gyro, DEC);
-  Serial.print(",");    
+  Serial.print(",");
   Serial.print(accel, DEC);
-  Serial.print(",");    
-  Serial.println(mag, DEC);  
+  Serial.print(",");
+  Serial.println(mag, DEC);
 }
 
 int I2CPresent = 0;
 
 void CheckI2CPresent()
 {
-  Wire.beginTransmission(0x28);  
+  Wire.beginTransmission(0x28);
   if (Wire.endTransmission() == 0) {
     I2CPresent = 1;
     bno055_address = 0x28;
-    bno = Adafruit_BNO055(-1, 0x028 );    
+    bno = Adafruit_BNO055(-1, 0x028 );
     return;
-  } 
-  
-  Wire.beginTransmission(0x29);  
+  }
+
+  Wire.beginTransmission(0x29);
   if (Wire.endTransmission() == 0) {
     I2CPresent = 1;
     bno055_address = 0x29;
     bno = Adafruit_BNO055(-1, 0x029 );
     return;
-  } 
+  }
 }
 
 //--------------------------------------------------------------------------------------
@@ -182,22 +186,22 @@ void CheckI2CPresent()
 // Desc: Retrieves the sensor data from the sensor board via I2C.
 //--------------------------------------------------------------------------------------
 void UpdateSensors()
-{    
-    bno.getEvent(&event);  
+{
+    bno.getEvent(&event);
 }
 
 
 //--------------------------------------------------------------------------------------
 // Func: Filter
-// Desc: Filters / merges sensor data. 
+// Desc: Filters / merges sensor data.
 //--------------------------------------------------------------------------------------
 
 // FROM https://stackoverflow.com/questions/1628386/normalise-orientation-between-0-and-360
-// Normalizes any number to an arbitrary range 
-// by assuming the range wraps around when going below min or above max 
-double normalize( const float value, const float start, const float end ) 
+// Normalizes any number to an arbitrary range
+// by assuming the range wraps around when going below min or above max
+double normalize( const float value, const float start, const float end )
 {
-  const float width       = end - start   ;   // 
+  const float width       = end - start   ;   //
   const float offsetValue = value - start ;   // value relative to 0
 
   return ( offsetValue - ( floor( offsetValue / width ) * width ) ) + start ;
@@ -213,16 +217,16 @@ void FilterSensorData()
     panAngle = event.orientation.x;
     tiltAngle  = event.orientation.y;
 
-    // Used to set initial values. 
+    // Used to set initial values.
     if (resetValues == 1)
     {
         BEEP_ON();
-        resetValues = 0; 
-      
-        tiltStart = tiltAngle;        
-        panStart = panAngle;                
-        rollStart = rollAngle;         
-       
+        resetValues = 0;
+
+        tiltStart = tiltAngle;
+        panStart = panAngle;
+        rollStart = rollAngle;
+
         BEEP_OFF();
     }
 
@@ -233,19 +237,19 @@ void FilterSensorData()
 
     // Normalize Angle For Pan
     panAngleOff = normalize(panAngleOff,-180,180);
-    panAngle = normalize(panAngle,-180,180); 
-      
+    panAngle = normalize(panAngle,-180,180);
+
     // Filter the Data
     if (TrackerStarted)
     {
         // All low-pass filters
-        
+
         tiltAngleLP = tiltAngleOff * tiltRollBeta + (1 - tiltRollBeta) * lastTiltAngle;
         lastTiltAngle = tiltAngleLP;
-         
+
         rollAngleLP = rollAngleOff * tiltRollBeta + (1 - tiltRollBeta) * lastRollAngle;
         lastRollAngle = rollAngleLP;
-          
+
         panAngleLP = panAngleOff * panBeta + (1 - panBeta) * lastPanAngle;
         lastPanAngle = panAngleLP;
 
@@ -257,18 +261,17 @@ void FilterSensorData()
 
         float tiltAngleTemp = (tiltAngleLP * tiltInverse * tiltFactor) + servoTiltCenter;
 		tiltAngleTemp = min(max(tiltAngleTemp, tiltMinPulse), tiltMaxPulse);
-        channel_value[htChannels[1]] = tiltAngleTemp;          
+        channel_value[htChannels[1]] = tiltAngleTemp;
 
         float rollAngleTemp = (rollAngleLP * rollInverse * rollFactor) + servoRollCenter;
 		rollAngleTemp = min(max(rollAngleTemp, rollMinPulse), rollMaxPulse);
-		channel_value[htChannels[2]] = rollAngleTemp;          
+		channel_value[htChannels[2]] = rollAngleTemp;
     }
 
-    float an0ch = ((analogRead(A0) + 988) - 400) *2;
-    float an1ch = ((analogRead(A1) + 988) - 400) *2;
-    channel_value[4] = an0ch;   // Channel 4                           // **** ANALOG CHANNELS HERE
-    channel_value[5] = an1ch;   // Channel 5
-    
+    // Use PWM Values
+    channel_value[4] = ((float)ch1_value) / 1000.0f * 250.0f; //0-1000 Output @ 250Hz PWM Frequency
+    channel_value[5] = ((float)ch2_value) / 1000.0f * 250.0f; //0-1000 Output @ 250Hz PWM Frequency
+
     // Calibration
     if(sys == 3 && gyro == 3 && accel == 3 && mag == 3 && doCalibrate) {
       StoreBNOCalibration();
@@ -288,22 +291,22 @@ void InitSensors()
     // Infinate Loop
     while(1) {
       Serial.println("No BNO055 detected... Check your wiring");
-      delay(1000);    
+      delay(1000);
     }
   }
 
   bno.setExtCrystalUse(true);
   bno.setMode((Adafruit_BNO055::adafruit_bno055_opmode_t)0x0C); // 9 Degrees Of Freedom, Fast Mag Cal On
   bno.getSensor(&sensor);
-  RemapAxes();  
+  RemapAxes();
 
   // Retreive BNO calibration data if stored in EEPROM
-  long bnoID; 
+  long bnoID;
   int eeAddress = BNO_EEPROM_START;
-  
-  EEPROM.get(eeAddress, bnoID);   
+
+  EEPROM.get(eeAddress, bnoID);
   adafruit_bno055_offsets_t calibrationData;
-  
+
   if (bnoID != sensor.sensor_id) {
       Serial.println("No Calibration Data Stored");
   } else {
@@ -318,10 +321,10 @@ void InitSensors()
 void StoreBNOCalibration() {
   int eeAddress = BNO_EEPROM_START;
   bno.getSensor(&sensor);
-  bnoID = sensor.sensor_id; 
+  bnoID = sensor.sensor_id;
   adafruit_bno055_offsets_t newCalib;
   bno.getSensorOffsets(newCalib);
-  Serial.println("Storing calibration data to EEPROM");  
+  Serial.println("Storing calibration data to EEPROM");
   EEPROM.put(eeAddress, bnoID);
   eeAddress += sizeof(long);
   EEPROM.put(eeAddress, newCalib);
@@ -335,7 +338,7 @@ void StoreBNOCalibration() {
 //--------------------------------------------------------------------------------------
 void ResetCenter()
 {
-    resetValues = 1; 
+    resetValues = 1;
     TrackerStarted = 1;
 }
 
@@ -343,10 +346,10 @@ void ResetCenter()
 // Func: RemapAxes
 // Desc: Allows the tracker board to be re-oriented in multiple positions.
 //       Called on startup and on config change.
-//       
+//
 //--------------------------------------------------------------------------------------
 
-void RemapAxes() 
+void RemapAxes()
 {
   char cas = axisRemap;
 
