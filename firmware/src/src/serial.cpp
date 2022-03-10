@@ -349,7 +349,7 @@ void parseData(DynamicJsonDocument &json)
             trkset.setDataItemSend(kv.key().c_str(),kv.value().as<bool>());
         }
 
-    // Request Data Items
+    // Set Channel Via Serial
     } else if (strcmp(command, "SETCH") == 0) {
         serialWrite("HT: Channel Set\r\n");
         JsonObject root = json.as<JsonObject>();
@@ -363,16 +363,16 @@ void parseData(DynamicJsonDocument &json)
                 serialWrite(chValue);
                 serialWrite(" = ");
                 serialWrite(val);
-                if(chValue > 0 && chValue < 17 &&
-                   val >= TrackerSettings::MIN_PWM &&
-                   val <= TrackerSettings::MAX_PWM)
+                if(chValue >= 0 && chValue <= 16 &&
+                   ((val >= TrackerSettings::MIN_PWM &&
+                   val <= TrackerSettings::MAX_PWM) ||
+                   val == 0))  // Don't override channel data if set to a Zero
                    serial_channels[chValue] = val;
             }
         }
 
     // Firmware Request
     } else if (strcmp(command, "FW") == 0) {
-
         json.clear();
         json["Cmd"] = "FW";
         json["Vers"] = FW_VERSION;

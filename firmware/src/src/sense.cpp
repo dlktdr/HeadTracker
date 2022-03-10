@@ -113,7 +113,7 @@ int sense_Init()
     }
 
     // Init Serial Channels to Zero
-    for(int i =0; i < sizeof(serial_channels); i++)
+    for(int i =0; i < 16; i++)
         serial_channels[i] = 0;
 
     setLEDFlag(LED_GYROCAL);
