@@ -23,3 +23,5 @@ void JSON_Process(char *jsonbuf);
 
 extern struct k_mutex data_mutex;
 extern DynamicJsonDocument json;
+
+extern volatile uint16_t serial_channels[16];

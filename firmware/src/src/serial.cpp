@@ -69,6 +69,8 @@ bool uiconnected = false;
 
 const struct device *dev;
 
+volatile uint16_t serial_channels[16];
+
 static void interrupt_handler(const struct device *dev, void *user_data)
 {
 	ARG_UNUSED(user_data);
@@ -347,7 +349,28 @@ void parseData(DynamicJsonDocument &json)
             trkset.setDataItemSend(kv.key().c_str(),kv.value().as<bool>());
         }
 
-    // Firmware Reqest
+    // Request Data Items
+    } else if (strcmp(command, "SETCH") == 0) {
+        serialWrite("HT: Channel Set\r\n");
+        JsonObject root = json.as<JsonObject>();
+        std::string val;
+        for (JsonPair kv : root) {
+            val = kv.key().c_str();
+            if(val.rfind("CH",0) == 0 && val.size() > 3) {
+                int chValue = std::stoi(val.substr(2));
+                int val = kv.value().as<int>();
+                serialWrite("Channel ");
+                serialWrite(chValue);
+                serialWrite(" = ");
+                serialWrite(val);
+                if(chValue > 0 && chValue < 17 &&
+                   val >= TrackerSettings::MIN_PWM &&
+                   val <= TrackerSettings::MAX_PWM)
+                   serial_channels[chValue] = val;
+            }
+        }
+
+    // Firmware Request
     } else if (strcmp(command, "FW") == 0) {
 
         json.clear();

@@ -112,6 +112,10 @@ int sense_Init()
         SF1eFilterInit(anFilter[i]);
     }
 
+    // Init Serial Channels to Zero
+    for(int i =0; i < sizeof(serial_channels); i++)
+        serial_channels[i] = 0;
+
     setLEDFlag(LED_GYROCAL);
 
     gyro_calibrated = false;
@@ -342,6 +346,13 @@ void calculate_Thread()
         }
 
         // 3) Set all incoming SBUS values
+
+        // Set Serial Channels
+        for(int i=0; i < 16; i++) {
+            if(serial_channels[i] != 0) {
+                channel_data[i] = serial_channels[i];
+            }
+        }
 
         //*** Todo
 
