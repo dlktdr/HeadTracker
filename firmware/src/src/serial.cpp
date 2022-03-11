@@ -474,7 +474,7 @@ void serialWriteHex(const uint8_t *data, int len)
 void serialWriteJSON(DynamicJsonDocument &json)
 {
     char data[TX_RNGBUF_SIZE];
-    int br = serializeJson(json, data+1, TX_RNGBUF_SIZE-sizeof(uint16_t));
+    int br = serializeJson(json, data+1, TX_RNGBUF_SIZE-sizeof(uint16_t)-2);
     uint16_t calccrc = escapeCRC(uCRC16Lib::calculate(data,br));
 
     if(br + 7 > TX_RNGBUF_SIZE)
