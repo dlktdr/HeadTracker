@@ -38,6 +38,6 @@ jobs:
         with:
           name: "${{ env.artifact_name }}"
           path: |
-            *.bin
+            /src/firmware/src/.pio/build/*/*.bin
           retention-days: 60
-          if-no-files-found: error          
+          if-no-files-found: error
