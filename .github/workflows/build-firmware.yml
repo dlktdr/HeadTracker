@@ -36,7 +36,7 @@ jobs:
       - name: Package Firmware
         uses: 'actions/upload-artifact@v2'
         with:
-          name: "${{ env.artifact_name }}"
+          name: buildfirmware
           path: |
             /src/firmware/src/.pio/build/*/*.bin
           retention-days: 60
