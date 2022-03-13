@@ -4,24 +4,19 @@ name: CI
 
 # Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the master branch
   push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
-  paths-ignore:
-      - 'gui/**'
-
-  # Allows you to run this workflow manually from the Actions tab
+    branches: 
+    - master
+#  pull_request:
+#    branches:
+#    - master
   workflow_dispatch:
 
 jobs:
-  # This workflow contains a single job called "build"
   build:
-    # The type of runner that the job will run on
     runs-on: ubuntu-latest
     container:
-      image: dlktdr/platformio_nrf52_zephyr
+      image: shaguarger/platformio
       volumes:
         - ${{ github.workspace }}:/src
 
@@ -32,16 +27,13 @@ jobs:
 
       # Runs a single command using the runners shell
       - name: Build Firmware
-        run: cd /src/firmware/src
-             pio run
+        run: |
+          cd /src/firmware/src
+          pio run
 
       # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
-        run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
           
-      - name: Package firmware
+      - name: Package Firmware
         uses: 'actions/upload-artifact@v2'
         with:
           name: "${{ env.artifact_name }}"
