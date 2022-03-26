@@ -17,6 +17,7 @@
 #define CALCULATE_PERIOD 6666   // (us) 150hz IMU calculations
 #define PWM_FREQUENCY 50        // (ms) PWM Period
 #define UIRESPONSIVE_TIME 10000 // (ms) 10Seconds without an ack data will stop;
+#define RESET_PULSE_PERIOD 500000 // (us) pulse duration for the reset signal to TX
 
 // Analog Filters 1 Euro Filter
 #define AN_CH_CNT 4

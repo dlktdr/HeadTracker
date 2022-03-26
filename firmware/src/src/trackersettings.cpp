@@ -48,6 +48,7 @@ TrackerSettings::TrackerSettings()
     tltch = DEF_TILT_CH;
     rllch = DEF_ROLL_CH;
     panch = DEF_PAN_CH;
+    alertch = DEF_ALERT_CH;
 
     // Servo Reversed bits
     servoreverse = 0x00;
@@ -415,6 +416,17 @@ void TrackerSettings::setRollCh(int value)
         rllch = (int)value;
 }
 
+int TrackerSettings::alertCh() const
+{
+    return alertch;
+}
+
+void TrackerSettings::setAlertCh(int value)
+{
+    if((value > 0 && value < 17) || value == -1)
+        alertch = (int)value;
+}
+
 //----------------------------------------------------------------------------------------
 // Remappable Buttons + PPM Output Pin + Bluetooth
 
@@ -770,6 +782,7 @@ void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
     v = json["rllch"]; if(!v.isNull()) setRollCh(v);
     v = json["tltch"]; if(!v.isNull()) setTiltCh(v);
     v = json["panch"]; if(!v.isNull()) setPanCh(v);
+    v = json["alertch"]; if(!v.isNull()) setAlertCh(v);
 
 // Servo Reversed
     v = json["servoreverse"]; if(!v.isNull()) setServoreverse(v);
@@ -954,6 +967,7 @@ void TrackerSettings::setJSONSettings(DynamicJsonDocument &json)
     json["rllch"] = rllch;
     json["panch"] = panch;
     json["tltch"] = tltch;
+    json["alertch"] = alertch;
 
 // Servo Reverse Channels
     json["servoreverse"] = servoreverse;

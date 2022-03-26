@@ -105,6 +105,7 @@ public:
     static constexpr bool DEF_RESET_ON_TILT = false;
     static constexpr float RESET_ON_TILT_TIME = 1.5; // Seconds to complete a head tilt
     static constexpr float RESET_ON_TILT_AFTER = 1.0; // How long after the tilt to reset
+    static constexpr float RECENTER_PULSE_DURATION = 0.5; // (sec) pulse width of recenter signal to tx
     static constexpr int DEF_PPM_OUT = 10; // Random choice
     static constexpr int DEF_PPM_IN = -1;
     static constexpr int PPM_CENTER = 1500;
@@ -118,6 +119,7 @@ public:
     static constexpr int DEF_TILT_CH = -1;
     static constexpr int DEF_ROLL_CH = -1;
     static constexpr int DEF_PAN_CH = -1;
+    static constexpr int DEF_ALERT_CH = -1;
     static constexpr int DEF_LP_PAN = 75;
     static constexpr int DEF_LP_TLTRLL = 75;
     static constexpr int DEF_PWM_A0_CH = -1;
@@ -200,6 +202,9 @@ public:
 
     int rollCh() const;
     void setRollCh(int value);
+
+    int alertCh() const;
+    void setAlertCh(int value);
 
     int ppmOutPin() const;
     void setPpmOutPin(int value);
@@ -348,7 +353,7 @@ private:
     int tlt_min,tlt_max,tlt_cnt;
     int pan_min,pan_max,pan_cnt;
     float rll_gain,tlt_gain,pan_gain;
-    int tltch,rllch,panch;
+    int tltch,rllch,panch,alertch;
 
     // Calibration
     float magxoff, magyoff, magzoff;
