@@ -23,6 +23,7 @@ TrackerSettings::TrackerSettings(QObject *parent):
     _data["panch"] = DEF_PAN_CH;
     _data["tltch"] = DEF_TILT_CH;
     _data["rllch"] = DEF_ROLL_CH;
+    _data["alertch"] = DEF_ALERT_CH;
 
     _data["servoreverse"] = (uint)0x00;
 
@@ -388,6 +389,17 @@ void TrackerSettings::setRollCh(int value)
 {
     if((value > 0 && value < 17) || value == -1)
         _data["rllch"] = value;
+}
+
+int TrackerSettings::alertCh() const
+{
+    return _data["alertch"].toUInt();
+}
+
+void TrackerSettings::setAlertCh(int value)
+{
+    if((value > 0 && value < 17) || value == -1)
+        _data["alertch"] = value;
 }
 
 int TrackerSettings::ppmOutPin() const

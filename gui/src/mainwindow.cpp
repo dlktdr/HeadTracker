@@ -184,6 +184,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->cmbpanchn,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbtiltchn,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbrllchn,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->cmbalertchn,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbRemap,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbSigns,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbButtonPin,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
@@ -573,6 +574,7 @@ void MainWindow::updateToUI()
     int panCh = trkset.panCh();
     int rllCh = trkset.rollCh();
     int tltCh = trkset.tiltCh();
+    int alertCh = trkset.alertCh();
     int a4Ch = trkset.analog4Ch();
     int a5Ch = trkset.analog5Ch();
     int a6Ch = trkset.analog6Ch();
@@ -589,6 +591,7 @@ void MainWindow::updateToUI()
     ui->cmbpanchn->setCurrentIndex(panCh==-1?0:panCh);
     ui->cmbrllchn->setCurrentIndex(rllCh==-1?0:rllCh);
     ui->cmbtiltchn->setCurrentIndex(tltCh==-1?0:tltCh);
+    ui->cmbalertchn->setCurrentIndex(alertCh==-1?0:alertCh);
     // Analog CH
     ui->cmbA4Ch->setCurrentIndex(a5Ch==-1?0:a4Ch);
     ui->cmbA5Ch->setCurrentIndex(a5Ch==-1?0:a5Ch);
@@ -684,9 +687,11 @@ void MainWindow::updateFromUI()
     int panCh = ui->cmbpanchn->currentIndex();
     int rllCh = ui->cmbrllchn->currentIndex();
     int tltCh = ui->cmbtiltchn->currentIndex();
+    int alertCh = ui->cmbalertchn->currentIndex();
     trkset.setPanCh(panCh==0?-1:panCh);
     trkset.setRollCh(rllCh==0?-1:rllCh);
     trkset.setTiltCh(tltCh==0?-1:tltCh);
+    trkset.setAlertCh(alertCh=0?-1:alertCh);
     trkset.setRollReversed(ui->chkrllrev->isChecked());
     trkset.setPanReversed(ui->chkpanrev->isChecked());
     trkset.setTiltReversed(ui->chktltrev->isChecked());
@@ -768,6 +773,7 @@ void MainWindow::updateFromUI()
     pins[PIN_PPMIN] = ppin_index==1?-1:ppin_index;
     int but_index = ui->cmbButtonPin->currentIndex()+1;
     pins[PIN_BUTRESET] = but_index==1?-1:but_index;
+    // TODO something to do here for ALERT_CH?
 
     bool sbusinchecked = ui->chkSbusInInv->isChecked();
     if(sbusinchecked) {

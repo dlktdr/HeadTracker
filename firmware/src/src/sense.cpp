@@ -433,12 +433,32 @@ void calculate_Thread()
         int tltch = trkset.tiltCh();
         int rllch = trkset.rollCh();
         int panch = trkset.panCh();
+        int alertch = trkset.alertCh();
         if(tltch > 0)
             channel_data[tltch - 1] = trpOutputEnabled == true ? tiltout_ui : trkset.Tlt_cnt();
         if(rllch > 0)
             channel_data[rllch - 1] = trpOutputEnabled == true ? rollout_ui : trkset.Rll_cnt();
         if(panch > 0)
             channel_data[panch - 1] = trpOutputEnabled == true ? panout_ui : trkset.Pan_cnt();
+
+        // TODO what is trpOutputEnabled?
+        static float pulsetimer=0;
+        static bool sendingresetpulse = false;
+        if (alertch > 0) {
+            // Synthesize a pulse indicating recenter started
+            channel_data[alertch - 1] = TrackerSettings::MIN_PWM;
+            if (butdnw) {
+                sendingresetpulse = true;
+                pulsetimer=0;
+            }
+            if (sendingresetpulse) {
+                channel_data[alertch - 1] = TrackerSettings::MAX_PWM;
+                pulsetimer += (float)CALCULATE_PERIOD / 1000000.0;
+                if(pulsetimer > TrackerSettings::RECENTER_PULSE_DURATION) {
+                    sendingresetpulse = false;
+                }
+            }
+        }
 
         // 9) Set the PPM Outputs
         for(int i=0;i<PpmOut_getChnCount();i++) {
