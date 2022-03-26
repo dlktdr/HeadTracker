@@ -95,9 +95,13 @@ void CalibrateBLE::prevClicked()
     // Magnetometer
     case MAGCAL: {
         ui->cmdPrevious->setText("Cancel");
-        ui->cmdNext->setText("Next");
+        ui->cmdNext->setText("Complete");
         ui->cmdNext->setDisabled(false);
         ui->stackedWidget->setCurrentIndex(0);
+        // Cancel Clicked, start over
+        ui->magcalwid->resetDataPoints();
+        emit calibrationCancel();
+        hide();
         step = MAGCAL;
         break;
     }

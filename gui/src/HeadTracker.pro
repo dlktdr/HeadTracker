@@ -40,7 +40,7 @@ SOURCES += \
     graph.cpp \
     popupslider.cpp \
     servominmax.cpp \
-    signalbars.cpp \    
+    signalbars.cpp \
     trackersettings.cpp \
     ucrc16lib.cpp
 
@@ -83,8 +83,6 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 RESOURCES += \
     Resources.qrc
 
-LIBS += -lOpengl32 -lglu32
-
 COPIES += stylesheets
 stylesheets.files = $$files("css/*.*")
 stylesheets.path = $$OUT_PWD
@@ -99,8 +97,10 @@ CONFIG(release, debug|release) {
     TARGET_PATH = $$OUT_PWD/release
 }
 
-# Only add on Windows, will have to manually add on linux
+# Windows specific
 win32 {
+    DEFINES += "WINDOWS=yes"
+    LIBS += -lOpengl32
     contains(QT_ARCH, x86_64) {
     COPIES += openssl
     openssl.files = $$files("lib_x64/*.dll")
@@ -110,6 +110,16 @@ win32 {
     openssl.files = $$files("lib_x86/*.dll")
     openssl.path = $$TARGET_PATH
     }
+}
+
+#Linux Specific
+unix:!macx {
+    DEFINES += "LINUX=yes"
+}
+
+#Mac Specific
+macx: {
+    DEFINES += "MACOS=yes"
 }
 
 DISTFILES += \
