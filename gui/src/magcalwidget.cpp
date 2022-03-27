@@ -5,14 +5,14 @@
 #include <QOpenGLFunctions>
 #include <QtOpenGL>
 #include "calibrate/imuread.h"
-#include "GL/glu.h"
 #include "magcalwidget.h"
 #include "calibrate/visualize.h"
 
 static const GLfloat light_ambient[4]  = { 0.0f, 0.0f, 0.0f, 1.0f };
+//static const GLfloat light_ambient[4]  = { 0.4f, 0.4f, 0.4f, 1.0f };
 static const GLfloat light_diffuse[4]  = { 1.0f, 1.0f, 1.0f, 1.0f };
 static const GLfloat light_specular[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
-static const GLfloat light_position[4] = { 2.0f, 5.0f, 5.0f, 0.0f };
+static const GLfloat light_position[4] = { 5.0f, 5.0f, -3.0f, 0.0f };
 
 static const GLfloat mat_ambient[4]    = { 0.7f, 0.7f, 0.7f, 1.0f };
 static const GLfloat mat_diffuse[4]    = { 0.8f, 0.8f, 0.8f, 1.0f };
@@ -96,18 +96,40 @@ void MagCalWidget::resetDataPoints()
     raw_data_reset();
 }
 
+void MagCalWidget::drawSphere(double r, int lats, int longs) {
+    int i, j;
+    for(i = 0; i <= lats; i++) {
+        double lat0 = M_PI * (-0.5 + (double) (i - 1) / lats);
+        double z0  = sin(lat0);
+        double zr0 =  cos(lat0);
+
+        double lat1 = M_PI * (-0.5 + (double) i / lats);
+        double z1 = sin(lat1);
+        double zr1 = cos(lat1);
+
+        glBegin(GL_QUAD_STRIP);
+        for(j = 0; j <= longs; j++) {
+            double lng = 2 * M_PI * (double) (j - 1) / longs;
+            double x = cos(lng);
+            double y = sin(lng);
+
+            glNormal3f(x * zr0, y * zr0, z0);
+            glVertex3f(r * x * zr0, r * y * zr0, r * z0);
+            glNormal3f(x * zr1, y * zr1, z1);
+            glVertex3f(r * x * zr1, r * y * zr1, r * z1);
+        }
+        glEnd();
+    }
+}
+
 void MagCalWidget::initializeGL()
 {
-    GLUquadric *sphere;
-
     glClearColor(1.0, 1.0, 1.0, 1.0);
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
-    //glShadeModel(GL_FLAT);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
     glEnable(GL_LIGHT0);
-    //glEnable(GL_NORMALIZE);
     glEnable(GL_COLOR_MATERIAL);
     glEnable(GL_LIGHTING);
     glLightfv(GL_LIGHT0, GL_AMBIENT,  light_ambient);
@@ -119,18 +141,15 @@ void MagCalWidget::initializeGL()
     glMaterialfv(GL_FRONT, GL_SPECULAR,  mat_specular);
     glMaterialfv(GL_FRONT, GL_SHININESS, high_shininess);
 
-    sphere = gluNewQuadric();
-    gluQuadricDrawStyle(sphere, GLU_FILL);
-    gluQuadricNormals(sphere, GLU_SMOOTH);
+
     spherelist = glGenLists(1);
     glNewList(spherelist, GL_COMPILE);
-    gluSphere(sphere, 0.08, 16, 14);
+    drawSphere(0.08, 16, 14);
     glEndList();
     spherelowreslist = glGenLists(1);
     glNewList(spherelowreslist, GL_COMPILE);
-    gluSphere(sphere, 0.08, 12, 10);
+    drawSphere(0.08, 12, 10);
     glEndList();
-    gluDeleteQuadric(sphere);
 
     // Set up the rendering context, load shaders and other resources, etc.:
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
@@ -163,11 +182,6 @@ void MagCalWidget::paintGL()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glColor3f(1, 0, 0);	// set current color to red
     glLoadIdentity();
-#if 0
-    gluLookAt(0.0, 0.0, 0.8, // eye location
-          0.0, 0.0, 0.0, // center
-          0.0, 1.0, 0.0); // up direction
-#endif
     xscale = 0.05;
     yscale = 0.05;
     zscale = 0.05;

@@ -25,6 +25,7 @@ private:
 
     GLuint spherelist;
     GLuint spherelowreslist;
+    void drawSphere(double r, int lats, int longs);
 
     int invert_q0=0;
     int invert_q1=0;

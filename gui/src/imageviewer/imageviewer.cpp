@@ -52,7 +52,6 @@
 
 #include <QApplication>
 #include <QClipboard>
-#include <QColorSpace>
 #include <QDir>
 #include <QFileDialog>
 #include <QImageReader>
@@ -124,10 +123,9 @@ bool ImageViewer::loadFile(const QString &fileName)
 void ImageViewer::setImage(const QImage &newImage)
 {
     image = newImage;
-    if (image.colorSpace().isValid())
-        image.convertToColorSpace(QColorSpace::SRgb);
+    //if (image.colorSpace().isValid())
+        //image.convertToColorSpace(QColorSpace::SRgb);
     imageLabel->setPixmap(QPixmap::fromImage(image));
-//! [4]
     scaleFactor = 1.0;
 
     scrollArea->setVisible(true);
@@ -140,8 +138,6 @@ void ImageViewer::setImage(const QImage &newImage)
 
     scaleImage(0.35);
 }
-
-//! [4]
 
 bool ImageViewer::saveFile(const QString &fileName)
 {
@@ -157,8 +153,6 @@ bool ImageViewer::saveFile(const QString &fileName)
     statusBar()->showMessage(message);
     return true;
 }
-
-//! [1]
 
 static void initializeImageFileDialog(QFileDialog &dialog, QFileDialog::AcceptMode acceptMode)
 {
@@ -189,7 +183,6 @@ void ImageViewer::open()
 
     while (dialog.exec() == QDialog::Accepted && !loadFile(dialog.selectedFiles().first())) {}
 }
-//! [1]
 
 void ImageViewer::saveAs()
 {
@@ -199,15 +192,12 @@ void ImageViewer::saveAs()
     while (dialog.exec() == QDialog::Accepted && !saveFile(dialog.selectedFiles().first())) {}
 }
 
-//! [5]
+
 void ImageViewer::print()
-//! [5] //! [6]
 {
-    Q_ASSERT(!imageLabel->pixmap(Qt::ReturnByValue).isNull());
 #if defined(QT_PRINTSUPPORT_LIB) && QT_CONFIG(printdialog)
-//! [6] //! [7]
+    Q_ASSERT(!imageLabel->pixmap()->isNull());
     QPrintDialog dialog(&printer, this);
-//! [7] //! [8]
     if (dialog.exec()) {
         QPainter painter(&printer);
         QPixmap pixmap = imageLabel->pixmap(Qt::ReturnByValue);
@@ -220,7 +210,6 @@ void ImageViewer::print()
     }
 #endif
 }
-//! [8]
 
 void ImageViewer::copy()
 {
@@ -327,7 +316,7 @@ void ImageViewer::scaleImage(double factor)
 //! [23] //! [24]
 {
     scaleFactor *= factor;
-    imageLabel->resize(scaleFactor * imageLabel->pixmap(Qt::ReturnByValue).size());
+    imageLabel->resize(scaleFactor * imageLabel->pixmap()->size());
 
     adjustScrollBar(scrollArea->horizontalScrollBar(), factor);
     adjustScrollBar(scrollArea->verticalScrollBar(), factor);

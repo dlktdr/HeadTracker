@@ -43,7 +43,7 @@ TrackerSettings::TrackerSettings(QObject *parent):
     _data["ppmchcnt"] = DEF_PPM_CHANNELS;
 
     _data["ppmininvert"] = false;
-    _data["btmode"] = (uint)0;    
+    _data["btmode"] = (uint)0;
     _data["orient"] = (uint)0;
     _data["rstppm"] = DEF_RST_PPM;
 
@@ -533,7 +533,7 @@ void TrackerSettings::setAxisRemap(uint value)
 }
 
 void TrackerSettings::setAxisSign(uint value)
-{        
+{
     _data["axissign"] = (uint)(value & 0x07);
 }
 
@@ -579,7 +579,7 @@ QVariantMap TrackerSettings::allData()
 }
 
 void TrackerSettings::setAllData(const QVariantMap &data)
-{    
+{
     QStringList keys = data.keys();
     foreach(QString key,keys) {
         _data[key] = data.value(key);
@@ -629,13 +629,13 @@ void TrackerSettings::setLiveDataMap(const QVariantMap &livelist,bool reset)
         _live.clear();
 
     // Update List
-    _live.insert(livelist);
+    _live = livelist;
 
     // Emit if a value has been updated
     bool ge=false,ae=false,me=false,oe=false,ooe=false,ppm=false;
     QMapIterator<QString, QVariant> i(livelist);
     while (i.hasNext()) {
-        i.next();        
+        i.next();
         QString key = i.key();
         if((key == "gyrox" || key == "gyroy" || key == "gyroz") && !ge) {
             emit(rawGyroChanged(_live["gyrox"].toFloat(),

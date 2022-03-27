@@ -24,26 +24,21 @@ signals:
 
 };
 
-#define WINDOWS
-
 #if defined(LINUX)
   #include <termios.h>
   #include <unistd.h>
   #include <GL/gl.h>  // sudo apt install mesa-common-dev
-  #include <GL/glu.h> // sudo apt install libglu1-mesa-dev freeglut3-dev
 #elif defined(WINDOWS)
   #include <windows.h>
   #include <GL/gl.h>
-  #include <GL/glu.h>
   #define random() rand()
   #ifndef M_PI
     #define M_PI 3.14159265358979323846
   #endif
-#elif defined(MACOSX)
+#elif defined(MACOS)
   #include <termios.h>
   #include <unistd.h>
   #include <OpenGL/gl.h>
-  #include <OpenGL/glu.h>
 #endif
 
 #if defined(LINUX)
