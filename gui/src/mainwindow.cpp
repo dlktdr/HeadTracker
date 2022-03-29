@@ -691,7 +691,7 @@ void MainWindow::updateFromUI()
     trkset.setPanCh(panCh==0?-1:panCh);
     trkset.setRollCh(rllCh==0?-1:rllCh);
     trkset.setTiltCh(tltCh==0?-1:tltCh);
-    trkset.setAlertCh(alertCh=0?-1:alertCh);
+    trkset.setAlertCh(alertCh==0?-1:alertCh);
     trkset.setRollReversed(ui->chkrllrev->isChecked());
     trkset.setPanReversed(ui->chkpanrev->isChecked());
     trkset.setTiltReversed(ui->chktltrev->isChecked());
@@ -773,7 +773,6 @@ void MainWindow::updateFromUI()
     pins[PIN_PPMIN] = ppin_index==1?-1:ppin_index;
     int but_index = ui->cmbButtonPin->currentIndex()+1;
     pins[PIN_BUTRESET] = but_index==1?-1:but_index;
-    // TODO something to do here for ALERT_CH?
 
     bool sbusinchecked = ui->chkSbusInInv->isChecked();
     if(sbusinchecked) {

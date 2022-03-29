@@ -314,12 +314,13 @@ void calculate_Thread()
         *   5) Reset Center on PPM channel
         *   6) Set auxiliary functions
         *   7) Set analog channels
-        *   8) Override desired channels with pan/tilt/roll
-        *   9) Output to PPMout
-        *  10) Output to Bluetooth
-        *  11) Output to SBUS
-        *  12) Output PWM channels
-        *  13) Output to USB Joystick
+        *   8) Set Reset Center pulse channel
+        *   9) Override desired channels with pan/tilt/roll
+        *  10) Output to PPMout
+        *  11) Output to Bluetooth
+        *  12) Output to SBUS
+        *  13) Output PWM channels
+        *  14) Output to USB Joystick
         *
         *  Channels should all be set to zero if they don't have valid data
         *  Only on the output should a channel be set to center if it's still zero
@@ -425,27 +426,13 @@ void calculate_Thread()
             channel_data[trkset.analog7Ch()-1] = an7;
         }
 
-        // 8) Set Tilt/Roll/Pan Channel Values
-        // Only set these outputs if button press mode is set to off
-        if(trkset.buttonPressMode() == false)
-            trpOutputEnabled = true;
+        // 8) First decide if 'reset center' pulse should be sent
 
-        int tltch = trkset.tiltCh();
-        int rllch = trkset.rollCh();
-        int panch = trkset.panCh();
-        int alertch = trkset.alertCh();
-        if(tltch > 0)
-            channel_data[tltch - 1] = trpOutputEnabled == true ? tiltout_ui : trkset.Tlt_cnt();
-        if(rllch > 0)
-            channel_data[rllch - 1] = trpOutputEnabled == true ? rollout_ui : trkset.Rll_cnt();
-        if(panch > 0)
-            channel_data[panch - 1] = trpOutputEnabled == true ? panout_ui : trkset.Pan_cnt();
-
-        // TODO what is trpOutputEnabled?
         static float pulsetimer=0;
         static bool sendingresetpulse = false;
+        int alertch = trkset.alertCh();
         if (alertch > 0) {
-            // Synthesize a pulse indicating recenter started
+            // Synthesize a pulse indicating reset center started
             channel_data[alertch - 1] = TrackerSettings::MIN_PWM;
             if (butdnw) {
                 sendingresetpulse = true;
@@ -460,7 +447,22 @@ void calculate_Thread()
             }
         }
 
-        // 9) Set the PPM Outputs
+        // 9) Then, set Tilt/Roll/Pan Channel Values (after reset center in case of channel overlap)
+        // Only set these outputs if button press mode is set to off        
+        if(trkset.buttonPressMode() == false)
+            trpOutputEnabled = true;
+
+        int tltch = trkset.tiltCh();
+        int rllch = trkset.rollCh();
+        int panch = trkset.panCh();
+        if(tltch > 0)
+            channel_data[tltch - 1] = trpOutputEnabled == true ? tiltout_ui : trkset.Tlt_cnt();
+        if(rllch > 0)
+            channel_data[rllch - 1] = trpOutputEnabled == true ? rollout_ui : trkset.Rll_cnt();
+        if(panch > 0)
+            channel_data[panch - 1] = trpOutputEnabled == true ? panout_ui : trkset.Pan_cnt();
+
+        // 10) Set the PPM Outputs
         for(int i=0;i<PpmOut_getChnCount();i++) {
             uint16_t ppmout = channel_data[i];
             if(ppmout == 0)
@@ -468,14 +470,14 @@ void calculate_Thread()
             PpmOut_setChannel(i,ppmout);
         }
 
-        // 10) Set all the BT Channels, send the zeros don't center
+        // 11) Set all the BT Channels, send the zeros don't center
         bool bleconnected=BTGetConnected();
         trkset.setBLEAddress(BTGetAddress());
         for(int i=0;i < BT_CHANNELS;i++) {
             BTSetChannel(i,channel_data[i]);
         }
 
-        // 11) Set all SBUS output channels, if disabled set to center
+        // 12) Set all SBUS output channels, if disabled set to center
         uint16_t sbus_data[16];
         for(int i=0;i<16;i++) {
             uint16_t sbusout = channel_data[i];
@@ -485,7 +487,7 @@ void calculate_Thread()
         }
         SBUS_TX_BuildData(sbus_data);
 
-        // 12) Set PWM Channels
+        // 13) Set PWM Channels
         for(int i=0;i<4;i++) {
             int pwmch = trkset.PWMCh(i)-1;
             if(pwmch >= 0 && pwmch < 16) {
@@ -496,7 +498,7 @@ void calculate_Thread()
             }
         }
 
-        // 13 Set USB Joystick Channels, Only 8 channels
+        // 14 Set USB Joystick Channels, Only 8 channels
         static int joycnt=0;
         if(joycnt++ == 1) {
             set_JoystickChannels(channel_data);

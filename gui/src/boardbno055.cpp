@@ -83,7 +83,6 @@ void BoardBNO055::saveToRAM()
     lst.append(QString::number(trkset->panCh()));
     lst.append(QString::number(trkset->tiltCh()));
     lst.append(QString::number(trkset->rollCh()));
-    lst.append(QString::number(trkset->alertCh()));
     lst.append(QString::number(trkset->axisRemap()));
     lst.append(QString::number(trkset->axisSign()));
     QString data = lst.join(',');
@@ -189,7 +188,7 @@ void BoardBNO055::parseIncomingHT(QString cmd)
     // Setting Data
     else if(cmd.left(5) == "$SET$") {
         QStringList setd = cmd.right(cmd.length()-5).split(',',Qt::KeepEmptyParts);
-        if(setd.length() == 23) {
+        if(setd.length() == 22) {
             trkset->setLPTiltRoll(setd.at(0).toFloat());
             trkset->setLPPan(setd.at(1).toFloat());
             trkset->setGyroWeightTiltRoll(setd.at(2).toFloat());
@@ -212,7 +211,6 @@ void BoardBNO055::parseIncomingHT(QString cmd)
             trkset->setRollCh(setd.at(19).toInt());
             trkset->setAxisRemap(setd.at(20).toUInt());
             trkset->setAxisSign(setd.at(21).toUInt());
-            trkset->setAlertCh(setd.at(22).toInt());
 
             emit paramReceiveComplete();
             emit statusMessage(tr("Settings Received"),2000);
