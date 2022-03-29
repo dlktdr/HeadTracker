@@ -6,10 +6,18 @@ name: CI
 on:
   push:
     branches: 
-    - master
+      - master
+    paths:
+      - '.github/workflows/build-firmware.yml'
+      - 'firmware/src/**'
+    
   pull_request:
     branches:
-    - master
+      - master
+    paths:
+      - '.github/workflows/build-firmware.yml'
+      - 'firmware/src/**'
+      
   workflow_dispatch:
 
 jobs:
@@ -24,15 +32,27 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
+      
+      - name: Cache pip
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+    
+      - name: Cache PlatformIO
+        uses: actions/cache@v2
+        with:
+          path: ~/.platformio
 
       # Runs a single command using the runners shell
       - name: Build Firmware
         run: |
           cd /src/firmware/src
-          pio run
+          pio run          
 
-      # Runs a set of commands using the runners shell
-          
+      # Runs a set of commands using the runners shell          
       - name: Package Firmware
         uses: 'actions/upload-artifact@v2'
         with:
