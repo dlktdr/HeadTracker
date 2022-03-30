@@ -111,6 +111,7 @@ public:
     static constexpr int DEF_TILT_CH = 1;
     static constexpr int DEF_ROLL_CH = 2;
     static constexpr int DEF_PAN_CH = 3;
+    static constexpr int DEF_ALERT_CH = -1;
     static constexpr int DEF_LP_PAN = 75;
     static constexpr int DEF_LP_TLTRLL = 75;
     static constexpr int DEF_PWM_A0_CH = -1;
@@ -199,6 +200,9 @@ public:
 
     int rollCh() const;
     void setRollCh(int value);
+
+    int alertCh() const;
+    void setAlertCh(int value);
 
     int ppmOutPin() const;
     void setPpmOutPin(int value);
