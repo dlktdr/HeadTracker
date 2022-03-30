@@ -472,7 +472,7 @@ void FirmwareWizard::programClicked()
 
         // Relative hostname
         } else {
-            QStringList host = ui->cmbSource->currentData().toString().split('/',Qt::KeepEmptyParts);
+            QStringList host = ui->cmbSource->currentData().toString().split('/',QString::KeepEmptyParts);
             host.removeLast();
             host.append("");
             QString hostparentfolder = host.join('/');

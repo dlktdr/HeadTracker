@@ -635,13 +635,15 @@ QVariantMap TrackerSettings::liveDataMap()
     return _live;
 }
 
-void TrackerSettings::setLiveDataMap(const QVariantMap &livelist,bool reset)
+void TrackerSettings::setLiveDataMap(const QVariantMap &livelist, bool reset)
 {
     if(reset)
         _live.clear();
 
     // Update List
-    _live = livelist;
+    QVariantMap::const_iterator ll;
+    for (ll = livelist.begin(); ll != livelist.end(); ++ll)
+      _live[ll.key()] = ll.value();
 
     // Emit if a value has been updated
     bool ge=false,ae=false,me=false,oe=false,ooe=false,ppm=false;

@@ -1,5 +1,9 @@
 #include "boardnano33ble.h"
 
+#ifndef WINDOWS
+#define Sleep(x) sleep(x)
+#endif
+
 BoardNano33BLE::BoardNano33BLE(TrackerSettings *ts)
 {
     trkset = ts;
