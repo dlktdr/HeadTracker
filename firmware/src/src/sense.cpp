@@ -149,6 +149,8 @@ void calculate_Thread()
                 amag[0] = magx; amag[1] = magy;  amag[2] = magz;
 
             }
+
+        // Average samples
         } else if(madgreads < MADGSTART_SAMPLES-1) {
             if(madgsensbits == MADGINIT_READY) {
                 madgsensbits = 0;
@@ -159,7 +161,7 @@ void calculate_Thread()
                 amag[0] /= 2;    amag[1] /= 2;     amag[2] /= 2;
             }
 
-        // Got 10 Values
+        // Got the averaged values, apply the initial orientation.
         } else if(madgreads == MADGSTART_SAMPLES-1) {
             // Pass it averaged values
             madgwick.begin(aacc[0], aacc[1], aacc[2], amag[0], amag[1], amag[2]);
@@ -167,7 +169,7 @@ void calculate_Thread()
             madgreads = MADGSTART_SAMPLES;
         }
 
-        // Apply initial orientation
+        // Do the AHRS calculations
         if(madgreads == MADGSTART_SAMPLES) {
             madgwick.update(gyrx * DEG_TO_RAD, gyry * DEG_TO_RAD, gyrz * DEG_TO_RAD,
                             accx, accy, accz,
@@ -196,7 +198,7 @@ void calculate_Thread()
         static bool btbtnlngupdated=false;
         if(BTGetMode() == BTPARARMT) {
             if(butlngdwn && btbtnlngupdated == false) {
-                BTRmtSendButtonPress(true);
+                BTRmtSendButtonPress(true); // Send the long press over bluetooth to remote board
                 btbtnlngupdated = true;
             }
             else if(btbtnlngupdated == true) {
@@ -219,7 +221,7 @@ void calculate_Thread()
         static bool btbtnupdated=false;
         if(BTGetMode() == BTPARARMT) {
             if(butdnw && btbtnupdated == false) {
-                BTRmtSendButtonPress(false);
+                BTRmtSendButtonPress(false); // Send the short press over bluetooth to remote board
                 btbtnupdated = true;
             }
             else if(btbtnupdated == true) {
@@ -279,6 +281,7 @@ void calculate_Thread()
                     doresetontilt = true;
                 }
             }
+
             // If hit a max/min wait an amount of time and reset it
             if(tiltpeak == true) {
                 resettime += (float)CALCULATE_PERIOD / 1000000.0;
@@ -470,8 +473,10 @@ void calculate_Thread()
         }
 
         // 9) Then, set Tilt/Roll/Pan Channel Values (after reset center in case of channel overlap)
-        // Only set these outputs if button press mode is set to off        
-        if(trkset.buttonPressMode() == false)
+
+        // If the long press for enable/disable isn't set or if there is no reset button configured
+        //   always enable the T/R/P outputs
+        if(trkset.buttonPressMode() == false || trkset.buttonPin() == 0)
             trpOutputEnabled = true;
 
         int tltch = trkset.tiltCh();

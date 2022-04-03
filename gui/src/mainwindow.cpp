@@ -554,6 +554,12 @@ void MainWindow::updateToUI()
     ui->chkLngBttnPress->setChecked(trkset.buttonPressMode());
     ui->chkRstOnTlt->setChecked(trkset.resetOnTiltMode());
 
+    // Button Press Mode - Enable/Disable on long press (Disable if no button pin selected)
+    if(trkset.buttonPin() > 0)
+        ui->chkLngBttnPress->setEnabled(true);
+    else
+        ui->chkLngBttnPress->setEnabled(false);
+
     ui->spnPPMFrameLen->setMinimum((double)TrackerSettings::PPM_MIN_FRAME / 1000.0);
     ui->spnPPMFrameLen->setMaximum((double)TrackerSettings::PPM_MAX_FRAME / 1000.0);
 
@@ -816,7 +822,7 @@ void MainWindow::updateFromUI()
     }
 
     // Button Press Mode - Enable/Disable on long press (Disable if no button pin selected)
-    if(pins[PIN_BUTRESET] > 0)
+    if(trkset.buttonPin() > 0)
         ui->chkLngBttnPress->setEnabled(true);
     else
         ui->chkLngBttnPress->setEnabled(false);
