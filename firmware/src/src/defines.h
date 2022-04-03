@@ -14,7 +14,7 @@
 #define SERIAL_PERIOD 30        // (ms) Serial processing
 #define DATA_PERIOD 2           // Multiplier of Serial Period (Live Data Transmission Speed)
 #define SENSOR_PERIOD 16666     // (us) 60hz Read Sensors
-#define CALCULATE_PERIOD 6666   // (us) 150hz IMU calculations
+#define CALCULATE_PERIOD 6000   // (us) 166hz IMU calculations
 #define PWM_FREQUENCY 50        // (ms) PWM Period
 #define UIRESPONSIVE_TIME 10000 // (ms) 10Seconds without an ack data will stop;
 
@@ -69,23 +69,22 @@ extern volatile bool gyro_calibrated;
 
 // Known good 14,15,16,17,18,19
 // Unusable 13
-#define SBUSIN1_PPICH 16
-#define SBUSIN2_PPICH 15
-#define SBUSOUT_PPICH 14
+#define SERIALIN1_PPICH 16
+#define SERIALIN2_PPICH 15
+#define SERIALOUT_PPICH 14
 #define PPMIN_PPICH1 17
 #define PPMIN_PPICH2 18
 #define PPMOUT_PPICH 19
 
-#define SBUS_UARTE_CH 1
+#define SERIAL_UARTE_CH 1
 
 // GPIOTE
 // Known good GPIOTE 0,1,2,3,4,5,6,7
-
-#define SBUSOUT0_GPIOTE 4
-#define SBUSOUT1_GPIOTE 5
-#define SBUSIN0_GPIOTE 0
-#define SBUSIN1_GPIOTE 1
-#define SBUSIN2_GPIOTE 2
+#define SERIALOUT0_GPIOTE 4
+#define SERIALOUT1_GPIOTE 5
+#define SERIALIN0_GPIOTE 0
+#define SERIALIN1_GPIOTE 1
+#define SERIALIN2_GPIOTE 2
 #define PPMIN_GPIOTE 6
 #define PPMOUT_GPIOTE 7
 
@@ -118,7 +117,8 @@ extern volatile bool gyro_calibrated;
 
 #if defined(RTOS_ZEPHYR)
 #define micros() k_cyc_to_us_floor32(k_cycle_get_32())
-#define micros64() k_cyc_to_us_floor64(k_uptime_get())
+#define millis64() k_uptime_get()
+#define micros64() k_cyc_to_us_floor64(k_cycle_get_32())
 #define millis() k_cyc_to_ms_floor32(k_cycle_get_32())
 #define rt_sleep_ms(x) k_msleep(x)
 #define rt_sleep_us(x) k_usleep(x)

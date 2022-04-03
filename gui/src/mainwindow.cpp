@@ -775,7 +775,7 @@ void MainWindow::updateFromUI()
     pins[PIN_BUTRESET] = but_index==1?-1:but_index;
 
     bool sbusinchecked = ui->chkSbusInInv->isChecked();
-    if(sbusinchecked) {
+    if(!sbusinchecked) {
         pins[PIN_SBUSIN1] = 5;
         pins[PIN_SBUSIN2] = 6;
     }
@@ -794,7 +794,7 @@ void MainWindow::updateFromUI()
     // Check for pin duplicates
     if(duplicates) {
         QString message = tr("Cannot pick dulplicate pins");
-        if(sbusinchecked)
+        if(!sbusinchecked)
             message += tr("\n  ** SBUS input invert signal needs pins D5 and D6 connected together");
         QMessageBox::information(this,tr("Error"), message);
 

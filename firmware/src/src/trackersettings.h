@@ -126,9 +126,10 @@ public:
     static constexpr int DEF_PWM_A1_CH = -1;
     static constexpr int DEF_PWM_A2_CH = -1;
     static constexpr int DEF_PWM_A3_CH = -1;
-    static constexpr bool DEF_SBUS_IN_INV = false;
-    static constexpr bool DEF_SBUS_OUT_INV = false;
+    static constexpr bool DEF_SBUS_IN_INV = true;
+    static constexpr bool DEF_SBUS_OUT_INV = true;
     static constexpr int DEF_SBUS_RATE = 60;
+    static constexpr float SBUS_ACTIVE_TIME = 0.1; // 10Hz
     static constexpr int DEF_ALG_A4_CH = -1;
     static constexpr int DEF_ALG_A5_CH = -1;
     static constexpr int DEF_ALG_A6_CH = -1;
@@ -271,7 +272,7 @@ public:
     int PWMCh(int pwmno) { return pwm[pwmno];}
 
 // SBUS
-    void setInvertedSBUSIn(bool v);
+    void setInvertedSBUSIn(bool v) {sbininv = v;}
     bool invertedSBUSIn() {return sbininv;}
     void setInvertedSBUSOut(bool v) {sboutinv = v;}
     bool invertedSBUSOut() {return sboutinv;}

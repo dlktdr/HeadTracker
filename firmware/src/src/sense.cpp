@@ -24,7 +24,7 @@
 #include "serial.h"
 #include "bluetooth/ble.h"
 #include "MadgwickAHRS/MadgwickAHRS.h"
-#include "SBUS/uarte_sbus.h"
+#include "SBUS/sbus.h"
 #include "APDS9960/APDS9960.h"
 #include "PWM/pmw.h"
 #include "LSM9DS1/LSM9DS1.h"
@@ -61,7 +61,7 @@ static uint16_t channel_data[16];
 
 Madgwick madgwick;
 
-uint32_t ustocalculate;
+int64_t usduration=0;
 
 static bool blesenseboard=false;
 static bool lastproximity=false;
@@ -127,14 +127,12 @@ int sense_Init()
 void calculate_Thread()
 {
     while(1) {
-        rt_sleep_us(CALCULATE_PERIOD);
-
         if(!senseTreadRun) {
+            rt_sleep_ms(10);
             continue;
         }
 
-        // Store current time to adjust sleep period for a consistent period
-        ustocalculate = micros();
+         usduration = micros();
 
         // Period Between Samples
         float deltat = madgwick.deltatUpdate();
@@ -343,8 +341,32 @@ void calculate_Thread()
         }
 
         // 3) Set all incoming SBUS values
-
-        //*** Todo
+        static float sbustimer=TrackerSettings::SBUS_ACTIVE_TIME;
+        static bool lostmsgsent=false;
+        static bool recmsgsent=false;
+        sbustimer += (float)CALCULATE_PERIOD / 1000000.0;
+        if(SBUS_Read_Data(sbus_in_chans)) { // Valid SBUS packet received?
+            sbustimer = 0;
+        }
+        // SBUS not received within XX time, disable
+        if(sbustimer > TrackerSettings::SBUS_ACTIVE_TIME) {
+            for(int i=0; i < 16; i++)
+                sbus_in_chans[i] = 0;
+            if(!lostmsgsent) {
+                serialWriteln("HT: SBUS Data Lost");
+                lostmsgsent = true;
+            }
+            recmsgsent = false;
+        // SBUS data still valid, set the channel values to the last SBUS
+        } else {
+            for(int i=0; i < 16; i++)
+                channel_data[i] = sbus_in_chans[i];
+            if(!recmsgsent) {
+                serialWriteln("HT: SBUS Data Received");
+                recmsgsent = true;
+            }
+            lostmsgsent = false;
+        }
 
         // 4) Set all incoming BT values
         // Bluetooth cannot send a zero value for a channel with PARA. Radios see this as invalid data.
@@ -537,6 +559,12 @@ void calculate_Thread()
             trkset.setBlueToothConnected(bleconnected);
             k_mutex_unlock(&data_mutex);
         }
+
+        usduration = micros() - usduration;
+        if(usduration < 0) { // FAULT - Code took all cpu
+            usduration = CALCULATE_PERIOD;
+        }
+        rt_sleep_us(CALCULATE_PERIOD - usduration);
     }
 }
 

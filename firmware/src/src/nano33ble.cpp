@@ -7,7 +7,7 @@
 #include "bluetooth/ble.h"
 #include "PPM/PPMOut.h"
 #include "PPM/PPMIn.h"
-#include "SBUS/uarte_sbus.h"
+#include "SBUS/sbus.h"
 #include "PWM/pmw.h"
 #include "Joystick/joystick.h"
 #include "log.h"
