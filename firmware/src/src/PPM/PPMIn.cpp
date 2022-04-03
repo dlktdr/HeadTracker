@@ -43,7 +43,7 @@ static int isrch_count=0;
 static uint16_t channels[16];
 static int ch_count=0;
 
-static volatile uint32_t runtime = 0;
+static volatile uint64_t runtime = 0;
 
 ISR_DIRECT_DECLARE(PPMInGPIOTE_ISR)
 {
@@ -67,7 +67,7 @@ ISR_DIRECT_DECLARE(PPMInGPIOTE_ISR)
             framestarted = true;
 
             // Used to check if a signal is here
-            runtime = micros();
+            runtime = micros64();
 
 
         // Valid Ch Range
@@ -211,8 +211,7 @@ void PpmIn_execute()
 {
     static bool sentconn=false;
 
-    uint64_t micros = micros64() - runtime;
-    if(micros > 60000) {
+    if(micros64() - runtime > 60000) {
         if(sentconn == false) {
             serialWriteln("HT: PPM Input Data Lost");
             sentconn = true;
