@@ -74,33 +74,6 @@ void io_Thread()
         if(!ioThreadRun)
             continue;
 
-        static bool lastButtonDown=false;
-        butpin = trkset.buttonPin();
-
-        // Make sure button pin is enabled
-        if(butpin < 1 || butpin > 13 )
-            continue;
-
-        bool buttonDown = digitalRead(D_TO_32X_PIN(butpin)) == 0;
-
-        // Button pressed down
-        if(buttonDown && !lastButtonDown) {
-            pressedtime = 0;
-
-        // Increment count if held down
-        } else if (buttonDown && lastButtonDown) {
-            pressedtime += IO_PERIOD;
-
-        // Just Released
-        } else if(!buttonDown && lastButtonDown) {
-            if(pressedtime > BUTTON_LONG_PRESS_TIME) {
-                longPressButton();
-            } else if (pressedtime > BUTTON_HOLD_TIME) {
-                pressButton();
-            }
-        }
-        lastButtonDown = buttonDown;
-
         // LEDS
         if(_ledmode & LED_GYROCAL) {
             led_on_time = 200;
@@ -132,6 +105,33 @@ void io_Thread()
         _counter+=IO_PERIOD;
         if(_counter > 10000)
             _counter = 0;
+
+        static bool lastButtonDown=false;
+        butpin = trkset.buttonPin();
+
+        // Make sure button pin is enabled
+        if(butpin < 1 || butpin > 13 )
+            continue;
+
+        bool buttonDown = digitalRead(D_TO_32X_PIN(butpin)) == 0;
+
+        // Button pressed down
+        if(buttonDown && !lastButtonDown) {
+            pressedtime = 0;
+
+        // Increment count if held down
+        } else if (buttonDown && lastButtonDown) {
+            pressedtime += IO_PERIOD;
+
+        // Just Released
+        } else if(!buttonDown && lastButtonDown) {
+            if(pressedtime > BUTTON_LONG_PRESS_TIME) {
+                longPressButton();
+            } else if (pressedtime > BUTTON_HOLD_TIME) {
+                pressButton();
+            }
+        }
+        lastButtonDown = buttonDown;
     }
 }
 
