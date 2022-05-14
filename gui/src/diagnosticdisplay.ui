@@ -32,7 +32,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QTableWidget" name="tblLiveData"/>
+    <widget class="QTableView" name="tblLiveData"/>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">

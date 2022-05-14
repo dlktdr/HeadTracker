@@ -1,3 +1,4 @@
+#include <QDebug>
 #include "diagnosticdisplay.h"
 #include "ui_diagnosticdisplay.h"
 
@@ -13,75 +14,29 @@ DiagnosticDisplay::DiagnosticDisplay(TrackerSettings *ts, QWidget *parent) :
     ui->tblParams->horizontalHeader()->setVisible(false);
     ui->tblParams->horizontalHeader()->setStretchLastSection(true);
     ui->tblParams->setColumnWidth(0,100);
-    ui->tblLiveData->verticalHeader()->setVisible(false);
-    ui->tblLiveData->horizontalHeader()->setVisible(false);
-    ui->tblLiveData->horizontalHeader()->setStretchLastSection(true);
-    ui->tblLiveData->setColumnWidth(0,100);
+    //buildSettingsModel();
+
+    model = new DataModel(trkset);
+    ui->tblLiveData->setModel(model);
+    //ui->tblLiveData->setStyleSheet("QTreeView::item {padding-left: 0px; border: 0px}");
+    ui->tblLiveData->resizeColumnToContents(0);
+    ui->tblLiveData->horizontalHeader()->setSectionResizeMode(1,QHeaderView::Stretch);
 }
 
 DiagnosticDisplay::~DiagnosticDisplay()
 {
-    delete ui;
+  delete ui;
 }
 
 void DiagnosticDisplay::updated()
 {
-
-    QVariantMap livedata;
     QVariantMap settings=trkset->allData();
 
     ui->tblParams->clear();
     ui->tblParams->setColumnCount(2);
     ui->tblParams->setRowCount(settings.count());
-    ui->tblLiveData->clear();
-    ui->tblLiveData->setColumnCount(2);
-    ui->tblLiveData->setRowCount(trkset->allDataItems().count());
 
     int row=0;
-    // Add all items to map    
-    foreach(QString dataval, trkset->allDataItems()) {
-      livedata[dataval] = QVariant("");
-    }
-
-    // Update actual data
-    QVariantMap currentdata=trkset->liveDataMap();
-    QMapIterator<QString, QVariant> a(currentdata);
-    while (a.hasNext()) {
-      a.next();
-      livedata[a.key()] = a.value();
-    }
-
-    // Remove any unused items
-    QMap<QString, bool> sendingdata=trkset->getDataItems();
-    QMapIterator<QString, bool> c(sendingdata);
-    while (c.hasNext()) {
-      c.next();
-      if(!c.value())
-        livedata[c.key()] = QString("");
-    }
-
-    // Show all data in widget
-    QMapIterator<QString, QVariant> i(livedata);
-    while (i.hasNext()) {
-        i.next();
-        QTableWidgetItem *key = new QTableWidgetItem(i.key());
-        key->setFlags(key->flags() | Qt::ItemIsUserCheckable);
-        if(i.value().toString().isEmpty())
-          key->setCheckState(Qt::Unchecked);
-        else
-          key->setCheckState(Qt::Checked);
-
-        QTableWidgetItem *value = new QTableWidgetItem(i.value().toString());
-        if(i.key() == "Cmd") {
-            key->setBackground(QBrush(Qt::lightGray));
-            value->setBackground(QBrush(Qt::lightGray));
-        }
-        ui->tblLiveData->setItem(row,0,key);
-        ui->tblLiveData->setItem(row++,1,value);
-    }
-
-
-    row=0;
     QMapIterator<QString, QVariant> x(settings);
     while (x.hasNext()) {
         x.next();
@@ -95,7 +50,156 @@ void DiagnosticDisplay::updated()
         ui->tblParams->setItem(row,0,key);
         ui->tblParams->setItem(row++,1,value);
     }
-
-
-
 }
+
+DataModel::DataModel(TrackerSettings *ts, QObject *parent)
+  : QAbstractItemModel(parent)
+{
+  trkset = ts;
+  int i=0;
+
+  // Build all the data
+  foreach(QString di, trkset->allDataItems()) {
+    DataItem *dataitem = new DataItem;
+    dataitem->checked = false;
+    dataitem->name = di;
+    dataitem->index0 = createIndex(i,0,dataitem);
+    dataitem->index1 = createIndex(i++,1,dataitem);
+    datalist.append(dataitem);
+  }
+  connect(trkset,&TrackerSettings::liveDataChanged, this, &DataModel::dataupdate);
+}
+
+DataModel::~DataModel()
+{
+  foreach(DataItem *itm, datalist) {
+    delete itm;
+  }
+}
+
+Qt::ItemFlags DataModel::flags(const QModelIndex &index) const
+{
+  if(index.column() == 0)
+    return Qt::ItemIsUserCheckable |
+           Qt::ItemIsEnabled;
+  return Qt::ItemIsEnabled;
+}
+
+bool DataModel::setData(const QModelIndex &index, const QVariant &value, int role)
+{
+  if(!index.isValid())
+    return false;
+  if(index.column() == 0 && role == Qt::CheckStateRole && index.row() < datalist.count()) {
+    qDebug() << "User checked row" << index.row();
+    DataItem *itm = datalist.at(index.row());
+    bool checked = value==Qt::Checked?true:false;
+
+    // Is it an array value
+    QString arrname = itm->name.mid(0,itm->name.indexOf('['));
+    if(arrname.size()) {
+      trkset->setDataItemSend(arrname, checked);
+      checkArray(arrname, checked); // Select them all
+    // Single Values
+    } else {
+      itm->checked = checked;
+      trkset->setDataItemSend(datalist.at(index.row())->name,itm->checked);
+    }
+    return true;
+  }
+  return false;
+}
+
+QVariant DataModel::data(const QModelIndex &index, int role) const
+{
+
+  if(index.row() >= datalist.count() - 1 || !index.isValid() )
+    return QVariant();
+
+  if(role == Qt::DisplayRole) {
+    if(index.column() == 0) {
+        return datalist.at(index.row())->name;
+    }
+    if(index.column() == 1) {
+        return datalist.at(index.row())->value;
+    }
+  } else if (role == Qt::CheckStateRole) {
+      if(index.column() == 0)
+        return datalist.at(index.row())->checked?Qt::Checked:Qt::Unchecked;
+    }
+  return QVariant();
+}
+
+QModelIndex DataModel::index(int row, int column, const QModelIndex &parent) const
+{
+  Q_UNUSED(parent)
+  if(!(row < datalist.count()))
+    return QModelIndex();
+
+  if(column == 0)
+    return datalist.at(row)->index0;
+  else if (column == 1)
+    return datalist.at(row)->index1;
+
+  return QModelIndex();
+}
+
+QModelIndex DataModel::parent(const QModelIndex &index) const
+{
+  Q_UNUSED(index);
+  return QModelIndex();
+}
+
+QVariant DataModel::headerData(int section, Qt::Orientation orientation, int role) const
+{
+  if(role != Qt::DisplayRole ||
+     orientation != Qt::Horizontal)
+    return QVariant();
+  if(section == 0)
+    return tr("Item");
+  if(section == 1)
+    return tr("Value");
+  return QVariant();
+}
+
+void DataModel::checkArray(QString array, bool checked)
+{
+  foreach(DataItem *itm, datalist) {
+    QString arrname = itm->name.mid(0,itm->name.indexOf('['));
+    if(arrname == array) {
+      itm->checked = checked;
+      Q_EMIT(dataChanged(itm->index0,itm->index0));
+    }
+  }
+}
+
+void DataModel::dataupdate()
+{
+  // Update local map of data
+  QVariantMap liveDataMap = trkset->liveDataMap();
+  QMapIterator<QString, QVariant> a(liveDataMap);
+  while (a.hasNext()) {
+    a.next();
+    for(int i=0; i < datalist.count(); ++i) {
+      if(datalist.at(i)->name == a.key()) {
+        datalist[i]->value = a.value();
+        Q_EMIT(dataChanged(datalist[i]->index1,datalist[i]->index1));
+      }
+    }
+  }
+
+  // Check all the currently sending items
+  QMapIterator<QString, bool> b(trkset->getDataItems());
+  while (b.hasNext()) {
+    b.next();
+    // Loop through all StandardItems to find a match
+    for(int i=0; i < datalist.count(); i++) {
+      DataItem *itm = datalist.at(i);
+      if(b.key() == itm->name) {
+        itm->checked = b.value();
+          Q_EMIT(dataChanged(itm->index0,itm->index0));
+        break;
+      }
+    }
+  }
+}
+
