@@ -188,6 +188,13 @@ void calculate_Thread()
         // Free Mutex Lock, Allow sensor updates
         k_mutex_unlock(&sensor_mutex);
 
+        // Re-apply inital orientation as soon as the gyro calibration is done
+        // As is is a good time to be known sitting still.
+        static bool lastgyrcal=false;
+        if(gyro_calibrated == true && lastgyrcal == false)
+            reset_fusion();
+        lastgyrcal = gyro_calibrated;
+
         // Toggles output on and off if long pressed
         bool butlngdwn = false;
         if(wasButtonLongPressed()) {
@@ -209,11 +216,9 @@ void calculate_Thread()
         // Zero button was pressed, adjust all values to zero
         bool butdnw = false;
         if(wasButtonPressed()) {
-            if(!trkset.resetOnTiltMode())
-                rolloffset = roll;
+            rolloffset = roll;
             panoffset = pan;
             tiltoffset = tilt;
-            reset_fusion();
             butdnw = true;
         }
 
@@ -476,8 +481,20 @@ void calculate_Thread()
 
         // If the long press for enable/disable isn't set or if there is no reset button configured
         //   always enable the T/R/P outputs
-        if(trkset.buttonPressMode() == false || trkset.buttonPin() == 0)
+        static bool lastbutmode = false;
+        bool buttonpresmode = trkset.buttonPressMode();
+        if(buttonpresmode == false || trkset.buttonPin() == 0)
             trpOutputEnabled = true;
+
+        // On user enabling the button press mode in the GUI default to TRP output off.
+        if(lastbutmode == false && buttonpresmode == true) {
+            trpOutputEnabled = false;
+        }
+        lastbutmode = buttonpresmode;
+
+        // If gyro isn't calibrated, don't output TRP
+        if(!gyro_calibrated)
+            trpOutputEnabled = false;
 
         int tltch = trkset.tiltCh();
         int rllch = trkset.rollCh();
@@ -559,8 +576,8 @@ void calculate_Thread()
             trkset.setGyroCalibrated(gyro_calibrated);
 
             // Qauterion Data
-            //float *qd = madgwick.getQuat();
-            //trkset.setQuaternion(qd);
+            float *qd = madgwick.getQuat();
+            trkset.setQuaternion(qd);
 
             // Bluetooth connected
             trkset.setBlueToothConnected(bleconnected);
@@ -668,9 +685,9 @@ void sensor_Thread()
 
             if(!gyro_calibrated) {
                 if(initrun) { // Preload on first read
-                    initrun = false;
                     avg[0] = rgyrx; avg[1] = rgyry; avg[2] = rgyrz;
                     lavg[0] = rgyrx; lavg[1] = rgyry; lavg[2] = rgyrz;
+                    initrun = false;
                 } else {
                     avg[0] = (avg[0] * GYRO_LP_BETA) + (rgyrx * (1.0-GYRO_LP_BETA));
                     avg[1] = (avg[1] * GYRO_LP_BETA) + (rgyry * (1.0-GYRO_LP_BETA));
@@ -682,7 +699,8 @@ void sensor_Thread()
                         diff[i] = fabs(avg[i] - lavg[i]) / (SENSOR_PERIOD/1000000.0);
                         lavg[i] = avg[i];
                     }
-                    // If rate of change low then increment the average
+
+                    // If rate of change low then decrement the counter
                     if(diff[0] < GYRO_PASS_DIFF &&
                        diff[1] < GYRO_PASS_DIFF &&
                        diff[2] < GYRO_PASS_DIFF)
