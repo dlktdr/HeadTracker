@@ -10,6 +10,13 @@ volatile bool longpressedbutton=false;
 volatile int butpin;
 volatile uint32_t _ledmode = 0;
 
+// LED Blink Patterns
+typedef struct {
+  uint32_t RGB=0;
+  uint16_t time=0;
+} rgb_s;
+rgb_s led_sequence[LED_MAX_SEQUENCE_COUNT];
+
 //                  0 1  2  3  4  5  6  7  8  9  10 11 12 13
 int dpintoport[] = {1,1, 1 ,1 ,1 ,1 ,1 ,0 ,0 ,0 ,1 ,1 ,1 ,0 };
 int dpintopin[]  = {3,10,11,12,15,13,14,23,21,27,2 ,1 ,8 ,13};
@@ -67,6 +74,9 @@ void io_Thread()
     bool led_is_on=false;
     int led_on_time=25;
     int led_off_time=200;
+    int rgb_sequence_no=0;
+    uint32_t rgb_timer=millis();
+
     uint32_t _counter=0;
 
     while(1) {
@@ -81,26 +91,83 @@ void io_Thread()
         } else if (_ledmode & LED_BTCONNECTED) {
             led_on_time = 800;
             led_off_time = 200;
+        } else if (_ledmode & LED_MAGCAL) {
+            led_on_time = 100;
+            led_off_time = 25;
         } else {
             led_on_time = 25;
             led_off_time = 200;
         }
+
         if((!led_is_on && (_counter % led_off_time == 0)) ||
             (led_is_on && (_counter % led_on_time == 0))) {
             led_is_on = !led_is_on;
             digitalWrite(LED_BUILTIN,led_is_on);
         }
 
-        // RGB_LED Output
-        if(_ledmode & LED_BTCONNECTED) // Blue LED = Bluetooth connected
-            digitalWrite(LEDB,LOW);
-        else
-            digitalWrite(LEDB,HIGH);
+        // Bluetooth Connected - Blue light on solid
+        if(_ledmode & LED_BTCONNECTED) {
+          led_sequence[0].RGB = RGB_BLUE;
+          led_sequence[0].time = 100;
+          led_sequence[1].time = 0; // End Sequence
 
-        if(_ledmode & LED_GYROCAL) // Red LED Flashing = Gyro_in_calibration
-            digitalWrite(LEDR,LOW);
+        // Bluetooth Scanning, Blue light slow blinking
+        } else if(_ledmode & LED_BTSCANNING) {
+          led_sequence[0].RGB = RGB_BLUE;
+          led_sequence[0].time = 300;
+          led_sequence[1].RGB = 0;
+          led_sequence[1].time = 300;
+          led_sequence[2].time = 0; // End Sequence
+
+        // Magnetometer Calibration Mode - Red, Blue, Pause
+        } else if(_ledmode & LED_MAGCAL) {
+          led_sequence[0].RGB = RGB_RED;
+          led_sequence[0].time = 200;
+          led_sequence[1].RGB = RGB_BLUE;
+          led_sequence[1].time = 200;
+          led_sequence[2].RGB = 0;    // Pause
+          led_sequence[2].time = 200;
+          led_sequence[3].time = 0; // End Sequence
+
+        // Gyro Calibration Mode - Long Red, Flashing
+        } else if(_ledmode & LED_GYROCAL) {
+          led_sequence[0].RGB = RGB_RED;
+          led_sequence[0].time = 400;
+          led_sequence[1].RGB = 0;
+          led_sequence[1].time = 200;
+          led_sequence[2].time = 0; // End Sequence
+        } else {
+          rgb_sequence_no = 0;
+          led_sequence[0].time = 0;
+        }
+
+        // Run the Sequence
+        uint32_t curcolor = led_sequence[rgb_sequence_no].RGB;
+        if(led_sequence[rgb_sequence_no].time == 0)
+          curcolor = 0;
+
+        // TODO - Replace me with PWM control
+        if(curcolor & RGB_RED)
+          digitalWrite(LEDR,LOW);
         else
-            digitalWrite(LEDR,HIGH);
+          digitalWrite(LEDR,HIGH);
+        if(curcolor & RGB_GREEN)
+          digitalWrite(LEDG,LOW);
+        else
+          digitalWrite(LEDG,HIGH);
+        if(curcolor & RGB_BLUE)
+          digitalWrite(LEDB,LOW);
+        else
+          digitalWrite(LEDB,HIGH);
+
+        if(millis() > rgb_timer + led_sequence[rgb_sequence_no].time) {
+          if(rgb_sequence_no < LED_MAX_SEQUENCE_COUNT &&
+             led_sequence[rgb_sequence_no].time != 0)
+             rgb_sequence_no++;
+          else
+            rgb_sequence_no = 0;
+          rgb_timer = millis(); // Reset current time
+        }
 
         _counter+=IO_PERIOD;
         if(_counter > 10000)
