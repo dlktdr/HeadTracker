@@ -1,6 +1,6 @@
 /*
  * This file is part of the Head Tracker distribution (https://github.com/dlktdr/headtracker)
- * Copyright (c) 2021 Cliff Blackburn
+ * Copyright (c) 2022 Cliff Blackburn
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -137,12 +137,12 @@ uint64_t bytesread = 0;
 
 bool SBUS_Read_Data(uint16_t ch_[16])
 {
-    //#ifdef DEBUG
+#ifdef DEBUG
         static bool toggle=false;
         pinMode(D_TO_32X_PIN(8),GPIO_OUTPUT);
         digitalWrite(D_TO_32X_PIN(8),toggle);
         toggle = !toggle;
-//#endif
+#endif
     bool newdata = false;
     while(SbusRx_Parse()) { // Get most recent data if more than 1 packet came in
         newdata = true;
