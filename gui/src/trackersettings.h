@@ -16,38 +16,39 @@
 // Variables to be sent back to GUI if enabled
 // Datatype, Name, UpdateDivisor, RoundTo
 #define DATA_VARS\
-    DV(float,magx,      1,1000)\
-    DV(float,magy,      1,1000)\
-    DV(float,magz,      1,1000)\
-    DV(float,gyrox,     1,1000)\
-    DV(float,gyroy,     1,1000)\
-    DV(float,gyroz,     1,1000)\
-    DV(float,accx,      1,1000)\
-    DV(float,accy,      1,1000)\
-    DV(float,accz,      1,1000)\
-    DV(float,off_magx,  5,1000)\
-    DV(float,off_magy,  5,1000)\
-    DV(float,off_magz,  5,1000)\
-    DV(float,off_gyrox, 5,1000)\
-    DV(float,off_gyroy, 5,1000)\
-    DV(float,off_gyroz, 5,1000)\
-    DV(float,off_accx,  5,1000)\
-    DV(float,off_accy,  5,1000)\
-    DV(float,off_accz,  5,1000)\
-    DV(float,tilt,      5,1000)\
-    DV(float,roll,      5,1000)\
-    DV(float,pan,       5,1000)\
-    DV(float,tiltoff,   1,1000)\
-    DV(float,rolloff,   1,1000)\
-    DV(float,panoff,    1,1000)\
-    DV(uint16_t,tiltout,1,-1)\
-    DV(uint16_t,rollout,1,-1)\
-    DV(uint16_t,panout, 1,-1)\
+    DV(float,magx,       1,1000)\
+    DV(float,magy,       1,1000)\
+    DV(float,magz,       1,1000)\
+    DV(float,gyrox,      1,1000)\
+    DV(float,gyroy,      1,1000)\
+    DV(float,gyroz,      1,1000)\
+    DV(float,accx,       1,1000)\
+    DV(float,accy,       1,1000)\
+    DV(float,accz,       1,1000)\
+    DV(float,off_magx,   5,1000)\
+    DV(float,off_magy,   5,1000)\
+    DV(float,off_magz,   5,1000)\
+    DV(float,off_gyrox,  5,1000)\
+    DV(float,off_gyroy,  5,1000)\
+    DV(float,off_gyroz,  5,1000)\
+    DV(float,off_accx,   5,1000)\
+    DV(float,off_accy,   5,1000)\
+    DV(float,off_accz,   5,1000)\
+    DV(float,tilt,       5,1000)\
+    DV(float,roll,       5,1000)\
+    DV(float,pan,        5,1000)\
+    DV(float,tiltoff,    1,1000)\
+    DV(float,rolloff,    1,1000)\
+    DV(float,panoff,     1,1000)\
+    DV(uint16_t,tiltout, 1,-1)\
+    DV(uint16_t,rollout, 1,-1)\
+    DV(uint16_t,panout,  1,-1)\
     DV(bool,isCalibrated,2,-1)\
-    DV(bool,btcon,      10,-1)\
-    DV(bool,isSense,      10,-1)\
+    DV(bool,gyroCal,     2,-1)\
+    DV(bool,btcon,       10,-1)\
+    DV(bool,isSense,     10,-1)\
     DV(bool,trpenabled,  10,-1)\
-    DV(uint8_t, cpuuse, 1,-1)
+    DV(uint8_t, cpuuse,  1,-1)
 
 // To shorten names, as these are sent to the GUI for decoding
 #define u8  uint8_t

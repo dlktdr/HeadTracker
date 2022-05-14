@@ -556,6 +556,8 @@ void calculate_Thread()
             trkset.setChannelOutValues(channel_data);
             trkset.setTRPEnabled(trpOutputEnabled);
 
+            trkset.setGyroCalibrated(gyro_calibrated);
+
             // Qauterion Data
             //float *qd = madgwick.getQuat();
             //trkset.setQuaternion(qd);
