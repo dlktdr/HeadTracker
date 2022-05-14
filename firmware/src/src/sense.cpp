@@ -841,12 +841,12 @@ void reset_fusion()
 void buildAuxData()
 {
     float pwmrange = (TrackerSettings::MAX_PWM - TrackerSettings::MIN_PWM);
-    auxdata[0] = (gyrx / 1000) * pwmrange + TrackerSettings::PPM_CENTER;
-    auxdata[1] = (gyry / 1000) * pwmrange + TrackerSettings::PPM_CENTER;
-    auxdata[2] = (gyrz / 1000) * pwmrange + TrackerSettings::PPM_CENTER;
-    auxdata[3] = (accx / 2.0f) * pwmrange + TrackerSettings::PPM_CENTER;
-    auxdata[4] = (accy / 2.0f) * pwmrange + TrackerSettings::PPM_CENTER;
-    auxdata[5] = (accz / 1.0f) * pwmrange + TrackerSettings::PPM_CENTER;
-    auxdata[6] = ((accz -1.0f) / 2.0f) * pwmrange + TrackerSettings::PPM_CENTER;
-    auxdata[7] = static_cast<float>(BTGetRSSI()) / 127.0 * pwmrange + TrackerSettings::MIN_PWM;
+    auxdata[TrackerSettings::AUX_GYRX] = (gyrx / 1000) * pwmrange + TrackerSettings::PPM_CENTER;
+    auxdata[TrackerSettings::AUX_GYRY] = (gyry / 1000) * pwmrange + TrackerSettings::PPM_CENTER;
+    auxdata[TrackerSettings::AUX_GYRZ] = (gyrz / 1000) * pwmrange + TrackerSettings::PPM_CENTER;
+    auxdata[TrackerSettings::AUX_ACCELX] = (accx / 2.0f) * pwmrange + TrackerSettings::PPM_CENTER;
+    auxdata[TrackerSettings::AUX_ACCELY] = (accy / 2.0f) * pwmrange + TrackerSettings::PPM_CENTER;
+    auxdata[TrackerSettings::AUX_ACCELZ] = (accz / 1.0f) * pwmrange + TrackerSettings::PPM_CENTER;
+    auxdata[TrackerSettings::AUX_ACCELZO] = ((accz -1.0f) / 2.0f) * pwmrange + TrackerSettings::PPM_CENTER;
+    auxdata[TrackerSettings::BT_RSSI] = static_cast<float>(BTGetRSSI()) / 127.0 * pwmrange + TrackerSettings::MIN_PWM;
 }
