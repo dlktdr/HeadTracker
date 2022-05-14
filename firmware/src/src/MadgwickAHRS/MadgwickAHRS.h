@@ -89,7 +89,7 @@ public:
 	}
 
     float deltatUpdate (){
-		Now = micros();
+		Now = micros64();
 		deltat = ((Now - lastUpdate) / 1000000.0f); // set integration time by time elapsed since last filter update
 		lastUpdate = Now;
 		return deltat;
