@@ -132,6 +132,9 @@ TrackerSettings::TrackerSettings()
     btcon = false;
     btpairedaddress[0] = 0;
 
+    // Serial Defaults
+    sermode = 0;
+
     // Features defaults
     rstonwave = false;
     isCalibrated = false;
@@ -995,6 +998,9 @@ void TrackerSettings::setJSONSettings(DynamicJsonDocument &json)
     json["pwm1"] = pwm[1];
     json["pwm2"] = pwm[2];
     json["pwm3"] = pwm[3];
+
+// Serial Mode
+    json["sermode"] = sermode;
 
 // SBUS Settings
     json["sbininv"] = sbininv;
