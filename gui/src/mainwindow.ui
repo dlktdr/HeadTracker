@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>580</width>
-    <height>697</height>
+    <width>623</width>
+    <height>745</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -555,7 +555,7 @@
                 <bool>false</bool>
                </property>
                <property name="currentIndex">
-                <number>0</number>
+                <number>3</number>
                </property>
                <widget class="QWidget" name="tabGeneral">
                 <attribute name="title">
@@ -1392,11 +1392,6 @@
                      <item>
                       <property name="text">
                        <string>SBUS</string>
-                      </property>
-                     </item>
-                     <item>
-                      <property name="text">
-                       <string>CRSF</string>
                       </property>
                      </item>
                     </widget>
@@ -3776,8 +3771,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>580</width>
-     <height>21</height>
+     <width>623</width>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">

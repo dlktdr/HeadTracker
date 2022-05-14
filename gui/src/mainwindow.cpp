@@ -972,11 +972,13 @@ void MainWindow::liveDataChanged()
       ui->servoTilt->setShowActualPosition(true);
       ui->servoRoll->setShowActualPosition(true);
       ui->lblRange->setText(tr("Range"));
+      ui->lblRange->setToolTip("");
     } else {
       ui->servoPan->setShowActualPosition(false);
       ui->servoTilt->setShowActualPosition(false);
       ui->servoRoll->setShowActualPosition(false);
-      ui->lblRange->setText(tr("Range - Output Disabled"));
+      ui->lblRange->setText(tr("<b>Range - Output Disabled</b>"));
+      ui->lblRange->setToolTip("1) Gryo calibration not complete\n2) Enable on long press option selected and button hasn't been long pressed");
     }
 }
 
