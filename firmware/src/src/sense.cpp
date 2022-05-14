@@ -132,7 +132,7 @@ void calculate_Thread()
             continue;
         }
 
-         usduration = micros();
+        usduration = micros64();
 
         // Period Between Samples
         float deltat = madgwick.deltatUpdate();
@@ -567,11 +567,14 @@ void calculate_Thread()
             k_mutex_unlock(&data_mutex);
         }
 
-        usduration = micros() - usduration;
-        if(usduration < 0) { // FAULT - Code took all cpu
-            usduration = CALCULATE_PERIOD;
+        // Adjust sleep for a more accurate period
+        usduration = micros64() - usduration;
+        if(CALCULATE_PERIOD - usduration < CALCULATE_PERIOD * 0.7) {  // Took a long time. Will crash if sleep is too short
+
+          rt_sleep_us(CALCULATE_PERIOD);
+        } else {
+          rt_sleep_us(CALCULATE_PERIOD - usduration);
         }
-        rt_sleep_us(CALCULATE_PERIOD - usduration);
     }
 }
 
