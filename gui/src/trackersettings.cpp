@@ -775,7 +775,12 @@ QStringList TrackerSettings::allDataItems()
 
 #define DA(DT, NAME, SIZE, DIV) \
   for(int i=0; i < SIZE; i++) {\
-    rv.append(QString(#NAME "[%1]").arg(i));\
+    if(strcmp(#DT, "chr") == 0) {\
+      rv.append(#NAME); \
+      break;\
+    }\
+    else \
+      rv.append(QString(#NAME "[%1]").arg(i));\
   }
     DATA_ARRAYS
 #undef DA
