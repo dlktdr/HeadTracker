@@ -630,11 +630,12 @@ void rotate(float pn[3], const float rotation[3])
 
 void reset_fusion()
 {
-    madgreads = 0;
-    madgsensbits = 0;
-    firstrun = true;
-    aacc[0] = 0; aacc[1] = 0; aacc[2] = 0;
-    amag[0] = 0; amag[1] = 0; amag[2] = 0;
+  madgreads = 0;
+  madgsensbits = 0;
+  firstrun = true;
+  aacc[0] = 0; aacc[1] = 0; aacc[2] = 0;
+  amag[0] = 0; amag[1] = 0; amag[2] = 0;
+  serialWriteln("Resetting fusion algorithm");
 }
 
 /* Builds data for auxiliary functions
