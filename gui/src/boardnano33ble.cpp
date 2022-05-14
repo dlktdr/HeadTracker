@@ -225,9 +225,6 @@ void BoardNano33BLE::startCalibration()
     dat["magx"] = true;
     dat["magy"] = true;
     dat["magz"] = true;
-    dat["gyrox"] = true;
-    dat["gyroy"] = true;
-    dat["gyroz"] = true;
     trkset->setDataItemSend(dat);
     bleCalibratorDialog->show();
 }
