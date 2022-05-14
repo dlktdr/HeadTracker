@@ -894,6 +894,17 @@ void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
     v = json["aux2func"]; if(!v.isNull()) setAuxFunc2(v);
     v = json["aux2ch"]; if(!v.isNull()) setAuxFunc2Ch(v);
 
+// Soft Iron Offsets
+    v = json["so00"]; if(!v.isNull()) magsioff[0] = v;
+    v = json["so01"]; if(!v.isNull()) magsioff[1] = v;
+    v = json["so02"]; if(!v.isNull()) magsioff[2] = v;
+    v = json["so10"]; if(!v.isNull()) magsioff[3] = v;
+    v = json["so11"]; if(!v.isNull()) magsioff[4] = v;
+    v = json["so12"]; if(!v.isNull()) magsioff[5] = v;
+    v = json["so20"]; if(!v.isNull()) magsioff[6] = v;
+    v = json["so21"]; if(!v.isNull()) magsioff[7] = v;
+    v = json["so22"]; if(!v.isNull()) magsioff[8] = v;
+
 // Calibrarion Values
     v = json["magxoff"];
     v1 =json["magyoff"];
@@ -908,17 +919,6 @@ void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
         setMagOffset(v,v1,v2);
         //serialWriteln("HT: Mag offsets set");
     }
-
-    // Soft Iron Offsets
-    v = json["so00"]; if(!v.isNull()) magsioff[0] = v;
-    v = json["so01"]; if(!v.isNull()) magsioff[1] = v;
-    v = json["so02"]; if(!v.isNull()) magsioff[2] = v;
-    v = json["so10"]; if(!v.isNull()) magsioff[3] = v;
-    v = json["so11"]; if(!v.isNull()) magsioff[4] = v;
-    v = json["so12"]; if(!v.isNull()) magsioff[5] = v;
-    v = json["so20"]; if(!v.isNull()) magsioff[6] = v;
-    v = json["so21"]; if(!v.isNull()) magsioff[7] = v;
-    v = json["so22"]; if(!v.isNull()) magsioff[8] = v;
 
 // Calibrarion Values
 // Disabled. Now done on boot
