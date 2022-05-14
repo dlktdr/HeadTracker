@@ -592,6 +592,7 @@ void TrackerSettings::magOffset(float &x, float &y, float &z) const
 void TrackerSettings::setMagOffset(float x,float y, float z)
 {
     magxoff=x;magyoff=y;magzoff=z;
+    reset_fusion();
 }
 
 // Set Inverted on PPMout
