@@ -2,17 +2,18 @@ name: Windows GUI
 
 on:
   push:
-    branches: 
+    branches:
       - master
     paths:
       - '.github/workflows/build-gui.yml'
-      - '/gui/src/**'
+      - 'gui/src/**'
 
-  pull_request:    
+  pull_request:
+    branches:
       - master
     paths:
       - '.github/workflows/build-gui.yml'
-      - '/gui/src/**'
+      - 'gui/src/**'
 
   workflow_dispatch:
 
@@ -84,7 +85,7 @@ jobs:
         # Execute the build.  You can specify a specific target with "--target <NAME>"
         run: |
           cd gui/src
-          qmake 
+          qmake
           make
 
       - name: Build Release File
@@ -96,4 +97,4 @@ jobs:
         with:
           name: "${{ env.artifact_name }}"
           path:  ${{github.workspace}}/output
-          retention-days: 15
+          retention-days: 60
