@@ -421,6 +421,12 @@ static void start_scan(void)
 	serialWriteln("HT: Scanning successfully started");
 }
 
+static struct bt_conn_le_phy_param phy_params = {
+  .options = BT_CONN_LE_PHY_OPT_CODED_S8,
+  .pref_tx_phy = BT_GAP_LE_PHY_CODED,
+  .pref_rx_phy = BT_GAP_LE_PHY_CODED,
+};
+
 static void rmtconnected(struct bt_conn *conn, uint8_t err)
 {
 	char addr[BT_ADDR_LE_STR_LEN];
@@ -429,12 +435,12 @@ static void rmtconnected(struct bt_conn *conn, uint8_t err)
 
 	if (err) {
 		serialWrite("HT: Failed to connect to ");
-        serialWrite(addr);
-        serialWrite(" (");
-        serialWrite(err);
-        serialWrite(")\r\n");
+    serialWrite(addr);
+    serialWrite(" (");
+    serialWrite(err);
+    serialWrite(")\r\n");
 
-		bt_conn_unref(pararmtconn);
+    bt_conn_unref(pararmtconn);
 		pararmtconn = NULL;
 
 		start_scan();
@@ -446,10 +452,24 @@ static void rmtconnected(struct bt_conn *conn, uint8_t err)
 	}
 
 	serialWrite("HT: Connected: ");
-    serialWrite(addr);
-    serialWriteln("");
+  serialWrite(addr);
+  serialWriteln("");
 
-    bleconnected = true;
+  bleconnected = true;
+
+  bt_conn_info info;
+  bt_conn_get_info(pararmtconn, &info);
+  serialWrite("HT: PHY Connection Rx:");
+  printPhy(info.le.phy->rx_phy);
+  serialWrite(" Tx:");
+  printPhy(info.le.phy->tx_phy);
+  serialWriteln();
+
+  serialWrite("HT: Requesting coded PHY - ");
+  if(bt_conn_le_phy_update(pararmtconn, &phy_params))
+    serialWriteln("FAILED");
+  else
+    serialWriteln("Success");
 
     // Start Discovery
 	if (conn == pararmtconn) {
@@ -492,6 +512,9 @@ static void rmtdisconnected(struct bt_conn *conn, uint8_t reason)
 static struct bt_conn_cb rmtconn_callbacks = {
 		.connected = rmtconnected,
 		.disconnected = rmtdisconnected,
+    .le_param_req = leparamrequested,
+    .le_param_updated = leparamupdated,
+    .le_phy_updated = lephyupdated
 };
 
 void BTRmtStart()

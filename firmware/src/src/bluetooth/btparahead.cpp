@@ -32,6 +32,7 @@
 void sendTrainer();
 int setTrainer(uint8_t *addr);
 void pushByte(uint8_t byte);
+
 static void disconnected(struct bt_conn *conn, uint8_t reason);
 static void connected(struct bt_conn *conn, uint8_t err);
 static ssize_t write_ct(struct bt_conn *conn, const struct bt_gatt_attr *attr, const void *buf, uint16_t len, uint16_t offset, uint8_t flags);
@@ -123,6 +124,16 @@ struct bt_le_conn_param *conparms = BT_LE_CONN_PARAM(BT_MIN_CONN_INTER_PERIF,
 static struct bt_conn_cb conn_callbacks = {
 	.connected = connected,
 	.disconnected = disconnected,
+  .le_param_req = leparamrequested,
+  .le_param_updated = leparamupdated,
+  .le_phy_updated = lephyupdated,
+  //.security_changed = securitychanged
+};
+
+static struct bt_conn_le_phy_param phy_params = {
+  .options = BT_CONN_LE_PHY_OPT_CODED_S8,
+  .pref_tx_phy = BT_GAP_LE_PHY_CODED,
+  .pref_rx_phy = BT_GAP_LE_PHY_CODED,
 };
 
 bt_addr_le_t addrarry[CONFIG_BT_ID_MAX];
@@ -149,6 +160,7 @@ void BTHeadStart()
     serialWriteln("HT: BLE Started Advertising");
 
     bt_conn_cb_register(&conn_callbacks);
+
 
     // Discover BT Address
     bt_id_get(addrarry, &addrcnt);
@@ -272,9 +284,6 @@ static ssize_t write_ct(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 
 	return len;
 }
-
-
-
 
 
 static ssize_t read_json(struct bt_conn *conn, const struct bt_gatt_attr *attr,
@@ -415,8 +424,22 @@ static void connected(struct bt_conn *conn, uint8_t err)
     serialWrite(addr_str);
     serialWrite("\r\n");
 
+    bt_conn_info info2;
+    bt_conn_get_info(conn, &info2);
+    serialWrite("HT: PHY Connection Rx:");
+    printPhy(info2.le.phy->rx_phy);
+    serialWrite(" Tx:");
+    printPhy(info2.le.phy->tx_phy);
+    serialWriteln();
+
     // Set Connection Parameters - Request updated rate
     bt_conn_le_param_update(curconn,conparms);
+
+    serialWrite("HT: Requesting coded PHY - ");
+    if(bt_conn_le_phy_update(curconn, &phy_params))
+      serialWriteln("FAILED");
+      else
+    serialWriteln("Success");
 
     // Start a Timer, If we don't see a Security Change within this time
     // e.g. a CC2540 chip then force a subscription for the PARA chip
@@ -424,6 +447,7 @@ static void connected(struct bt_conn *conn, uint8_t err)
 
     bleconnected = true;
 }
+
 
 static void disconnected(struct bt_conn *conn, uint8_t reason)
 {
