@@ -465,6 +465,15 @@ static void rmtconnected(struct bt_conn *conn, uint8_t err)
   printPhy(info.le.phy->tx_phy);
   serialWriteln();
 
+  serialWrite("HT: BT Connection Params Int:");
+  serialWrite(info.le.interval);
+  serialWrite(" Lat:");
+  serialWrite(info.le.latency);
+  serialWrite(" Timeout:");
+  serialWrite(info.le.timeout);
+  serialWriteln();
+
+
   serialWrite("HT: Requesting coded PHY - ");
   if(bt_conn_le_phy_update(pararmtconn, &phy_params))
     serialWriteln("FAILED");
