@@ -57,30 +57,41 @@ void bt_init()
 
 void bt_Thread()
 {
-    while(1) {
-        rt_sleep_us(BT_PERIOD);
+  int64_t usduration=0;
+  while(1) {
+    usduration = micros64();
 
-        if(!btThreadRun)
-            continue;
-
-        switch(curmode) {
-        case BTPARAHEAD:
-            BTHeadExecute();
-            break;
-        case BTPARARMT:
-            BTRmtExecute();
-            break;
-        case BTSCANONLY:
-            break;
-        default:
-            break;
-        }
-
-        if(bleconnected)
-            setLEDFlag(LED_BTCONNECTED);
-        else
-            clearLEDFlag(LED_BTCONNECTED);
+    if(!btThreadRun) {
+      rt_sleep_ms(10);
+      continue;
     }
+
+    switch(curmode) {
+    case BTPARAHEAD:
+      BTHeadExecute();
+      break;
+    case BTPARARMT:
+      BTRmtExecute();
+      break;
+    case BTSCANONLY:
+      break;
+    default:
+      break;
+    }
+
+    if(bleconnected)
+      setLEDFlag(LED_BTCONNECTED);
+    else
+      clearLEDFlag(LED_BTCONNECTED);
+
+    // Adjust sleep for a more accurate period
+    usduration = micros64() - usduration;
+    if(BT_PERIOD - usduration < BT_PERIOD * 0.7) {  // Took a long time. Will crash if sleep is too short
+      rt_sleep_us(BT_PERIOD);
+    } else {
+      rt_sleep_us(BT_PERIOD - usduration);
+    }
+  }
 }
 
 void BTSetMode(btmodet mode)
@@ -223,7 +234,7 @@ void leparamupdated(struct bt_conn *conn,
   serialWrite(interval);
   serialWrite(" Lat:");
   serialWrite(latency);
-  serialWrite(" Timout:");
+  serialWrite(" Timeout:");
   serialWrite(timeout);
   serialWriteln();
 }
