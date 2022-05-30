@@ -145,65 +145,66 @@ void serial_init()
 
 void serial_Thread()
 {
-    uint8_t buffer[64];
-    static uint32_t datacounter=0;
+  uint8_t buffer[64];
+  static uint32_t datacounter=0;
 
-    while(1) {
-        rt_sleep_ms(SERIAL_PERIOD);
+  while(1) {
+    rt_sleep_ms(SERIAL_PERIOD);
 
-        if(!serialThreadRun) {
-            continue;
-        }
+    if(!serialThreadRun) {
+        continue;
+    }
 
-        digitalWrite(LEDG,LOW);
+    digitalWrite(LEDG,LOW);
 
-        // If serial not open, abort all transfers, clear buffer
-        uint32_t dtr = 0;
+    // If serial not open, abort all transfers, clear buffer
+    uint32_t dtr = 0;
 		uart_line_ctrl_get(dev, UART_LINE_CTRL_DTR, &dtr);
 		if (!dtr) {
-            ring_buf_reset(&ringbuf_tx);
-            uart_tx_abort(dev);
-            uiResponsive = k_uptime_get() - 1;
+      ring_buf_reset(&ringbuf_tx);
+      uart_tx_abort(dev);
+      uiResponsive = k_uptime_get() - 1;
+      trkset.stopAllData();
 
-
-        // Port is open, send data
-        } else {
-            int rb_len = ring_buf_get(&ringbuf_tx, buffer, sizeof(buffer));
-            if(rb_len) {
-                int send_len = uart_fifo_fill(dev, buffer, rb_len);
-                if (send_len < rb_len) {
-                    LOG_ERR("USB CDC Ring Buffer Full, Dropped data");
-                }
-            }
+    // Port is open, send data
+    } else {
+      int rb_len = ring_buf_get(&ringbuf_tx, buffer, sizeof(buffer));
+      if(rb_len) {
+        int send_len = uart_fifo_fill(dev, buffer, rb_len);
+        if (send_len < rb_len) {
+            LOG_ERR("USB CDC Ring Buffer Full, Dropped data");
         }
-
-        serialrx_Process();
-
-        digitalWrite(LEDG,HIGH);
-
-        // Data output
-        if(datacounter++ >= DATA_PERIOD) {
-            datacounter = 0;
-            // Is the UI Still responsive?
-            int64_t curtime = k_uptime_get();
-
-            if(uiResponsive > curtime) {
-                uiconnected = true;
-
-                // If sense thread is writing, wait until complete
-                k_mutex_lock(&data_mutex, K_FOREVER);
-                json.clear();
-                trkset.setJSONData(json);
-                k_mutex_unlock(&data_mutex);
-
-                json["Cmd"] = "Data";
-                serialWriteJSON(json);
-
-            }  else {
-                uiconnected = false;
-            }
-        }
+      }
     }
+
+    serialrx_Process();
+
+    digitalWrite(LEDG,HIGH);
+
+    // Data output
+    if(datacounter++ >= DATA_PERIOD) {
+      datacounter = 0;
+      // Is the UI Still responsive?
+      int64_t curtime = k_uptime_get();
+
+      if(uiResponsive > curtime) {
+        uiconnected = true;
+
+        // If sense thread is writing, wait until complete
+        k_mutex_lock(&data_mutex, K_FOREVER);
+        json.clear();
+        trkset.setJSONData(json);
+        k_mutex_unlock(&data_mutex);
+        if(json.size()) {
+          json["Cmd"] = "Data";
+          serialWriteJSON(json);
+        }
+
+      } else {
+        uiconnected = false;
+      }
+    }
+  }
 }
 
 void serialrx_Process()
@@ -350,13 +351,12 @@ void parseData(DynamicJsonDocument &json)
     // Firmware Reqest
     } else if (strcmp(command, "FW") == 0) {
 
-        json.clear();
-        json["Cmd"] = "FW";
-        json["Vers"] = FW_VERSION;
-        json["Hard"] = FW_BOARD;
-        uiResponsive = k_uptime_get() - 1; // Don't send data on FW request.
-        serialWriteJSON(json);
-        serialWrite("HT: FW Requested\r\n");
+        DynamicJsonDocument fwjson(100);
+        fwjson["Cmd"] = "FW";
+        fwjson["Vers"] = FW_VERSION;
+        fwjson["Hard"] = FW_BOARD;
+        fwjson["Git"] = STRINGIFY(FW_GIT_REV);
+        serialWriteJSON(fwjson);
 
     // Unknown Command
     } else {
@@ -474,7 +474,7 @@ void serialWriteHex(const uint8_t *data, int len)
 void serialWriteJSON(DynamicJsonDocument &json)
 {
     char data[TX_RNGBUF_SIZE];
-    int br = serializeJson(json, data+1, TX_RNGBUF_SIZE-sizeof(uint16_t)-2);
+    int br = serializeJson(json, data+1, TX_RNGBUF_SIZE-7);
     uint16_t calccrc = escapeCRC(uCRC16Lib::calculate(data,br));
 
     if(br + 7 > TX_RNGBUF_SIZE)

@@ -697,10 +697,11 @@ void TrackerSettings::setLiveDataMap(const QVariantMap &livelist, bool reset)
     emit liveDataChanged();
 }
 
-void TrackerSettings::setHardware(QString vers, QString hard)
+void TrackerSettings::setHardware(QString vers, QString hard, QString git)
 {
     _data["Vers"] = vers;
     _data["Hard"] = hard;
+    _data["Git"] = git;
 }
 
 void TrackerSettings::setSoftIronOffsets(float soo[3][3])

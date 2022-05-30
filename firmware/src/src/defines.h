@@ -1,6 +1,19 @@
 #pragma once
 
-// Maj + Min + Rev Defined in Platformio.ini
+// Defines specified at compile time. If not, use 0.0.0
+#ifndef FW_MAJ
+  #define FW_MAJ 0
+#endif
+#ifndef FW_MIN
+  #define FW_MIN 0
+#endif
+#ifndef FW_REV
+  #define FW_REV 0
+#endif
+#ifndef FW_GIT_REV
+  #define FW_GIT_REV "-------"
+#endif
+
 #define VERSION FW_MAJ.CONCAT(FW_MIN,FW_REV)
 #define FW_VERSION STRINGIFY(VERSION)
 #define FW_BOARD "NANO33BLE"
@@ -112,9 +125,7 @@ extern volatile bool gyro_calibrated;
 // Magnetometer, Initial Orientation, Samples to average
 #define MADGSTART_SAMPLES 15
 
-// RTOS Options
-
-
+// RTOS Specifics
 #if defined(RTOS_ZEPHYR)
 #define micros() k_cyc_to_us_floor32(k_cycle_get_32())
 #define millis64() k_uptime_get()

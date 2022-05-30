@@ -62,7 +62,7 @@ void clearLEDFlag(uint32_t ledMode)
     _ledmode &= ~ledMode;
 }
 
-void clearAllFlags(uint32_t ledMode)
+void clearAllFlags()
 {
     _ledmode = 0;
 }
@@ -76,7 +76,6 @@ void io_Thread()
     int led_off_time=200;
     int rgb_sequence_no=0;
     uint32_t rgb_timer=millis();
-
     uint32_t _counter=0;
 
     while(1) {
@@ -161,7 +160,7 @@ void io_Thread()
           digitalWrite(LEDB,HIGH);
 
         if(millis() > rgb_timer + led_sequence[rgb_sequence_no].time) {
-          if(rgb_sequence_no < LED_MAX_SEQUENCE_COUNT &&
+          if(rgb_sequence_no < LED_MAX_SEQUENCE_COUNT - 1 &&
              led_sequence[rgb_sequence_no].time != 0)
              rgb_sequence_no++;
           else

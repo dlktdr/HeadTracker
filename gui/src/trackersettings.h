@@ -347,7 +347,7 @@ public:
 
     QString hardware() {return _data["Hard"].toString();}
     QString fwVersion() {return _data["Vers"].toString();}
-    void setHardware(QString vers,QString hard);
+    void setHardware(QString vers,QString hard, QString git="");
 
     void setSoftIronOffsets(float soo[3][3]);
 
