@@ -747,7 +747,7 @@ void MainWindow::updateFromUI()
     int auxF2Ch = ui->cmbAuxFn2Ch->currentIndex();
     trkset.setAuxFunc0Ch(auxF0Ch==0?-1:auxF0Ch);
     trkset.setAuxFunc1Ch(auxF1Ch==0?-1:auxF1Ch);
-    trkset.setAuxFunc2Ch(auxF1Ch==0?-1:auxF2Ch);
+    trkset.setAuxFunc2Ch(auxF2Ch==0?-1:auxF2Ch);
     trkset.setAuxFunc0(ui->cmbAuxFn0->currentIndex());
     trkset.setAuxFunc1(ui->cmbAuxFn1->currentIndex());
     trkset.setAuxFunc2(ui->cmbAuxFn2->currentIndex());

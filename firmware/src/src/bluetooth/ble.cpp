@@ -57,30 +57,41 @@ void bt_init()
 
 void bt_Thread()
 {
-    while(1) {
-        rt_sleep_us(BT_PERIOD);
+  int64_t usduration=0;
+  while(1) {
+    usduration = micros64();
 
-        if(!btThreadRun)
-            continue;
-
-        switch(curmode) {
-        case BTPARAHEAD:
-            BTHeadExecute();
-            break;
-        case BTPARARMT:
-            BTRmtExecute();
-            break;
-        case BTSCANONLY:
-            break;
-        default:
-            break;
-        }
-
-        if(bleconnected)
-            setLEDFlag(LED_BTCONNECTED);
-        else
-            clearLEDFlag(LED_BTCONNECTED);
+    if(!btThreadRun) {
+      rt_sleep_ms(10);
+      continue;
     }
+
+    switch(curmode) {
+    case BTPARAHEAD:
+      BTHeadExecute();
+      break;
+    case BTPARARMT:
+      BTRmtExecute();
+      break;
+    case BTSCANONLY:
+      break;
+    default:
+      break;
+    }
+
+    if(bleconnected)
+      setLEDFlag(LED_BTCONNECTED);
+    else
+      clearLEDFlag(LED_BTCONNECTED);
+
+    // Adjust sleep for a more accurate period
+    usduration = micros64() - usduration;
+    if(BT_PERIOD - usduration < BT_PERIOD * 0.7) {  // Took a long time. Will crash if sleep is too short
+      rt_sleep_us(BT_PERIOD);
+    } else {
+      rt_sleep_us(BT_PERIOD - usduration);
+    }
+  }
 }
 
 void BTSetMode(btmodet mode)
@@ -200,3 +211,66 @@ int8_t BTGetRSSI()
     return -1;
 }
 
+bool leparamrequested(struct bt_conn *conn, struct bt_le_conn_param *param)
+{
+  serialWrite("HT: Bluetooth Params Request. IntMax:");
+  serialWrite(param->interval_max);
+  serialWrite(" IntMin:");
+  serialWrite(param->interval_min);
+  serialWrite(" Lat:");
+  serialWrite(param->latency);
+  serialWrite(" Timout:");
+  serialWrite(param->timeout);
+  serialWriteln();
+  return true;
+}
+
+void leparamupdated(struct bt_conn *conn,
+                           uint16_t interval,
+				                   uint16_t latency,
+                           uint16_t timeout)
+{
+  serialWrite("HT: Bluetooth Params Updated. Int:");
+  serialWrite(interval);
+  serialWrite(" Lat:");
+  serialWrite(latency);
+  serialWrite(" Timeout:");
+  serialWrite(timeout);
+  serialWriteln();
+}
+
+void securitychanged(struct bt_conn *conn, bt_security_t level, enum bt_security_err err)
+{
+  serialWrite("HT: Bluetooth Security Changed. Lvl:");
+  serialWrite(level);
+  serialWrite(" Err:");
+  serialWrite(err);
+  serialWriteln();
+}
+
+void printPhy(int phy)
+{
+  switch(phy) {
+    case BT_GAP_LE_PHY_NONE:
+      serialWrite("None");
+      break;
+    case BT_GAP_LE_PHY_1M:
+      serialWrite("1M");
+      break;
+    case BT_GAP_LE_PHY_2M:
+      serialWrite("2M");
+      break;
+    case BT_GAP_LE_PHY_CODED:
+      serialWrite("Coded");
+      break;
+  }
+}
+
+void lephyupdated(struct bt_conn *conn, struct bt_conn_le_phy_info *param)
+{
+  serialWrite("HT: Bluetooth PHY Updated. RxPHY:");
+  printPhy(param->rx_phy);
+  serialWrite(" TxPHY:");
+  printPhy(param->tx_phy);
+  serialWriteln();
+}
