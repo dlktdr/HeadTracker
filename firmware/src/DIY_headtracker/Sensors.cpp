@@ -94,8 +94,8 @@ sensor_t sensor;
 // End settings
 
 // PWM Values
-extern volatile unsigned int ch1_value=0;
-extern volatile unsigned int ch2_value=0;
+extern volatile unsigned int pwm1_value;
+extern volatile unsigned int pwm2_value;
 
 // Function used to write to I2C:
 void WriteToI2C(int device, byte address, byte val)
@@ -269,8 +269,8 @@ void FilterSensorData()
     }
 
     // Use PWM Values
-    channel_value[4] = ((float)ch1_value) / 1000.0f * 250.0f; //0-1000 Output @ 250Hz PWM Frequency
-    channel_value[5] = ((float)ch2_value) / 1000.0f * 250.0f; //0-1000 Output @ 250Hz PWM Frequency
+    channel_value[4] = ((float)pwm1_value) / 1000.0f * 250.0f; //0-1000 Output @ 250Hz PWM Frequency
+    channel_value[5] = ((float)pwm2_value) / 1000.0f * 250.0f; //0-1000 Output @ 250Hz PWM Frequency
 
     // Calibration
     if(sys == 3 && gyro == 3 && accel == 3 && mag == 3 && doCalibrate) {

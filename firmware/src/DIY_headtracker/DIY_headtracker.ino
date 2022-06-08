@@ -13,8 +13,8 @@
 // - 2.00 - Nov 2020 - Cliff Blackburn - Modified for use with the Bosch BNO055 IC
 //-----------------------------------------------------------------------------
 
+#include <Arduino.h>
 #include <Wire.h>
-#include <PinChangeInt.h>
 #include "config.h"
 #include "functions.h"
 #include "sensors.h"
@@ -109,6 +109,9 @@ extern uint8_t sys, gyro, accel, mag;
 
 // End settings
 
+void tickpin2();
+void tickpin3();
+
 //--------------------------------------------------------------------------------------
 // Func: setup
 // Desc: Called by Arduino framework at initialization time. This sets up pins for I/O,
@@ -119,14 +122,10 @@ void setup()
     Serial.begin(SERIAL_BAUD);
 
     pinMode(9,OUTPUT);
-    digitalWrite(2,HIGH);
-    digitalWrite(3,HIGH);
 
     // Set all other pins to input, for safety.
     pinMode(0,INPUT);
     pinMode(1,INPUT);
-    pinMode(2,INPUT);
-    pinMode(3,INPUT);
     pinMode(6,INPUT);
     pinMode(7,INPUT);
     pinMode(8,INPUT);
@@ -134,8 +133,8 @@ void setup()
     // Add interrupts to pin 2
     pinMode(2, INPUT); digitalWrite(2, HIGH);
     pinMode(3, INPUT); digitalWrite(3, HIGH);
-    PCintPort::attachInterrupt(2, &rising, RISING);
-    PCintPort::attachInterrupt(3, &rising, RISING);
+    attachInterrupt(digitalPinToInterrupt(2), tickpin2, CHANGE);
+    attachInterrupt(digitalPinToInterrupt(3), tickpin3, CHANGE);
 
     // Set button pin to input:
     pinMode(BUTTON_INPUT,INPUT);
@@ -145,8 +144,6 @@ void setup()
 
     digitalWrite(0,LOW); // pull-down resistor
     digitalWrite(1,LOW);
-    digitalWrite(2,HIGH);
-    digitalWrite(3,HIGH);
 
     pinMode(ARDUINO_LED,OUTPUT);    // Arduino LED
     digitalWrite(ARDUINO_LED, HIGH);
@@ -763,30 +760,26 @@ uint16_t escapeCRC(uint16_t crc)
     return (uint16_t)crclow | ((uint16_t)crchigh << 8);
 }
 
-volatile unsigned int ch1_value=0;
-volatile unsigned int ch2_value=0;
+volatile unsigned int pwm1_value=0;
+volatile unsigned int pwm2_value=0;
 volatile unsigned int pin2_hightime = 0;
 volatile unsigned int pin3_hightime = 0;
-uint8_t latest_interrupted_pin;
 
-void rising()
+void tickpin2()
 {
-    latest_interrupted_pin=PCintPort::arduinoPin;
-    PCintPort::attachInterrupt(latest_interrupted_pin, &falling, FALLING);
-    if(latest_interrupted_pin == 2)
-        pin2_hightime = micros();
-    else
-        pin3_hightime = micros();
+  if (digitalRead(2) == HIGH) {
+    pin2_hightime = micros();
+  } else {
+    pwm1_value = micros()-pin2_hightime;
+  }
+
 }
 
-void falling()
+void tickpin3()
 {
-    latest_interrupted_pin=PCintPort::arduinoPin;
-    PCintPort::attachInterrupt(latest_interrupted_pin, &rising, RISING);
-    if(latest_interrupted_pin == 2)
-        pin2_hightime = micros()-prev_time;
-    else
-        pin3_hightime = micros();
-    pwm_value = micros()-prev_time;
+  if(digitalRead(3) == HIGH) {
+    pin3_hightime = micros();
+  } else {
+    pwm2_value = micros()-pin3_hightime;
+  }
 }
-
