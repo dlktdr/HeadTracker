@@ -2,8 +2,8 @@
 
 #include "defines.h"
 #include <bluetooth/conn.h>
-#include "bluetooth/btparahead.h"
-#include "bluetooth/btpararmt.h"
+#include "btparahead.h"
+#include "btpararmt.h"
 
 #define LEN_BLUETOOTH_ADDR              16
 #define MAX_BLUETOOTH_DISTANT_ADDR      6

@@ -1,12 +1,11 @@
 #pragma once
 
-
-#include <include/arduinojsonwrp.h>
+#include "arduinojsonwrp.h"
 #include <zephyr.h>
-#include "PPM/PPMOut.h"
-#include "PPM/PPMIn.h"
-#include "bluetooth/btparahead.h"
-#include "bluetooth/btpararmt.h"
+#include "PPMOut.h"
+#include "PPMIn.h"
+#include "btparahead.h"
+#include "btpararmt.h"
 #include "serial.h"
 
 // Variables to be sent back to GUI if enabled

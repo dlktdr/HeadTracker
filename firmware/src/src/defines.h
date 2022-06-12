@@ -51,7 +51,7 @@
 #define BT_MIN_CONN_INTER_PERIF 10  // When run as para slave
 #define BT_MAX_CONN_INTER_PERIF 10
 
-#define BT_CONN_LOST_TIME 70 // 100 * 10ms = 0.7seconds
+#define BT_CONN_LOST_TIME 100 // 100 * 10ms = 1seconds
 
 // Thread Priority Definitions
 #define PRIORITY_LOW 12

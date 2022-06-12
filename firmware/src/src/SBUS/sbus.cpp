@@ -19,7 +19,7 @@
 #include <string.h>
 #include <sys/ring_buffer.h>
 #include "sbus.h"
-#include "targets/nano33ble/auxserial.h"
+#include "auxserial.h"
 #include "defines.h"
 #include "io.h"
 #include "trackersettings.h"
