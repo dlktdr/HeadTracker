@@ -42,16 +42,16 @@ void socClearFlash()
     flash_dev = device_get_binding(DT_CHOSEN_ZEPHYR_FLASH_CONTROLLER_LABEL);
 
 	if (!flash_dev) {
-		serialWrite("HT: Nordic nRF5 flash driver was not found!\r\n");
+		serialWriteln("HT: Nordic nRF5 flash driver was not found!");
 		return;
 	}
 
 	if (flash_erase(flash_dev, FLASH_OFFSET, FLASH_PAGE_SIZE) != 0) {
-		serialWrite("HT: Flash erase Failure\r\n");
+		serialWriteln("HT: Flash erase Failure");
         return;
     }
 
-    serialWrite("HT: Flash erase succeeded\r\n");
+    serialWriteln("HT: Flash erase succeeded");
 }
 
 int socWriteFlash(const char *datain, int len)
@@ -61,19 +61,19 @@ int socWriteFlash(const char *datain, int len)
     flash_dev = device_get_binding(DT_CHOSEN_ZEPHYR_FLASH_CONTROLLER_LABEL);
 
 	if (!flash_dev) {
-		serialWrite("HT: Nordic nRF5 flash driver was not found!\r\n");
+		serialWriteln("HT: Nordic nRF5 flash driver was not found!");
 		return -1;
 	}
 
 	if (flash_erase(flash_dev, FLASH_OFFSET, FLASH_PAGE_SIZE) != 0) {
-		serialWrite("HT: Flash erase Failure\r\n");
+		serialWriteln("HT: Flash erase Failure");
         return -1;
     }
 
-    serialWrite("HT: Flash erase succeeded\r\n");
+    serialWriteln("HT: Flash erase succeeded");
 
     if (flash_write(flash_dev, FLASH_OFFSET, (const void *)datain, FLASH_PAGE_SIZE) != 0) {
-        serialWrite("   Flash write failed!\r\n");
+        serialWriteln("   Flash write failed!");
         return -1;
     }
 

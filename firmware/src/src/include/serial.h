@@ -15,9 +15,9 @@ void serialWrite(const char *data, int len);
 void serialWrite(const char *data);
 void serialWrite(const char c);
 void serialWriteln(const char *data = "");
+int serialWriteF(const char *format, ...);
 void serialWriteJSON(DynamicJsonDocument &json);
 void serialWriteHex(const uint8_t *data, int len);
-//int serialWriteF(const char *c, ...);
 
 void JSON_Process(char *jsonbuf);
 

@@ -153,7 +153,7 @@ void BTHeadStart()
     // Start Advertising
     int err = bt_le_adv_start(&my_param, ad, ARRAY_SIZE(ad), NULL, 0);
 	if (err) {
-		serialWriteln("HT: Advertising failed to start (err %d)");
+		serialWriteF("HT: Advertising failed to start (err %d)", err);
 		return;
 	}
 
@@ -256,16 +256,12 @@ int8_t BTHeadGetRSSI()
 
 static void ct_ccc_cfg_changed_overr(const struct bt_gatt_attr *attr, uint16_t value)
 {
-    serialWrite("HT: Override CCC Value Changed (");
-    serialWrite(value);
-    serialWrite(")\r\n");
+    serialWriteF("HT: Override CCC Value Changed (%d)\r\n", value);
 }
 
 static void ct_ccc_cfg_changed_frsky(const struct bt_gatt_attr *attr, uint16_t value)
 {
-    serialWrite("HT: FrSky CCC Value Changed (");
-    serialWrite(value);
-    serialWrite(")\r\n");
+    serialWriteF("HT: FrSky CCC Value Changed (%d)\r\n", value);
 }
 
 static ssize_t read_ct(struct bt_conn *conn, const struct bt_gatt_attr *attr,
@@ -306,9 +302,7 @@ static ssize_t write_json(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 {
     char sc=0;
 
-    serialWrite("BLE:");
-    serialWrite((char*)buf, len);
-    serialWriteln();
+    serialWriteF("BLE:%.*s\r\n", len, buf);
 
     for(int i=0; i < len; i++) {
         sc = *((char*)buf + i);
@@ -323,9 +317,7 @@ static ssize_t write_json(struct bt_conn *conn, const struct bt_gatt_attr *attr,
             // Make sure it's a complete frame, SOT at beginning
             if(blejsonbuffer[0] == 0x02) {
                 *blejsonbufptr = 0; // Null terminate
-                serialWrite("BLE Data RX:");
-                serialWrite(blejsonbuffer);
-                serialWriteln();
+                serialWriteF("BLE Data RX:%s\r\n", blejsonbuffer);
                 JSON_Process(blejsonbuffer+1);
             }
             // Reset Buffer
@@ -402,9 +394,7 @@ K_TIMER_DEFINE(my_timer, hasSecurityChangedTimer, NULL);
 static void connected(struct bt_conn *conn, uint8_t err)
 {
 	if (err) {
-		serialWrite("HT: Bluetooth Connection failed ");
-        serialWrite(err);
-        serialWrite("\r\n");
+		serialWriteF("HT: Bluetooth Connection failed %d\r\n", err);
 	} else {
 		serialWriteln("HT: Bluetooth connected :)");
 	}
@@ -420,26 +410,16 @@ static void connected(struct bt_conn *conn, uint8_t err)
     char addr_str[50];
     bt_addr_le_to_str(info.le.dst, addr_str, sizeof(addr_str));
 
-    serialWrite("HT: Connected to Address ");
-    serialWrite(addr_str);
-    serialWrite("\r\n");
+    serialWriteF("HT: Connected to Address %s\r\n", addr_str);
 
     bt_conn_info info2;
     bt_conn_get_info(conn, &info2);
-    serialWrite("HT: PHY Connection Rx:");
-    printPhy(info2.le.phy->rx_phy);
-    serialWrite(" Tx:");
-    printPhy(info2.le.phy->tx_phy);
-    serialWriteln();
-
+    serialWriteF("HT: PHY Connection Rx:%s TX:%s\r\n", printPhy(info2.le.phy->rx_phy), printPhy(info2.le.phy->tx_phy));
+ 
     // Set Connection Parameters - Request updated rate
     bt_conn_le_param_update(curconn,conparms);
 
-    serialWrite("HT: Requesting coded PHY - ");
-    if(bt_conn_le_phy_update(curconn, &phy_params))
-      serialWriteln("FAILED");
-      else
-    serialWriteln("Success");
+    serialWriteF("HT: Requesting coded PHY - %s\r\n", bt_conn_le_phy_update(curconn, &phy_params) ? "FAILED" : "Success");
 
     // Start a Timer, If we don't see a Security Change within this time
     // e.g. a CC2540 chip then force a subscription for the PARA chip
@@ -451,14 +431,12 @@ static void connected(struct bt_conn *conn, uint8_t err)
 
 static void disconnected(struct bt_conn *conn, uint8_t reason)
 {
-    serialWrite("HT: Bluetooth disconnected (reason ");
-    serialWrite(reason);
-    serialWriteln(")");
+    serialWriteF("HT: Bluetooth disconnected (reason %d)\r\n", reason);
 
     // Start advertising
     int err = bt_le_adv_start(&my_param, ad, ARRAY_SIZE(ad), NULL, 0);
 	if (err) {
-		serialWriteln("HT: Advertising failed to start (err %d)");
+		serialWriteF("HT: Advertising failed to start (err %d)\r\n", err);
 		return;
 	}
 

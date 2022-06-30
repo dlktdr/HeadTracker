@@ -1070,8 +1070,11 @@ void TrackerSettings::setJSONSettings(DynamicJsonDocument &json)
 void TrackerSettings::saveToEEPROM()
 {
     char buffer[TX_RNGBUF_SIZE];
+
+    k_mutex_lock(&data_mutex, K_FOREVER);
     setJSONSettings(json);
     int len = serializeJson(json,buffer,TX_RNGBUF_SIZE);
+    k_mutex_unlock(&data_mutex);
 
     if(socWriteFlash(buffer,len)) {
         serialWriteln("HT: Flash Write Failed");
@@ -1086,6 +1089,8 @@ void TrackerSettings::loadFromEEPROM()
 {
     // Load Settings
     DeserializationError de;
+
+    k_mutex_lock(&data_mutex, K_FOREVER);
     de = deserializeJson(json, get_flashSpace());
 
     if(de != DeserializationError::Ok)
@@ -1098,6 +1103,7 @@ void TrackerSettings::loadFromEEPROM()
         serialWriteln("HT: Loading settings from flash");
         loadJSONSettings(json);
     }
+    k_mutex_unlock(&data_mutex);
 }
 
 /* Sets if a data item should be included while in data to GUI

@@ -67,6 +67,7 @@ uint8_t read_overrides(struct bt_conn *conn, uint8_t err,
 				    struct bt_gatt_read_params *params,
 				    const void *data, uint16_t length)
 {
+    // TODO we can probably make this work (little/big endian)
     serialWrite("HT: Read Override Data (0x");
     serialWriteHex((uint8_t*)data,2);
     serialWriteln(")");
@@ -114,6 +115,7 @@ static uint8_t over_notify_func(struct bt_conn *conn,
 			   struct bt_gatt_subscribe_params *params,
 			   const void *data, uint16_t length)
 {
+    // TODO we can probably make this work (little/big endian)
     serialWrite("HT: BT Override Channels Changed (0x");
     serialWriteHex((uint8_t*)data,2);
     serialWriteln(")");
@@ -136,7 +138,7 @@ static uint8_t discover_func(struct bt_conn *conn,
     static int ccclvl=0;
 
 	if (!attr) {
-		serialWrite("HT: Discover complete\r\n");
+		serialWriteln("HT: Discover complete");
 		(void)memset(params, 0, sizeof(*params));
 		return BT_GATT_ITER_STOP;
 	}
@@ -144,13 +146,7 @@ static uint8_t discover_func(struct bt_conn *conn,
 #if defined(DEBUG)
     char str[30];
     bt_uuid_to_str(params->uuid,str,sizeof(str));
-    serialWrite("Discovered UUID ");
-    serialWrite(str);
-    serialWriteln();
-
-    serialWrite("Arribute Handle=");
-    serialWrite(attr->handle);
-    serialWriteln();
+    serialWriteF("Discovered UUID %s Attribute Handle=%d\r\n", str, attr->handle);
 #endif
 
     // Found the FRSky FFF0 Service?
@@ -166,9 +162,7 @@ static uint8_t discover_func(struct bt_conn *conn,
 
 		err = bt_gatt_discover(conn, &discover_params);
 		if (err) {
-           	serialWrite("HT: Discover failed (err ");
-            serialWrite(err);
-            serialWrite(")\r\n");
+           	serialWrite("HT: Discover failed (err %d)\r\n", err);
 	    }
     // Found the Frsky FFF6 Characteristic, Get the CCCD for it & subscribe
     } else if (!bt_uuid_cmp(discover_params.uuid, &frskychar.uuid)) {
@@ -186,9 +180,7 @@ static uint8_t discover_func(struct bt_conn *conn,
 
 		err = bt_gatt_discover(conn, &discover_params);
 		if (err) {
-           	serialWrite("HT: Discover failed (err ");
-            serialWrite(err);
-            serialWrite(")\r\n");
+           	serialWriteF("HT: Discover failed (err %d)\r\n", err);
 		}
 
     // Found the FFF6 CCCD descriptor, subscribe to notifications
@@ -201,11 +193,9 @@ static uint8_t discover_func(struct bt_conn *conn,
 
 		err = bt_gatt_subscribe(conn, &subscribefff6);
 		if (err && err != -EALREADY) {
-            serialWrite("HT: Subscribe failed (err ");
-            serialWrite(err);
-            serialWrite(")\r\n");
+            serialWriteF("HT: Subscribe failed (err %d)\r\n", err);
 		} else {
-			serialWrite("HT: Subscribed to Frsky Data\r\n");
+			serialWriteln("HT: Subscribed to Frsky Data");
 		}
 
 //-----------------------------------------------------------------------------------
@@ -217,9 +207,7 @@ static uint8_t discover_func(struct bt_conn *conn,
 		discover_params.type = BT_GATT_DISCOVER_DESCRIPTOR;
         err = bt_gatt_discover(conn, &discover_params);
 		if (err) {
-           	serialWrite("HT: Discover failed (err ");
-            serialWrite(err);
-            serialWrite(")\r\n");
+           	serialWriteF("HT: Discover failed (err %d)\r\n", err);
 	    }
 
 	} else if (!bt_uuid_cmp(discover_params.uuid, &htoverridech.uuid)) {
@@ -237,9 +225,7 @@ static uint8_t discover_func(struct bt_conn *conn,
         subscribeaff1.value_handle = attr->handle;
         err = bt_gatt_discover(conn, &discover_params);
 		if (err) {
-           	serialWrite("HT: Discover failed (err ");
-            serialWrite(err);
-            serialWrite(")\r\n");
+           	serialWriteF("HT: Discover failed (err %d)\r\n", err);
 	    }
 
 	} else if (!bt_uuid_cmp(discover_params.uuid, &ccc.uuid) && ccclvl == 1){
@@ -251,9 +237,7 @@ static uint8_t discover_func(struct bt_conn *conn,
 
 		err = bt_gatt_subscribe(conn, &subscribeaff1);
 		if (err && err != -EALREADY) {
-            serialWrite("HT: Subscribe to overrides failed (err ");
-            serialWrite(err);
-            serialWrite(")\r\n");
+            serialWriteF("HT: Subscribe to overrides failed (err %d)\r\n", err);
 		} else {
 			serialWrite("HT: Subscribed to Overrides\r\n");
 		}
@@ -266,9 +250,7 @@ static uint8_t discover_func(struct bt_conn *conn,
 		discover_params.type = BT_GATT_DISCOVER_DESCRIPTOR;
         err = bt_gatt_discover(conn, &discover_params);
 		if (err) {
-           	serialWrite("HT: Discover failed (err ");
-            serialWrite(err);
-            serialWrite(")\r\n");
+           	serialWriteF("HT: Discover failed (err %d)\r\n", err);
 	    }
 
 	// Found the HT Button Reset Characteristic
@@ -306,9 +288,8 @@ static bool eir_found(struct bt_data *data, void *user_data)
         break;
     case BT_DATA_NAME_SHORTENED:
     case BT_DATA_NAME_COMPLETE:   // *** DOESN'T WORK, MISSING DATA IN ADVERTISE???
-        //serialWrite("Device Name ");
-        //serialWriteln();
-        //serialWrite((char*)data->data,data->data_len);
+        //serialWriteln("Device Name ");
+        //serialWriteln((char*)data->data,data->data_len);
         break;
 	case BT_DATA_UUID16_SOME:
 	case BT_DATA_UUID16_ALL:
@@ -331,9 +312,7 @@ static bool eir_found(struct bt_data *data, void *user_data)
         	bt_addr_le_to_str(addr, addrstr, sizeof(addrstr));
             addrstr[17] = 0;
 
-            /*serialWrite("HT: Has a FrSky Service on ");
-            serialWrite(addrstr);
-            serialWriteln();*/
+            //serialWriteF("HT: Has a FrSky Service on %s\r\n", addrstr);
 
             // Notify GUI that a valid BT device was discovered
             trkset.setDiscoveredBTHead(addrstr);
@@ -375,6 +354,7 @@ static bool eir_found(struct bt_data *data, void *user_data)
 		    int	err = bt_conn_le_create(addr, &btconparm,
 						rmtconparms, &pararmtconn);
 			if (err) {
+                // TODO we can probably make this work (little/big endian)
 				serialWrite("HT: Create conn failed (Error ");
                 serialWriteHex((uint8_t *)&err,1);
                 serialWriteln(")");
@@ -411,9 +391,7 @@ static void start_scan(void)
 {
     int err = bt_le_scan_start(&scnparams, device_found);
 	if (err) {
-		serialWrite("HT: Scanning failed to start (err ");
-        serialWrite(err);
-        serialWriteln(")");
+		serialWriteF("HT: Scanning failed to start (err %d)\r\n", err);
 		return;
 	}
 
@@ -434,13 +412,9 @@ static void rmtconnected(struct bt_conn *conn, uint8_t err)
 	bt_addr_le_to_str(bt_conn_get_dst(conn), addr, sizeof(addr));
 
 	if (err) {
-		serialWrite("HT: Failed to connect to ");
-    serialWrite(addr);
-    serialWrite(" (");
-    serialWrite(err);
-    serialWrite(")\r\n");
+		serialWriteF("HT: Failed to connect to %s (%d)\r\n", addr, err);
 
-    bt_conn_unref(pararmtconn);
+        bt_conn_unref(pararmtconn);
 		pararmtconn = NULL;
 
 		start_scan();
@@ -451,34 +425,16 @@ static void rmtconnected(struct bt_conn *conn, uint8_t err)
 		return;
 	}
 
-	serialWrite("HT: Connected: ");
-  serialWrite(addr);
-  serialWriteln("");
+	serialWriteF("HT: Connected: %s\r\n", addr);
 
-  bleconnected = true;
+    bleconnected = true;
+    bt_conn_info info;
+    bt_conn_get_info(pararmtconn, &info);
 
-  bt_conn_info info;
-  bt_conn_get_info(pararmtconn, &info);
-  serialWrite("HT: PHY Connection Rx:");
-  printPhy(info.le.phy->rx_phy);
-  serialWrite(" Tx:");
-  printPhy(info.le.phy->tx_phy);
-  serialWriteln();
-
-  serialWrite("HT: BT Connection Params Int:");
-  serialWrite(info.le.interval);
-  serialWrite(" Lat:");
-  serialWrite(info.le.latency);
-  serialWrite(" Timeout:");
-  serialWrite(info.le.timeout);
-  serialWriteln();
-
-
-  serialWrite("HT: Requesting coded PHY - ");
-  if(bt_conn_le_phy_update(pararmtconn, &phy_params))
-    serialWriteln("FAILED");
-  else
-    serialWriteln("Success");
+    serialWriteF("HT: PHY Connection Rx:%d Tx:%d\r\n", info.le.phy->rx_phy, info.le.phy->tx_phy);
+    serialWriteF("HT: BT Connection Params Int:%d Lat:%d Timeout:%d\r\n", 
+        info.le.interval, info.le.latency, info.le.timeout);
+    serialWriteF("HT: Requesting coded PHY - %s\r\n", bt_conn_le_phy_update(pararmtconn, &phy_params) ? "FAILED" : "Success");
 
     // Start Discovery
 	if (conn == pararmtconn) {
@@ -491,9 +447,7 @@ static void rmtconnected(struct bt_conn *conn, uint8_t err)
 
 		err = bt_gatt_discover(pararmtconn, &discover_params);
 		if (err) {
-            serialWrite("Discover failed (err ");
-            serialWrite(err);
-            serialWrite(")\r\n");
+            serialWriteF("Discover failed (err %d)\r\n", err);
 			return;
 		}
 	}
@@ -505,9 +459,7 @@ static void rmtdisconnected(struct bt_conn *conn, uint8_t reason)
 
 	bt_addr_le_to_str(bt_conn_get_dst(conn), addr, sizeof(addr));
 
-	serialWrite("HT: Disconnected: ");
-    serialWrite(addr);
-    serialWriteln("");
+	serialWriteF("HT: Disconnected: %s\r\n", addr);
 
 	bt_conn_unref(pararmtconn);
 	pararmtconn = NULL;

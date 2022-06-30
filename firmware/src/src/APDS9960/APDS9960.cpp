@@ -49,7 +49,7 @@ bool APDS9960::begin() {
 
     i2c_dev = device_get_binding("I2C_1");
 	if (!i2c_dev) {
-		serialWrite("HT: Could not get device binding for I2C\r\n");
+		serialWriteln("HT: Could not get device binding for I2C");
 		return false;
 	}
 

@@ -45,14 +45,12 @@ void bt_init()
 {
     int err = bt_enable(NULL);
 	if (err) {
-		serialWrite("HT: Bluetooth init failed (err %d)");
-        serialWrite(err);
-        serialWriteln("");
+		serialWriteF("HT: Bluetooth init failed (err %d)\r\n", err);
 		return;
 	}
 
-    serialWriteln("HT: Bluetooth initialized");
-    btThreadRun = true;
+  serialWriteln("HT: Bluetooth initialized");
+  btThreadRun = true;
 }
 
 void bt_Thread()
@@ -213,15 +211,11 @@ int8_t BTGetRSSI()
 
 bool leparamrequested(struct bt_conn *conn, struct bt_le_conn_param *param)
 {
-  serialWrite("HT: Bluetooth Params Request. IntMax:");
-  serialWrite(param->interval_max);
-  serialWrite(" IntMin:");
-  serialWrite(param->interval_min);
-  serialWrite(" Lat:");
-  serialWrite(param->latency);
-  serialWrite(" Timout:");
-  serialWrite(param->timeout);
-  serialWriteln();
+  serialWriteF("HT: Bluetooth Params Request. IntMax:%d IntMin:%d Lat:%d Timeout:%d\r\n",
+    param->interval_max,
+    param->interval_min,
+    param->latency,
+    param->timeout);
   return true;
 }
 
@@ -230,47 +224,30 @@ void leparamupdated(struct bt_conn *conn,
 				                   uint16_t latency,
                            uint16_t timeout)
 {
-  serialWrite("HT: Bluetooth Params Updated. Int:");
-  serialWrite(interval);
-  serialWrite(" Lat:");
-  serialWrite(latency);
-  serialWrite(" Timeout:");
-  serialWrite(timeout);
-  serialWriteln();
+  serialWriteF("HT: Bluetooth Params Updated. Int:%d Lat:%d Timeout:%d\r\n", interval, latency, timeout);
 }
 
 void securitychanged(struct bt_conn *conn, bt_security_t level, enum bt_security_err err)
 {
-  serialWrite("HT: Bluetooth Security Changed. Lvl:");
-  serialWrite(level);
-  serialWrite(" Err:");
-  serialWrite(err);
-  serialWriteln();
+  serialWriteF("HT: Bluetooth Security Changed. Lvl:%d Err:%d\r\n", level, err);
 }
 
-void printPhy(int phy)
+const char *printPhy(int phy)
 {
   switch(phy) {
     case BT_GAP_LE_PHY_NONE:
-      serialWrite("None");
-      break;
+      return("None");
     case BT_GAP_LE_PHY_1M:
-      serialWrite("1M");
-      break;
+      return("1M");
     case BT_GAP_LE_PHY_2M:
-      serialWrite("2M");
-      break;
+      return("2M");
     case BT_GAP_LE_PHY_CODED:
-      serialWrite("Coded");
-      break;
+      return("Coded");
   }
+  return "Unknown";
 }
 
 void lephyupdated(struct bt_conn *conn, struct bt_conn_le_phy_info *param)
 {
-  serialWrite("HT: Bluetooth PHY Updated. RxPHY:");
-  printPhy(param->rx_phy);
-  serialWrite(" TxPHY:");
-  printPhy(param->tx_phy);
-  serialWriteln();
+  serialWriteF("HT: Bluetooth PHY Updated. RxPHY:%s TxPHY:%s\r\n", param->rx_phy, param->tx_phy);
 }

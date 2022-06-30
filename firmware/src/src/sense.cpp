@@ -398,9 +398,7 @@ void calculate_Thread()
         static bool hasrstppm=false;
         if(rstppmch >= 0 && rstppmch < 16) {
             if(channel_data[rstppmch] > 1800 && hasrstppm == false) {
-                serialWrite("HT: Reset Center - Input Channel ");
-                serialWrite(rstppmch+1);
-                serialWriteln(" > 1800us");
+                serialWriteF("HT: Reset Center - Input Channel %d > 1800us\r\n", rstppmch+1);
                 pressButton();
                 hasrstppm = true;
             } else if (channel_data[rstppmch] < 1700 && hasrstppm == true) {
@@ -626,9 +624,7 @@ void sensor_Thread()
                 if(APDS.proximityAvailable()) {
                     int proximity = APDS.readProximity();
 
-                    /*serialWrite("HT: Prox=");
-                    serialWrite(proximity);
-                    serialWriteln();*/
+                    //serialWriteF("HT: Prox=%d\r\n", proximity);
 
                     // Store High and Low Values, Generate reset thresholds
                     maxproximity = MAX(proximity, maxproximity);
