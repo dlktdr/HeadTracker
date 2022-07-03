@@ -247,7 +247,7 @@ void serialrx_Process()
         else {
             // Check how much free data is in the buffer
             if(jsonbufptr >= jsonbuffer + sizeof(jsonbuffer) - 3) {
-                serialWriteln("HT: Error JSON data too long, overflow");
+                LOGE("Error JSON data too long, overflow");
                 jsonbufptr = jsonbuffer; // Reset Buffer
 
             // Add data to buffer
@@ -281,17 +281,17 @@ void JSON_Process(char *jsonbuf)
         DeserializationError de = deserializeJson(json, jsonbuf);
         if(de) {
             if(de == DeserializationError::IncompleteInput)
-                serialWriteln("HT: DeserializeJson() Failed - Incomplete Input");
+                LOGE("DeserializeJson() Failed - Incomplete Input");
             else if(de == DeserializationError::InvalidInput)
-                serialWriteln("HT: DeserializeJson() Failed - Invalid Input");
+                LOGE("DeserializeJson() Failed - Invalid Input");
             else if(de == DeserializationError::NoMemory)
-                serialWriteln("HT: DeserializeJson() Failed - NoMemory");
+                LOGE("DeserializeJson() Failed - NoMemory");
             else if(de == DeserializationError::EmptyInput)
-                serialWriteln("HT: DeserializeJson() Failed - Empty Input");
+                LOGE("DeserializeJson() Failed - Empty Input");
             else if(de == DeserializationError::TooDeep)
-                serialWriteln("HT: DeserializeJson() Failed - TooDeep");
+                LOGE("DeserializeJson() Failed - TooDeep");
             else
-                serialWriteln("HT: DeserializeJson() Failed - Other");
+                LOGE("DeserializeJson() Failed - Other");
         } else {
             // Parse The JSON Data in dataparser.cpp
             parseData(json);      
@@ -307,7 +307,7 @@ void parseData(DynamicJsonDocument &json)
 
     JsonVariant v = json["Cmd"];
     if(v.isNull()) {
-        serialWriteln("HT: Invalid JSON, No Command");
+        LOGE("Invalid JSON, No Command");
         return;
     }
 
@@ -316,22 +316,23 @@ void parseData(DynamicJsonDocument &json)
 
     // Reset Center
     if(strcmp(command,"RstCnt") == 0) {
-        serialWriteln("HT: Resetting Center");
+        // TODO we should also log when the button on the device issues a Reset Center
+        LOGI("Resetting Center");
         pressButton();
 
     // Settings Sent from UI
     } else if (strcmp(command, "Set") == 0) {
         trkset.loadJSONSettings(json);
-        serialWriteln("HT: Storing Settings");
+        LOGI("Storing Settings");
 
     // Save to Flash
     } else if (strcmp(command, "Flash") == 0) {
-        serialWriteln("HT: Saving to Flash");
+        LOGI("Saving to Flash");
         trkset.saveToEEPROM();
 
     // Erase
     } else if (strcmp(command, "Erase") == 0) {
-        serialWriteln("HT: Clearing Flash");
+        LOGI("Clearing Flash");
         socClearFlash();
 
     // Reboot
@@ -345,7 +346,7 @@ void parseData(DynamicJsonDocument &json)
 
     // Get settings
     } else if (strcmp(command, "Get") == 0) {
-        serialWriteln("HT: Sending Settings");
+        LOGI("Sending Settings");
         json.clear();
         trkset.setJSONSettings(json);
         json["Cmd"] = "Set";
@@ -364,12 +365,12 @@ void parseData(DynamicJsonDocument &json)
 
     // Stop All Data Items
     } else if (strcmp(command, "D--") == 0) {
-        serialWriteln("HT: Clearing Data List");
+        LOGI("Clearing Data List");
         trkset.stopAllData();
 
     // Request Data Items
     } else if (strcmp(command, "RD") == 0) {
-        serialWriteln("HT: Data Added/Remove");
+        LOGI("Data Added/Remove");
         // using C++11 syntax (preferred):
         JsonObject root = json.as<JsonObject>();
         for (JsonPair kv : root) {
@@ -390,7 +391,7 @@ void parseData(DynamicJsonDocument &json)
 
     // Unknown Command
     } else {
-        serialWriteln("HT: Unknown Command");
+        LOGW("Unknown Command");
         return;
     }
 

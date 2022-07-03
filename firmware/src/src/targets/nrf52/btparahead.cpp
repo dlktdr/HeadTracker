@@ -24,7 +24,7 @@
 
 #include "trackersettings.h"
 #include "btparahead.h"
-#include "serial.h"
+#include "log.h"
 #include "io.h"
 #include "nano33ble.h"
 #include "defines.h"
@@ -148,16 +148,16 @@ void BTHeadStart()
         chan_vals[i] = TrackerSettings::PPM_CENTER;
     }
 
-    serialWriteln("HT: BLE Starting Head Bluetooth");
+    LOGI("BLE Starting Head Bluetooth");
 
     // Start Advertising
     int err = bt_le_adv_start(&my_param, ad, ARRAY_SIZE(ad), NULL, 0);
 	if (err) {
-		serialWriteF("HT: Advertising failed to start (err %d)", err);
+		LOGE("Advertising failed to start (err %d)", err);
 		return;
 	}
 
-    serialWriteln("HT: BLE Started Advertising");
+    LOGI("BLE Started Advertising");
 
     bt_conn_cb_register(&conn_callbacks);
 
@@ -173,18 +173,18 @@ void BTHeadStart()
 
 void BTHeadStop()
 {
-    serialWriteln("HT: BLE Stopping Head Bluetooth");
+    LOGI("BLE Stopping Head Bluetooth");
 
     // Stop Advertising
     int rv = bt_le_adv_stop();
     if(rv) {
-        serialWrite("HT: BLE Unable to Stop advertising");
+        LOGE("BLE Unable to Stop advertising");
     } else {
-        serialWriteln("HT: BLE Stopped Advertising");
+        LOGI("BLE Stopped Advertising");
     }
 
     if(curconn){
-        serialWriteln("HT: BLE Disconnecting Active Connection");
+        LOGI("BLE Disconnecting Active Connection");
         bt_conn_disconnect(curconn,0);
         bt_conn_unref(curconn);
     }
@@ -236,7 +236,7 @@ void BTHeadSetChannel(int channel, const uint16_t value)
 
     // Send a notify if override ch's have changed
     if(lovch != ovridech) {
-        serialWriteln("HT: Updating Notify Channels");
+        LOGI("Updating Notify Channels");
         bt_gatt_notify(NULL, &bt_srv.attrs[4], &ovridech, 2);
     }
     lovch = ovridech;
@@ -256,12 +256,12 @@ int8_t BTHeadGetRSSI()
 
 static void ct_ccc_cfg_changed_overr(const struct bt_gatt_attr *attr, uint16_t value)
 {
-    serialWriteF("HT: Override CCC Value Changed (%d)\r\n", value);
+    LOGI("Override CCC Value Changed (%d)", value);
 }
 
 static void ct_ccc_cfg_changed_frsky(const struct bt_gatt_attr *attr, uint16_t value)
 {
-    serialWriteF("HT: FrSky CCC Value Changed (%d)\r\n", value);
+    LOGI("FrSky CCC Value Changed (%d)", value);
 }
 
 static ssize_t read_ct(struct bt_conn *conn, const struct bt_gatt_attr *attr,
@@ -285,7 +285,7 @@ static ssize_t write_ct(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 static ssize_t read_json(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 		       void *buf, uint16_t len, uint16_t offset)
 {
-    serialWriteln("JSON Read");
+    LOGI("JSON Read");
     JsonVariant v,v1,v2;
 	char *value = (char*)attr->user_data;
 
@@ -302,7 +302,7 @@ static ssize_t write_json(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 {
     char sc=0;
 
-    serialWriteF("BLE:%.*s\r\n", len, buf);
+    LOGI("BLE:%.*s", len, buf);
 
     for(int i=0; i < len; i++) {
         sc = *((char*)buf + i);
@@ -317,7 +317,7 @@ static ssize_t write_json(struct bt_conn *conn, const struct bt_gatt_attr *attr,
             // Make sure it's a complete frame, SOT at beginning
             if(blejsonbuffer[0] == 0x02) {
                 *blejsonbufptr = 0; // Null terminate
-                serialWriteF("BLE Data RX:%s\r\n", blejsonbuffer);
+                LOGI("BLE Data RX:%s", blejsonbuffer);
                 JSON_Process(blejsonbuffer+1);
             }
             // Reset Buffer
@@ -326,7 +326,7 @@ static ssize_t write_json(struct bt_conn *conn, const struct bt_gatt_attr *attr,
         } else {
             // Check how much free data is in the buffer
             if(blejsonbufptr >= blejsonbuffer + sizeof(blejsonbuffer) - 3) {
-                serialWriteln("BLE: Error JSON data too long, overflow");
+                LOGE("JSON data too long, overflow");
                 blejsonbufptr = blejsonbuffer; // Reset Buffer
                 blejsonbuffer[0] = 0;
             // Add data to buffer
@@ -345,7 +345,7 @@ static ssize_t read_over(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 {
 	char *value = (char*)attr->user_data;
 
-    serialWriteln("HT: Override Ch's Read");
+    LOGI("Override Ch's Read");
     memcpy(overdata, (void*)&ovridech, sizeof(ovridech));
 
 	return bt_gatt_attr_read(conn, attr, buf, len, offset, value,
@@ -359,10 +359,10 @@ static ssize_t write_but(struct bt_conn *conn, const struct bt_gatt_attr *attr,
     if(len == 1) {
         char ccenet = ((const char*)buf)[0];
         if(ccenet == 'R') {
-            serialWriteln("HT: Remote BT Button Pressed");
+            LOGI("Remote BT Button Pressed");
             pressButton();
         } else if(ccenet == 'L') {
-            serialWriteln("HT: Remote BT Button Long Pressed");
+            LOGI("Remote BT Button Long Pressed");
             longPressButton();
         }
     }
@@ -383,10 +383,10 @@ void hasSecurityChangedTimer(struct k_timer *tmr)
     if(sl == BT_SECURITY_L1) {
         uint8_t ccv = BT_GATT_CCC_NOTIFY;
         bt_gatt_attr_write_ccc(curconn, &bt_srv.attrs[3], &ccv, 1 , 0, 0);
-        serialWriteln("HT: Detected a CC2650 Chip (PARA Wireless)");
+        LOGI("Detected a CC2650 Chip (PARA Wireless)");
     }
     else
-        serialWriteln("HT: Detected a CC2540 Chip (non-PARA)");
+        LOGI("Detected a CC2540 Chip (non-PARA)");
 }
 
 K_TIMER_DEFINE(my_timer, hasSecurityChangedTimer, NULL);
@@ -394,9 +394,9 @@ K_TIMER_DEFINE(my_timer, hasSecurityChangedTimer, NULL);
 static void connected(struct bt_conn *conn, uint8_t err)
 {
 	if (err) {
-		serialWriteF("HT: Bluetooth Connection failed %d\r\n", err);
+		LOGE("Bluetooth Connection failed %d", err);
 	} else {
-		serialWriteln("HT: Bluetooth connected :)");
+		LOGI("Bluetooth connected :)");
 	}
 
     // Stop Advertising
@@ -410,16 +410,16 @@ static void connected(struct bt_conn *conn, uint8_t err)
     char addr_str[50];
     bt_addr_le_to_str(info.le.dst, addr_str, sizeof(addr_str));
 
-    serialWriteF("HT: Connected to Address %s\r\n", addr_str);
+    LOGI("Connected to Address %s", addr_str);
 
     bt_conn_info info2;
     bt_conn_get_info(conn, &info2);
-    serialWriteF("HT: PHY Connection Rx:%s TX:%s\r\n", printPhy(info2.le.phy->rx_phy), printPhy(info2.le.phy->tx_phy));
+    LOGI("PHY Connection Rx:%s TX:%s", printPhy(info2.le.phy->rx_phy), printPhy(info2.le.phy->tx_phy));
  
     // Set Connection Parameters - Request updated rate
     bt_conn_le_param_update(curconn,conparms);
 
-    serialWriteF("HT: Requesting coded PHY - %s\r\n", bt_conn_le_phy_update(curconn, &phy_params) ? "FAILED" : "Success");
+    LOGI("Requesting coded PHY - %s", bt_conn_le_phy_update(curconn, &phy_params) ? "FAILED" : "Success");
 
     // Start a Timer, If we don't see a Security Change within this time
     // e.g. a CC2540 chip then force a subscription for the PARA chip
@@ -431,12 +431,12 @@ static void connected(struct bt_conn *conn, uint8_t err)
 
 static void disconnected(struct bt_conn *conn, uint8_t reason)
 {
-    serialWriteF("HT: Bluetooth disconnected (reason %d)\r\n", reason);
+    LOGW("Bluetooth disconnected (reason %d)", reason);
 
     // Start advertising
     int err = bt_le_adv_start(&my_param, ad, ARRAY_SIZE(ad), NULL, 0);
 	if (err) {
-		serialWriteF("HT: Advertising failed to start (err %d)\r\n", err);
+		LOGE("Advertising failed to start (err %d)", err);
 		return;
 	}
 

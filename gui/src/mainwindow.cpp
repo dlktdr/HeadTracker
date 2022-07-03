@@ -453,7 +453,7 @@ void MainWindow::addToLog(QString log, int ll)
     QString color = "black";
     if(ll==2) // Debug
         color = "red";
-    else if(log.contains("HT:"))
+    else if(log.contains("HT:")) // TODO change this to detect logger messages
         color = "green";
     else if(log.contains("GUI:"))
         color = "blue";

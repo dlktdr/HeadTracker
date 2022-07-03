@@ -21,7 +21,7 @@
 #include "trackersettings.h"
 #include "sense.h"
 #include "nano33ble.h"
-#include "serial.h"
+#include "log.h"
 #include "ble.h"
 #include "MadgwickAHRS/MadgwickAHRS.h"
 #include "SBUS/sbus.h"
@@ -89,7 +89,7 @@ volatile bool senseTreadRun = false;
 int sense_Init()
 {
     if (!IMU.begin()) {
-        serialWriteln("Failed to initalize sensors");
+        LOGE("Failed to initalize sensors");
         return -1;
     }
 
@@ -361,7 +361,7 @@ void calculate_Thread()
             for(int i=0; i < 16; i++)
                 sbus_in_chans[i] = 0;
             if(!lostmsgsent) {
-                serialWriteln("HT: SBUS Data Lost");
+                LOGE("SBUS Data Lost");
                 lostmsgsent = true;
             }
             recmsgsent = false;
@@ -370,7 +370,7 @@ void calculate_Thread()
             for(int i=0; i < 16; i++)
                 channel_data[i] = sbus_in_chans[i];
             if(!recmsgsent) {
-                serialWriteln("HT: SBUS Data Received");
+                LOGD("SBUS Data Received");
                 recmsgsent = true;
             }
             lostmsgsent = false;
@@ -398,7 +398,7 @@ void calculate_Thread()
         static bool hasrstppm=false;
         if(rstppmch >= 0 && rstppmch < 16) {
             if(channel_data[rstppmch] > 1800 && hasrstppm == false) {
-                serialWriteF("HT: Reset Center - Input Channel %d > 1800us\r\n", rstppmch+1);
+                LOGI("Reset Center - Input Channel %d > 1800us", rstppmch+1);
                 pressButton();
                 hasrstppm = true;
             } else if (channel_data[rstppmch] < 1700 && hasrstppm == true) {
@@ -624,7 +624,7 @@ void sensor_Thread()
                 if(APDS.proximityAvailable()) {
                     int proximity = APDS.readProximity();
 
-                    //serialWriteF("HT: Prox=%d\r\n", proximity);
+                    LOGT("Prox=%d", proximity);
 
                     // Store High and Low Values, Generate reset thresholds
                     maxproximity = MAX(proximity, maxproximity);
@@ -636,7 +636,7 @@ void sensor_Thread()
                     if(highthreshold - lowthreshold > APDS_HYSTERISIS*2) {
                         if (proximity < lowthreshold && lastproximity == false) {
                             pressButton();
-                            serialWriteln("HT: Reset center from a close proximity");
+                            LOGI("Reset center from a close proximity");
                             lastproximity = true;
                         } else if(proximity > highthreshold) {
                             // Clear flag on proximity clear
@@ -828,7 +828,7 @@ void reset_fusion()
   firstrun = true;
   aacc[0] = 0; aacc[1] = 0; aacc[2] = 0;
   amag[0] = 0; amag[1] = 0; amag[2] = 0;
-  serialWriteln("HT: Resetting fusion algorithm");
+  LOGI("Resetting fusion algorithm");
 }
 
 /* Builds data for auxiliary functions

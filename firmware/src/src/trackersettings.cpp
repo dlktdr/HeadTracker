@@ -21,6 +21,7 @@
 
 #include "soc_flash.h"
 #include "io.h"
+#include "log.h"
 #include "sense.h"
 #include "base64.h"
 #include "SBUS/sbus.h"
@@ -834,7 +835,7 @@ void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
        (bp   > 0 && (bp == ppmi || bp == ppmo)) ||
        (ppmi > 0 && (ppmi == bp || ppmi == ppmo)) ||
        (ppmo > 0 && (ppmo == bp || ppmo == ppmi)))) {
-        serialWriteln("HT: FAULT! Setting Pins, cannot have duplicates");
+        LOGE("FAULT! Setting Pins, cannot have duplicates");
     } else {
         // Disable all pins first, so no conflicts on change
         setButtonPin(-1);
@@ -917,7 +918,7 @@ void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
             isCalibrated = true; // Add a notify flag calibration is complete
         }
         setMagOffset(v,v1,v2);
-        //serialWriteln("HT: Mag offsets set");
+        LOGD("Mag offsets set");
     }
 
 // Calibrarion Values
@@ -1077,9 +1078,9 @@ void TrackerSettings::saveToEEPROM()
     k_mutex_unlock(&data_mutex);
 
     if(socWriteFlash(buffer,len)) {
-        serialWriteln("HT: Flash Write Failed");
+        LOGE("Flash Write Failed");
     } else {
-        serialWriteln("HT: Saved to Flash");
+        LOGI("Saved to Flash");
     }
 }
 
@@ -1094,13 +1095,13 @@ void TrackerSettings::loadFromEEPROM()
     de = deserializeJson(json, get_flashSpace());
 
     if(de != DeserializationError::Ok)
-        serialWriteln("HT: Invalid JSON Data");
+        LOGE("Invalid JSON Data");
 
     if(json["UUID"] == 837727) {
-        serialWriteln("HT: Device has been freshly programmed, no data found");
+        LOGI("Device has been freshly programmed, no data found");
 
     } else {
-        serialWriteln("HT: Loading settings from flash");
+        LOGI("Loading settings from flash");
         loadJSONSettings(json);
     }
     k_mutex_unlock(&data_mutex);

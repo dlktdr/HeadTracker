@@ -21,7 +21,7 @@
 #include <drivers/flash.h>
 #include <storage/flash_map.h>
 #include "defines.h"
-#include "serial.h"
+#include "log.h"
 #include "soc_flash.h"
 
 #define FLASH_OFFSET FLASH_AREA_OFFSET(datapt)
@@ -42,16 +42,16 @@ void socClearFlash()
     flash_dev = device_get_binding(DT_CHOSEN_ZEPHYR_FLASH_CONTROLLER_LABEL);
 
 	if (!flash_dev) {
-		serialWriteln("HT: Nordic nRF5 flash driver was not found!");
+		LOGE("Nordic nRF5 flash driver was not found!");
 		return;
 	}
 
 	if (flash_erase(flash_dev, FLASH_OFFSET, FLASH_PAGE_SIZE) != 0) {
-		serialWriteln("HT: Flash erase Failure");
+		LOGE("Flash erase Failure");
         return;
     }
 
-    serialWriteln("HT: Flash erase succeeded");
+    LOGI("Flash erase succeeded");
 }
 
 int socWriteFlash(const char *datain, int len)
@@ -61,19 +61,19 @@ int socWriteFlash(const char *datain, int len)
     flash_dev = device_get_binding(DT_CHOSEN_ZEPHYR_FLASH_CONTROLLER_LABEL);
 
 	if (!flash_dev) {
-		serialWriteln("HT: Nordic nRF5 flash driver was not found!");
+		LOGE("Nordic nRF5 flash driver was not found!");
 		return -1;
 	}
 
 	if (flash_erase(flash_dev, FLASH_OFFSET, FLASH_PAGE_SIZE) != 0) {
-		serialWriteln("HT: Flash erase Failure");
+		LOGE("Flash erase Failure");
         return -1;
     }
 
-    serialWriteln("HT: Flash erase succeeded");
+    LOGI("Flash erase succeeded");
 
     if (flash_write(flash_dev, FLASH_OFFSET, (const void *)datain, FLASH_PAGE_SIZE) != 0) {
-        serialWriteln("   Flash write failed!");
+        LOGE("   Flash write failed!");
         return -1;
     }
 

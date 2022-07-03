@@ -20,7 +20,7 @@
 #include <bluetooth/conn.h>
 #include <bluetooth/uuid.h>
 
-#include "serial.h"
+#include "log.h"
 #include "io.h"
 #include "nano33ble.h"
 #include "ble.h"
@@ -45,11 +45,11 @@ void bt_init()
 {
     int err = bt_enable(NULL);
 	if (err) {
-		serialWriteF("HT: Bluetooth init failed (err %d)\r\n", err);
+		LOGE("Bluetooth init failed (err %d)", err);
 		return;
 	}
 
-  serialWriteln("HT: Bluetooth initialized");
+  LOGI("Bluetooth initialized");
   btThreadRun = true;
 }
 
@@ -211,7 +211,7 @@ int8_t BTGetRSSI()
 
 bool leparamrequested(struct bt_conn *conn, struct bt_le_conn_param *param)
 {
-  serialWriteF("HT: Bluetooth Params Request. IntMax:%d IntMin:%d Lat:%d Timeout:%d\r\n",
+  LOGI("Bluetooth Params Request. IntMax:%d IntMin:%d Lat:%d Timeout:%d",
     param->interval_max,
     param->interval_min,
     param->latency,
@@ -224,12 +224,12 @@ void leparamupdated(struct bt_conn *conn,
 				                   uint16_t latency,
                            uint16_t timeout)
 {
-  serialWriteF("HT: Bluetooth Params Updated. Int:%d Lat:%d Timeout:%d\r\n", interval, latency, timeout);
+  LOGI("Bluetooth Params Updated. Int:%d Lat:%d Timeout:%d", interval, latency, timeout);
 }
 
 void securitychanged(struct bt_conn *conn, bt_security_t level, enum bt_security_err err)
 {
-  serialWriteF("HT: Bluetooth Security Changed. Lvl:%d Err:%d\r\n", level, err);
+  LOGI("Bluetooth Security Changed. Lvl:%d Err:%d", level, err);
 }
 
 const char *printPhy(int phy)
@@ -249,5 +249,5 @@ const char *printPhy(int phy)
 
 void lephyupdated(struct bt_conn *conn, struct bt_conn_le_phy_info *param)
 {
-  serialWriteF("HT: Bluetooth PHY Updated. RxPHY:%s TxPHY:%s\r\n", param->rx_phy, param->tx_phy);
+  LOGI("Bluetooth PHY Updated. RxPHY:%s TxPHY:%s", param->rx_phy, param->tx_phy);
 }

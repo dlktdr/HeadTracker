@@ -19,7 +19,7 @@
 #include <nrfx_ppi.h>
 #include <nrfx_gpiote.h>
 #include <chrono>
-#include "serial.h"
+#include "log.h"
 #include "defines.h"
 #include "PPMIn.h"
 #include "io.h"
@@ -213,7 +213,7 @@ void PpmIn_execute()
 
     if(micros64() - runtime > 60000) {
         if(sentconn == false) {
-            serialWriteln("HT: PPM Input Data Lost");
+            LOGW("PPM Input Data Lost");
             sentconn = true;
             ch_count = 0;
         }
@@ -223,7 +223,7 @@ void PpmIn_execute()
             cyclescount++;
         else {
             if(sentconn == true && ch_count >= 4 && ch_count <= 16) {
-                serialWriteln("HT: PPM Input Data Received");
+                LOGI("PPM Input Data Received");
                 sentconn = false;
             }
         }

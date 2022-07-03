@@ -22,6 +22,7 @@
 #include "auxserial.h"
 #include "defines.h"
 #include "io.h"
+#include "log.h"
 #include "trackersettings.h"
 #include <nrfx.h>
 #include <nrfx_uarte.h>
@@ -184,7 +185,7 @@ bool SBUS_Read_Data(uint16_t ch_[16])
             float elapsed = (float)(millis64() - sbstarttime) / 1000.0f;
             uint32_t bytes = bytecount - bytesread; // Bytes read in this time
             sbusrate = 0;
-            serialWriteF("SBUS Rate - %d BytesRx - %d\r\n", (int)(elapsed * 1000.0f), (int)bytes);
+            LOGD("SBUS Rate - %d BytesRx - %d", (int)(elapsed * 1000.0f), (int)bytes);
         }
 #endif
 
