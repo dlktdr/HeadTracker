@@ -267,16 +267,15 @@ void JSON_Process(char *jsonbuf)
         k_mutex_lock(&ring_tx_mutex, K_FOREVER);
         uint16_t calccrc = escapeCRC(uCRC16Lib::calculate(jsonbuf,len-sizeof(uint16_t)));
         if(calccrc != *(uint16_t*)(jsonbuf+len-sizeof(uint16_t))) {
-            serialWriteln("\x15"); // Not-Acknowledged
+            serialWrite("\x15\r\n"); // Not-Acknowledged
             k_mutex_unlock(&ring_tx_mutex);
             return;
         } else {
-            serialWriteln("\x06"); // Acknowledged
+            serialWrite("\x06\r\n"); // Acknowledged
         }
         // Remove CRC from end of buffer
         jsonbuf[len-sizeof(uint16_t)] = 0;
 
-        // TODO look for deadlock cycles
         k_mutex_lock(&data_mutex, K_FOREVER);
         DeserializationError de = deserializeJson(json, jsonbuf);
         if(de) {
@@ -437,37 +436,10 @@ void serialWrite(const char *data, int len)
     }
 }
 
-void serialWrite(std::string str)
-{
-    serialWrite(str.c_str());
-}
-
-void serialWrite(int val)
-{
-    char buf[50];
-    __itoa(val,buf,10);
-    // Append Output to the serial output buffer
-    serialWrite(buf, strlen(buf));
-}
-
 void serialWrite(const char *data)
 {
     // Append Output to the serial output buffer
     serialWrite(data, strlen(data));
-}
-
-void serialWrite(const char c) {
-    char h = c;
-    serialWrite(&h,1);
-}
-
-void serialWriteln(const char *data)
-{
-    // Make sure CRLF gets put
-    k_mutex_lock(&ring_tx_mutex, K_FOREVER);
-    serialWrite(data, strlen(data));
-    serialWrite("\r\n");
-    k_mutex_unlock(&ring_tx_mutex);
 }
 
 int serialWriteF(const char *format, ...)
@@ -479,25 +451,6 @@ int serialWriteF(const char *format, ...)
     va_end(vArg);
     serialWrite(buf, len);
     return len;
-}
-
-void serialWriteHex(const uint8_t *data, int len)
-{
-    k_mutex_lock(&ring_tx_mutex, K_FOREVER);
-    for(int i=0; i < len; i++) {
-        uint8_t nib1 = (*data >> 4) & 0x0F;
-        uint8_t nib2 = *data++ & 0x0F;
-        if(nib1 > 9)
-            serialWrite((char)('A' + nib1-10));
-        else
-            serialWrite((char)('0' + nib1));
-        if(nib2 > 9)
-            serialWrite((char)('A' + nib2-10));
-        else
-            serialWrite((char)('0' + nib2));
-        serialWrite(' ');
-    }
-    k_mutex_unlock(&ring_tx_mutex);
 }
 
 // FIX Me to Not use as Much Stack.

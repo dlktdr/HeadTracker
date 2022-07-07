@@ -38,6 +38,25 @@ char log_level_to_char(log_level level) {
     }
 }
 
+char* bytesToHex(const uint8_t *data, int len, char *buffer)
+{
+    char *bufptr = buffer;
+    for(int i=0; i < len; i++) {
+        uint8_t nib1 = (*data >> 4) & 0x0F;
+        uint8_t nib2 = *data++ & 0x0F;
+        if(nib1 > 9)
+            *bufptr++ = ((char)('A' + nib1-10));
+        else
+            *bufptr++ = ((char)('0' + nib1));
+        if(nib2 > 9)
+            *bufptr++ = ((char)('A' + nib2-10));
+        else
+            *bufptr++ = ((char)('0' + nib2));
+    }
+    *bufptr = 0;
+    return buffer;
+}
+
 int ht_serial_logger(const log_level level, ...) {
     int len1 = 0;
     int len2 = 0;
@@ -63,10 +82,15 @@ int ht_serial_logger(const log_level level, ...) {
             len2 = vsnprintf(log_buffer2, LOG_BUFFER2_SIZE, log_buffer1, vArg);
 
             if (len2 >= LOG_BUFFER2_SIZE) {
-                // TODO print overflow
+                // formatted string too long -- truncate
+                log_buffer2[LOG_BUFFER2_SIZE - 2] = '>';
+                log_buffer2[LOG_BUFFER2_SIZE - 1] = 0;
+                len2 = LOG_BUFFER2_SIZE;
             }
         } else {
-            // TODO print overflow
+            // syntheszed log formatter string too long -- we're stuck
+            len2 = snprintf(log_buffer2, LOG_BUFFER2_SIZE, "ERROR: log formatter line too long [%d] for buffer [%d]\r\n",
+                len1, LOG_BUFFER1_SIZE);
         }
         va_end(vArg);
 

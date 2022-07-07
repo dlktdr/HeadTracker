@@ -67,10 +67,8 @@ uint8_t read_overrides(struct bt_conn *conn, uint8_t err,
 				    struct bt_gatt_read_params *params,
 				    const void *data, uint16_t length)
 {
-    // TODO we can probably make this work (little/big endian)
-    serialWrite("HT: Read Override Data (0x");
-    serialWriteHex((uint8_t*)data,2);
-    serialWriteln(")");
+    char buf[10];
+    LOGI("Read Override Data (%s)", bytesToHex((uint8_t*)data, 2, buf));
     if(length == 2) {
         // Store Overrides
         memcpy(&chanoverrides, data, sizeof(chanoverrides));
@@ -115,10 +113,8 @@ static uint8_t over_notify_func(struct bt_conn *conn,
 			   struct bt_gatt_subscribe_params *params,
 			   const void *data, uint16_t length)
 {
-    // TODO we can probably make this work (little/big endian)
-    serialWrite("HT: BT Override Channels Changed (0x");
-    serialWriteHex((uint8_t*)data,2);
-    serialWriteln(")");
+    char buf[10];
+    LOGI("BT Override Channels Changed (%s)", bytesToHex((uint8_t*)data, 2, buf));
 	if (!data) {
 		return BT_GATT_ITER_CONTINUE;
 	}
@@ -145,7 +141,6 @@ static uint8_t discover_func(struct bt_conn *conn,
 
 #if defined(DEBUG)
     char str[30];
-    // TODO flip this over to stack based -- then don't need DEBUG if
     bt_uuid_to_str(params->uuid,str,sizeof(str));
     LOGD("Discovered UUID %s Attribute Handle=%d", str, attr->handle);
 #endif
@@ -354,10 +349,8 @@ static bool eir_found(struct bt_data *data, void *user_data)
 		    int	err = bt_conn_le_create(addr, &btconparm,
 						rmtconparms, &pararmtconn);
 			if (err) {
-                // TODO we can probably make this work (little/big endian)
-				serialWrite("HT: Create conn failed (Error ");
-                serialWriteHex((uint8_t *)&err,1);
-                serialWriteln(")");
+                char buf[10];
+				LOGE("HT: Create conn failed (Error %s)", bytesToHex((uint8_t*)&err, 1, buf));
 
                 // Re-start Scanning
                 start_scan();

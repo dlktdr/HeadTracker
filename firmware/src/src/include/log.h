@@ -33,6 +33,7 @@ extern log_level global_log_level;
 #define LOGT(...)   HT_LOG(TRACE, __VA_ARGS__)
 
 extern int ht_serial_logger(const log_level level, ...);
+extern char* bytesToHex(const uint8_t *data, int len, char* buffer);
 
 #define HT_LOG(LEVEL, ...) ht_serial_logger(LEVEL, __VA_ARGS__)
 
