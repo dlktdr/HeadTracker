@@ -30,7 +30,7 @@
 #include <math.h>
 #include "defines.h"
 #include "LSM9DS1.h"
-#include "serial.h"
+#include "log.h"
 
 #define LSM9DS1_ADDRESS            0x6b
 
@@ -68,7 +68,7 @@ int LSM9DS1Class::begin()
 {
   i2c_dev = device_get_binding("I2C_1");
 	if (!i2c_dev) {
-		serialWrite("HT: Could not get device binding for I2C\r\n");
+		LOGE("Could not get device binding for I2C");
 		return 0;
 	}
 

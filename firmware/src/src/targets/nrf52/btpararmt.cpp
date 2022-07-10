@@ -24,7 +24,7 @@
 #include <bluetooth/gatt.h>
 #include <sys/byteorder.h>
 
-#include "serial.h"
+#include "log.h"
 #include "io.h"
 #include "nano33ble.h"
 #include "trackersettings.h"
@@ -67,9 +67,8 @@ uint8_t read_overrides(struct bt_conn *conn, uint8_t err,
 				    struct bt_gatt_read_params *params,
 				    const void *data, uint16_t length)
 {
-    serialWrite("HT: Read Override Data (0x");
-    serialWriteHex((uint8_t*)data,2);
-    serialWriteln(")");
+    char buf[10];
+    LOGI("Read Override Data (%s)", bytesToHex((uint8_t*)data, 2, buf));
     if(length == 2) {
         // Store Overrides
         memcpy(&chanoverrides, data, sizeof(chanoverrides));
@@ -114,9 +113,8 @@ static uint8_t over_notify_func(struct bt_conn *conn,
 			   struct bt_gatt_subscribe_params *params,
 			   const void *data, uint16_t length)
 {
-    serialWrite("HT: BT Override Channels Changed (0x");
-    serialWriteHex((uint8_t*)data,2);
-    serialWriteln(")");
+    char buf[10];
+    LOGI("BT Override Channels Changed (%s)", bytesToHex((uint8_t*)data, 2, buf));
 	if (!data) {
 		return BT_GATT_ITER_CONTINUE;
 	}
@@ -136,7 +134,7 @@ static uint8_t discover_func(struct bt_conn *conn,
     static int ccclvl=0;
 
 	if (!attr) {
-		serialWrite("HT: Discover complete\r\n");
+		LOGI("Discover complete");
 		(void)memset(params, 0, sizeof(*params));
 		return BT_GATT_ITER_STOP;
 	}
@@ -144,18 +142,12 @@ static uint8_t discover_func(struct bt_conn *conn,
 #if defined(DEBUG)
     char str[30];
     bt_uuid_to_str(params->uuid,str,sizeof(str));
-    serialWrite("Discovered UUID ");
-    serialWrite(str);
-    serialWriteln();
-
-    serialWrite("Arribute Handle=");
-    serialWrite(attr->handle);
-    serialWriteln();
+    LOGD("Discovered UUID %s Attribute Handle=%d", str, attr->handle);
 #endif
 
     // Found the FRSky FFF0 Service?
 	if (!bt_uuid_cmp(discover_params.uuid, &frskyserv.uuid)) {
-        serialWriteln("HT: Found FRSky Service 0xFFF0");
+        LOGI("Found FRSky Service 0xFFF0");
 //-----------------------------------------------------------------------------------
 // 0xFFF6
         // Setup next discovery
@@ -166,13 +158,11 @@ static uint8_t discover_func(struct bt_conn *conn,
 
 		err = bt_gatt_discover(conn, &discover_params);
 		if (err) {
-           	serialWrite("HT: Discover failed (err ");
-            serialWrite(err);
-            serialWrite(")\r\n");
+           	LOGE("Discover failed (err %d)", err);
 	    }
     // Found the Frsky FFF6 Characteristic, Get the CCCD for it & subscribe
     } else if (!bt_uuid_cmp(discover_params.uuid, &frskychar.uuid)) {
-        serialWriteln("HT: Found FRSky Caracteristic 0xFFF6");
+        LOGI("Found FRSky Caracteristic 0xFFF6");
 
 //-----------------------------------------------------------------------------------
 // 0xFFF6 (0x2902) - PARA CCC
@@ -186,14 +176,12 @@ static uint8_t discover_func(struct bt_conn *conn,
 
 		err = bt_gatt_discover(conn, &discover_params);
 		if (err) {
-           	serialWrite("HT: Discover failed (err ");
-            serialWrite(err);
-            serialWrite(")\r\n");
+           	LOGE("Discover failed (err %d)", err);
 		}
 
     // Found the FFF6 CCCD descriptor, subscribe to notifications
 	} else if (!bt_uuid_cmp(discover_params.uuid, &ccc.uuid) && ccclvl == 0){
-        serialWriteln("HT: Found FRSky CCC");
+        LOGI("Found FRSky CCC");
 
 		subscribefff6.notify = notify_func;
 		subscribefff6.value = BT_GATT_CCC_NOTIFY;
@@ -201,11 +189,9 @@ static uint8_t discover_func(struct bt_conn *conn,
 
 		err = bt_gatt_subscribe(conn, &subscribefff6);
 		if (err && err != -EALREADY) {
-            serialWrite("HT: Subscribe failed (err ");
-            serialWrite(err);
-            serialWrite(")\r\n");
+            LOGE("Subscribe failed (err %d)", err);
 		} else {
-			serialWrite("HT: Subscribed to Frsky Data\r\n");
+			LOGI("Subscribed to Frsky Data");
 		}
 
 //-----------------------------------------------------------------------------------
@@ -217,13 +203,11 @@ static uint8_t discover_func(struct bt_conn *conn,
 		discover_params.type = BT_GATT_DISCOVER_DESCRIPTOR;
         err = bt_gatt_discover(conn, &discover_params);
 		if (err) {
-           	serialWrite("HT: Discover failed (err ");
-            serialWrite(err);
-            serialWrite(")\r\n");
+           	LOGE("Discover failed (err %d)", err);
 	    }
 
 	} else if (!bt_uuid_cmp(discover_params.uuid, &htoverridech.uuid)) {
-        serialWriteln("HT: Found Override Characteristic");
+        LOGI("Found Override Characteristic");
 
 //-----------------------------------------------------------------------------------
 // 0xAFF1(0x2902) - Override's CCC
@@ -237,13 +221,11 @@ static uint8_t discover_func(struct bt_conn *conn,
         subscribeaff1.value_handle = attr->handle;
         err = bt_gatt_discover(conn, &discover_params);
 		if (err) {
-           	serialWrite("HT: Discover failed (err ");
-            serialWrite(err);
-            serialWrite(")\r\n");
+           	LOGE("Discover failed (err %d)", err);
 	    }
 
 	} else if (!bt_uuid_cmp(discover_params.uuid, &ccc.uuid) && ccclvl == 1){
-        serialWriteln("HT: Found Override CCC");
+        LOGI("Found Override CCC");
 
         subscribeaff1.notify = over_notify_func;
 		subscribeaff1.value = BT_GATT_CCC_NOTIFY;
@@ -251,11 +233,9 @@ static uint8_t discover_func(struct bt_conn *conn,
 
 		err = bt_gatt_subscribe(conn, &subscribeaff1);
 		if (err && err != -EALREADY) {
-            serialWrite("HT: Subscribe to overrides failed (err ");
-            serialWrite(err);
-            serialWrite(")\r\n");
+            LOGE("Subscribe to overrides failed (err %d)", err);
 		} else {
-			serialWrite("HT: Subscribed to Overrides\r\n");
+			LOGI("Subscribed to Overrides");
 		}
 
 //-----------------------------------------------------------------------------------
@@ -266,21 +246,18 @@ static uint8_t discover_func(struct bt_conn *conn,
 		discover_params.type = BT_GATT_DISCOVER_DESCRIPTOR;
         err = bt_gatt_discover(conn, &discover_params);
 		if (err) {
-           	serialWrite("HT: Discover failed (err ");
-            serialWrite(err);
-            serialWrite(")\r\n");
+           	LOGE("Discover failed (err %d)", err);
 	    }
 
 	// Found the HT Button Reset Characteristic
 	} else if (!bt_uuid_cmp(discover_params.uuid, &btbutton.uuid)) {
-        serialWriteln("HT: Found headboard connection");
-        serialWriteln("HT: Enabling button indication forwarding");
+        LOGI("Found headboard connection. Enabling button indication forwarding");
         contoheadboard = true;
         buttonhandle = attr->handle;
         buttonattr = attr;
 
 
-        serialWriteln("HT: Reading Overrides in Timeout");
+        LOGI("Reading Overrides in Timeout");
 
         // Do an initial read of the BT override data
         rparm.handle_count = 1;
@@ -302,18 +279,17 @@ static bool eir_found(struct bt_data *data, void *user_data)
 
 	switch (data->type) {
     case BT_DATA_FLAGS:
-        //serialWriteln("Flags Found");
+        LOGD("Flags Found");
         break;
     case BT_DATA_NAME_SHORTENED:
     case BT_DATA_NAME_COMPLETE:   // *** DOESN'T WORK, MISSING DATA IN ADVERTISE???
-        //serialWrite("Device Name ");
-        //serialWriteln();
-        //serialWrite((char*)data->data,data->data_len);
+        LOGD("Device Name %.*s");
+        //serialWriteln((char*)data->data,data->data_len);
         break;
 	case BT_DATA_UUID16_SOME:
 	case BT_DATA_UUID16_ALL:
 		if (data->data_len % sizeof(uint16_t) != 0U) {
-			serialWriteln("HT: AD malformed");
+			LOGW("AD malformed");
 			return true;
 		}
 
@@ -331,9 +307,7 @@ static bool eir_found(struct bt_data *data, void *user_data)
         	bt_addr_le_to_str(addr, addrstr, sizeof(addrstr));
             addrstr[17] = 0;
 
-            /*serialWrite("HT: Has a FrSky Service on ");
-            serialWrite(addrstr);
-            serialWriteln();*/
+            LOGD("Has a FrSky Service on %s", addrstr);
 
             // Notify GUI that a valid BT device was discovered
             trkset.setDiscoveredBTHead(addrstr);
@@ -349,7 +323,7 @@ static bool eir_found(struct bt_data *data, void *user_data)
                     okaytocon = true;
                }
                else {
-                   serialWriteln("HT: FRSky device found. Not connecting. Incorrect Address");
+                   LOGW("FRSky device found. Not connecting. Incorrect Address");
                }
             } else
                 okaytocon = true;
@@ -362,7 +336,7 @@ static bool eir_found(struct bt_data *data, void *user_data)
             if(isscanning)
                 bt_le_scan_stop();
 
-            serialWriteln("HT: Connecting to device...");
+            LOGI("Connecting to device...");
 
             struct bt_conn_le_create_param btconparm = {
                 .options = (BT_CONN_LE_OPT_NONE),
@@ -375,9 +349,8 @@ static bool eir_found(struct bt_data *data, void *user_data)
 		    int	err = bt_conn_le_create(addr, &btconparm,
 						rmtconparms, &pararmtconn);
 			if (err) {
-				serialWrite("HT: Create conn failed (Error ");
-                serialWriteHex((uint8_t *)&err,1);
-                serialWriteln(")");
+                char buf[10];
+				LOGE("HT: Create conn failed (Error %s)", bytesToHex((uint8_t*)&err, 1, buf));
 
                 // Re-start Scanning
                 start_scan();
@@ -411,14 +384,12 @@ static void start_scan(void)
 {
     int err = bt_le_scan_start(&scnparams, device_found);
 	if (err) {
-		serialWrite("HT: Scanning failed to start (err ");
-        serialWrite(err);
-        serialWriteln(")");
+		LOGE("Scanning failed to start (err %d)", err);
 		return;
 	}
 
     isscanning = true;
-	serialWriteln("HT: Scanning successfully started");
+	LOGI("Scanning successfully started");
 }
 
 static struct bt_conn_le_phy_param phy_params = {
@@ -434,13 +405,9 @@ static void rmtconnected(struct bt_conn *conn, uint8_t err)
 	bt_addr_le_to_str(bt_conn_get_dst(conn), addr, sizeof(addr));
 
 	if (err) {
-		serialWrite("HT: Failed to connect to ");
-    serialWrite(addr);
-    serialWrite(" (");
-    serialWrite(err);
-    serialWrite(")\r\n");
+		LOGE("Failed to connect to %s (%d)", addr, err);
 
-    bt_conn_unref(pararmtconn);
+        bt_conn_unref(pararmtconn);
 		pararmtconn = NULL;
 
 		start_scan();
@@ -451,34 +418,16 @@ static void rmtconnected(struct bt_conn *conn, uint8_t err)
 		return;
 	}
 
-	serialWrite("HT: Connected: ");
-  serialWrite(addr);
-  serialWriteln("");
+	LOGI("Connected: %s", addr);
 
-  bleconnected = true;
+    bleconnected = true;
+    bt_conn_info info;
+    bt_conn_get_info(pararmtconn, &info);
 
-  bt_conn_info info;
-  bt_conn_get_info(pararmtconn, &info);
-  serialWrite("HT: PHY Connection Rx:");
-  printPhy(info.le.phy->rx_phy);
-  serialWrite(" Tx:");
-  printPhy(info.le.phy->tx_phy);
-  serialWriteln();
-
-  serialWrite("HT: BT Connection Params Int:");
-  serialWrite(info.le.interval);
-  serialWrite(" Lat:");
-  serialWrite(info.le.latency);
-  serialWrite(" Timeout:");
-  serialWrite(info.le.timeout);
-  serialWriteln();
-
-
-  serialWrite("HT: Requesting coded PHY - ");
-  if(bt_conn_le_phy_update(pararmtconn, &phy_params))
-    serialWriteln("FAILED");
-  else
-    serialWriteln("Success");
+    LOGI("PHY Connection Rx:%d Tx:%d", info.le.phy->rx_phy, info.le.phy->tx_phy);
+    LOGI("BT Connection Params Int:%d Lat:%d Timeout:%d", 
+        info.le.interval, info.le.latency, info.le.timeout);
+    LOGI("Requesting coded PHY - %s", bt_conn_le_phy_update(pararmtconn, &phy_params) ? "FAILED" : "Success");
 
     // Start Discovery
 	if (conn == pararmtconn) {
@@ -491,9 +440,7 @@ static void rmtconnected(struct bt_conn *conn, uint8_t err)
 
 		err = bt_gatt_discover(pararmtconn, &discover_params);
 		if (err) {
-            serialWrite("Discover failed (err ");
-            serialWrite(err);
-            serialWrite(")\r\n");
+            LOGE("Discover failed (err %d)", err);
 			return;
 		}
 	}
@@ -505,9 +452,7 @@ static void rmtdisconnected(struct bt_conn *conn, uint8_t reason)
 
 	bt_addr_le_to_str(bt_conn_get_dst(conn), addr, sizeof(addr));
 
-	serialWrite("HT: Disconnected: ");
-    serialWrite(addr);
-    serialWriteln("");
+	LOGI("Disconnected: %s", addr);
 
 	bt_conn_unref(pararmtconn);
 	pararmtconn = NULL;
@@ -535,7 +480,7 @@ void BTRmtStart()
     for(int i = 0; i < BT_CHANNELS; i++)
         chan_vals[i] = 0;
 
-    serialWriteln("HT: Starting Remote Para Bluetooth");
+    LOGI("Starting Remote Para Bluetooth");
 
     bt_conn_cb_register(&rmtconn_callbacks);
 
@@ -562,7 +507,7 @@ void BTRmtStop()
     bt_le_scan_stop();
     isscanning = false;
 
-    serialWriteln("HT: Stopping Remote Para Bluetooth");
+    LOGI("Stopping Remote Para Bluetooth");
 
     // Close all Connections, Callback to above func
     bt_conn_foreach(BT_CONN_TYPE_ALL, closeConnection, NULL);
@@ -614,11 +559,11 @@ void BTRmtSendButtonPress(bool longpress)
 
     if(longpress) {
         rstdata[0] = 'L';
-        serialWriteln("HT: Sending Long Button Press to Head Board");
+        LOGI("Sending Long Button Press to Head Board");
     }
     else {
         rstdata[0] = 'R';
-        serialWriteln("HT: Sending Button Press to Head Board");
+        LOGI("Sending Button Press to Head Board");
     }
 
     write_params.handle = sys_le16_to_cpu(buttonhandle);
@@ -629,7 +574,7 @@ void BTRmtSendButtonPress(bool longpress)
     write_params.func = btwrite_cb;
 
     if(bt_gatt_write(pararmtconn, &write_params) < 0)
-        serialWriteln("HT: Failed to send button press");
+        LOGW("Failed to send button press");
 }
 
 

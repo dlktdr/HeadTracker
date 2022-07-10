@@ -43,14 +43,16 @@ void parseData(DynamicJsonDocument &json);
 uint16_t escapeCRC(uint16_t crc);
 int buffersFilled();
 
+// Connection state
+uint32_t dtr = 0;
 
 // Ring Buffers
 uint8_t ring_buffer_tx[TX_RNGBUF_SIZE]; // transmit buffer
 uint8_t ring_buffer_rx[RX_RNGBUF_SIZE]; // receive buffer
-uint8_t ring_buffer_json[RX_RNGBUF_SIZE]; // json data buffer
 struct ring_buf ringbuf_tx;
 struct ring_buf ringbuf_rx;
-struct ring_buf ringbuf_json;
+K_MUTEX_DEFINE(ring_tx_mutex);
+K_MUTEX_DEFINE(ring_rx_mutex);
 
 // JSON Data
 char jsonbuffer[JSON_BUF_SIZE];
@@ -75,21 +77,19 @@ static void interrupt_handler(const struct device *dev, void *user_data)
 
     // Force bootloader if baud set to 1200bps
     uint32_t baud=0;
-    uart_line_ctrl_get(dev,UART_LINE_CTRL_BAUD_RATE, &baud);
-    if(baud == 1200) {
-
-    }
-
 	while (uart_irq_update(dev) && uart_irq_is_pending(dev)) {
 		if (uart_irq_rx_ready(dev)) {
 			int recv_len, rb_len;
 			uint8_t buffer[64];
-			size_t len = MIN(ring_buf_space_get(&ringbuf_rx), sizeof(buffer));
 
+      k_mutex_lock(&ring_rx_mutex, K_FOREVER);
+			size_t len = MIN(ring_buf_space_get(&ringbuf_rx), sizeof(buffer));
 			recv_len = uart_fifo_read(dev, buffer, len);
 			rb_len = ring_buf_put(&ringbuf_rx, buffer, recv_len);
+            k_mutex_unlock(&ring_rx_mutex);
+
 			if (rb_len < recv_len) {
-                //LOG_ERR("RX Ring Buffer Full");
+        //LOGE("RX Ring Buffer Full");
 			}
 		}
 	}
@@ -110,11 +110,13 @@ void serial_init()
 	}
 
 	ring_buf_init(&ringbuf_tx, sizeof(ring_buffer_tx), ring_buffer_tx);
-    ring_buf_init(&ringbuf_rx, sizeof(ring_buffer_rx), ring_buffer_rx);
-    ring_buf_init(&ringbuf_json, sizeof(ring_buffer_json), ring_buffer_json);
+  k_mutex_init(&ring_tx_mutex);
+
+  ring_buf_init(&ringbuf_rx, sizeof(ring_buffer_rx), ring_buffer_rx);
+  k_mutex_init(&ring_rx_mutex);
 
 #ifdef WAITFOR_DTR
-    uint32_t dtr = 0U;
+  uint32_t dtr = 0U;
 	while (true) {
 		uart_line_ctrl_get(dev, UART_LINE_CTRL_DTR, &dtr);
 		if (dtr) {
@@ -124,7 +126,6 @@ void serial_init()
 			rt_sleep_ms(100);
 		}
 	}
-
 #endif
 
 	/* They are optional, we use them to test the interrupt endpoint */
@@ -139,7 +140,7 @@ void serial_init()
 	/* Enable rx interrupts */
 	uart_irq_rx_enable(dev);
 
-    serialThreadRun = true;
+  serialThreadRun = true;
 }
 
 
@@ -158,24 +159,45 @@ void serial_Thread()
     digitalWrite(LEDG,LOW);
 
     // If serial not open, abort all transfers, clear buffer
-    uint32_t dtr = 0;
-		uart_line_ctrl_get(dev, UART_LINE_CTRL_DTR, &dtr);
-		if (!dtr) {
+    uint32_t new_dtr = 0;
+    uart_line_ctrl_get(dev, UART_LINE_CTRL_DTR, &new_dtr);
+
+    k_mutex_lock(&ring_tx_mutex, K_FOREVER);
+
+    // lost connection
+    if (dtr && !new_dtr) {
       ring_buf_reset(&ringbuf_tx);
       uart_tx_abort(dev);
       uiResponsive = k_uptime_get() - 1;
       trkset.stopAllData();
+    }
 
-    // Port is open, send data
-    } else {
+    // gaining new connection
+    if (!dtr && new_dtr) {
+      ring_buf_reset(&ringbuf_tx);
+      uart_tx_abort(dev);
+
+      // Force bootloader if baud set to 1200bps TODO (Test Me)
+      /*uint32_t baud=0;
+      uart_line_ctrl_get(dev,UART_LINE_CTRL_BAUD_RATE, &baud);
+      if(baud == 1200) {
+        (*((volatile uint32_t *) 0x20007FFCul)) = 0x07738135;
+        NVIC_SystemReset();
+      }*/
+    }
+
+    // Port is now open or still open, send data
+    if ((new_dtr || dtr ) && uiconnected) {
       int rb_len = ring_buf_get(&ringbuf_tx, buffer, sizeof(buffer));
       if(rb_len) {
         int send_len = uart_fifo_fill(dev, buffer, rb_len);
         if (send_len < rb_len) {
-            LOG_ERR("USB CDC Ring Buffer Full, Dropped data");
+          LOG_ERR("USB CDC Ring Buffer Full, Dropped data");
         }
       }
     }
+    k_mutex_unlock(&ring_tx_mutex);
+    dtr = new_dtr;
 
     serialrx_Process();
 
@@ -183,309 +205,274 @@ void serial_Thread()
 
     // Data output
     if(datacounter++ >= DATA_PERIOD) {
-      datacounter = 0;
-      // Is the UI Still responsive?
-      int64_t curtime = k_uptime_get();
+        datacounter = 0;
+        // Is the UI Still responsive?
+        int64_t curtime = k_uptime_get();
 
-      if(uiResponsive > curtime) {
-        uiconnected = true;
+        // TODO we can probably remove or utilize this test alongside dtr transitions
+        if(uiResponsive > curtime) {
+          uiconnected = true;
 
-        // If sense thread is writing, wait until complete
-        k_mutex_lock(&data_mutex, K_FOREVER);
-        json.clear();
-        trkset.setJSONData(json);
-        k_mutex_unlock(&data_mutex);
-        if(json.size()) {
-          json["Cmd"] = "Data";
-          serialWriteJSON(json);
+          // If sense thread is writing, wait until complete
+          k_mutex_lock(&data_mutex, K_FOREVER);
+          json.clear();
+          trkset.setJSONData(json);
+          if(json.size()) {
+            json["Cmd"] = "Data";
+            serialWriteJSON(json);
+          }
+          k_mutex_unlock(&data_mutex);
+
+        } else {
+            uiconnected = false;
         }
-
-      } else {
-        uiconnected = false;
-      }
     }
   }
 }
 
 void serialrx_Process()
 {
-    char sc=0;
+  char sc=0;
 
-    // Get byte by byte data from the serial receive ring buffer
-    while(ring_buf_get(&ringbuf_rx,(uint8_t*)&sc,1))
-    {
-         if(sc == 0x02) {  // Start Of Text Character, clear buffer
-            jsonbufptr = jsonbuffer; // Reset Buffer
+  // Get byte by byte data from the serial receive ring buffer
+  k_mutex_lock(&ring_rx_mutex, K_FOREVER);
+  while(ring_buf_get(&ringbuf_rx,(uint8_t*)&sc,1))
+  {
+    if(sc == 0x02) {  // Start Of Text Character, clear buffer
+      jsonbufptr = jsonbuffer; // Reset Buffer
 
-        } else if (sc == 0x03) { // End of Text Characher, parse JSON data
-            *jsonbufptr = 0; // Null terminate
-            JSON_Process(jsonbuffer);
-            jsonbufptr = jsonbuffer; // Reset Buffer
-        }
-        else {
-            // Check how much free data is in the buffer
-            if(jsonbufptr >= jsonbuffer + sizeof(jsonbuffer) - 3) {
-                serialWriteln("HT: Error JSON data too long, overflow");
-                jsonbufptr = jsonbuffer; // Reset Buffer
+    } else if (sc == 0x03) { // End of Text Characher, parse JSON data
+      *jsonbufptr = 0; // Null terminate
+      JSON_Process(jsonbuffer);
+      jsonbufptr = jsonbuffer; // Reset Buffer
+    } else {
+      // Check how much free data is in the buffer
+      if(jsonbufptr >= jsonbuffer + sizeof(jsonbuffer) - 3) {
+        LOGE("Error JSON data too long, overflow");
+        jsonbufptr = jsonbuffer; // Reset Buffer
 
-            // Add data to buffer
-            } else {
-                *(jsonbufptr++) = sc;
-            }
-        }
+      // Add data to buffer
+      } else {
+          *(jsonbufptr++) = sc;
+      }
     }
+  }
+  k_mutex_unlock(&ring_rx_mutex);
 }
 
 void JSON_Process(char *jsonbuf)
 {
-    // CRC Check Data
-    int len = strlen(jsonbuf);
-    if(len > 2) {
-        uint16_t calccrc = escapeCRC(uCRC16Lib::calculate(jsonbuf,len-sizeof(uint16_t)));
-        if(calccrc != *(uint16_t*)(jsonbuf+len-sizeof(uint16_t))) {
-            serialWrite("\x15\r\n"); // Not-Acknowledged
-            return;
-        } else {
-            serialWrite("\x06\r\n"); // Acknowledged
-        }
-        // Remove CRC from end of buffer
-        jsonbuf[len-sizeof(uint16_t)] = 0;
-        DeserializationError de = deserializeJson(json, jsonbuf);
-        if(de) {
-            if(de == DeserializationError::IncompleteInput)
-                serialWrite("HT: DeserializeJson() Failed - Incomplete Input\r\n");
-            else if(de == DeserializationError::InvalidInput)
-                serialWrite("HT: DeserializeJson() Failed - Invalid Input\r\n");
-            else if(de == DeserializationError::NoMemory)
-                serialWrite("HT: DeserializeJson() Failed - NoMemory\r\n");
-            else if(de == DeserializationError::EmptyInput)
-                serialWrite("HT: DeserializeJson() Failed - Empty Input\r\n");
-            else if(de == DeserializationError::TooDeep)
-                serialWrite("HT: DeserializeJson() Failed - TooDeep\r\n");
-            else
-                serialWrite("HT: DeserializeJson() Failed - Other\r\n");
-        } else {
-            // Parse The JSON Data in dataparser.cpp
-            parseData(json);
-        }
+  // CRC Check Data
+  int len = strlen(jsonbuf);
+  if(len > 2) {
+    k_mutex_lock(&ring_tx_mutex, K_FOREVER);
+    uint16_t calccrc = escapeCRC(uCRC16Lib::calculate(jsonbuf,len-sizeof(uint16_t)));
+    if(calccrc != *(uint16_t*)(jsonbuf+len-sizeof(uint16_t))) {
+      serialWrite("\x15\r\n"); // Not-Acknowledged
+      k_mutex_unlock(&ring_tx_mutex);
+      return;
+    } else {
+      serialWrite("\x06\r\n"); // Acknowledged
     }
+    // Remove CRC from end of buffer
+    jsonbuf[len-sizeof(uint16_t)] = 0;
+
+    k_mutex_lock(&data_mutex, K_FOREVER);
+    DeserializationError de = deserializeJson(json, jsonbuf);
+    if(de) {
+      if(de == DeserializationError::IncompleteInput)
+          LOGE("DeserializeJson() Failed - Incomplete Input");
+      else if(de == DeserializationError::InvalidInput)
+          LOGE("DeserializeJson() Failed - Invalid Input");
+      else if(de == DeserializationError::NoMemory)
+          LOGE("DeserializeJson() Failed - NoMemory");
+      else if(de == DeserializationError::EmptyInput)
+          LOGE("DeserializeJson() Failed - Empty Input");
+      else if(de == DeserializationError::TooDeep)
+          LOGE("DeserializeJson() Failed - TooDeep");
+      else
+          LOGE("DeserializeJson() Failed - Other");
+    } else {
+      // Parse The JSON Data in dataparser.cpp
+      parseData(json);
+    }
+    k_mutex_unlock(&data_mutex);
+    k_mutex_unlock(&ring_tx_mutex);
+  }
 }
 
 // New JSON data received from the PC
 void parseData(DynamicJsonDocument &json)
 {
+  JsonVariant v = json["Cmd"];
+  if(v.isNull()) {
+    LOGE("Invalid JSON, No Command");
+    return;
+  }
 
-    JsonVariant v = json["Cmd"];
-    if(v.isNull()) {
-      serialWrite("HT: Invalid JSON, No Command\r\n");
-      return;
+  // For strcmp;
+  const char *command = v;
+
+  // Reset Center
+  if(strcmp(command,"RstCnt") == 0) {
+    // TODO we should also log when the button on the device issues a Reset Center
+    LOGI("Resetting Center");
+    pressButton();
+
+  // Settings Sent from UI
+  } else if (strcmp(command, "Set") == 0) {
+    trkset.loadJSONSettings(json);
+    LOGI("Storing Settings");
+
+  // Save to Flash
+  } else if (strcmp(command, "Flash") == 0) {
+    LOGI("Saving to Flash");
+    trkset.saveToEEPROM();
+
+  // Erase
+  } else if (strcmp(command, "Erase") == 0) {
+    LOGI("Clearing Flash");
+    socClearFlash();
+
+  // Reboot
+  } else if (strcmp(command, "Reboot") == 0) {
+    sys_reboot(SYS_REBOOT_COLD);
+
+  // Force Bootloader
+  } else if (strcmp(command, "Boot") == 0) {
+    (*((volatile uint32_t *) 0x20007FFCul)) = 0x07738135;
+    NVIC_SystemReset();
+
+  // Get settings
+  } else if (strcmp(command, "Get") == 0) {
+    LOGI("Sending Settings");
+    json.clear();
+    trkset.setJSONSettings(json);
+    json["Cmd"] = "Set";
+    serialWriteJSON(json);
+
+  // Im Here Received, Means the GUI is running
+  } else if (strcmp(command, "IH") == 0) {
+    __NOP();
+
+  // Get a List of All Data Items
+  } else if (strcmp(command, "DatLst") == 0) {
+    json.clear();
+    trkset.setJSONDataList(json);
+    json["Cmd"] = "DataList";
+    serialWriteJSON(json);
+
+  // Stop All Data Items
+  } else if (strcmp(command, "D--") == 0) {
+    LOGI("Clearing Data List");
+    trkset.stopAllData();
+
+  // Request Data Items
+  } else if (strcmp(command, "RD") == 0) {
+    LOGI("Data Added/Remove");
+    // using C++11 syntax (preferred):
+    JsonObject root = json.as<JsonObject>();
+    for (JsonPair kv : root) {
+      if(kv.key() == "Cmd")
+        continue;
+      trkset.setDataItemSend(kv.key().c_str(),kv.value().as<bool>());
     }
 
-    // For strcmp;
-    const char *command = v;
+  // Firmware Reqest
+  } else if (strcmp(command, "FW") == 0) {
+    DynamicJsonDocument fwjson(100);
+    fwjson["Cmd"] = "FW";
+    fwjson["Vers"] = FW_VERSION;
+    fwjson["Hard"] = FW_BOARD;
+    fwjson["Git"] = STRINGIFY(FW_GIT_REV);
+    serialWriteJSON(fwjson);
 
-    // Reset Center
-    if(strcmp(command,"RstCnt") == 0) {
-        serialWrite("HT: Resetting Center\r\n");
-        pressButton();
+  // Unknown Command
+  } else {
+    LOGW("Unknown Command");
+    return;
+  }
 
-    // Settings Sent from UI
-    } else if (strcmp(command, "Set") == 0) {
-        trkset.loadJSONSettings(json);
-        serialWrite("HT: Storing Settings\r\n");
-
-    // Save to Flash
-    } else if (strcmp(command, "Flash") == 0) {
-        serialWrite("HT: Saving to Flash\r\n");
-        trkset.saveToEEPROM();
-
-    // Erase
-    } else if (strcmp(command, "Erase") == 0) {
-        serialWrite("HT: Clearing Flash\r\n");
-        socClearFlash();
-
-    // Reboot
-    } else if (strcmp(command, "Reboot") == 0) {
-        sys_reboot(SYS_REBOOT_COLD);
-
-    // Force Bootloader
-    } else if (strcmp(command, "Boot") == 0) {
-        (*((volatile uint32_t *) 0x20007FFCul)) = 0x07738135;
-        NVIC_SystemReset();
-
-    // Get settings
-    } else if (strcmp(command, "Get") == 0) {
-        serialWrite("HT: Sending Settings\r\n");
-        json.clear();
-        trkset.setJSONSettings(json);
-        json["Cmd"] = "Set";
-        serialWriteJSON(json);
-
-    // Im Here Received, Means the GUI is running
-    } else if (strcmp(command, "IH") == 0) {
-        __NOP();
-
-    // Get a List of All Data Items
-    } else if (strcmp(command, "DatLst") == 0) {
-        json.clear();
-        trkset.setJSONDataList(json);
-        json["Cmd"] = "DataList";
-        serialWriteJSON(json);
-
-    // Stop All Data Items
-    } else if (strcmp(command, "D--") == 0) {
-        serialWrite("HT: Clearing Data List\r\n");
-        trkset.stopAllData();
-
-    // Request Data Items
-    } else if (strcmp(command, "RD") == 0) {
-        serialWrite("HT: Data Added/Remove\r\n");
-        // using C++11 syntax (preferred):
-        JsonObject root = json.as<JsonObject>();
-        for (JsonPair kv : root) {
-            if(kv.key() == "Cmd")
-                continue;
-            trkset.setDataItemSend(kv.key().c_str(),kv.value().as<bool>());
-        }
-
-    // Firmware Reqest
-    } else if (strcmp(command, "FW") == 0) {
-
-        DynamicJsonDocument fwjson(100);
-        fwjson["Cmd"] = "FW";
-        fwjson["Vers"] = FW_VERSION;
-        fwjson["Hard"] = FW_BOARD;
-        fwjson["Git"] = STRINGIFY(FW_GIT_REV);
-        serialWriteJSON(fwjson);
-
-    // Unknown Command
-    } else {
-        serialWrite("HT: Unknown Command\r\n");
-        return;
-    }
-
-    // GUI responsive, update connected timer
-    uiResponsive = k_uptime_get() + UIRESPONSIVE_TIME;
+  // GUI responsive, update connected timer
+  uiResponsive = k_uptime_get() + UIRESPONSIVE_TIME;
 }
 
 // Remove any of the escape characters
 uint16_t escapeCRC(uint16_t crc)
 {
-    // Characters to escape out
-    uint8_t crclow = crc & 0xFF;
-    uint8_t crchigh = (crc >> 8) & 0xFF;
-    if(crclow == 0x00 ||
-       crclow == 0x02 ||
-       crclow == 0x03 ||
-       crclow == 0x06 ||
-       crclow == 0x15)
-        crclow ^= 0xFF; //?? why not..
-    if(crchigh == 0x00 ||
-       crchigh == 0x02 ||
-       crchigh == 0x03 ||
-       crchigh == 0x06 ||
-       crchigh == 0x15)
-        crchigh ^= 0xFF; //?? why not..
-    return (uint16_t)crclow | ((uint16_t)crchigh << 8);
+  // Characters to escape out
+  uint8_t crclow = crc & 0xFF;
+  uint8_t crchigh = (crc >> 8) & 0xFF;
+  if(crclow == 0x00 ||
+     crclow == 0x02 ||
+     crclow == 0x03 ||
+     crclow == 0x06 ||
+     crclow == 0x15)
+     crclow ^= 0xFF; //?? why not..
+  if(crchigh == 0x00 ||
+     crchigh == 0x02 ||
+     crchigh == 0x03 ||
+     crchigh == 0x06 ||
+     crchigh == 0x15)
+     crchigh ^= 0xFF; //?? why not..
+  return (uint16_t)crclow | ((uint16_t)crchigh << 8);
 }
 
 // Base write function.
 
 void serialWrite(const char *data, int len)
 {
-    //  Lock to prevent two threads from adding in wrong order
-    uint32_t key = irq_lock();
-    if(ring_buf_space_get(&ringbuf_tx) < (uint32_t)len) { // Not enough room, drop it.
-        irq_unlock(key);
-        return;
-    }
-    int rb_len = ring_buf_put(&ringbuf_tx,(uint8_t *) data, len);
-    irq_unlock(key);
-    if(rb_len != len) {
-        // Couldn't add to buffer for some reason
-        __NOP();
-    }
-}
-
-void serialWrite(std::string str)
-{
-    serialWrite(str.c_str());
-}
-
-void serialWrite(int val)
-{
-    char buf[50];
-    __itoa(val,buf,10);
-    // Append Output to the serial output buffer
-    serialWrite(buf, strlen(buf));
+  k_mutex_lock(&ring_tx_mutex, K_FOREVER);
+  if(ring_buf_space_get(&ringbuf_tx) < (uint32_t)len) { // Not enough room, drop it.
+    k_mutex_unlock(&ring_tx_mutex);
+    return;
+  }
+  int rb_len = ring_buf_put(&ringbuf_tx,(uint8_t *) data, len);
+  k_mutex_unlock(&ring_tx_mutex);
+  if(rb_len != len) {
+    // TODO: deal with this case
+    __NOP();
+  }
 }
 
 void serialWrite(const char *data)
 {
-    // Append Output to the serial output buffer
-    serialWrite(data, strlen(data));
+  // Append Output to the serial output buffer
+  serialWrite(data, strlen(data));
 }
 
-void serialWrite(const char c) {
-    char h = c;
-    serialWrite(&h,1);
-}
-
-void serialWriteln(const char *data)
+int serialWriteF(const char *format, ...)
 {
-    // Make sure CRLF gets put
-    uint32_t key = irq_lock();
-    serialWrite(data, strlen(data));
-    serialWrite("\r\n");
-    irq_unlock(key);
-}
-
-/*int serialWriteF(const char *c, ...)
-{
-    char bff[256] = "Uknonen";
-    int len=-1;
-
-    va_list argptr;
-    va_start(argptr, c);
-    //len = vsnprintk(bff, sizeof(bff), c, argptr);
-    va_end(argptr);
-    serialWrite(bff,len);
-    return len;
-}*/
-
-void serialWriteHex(const uint8_t *data, int len)
-{
-    for(int i=0; i < len; i++) {
-        uint8_t nib1 = (*data >> 4) & 0x0F;
-        uint8_t nib2 = *data++ & 0x0F;
-        if(nib1 > 9)
-            serialWrite((char)('A' + nib1-10));
-        else
-            serialWrite((char)('0' + nib1));
-        if(nib2 > 9)
-            serialWrite((char)('A' + nib2-10));
-        else
-            serialWrite((char)('0' + nib2));
-        serialWrite(' ');
-    }
+  va_list vArg;
+  va_start(vArg, format);
+  char buf[256];
+  int len = vsnprintf(buf, sizeof(buf), format, vArg);
+  va_end(vArg);
+  serialWrite(buf, len);
+  return len;
 }
 
 // FIX Me to Not use as Much Stack.
 void serialWriteJSON(DynamicJsonDocument &json)
 {
-    char data[TX_RNGBUF_SIZE];
-    int br = serializeJson(json, data+1, TX_RNGBUF_SIZE-7);
-    uint16_t calccrc = escapeCRC(uCRC16Lib::calculate(data,br));
+  char data[TX_RNGBUF_SIZE];
 
-    if(br + 7 > TX_RNGBUF_SIZE)
-        return;
+  k_mutex_lock(&ring_tx_mutex, K_FOREVER);
+  int br = serializeJson(json, data+1, TX_RNGBUF_SIZE-7);
+  uint16_t calccrc = escapeCRC(uCRC16Lib::calculate(data,br));
 
-    data[0] = 0x02;
-    data[br+1] = (calccrc >> 8 ) & 0xFF;
-    data[br+2] = calccrc & 0xFF;
-    data[br+3] = 0x03;
-    data[br+4] = '\r';
-    data[br+5] = '\n';
+  if(br + 7 > TX_RNGBUF_SIZE) {
+    k_mutex_unlock(&ring_tx_mutex);
+    return;
+  }
 
-    serialWrite(data, br+6);
+  data[0] = 0x02;
+  data[br+1] = (calccrc >> 8 ) & 0xFF;
+  data[br+2] = calccrc & 0xFF;
+  data[br+3] = 0x03;
+  data[br+4] = '\r';
+  data[br+5] = '\n';
+
+  serialWrite(data, br+6);
+  k_mutex_unlock(&ring_tx_mutex);
 }

@@ -43,4 +43,4 @@ void leparamupdated(struct bt_conn *conn,
                            uint16_t timeout);
 void securitychanged(struct bt_conn *conn, bt_security_t level, enum bt_security_err err);
 void lephyupdated(struct bt_conn *conn, struct bt_conn_le_phy_info *param);
-void printPhy(int);
+const char *printPhy(int);

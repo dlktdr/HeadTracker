@@ -21,7 +21,7 @@
 
 #include "APDS9960.h"
 #include "io.h"
-#include "serial.h"
+#include "log.h"
 #include "defines.h"
 #include <drivers/i2c.h>
 
@@ -49,7 +49,7 @@ bool APDS9960::begin() {
 
     i2c_dev = device_get_binding("I2C_1");
 	if (!i2c_dev) {
-		serialWrite("HT: Could not get device binding for I2C\r\n");
+		LOGE("Could not get device binding for I2C");
 		return false;
 	}
 

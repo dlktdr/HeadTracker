@@ -22,6 +22,7 @@
 #include "auxserial.h"
 #include "defines.h"
 #include "io.h"
+#include "log.h"
 #include "trackersettings.h"
 #include <nrfx.h>
 #include <nrfx_uarte.h>
@@ -89,7 +90,7 @@ uint64_t bytecount=0;
 bool SbusRx_Parse() {
   /* Parse messages */
   while (AuxSerial_Read(&cur_byte_, 1)) {
-      /*serialWriteHex(&cur_byte_,1);
+      /*TODO fixme serialWriteHex(&cur_byte_,1);
       if ((cur_byte_ == HEADER_) && ((prev_byte_ == FOOTER_) ||
          ((prev_byte_ & 0x0F) == FOOTER2_))) {
         serialWriteln();
@@ -184,11 +185,7 @@ bool SBUS_Read_Data(uint16_t ch_[16])
             float elapsed = (float)(millis64() - sbstarttime) / 1000.0f;
             uint32_t bytes = bytecount - bytesread; // Bytes read in this time
             sbusrate = 0;
-            serialWrite("SBUS Rate - ");
-            serialWrite((int)(elapsed * 1000.0f));
-            serialWrite(" BytesRX - ");
-            serialWrite((int)bytes);
-            serialWriteln();
+            LOGD("SBUS Rate - %d BytesRx - %d", (int)(elapsed * 1000.0f), (int)bytes);
         }
 #endif
 
