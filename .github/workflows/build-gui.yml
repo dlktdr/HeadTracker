@@ -65,7 +65,7 @@ jobs:
           cp gui/src/css/stylesheet.css output/
           cp gui/src/css/Background.svg output/
           cd output
-          wget https://github.com/arduino/arduino-flash-tools/raw/master/tools_windows/bossac/bin/bossac.exe
+          curl -L -o bossac.exe https://github.com/arduino/arduino-flash-tools/raw/master/tools_windows/bossac/bin/bossac.exe
           windeployqt HeadTracker.exe            
 
       - name: Archive production artifacts
