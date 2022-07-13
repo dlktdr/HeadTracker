@@ -83,7 +83,7 @@ public:
     static constexpr int MAX_PWM=2012;
     static constexpr int DEF_MIN_PWM=1050;
     static constexpr int DEF_MAX_PWM=1950;
-    static constexpr int MINMAX_RNG=242;
+    static constexpr int MINMAX_RNG=412;
     static constexpr int MIN_CNT=(((MAX_PWM-MIN_PWM)/2)+MIN_PWM-MINMAX_RNG);
     static constexpr int MAX_CNT=(((MAX_PWM-MIN_PWM)/2)+MIN_PWM+MINMAX_RNG);
     static constexpr int HT_TILT_REVERSE_BIT  = 0x01;
