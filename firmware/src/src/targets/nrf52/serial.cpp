@@ -15,30 +15,32 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stdio.h>
+#include "serial.h"
+
 #include <device.h>
 #include <drivers/uart.h>
-#include <soc.h>
 #include <drivers/uart/cdc_acm.h>
 #include <drivers/usb/usb_dc.h>
-#include <usb/class/usb_cdc.h>
-#include <sys/ring_buffer.h>
-#include <stdlib.h>
-#include <zephyr.h>
-#include <power/reboot.h>
 #include <math.h>
-#include "serial.h"
-#include "ucrc16lib.h"
+#include <power/reboot.h>
+#include <soc.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/ring_buffer.h>
+#include <usb/class/usb_cdc.h>
+#include <zephyr.h>
+
 #include "io.h"
 #include "log.h"
 #include "soc_flash.h"
 #include "trackersettings.h"
+#include "ucrc16lib.h"
 
 // Wait for serial connection before starting..
 //#define WAITFOR_DTR
 
 void serialrx_Process();
-char* getJSONBuffer();
+char *getJSONBuffer();
 void parseData(DynamicJsonDocument &json);
 uint16_t escapeCRC(uint16_t crc);
 int buffersFilled();
@@ -47,8 +49,8 @@ int buffersFilled();
 uint32_t dtr = 0;
 
 // Ring Buffers
-uint8_t ring_buffer_tx[TX_RNGBUF_SIZE]; // transmit buffer
-uint8_t ring_buffer_rx[RX_RNGBUF_SIZE]; // receive buffer
+uint8_t ring_buffer_tx[TX_RNGBUF_SIZE];  // transmit buffer
+uint8_t ring_buffer_rx[RX_RNGBUF_SIZE];  // receive buffer
 struct ring_buf ringbuf_tx;
 struct ring_buf ringbuf_rx;
 K_MUTEX_DEFINE(ring_tx_mutex);
@@ -73,43 +75,41 @@ const struct device *dev;
 
 static void interrupt_handler(const struct device *dev, void *user_data)
 {
-	ARG_UNUSED(user_data);
+  ARG_UNUSED(user_data);
 
-    // Force bootloader if baud set to 1200bps
-    uint32_t baud=0;
-	while (uart_irq_update(dev) && uart_irq_is_pending(dev)) {
-		if (uart_irq_rx_ready(dev)) {
-			int recv_len, rb_len;
-			uint8_t buffer[64];
+  while (uart_irq_update(dev) && uart_irq_is_pending(dev)) {
+    if (uart_irq_rx_ready(dev)) {
+      int recv_len, rb_len;
+      uint8_t buffer[64];
 
       k_mutex_lock(&ring_rx_mutex, K_FOREVER);
-			size_t len = MIN(ring_buf_space_get(&ringbuf_rx), sizeof(buffer));
-			recv_len = uart_fifo_read(dev, buffer, len);
-			rb_len = ring_buf_put(&ringbuf_rx, buffer, recv_len);
-            k_mutex_unlock(&ring_rx_mutex);
+      size_t len = MIN(ring_buf_space_get(&ringbuf_rx), sizeof(buffer));
+      recv_len = uart_fifo_read(dev, buffer, len);
+      rb_len = ring_buf_put(&ringbuf_rx, buffer, recv_len);
+      k_mutex_unlock(&ring_rx_mutex);
 
-			if (rb_len < recv_len) {
-        //LOGE("RX Ring Buffer Full");
-			}
-		}
-	}
+      if (rb_len < recv_len) {
+        // LOGE("RX Ring Buffer Full");
+      }
+    }
+  }
 }
 
 void serial_init()
 {
-	int ret;
+  int ret;
 
-	dev = device_get_binding("CDC_ACM_0");
-	if (!dev) {
-		return;
-	}
+  dev = device_get_binding("CDC_ACM_0");
+  if (!dev) {
+    return;
+  }
 
-	ret = usb_enable(NULL);
-	if (ret != 0) {
-		return;
-	}
+  ret = usb_enable(NULL);
+  if (ret != 0) {
+    return;
+  }
 
-	ring_buf_init(&ringbuf_tx, sizeof(ring_buffer_tx), ring_buffer_tx);
+  ring_buf_init(&ringbuf_tx, sizeof(ring_buffer_tx), ring_buffer_tx);
   k_mutex_init(&ring_tx_mutex);
 
   ring_buf_init(&ringbuf_rx, sizeof(ring_buffer_rx), ring_buffer_rx);
@@ -117,46 +117,45 @@ void serial_init()
 
 #ifdef WAITFOR_DTR
   uint32_t dtr = 0U;
-	while (true) {
-		uart_line_ctrl_get(dev, UART_LINE_CTRL_DTR, &dtr);
-		if (dtr) {
-			break;
-		} else {
-			/* Give CPU resources to low priority threads. */
-			rt_sleep_ms(100);
-		}
-	}
+  while (true) {
+    uart_line_ctrl_get(dev, UART_LINE_CTRL_DTR, &dtr);
+    if (dtr) {
+      break;
+    } else {
+      /* Give CPU resources to low priority threads. */
+      rt_sleep_ms(100);
+    }
+  }
 #endif
 
-	/* They are optional, we use them to test the interrupt endpoint */
-	ret = uart_line_ctrl_set(dev, UART_LINE_CTRL_DCD, 1);
-	ret = uart_line_ctrl_set(dev, UART_LINE_CTRL_DSR, 1);
+  /* They are optional, we use them to test the interrupt endpoint */
+  ret = uart_line_ctrl_set(dev, UART_LINE_CTRL_DCD, 1);
+  ret = uart_line_ctrl_set(dev, UART_LINE_CTRL_DSR, 1);
 
-	/* Wait 1 sec for the host to do all settings */
-	k_busy_wait(1000000);
+  /* Wait 1 sec for the host to do all settings */
+  k_busy_wait(1000000);
 
-	uart_irq_callback_set(dev, interrupt_handler);
+  uart_irq_callback_set(dev, interrupt_handler);
 
-	/* Enable rx interrupts */
-	uart_irq_rx_enable(dev);
+  /* Enable rx interrupts */
+  uart_irq_rx_enable(dev);
 
   serialThreadRun = true;
 }
 
-
 void serial_Thread()
 {
   uint8_t buffer[64];
-  static uint32_t datacounter=0;
+  static uint32_t datacounter = 0;
 
-  while(1) {
+  while (1) {
     rt_sleep_ms(SERIAL_PERIOD);
 
-    if(!serialThreadRun) {
-        continue;
+    if (!serialThreadRun) {
+      continue;
     }
 
-    digitalWrite(LEDG,LOW);
+    digitalWrite(LEDG, LOW);
 
     // If serial not open, abort all transfers, clear buffer
     uint32_t new_dtr = 0;
@@ -187,9 +186,9 @@ void serial_Thread()
     }
 
     // Port is now open or still open, send data
-    if ((new_dtr || dtr ) && uiconnected) {
+    if ((new_dtr || dtr) && uiconnected) {
       int rb_len = ring_buf_get(&ringbuf_tx, buffer, sizeof(buffer));
-      if(rb_len) {
+      if (rb_len) {
         int send_len = uart_fifo_fill(dev, buffer, rb_len);
         if (send_len < rb_len) {
           LOG_ERR("USB CDC Ring Buffer Full, Dropped data");
@@ -201,59 +200,58 @@ void serial_Thread()
 
     serialrx_Process();
 
-    digitalWrite(LEDG,HIGH);
+    digitalWrite(LEDG, HIGH);
 
     // Data output
-    if(datacounter++ >= DATA_PERIOD) {
-        datacounter = 0;
-        // Is the UI Still responsive?
-        int64_t curtime = k_uptime_get();
+    if (datacounter++ >= DATA_PERIOD) {
+      datacounter = 0;
+      // Is the UI Still responsive?
+      int64_t curtime = k_uptime_get();
 
-        // TODO we can probably remove or utilize this test alongside dtr transitions
-        if(uiResponsive > curtime) {
-          uiconnected = true;
+      // TODO we can probably remove or utilize this test alongside dtr transitions
+      if (uiResponsive > curtime) {
+        uiconnected = true;
 
-          // If sense thread is writing, wait until complete
-          k_mutex_lock(&data_mutex, K_FOREVER);
-          json.clear();
-          trkset.setJSONData(json);
-          if(json.size()) {
-            json["Cmd"] = "Data";
-            serialWriteJSON(json);
-          }
-          k_mutex_unlock(&data_mutex);
-
-        } else {
-            uiconnected = false;
+        // If sense thread is writing, wait until complete
+        k_mutex_lock(&data_mutex, K_FOREVER);
+        json.clear();
+        trkset.setJSONData(json);
+        if (json.size()) {
+          json["Cmd"] = "Data";
+          serialWriteJSON(json);
         }
+        k_mutex_unlock(&data_mutex);
+
+      } else {
+        uiconnected = false;
+      }
     }
   }
 }
 
 void serialrx_Process()
 {
-  char sc=0;
+  char sc = 0;
 
   // Get byte by byte data from the serial receive ring buffer
   k_mutex_lock(&ring_rx_mutex, K_FOREVER);
-  while(ring_buf_get(&ringbuf_rx,(uint8_t*)&sc,1))
-  {
-    if(sc == 0x02) {  // Start Of Text Character, clear buffer
-      jsonbufptr = jsonbuffer; // Reset Buffer
+  while (ring_buf_get(&ringbuf_rx, (uint8_t *)&sc, 1)) {
+    if (sc == 0x02) {           // Start Of Text Character, clear buffer
+      jsonbufptr = jsonbuffer;  // Reset Buffer
 
-    } else if (sc == 0x03) { // End of Text Characher, parse JSON data
-      *jsonbufptr = 0; // Null terminate
+    } else if (sc == 0x03) {  // End of Text Characher, parse JSON data
+      *jsonbufptr = 0;        // Null terminate
       JSON_Process(jsonbuffer);
-      jsonbufptr = jsonbuffer; // Reset Buffer
+      jsonbufptr = jsonbuffer;  // Reset Buffer
     } else {
       // Check how much free data is in the buffer
-      if(jsonbufptr >= jsonbuffer + sizeof(jsonbuffer) - 3) {
+      if (jsonbufptr >= jsonbuffer + sizeof(jsonbuffer) - 3) {
         LOGE("Error JSON data too long, overflow");
-        jsonbufptr = jsonbuffer; // Reset Buffer
+        jsonbufptr = jsonbuffer;  // Reset Buffer
 
-      // Add data to buffer
+        // Add data to buffer
       } else {
-          *(jsonbufptr++) = sc;
+        *(jsonbufptr++) = sc;
       }
     }
   }
@@ -264,34 +262,34 @@ void JSON_Process(char *jsonbuf)
 {
   // CRC Check Data
   int len = strlen(jsonbuf);
-  if(len > 2) {
+  if (len > 2) {
     k_mutex_lock(&ring_tx_mutex, K_FOREVER);
-    uint16_t calccrc = escapeCRC(uCRC16Lib::calculate(jsonbuf,len-sizeof(uint16_t)));
-    if(calccrc != *(uint16_t*)(jsonbuf+len-sizeof(uint16_t))) {
-      serialWrite("\x15\r\n"); // Not-Acknowledged
+    uint16_t calccrc = escapeCRC(uCRC16Lib::calculate(jsonbuf, len - sizeof(uint16_t)));
+    if (calccrc != *(uint16_t *)(jsonbuf + len - sizeof(uint16_t))) {
+      serialWrite("\x15\r\n");  // Not-Acknowledged
       k_mutex_unlock(&ring_tx_mutex);
       return;
     } else {
-      serialWrite("\x06\r\n"); // Acknowledged
+      serialWrite("\x06\r\n");  // Acknowledged
     }
     // Remove CRC from end of buffer
-    jsonbuf[len-sizeof(uint16_t)] = 0;
+    jsonbuf[len - sizeof(uint16_t)] = 0;
 
     k_mutex_lock(&data_mutex, K_FOREVER);
     DeserializationError de = deserializeJson(json, jsonbuf);
-    if(de) {
-      if(de == DeserializationError::IncompleteInput)
-          LOGE("DeserializeJson() Failed - Incomplete Input");
-      else if(de == DeserializationError::InvalidInput)
-          LOGE("DeserializeJson() Failed - Invalid Input");
-      else if(de == DeserializationError::NoMemory)
-          LOGE("DeserializeJson() Failed - NoMemory");
-      else if(de == DeserializationError::EmptyInput)
-          LOGE("DeserializeJson() Failed - Empty Input");
-      else if(de == DeserializationError::TooDeep)
-          LOGE("DeserializeJson() Failed - TooDeep");
+    if (de) {
+      if (de == DeserializationError::IncompleteInput)
+        LOGE("DeserializeJson() Failed - Incomplete Input");
+      else if (de == DeserializationError::InvalidInput)
+        LOGE("DeserializeJson() Failed - Invalid Input");
+      else if (de == DeserializationError::NoMemory)
+        LOGE("DeserializeJson() Failed - NoMemory");
+      else if (de == DeserializationError::EmptyInput)
+        LOGE("DeserializeJson() Failed - Empty Input");
+      else if (de == DeserializationError::TooDeep)
+        LOGE("DeserializeJson() Failed - TooDeep");
       else
-          LOGE("DeserializeJson() Failed - Other");
+        LOGE("DeserializeJson() Failed - Other");
     } else {
       // Parse The JSON Data in dataparser.cpp
       parseData(json);
@@ -305,7 +303,7 @@ void JSON_Process(char *jsonbuf)
 void parseData(DynamicJsonDocument &json)
 {
   JsonVariant v = json["Cmd"];
-  if(v.isNull()) {
+  if (v.isNull()) {
     LOGE("Invalid JSON, No Command");
     return;
   }
@@ -314,36 +312,36 @@ void parseData(DynamicJsonDocument &json)
   const char *command = v;
 
   // Reset Center
-  if(strcmp(command,"RstCnt") == 0) {
+  if (strcmp(command, "RstCnt") == 0) {
     // TODO we should also log when the button on the device issues a Reset Center
     LOGI("Resetting Center");
     pressButton();
 
-  // Settings Sent from UI
+    // Settings Sent from UI
   } else if (strcmp(command, "Set") == 0) {
     trkset.loadJSONSettings(json);
     LOGI("Storing Settings");
 
-  // Save to Flash
+    // Save to Flash
   } else if (strcmp(command, "Flash") == 0) {
     LOGI("Saving to Flash");
     trkset.saveToEEPROM();
 
-  // Erase
+    // Erase
   } else if (strcmp(command, "Erase") == 0) {
     LOGI("Clearing Flash");
     socClearFlash();
 
-  // Reboot
+    // Reboot
   } else if (strcmp(command, "Reboot") == 0) {
     sys_reboot(SYS_REBOOT_COLD);
 
-  // Force Bootloader
+    // Force Bootloader
   } else if (strcmp(command, "Boot") == 0) {
-    (*((volatile uint32_t *) 0x20007FFCul)) = 0x07738135;
+    (*((volatile uint32_t *)0x20007FFCul)) = 0x07738135;
     NVIC_SystemReset();
 
-  // Get settings
+    // Get settings
   } else if (strcmp(command, "Get") == 0) {
     LOGI("Sending Settings");
     json.clear();
@@ -351,34 +349,33 @@ void parseData(DynamicJsonDocument &json)
     json["Cmd"] = "Set";
     serialWriteJSON(json);
 
-  // Im Here Received, Means the GUI is running
+    // Im Here Received, Means the GUI is running
   } else if (strcmp(command, "IH") == 0) {
     __NOP();
 
-  // Get a List of All Data Items
+    // Get a List of All Data Items
   } else if (strcmp(command, "DatLst") == 0) {
     json.clear();
     trkset.setJSONDataList(json);
     json["Cmd"] = "DataList";
     serialWriteJSON(json);
 
-  // Stop All Data Items
+    // Stop All Data Items
   } else if (strcmp(command, "D--") == 0) {
     LOGI("Clearing Data List");
     trkset.stopAllData();
 
-  // Request Data Items
+    // Request Data Items
   } else if (strcmp(command, "RD") == 0) {
     LOGI("Data Added/Remove");
     // using C++11 syntax (preferred):
     JsonObject root = json.as<JsonObject>();
     for (JsonPair kv : root) {
-      if(kv.key() == "Cmd")
-        continue;
-      trkset.setDataItemSend(kv.key().c_str(),kv.value().as<bool>());
+      if (kv.key() == "Cmd") continue;
+      trkset.setDataItemSend(kv.key().c_str(), kv.value().as<bool>());
     }
 
-  // Firmware Reqest
+    // Firmware Reqest
   } else if (strcmp(command, "FW") == 0) {
     DynamicJsonDocument fwjson(100);
     fwjson["Cmd"] = "FW";
@@ -387,7 +384,7 @@ void parseData(DynamicJsonDocument &json)
     fwjson["Git"] = STRINGIFY(FW_GIT_REV);
     serialWriteJSON(fwjson);
 
-  // Unknown Command
+    // Unknown Command
   } else {
     LOGW("Unknown Command");
     return;
@@ -403,18 +400,10 @@ uint16_t escapeCRC(uint16_t crc)
   // Characters to escape out
   uint8_t crclow = crc & 0xFF;
   uint8_t crchigh = (crc >> 8) & 0xFF;
-  if(crclow == 0x00 ||
-     crclow == 0x02 ||
-     crclow == 0x03 ||
-     crclow == 0x06 ||
-     crclow == 0x15)
-     crclow ^= 0xFF; //?? why not..
-  if(crchigh == 0x00 ||
-     crchigh == 0x02 ||
-     crchigh == 0x03 ||
-     crchigh == 0x06 ||
-     crchigh == 0x15)
-     crchigh ^= 0xFF; //?? why not..
+  if (crclow == 0x00 || crclow == 0x02 || crclow == 0x03 || crclow == 0x06 || crclow == 0x15)
+    crclow ^= 0xFF;  //?? why not..
+  if (crchigh == 0x00 || crchigh == 0x02 || crchigh == 0x03 || crchigh == 0x06 || crchigh == 0x15)
+    crchigh ^= 0xFF;  //?? why not..
   return (uint16_t)crclow | ((uint16_t)crchigh << 8);
 }
 
@@ -423,13 +412,13 @@ uint16_t escapeCRC(uint16_t crc)
 void serialWrite(const char *data, int len)
 {
   k_mutex_lock(&ring_tx_mutex, K_FOREVER);
-  if(ring_buf_space_get(&ringbuf_tx) < (uint32_t)len) { // Not enough room, drop it.
+  if (ring_buf_space_get(&ringbuf_tx) < (uint32_t)len) {  // Not enough room, drop it.
     k_mutex_unlock(&ring_tx_mutex);
     return;
   }
-  int rb_len = ring_buf_put(&ringbuf_tx,(uint8_t *) data, len);
+  int rb_len = ring_buf_put(&ringbuf_tx, (uint8_t *)data, len);
   k_mutex_unlock(&ring_tx_mutex);
-  if(rb_len != len) {
+  if (rb_len != len) {
     // TODO: deal with this case
     __NOP();
   }
@@ -458,21 +447,21 @@ void serialWriteJSON(DynamicJsonDocument &json)
   char data[TX_RNGBUF_SIZE];
 
   k_mutex_lock(&ring_tx_mutex, K_FOREVER);
-  int br = serializeJson(json, data+1, TX_RNGBUF_SIZE-7);
-  uint16_t calccrc = escapeCRC(uCRC16Lib::calculate(data,br));
+  int br = serializeJson(json, data + 1, TX_RNGBUF_SIZE - 7);
+  uint16_t calccrc = escapeCRC(uCRC16Lib::calculate(data, br));
 
-  if(br + 7 > TX_RNGBUF_SIZE) {
+  if (br + 7 > TX_RNGBUF_SIZE) {
     k_mutex_unlock(&ring_tx_mutex);
     return;
   }
 
   data[0] = 0x02;
-  data[br+1] = (calccrc >> 8 ) & 0xFF;
-  data[br+2] = calccrc & 0xFF;
-  data[br+3] = 0x03;
-  data[br+4] = '\r';
-  data[br+5] = '\n';
+  data[br + 1] = (calccrc >> 8) & 0xFF;
+  data[br + 2] = calccrc & 0xFF;
+  data[br + 3] = 0x03;
+  data[br + 4] = '\r';
+  data[br + 5] = '\n';
 
-  serialWrite(data, br+6);
+  serialWrite(data, br + 6);
   k_mutex_unlock(&ring_tx_mutex);
 }

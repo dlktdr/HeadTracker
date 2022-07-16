@@ -1,7 +1,7 @@
 /*
  * This file is part of the Head Tracker distribution (https://github.com/dlktdr/headtracker)
  * Copyright (c) 2021 Cliff Blackburn
-  *
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, version 3.
@@ -17,9 +17,11 @@
 
 #pragma once
 
-#include <nrfx_ppi.h>
 #include <nrfx_gpiote.h>
+#include <nrfx_ppi.h>
+
 #include "defines.h"
+
 
 int PWM_Init(int updateRate);
 void setPWMValue(int ch, uint16_t value);

@@ -15,74 +15,61 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <zephyr.h>
-#include <nrfx.h>
-#include <nrfx_uarte.h>
-#include <nrfx_ppi.h>
-#include "defines.h"
 #include "auxserial.h"
+
+#include <nrfx.h>
+#include <nrfx_ppi.h>
+#include <nrfx_uarte.h>
+#include <zephyr.h>
+
+#include "defines.h"
 #include "ringbuffer.h"
 
-static bool serialopened=false;
 
-static uint8_t serialDMATx[SERIAL_TX_SIZE]; // DMA Access Buffer Write
+static bool serialopened = false;
+
+static uint8_t serialDMATx[SERIAL_TX_SIZE];  // DMA Access Buffer Write
 
 // In/Out Buffers
 ringbuffer<uint8_t> serialRxBuf(SERIAL_RX_SIZE);
 ringbuffer<uint8_t> serialTxBuf(SERIAL_TX_SIZE);
 
-static bool invertTX=false;
-static bool invertRX=false;
+static bool invertTX = false;
+static bool invertRX = false;
 
-volatile bool isTransmitting=false;
+volatile bool isTransmitting = false;
 
-void Serial_Start_TX(bool disableint=true)
-{
+void Serial_Start_TX(bool disableint = true) {}
 
-}
+void SerialTX_isr() {}
 
-void SerialTX_isr()
-{
-
-}
-
-void SerialRX_isr()
-{
-
-}
+void SerialRX_isr() {}
 
 int AuxSerial_Open(uint32_t baudrate, uint16_t prtset, uint8_t inversions)
 {
-    if(serialopened)
-        return SERIAL_ALREADY_OPEN;
+  if (serialopened) return SERIAL_ALREADY_OPEN;
 
-    AuxSerial_Close(); // Put the periferial in a good off state
-
+  AuxSerial_Close();  // Put the periferial in a good off state
 }
 
 void AuxSerial_Close()
 {
-    if(!serialopened)
-        return;
+  if (!serialopened) return;
 
-    serialopened = false;
+  serialopened = false;
 }
 
 uint32_t AuxSerial_Write(uint8_t *buffer, uint32_t len)
 {
-    if(serialTxBuf.getFree() < len)
-        return SERIAL_BUFFER_FULL;
-    serialTxBuf.write(buffer,len);
-    Serial_Start_TX();
-    return 0;
+  if (serialTxBuf.getFree() < len) return SERIAL_BUFFER_FULL;
+  serialTxBuf.write(buffer, len);
+  Serial_Start_TX();
+  return 0;
 }
 
 uint32_t AuxSerial_Read(uint8_t *buffer, uint32_t bufsize)
 {
-    return serialRxBuf.read(buffer, bufsize);
+  return serialRxBuf.read(buffer, bufsize);
 }
 
-bool AuxSerial_Available()
-{
-    return serialRxBuf.getOccupied() > 0;
-}
+bool AuxSerial_Available() { return serialRxBuf.getOccupied() > 0; }

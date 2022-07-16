@@ -17,66 +17,68 @@
 
 // Writing to flash
 
-#include <zephyr.h>
-#include <drivers/flash.h>
-#include <storage/flash_map.h>
-#include "defines.h"
-#include "log.h"
 #include "soc_flash.h"
 
+#include <drivers/flash.h>
+#include <storage/flash_map.h>
+#include <zephyr.h>
+
+#include "defines.h"
+#include "log.h"
+
+
 #define FLASH_OFFSET FLASH_AREA_OFFSET(datapt)
-#define FLASH_PAGE_SIZE   4096 // Can grow up to 0x4000
+#define FLASH_PAGE_SIZE 4096  // Can grow up to 0x4000
 
 const char *get_flashSpace()
 {
-    const char *addr = (const char *)FLASH_OFFSET;
-    if(*addr == 0xFF) // Blank Flash
-        return "{\"UUID\":837727}";
-    return addr;
+  const char *addr = (const char *)FLASH_OFFSET;
+  if (*addr == 0xFF)  // Blank Flash
+    return "{\"UUID\":837727}";
+  return addr;
 }
 
 void socClearFlash()
 {
-	const struct device *flash_dev;
+  const struct device *flash_dev;
 
-    flash_dev = device_get_binding(DT_CHOSEN_ZEPHYR_FLASH_CONTROLLER_LABEL);
+  flash_dev = device_get_binding(DT_CHOSEN_ZEPHYR_FLASH_CONTROLLER_LABEL);
 
-	if (!flash_dev) {
-		LOGE("Nordic nRF5 flash driver was not found!");
-		return;
-	}
+  if (!flash_dev) {
+    LOGE("Nordic nRF5 flash driver was not found!");
+    return;
+  }
 
-	if (flash_erase(flash_dev, FLASH_OFFSET, FLASH_PAGE_SIZE) != 0) {
-		LOGE("Flash erase Failure");
-        return;
-    }
+  if (flash_erase(flash_dev, FLASH_OFFSET, FLASH_PAGE_SIZE) != 0) {
+    LOGE("Flash erase Failure");
+    return;
+  }
 
-    LOGI("Flash erase succeeded");
+  LOGI("Flash erase succeeded");
 }
 
 int socWriteFlash(const char *datain, int len)
 {
-	const struct device *flash_dev;
+  const struct device *flash_dev;
 
-    flash_dev = device_get_binding(DT_CHOSEN_ZEPHYR_FLASH_CONTROLLER_LABEL);
+  flash_dev = device_get_binding(DT_CHOSEN_ZEPHYR_FLASH_CONTROLLER_LABEL);
 
-	if (!flash_dev) {
-		LOGE("Nordic nRF5 flash driver was not found!");
-		return -1;
-	}
+  if (!flash_dev) {
+    LOGE("Nordic nRF5 flash driver was not found!");
+    return -1;
+  }
 
-	if (flash_erase(flash_dev, FLASH_OFFSET, FLASH_PAGE_SIZE) != 0) {
-		LOGE("Flash erase Failure");
-        return -1;
-    }
+  if (flash_erase(flash_dev, FLASH_OFFSET, FLASH_PAGE_SIZE) != 0) {
+    LOGE("Flash erase Failure");
+    return -1;
+  }
 
-    LOGI("Flash erase succeeded");
+  LOGI("Flash erase succeeded");
 
-    if (flash_write(flash_dev, FLASH_OFFSET, (const void *)datain, FLASH_PAGE_SIZE) != 0) {
-        LOGE("   Flash write failed!");
-        return -1;
-    }
+  if (flash_write(flash_dev, FLASH_OFFSET, (const void *)datain, FLASH_PAGE_SIZE) != 0) {
+    LOGE("   Flash write failed!");
+    return -1;
+  }
 
-    return 0;
+  return 0;
 }
-

@@ -20,51 +20,51 @@
 */
 
 #include "APDS9960.h"
-#include "io.h"
-#include "log.h"
-#include "defines.h"
+
 #include <drivers/i2c.h>
 
+#include "defines.h"
+#include "io.h"
+#include "log.h"
+
 APDS9960::APDS9960(int intPin) :
-  _intPin(intPin),
-  _gestureEnabled(false),
-  _proximityEnabled(false),
-  _colorEnabled(false),
-  _gestureIn(false),
-  _gestureDirectionX(0),
-  _gestureDirectionY(0),
-  _gestureDirInX(0),
-  _gestureDirInY(0),
-  _gestureSensitivity(20),
-  _detectedGesture(GESTURE_NONE)
+    _intPin(intPin),
+    _gestureEnabled(false),
+    _proximityEnabled(false),
+    _colorEnabled(false),
+    _gestureIn(false),
+    _gestureDirectionX(0),
+    _gestureDirectionY(0),
+    _gestureDirInX(0),
+    _gestureDirInY(0),
+    _gestureSensitivity(20),
+    _detectedGesture(GESTURE_NONE)
 {
-    i2c_dev = NULL;
+  i2c_dev = NULL;
 }
 
-APDS9960::~APDS9960()
+APDS9960::~APDS9960() {}
+
+bool APDS9960::begin()
 {
-}
+  i2c_dev = device_get_binding("I2C_1");
+  if (!i2c_dev) {
+    LOGE("Could not get device binding for I2C");
+    return false;
+  }
 
-bool APDS9960::begin() {
-
-    i2c_dev = device_get_binding("I2C_1");
-	if (!i2c_dev) {
-		LOGE("Could not get device binding for I2C");
-		return false;
-	}
-
-    i2c_configure(i2c_dev, I2C_SPEED_SET(I2C_SPEED_FAST)|I2C_MODE_MASTER);
+  i2c_configure(i2c_dev, I2C_SPEED_SET(I2C_SPEED_FAST) | I2C_MODE_MASTER);
 
   // Check ID register
   uint8_t id;
   if (!getID(&id)) return false;
-  if (id!=0xAB) return false;
+  if (id != 0xAB) return false;
 
   // Disable everything
   if (!setENABLE(0x00)) return false;
   if (!setWTIME(0xFF)) return false;
-  if (!setGPULSE(0x8F)) return false; // 16us, 16 pulses // default is: 0x40 = 8us, 1 pulse
-  if (!setPPULSE(0x8F)) return false; // 16us, 16 pulses // default is: 0x40 = 8us, 1 pulse
+  if (!setGPULSE(0x8F)) return false;  // 16us, 16 pulses // default is: 0x40 = 8us, 1 pulse
+  if (!setPPULSE(0x8F)) return false;  // 16us, 16 pulses // default is: 0x40 = 8us, 1 pulse
   if (!setGestureIntEnable(true)) return false;
   if (!setGestureMode(true)) return false;
   if (!enablePower()) return false;
@@ -84,17 +84,18 @@ bool APDS9960::begin() {
   return true;
 }
 
-void APDS9960::end() {
+void APDS9960::end()
+{
   // Disable everything
   setENABLE(0x00);
 
   _gestureEnabled = false;
-
 }
 
 // Sets the LED current boost value:
 // 0=100%, 1=150%, 2=200%, 3=300%
-bool APDS9960::setLEDBoost(uint8_t boost) {
+bool APDS9960::setLEDBoost(uint8_t boost)
+{
   uint8_t r;
   if (!getCONFIG2(&r)) return false;
   r &= 0b11001111;
@@ -102,39 +103,40 @@ bool APDS9960::setLEDBoost(uint8_t boost) {
   return setCONFIG2(r);
 }
 
-void APDS9960::setGestureSensitivity(uint8_t sensitivity) {
+void APDS9960::setGestureSensitivity(uint8_t sensitivity)
+{
   if (sensitivity > 100) sensitivity = 100;
   _gestureSensitivity = 100 - sensitivity;
 }
 
-void APDS9960::setInterruptPin(int pin) {
-  _intPin = pin;
-}
+void APDS9960::setInterruptPin(int pin) { _intPin = pin; }
 
-bool APDS9960::setGestureIntEnable(bool en) {
-    uint8_t r;
-    if (!getGCONF4(&r)) return false;
-    if (en) {
-      r |= 0b00000010;
-    } else {
-      r &= 0b11111101;
-    }
-    return setGCONF4(r);
+bool APDS9960::setGestureIntEnable(bool en)
+{
+  uint8_t r;
+  if (!getGCONF4(&r)) return false;
+  if (en) {
+    r |= 0b00000010;
+  } else {
+    r &= 0b11111101;
+  }
+  return setGCONF4(r);
 }
 
 bool APDS9960::setGestureMode(bool en)
 {
-    uint8_t r;
-    if (!getGCONF4(&r)) return false;
-    if (en) {
-      r |= 0b00000001;
-    } else {
-      r &= 0b11111110;
-    }
-    return setGCONF4(r);
+  uint8_t r;
+  if (!getGCONF4(&r)) return false;
+  if (en) {
+    r |= 0b00000001;
+  } else {
+    r &= 0b11111110;
+  }
+  return setGCONF4(r);
 }
 
-bool APDS9960::enablePower() {
+bool APDS9960::enablePower()
+{
   uint8_t r;
   if (!getENABLE(&r)) return false;
   if ((r & 0b00000001) != 0) return true;
@@ -142,7 +144,8 @@ bool APDS9960::enablePower() {
   return setENABLE(r);
 }
 
-bool APDS9960::disablePower() {
+bool APDS9960::disablePower()
+{
   uint8_t r;
   if (!getENABLE(&r)) return false;
   if ((r & 0b00000001) == 0) return true;
@@ -150,7 +153,8 @@ bool APDS9960::disablePower() {
   return setENABLE(r);
 }
 
-bool APDS9960::enableColor() {
+bool APDS9960::enableColor()
+{
   uint8_t r;
   if (!getENABLE(&r)) return false;
   if ((r & 0b00000010) != 0) {
@@ -163,7 +167,8 @@ bool APDS9960::enableColor() {
   return res;
 }
 
-bool APDS9960::disableColor() {
+bool APDS9960::disableColor()
+{
   uint8_t r;
   if (!getENABLE(&r)) return false;
   if ((r & 0b00000010) == 0) {
@@ -172,11 +177,12 @@ bool APDS9960::disableColor() {
   }
   r &= 0b11111101;
   bool res = setENABLE(r);
-  _colorEnabled = !res; // (res == true) if successfully disabled
+  _colorEnabled = !res;  // (res == true) if successfully disabled
   return res;
 }
 
-bool APDS9960::enableProximity() {
+bool APDS9960::enableProximity()
+{
   uint8_t r;
   if (!getENABLE(&r)) return false;
   if ((r & 0b00000100) != 0) {
@@ -189,7 +195,8 @@ bool APDS9960::enableProximity() {
   return res;
 }
 
-bool APDS9960::disableProximity() {
+bool APDS9960::disableProximity()
+{
   uint8_t r;
   if (!getENABLE(&r)) return false;
   if ((r & 0b00000100) == 0) {
@@ -198,11 +205,12 @@ bool APDS9960::disableProximity() {
   }
   r &= 0b11111011;
   bool res = setENABLE(r);
-  _proximityEnabled = !res; // (res == true) if successfully disabled
+  _proximityEnabled = !res;  // (res == true) if successfully disabled
   return res;
 }
 
-bool APDS9960::enableWait() {
+bool APDS9960::enableWait()
+{
   uint8_t r;
   if (!getENABLE(&r)) return false;
   if ((r & 0b00001000) != 0) return true;
@@ -210,7 +218,8 @@ bool APDS9960::enableWait() {
   return setENABLE(r);
 }
 
-bool APDS9960::disableWait() {
+bool APDS9960::disableWait()
+{
   uint8_t r;
   if (!getENABLE(&r)) return false;
   if ((r & 0b00001000) == 0) return true;
@@ -218,7 +227,8 @@ bool APDS9960::disableWait() {
   return setENABLE(r);
 }
 
-bool APDS9960::enableGesture() {
+bool APDS9960::enableGesture()
+{
   uint8_t r;
   if (!getENABLE(&r)) return false;
   if ((r & 0b01000000) != 0) {
@@ -231,7 +241,8 @@ bool APDS9960::enableGesture() {
   return res;
 }
 
-bool APDS9960::disableGesture() {
+bool APDS9960::disableGesture()
+{
   uint8_t r;
   if (!getENABLE(&r)) return false;
   if ((r & 0b01000000) == 0) {
@@ -240,34 +251,34 @@ bool APDS9960::disableGesture() {
   }
   r &= 0b10111111;
   bool res = setENABLE(r);
-  _gestureEnabled = !res; // (res == true) if successfully disabled
+  _gestureEnabled = !res;  // (res == true) if successfully disabled
   return res;
 }
 
 #define APDS9960_ADDR 0x39
 
-bool APDS9960::write(uint8_t val) {
-    return !i2c_write(i2c_dev, &val, 1, APDS9960_ADDR);
+bool APDS9960::write(uint8_t val) { return !i2c_write(i2c_dev, &val, 1, APDS9960_ADDR); }
+
+bool APDS9960::write(uint8_t reg, uint8_t val)
+{
+  uint8_t i2write[2] = {reg, val};
+  return !i2c_write(i2c_dev, i2write, sizeof(i2write), APDS9960_ADDR);
 }
 
-bool APDS9960::write(uint8_t reg, uint8_t val) {
-    uint8_t i2write[2] = {reg,val};
-    return !i2c_write(i2c_dev, i2write, sizeof(i2write), APDS9960_ADDR);
+bool APDS9960::read(uint8_t reg, uint8_t* val)
+{
+  if (i2c_write_read(i2c_dev, APDS9960_ADDR, &reg, 1, val, 1)) return false;
+  return true;
 }
 
-bool APDS9960::read(uint8_t reg, uint8_t *val) {
-    if(i2c_write_read(i2c_dev, APDS9960_ADDR, &reg, 1, val, 1))
-        return false;
-    return true;
+size_t APDS9960::readBlock(uint8_t reg, uint8_t* val, unsigned int len)
+{
+  if (i2c_write_read(i2c_dev, APDS9960_ADDR, &reg, 1, val, len)) return false;
+  return true;
 }
 
-size_t APDS9960::readBlock(uint8_t reg, uint8_t *val, unsigned int len) {
-    if(i2c_write_read(i2c_dev, APDS9960_ADDR, &reg, 1, val, len))
-        return false;
-    return true;
-}
-
-int APDS9960::gestureFIFOAvailable() {
+int APDS9960::gestureFIFOAvailable()
+{
   uint8_t r;
   if (!getGSTATUS(&r)) return -1;
   if ((r & 0x01) == 0x00) return -2;
@@ -275,7 +286,8 @@ int APDS9960::gestureFIFOAvailable() {
   return r;
 }
 
-int APDS9960::handleGesture() {
+int APDS9960::handleGesture()
+{
   const int gestureThreshold = 30;
   while (true) {
     int available = gestureFIFOAvailable();
@@ -285,12 +297,12 @@ int APDS9960::handleGesture() {
     uint8_t bytes_read = readGFIFO_U(fifo_data, available * 4);
     if (bytes_read == 0) return 0;
 
-    for (int i = 0; i+3 < bytes_read; i+=4) {
-      uint8_t u,d,l,r;
+    for (int i = 0; i + 3 < bytes_read; i += 4) {
+      uint8_t u, d, l, r;
       u = fifo_data[i];
-      d = fifo_data[i+1];
-      l = fifo_data[i+2];
-      r = fifo_data[i+3];
+      d = fifo_data[i + 1];
+      l = fifo_data[i + 2];
+      r = fifo_data[i + 3];
       // Serial.print(u);
       // Serial.print(",");
       // Serial.print(d);
@@ -299,7 +311,8 @@ int APDS9960::handleGesture() {
       // Serial.print(",");
       // Serial.println(r);
 
-      if (u<gestureThreshold && d<gestureThreshold && l<gestureThreshold && r<gestureThreshold) {
+      if (u < gestureThreshold && d < gestureThreshold && l < gestureThreshold &&
+          r < gestureThreshold) {
         _gestureIn = true;
         if (_gestureDirInX != 0 || _gestureDirInY != 0) {
           int totalX = _gestureDirInX - _gestureDirectionX;
@@ -308,10 +321,18 @@ int APDS9960::handleGesture() {
           // Serial.print(totalX);
           // Serial.print(",");
           // Serial.println(totalY);
-          if (totalX < -_gestureSensitivity) { _detectedGesture = GESTURE_LEFT; }
-          if (totalX > _gestureSensitivity) { _detectedGesture = GESTURE_RIGHT; }
-          if (totalY < -_gestureSensitivity) { _detectedGesture = GESTURE_DOWN; }
-          if (totalY > _gestureSensitivity) { _detectedGesture = GESTURE_UP; }
+          if (totalX < -_gestureSensitivity) {
+            _detectedGesture = GESTURE_LEFT;
+          }
+          if (totalX > _gestureSensitivity) {
+            _detectedGesture = GESTURE_RIGHT;
+          }
+          if (totalY < -_gestureSensitivity) {
+            _detectedGesture = GESTURE_DOWN;
+          }
+          if (totalY > _gestureSensitivity) {
+            _detectedGesture = GESTURE_UP;
+          }
           _gestureDirectionX = 0;
           _gestureDirectionY = 0;
           _gestureDirInX = 0;
@@ -336,7 +357,8 @@ int APDS9960::handleGesture() {
   }
 }
 
-int APDS9960::gestureAvailable() {
+int APDS9960::gestureAvailable()
+{
   if (!_gestureEnabled) enableGesture();
 
   if (_intPin > -1) {
@@ -354,7 +376,8 @@ int APDS9960::gestureAvailable() {
   return (_detectedGesture == GESTURE_NONE) ? 0 : 1;
 }
 
-int APDS9960::readGesture() {
+int APDS9960::readGesture()
+{
   int gesture = _detectedGesture;
 
   _detectedGesture = GESTURE_NONE;
@@ -362,7 +385,8 @@ int APDS9960::readGesture() {
   return gesture;
 }
 
-int APDS9960::colorAvailable() {
+int APDS9960::colorAvailable()
+{
   uint8_t r;
 
   enableColor();
@@ -378,16 +402,18 @@ int APDS9960::colorAvailable() {
   return 0;
 }
 
-bool APDS9960::readColor(int& r, int& g, int& b) {
+bool APDS9960::readColor(int& r, int& g, int& b)
+{
   int c;
 
   return readColor(r, g, b, c);
 }
 
-bool APDS9960::readColor(int& r, int& g, int& b, int& c) {
+bool APDS9960::readColor(int& r, int& g, int& b, int& c)
+{
   uint16_t colors[4];
 
-  if (!readCDATAL((uint8_t *)colors, sizeof(colors))) {
+  if (!readCDATAL((uint8_t*)colors, sizeof(colors))) {
     r = -1;
     g = -1;
     b = -1;
@@ -406,7 +432,8 @@ bool APDS9960::readColor(int& r, int& g, int& b, int& c) {
   return true;
 }
 
-int APDS9960::proximityAvailable() {
+int APDS9960::proximityAvailable()
+{
   uint8_t r;
 
   enableProximity();
@@ -422,7 +449,8 @@ int APDS9960::proximityAvailable() {
   return 0;
 }
 
-int APDS9960::readProximity() {
+int APDS9960::readProximity()
+{
   uint8_t r;
 
   if (!getPDATA(&r)) {

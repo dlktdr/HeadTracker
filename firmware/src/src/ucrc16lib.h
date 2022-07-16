@@ -14,13 +14,13 @@ typedef unsigned char uint8_t;
 
 #define uCRC16Lib_POLYNOMIAL 0x8408
 
-class uCRC16Lib {
-public:
-    static uint16_t calculate(char *, uint16_t);
-    const static uint16_t crc_ok = 0x0F47;
+class uCRC16Lib
+{
+ public:
+  static uint16_t calculate(char *, uint16_t);
+  const static uint16_t crc_ok = 0x0F47;
 
-private:
-    // Static library, no need to construct objects
-    uCRC16Lib();
-
+ private:
+  // Static library, no need to construct objects
+  uCRC16Lib();
 };

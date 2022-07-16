@@ -15,18 +15,20 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <zephyr.h>
+#include "ble.h"
+
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/conn.h>
 #include <bluetooth/uuid.h>
+#include <zephyr.h>
 
-#include "log.h"
 #include "io.h"
+#include "log.h"
 #include "nano33ble.h"
-#include "ble.h"
+
 
 // Globals
-volatile bool bleconnected=false;
+volatile bool bleconnected = false;
 volatile bool btscanonly = false;
 btmodet curmode = BTDISABLE;
 
@@ -43,11 +45,11 @@ volatile bool btThreadRun = false;
 
 void bt_init()
 {
-    int err = bt_enable(NULL);
-	if (err) {
-		LOGE("Bluetooth init failed (err %d)", err);
-		return;
-	}
+  int err = bt_enable(NULL);
+  if (err) {
+    LOGE("Bluetooth init failed (err %d)", err);
+    return;
+  }
 
   LOGI("Bluetooth initialized");
   btThreadRun = true;
@@ -55,36 +57,37 @@ void bt_init()
 
 void bt_Thread()
 {
-  int64_t usduration=0;
-  while(1) {
+  int64_t usduration = 0;
+  while (1) {
     usduration = micros64();
 
-    if(!btThreadRun) {
+    if (!btThreadRun) {
       rt_sleep_ms(10);
       continue;
     }
 
-    switch(curmode) {
-    case BTPARAHEAD:
-      BTHeadExecute();
-      break;
-    case BTPARARMT:
-      BTRmtExecute();
-      break;
-    case BTSCANONLY:
-      break;
-    default:
-      break;
+    switch (curmode) {
+      case BTPARAHEAD:
+        BTHeadExecute();
+        break;
+      case BTPARARMT:
+        BTRmtExecute();
+        break;
+      case BTSCANONLY:
+        break;
+      default:
+        break;
     }
 
-    if(bleconnected)
+    if (bleconnected)
       setLEDFlag(LED_BTCONNECTED);
     else
       clearLEDFlag(LED_BTCONNECTED);
 
     // Adjust sleep for a more accurate period
     usduration = micros64() - usduration;
-    if(BT_PERIOD - usduration < BT_PERIOD * 0.7) {  // Took a long time. Will crash if sleep is too short
+    if (BT_PERIOD - usduration <
+        BT_PERIOD * 0.7) {  // Took a long time. Will crash if sleep is too short
       rt_sleep_us(BT_PERIOD);
     } else {
       rt_sleep_us(BT_PERIOD - usduration);
@@ -94,135 +97,124 @@ void bt_Thread()
 
 void BTSetMode(btmodet mode)
 {
-    // Requested same mode, just return
-    if(mode == curmode)
-        return;
+  // Requested same mode, just return
+  if (mode == curmode) return;
 
-    btThreadRun = false;
+  btThreadRun = false;
 
-    // Shut Down
-    switch(curmode) {
+  // Shut Down
+  switch (curmode) {
     case BTPARAHEAD:
-        BTHeadStop();
-        break;
+      BTHeadStop();
+      break;
     case BTPARARMT:
-        BTRmtStop();
-        btscanonly = false;
-        break;
+      BTRmtStop();
+      btscanonly = false;
+      break;
     case BTSCANONLY:
-        BTRmtStop();
-        btscanonly = false;
-        break;
+      BTRmtStop();
+      btscanonly = false;
+      break;
     default:
-        break;
-    }
+      break;
+  }
 
-    // Start Up
-    switch(mode) {
+  // Start Up
+  switch (mode) {
     case BTPARAHEAD:
-        BTHeadStart();
-        break;
+      BTHeadStart();
+      break;
     case BTPARARMT:
-        btscanonly = false;
-        BTRmtStart();
-        break;
+      btscanonly = false;
+      BTRmtStart();
+      break;
     case BTSCANONLY:
-        btscanonly = true;
-        BTRmtStart();
+      btscanonly = true;
+      BTRmtStart();
     default:
-        break;
-    }
+      break;
+  }
 
-    btThreadRun = true;
+  btThreadRun = true;
 
-    curmode = mode;
+  curmode = mode;
 }
 
-btmodet BTGetMode()
-{
-    return curmode;
-}
+btmodet BTGetMode() { return curmode; }
 
 bool BTGetConnected()
 {
-    if(curmode == BTDISABLE)
-        return false;
-    return bleconnected;
+  if (curmode == BTDISABLE) return false;
+  return bleconnected;
 }
 
 uint16_t BTGetChannel(int chno)
 {
-    switch(curmode) {
+  switch (curmode) {
     case BTPARAHEAD:
-        return BTHeadGetChannel(chno);
+      return BTHeadGetChannel(chno);
     case BTPARARMT:
-        return BTRmtGetChannel(chno);
+      return BTRmtGetChannel(chno);
     case BTSCANONLY:
-        return 0;
+      return 0;
     default:
-        break;
-    }
+      break;
+  }
 
-    return 0;
+  return 0;
 }
 
 void BTSetChannel(int channel, const uint16_t value)
 {
-    switch(curmode) {
+  switch (curmode) {
     case BTPARAHEAD:
-        BTHeadSetChannel(channel, value);
-        break;
+      BTHeadSetChannel(channel, value);
+      break;
     case BTPARARMT:
-        BTRmtSetChannel(channel, value);
-        break;
+      BTRmtSetChannel(channel, value);
+      break;
     default:
-        break;
-    }
+      break;
+  }
 }
 
 const char *BTGetAddress()
 {
-    switch(curmode) {
+  switch (curmode) {
     case BTPARAHEAD:
-        return BTHeadGetAddress();
+      return BTHeadGetAddress();
     case BTPARARMT:
     case BTSCANONLY:
-        return BTRmtGetAddress();
+      return BTRmtGetAddress();
     default:
-        break;
-    }
-    return "BT_DISABLED";
+      break;
+  }
+  return "BT_DISABLED";
 }
 
 int8_t BTGetRSSI()
 {
-    switch(curmode) {
+  switch (curmode) {
     case BTPARAHEAD:
-        return BTHeadGetRSSI();
+      return BTHeadGetRSSI();
     case BTPARARMT:
-        return BTRmtGetRSSI();
-        break;
+      return BTRmtGetRSSI();
+      break;
     default:
-        break;
-    }
+      break;
+  }
 
-    return -1;
+  return -1;
 }
 
 bool leparamrequested(struct bt_conn *conn, struct bt_le_conn_param *param)
 {
-  LOGI("Bluetooth Params Request. IntMax:%d IntMin:%d Lat:%d Timeout:%d",
-    param->interval_max,
-    param->interval_min,
-    param->latency,
-    param->timeout);
+  LOGI("Bluetooth Params Request. IntMax:%d IntMin:%d Lat:%d Timeout:%d", param->interval_max,
+       param->interval_min, param->latency, param->timeout);
   return true;
 }
 
-void leparamupdated(struct bt_conn *conn,
-                           uint16_t interval,
-				                   uint16_t latency,
-                           uint16_t timeout)
+void leparamupdated(struct bt_conn *conn, uint16_t interval, uint16_t latency, uint16_t timeout)
 {
   LOGI("Bluetooth Params Updated. Int:%d Lat:%d Timeout:%d", interval, latency, timeout);
 }
@@ -234,15 +226,15 @@ void securitychanged(struct bt_conn *conn, bt_security_t level, enum bt_security
 
 const char *printPhy(int phy)
 {
-  switch(phy) {
+  switch (phy) {
     case BT_GAP_LE_PHY_NONE:
-      return("None");
+      return ("None");
     case BT_GAP_LE_PHY_1M:
-      return("1M");
+      return ("1M");
     case BT_GAP_LE_PHY_2M:
-      return("2M");
+      return ("2M");
     case BT_GAP_LE_PHY_CODED:
-      return("Coded");
+      return ("Coded");
   }
   return "Unknown";
 }

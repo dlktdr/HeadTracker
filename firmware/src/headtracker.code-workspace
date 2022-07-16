@@ -1,0 +1,22 @@
+{
+  "folders": [
+    {
+      "path": "."
+    }
+  ],
+  "extensions": {
+    "recommendations": [
+      "platformio.platformio-ide",
+      "ms-vscode.cpptools",
+      "xaver.clang-format",
+    ]
+  },
+  "settings": {
+    "editor.find.addExtraSpaceOnTop": false,
+    "files.trimTrailingWhitespace": true,
+    "workbench.colorCustomizations": {
+      "titleBar.activeBackground": "#020081",
+      "titleBar.activeForeground": "#ffffff"
+    },
+  }
+}
