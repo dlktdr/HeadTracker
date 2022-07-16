@@ -67,8 +67,7 @@ K_MUTEX_DEFINE(data_mutex);
 // Flag that serial has been initalized
 volatile bool serialThreadRun = false;
 
-// Timers, Initially start timed out
-// volatile int64_t uiResponsive = k_uptime_get();
+// Flag that gets set after GUI requests firmware version
 volatile bool uiconnected = false;
 
 const struct device *dev;
@@ -167,7 +166,6 @@ void serial_Thread()
     if (dtr && !new_dtr) {
       ring_buf_reset(&ringbuf_tx);
       uart_tx_abort(dev);
-      // uiResponsive = k_uptime_get() - 1;
       trkset.stopAllData();
       uiconnected = false;
     }
