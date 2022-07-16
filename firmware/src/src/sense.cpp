@@ -36,6 +36,8 @@
 #include "pmw.h"
 #include "trackersettings.h"
 
+#define DEBUG_SENSOR_RATES
+
 static float auxdata[10];
 static float raccx = 0, raccy = 0, raccz = 0;
 static float rmagx = 0, rmagy = 0, rmagz = 0;
