@@ -22,14 +22,13 @@
 #define BUTTON_LONG_PRESS_TIME 1000  // How long to hold button Enable/Disables Tilt/Roll/Pan (ms)
 
 // Thread Periods
-#define IO_PERIOD 25             // (ms) IO Period (button reading)
-#define BT_PERIOD 12500          // (us) Bluetooth update rate
-#define SERIAL_PERIOD 30         // (ms) Serial processing
-#define DATA_PERIOD 2            // Multiplier of Serial Period (Live Data Transmission Speed)
-#define SENSOR_PERIOD 16666      // (us) 60hz Read Sensors
-#define CALCULATE_PERIOD 6000    // (us) 166hz IMU calculations
-#define PWM_FREQUENCY 50         // (ms) PWM Period
-#define UIRESPONSIVE_TIME 10000  // (ms) 10Seconds without an ack data will stop;
+#define IO_PERIOD 25           // (ms) IO Period (button reading)
+#define BT_PERIOD 12500        // (us) Bluetooth update rate
+#define SERIAL_PERIOD 30       // (ms) Serial processing
+#define DATA_PERIOD 2          // Multiplier of Serial Period (Live Data Transmission Speed)
+#define SENSOR_PERIOD 4000     // (us) 100hz Read Sensors
+#define CALCULATE_PERIOD 6000  // (us) 166hz IMU calculations
+#define PWM_FREQUENCY 50       // (ms) PWM Period
 
 // Analog Filters 1 Euro Filter
 #define AN_CH_CNT 4
@@ -118,9 +117,9 @@ extern volatile bool gyro_calibrated;
 #define RAD_TO_DEG 57.29577951308
 
 // Gyro Calibration Defines
-#define GYRO_STABLE_SAMPLES 50  // samples to average of not moving for a success gyro cal
-#define GYRO_PASS_DIFF 5.0      // Differential less than this deg/sec^2 considered stable
-#define GYRO_LP_BETA 0.9        // Gyro Sample Moving Average Beta (0.0-1
+#define GYRO_STABLE_SAMPLES 100  // samples to average of not moving for a success gyro cal
+#define GYRO_PASS_DIFF 24.0      // Differential less than this deg/sec^2 considered stable
+#define GYRO_LP_BETA 0.9         // Gyro Sample Moving Average Beta (0.0-1
 
 // Magnetometer, Initial Orientation, Samples to average
 #define MADGSTART_SAMPLES 15

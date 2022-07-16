@@ -34,7 +34,6 @@
 #include "defines.h"
 #include "log.h"
 
-
 #define LSM9DS1_ADDRESS 0x6b
 
 #define LSM9DS1_WHO_AM_I 0x0f
@@ -89,20 +88,13 @@ int LSM9DS1Class::begin()
     return 0;
   }
 
-  writeRegister(LSM9DS1_ADDRESS, LSM9DS1_CTRL_REG1_G, 0x78);   // 119 Hz, 2000 dps, 16 Hz BW
-  writeRegister(LSM9DS1_ADDRESS, LSM9DS1_CTRL_REG6_XL, 0x70);  // 119 Hz, 4G
+  writeRegister(LSM9DS1_ADDRESS, LSM9DS1_CTRL_REG1_G, 0b10111010);  // 476Hz 57Hz Cut Off
+  writeRegister(LSM9DS1_ADDRESS, LSM9DS1_CTRL_REG6_XL, 0x70);       // 119 Hz, 4G
 
   writeRegister(LSM9DS1_ADDRESS_M, LSM9DS1_CTRL_REG1_M,
-                0b11111000);  // Temperature compensation enable, ultra high performance, 80 Hz
-  // writeRegister(LSM9DS1_ADDRESS_M, LSM9DS1_CTRL_REG1_M, 0b10111000); // Temperature compensation
-  // enable, medium performance, 40 Hz
-  //   writeRegister(LSM9DS1_ADDRESS_M, LSM9DS1_CTRL_REG1_M, 0xb4); // Temperature compensation
-  //   enable, medium performance, 20 Hz
+                0b11111010);  // Temperature comp, ultra HP, 80 Hz, Fast ODR
   writeRegister(LSM9DS1_ADDRESS_M, LSM9DS1_CTRL_REG2_M, 0x00);  // 4 Gauss
-  //  writeRegister(LSM9DS1_ADDRESS_M, LSM9DS1_CTRL_REG2_M, 0b01100000); // 16 Gauss
   writeRegister(LSM9DS1_ADDRESS_M, LSM9DS1_CTRL_REG3_M, 0x00);  // Continuous conversion mode
-  // writeRegister(LSM9DS1_ADDRESS_M, LSM9DS1_CTRL_REG4_M, 0b00000100); // Z-axis operative mode
-  // medium performance
   writeRegister(LSM9DS1_ADDRESS_M, LSM9DS1_CTRL_REG4_M,
                 0b00001100);  // Z-axis operative mode ultra high performance
 
