@@ -3772,7 +3772,7 @@
      <x>0</x>
      <y>0</y>
      <width>623</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -3798,6 +3798,7 @@
     <addaction name="actionShow_Serial_Transmissions"/>
     <addaction name="actionChannel_Viewer"/>
     <addaction name="actionEraseFlash"/>
+    <addaction name="action_Vector_View"/>
    </widget>
    <widget class="QMenu" name="menu_Help">
     <property name="title">
@@ -3881,6 +3882,11 @@
   <action name="actionEraseFlash">
    <property name="text">
     <string>&amp;Restore Defaults</string>
+   </property>
+  </action>
+  <action name="action_Vector_View">
+   <property name="text">
+    <string>&amp;IMU Vector View</string>
    </property>
   </action>
  </widget>

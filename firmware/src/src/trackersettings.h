@@ -9,7 +9,6 @@
 #include "btpararmt.h"
 #include "serial.h"
 
-
 // Variables to be sent back to GUI if enabled
 // Datatype, Name, UpdateDivisor, RoundTo
 #define DATA_VARS               \
@@ -22,15 +21,15 @@
   DV(float, accx, 1, 1000)      \
   DV(float, accy, 1, 1000)      \
   DV(float, accz, 1, 1000)      \
-  DV(float, off_magx, 5, 1000)  \
-  DV(float, off_magy, 5, 1000)  \
-  DV(float, off_magz, 5, 1000)  \
-  DV(float, off_gyrox, 5, 1000) \
-  DV(float, off_gyroy, 5, 1000) \
-  DV(float, off_gyroz, 5, 1000) \
-  DV(float, off_accx, 5, 1000)  \
-  DV(float, off_accy, 5, 1000)  \
-  DV(float, off_accz, 5, 1000)  \
+  DV(float, off_magx, 1, 1000)  \
+  DV(float, off_magy, 1, 1000)  \
+  DV(float, off_magz, 1, 1000)  \
+  DV(float, off_gyrox, 1, 1000) \
+  DV(float, off_gyroy, 1, 1000) \
+  DV(float, off_gyroz, 1, 1000) \
+  DV(float, off_accx, 1, 1000)  \
+  DV(float, off_accy, 1, 1000)  \
+  DV(float, off_accz, 1, 1000)  \
   DV(float, tilt, 5, 1000)      \
   DV(float, roll, 5, 1000)      \
   DV(float, pan, 5, 1000)       \

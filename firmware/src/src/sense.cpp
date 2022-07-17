@@ -36,7 +36,6 @@
 #include "pmw.h"
 #include "trackersettings.h"
 
-
 static float auxdata[10];
 static float raccx = 0, raccy = 0, raccz = 0;
 static float rmagx = 0, rmagy = 0, rmagz = 0;
@@ -138,10 +137,13 @@ void calculate_Thread()
     usduration = micros64();
 
     // Period Between Samples
-    float deltat = madgwick.deltatUpdate();
+    pinMode(D_TO_32X_PIN(2), GPIO_OUTPUT);
+    digitalWrite(D_TO_32X_PIN(2), HIGH);
 
     // Use a mutex so sensor data can't be updated part way
     k_mutex_lock(&sensor_mutex, K_FOREVER);
+
+    float deltat = 0.00608;
 
     // Only do this update after the first mag and accel data have been read.
     if (madgreads == 0) {
@@ -586,6 +588,7 @@ void calculate_Thread()
       k_mutex_unlock(&data_mutex);
     }
 
+    digitalWrite(D_TO_32X_PIN(2), LOW);
     // Adjust sleep for a more accurate period
     usduration = micros64() - usduration;
     if (CALCULATE_PERIOD - usduration <

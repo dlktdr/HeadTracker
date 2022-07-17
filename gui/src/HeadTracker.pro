@@ -42,7 +42,8 @@ SOURCES += \
     servominmax.cpp \
     signalbars.cpp \
     trackersettings.cpp \
-    ucrc16lib.cpp
+    ucrc16lib.cpp \
+    vectorviewer.cpp
 
 
 HEADERS += \
@@ -65,7 +66,8 @@ HEADERS += \
     servominmax.h \
     signalbars.h \
     trackersettings.h \
-    ucrc16lib.h
+    ucrc16lib.h \
+    vectorviewer.h
 
 FORMS += \
     calibrateble.ui \
@@ -73,7 +75,8 @@ FORMS += \
     channelviewer.ui \
     diagnosticdisplay.ui \
     firmwarewizard.ui \
-    mainwindow.ui
+    mainwindow.ui \
+    vectorviewer.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

@@ -19,6 +19,7 @@
 #include "diagnosticdisplay.h"
 #include "boardnano33ble.h"
 #include "boardbno055.h"
+#include "vectorviewer.h"
 #include "imageviewer/imageviewer.h"
 
 const int MAX_LOG_LENGTH=6000; // How many bytes to keep of log data in the gui
@@ -69,6 +70,7 @@ private:
     ChannelViewer *channelviewer;
     QMessageBox *msgbox;
     QTextEdit *serialDebug;
+    VectorViewer *vectorViewer;
     ImageViewer *imageViewer;
 
     QQueue<QByteArray> serialDataOut;
@@ -118,6 +120,7 @@ private slots:
     void startData();
     void showDiagsClicked();
     void showSerialDiagClicked();
+    void showVectorViewerClicked();
     void showChannelViewerClicked();
     void BLE33tabChanged();
     void BTModeChanged();
