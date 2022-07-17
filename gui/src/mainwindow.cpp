@@ -53,6 +53,8 @@ MainWindow::MainWindow(QWidget *parent)
     serialDebug->resize(600,300);
     channelviewer = new ChannelViewer(&trkset, this);
     channelviewer->setWindowFlags(Qt::Window);
+    vectorViewer = new VectorViewer(&trkset, this);
+    vectorViewer->setWindowFlags(Qt::Window);
 
 #ifdef DEBUG_HT
     serialDebug->show();
@@ -217,6 +219,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->actionShow_Data,SIGNAL(triggered()),this,SLOT(showDiagsClicked()));
     connect(ui->actionShow_Serial_Transmissions,SIGNAL(triggered()),this,SLOT(showSerialDiagClicked()));
     connect(ui->actionChannel_Viewer,SIGNAL(triggered()),this,SLOT(showChannelViewerClicked()));
+    connect(ui->action_Vector_View,SIGNAL(triggered()),this,SLOT(showVectorViewerClicked()));
     connect(ui->actionOnline_Help, SIGNAL(triggered()),this, SLOT(openHelp()));
     connect(ui->actionPinout, SIGNAL(triggered()),this, SLOT(showPinView()));
     connect(ui->actionEraseFlash, SIGNAL(triggered()),this, SLOT(eraseFlash()));
@@ -1187,6 +1190,13 @@ void MainWindow::showSerialDiagClicked()
     serialDebug->show();
     serialDebug->activateWindow();
     serialDebug->raise();
+}
+
+void MainWindow::showVectorViewerClicked()
+{
+    vectorViewer->show();
+    vectorViewer->activateWindow();
+    vectorViewer->raise();
 }
 
 void MainWindow::showChannelViewerClicked()
