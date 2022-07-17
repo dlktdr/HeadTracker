@@ -1,6 +1,6 @@
 {
   "build": {
-    "arduino":{
+    "arduino": {
       "ldscript": "linker_script.ld"
     },
     "core": "nRF5",
@@ -8,7 +8,7 @@
     "extra_flags": "-DARDUINO_ARDUINO_NANO33BLE -DARDUINO_ARCH_NRF52840 -DNRF52840_XXAA",
     "f_cpu": "64000000L",
     "hwids": [
-          [
+      [
         "0x2341",
         "0x005a"
       ],
@@ -29,7 +29,6 @@
     "svd_path": "nrf52840.svd"
   },
   "frameworks": [
-    "arduino",
     "zephyr"
   ],
   "name": "Arduino Nano 33 BLE",

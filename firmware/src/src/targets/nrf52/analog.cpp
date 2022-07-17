@@ -4,8 +4,8 @@
 #include <string.h>
 #include <zephyr.h>
 
+#include "log.h"
 #include "serial.h"
-
 
 // Simple analog input method
 // this just reads a sample then waits then returns it
@@ -13,7 +13,7 @@
 // ADC Sampling Settings
 // doc says that impedance of 800K == 40usec sample time
 
-#define ADC_DEVICE_NAME DT_LABEL(DT_ALIAS(adcctrl))
+//#define ADC_DEVICE_NAME DT_LABEL(DT_ALIAS(adcctrl))
 #define ADC_RESOLUTION 10
 #define ADC_GAIN ADC_GAIN_1_6
 #define ADC_REFERENCE ADC_REF_INTERNAL
@@ -40,7 +40,11 @@ static struct adc_channel_cfg m_1st_channel_cfg = {
 static const struct device *init_adc(int channel)
 {
   int ret;
-  const struct device *adc_dev = device_get_binding(ADC_DEVICE_NAME);
+  const struct device *adc_dev = DEVICE_DT_GET(DT_ALIAS(adcctrl));
+  if (!adc_dev) {
+    LOGE("Could not get device binding for ADC");
+    return 0;
+  }
   if (_LastChannel != channel) {
     _IsInitialized = false;
     _LastChannel = channel;
