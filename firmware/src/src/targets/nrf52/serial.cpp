@@ -98,7 +98,7 @@ void serial_init()
 {
   int ret;
 
-  dev = device_get_binding("CDC_ACM_0");
+  dev = DEVICE_DT_GET_ONE(zephyr_cdc_acm_uart);
   if (!dev) {
     return;
   }
@@ -191,7 +191,7 @@ void serial_Thread()
       if (rb_len) {
         int send_len = uart_fifo_fill(dev, buffer, rb_len);
         if (send_len < rb_len) {
-          LOG_ERR("USB CDC Ring Buffer Full, Dropped data");
+          // LOGE("USB CDC Ring Buffer Full, Dropped data");
         }
       }
     } else {

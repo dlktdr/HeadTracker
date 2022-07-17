@@ -20,7 +20,6 @@
 #include "soc_flash.h"
 #include "trackersettings.h"
 
-
 #define CLOCK_NODE DT_INST(0, nordic_nrf_clock)
 static const struct device *clock0;
 
@@ -32,7 +31,7 @@ void start(void)
 {
   // Force High Accuracy Clock
   const char *clock_label = DT_LABEL(CLOCK_NODE);
-  clock0 = device_get_binding(clock_label);
+  clock0 = DEVICE_DT_GET(DT_NODELABEL(clock));
   if (clock0 == NULL) {
     printk("Failed to fetch clock %s\n", clock_label);
   }

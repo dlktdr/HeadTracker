@@ -4,7 +4,6 @@
 
 #include "trackersettings.h"
 
-
 volatile bool ioThreadRun = false;
 const device *gpios[2];
 
@@ -187,8 +186,8 @@ void io_Thread()
 void io_init()
 {
   if (ioThreadRun) return;
-  gpios[0] = device_get_binding("GPIO_0");
-  gpios[1] = device_get_binding("GPIO_1");
+  gpios[0] = DEVICE_DT_GET(DT_NODELABEL(gpio0));  // device_get_binding("GPIO_0");
+  gpios[1] = DEVICE_DT_GET(DT_NODELABEL(gpio1));  // device_get_binding("GPIO_1");
 
   pinMode(ARDUINO_INTERNAL_VDD_ENV_ENABLE, GPIO_OUTPUT);
   pinMode(ARDUINO_INTERNAL_I2C_PULLUP, GPIO_OUTPUT);
