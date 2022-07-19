@@ -191,7 +191,7 @@ void serial_Thread()
       if (rb_len) {
         int send_len = uart_fifo_fill(dev, buffer, rb_len);
         if (send_len < rb_len) {
-          // LOGE("USB CDC Ring Buffer Full, Dropped data");
+          LOG_ERR("USB CDC Ring Buffer Full, Dropped data");
         }
       }
     }
