@@ -67,9 +67,8 @@ K_MUTEX_DEFINE(data_mutex);
 // Flag that serial has been initalized
 volatile bool serialThreadRun = false;
 
-// Timers, Initially start timed out
-volatile int64_t uiResponsive = k_uptime_get();
-bool uiconnected = false;
+// Flag that gets set after GUI requests firmware version
+volatile bool uiconnected = false;
 
 const struct device *dev;
 
@@ -167,14 +166,15 @@ void serial_Thread()
     if (dtr && !new_dtr) {
       ring_buf_reset(&ringbuf_tx);
       uart_tx_abort(dev);
-      uiResponsive = k_uptime_get() - 1;
       trkset.stopAllData();
+      uiconnected = false;
     }
 
     // gaining new connection
     if (!dtr && new_dtr) {
       ring_buf_reset(&ringbuf_tx);
       uart_tx_abort(dev);
+      uiconnected = false;
 
       // Force bootloader if baud set to 1200bps TODO (Test Me)
       /*uint32_t baud=0;
@@ -194,6 +194,8 @@ void serial_Thread()
           LOG_ERR("USB CDC Ring Buffer Full, Dropped data");
         }
       }
+    } else {
+      ring_buf_reset(&ringbuf_tx);  // Clear buffer
     }
     k_mutex_unlock(&ring_tx_mutex);
     dtr = new_dtr;
@@ -209,9 +211,7 @@ void serial_Thread()
       int64_t curtime = k_uptime_get();
 
       // TODO we can probably remove or utilize this test alongside dtr transitions
-      if (uiResponsive > curtime) {
-        uiconnected = true;
-
+      if (uiconnected) {
         // If sense thread is writing, wait until complete
         k_mutex_lock(&data_mutex, K_FOREVER);
         json.clear();
@@ -221,9 +221,6 @@ void serial_Thread()
           serialWriteJSON(json);
         }
         k_mutex_unlock(&data_mutex);
-
-      } else {
-        uiconnected = false;
       }
     }
   }
@@ -383,15 +380,13 @@ void parseData(DynamicJsonDocument &json)
     fwjson["Hard"] = FW_BOARD;
     fwjson["Git"] = STRINGIFY(FW_GIT_REV);
     serialWriteJSON(fwjson);
+    uiconnected = true;  // Only allow writing back data after this is seen from the GUI
 
     // Unknown Command
   } else {
     LOGW("Unknown Command");
     return;
   }
-
-  // GUI responsive, update connected timer
-  uiResponsive = k_uptime_get() + UIRESPONSIVE_TIME;
 }
 
 // Remove any of the escape characters

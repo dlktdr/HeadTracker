@@ -29,7 +29,6 @@
 #define SENSOR_PERIOD 16666      // (us) 60hz Read Sensors
 #define CALCULATE_PERIOD 6000    // (us) 166hz IMU calculations
 #define PWM_FREQUENCY 50         // (ms) PWM Period
-#define UIRESPONSIVE_TIME 10000  // (ms) 10Seconds without an ack data will stop;
 
 // Analog Filters 1 Euro Filter
 #define AN_CH_CNT 4
