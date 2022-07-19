@@ -38,6 +38,7 @@ private:
   Ui::VectorViewer *ui;
   VectorOpenGL *vectGLWidget;
   TrackerSettings *trkset;
+  void showEvent(QShowEvent *event);
 };
 
 #endif // VECTORVIEWER_H

@@ -156,7 +156,6 @@ void drawOrigin()
 }
 
 
-
 void VectorOpenGL::initializeGL()
 {
     glClearColor(0.0, 0.0, 0.0, 1.0);
@@ -183,13 +182,10 @@ void VectorOpenGL::paintGL()
 {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glLoadIdentity();
-  glTranslatef(0.0, 0.0, -60.0);
-  glRotatef(-80, 1.0, 0.1, 0.0);
+  glTranslatef(0.0, 0.0, -40.0);
+  glRotatef(-80, 1.0, 0.3, 0.0);
 
   drawOrigin();
-
-
-
 }
 
 
@@ -205,12 +201,7 @@ VectorViewer::VectorViewer(TrackerSettings *trk, QWidget *parent) :
   vectGLWidget = new VectorOpenGL(trk);
   mylay->addWidget(vectGLWidget);
 
-  // Disable all data
-  QMap<QString, bool> dataitems;
-  dataitems.insert("off_accx",true);
-  dataitems.insert("off_accy",true);
-  dataitems.insert("off_accy",true);
-  trkset->setDataItemSend(dataitems);
+
 
   connect(trkset,&TrackerSettings::liveDataChanged,vectGLWidget,&VectorOpenGL::dataUpdate);
 
@@ -219,4 +210,15 @@ VectorViewer::VectorViewer(TrackerSettings *trk, QWidget *parent) :
 VectorViewer::~VectorViewer()
 {
   delete ui;
+}
+
+void VectorViewer::showEvent(QShowEvent *event)
+{
+  QMap<QString, bool> dataitems;
+  dataitems.insert("off_accx",true);
+  dataitems.insert("off_accy",true);
+  dataitems.insert("off_accz",true);
+  trkset->clearDataItems();
+  trkset->setDataItemSend(dataitems);
+     event->accept();
 }
