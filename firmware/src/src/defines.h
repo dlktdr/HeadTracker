@@ -18,6 +18,12 @@
 #define FW_VERSION STRINGIFY(VERSION)
 #define FW_BOARD "NANO33BLE"
 
+#if defined(DEBUG)
+#define DEFAULT_LOG_LEVEL INFO
+#elif
+#define DEFAULT_LOG_LEVEL DEBUG
+#endif
+
 #define BUTTON_HOLD_TIME 1           // How long should the button be held for a normal press (ms)
 #define BUTTON_LONG_PRESS_TIME 1000  // How long to hold button Enable/Disables Tilt/Roll/Pan (ms)
 
