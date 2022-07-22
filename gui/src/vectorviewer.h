@@ -18,11 +18,30 @@ public:
 public slots:
   void dataUpdate();
 protected:
-    void initializeGL() override;
-    void resizeGL(int w, int h) override;
-    void paintGL() override;
+  void initializeGL() override;
+  void resizeGL(int w, int h) override;
+  void paintGL() override;
+  void wheelEvent(QWheelEvent *event) override;
+
 private:
   TrackerSettings *trkset;
+  float accx;
+  float accy;
+  float accz;
+
+  float magx;
+  float magy;
+  float magz;
+  float accMag ;
+  float accAngX;
+  float accAngY;
+  float accAngZ;
+
+  float magMag ;
+  float magAngX;
+  float magAngY;
+  float magAngZ;
+  float zoomScale=1.0;
 };
 
 
@@ -39,6 +58,8 @@ private:
   VectorOpenGL *vectGLWidget;
   TrackerSettings *trkset;
   void showEvent(QShowEvent *event);
+
+
 };
 
 #endif // VECTORVIEWER_H

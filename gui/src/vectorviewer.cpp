@@ -22,7 +22,27 @@ VectorOpenGL::VectorOpenGL(TrackerSettings *trk, QWidget *parent)
 
 void VectorOpenGL::dataUpdate()
 {
+  accx = trkset->liveData("off_accx").toFloat();
+  accy = trkset->liveData("off_accy").toFloat();
+  accz = trkset->liveData("off_accz").toFloat();
 
+  magx = trkset->liveData("off_magx").toFloat();
+  magy = trkset->liveData("off_magy").toFloat();
+  magz = trkset->liveData("off_magz").toFloat();
+
+  accMag = sqrt(accx*accx + accy*accy + accz*accz);
+  accAngX = acos(accx/accMag) * 180 / M_PI;
+  accAngY = acos(accy/accMag) * 180 / M_PI;
+  accAngZ = acos(accz/accMag) * 180 / M_PI;
+
+  magMag = sqrt(magx*magx + magy*magy + magz*magz);
+  magAngX = acos(magx/magMag) * 180 / M_PI;
+  magAngY = acos(magy/magMag) * 180 / M_PI;
+  magAngZ = acos(magz/magMag) * 180 / M_PI;
+  qDebug() << "Acc " << accMag << accx << accy << accz << accAngX << accAngY << accAngZ;
+  qDebug() << "Mag " << magMag << magAngX << magAngY << magAngZ;
+
+  repaint();
 }
 
 void VectorOpenGL::resizeGL(int width, int height)
@@ -97,9 +117,6 @@ void draw_cylinder(GLfloat radius,
         glVertex3f(radius, 0.0, height);
     glEnd();*/
 }
-
-
-
 
 void drawArrow(float height, float offset=0)
 {
@@ -183,9 +200,44 @@ void VectorOpenGL::paintGL()
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glLoadIdentity();
   glTranslatef(0.0, 0.0, -40.0);
-  glRotatef(-80, 1.0, 0.3, 0.0);
+  glRotatef(-80, 1.0, 0.0, 0.0);
+  glScaled(zoomScale, zoomScale, zoomScale);
+
+
+  glPushMatrix();
+  glColor3f(1, 1, 1);
+  glBegin(GL_LINES);
+     glVertex3f(0,0,0);
+     glVertex3f(accx*10,accy*10,accz*10);
+  glEnd();
+  glPopMatrix();
+
+  glPushMatrix();
+  glColor3f(1, 1, 0);
+  glBegin(GL_LINES);
+     glVertex3f(0,0,0);
+     glVertex3f(magx,magy,magz);
+  glEnd();
+  glPopMatrix();
+
 
   drawOrigin();
+
+//  glRotatef(1.0,accAngX/360,accAngY/360,accAngZ/360);
+//  drawArrow(accMag*5);
+
+}
+
+void VectorOpenGL::wheelEvent(QWheelEvent *event)
+{
+  QPoint numDegrees = event->angleDelta();
+  if (numDegrees.y() < 0)  zoomScale = zoomScale/1.1;
+  if (numDegrees.y() > 0)  zoomScale = zoomScale*1.1;
+
+  /*GLint viewport[4];
+  glGetIntegerv(GL_VIEWPORT,viewport);
+  resizeGL(viewport[2], viewport[3]);*/
+  repaint(); // call paintGL()
 }
 
 
@@ -201,8 +253,6 @@ VectorViewer::VectorViewer(TrackerSettings *trk, QWidget *parent) :
   vectGLWidget = new VectorOpenGL(trk);
   mylay->addWidget(vectGLWidget);
 
-
-
   connect(trkset,&TrackerSettings::liveDataChanged,vectGLWidget,&VectorOpenGL::dataUpdate);
 
 }
@@ -214,11 +264,19 @@ VectorViewer::~VectorViewer()
 
 void VectorViewer::showEvent(QShowEvent *event)
 {
+  // Save currently sending Items - TODO
+  //   on close of window restore them
+  trkset->clearDataItems();
+
   QMap<QString, bool> dataitems;
   dataitems.insert("off_accx",true);
   dataitems.insert("off_accy",true);
   dataitems.insert("off_accz",true);
-  trkset->clearDataItems();
+
+  dataitems.insert("off_magx",true);
+  dataitems.insert("off_magy",true);
+  dataitems.insert("off_magz",true);
+
   trkset->setDataItemSend(dataitems);
-     event->accept();
+  event->accept();
 }
