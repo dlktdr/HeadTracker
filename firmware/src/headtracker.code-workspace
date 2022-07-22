@@ -18,5 +18,8 @@
       "titleBar.activeBackground": "#020081",
       "titleBar.activeForeground": "#ffffff"
     },
+    "files.associations": {
+      "cmath": "cpp"
+    },
   }
 }

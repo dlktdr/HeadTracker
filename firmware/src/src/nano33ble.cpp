@@ -70,11 +70,13 @@ K_THREAD_DEFINE(io_Thread_id, 512, io_Thread, NULL, NULL, NULL, IO_THREAD_PRIO, 
 K_THREAD_DEFINE(serial_Thread_id, 16384, serial_Thread, NULL, NULL, NULL, SERIAL_THREAD_PRIO,
                 K_FP_REGS, 1000);
 K_THREAD_DEFINE(bt_Thread_id, 4096, bt_Thread, NULL, NULL, NULL, BT_THREAD_PRIO, 0, 0);
+K_THREAD_DEFINE(SBUS_Thread_id, 1024, sbus_Thread, NULL, NULL, NULL, SBUS_THREAD_PRIO, 0, 1000);
+
 K_THREAD_DEFINE(sensor_Thread_id, 4096, sensor_Thread, NULL, NULL, NULL, SENSOR_THREAD_PRIO,
                 K_FP_REGS, 1000);
 K_THREAD_DEFINE(calculate_Thread_id, 4096, calculate_Thread, NULL, NULL, NULL,
                 CALCULATE_THREAD_PRIO, K_FP_REGS, 1000);
-K_THREAD_DEFINE(SBUS_Thread_id, 1024, sbus_Thread, NULL, NULL, NULL, SBUS_THREAD_PRIO, 0, 1000);
+K_THREAD_DEFINE(oneSecThread_id, 1024, onesecThread, NULL, NULL, NULL, CALCULATE_THREAD_PRIO, K_FP_REGS, 1000);
 
 #elif defined(RTOS_FREERTOS)
 #error "TODO... Add tasks for FreeRTOS"

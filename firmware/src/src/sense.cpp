@@ -129,10 +129,235 @@ int sense_Init()
 // Calculations and Main Channel Thread
 //----------------------------------------------------------------------
 
-void calculate_Thread()
+/*============================================================================*/
+/*============================================================================*/
+/*                             Math routines                                  */
+/*============================================================================*/
+/*============================================================================*/
+/*----------------------------------------------------------------------------*/
+static void MatrixMultiply(float *M1, float *M2)
+/*----------------------------------------------------------------------------*/
+/* M1 = M1*M2                                                                 */
+/*----------------------------------------------------------------------------*/
+{
+  /* Declarations */
+  float M_buff[9];
+  int i;
+
+  for (i = 0; i < 9; i++) M_buff[i] = M1[i];
+
+  M1[0] = M_buff[0] * M2[0] + M_buff[1] * M2[3] + M_buff[2] * M2[6];
+  M1[3] = M_buff[3] * M2[0] + M_buff[4] * M2[3] + M_buff[5] * M2[6];
+  M1[6] = M_buff[6] * M2[0] + M_buff[7] * M2[3] + M_buff[8] * M2[6];
+
+  M1[1] = M_buff[0] * M2[1] + M_buff[1] * M2[4] + M_buff[2] * M2[7];
+  M1[4] = M_buff[3] * M2[1] + M_buff[4] * M2[4] + M_buff[5] * M2[7];
+  M1[7] = M_buff[6] * M2[1] + M_buff[7] * M2[4] + M_buff[8] * M2[7];
+
+  M1[2] = M_buff[0] * M2[2] + M_buff[1] * M2[5] + M_buff[2] * M2[8];
+  M1[5] = M_buff[3] * M2[2] + M_buff[4] * M2[5] + M_buff[5] * M2[8];
+  M1[8] = M_buff[6] * M2[2] + M_buff[7] * M2[5] + M_buff[8] * M2[8];
+}
+
+/*----------------------------------------------------------------------------*/
+static void TransposeMatrix(float *M1, float *M2)
+/*----------------------------------------------------------------------------*/
+/* M2 = Transpose M1                                                          */
+/*----------------------------------------------------------------------------*/
+{
+  M2[0] = M1[0];
+  M2[1] = M1[3];
+  M2[2] = M1[6];
+  M2[3] = M1[1];
+  M2[4] = M1[4];
+  M2[5] = M1[7];
+  M2[6] = M1[2];
+  M2[7] = M1[5];
+  M2[8] = M1[8];
+}
+
+/*----------------------------------------------------------------------------*/
+static void MatrixVector(float *M, float *V1, float *V2)
+/*----------------------------------------------------------------------------*/
+/* V2 = M*V1                                                                  */
+/*----------------------------------------------------------------------------*/
+{
+  V2[0] = M[0] * V1[0] + M[1] * V1[1] + M[2] * V1[2];
+  V2[1] = M[3] * V1[0] + M[4] * V1[1] + M[5] * V1[2];
+  V2[2] = M[6] * V1[0] + M[7] * V1[1] + M[8] * V1[2];
+}
+
+/*----------------------------------------------------------------------------*/
+static void VectorDotProduct(float *V1, float *V2, float *Scalar_Product)
+/*----------------------------------------------------------------------------*/
+/* Scalar_Product = V1.V2                                                     */
+/*----------------------------------------------------------------------------*/
+{
+  /* Declarations */
+  int i;
+
+  *Scalar_Product = 0.;
+  for (i = 0; i < 3; i++) *Scalar_Product += V1[i] * V2[i];
+}
+
+/*----------------------------------------------------------------------------*/
+static void VectorCross(float *V1, float *V2, float *V3)
+/*----------------------------------------------------------------------------*/
+/* V3 = V1xV2                                                                 */
+/*----------------------------------------------------------------------------*/
+{
+  V3[0] = V1[1] * V2[2] - V1[2] * V2[1];
+  V3[1] = V1[2] * V2[0] - V1[0] * V2[2];
+  V3[2] = V1[0] * V2[1] - V1[1] * V2[0];
+}
+
+/*----------------------------------------------------------------------------*/
+static void VectorAdd(float *V1, float *V2, float *V3)
+/*----------------------------------------------------------------------------*/
+/* V3 = V1+V2                                                                 */
+/*----------------------------------------------------------------------------*/
+{
+  /* Declarations */
+  int i;
+
+  for (i = 0; i < 3; i++) V3[i] = V1[i] + V2[i];
+}
+
+#define KP 0.2   // Ccorrection proportional gain
+#define KI 0.01  // Correction integral gain
+
+#define R2D 57.295779  // Radians to degrees
+#define D2R 0.0174533  // Degrees to radians
+
+float u0[3];
+float u1[3];
+float u2[3];
+
+float rmat[9];
+float rup[9];
+float errorRP[3];
+float omegacorrPAcc[3];
+float omegacorrPMag[3];
+float biasGyros[3];
+float dirovergndHB[3];
+float dirovergndHMag[3];
+float errorYawground[3];
+float errorYawplane[3];
+
+float omegatotal[3], theta[3];
+float MagvecEarth[3];
+float V_buff[3];
+float r_buff[9];
+float f_buff;
+
+int i;
+
+void onesecThread()
 {
   while (1) {
-    if (!senseTreadRun || pauseForFlash) {
+    rt_sleep_ms(1000);
+    // Use a mutex so sensor data can't be updated part way
+    k_mutex_lock(&sensor_mutex, K_FOREVER);
+
+    /* Orthogonalization */
+    /* ================= */
+    /* ================= */
+    /* (U,V) */
+    VectorDotProduct(&rmat[0], &rmat[3], &f_buff);
+    f_buff /= 2.;
+
+    /* U = U - 0.5*V(U,V) */
+    for (i = 0; i < 3; i++) V_buff[i] = rmat[i];
+    for (i = 0; i < 3; i++) rmat[i] -= rmat[3 + i] * f_buff;
+
+    /* V = V - 0.5*U(U,V) */
+    for (i = 0; i < 3; i++) rmat[3 + i] -= V_buff[i] * f_buff;
+
+    /* W = UxV */
+    VectorCross(&rmat[0], &rmat[3], &rmat[6]);
+
+    /* U scaling */
+    VectorDotProduct(&rmat[0], &rmat[0], &f_buff);
+    f_buff = 1. / sqrt(f_buff);
+    for (i = 0; i < 3; i++) rmat[i] = rmat[i] * f_buff;
+
+    /* V scaling */
+    VectorDotProduct(&rmat[3], &rmat[3], &f_buff);
+    f_buff = 1. / sqrt(f_buff);
+    for (i = 0; i < 3; i++) rmat[3 + i] = rmat[3 + i] * f_buff;
+
+    /* W scaling */
+    VectorDotProduct(&rmat[6], &rmat[6], &f_buff);
+    f_buff = 1. / sqrt(f_buff);
+    for (i = 0; i < 3; i++) rmat[6 + i] = rmat[6 + i] * f_buff;
+
+    // Free Mutex Lock, Allow sensor updates
+    k_mutex_unlock(&sensor_mutex);
+  }
+}
+
+void calculate_Thread()
+{
+  // -------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
+  // Initalize
+
+  /* Initial Euler angles */
+  /* ==================== */
+  pan = 0. * D2R;
+  tilt = 0. * D2R;
+  roll = 0. * D2R;
+  tiltoffset = 0;
+  rolloffset = 0;
+  panoffset = 0;
+
+  /* Initialize DCM */
+  /* ============== */
+  /* xe in body frame */
+  rmat[0] = cos(pan) * cos(tilt);
+  rmat[1] = -sin(pan) * cos(roll) + cos(pan) * sin(tilt) * sin(roll);
+  rmat[2] = sin(pan) * sin(roll) + cos(pan) * sin(tilt) * cos(roll);
+  /* ye in body frame */
+  rmat[3] = sin(pan) * cos(tilt);
+  rmat[4] = cos(pan) * cos(roll) + sin(pan) * sin(tilt) * sin(roll);
+  rmat[5] = -cos(pan) * sin(roll) + sin(pan) * sin(tilt) * cos(roll);
+  /* ze in body frame */
+  rmat[6] = -sin(tilt);
+  rmat[7] = cos(tilt) * sin(roll);
+  rmat[8] = cos(tilt) * cos(roll);
+
+  /* Update matrix rup = identity */
+  /* ============================ */
+  for (i = 0; i < 9; i++) rup[i] = 0.;
+  rup[0] = 1.;
+  rup[4] = 1.;
+  rup[8] = 1.;
+
+  /* tilt-roll correction */
+  /* ===================== */
+  for (i = 0; i < 3; i++) omegacorrPAcc[i] = 0.;
+
+  /* pan correction */
+  /* ============== */
+  for (i = 0; i < 3; i++) omegacorrPMag[i] = 0.;
+
+  /* Gyros bias */
+  /* ========== */
+  for (i = 0; i < 3; i++) biasGyros[i] = 0.;
+
+  // -------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
+
+  float lastUpdate=0;
+
+  while (1) {
+    if (!senseTreadRun || !gyro_calibrated) {
       rt_sleep_ms(10);
       continue;
     }
@@ -146,61 +371,134 @@ void calculate_Thread()
     // Use a mutex so sensor data can't be updated part way
     k_mutex_lock(&sensor_mutex, K_FOREVER);
 
-    float deltat = 0.00608;
+    // GYRO
+    u0[0] = gyrx * DEG_TO_RAD;
+    u0[1] = gyry * DEG_TO_RAD;
+    ;
+    u0[2] = gyrz * DEG_TO_RAD;
 
-    // Only do this update after the first mag and accel data have been read.
-    if (madgreads == 0) {
-      if (madgsensbits == MADGINIT_READY) {
-        madgsensbits = 0;
-        madgreads++;
-        aacc[0] = accx;
-        aacc[1] = accy;
-        aacc[2] = accz;
-        amag[0] = magx;
-        amag[1] = magy;
-        amag[2] = magz;
-      }
+    u1[0] = accx * 9.80665;
+    u1[1] = accy * 9.80665;
+    u1[2] = accz * 9.80665;
 
-      // Average samples
-    } else if (madgreads < MADGSTART_SAMPLES - 1) {
-      if (madgsensbits == MADGINIT_READY) {
-        madgsensbits = 0;
-        madgreads++;
-        aacc[0] += accx;
-        aacc[1] += accy;
-        aacc[2] += accz;
-        aacc[0] /= 2;
-        aacc[1] /= 2;
-        aacc[2] /= 2;
-        amag[0] += magx;
-        amag[1] += magy;
-        amag[2] += magz;
-        amag[0] /= 2;
-        amag[1] /= 2;
-        amag[2] /= 2;
-      }
+    u2[0] = magx * 10;
+    u2[1] = magy * 10;
+    u2[2] = magz * 10;
 
-      // Got the averaged values, apply the initial orientation.
-    } else if (madgreads == MADGSTART_SAMPLES - 1) {
-      // Pass it averaged values
-      madgwick.begin(aacc[0], aacc[1], aacc[2], amag[0], amag[1], amag[2]);
-      panoffset = pan;
-      madgreads = MADGSTART_SAMPLES;
-    }
+    float Now = micros();
+    float SAMPLE_TIME_0 =
+        ((Now - lastUpdate) /
+         1000000.0f);  // set integration time by time elapsed since last filter update
+    lastUpdate = Now;
 
-    // Do the AHRS calculations
-    if (madgreads == MADGSTART_SAMPLES) {
-      madgwick.update(gyrx * DEG_TO_RAD, gyry * DEG_TO_RAD, gyrz * DEG_TO_RAD, accx, accy, accz,
-                      magx, magy, magz, deltat);
-      roll = madgwick.getPitch();
-      tilt = madgwick.getRoll();
-      pan = madgwick.getYaw();
+    /*============================================================================*/
+    /*============================================================================*/
+    /*                                25ms routine                                */
+    /*============================================================================*/
+    /*============================================================================*/
 
-      if (firstrun) {
-        panoffset = pan;
-        firstrun = false;
-      }
-    }
+    /* R matrix update */
+    /* =============== */
+    /* =============== */
+    /* Read body angular velocity (p q r gyrometers) */
+    for (i = 0; i < 3; i++) omegatotal[i] = u0[i];
+
+    /* Add pitch-roll and yaw corrections */
+    VectorAdd(omegatotal, omegacorrPAcc, omegatotal);
+    VectorAdd(omegatotal, omegacorrPMag, omegatotal);
+    VectorAdd(omegatotal, biasGyros, omegatotal);
+
+    /* Integrate angular velocity over the 25ms time step */
+    for (i = 0; i < 3; i++) theta[i] = omegatotal[i] * SAMPLE_TIME_0;
+
+    /* Assemble equivalent small rotation matrix (update matrix) */
+    rup[1] = -theta[2];
+    rup[2] = theta[1];
+    rup[3] = theta[2];
+    rup[5] = -theta[0];
+    rup[6] = -theta[1];
+    rup[7] = theta[0];
+
+    /* Rotate body frame */
+    MatrixMultiply(rmat, rup);
+
+    /* roll-tilt correction */
+    /* ===================== */
+    /* ===================== */
+    /* Read body acceleration (x y z accelerometers) */
+    for (i = 0; i < 3; i++) V_buff[i] = u1[i];
+
+    /* Normalize body acceleration vector */
+    /* Note: if f_buff close to zero then errorRP will be close to zero */
+    VectorDotProduct(V_buff, V_buff, &f_buff);
+    f_buff = 1. / sqrt(f_buff);
+    if (f_buff > 0.001)
+      for (i = 0; i < 3; i++) V_buff[i] *= sqrt(f_buff);
+
+    /* Compute the roll-pitch error vector: cross product of measured */
+    /* earth Z vector with estimated earth vector expressed in body   */
+    /* frame (3rd row of rmat)                                        */
+    VectorCross(V_buff, &rmat[6], errorRP);
+
+    /* Compute pitch-roll correction proportional term */
+    for (i = 0; i < 3; i++) omegacorrPAcc[i] = errorRP[i] * KP;
+
+    /* Add pitch-roll error to integrator */
+    for (i = 0; i < 3; i++) biasGyros[i] += errorRP[i] * KI * SAMPLE_TIME_0;
+
+    /* pan correction */
+    /* ============== */
+    /* ============== */
+    /* Read the magnetometer vector */
+    for (i = 0; i < 3; i++) V_buff[i] = u2[i];
+
+    /* Express the magnetometer vector in the Earth frame */
+    MatrixVector(rmat, V_buff, MagvecEarth);
+
+    /* Horizontal component of the magnetometer vector in the Earth frame */
+    for (i = 0; i < 2; i++) dirovergndHMag[i] = MagvecEarth[i];
+    dirovergndHMag[2] = 0.;
+
+    /* Normalization */
+    f_buff = dirovergndHMag[0] * dirovergndHMag[0] + dirovergndHMag[1] * dirovergndHMag[1];
+    f_buff = 1. / sqrt(f_buff);
+    for (i = 0; i < 2; i++) dirovergndHMag[i] *= f_buff;
+
+    /* Horizontal component of Earth magnetic vector */
+    /* The Earth magnetic horizontal vector is the reference for yaw=0 */
+    dirovergndHB[0] = 1.;
+    dirovergndHB[1] = 0.;
+    dirovergndHB[2] = 0.;
+
+    /* Compute the yaw error vector expressed in earth frame */
+    VectorCross(dirovergndHMag, dirovergndHB, errorYawground);
+
+    /* Express the yaw error vector in the body frame */
+    TransposeMatrix(rmat, r_buff);
+    MatrixVector(r_buff, errorYawground, errorYawplane);
+
+    /* Compute yaw correction proportional term */
+    for (i = 0; i < 3; i++) omegacorrPMag[i] = errorYawplane[i] * KP;
+
+    /* Update gyros bias */
+    for (i = 0; i < 3; i++) biasGyros[i] += errorYawplane[i] * KI * SAMPLE_TIME_0;
+
+    /* Euler angles from DCM */
+    /* ===================== */
+    /* atan2(rmat31,rmat11) */
+    pan = atan2(rmat[3], rmat[0]) * RAD_TO_DEG;
+
+    /* -asin(rmat31) */
+    tilt = atan2(rmat[7], rmat[8])* RAD_TO_DEG;
+
+    /* atan2(rmat32,rmat33) */
+    roll = -asin(rmat[6])* RAD_TO_DEG;
+
+    // -------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
 
     // Free Mutex Lock, Allow sensor updates
     k_mutex_unlock(&sensor_mutex);
@@ -252,21 +550,21 @@ void calculate_Thread()
     float tiltout =
         (tilt - tiltoffset) * trkset.Tlt_gain() * (trkset.isTiltReversed() ? -1.0 : 1.0);
     float beta = (float)trkset.lpTiltRoll() / 100;  // LP Beta
-    filter_expAverage(&tiltout, beta, &l_tiltout);
+    // filter_expAverage(&tiltout, beta, &l_tiltout);
     uint16_t tiltout_ui = tiltout + trkset.Tlt_cnt();                       // Apply Center Offset
     tiltout_ui = MAX(MIN(tiltout_ui, trkset.Tlt_max()), trkset.Tlt_min());  // Limit Output
 
-    // Roll output
+    // roll output
     float rollout =
         (roll - rolloffset) * trkset.Rll_gain() * (trkset.isRollReversed() ? -1.0 : 1.0);
-    filter_expAverage(&rollout, beta, &l_rollout);
+    // filter_expAverage(&rollout, beta, &l_rollout);
     uint16_t rollout_ui = rollout + trkset.Rll_cnt();                       // Apply Center Offset
     rollout_ui = MAX(MIN(rollout_ui, trkset.Rll_max()), trkset.Rll_min());  // Limit Output
 
     // Pan output, Normalize to +/- 180 Degrees
     float panout = normalize((pan - panoffset), -180, 180) * trkset.Pan_gain() *
                    (trkset.isPanReversed() ? -1.0 : 1.0);
-    filter_expAverage(&panout, (float)trkset.lpPan() / 100, &l_panout);
+    // filter_expAverage(&panout, (float)trkset.lpPan() / 100, &l_panout);
     uint16_t panout_ui = panout + trkset.Pan_cnt();                       // Apply Center Offset
     panout_ui = MAX(MIN(panout_ui, trkset.Pan_max()), trkset.Pan_min());  // Limit Output
 
@@ -485,7 +783,7 @@ void calculate_Thread()
       }
     }
 
-    // 9) Then, set Tilt/Roll/Pan Channel Values (after reset center in case of channel overlap)
+    // 9) Then, set Tilt/roll/Pan Channel Values (after reset center in case of channel overlap)
 
     // If the long press for enable/disable isn't set or if there is no reset button configured
     //   always enable the T/R/P outputs
