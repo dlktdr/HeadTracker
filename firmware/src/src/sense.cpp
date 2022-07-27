@@ -51,7 +51,6 @@ static float rolloffset = 0, panoffset = 0, tiltoffset = 0;
 static float magxoff = 0, magyoff = 0, magzoff = 0;
 static float accxoff = 0, accyoff = 0, acczoff = 0;
 static float gyrxoff = 0, gyryoff = 0, gyrzoff = 0;
-static float l_panout = 0, l_tiltout = 0, l_rollout = 0;
 static bool trpOutputEnabled = false;  // Default to disabled T/R/P output
 volatile bool gyro_calibrated = false;
 
@@ -549,22 +548,18 @@ void calculate_Thread()
     // Tilt output
     float tiltout =
         (tilt - tiltoffset) * trkset.Tlt_gain() * (trkset.isTiltReversed() ? -1.0 : 1.0);
-    float beta = (float)trkset.lpTiltRoll() / 100;  // LP Beta
-    // filter_expAverage(&tiltout, beta, &l_tiltout);
     uint16_t tiltout_ui = tiltout + trkset.Tlt_cnt();                       // Apply Center Offset
     tiltout_ui = MAX(MIN(tiltout_ui, trkset.Tlt_max()), trkset.Tlt_min());  // Limit Output
 
     // roll output
     float rollout =
         (roll - rolloffset) * trkset.Rll_gain() * (trkset.isRollReversed() ? -1.0 : 1.0);
-    // filter_expAverage(&rollout, beta, &l_rollout);
     uint16_t rollout_ui = rollout + trkset.Rll_cnt();                       // Apply Center Offset
     rollout_ui = MAX(MIN(rollout_ui, trkset.Rll_max()), trkset.Rll_min());  // Limit Output
 
     // Pan output, Normalize to +/- 180 Degrees
     float panout = normalize((pan - panoffset), -180, 180) * trkset.Pan_gain() *
                    (trkset.isPanReversed() ? -1.0 : 1.0);
-    // filter_expAverage(&panout, (float)trkset.lpPan() / 100, &l_panout);
     uint16_t panout_ui = panout + trkset.Pan_cnt();                       // Apply Center Offset
     panout_ui = MAX(MIN(panout_ui, trkset.Pan_max()), trkset.Pan_min());  // Limit Output
 

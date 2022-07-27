@@ -27,9 +27,6 @@ TrackerSettings::TrackerSettings(QObject *parent):
 
     _data["servoreverse"] = (uint)0x00;
 
-    _data["lppan"] = DEF_LP_PAN;
-    _data["lptiltroll"] = DEF_LP_TLTRLL;
-
     _data["axisremap"] = (uint)AXES_MAP(AXIS_X,AXIS_Y,AXIS_Z);
     _data["axissign"] = (uint)0;
 
@@ -267,26 +264,6 @@ void TrackerSettings::setTlt_cnt(int value)
     if(value > MAX_CNT)
         value = MAX_CNT;
     _data["tlt_cnt"] = value;
-}
-
-int TrackerSettings::lpTiltRoll() const
-{
-    return _data["lptiltroll"].toInt();
-}
-
-void TrackerSettings::setLPTiltRoll(int value)
-{
-    _data["lptiltroll"] = value;
-}
-
-int TrackerSettings::lpPan() const
-{
-    return _data["lppan"].toInt();
-}
-
-void TrackerSettings::setLPPan(int value)
-{
-    _data["lppan"] = value;
 }
 
 int TrackerSettings::gyroWeightTiltRoll() const

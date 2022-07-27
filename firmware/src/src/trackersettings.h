@@ -124,8 +124,6 @@ class TrackerSettings
   static constexpr int DEF_ROLL_CH = -1;
   static constexpr int DEF_PAN_CH = -1;
   static constexpr int DEF_ALERT_CH = -1;
-  static constexpr int DEF_LP_PAN = 90;
-  static constexpr int DEF_LP_TLTRLL = 90;
   static constexpr int DEF_PWM_A0_CH = -1;
   static constexpr int DEF_PWM_A1_CH = -1;
   static constexpr int DEF_PWM_A2_CH = -1;
@@ -184,12 +182,6 @@ class TrackerSettings
 
   int Tlt_cnt() const;
   void setTlt_cnt(int value);
-
-  int lpPan() const;
-  void setLPPan(int value);
-
-  int lpTiltRoll() const;
-  void setLPTiltRoll(int value);
 
   char servoReverse() const;
   void setServoreverse(char value);
@@ -387,7 +379,6 @@ class TrackerSettings
   int rotx, roty, rotz;
 
   int servoreverse;
-  int lppan, lptiltroll;
   int buttonpin, ppmoutpin, ppminpin;
   bool butlngps;
   bool rstontlt;

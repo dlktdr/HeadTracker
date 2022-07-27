@@ -113,8 +113,6 @@ public:
     static constexpr int DEF_ROLL_CH = 2;
     static constexpr int DEF_PAN_CH = 3;
     static constexpr int DEF_ALERT_CH = -1;
-    static constexpr int DEF_LP_PAN = 75;
-    static constexpr int DEF_LP_TLTRLL = 75;
     static constexpr int DEF_PWM_A0_CH = -1;
     static constexpr int DEF_PWM_A1_CH = -1;
     static constexpr int DEF_PWM_A2_CH = -1;
@@ -171,12 +169,6 @@ public:
 
     int Tlt_cnt() const;
     void setTlt_cnt(int value);
-
-    int lpPan() const;
-    void setLPPan(int value);
-
-    int lpTiltRoll() const;
-    void setLPTiltRoll(int value);
 
     int gyroWeightTiltRoll() const;
     void setGyroWeightTiltRoll(int value);

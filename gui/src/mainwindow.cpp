@@ -128,10 +128,6 @@ MainWindow::MainWindow(QWidget *parent)
     //connect(ui->chkRawData,SIGNAL(clicked(bool)),this,SLOT(setDataMode(bool)));
 
     // Spin Boxes
-    connect(ui->spnLPPan,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->spnLPTiltRoll,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->spnLPPan2,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->spnLPTiltRoll2,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->spnPPMSync,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->spnPPMFrameLen,SIGNAL(valueChanged(double)),this,SLOT(updateFromUI()));
     connect(ui->spnA4Gain,SIGNAL(valueChanged(double)),this,SLOT(updateFromUI()));
@@ -566,10 +562,6 @@ void MainWindow::updateToUI()
     ui->spnPPMFrameLen->setMinimum((double)TrackerSettings::PPM_MIN_FRAME / 1000.0);
     ui->spnPPMFrameLen->setMaximum((double)TrackerSettings::PPM_MAX_FRAME / 1000.0);
 
-    ui->spnLPTiltRoll->setValue(trkset.lpTiltRoll());
-    ui->spnLPPan->setValue(trkset.lpPan());
-    ui->spnLPTiltRoll2->setValue(trkset.lpTiltRoll());
-    ui->spnLPPan2->setValue(trkset.lpPan());
     ui->spnA4Gain->setValue(trkset.analog4Gain());
     ui->spnA4Off->setValue(trkset.analog4Offset());
     ui->spnA5Gain->setValue(trkset.analog5Gain());
@@ -716,15 +708,6 @@ void MainWindow::updateFromUI()
     trkset.setRll_min(ui->servoRoll->minimumValue());
     trkset.setRll_max(ui->servoRoll->maximumValue());
     trkset.setRll_gain(static_cast<float>(ui->rll_gain->value())/10.0f);
-
-    // Filters
-    if(trkset.hardware() == "NANO33BLE") {
-        trkset.setLPTiltRoll(ui->spnLPTiltRoll->value());
-        trkset.setLPPan(ui->spnLPPan->value());
-    } else if (trkset.hardware() == "BNO055") {
-        trkset.setLPTiltRoll(ui->spnLPTiltRoll2->value());
-        trkset.setLPPan(ui->spnLPPan2->value());
-    }
 
     // Analog
     trkset.setAnalog4Gain(ui->spnA4Gain->value());

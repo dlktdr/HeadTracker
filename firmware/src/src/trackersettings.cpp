@@ -55,10 +55,6 @@ TrackerSettings::TrackerSettings()
   // Servo Reversed bits
   servoreverse = 0x00;
 
-  // Low Pass Filter
-  lppan = DEF_LP_PAN;
-  lptiltroll = DEF_LP_TLTRLL;
-
   // Sensor Offsets
   magxoff = 0;
   magyoff = 0;
@@ -270,14 +266,6 @@ void TrackerSettings::setTlt_cnt(int value)
   if (value > MAX_CNT) value = MAX_CNT;
   tlt_cnt = value;
 }
-
-int TrackerSettings::lpTiltRoll() const { return lptiltroll; }
-
-void TrackerSettings::setLPTiltRoll(int value) { lptiltroll = value; }
-
-int TrackerSettings::lpPan() const { return lppan; }
-
-void TrackerSettings::setLPPan(int value) { lppan = value; }
 
 char TrackerSettings::servoReverse() const { return servoreverse; }
 
@@ -695,12 +683,6 @@ void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
   v = json["pan_cnt"];
   if (!v.isNull()) setPan_cnt(v);
 
-  // Misc Gains
-  v = json["lppan"];
-  if (!v.isNull()) setLPPan(v);
-  v = json["lptiltroll"];
-  if (!v.isNull()) setLPTiltRoll(v);
-
   // Bluetooth
   v = json["btmode"];
   if (!v.isNull()) setBlueToothMode(v);
@@ -920,10 +902,6 @@ void TrackerSettings::setJSONSettings(DynamicJsonDocument &json)
 
   // Servo Reverse Channels
   json["servoreverse"] = servoreverse;
-
-  // Gains
-  json["lppan"] = lppan;
-  json["lptiltroll"] = lptiltroll;
 
   // Pins
   json["ppminpin"] = ppminpin;
