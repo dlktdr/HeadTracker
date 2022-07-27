@@ -20,7 +20,6 @@
 #include "soc_flash.h"
 #include "trackersettings.h"
 
-
 #define CLOCK_NODE DT_INST(0, nordic_nrf_clock)
 static const struct device *clock0;
 
@@ -76,7 +75,7 @@ K_THREAD_DEFINE(sensor_Thread_id, 4096, sensor_Thread, NULL, NULL, NULL, SENSOR_
                 K_FP_REGS, 1000);
 K_THREAD_DEFINE(calculate_Thread_id, 4096, calculate_Thread, NULL, NULL, NULL,
                 CALCULATE_THREAD_PRIO, K_FP_REGS, 1000);
-K_THREAD_DEFINE(oneSecThread_id, 1024, onesecThread, NULL, NULL, NULL, CALCULATE_THREAD_PRIO, K_FP_REGS, 1000);
+
 
 #elif defined(RTOS_FREERTOS)
 #error "TODO... Add tasks for FreeRTOS"

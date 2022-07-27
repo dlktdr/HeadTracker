@@ -1,13 +1,10 @@
 #pragma once
 
+#include <zephyr.h>
+
 #define APDS_HYSTERISIS 10
 
-// Oversample Setting
-#if defined(MAHONY) || defined(MADGWICK)
-const int SENSEUPDATE = 1;
-#else
-const int SENSEUPDATE = 6;
-#endif
+extern struct k_mutex sensor_mutex;
 
 int sense_Init();
 void sensor_Thread();
