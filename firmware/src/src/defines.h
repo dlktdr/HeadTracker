@@ -2,34 +2,33 @@
 
 // Defines specified at compile time. If not, use 0.0.0
 #ifndef FW_MAJ
-  #define FW_MAJ 0
+#define FW_MAJ 0
 #endif
 #ifndef FW_MIN
-  #define FW_MIN 0
+#define FW_MIN 0
 #endif
 #ifndef FW_REV
-  #define FW_REV 0
+#define FW_REV 0
 #endif
 #ifndef FW_GIT_REV
-  #define FW_GIT_REV "-------"
+#define FW_GIT_REV "-------"
 #endif
 
-#define VERSION FW_MAJ.CONCAT(FW_MIN,FW_REV)
+#define VERSION FW_MAJ.CONCAT(FW_MIN, FW_REV)
 #define FW_VERSION STRINGIFY(VERSION)
 #define FW_BOARD "NANO33BLE"
 
-#define BUTTON_HOLD_TIME 1 // How long should the button be held for a normal press (ms)
+#define BUTTON_HOLD_TIME 1           // How long should the button be held for a normal press (ms)
 #define BUTTON_LONG_PRESS_TIME 1000  // How long to hold button Enable/Disables Tilt/Roll/Pan (ms)
 
 // Thread Periods
-#define IO_PERIOD 25            // (ms) IO Period (button reading)
-#define BT_PERIOD 12500         // (us) Bluetooth update rate
-#define SERIAL_PERIOD 30        // (ms) Serial processing
-#define DATA_PERIOD 2           // Multiplier of Serial Period (Live Data Transmission Speed)
-#define SENSOR_PERIOD 16666     // (us) 60hz Read Sensors
-#define CALCULATE_PERIOD 6000   // (us) 166hz IMU calculations
-#define PWM_FREQUENCY 50        // (ms) PWM Period
-#define UIRESPONSIVE_TIME 10000 // (ms) 10Seconds without an ack data will stop;
+#define IO_PERIOD 25             // (ms) IO Period (button reading)
+#define BT_PERIOD 12500          // (us) Bluetooth update rate
+#define SERIAL_PERIOD 30         // (ms) Serial processing
+#define DATA_PERIOD 2            // Multiplier of Serial Period (Live Data Transmission Speed)
+#define SENSOR_PERIOD 16666      // (us) 60hz Read Sensors
+#define CALCULATE_PERIOD 6000    // (us) 166hz IMU calculations
+#define PWM_FREQUENCY 50         // (ms) PWM Period
 
 // Analog Filters 1 Euro Filter
 #define AN_CH_CNT 4
@@ -39,7 +38,7 @@
 #define AN_FILT_DERCO 1
 
 // SBUS
-#define SBUSIN_PIN 10 // RX Pin
+#define SBUSIN_PIN 10  // RX Pin
 #define SBUSIN_PORT 1
 #define SBUSOUT_PIN 3
 #define SBUSOUT_PORT 1
@@ -51,7 +50,7 @@
 #define BT_MIN_CONN_INTER_PERIF 10  // When run as para slave
 #define BT_MAX_CONN_INTER_PERIF 10
 
-#define BT_CONN_LOST_TIME 100 // 100 * 10ms = 1seconds
+#define BT_CONN_LOST_TIME 100  // 100 * 10ms = 1seconds
 
 // Thread Priority Definitions
 #define PRIORITY_LOW 12
@@ -118,9 +117,9 @@ extern volatile bool gyro_calibrated;
 #define RAD_TO_DEG 57.29577951308
 
 // Gyro Calibration Defines
-#define GYRO_STABLE_SAMPLES 50 // samples to average of not moving for a success gyro cal
-#define GYRO_PASS_DIFF 5.0 // Differential less than this deg/sec^2 considered stable
-#define GYRO_LP_BETA 0.9 // Gyro Sample Moving Average Beta (0.0-1
+#define GYRO_STABLE_SAMPLES 50  // samples to average of not moving for a success gyro cal
+#define GYRO_PASS_DIFF 5.0      // Differential less than this deg/sec^2 considered stable
+#define GYRO_LP_BETA 0.9        // Gyro Sample Moving Average Beta (0.0-1
 
 // Magnetometer, Initial Orientation, Samples to average
 #define MADGSTART_SAMPLES 15
@@ -135,7 +134,7 @@ extern volatile bool gyro_calibrated;
 #define rt_sleep_us(x) k_usleep(x)
 
 #elif defined(RTOS_FREERTOS)
-#error ("FREE RTOS NOT IMPLEMENTED")
+#error("FREE RTOS NOT IMPLEMENTED")
 #define micros()
 #define micros64()
 #define millis()
@@ -143,5 +142,5 @@ extern volatile bool gyro_calibrated;
 #define rt_sleep_ms(x)
 #define rt_sleep_us(x)
 #else
-#error ("NO RTOS DECLARED")
+#error("NO RTOS DECLARED")
 #endif

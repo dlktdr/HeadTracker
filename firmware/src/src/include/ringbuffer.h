@@ -26,111 +26,106 @@
 #ifndef RINGBUFFER_H
 #define RINGBUFFER_H
 
-#include <algorithm>
 #include <memory.h>
 
+#include <algorithm>
 
-template<typename T> class ringbuffer {
-public:
-    /**
-      * create a ringbuffer with space for up to size elements.
-      */
-    explicit ringbuffer(size_t size)
-            : size(size)
-            , begin(0)
-            , end(0)
-            , wrap(false)
-    {
-        buffer = new T[size];
+template <typename T>
+class ringbuffer
+{
+ public:
+  /**
+   * create a ringbuffer with space for up to size elements.
+   */
+  explicit ringbuffer(size_t size) : size(size), begin(0), end(0), wrap(false)
+  {
+    buffer = new T[size];
+  }
+
+  /**
+   * copy constructor
+   */
+  ringbuffer(const ringbuffer<T>& rb)
+  {
+    this(rb.size);
+    begin = rb.begin;
+    end = rb.end;
+    memcpy(buffer, rb.buffer, sizeof(T) * size);
+  }
+
+  /**
+   * destructor
+   */
+  ~ringbuffer() { delete[] buffer; }
+
+  size_t write(const T* data, size_t n)
+  {
+    n = std::min(n, getFree());
+
+    if (n == 0) {
+      return n;
     }
 
-    /**
-      * copy constructor
-      */
-    ringbuffer(const ringbuffer<T> & rb)
-    {
-        this(rb.size);
-        begin = rb.begin;
-        end = rb.end;
-        memcpy(buffer, rb.buffer, sizeof(T) * size);
+    const size_t first_chunk = std::min(n, size - end);
+    memcpy(buffer + end, data, first_chunk * sizeof(T));
+    end = (end + first_chunk) % size;
+
+    if (first_chunk < n) {
+      const size_t second_chunk = n - first_chunk;
+      memcpy(buffer + end, data + first_chunk, second_chunk * sizeof(T));
+      end = (end + second_chunk) % size;
     }
 
-    /**
-      * destructor
-      */
-    ~ringbuffer()
-    {
-        delete[] buffer;
+    if (begin == end) {
+      wrap = true;
     }
 
-    size_t write(const T * data, size_t n)
-    {
-        n = std::min(n, getFree());
+    return n;
+  }
 
-        if (n == 0) {
-            return n;
-        }
+  size_t read(T* dest, size_t n)
+  {
+    n = std::min(n, getOccupied());
 
-        const size_t first_chunk = std::min(n, size - end);
-        memcpy(buffer + end, data, first_chunk * sizeof(T));
-        end = (end + first_chunk) % size;
-
-        if (first_chunk < n) {
-            const size_t second_chunk = n - first_chunk;
-            memcpy(buffer + end, data + first_chunk, second_chunk * sizeof(T));
-            end = (end + second_chunk) % size;
-        }
-
-        if (begin == end) {
-            wrap = true;
-        }
-
-        return n;
+    if (n == 0) {
+      return n;
     }
 
-    size_t read(T * dest, size_t n)
-    {
-        n = std::min(n, getOccupied());
-
-        if (n == 0) {
-            return n;
-        }
-
-        if (wrap) {
-            wrap = false;
-        }
-
-        const size_t first_chunk = std::min(n, size - begin);
-        memcpy(dest, buffer + begin, first_chunk * sizeof(T));
-        begin = (begin + first_chunk) % size;
-
-        if (first_chunk < n) {
-            const size_t second_chunk = n - first_chunk;
-            memcpy(dest + first_chunk, buffer + begin, second_chunk * sizeof(T));
-            begin = (begin + second_chunk) % size;
-        }
-        return n;
+    if (wrap) {
+      wrap = false;
     }
 
-    size_t getOccupied() {
-        if (end == begin) {
-            return wrap ? size : 0;
-        } else if (end > begin) {
-            return end - begin;
-        } else {
-            return size + end - begin;
-        }
-    }
+    const size_t first_chunk = std::min(n, size - begin);
+    memcpy(dest, buffer + begin, first_chunk * sizeof(T));
+    begin = (begin + first_chunk) % size;
 
-    size_t getFree() {
-        return size - getOccupied();
+    if (first_chunk < n) {
+      const size_t second_chunk = n - first_chunk;
+      memcpy(dest + first_chunk, buffer + begin, second_chunk * sizeof(T));
+      begin = (begin + second_chunk) % size;
     }
-private:
-    T * buffer;
-    size_t size;
-    size_t begin;
-    size_t end;
-    bool wrap;
+    return n;
+  }
+
+  size_t getOccupied()
+  {
+    if (end == begin) {
+      return wrap ? size : 0;
+    } else if (end > begin) {
+      return end - begin;
+    } else {
+      return size + end - begin;
+    }
+  }
+
+  size_t getFree() { return size - getOccupied(); }
+
+ private:
+  T* buffer;
+  size_t size;
+  size_t begin;
+  size_t end;
+  bool wrap;
 };
 
-#endif // RINGBUFFER_H
+#endif  // RINGBUFFER_H

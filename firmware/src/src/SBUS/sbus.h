@@ -17,6 +17,8 @@
 
 #pragma once
 
+#include <stdint.h>
+
 #include "defines.h"
 
 void SBUS_TX_BuildData(uint16_t ch_[16]);
