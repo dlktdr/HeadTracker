@@ -392,7 +392,7 @@ void TrackerSettings::setResetOnWave(bool value) { rstonwave = value; }
 void TrackerSettings::setPWMCh(int pwmno, int pwmch)
 {
   if (pwmno >= 0 && pwmno <= 3) {
-    if (pwmch > 0 && pwmch <= 16) pwm[pwmno] = pwmch;
+    if (pwmch > 0 && pwmch <= 16 || pwmch == -1) pwm[pwmno] = pwmch;
   }
 }
 
