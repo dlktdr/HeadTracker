@@ -147,7 +147,7 @@ void serial_Thread()
   while (1) {
     rt_sleep_ms(SERIAL_PERIOD);
 
-    if (!serialThreadRun) {
+    if (!serialThreadRun || pauseForFlash) {
       continue;
     }
 

@@ -26,9 +26,10 @@
 #include "defines.h"
 #include "log.h"
 
-
 #define FLASH_OFFSET FLASH_AREA_OFFSET(datapt)
 #define FLASH_PAGE_SIZE 4096  // Can grow up to 0x4000
+
+volatile bool pauseForFlash = false;
 
 const char *get_flashSpace()
 {
@@ -49,10 +50,15 @@ void socClearFlash()
     return;
   }
 
+  pauseForFlash = true;
+  rt_sleep_ms(PAUSE_BEFORE_FLASH);
+
   if (flash_erase(flash_dev, FLASH_OFFSET, FLASH_PAGE_SIZE) != 0) {
     LOGE("Flash erase Failure");
+    pauseForFlash = false;
     return;
   }
+  pauseForFlash = false;
 
   LOGI("Flash erase succeeded");
 }
@@ -68,8 +74,12 @@ int socWriteFlash(const char *datain, int len)
     return -1;
   }
 
+  pauseForFlash = true;
+  rt_sleep_ms(PAUSE_BEFORE_FLASH);
+
   if (flash_erase(flash_dev, FLASH_OFFSET, FLASH_PAGE_SIZE) != 0) {
     LOGE("Flash erase Failure");
+    pauseForFlash = false;
     return -1;
   }
 
@@ -77,8 +87,13 @@ int socWriteFlash(const char *datain, int len)
 
   if (flash_write(flash_dev, FLASH_OFFSET, (const void *)datain, FLASH_PAGE_SIZE) != 0) {
     LOGE("   Flash write failed!");
+    pauseForFlash = false;
     return -1;
   }
+
+  LOGI("Flash write succeeded");
+
+  pauseForFlash = false;
 
   return 0;
 }
