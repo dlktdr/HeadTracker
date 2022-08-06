@@ -175,8 +175,8 @@ void DataModel::checkArray(QString array, bool checked)
 void DataModel::dataupdate()
 {
   // Update local map of data
-  QVariantMap liveDataMap = trkset->liveDataMap();
-  QMapIterator<QString, QVariant> a(liveDataMap);
+  QVariantMap liveData = trkset->liveData();
+  QMapIterator<QString, QVariant> a(liveData);
   while (a.hasNext()) {
     a.next();
     for(int i=0; i < datalist.count(); ++i) {

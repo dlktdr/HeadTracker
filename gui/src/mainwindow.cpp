@@ -1,4 +1,5 @@
 
+#include <QtQuick>
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QJsonObject>
@@ -17,6 +18,7 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    qmlRegisterSingletonInstance("Qt.example.qobjectSingleton", 1, 0, "TrackerSettings", &trkset);
     waitingOnParameters = false;
     msgbox = new QMessageBox(this);
 
@@ -53,8 +55,7 @@ MainWindow::MainWindow(QWidget *parent)
     serialDebug->resize(600,300);
     channelviewer = new ChannelViewer(&trkset, this);
     channelviewer->setWindowFlags(Qt::Window);
-    vectorViewer = new VectorViewer(&trkset, this);
-    vectorViewer->setWindowFlags(Qt::Window);
+    vectorViewer = new VectorViewer(&trkset, QUrl("qrc:/qml/vectorview.qml"));
 
 #ifdef DEBUG_HT
     serialDebug->show();
@@ -1195,8 +1196,6 @@ void MainWindow::showSerialDiagClicked()
 void MainWindow::showVectorViewerClicked()
 {
     vectorViewer->show();
-    vectorViewer->activateWindow();
-    vectorViewer->raise();
 }
 
 void MainWindow::showChannelViewerClicked()

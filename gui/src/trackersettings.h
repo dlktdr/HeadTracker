@@ -72,6 +72,8 @@
 class TrackerSettings : public QObject
 {    
     Q_OBJECT
+    Q_PROPERTY(QVariantMap liveData READ liveData NOTIFY liveDataChanged)
+
 public:
     enum {BTDISABLE,BTPARAHEAD,BTPARARMT};
 
@@ -342,7 +344,8 @@ public:
     void setLiveData(const QString &name, const QVariant &live);
     void clearLiveData() {_live.clear();}
 
-    QVariantMap liveDataMap();
+    QVariantMap liveData();
+
     void setLiveDataMap(const QVariantMap &livelist, bool clear=false);
 
     QString hardware() {return _data["Hard"].toString();}

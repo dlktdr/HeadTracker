@@ -630,7 +630,7 @@ void TrackerSettings::setLiveData(const QString &name, const QVariant &live)
     setLiveDataMap(map);
 }
 
-QVariantMap TrackerSettings::liveDataMap()
+QVariantMap TrackerSettings::liveData()
 {
     return _live;
 }
