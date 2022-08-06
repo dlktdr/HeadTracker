@@ -418,7 +418,7 @@ void calculate_Thread()
     int aux0ch = trkset.auxFunc0Ch();
     int aux1ch = trkset.auxFunc1Ch();
     int aux2ch = trkset.auxFunc2Ch();
-    if (aux0ch > 0 || aux1ch > 0) {
+    if (aux0ch > 0 || aux1ch > 0 || aux2ch > 0) {
       buildAuxData();
       if (aux0ch > 0) channel_data[aux0ch - 1] = auxdata[trkset.auxFunc0()];
       if (aux1ch > 0) channel_data[aux1ch - 1] = auxdata[trkset.auxFunc1()];
