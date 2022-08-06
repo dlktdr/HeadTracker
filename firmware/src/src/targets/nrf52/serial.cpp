@@ -180,13 +180,13 @@ void serial_Thread()
       }*/
     }
 
-    // Port is now open or still open, send data
-    if (new_dtr || dtr) {
+    // Port is open, send data
+    if (new_dtr) {
       int rb_len = ring_buf_get(&ringbuf_tx, buffer, sizeof(buffer));
       if (rb_len) {
         int send_len = uart_fifo_fill(dev, buffer, rb_len);
         if (send_len < rb_len) {
-          LOG_ERR("USB CDC Ring Buffer Full, Dropped data");
+          // LOG_ERR("USB CDC Ring Buffer Full, Dropped data");
         }
       }
     } else {
@@ -202,8 +202,6 @@ void serial_Thread()
     // Data output
     if (datacounter++ >= DATA_PERIOD) {
       datacounter = 0;
-      // Is the UI Still responsive?
-      int64_t curtime = k_uptime_get();
 
       // If sense thread is writing, wait until complete
       k_mutex_lock(&data_mutex, K_FOREVER);
