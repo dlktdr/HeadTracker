@@ -715,14 +715,17 @@ void TrackerSettings::setSoftIronOffsets(float soo[3][3])
 }
 
 // Sets all data items to diabled
-void TrackerSettings::clearDataItems()
+void TrackerSettings::clearDataItems(bool force)
 {
     QMapIterator<QString, bool> i(_realtimedata);
     while (i.hasNext()) {
         i.next();
         _realtimedata[i.key()] = false;
     }
-    setDataItemsMatched();
+    if(force)
+      setDataItemsMatched();
+    else
+      emit requestedDataItemChanged();
 }
 
 // Add/remove a single item to be sent

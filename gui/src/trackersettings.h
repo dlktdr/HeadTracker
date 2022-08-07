@@ -358,7 +358,7 @@ public:
 
     // Realtime data requested from the board
     // Keeps track of them in _data2send list
-    void clearDataItems();
+    void clearDataItems(bool force=false);
     void setDataItemSend(const QString &itm, const bool &enabled);
     void setDataItemSend(QMap<QString,bool> items);
     QMap<QString, bool> getDataItemsDiff();

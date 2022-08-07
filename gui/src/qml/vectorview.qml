@@ -1,43 +1,66 @@
 import QtQuick 2.15
 import QtQuick.Window 2.14
 import QtQuick3D 1.15
+import QtQuick.Controls 2.15
 import Qt.example.qobjectSingleton 1.0
 
 Rectangle {
   id: window
   width: 640
-  height: 640
+  height: 480
   visible: true
-  color: "black"
+  color: "#f0f0f0"
+
+  function getAngle() {
+      if(!compassrawmag.checked) {
+          return -1.0 * TrackerSettings.liveData["panoff"]
+      } else {
+          return Math.atan2(TrackerSettings.liveData["off_magy"],TrackerSettings.liveData["off_magx"]) * 180 / Math.PI
+      }
+  }
 
   Rectangle {
-      id: qt_logo
-      width: 230
-      height: 230
+    id: compass
+    anchors.top: parent.top
+    anchors.right: parent.right
+    width: 200
+    height: 200
+    color: "transparent"
+
+     Image {
+        id: compass_back
+        width: parent.width
+        height: parent.height
+        source: "compass_back.svg"
+     }
+
+     Image {
+         id: compass_needle
+         width: parent.width
+         height: parent.height
+         source: "compass_needle.svg"
+         rotation: getAngle()
+     }
+  }
+
+  Text {
+      id: text
       anchors.top: parent.top
       anchors.left: parent.left
-      anchors.margins: 10
+      anchors.margins: 5
 
-      color: "transparent"
+      color: "black"
+      font.pixelSize: 17
+      font.bold: true
+      text: qsTr("HeadTracker 3D")
+  }
 
-      layer.enabled: true
-
-      Rectangle {
-          anchors.fill: parent
-          color: "black"
-
-          Text {
-              id: text
-              anchors.top: parent.top
-              anchors.left: parent.left
-              //anchors.topMargin: 100
-
-              color: "white"
-              font.pixelSize: 17
-              text: qsTr("HEADTRACKER 3D!")
-              //rotation: TrackerSettings.liveData["tiltoff"]
-          }
-      }
+  CheckBox {
+      id: compassrawmag
+      anchors.top: text.bottom
+      anchors.left: parent.left
+      text: qsTr("Compass=Atan2(x,y)")
+      checked: false
   }
 
   View3D {
@@ -52,47 +75,28 @@ Rectangle {
           eulerRotation.x: 0
       }
 
-      DirectionalLight {
-          eulerRotation.x: 0
-      }
+        DirectionalLight {
+            ambientColor: Qt.rgba(0.5,0.5,0.5,1.0)
+            brightness: 3000
+            position: Qt.vector3d(0,800,800)
+            eulerRotation.x: -45
+            eulerRotation.y: 0
+            eulerRotation.z: 0
+        }
 
-      Nano33BLE {
+      FPVGoggles {
         id: nano
         visible: true
-        position: Qt.vector3d(-125, 0, 0)
-        scale: Qt.vector3d(0.3,0.3,0.3)
-        eulerRotation.x: (-1.0 *TrackerSettings.liveData["tiltoff"]) - 90
-        eulerRotation.z: TrackerSettings.liveData["rolloff"]
+        position: Qt.vector3d(-0, -80, 0)
+        scale: Qt.vector3d(0.2,0.2,0.2)
+        eulerRotation.x: TrackerSettings.liveData["tiltoff"]
         eulerRotation.y: TrackerSettings.liveData["panoff"]
+        eulerRotation.z: -1.0 * TrackerSettings.liveData["rolloff"]
+
+
       }
-
-      /*Model {
-          id: cube
-          visible: true
-          position: Qt.vector3d(0, 0, 0)
-          source: "#Cube"
-          materials: [ DefaultMaterial {
-                  diffuseMap: Texture {
-                      id: texture
-                      sourceItem: qt_logo
-                  }
-              }
-          ]
-          eulerRotation.x: -TrackerSettings.liveData["tiltoff"]
-          eulerRotation.z: TrackerSettings.liveData["rolloff"]
-          eulerRotation.y: TrackerSettings.liveData["panoff"]
-
-
-          /*SequentialAnimation on eulerRotation {
-              loops: Animation.Infinite
-              PropertyAnimation {
-                  duration: 5000
-                  from: Qt.vector3d(0, 0, 0)
-                  to: Qt.vector3d(360, 0, 360)
-              }
-          }*/
-      //}
   }
+}
 
   /*MouseArea {
       id: mouseArea
@@ -134,4 +138,3 @@ Rectangle {
           }
       }
   }*/
-}

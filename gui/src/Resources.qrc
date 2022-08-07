@@ -17,7 +17,9 @@
     </qresource>
     <qresource prefix="/">
         <file>qml/vectorview.qml</file>
-        <file>qml/Nano33BLE.qml</file>
-        <file>qml/meshes/board.mesh</file>
+        <file>qml/compass_back.svg</file>
+        <file>qml/compass_needle.svg</file>
+        <file>qml/meshes/pasted__pCylinder3.mesh</file>
+        <file>qml/FPVGoggles.qml</file>
     </qresource>
 </RCC>

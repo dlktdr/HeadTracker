@@ -341,6 +341,7 @@ void MainWindow::serialDisconnect()
     ui->servoTilt->setShowActualPosition(false);
     ui->servoRoll->setShowActualPosition(false);
     ui->actionEraseFlash->setEnabled(false);
+    ui->action_Vector_View->setEnabled(false);
 
     sending = false;
     currentboard = nullptr;
@@ -358,7 +359,8 @@ void MainWindow::serialDisconnect()
     } else {
         channelViewerOpen = false;
     }
-    trkset.clearDataItems();
+    vectorViewer->hide();
+    trkset.clearDataItems(true);
 
     // Notify all boards we have disconnected
 }
@@ -1393,6 +1395,7 @@ void MainWindow::boardDiscovered(BoardType *brd)
         ui->cmdReboot->setEnabled(true);
         ui->stackedWidget->setCurrentIndex(3);
         ui->cmdChannelViewer->setEnabled(true);
+        ui->action_Vector_View->setEnabled(true);
 
         // Check Firmware Version is Compatible
 

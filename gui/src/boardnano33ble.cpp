@@ -173,7 +173,7 @@ void BoardNano33BLE::reqDataItemChanged()
 void BoardNano33BLE::calibrationCancel()
 {
     // Remove all items
-    trkset->clearDataItems();
+    trkset->clearDataItems(true);
     stopData();
 
     // Only request the ones that were active on calibration start
@@ -186,7 +186,7 @@ void BoardNano33BLE::calibrationCancel()
 void BoardNano33BLE::calibrationComplete()
 {
     // Remove all items
-    trkset->clearDataItems();
+    trkset->clearDataItems(true);
     stopData();
 
     // Only request the ones that were active on calibration start
@@ -218,7 +218,7 @@ void BoardNano33BLE::startCalibration()
     cursendingdataitems = trkset->getDataItems();
 
     // Stop sending all data items
-    trkset->clearDataItems();
+    trkset->clearDataItems(true);
     stopData();
 
     // Request just calibration items

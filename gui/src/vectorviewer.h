@@ -16,8 +16,11 @@ public:
                         QWindow *parent = nullptr);
 
 private:
+  QMap<QString, bool> lastDataItems;
   TrackerSettings *trkset;
-  void showEvent(QShowEvent *event);
+  void showEvent(QShowEvent *event) override;
+  void hideEvent(QHideEvent *event) override;
+  void restoreDataItems();
 
 };
 

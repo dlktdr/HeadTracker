@@ -9,8 +9,10 @@ VectorViewer::VectorViewer(TrackerSettings *trk, const QUrl &source, QWindow *pa
 
 void VectorViewer::showEvent(QShowEvent *event)
 {
-  // Save currently sending Items - TODO
-  //   on close of window restore them
+  // Store previous items
+  lastDataItems = trkset->getDataItems();
+
+  // Clear them all
   trkset->clearDataItems();
 
   QMap<QString, bool> dataitems;
@@ -22,6 +24,22 @@ void VectorViewer::showEvent(QShowEvent *event)
   dataitems.insert("off_magy",true);
   dataitems.insert("off_magz",true);
 
+  dataitems.insert("tiltoff",true);
+  dataitems.insert("rolloff",true);
+  dataitems.insert("panoff",true);
+
   trkset->setDataItemSend(dataitems);
   event->accept();
+}
+
+void VectorViewer::hideEvent(QHideEvent *evt)
+{
+  restoreDataItems();
+  evt->accept();
+}
+
+void VectorViewer::restoreDataItems()
+{
+  trkset->clearDataItems();
+  trkset->setDataItemSend(lastDataItems);
 }
