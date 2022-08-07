@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>615</width>
+    <width>623</width>
     <height>756</height>
    </rect>
   </property>
@@ -3157,6 +3157,12 @@
        </item>
        <item row="3" column="5">
         <widget class="QComboBox" name="cmbrllchn">
+         <property name="minimumSize">
+          <size>
+           <width>50</width>
+           <height>0</height>
+          </size>
+         </property>
          <item>
           <property name="text">
            <string>Off</string>
@@ -3267,7 +3273,7 @@
          </property>
          <property name="maximumSize">
           <size>
-           <width>60</width>
+           <width>40</width>
            <height>16777215</height>
           </size>
          </property>
@@ -3278,7 +3284,7 @@
           <bool>false</bool>
          </property>
          <property name="styleSheet">
-          <string notr="true">margin-left:25%;</string>
+          <string notr="true">margin-left:15%;</string>
          </property>
          <property name="text">
           <string/>
@@ -3343,6 +3349,12 @@
        </item>
        <item row="2" column="5">
         <widget class="QComboBox" name="cmbtiltchn">
+         <property name="minimumSize">
+          <size>
+           <width>50</width>
+           <height>0</height>
+          </size>
+         </property>
          <item>
           <property name="text">
            <string>Off</string>
@@ -3448,6 +3460,12 @@
        </item>
        <item row="4" column="5">
         <widget class="QComboBox" name="cmbpanchn">
+         <property name="minimumSize">
+          <size>
+           <width>50</width>
+           <height>0</height>
+          </size>
+         </property>
          <item>
           <property name="text">
            <string>Off</string>
@@ -3545,7 +3563,7 @@
          </property>
          <property name="maximumSize">
           <size>
-           <width>60</width>
+           <width>40</width>
            <height>16777215</height>
           </size>
          </property>
@@ -3556,7 +3574,7 @@
           <bool>false</bool>
          </property>
          <property name="styleSheet">
-          <string notr="true">margin-left:25%;</string>
+          <string notr="true">margin-left:15%;</string>
          </property>
          <property name="text">
           <string/>
@@ -3589,13 +3607,12 @@
          </property>
          <property name="maximumSize">
           <size>
-           <width>60</width>
+           <width>40</width>
            <height>16777215</height>
           </size>
          </property>
          <property name="styleSheet">
-          <string>margin-left:50%; 
-margin-right:50%;</string>
+          <string notr="true"/>
          </property>
          <property name="text">
           <string>Reverse</string>
@@ -3615,7 +3632,7 @@ margin-right:50%;</string>
          </property>
          <property name="maximumSize">
           <size>
-           <width>60</width>
+           <width>40</width>
            <height>16777215</height>
           </size>
          </property>
@@ -3626,7 +3643,7 @@ margin-right:50%;</string>
           <bool>false</bool>
          </property>
          <property name="styleSheet">
-          <string notr="true">margin-left:25%;</string>
+          <string notr="true">margin-left:15%;</string>
          </property>
          <property name="text">
           <string/>
@@ -3980,7 +3997,7 @@ margin-right:50%;</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>615</width>
+     <width>623</width>
      <height>22</height>
     </rect>
    </property>
