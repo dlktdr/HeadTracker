@@ -2,6 +2,7 @@
 
 #include <zephyr.h>
 
+#include "soc_flash.h"
 #include "trackersettings.h"
 
 
@@ -68,7 +69,7 @@ void io_Thread()
 
   while (1) {
     rt_sleep_ms(IO_PERIOD);
-    if (!ioThreadRun) continue;
+    if (!ioThreadRun || pauseForFlash) continue;
 
     // LEDS
     if (_ledmode & LED_GYROCAL) {

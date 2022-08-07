@@ -67,9 +67,6 @@ K_MUTEX_DEFINE(data_mutex);
 // Flag that serial has been initalized
 volatile bool serialThreadRun = false;
 
-// Flag that gets set after GUI requests firmware version
-volatile bool uiconnected = false;
-
 const struct device *dev;
 
 static void interrupt_handler(const struct device *dev, void *user_data)
@@ -150,7 +147,7 @@ void serial_Thread()
   while (1) {
     rt_sleep_ms(SERIAL_PERIOD);
 
-    if (!serialThreadRun) {
+    if (!serialThreadRun || pauseForFlash) {
       continue;
     }
 
@@ -167,14 +164,12 @@ void serial_Thread()
       ring_buf_reset(&ringbuf_tx);
       uart_tx_abort(dev);
       trkset.stopAllData();
-      uiconnected = false;
     }
 
     // gaining new connection
     if (!dtr && new_dtr) {
       ring_buf_reset(&ringbuf_tx);
       uart_tx_abort(dev);
-      uiconnected = false;
 
       // Force bootloader if baud set to 1200bps TODO (Test Me)
       /*uint32_t baud=0;
@@ -185,13 +180,13 @@ void serial_Thread()
       }*/
     }
 
-    // Port is now open or still open, send data
-    if ((new_dtr || dtr) && uiconnected) {
+    // Port is open, send data
+    if (new_dtr) {
       int rb_len = ring_buf_get(&ringbuf_tx, buffer, sizeof(buffer));
       if (rb_len) {
         int send_len = uart_fifo_fill(dev, buffer, rb_len);
         if (send_len < rb_len) {
-          LOG_ERR("USB CDC Ring Buffer Full, Dropped data");
+          // LOG_ERR("USB CDC Ring Buffer Full, Dropped data");
         }
       }
     } else {
@@ -207,21 +202,16 @@ void serial_Thread()
     // Data output
     if (datacounter++ >= DATA_PERIOD) {
       datacounter = 0;
-      // Is the UI Still responsive?
-      int64_t curtime = k_uptime_get();
 
-      // TODO we can probably remove or utilize this test alongside dtr transitions
-      if (uiconnected) {
-        // If sense thread is writing, wait until complete
-        k_mutex_lock(&data_mutex, K_FOREVER);
-        json.clear();
-        trkset.setJSONData(json);
-        if (json.size()) {
-          json["Cmd"] = "Data";
-          serialWriteJSON(json);
-        }
-        k_mutex_unlock(&data_mutex);
+      // If sense thread is writing, wait until complete
+      k_mutex_lock(&data_mutex, K_FOREVER);
+      json.clear();
+      trkset.setJSONData(json);
+      if (json.size()) {
+        json["Cmd"] = "Data";
+        serialWriteJSON(json);
       }
+      k_mutex_unlock(&data_mutex);
     }
   }
 }
@@ -380,7 +370,6 @@ void parseData(DynamicJsonDocument &json)
     fwjson["Hard"] = FW_BOARD;
     fwjson["Git"] = STRINGIFY(FW_GIT_REV);
     serialWriteJSON(fwjson);
-    uiconnected = true;  // Only allow writing back data after this is seen from the GUI
 
     // Unknown Command
   } else {

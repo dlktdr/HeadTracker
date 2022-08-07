@@ -42,6 +42,7 @@ void start(void)
   joystick_init();
 
   // Setup Serial
+  logger_init();
   serial_init();
 
   // Actual Calculations - sense.cpp

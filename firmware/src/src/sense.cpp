@@ -34,8 +34,8 @@
 #include "log.h"
 #include "nano33ble.h"
 #include "pmw.h"
+#include "soc_flash.h"
 #include "trackersettings.h"
-
 
 static float auxdata[10];
 static float raccx = 0, raccy = 0, raccz = 0;
@@ -130,7 +130,7 @@ int sense_Init()
 void calculate_Thread()
 {
   while (1) {
-    if (!senseTreadRun) {
+    if (!senseTreadRun || pauseForFlash) {
       rt_sleep_ms(10);
       continue;
     }
@@ -613,7 +613,7 @@ void sensor_Thread()
   while (1) {
     rt_sleep_us(SENSOR_PERIOD);
 
-    if (!senseTreadRun) {
+    if (!senseTreadRun || pauseForFlash) {
       continue;
     }
 

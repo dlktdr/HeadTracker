@@ -18,6 +18,12 @@
 #define FW_VERSION STRINGIFY(VERSION)
 #define FW_BOARD "NANO33BLE"
 
+#if defined(DEBUG)
+#define DEFAULT_LOG_LEVEL DEBUG
+#else
+#define DEFAULT_LOG_LEVEL INFO
+#endif
+
 #define BUTTON_HOLD_TIME 1           // How long should the button be held for a normal press (ms)
 #define BUTTON_LONG_PRESS_TIME 1000  // How long to hold button Enable/Disables Tilt/Roll/Pan (ms)
 
@@ -29,6 +35,7 @@
 #define SENSOR_PERIOD 16666      // (us) 60hz Read Sensors
 #define CALCULATE_PERIOD 6000    // (us) 166hz IMU calculations
 #define PWM_FREQUENCY 50         // (ms) PWM Period
+#define PAUSE_BEFORE_FLASH 60    // (ms) Time to pause all threads before Flash writing
 
 // Analog Filters 1 Euro Filter
 #define AN_CH_CNT 4

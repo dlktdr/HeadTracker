@@ -26,6 +26,7 @@
 #include "auxserial.h"
 #include "io.h"
 #include "log.h"
+#include "soc_flash.h"
 #include "trackersettings.h"
 
 #define SBUS_FRAME_LEN 25
@@ -55,7 +56,7 @@ uint8_t localTXBuffer[SBUS_FRAME_LEN];  // Local Buffer
 void sbus_Thread()
 {
   while (1) {
-    if (!sbusTreadRun) {
+    if (!sbusTreadRun || pauseForFlash) {
       rt_sleep_ms(50);
       continue;
     }

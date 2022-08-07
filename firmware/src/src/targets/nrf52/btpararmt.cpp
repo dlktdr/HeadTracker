@@ -275,17 +275,17 @@ static bool eir_found(struct bt_data *data, void *user_data)
 
   switch (data->type) {
     case BT_DATA_FLAGS:
-      LOGD("Flags Found");
+      LOGT("Flags Found");
       break;
     case BT_DATA_NAME_SHORTENED:
     case BT_DATA_NAME_COMPLETE:  // *** DOESN'T WORK, MISSING DATA IN ADVERTISE???
-      LOGD("Device Name %.*s");
+      LOGT("Device Name %.*s");
       // serialWriteln((char*)data->data,data->data_len);
       break;
     case BT_DATA_UUID16_SOME:
     case BT_DATA_UUID16_ALL:
       if (data->data_len % sizeof(uint16_t) != 0U) {
-        LOGW("AD malformed");
+        LOGD("AD malformed");
         return true;
       }
 
@@ -340,7 +340,7 @@ static bool eir_found(struct bt_data *data, void *user_data)
         int err = bt_conn_le_create(addr, &btconparm, rmtconparms, &pararmtconn);
         if (err) {
           char buf[10];
-          LOGE("HT: Create conn failed (Error %s)", bytesToHex((uint8_t *)&err, 1, buf));
+          LOGE("Create conn failed (Error %s)", bytesToHex((uint8_t *)&err, 1, buf));
 
           // Re-start Scanning
           start_scan();

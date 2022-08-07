@@ -25,7 +25,7 @@
 #include "io.h"
 #include "log.h"
 #include "nano33ble.h"
-
+#include "soc_flash.h"
 
 // Globals
 volatile bool bleconnected = false;
@@ -61,7 +61,7 @@ void bt_Thread()
   while (1) {
     usduration = micros64();
 
-    if (!btThreadRun) {
+    if (!btThreadRun || pauseForFlash) {
       rt_sleep_ms(10);
       continue;
     }
