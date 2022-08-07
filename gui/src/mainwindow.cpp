@@ -931,6 +931,9 @@ void MainWindow::manualSend()
 void MainWindow::offOrientChanged(float t,float r,float p)
 {
     ui->graphView->addDataPoints(t,r,p);
+    ui->lblTiltValue->setText(QString::number(t,'f',1) + "°");
+    ui->lblRollValue->setText(QString::number(r,'f',1) + "°");
+    ui->lblPanValue->setText(QString::number(p,'f',1) + "°");
 }
 
 void MainWindow::ppmOutChanged(int t,int r,int p)
@@ -939,7 +942,6 @@ void MainWindow::ppmOutChanged(int t,int r,int p)
     ui->servoRoll->setActualPosition(r);
     ui->servoPan->setActualPosition(p);
 
-    // Add a timer here so if no updates these disable
     ui->servoPan->setShowActualPosition(true);
     ui->servoTilt->setShowActualPosition(true);
     ui->servoRoll->setShowActualPosition(true);
