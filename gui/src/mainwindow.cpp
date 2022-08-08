@@ -1377,7 +1377,6 @@ void MainWindow::boardDiscovered(BoardType *brd)
         ui->cmbRemap->setVisible(false);
         ui->cmbSigns->setVisible(false);
         ui->cmdSaveNVM->setVisible(true);
-        ui->grbSettings->setTitle("Nano 33 BLE");
         ui->cmdStopGraph->setEnabled(true);
         ui->cmdStartGraph->setEnabled(true);
         ui->cmdSend->setEnabled(true);
@@ -1421,7 +1420,6 @@ void MainWindow::boardDiscovered(BoardType *brd)
         ui->cmbSigns->setVisible(true);
         ui->chkRawData->setVisible(true);
         ui->cmdSaveNVM->setVisible(false);
-        ui->grbSettings->setTitle("BNO055");
         ui->cmdStopGraph->setEnabled(true);
         ui->cmdStartGraph->setEnabled(true);
         ui->cmdSend->setEnabled(true);
