@@ -9,9 +9,7 @@
 
 #include "defines.h"
 #include "sense.h"
-
-float kp = 0.2;
-float ki = 0.01;
+#include "trackersettings.h"
 
 #define R2D RAD_TO_DEG  // Radians to degrees
 #define D2R DEG_TO_RAD  // Degrees to radians
@@ -248,6 +246,8 @@ void DCMOneSecThread()
 
 void DcmCalculate(float u0[3], float u1[3], float u2[3], float deltat)
 {
+  float kp = trkset.Kp();
+  float ki = trkset.Ki();
   // Don't do calulations if no accel or mag data, will result in Nan
   if (fabs(u1[0] + u1[1] + u1[2]) < 0.0001) return;
   if (fabs(u2[0] + u2[1] + u2[2]) < 0.0001) return;
@@ -369,15 +369,6 @@ void DcmAhrsResetCenter()
 float DcmGetTilt() { return tilt; }
 float DcmGetRoll() { return roll; }
 float DcmGetPan() { return pan; }
-void DcmSetKp(float p)
-{
-  if (p > 0 && p < 1) kp = p;
-}
-
-void DcmSetKi(float i)
-{
-  if (i > 0 && i < 1) ki = i;
-}
 
 K_THREAD_DEFINE(DCMOneSecThread_id, 1024, DCMOneSecThread, NULL, NULL, NULL, CALCULATE_THREAD_PRIO,
                 K_FP_REGS, 1000);

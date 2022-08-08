@@ -144,6 +144,8 @@ class TrackerSettings
   static constexpr int DEF_AUX_FUNC = 0;
   static constexpr int MAX_DATA_VARS = 40;
   static constexpr int DEF_SERIAL_MODE = 0;
+  static constexpr float DEF_KP = 0.2f;
+  static constexpr float DEF_KI = 0.01f;
 
   TrackerSettings();
 
@@ -331,6 +333,12 @@ class TrackerSettings
   int auxFunc1() { return aux1func; }
   int auxFunc2() { return aux2func; }
 
+  // IMU
+  float Kp() { return kp; }
+  float Ki() { return ki; }
+  void setKp(float value) { kp = value; }
+  void setKi(float value) { ki = value; }
+
   void loadJSONSettings(DynamicJsonDocument &json);
   void setJSONSettings(DynamicJsonDocument &json);
 
@@ -400,6 +408,7 @@ class TrackerSettings
   float an4off, an5off, an6off, an7off;      // Analog Offsets
   int aux0ch, aux1ch, aux2ch;                // Auxiliary Function Channels
   int aux0func, aux1func, aux2func;          // Auxiliary Functions
+  float kp, ki;
 
   bool sboutinv;
   bool sbininv;

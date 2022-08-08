@@ -142,6 +142,9 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->spnRotY,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->spnRotZ,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->spnSBUSRate,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->spnKp,SIGNAL(valueChanged(double)),this,SLOT(updateFromUI()));
+    connect(ui->spnKi,SIGNAL(valueChanged(double)),this,SLOT(updateFromUI()));
+
 
     // Gain Sliders
     connect(ui->til_gain,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
@@ -571,6 +574,8 @@ void MainWindow::updateToUI()
     ui->spnA7Off->setValue(trkset.analog7Offset());
     ui->spnA7Gain->setValue(trkset.analog7Gain());
     ui->spnSBUSRate->setValue(trkset.SBUSRate());
+    ui->spnKi->setValue(trkset.Ki());
+    ui->spnKp->setValue(trkset.Kp());
 
     int panCh = trkset.panCh();
     int rllCh = trkset.rollCh();
@@ -737,6 +742,10 @@ void MainWindow::updateFromUI()
     trkset.setAuxFunc0(ui->cmbAuxFn0->currentIndex());
     trkset.setAuxFunc1(ui->cmbAuxFn1->currentIndex());
     trkset.setAuxFunc2(ui->cmbAuxFn2->currentIndex());
+
+    // IMU
+    trkset.setKp(ui->spnKp->value());
+    trkset.setKi(ui->spnKi->value());
 
     // PWM
     int pwmCh0 = ui->cmbPWM0->currentIndex();

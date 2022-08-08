@@ -85,6 +85,9 @@ TrackerSettings::TrackerSettings(QObject *parent):
     _data["roty"] = DEF_BOARD_ROT_Y;
     _data["rotz"] = DEF_BOARD_ROT_Z;
 
+    _data["Kp"] = DEF_KP;
+    _data["Ki"] = DEF_KI;
+
     _live["btaddr"] = QString("00:00:00:00:00:00");
 
     // Add All Realtime data Items to Map

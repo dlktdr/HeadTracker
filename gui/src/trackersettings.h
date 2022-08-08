@@ -130,7 +130,8 @@ public:
     static constexpr int DEF_AUX_CH1 = -1;
     static constexpr int DEF_AUX_CH2 = -1;
     static constexpr int DEF_AUX_FUNC = 0;
-
+    static constexpr float DEF_KP = 0.2f;
+    static constexpr float DEF_KI = 0.01f;
 
     TrackerSettings(QObject *parent=nullptr);
 
@@ -296,6 +297,12 @@ public:
     int auxFunc0() {return _data["aux0func"].toInt();}
     int auxFunc1() {return _data["aux1func"].toInt();}
     int auxFunc2() {return _data["aux2func"].toInt();}
+
+    // IMU Functions
+    float Kp() {return _data["Kp"].toFloat();}
+    float Ki() {return _data["Ki"].toFloat();}
+    void setKp(float value) {_data["Kp"] = QString::number(value,'g',4);}
+    void setKi(float value) {_data["Ki"] = QString::number(value,'g',4);}
 
     // PWM Functions
     int pwmCh(int ch) {return _data[QString("pwm%1").arg(ch)].toInt();}

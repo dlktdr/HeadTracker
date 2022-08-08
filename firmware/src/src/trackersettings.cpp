@@ -137,6 +137,10 @@ TrackerSettings::TrackerSettings()
   aux1func = DEF_AUX_FUNC;
   aux2func = DEF_AUX_FUNC;
 
+  // IMU
+  kp = DEF_KP;
+  ki = DEF_KI;
+
   // Bluetooth defaults
   btmode = 0;
   btcon = false;
@@ -820,6 +824,12 @@ void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
   v = json["aux2ch"];
   if (!v.isNull()) setAuxFunc2Ch(v);
 
+  // IMU
+  v = json["Kp"];
+  if (!v.isNull()) setKp(v);
+  v = json["Ki"];
+  if (!v.isNull()) setKi(v);
+
   // Soft Iron Offsets
   v = json["so00"];
   if (!v.isNull()) magsioff[0] = v;
@@ -957,6 +967,10 @@ void TrackerSettings::setJSONSettings(DynamicJsonDocument &json)
   json["aux1ch"] = aux1ch;
   json["aux2func"] = aux2func;
   json["aux2ch"] = aux2ch;
+
+  // IMU
+  json["Kp"] = kp;
+  json["Ki"] = ki;
 
   // Bluetooth Settings
   json["btmode"] = btmode;
