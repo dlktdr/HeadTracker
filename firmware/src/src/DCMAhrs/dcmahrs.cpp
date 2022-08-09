@@ -350,11 +350,11 @@ void DcmCalculate(float u0[3], float u1[3], float u2[3], float deltat)
   /* atan2(rmat31,rmat11) */
   pan = atan2(rout[3], rout[0]) * RAD_TO_DEG;
 
-  /* -asin(rmat31) */
-  tilt = atan2(rout[7], rout[8]) * RAD_TO_DEG;
-
   /* atan2(rmat32,rmat33) */
-  roll = -asin(rout[6]) * RAD_TO_DEG;
+  tilt = -asin(rout[6]) * RAD_TO_DEG;
+
+  /* -asin(rmat31) */
+  roll = atan2(rout[7], rout[8]) * RAD_TO_DEG;
 }
 
 void DcmAhrsResetCenter()

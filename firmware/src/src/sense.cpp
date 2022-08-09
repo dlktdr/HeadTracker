@@ -152,16 +152,21 @@ void calculate_Thread()
     lastUpdate = Now;
 
     // Scale properly for DCM algorithm
+    // PAUL's reference frame is standard aeronautical:
+    //    X axis is the longitudinal axis pointing ahead,
+    //    Z axis is the vertical axis pointing downwards,
+    //    Y axis is the lateral one, pointing in such a way that the frame is right-handed.
+    // PAUL's acceleration from accelerometer sign convention is opposite of used by rest of program
     float u0[3], u1[3], u2[3];
-    u0[0] = gyrx * DEG_TO_RAD;
-    u0[1] = gyry * DEG_TO_RAD;
-    u0[2] = gyrz * DEG_TO_RAD;
-    u1[0] = accx * 9.80665;
-    u1[1] = accy * 9.80665;
-    u1[2] = accz * 9.80665;
-    u2[0] = magx * 10;
-    u2[1] = magy * 10;
-    u2[2] = magz * 10;
+    u0[0] =       gyrx * DEG_TO_RAD;
+    u0[1] = -1. * gyry * DEG_TO_RAD;
+    u0[2] = -1. * gyrz * DEG_TO_RAD;
+    u1[0] = -1. * accx * 9.80665;
+    u1[1] =       accy * 9.80665;
+    u1[2] =       accz * 9.80665;
+    u2[0] =       magx * 10;
+    u2[1] = -1. * magy * 10;
+    u2[2] = -1. * magz * 10;
 
     DcmCalculate(u0, u1, u2, deltat);
 
