@@ -190,7 +190,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->cmbButtonPin,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbPpmInPin,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbPpmOutPin,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->cmbBtMode,SIGNAL(currentIndexChanged(int)),this,SLOT(BTModeChanged()));
+    connect(ui->cmbBtMode,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     //connect(ui->cmbResetOnPPM,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbPPMChCount,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbA4Ch,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
@@ -1241,7 +1241,7 @@ void MainWindow::BLE33tabChanged()
     trkset.setDataItemSend(dataitms);
 }
 
-void MainWindow::BTModeChanged()
+/*void MainWindow::BTModeChanged()
 {
     updateFromUI();
 
@@ -1257,7 +1257,7 @@ void MainWindow::BTModeChanged()
             QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
         reboot();
     }
-}
+}*/
 
 void MainWindow::reboot()
 {

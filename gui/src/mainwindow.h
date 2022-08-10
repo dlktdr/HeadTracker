@@ -122,7 +122,7 @@ private slots:
     void showSerialDiagClicked();
     void showChannelViewerClicked();
     void BLE33tabChanged();
-    void BTModeChanged();
+//    void BTModeChanged();
     void reboot();
     void openHelp();
     void showPinView();
