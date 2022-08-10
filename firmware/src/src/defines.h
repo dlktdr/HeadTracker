@@ -86,14 +86,15 @@ extern volatile bool gyro_calibrated;
 // and can't be used by Zephyr
 // Cannot use GPIOTE interrupt as I override the interrupt handler in PPMIN
 
-// Known good 16,17,18,19
-// 14/15 used for BT LNA
-#define SERIALIN1_PPICH 16
-#define SERIALIN2_PPICH 15
-#define SERIALOUT_PPICH 1
-#define PPMIN_PPICH1 17
-#define PPMIN_PPICH2 18
-#define PPMOUT_PPICH 19
+#define PPMOUT_PPICH 0
+#define SERIALIN1_PPICH 1
+#define SERIALIN2_PPICH 2
+#define SERIALOUT_PPICH 3
+#define PPMIN_PPICH1 4
+#define PPMIN_PPICH2 5
+// 6 Used
+// 7 Enable always gets flipped off
+// 8+ ??
 
 #define SERIAL_UARTE_CH 1
 

@@ -162,7 +162,7 @@ void PpmOut_setPin(int pinNum)
   PPMOUT_TIMER->EVENTS_COMPARE[PPMOUT_TMRCOMP_CH] = 0;
   NRF_GPIOTE->CONFIG[PPMOUT_GPIOTE] = 0;  // Disable Config
 
-  // Disable PPI 10
+  // Disable PPI
   NRF_PPI->CHENCLR = PPMOUT_PPICH_MSK;
 
   // Set current pin back to low drive  , if enabled
@@ -202,7 +202,7 @@ void PpmOut_setPin(int pinNum)
     NRF_PPI->CH[PPMOUT_PPICH].EEP = (uint32_t)&PPMOUT_TIMER->EVENTS_COMPARE[PPMOUT_TMRCOMP_CH];
     NRF_PPI->CH[PPMOUT_PPICH].TEP = (uint32_t)&NRF_GPIOTE->TASKS_OUT[PPMOUT_GPIOTE];
 
-    // Enable PPI 10
+    // Enable PPI
     NRF_PPI->CHENSET = PPMOUT_PPICH_MSK;
 
     // Start
