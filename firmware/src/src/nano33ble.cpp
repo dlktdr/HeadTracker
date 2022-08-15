@@ -6,6 +6,7 @@
 #include <drivers/counter.h>
 #include <nrfx_clock.h>
 
+#include "DCMAhrs/dcmahrs.h"
 #include "PPMIn.h"
 #include "PPMOut.h"
 #include "SBUS/sbus.h"
@@ -70,12 +71,12 @@ K_THREAD_DEFINE(serial_Thread_id, 16384, serial_Thread, NULL, NULL, NULL, SERIAL
                 K_FP_REGS, 1000);
 K_THREAD_DEFINE(bt_Thread_id, 4096, bt_Thread, NULL, NULL, NULL, BT_THREAD_PRIO, 0, 0);
 K_THREAD_DEFINE(SBUS_Thread_id, 1024, sbus_Thread, NULL, NULL, NULL, SBUS_THREAD_PRIO, 0, 1000);
-
 K_THREAD_DEFINE(sensor_Thread_id, 4096, sensor_Thread, NULL, NULL, NULL, SENSOR_THREAD_PRIO,
-                K_FP_REGS, 1000);
+                K_FP_REGS, 1500);
 K_THREAD_DEFINE(calculate_Thread_id, 4096, calculate_Thread, NULL, NULL, NULL,
-                CALCULATE_THREAD_PRIO, K_FP_REGS, 1000);
-
+                CALCULATE_THREAD_PRIO, K_FP_REGS, 1600);
+K_THREAD_DEFINE(DCMnormalization_Thread_id, 1024, DCMnormalization_Thread, NULL, NULL, NULL,
+                CALCULATE_THREAD_PRIO, K_FP_REGS, 1700);
 
 #elif defined(RTOS_FREERTOS)
 #error "TODO... Add tasks for FreeRTOS"

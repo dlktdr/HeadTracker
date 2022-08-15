@@ -241,7 +241,7 @@ void DcmAHRSInitialize(float u0[3], float u1[3], float u2[3])
 
 /*----------------------------------------------------------------------------*/
 
-void DCMOneSecThread()
+void DCMnormalization_Thread()
 {
   while (1) {
     rt_sleep_ms(1000);
