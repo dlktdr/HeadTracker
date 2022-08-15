@@ -14,6 +14,7 @@
 #define R2D RAD_TO_DEG  // Radians to degrees
 #define D2R DEG_TO_RAD  // Degrees to radians
 
+bool DCMInitFlag = true;
 float tilt, roll, pan;
 float rzero[9];
 float rmat[9];
@@ -143,43 +144,84 @@ static void MatrixMultiply2(float *M1, float *M2, float *M3)
   M3[8] = M1[6] * M2[2] + M1[7] * M2[5] + M1[8] * M2[8];
 }
 
-void DcmAHRSInitialize()
+/*----------------------------------------------------------------------------*/
+void DcmAHRSInitialize(float u0[3], float u1[3], float u2[3])
+/*----------------------------------------------------------------------------*/
+/* This routine computes the initial tilt roll pan                            */
+/* and initializes the DCM algorithm                                          */
+/* The Rzero matrix is set to the DCM matrix so that tilt roll pan are equal  */
+/* to zero after boot                                                         */
+/*----------------------------------------------------------------------------*/
 {
-  // Initalize
+  /* Declarations */
+  float tilt0, roll0, pan0;
+  float BeX, BeY;
+  float Ct, St, Cr, Sr, Cp, Sp;
 
-  /* Initial Euler angles */
-  /* ==================== */
-  pan = 0. * D2R;
-  tilt = 0. * D2R;
-  roll = 0. * D2R;
 
+  /* Compute initial orientation relatively to Earth NED frame */
+  /* X local Magnetic North                                    */
+  /* Y east                                                    */
+  /* Z down                                                    */
+  /* ========================================================= */
+  /* ========================================================= */
+  /* Compute tilt and roll with gravity vector */
+  /* ========================================= */
+  /* Read body acceleration (x y z accelerometers) */
+  for (int i = 0; i < 3; i++) V_buff[i] = u1[i];
+
+  /* Normalize body acceleration vector */
+  VectorDotProduct(V_buff, V_buff, &f_buff);
+  f_buff = 1. / sqrt(f_buff);
+  if (f_buff > 0.001)
+    for (int i = 0; i < 3; i++) V_buff[i] *= sqrt(f_buff);
+
+  /* Tilt and roll in radians */
+  tilt0 = -asin(V_buff[0]);
+  roll0 = atan2(V_buff[1], V_buff[2]);
+
+  /* Compute pan with Magnetic North vector */
+  /* ====================================== */
+  /* Straighten Magnetometer x and y (remove tilt and roll) */
+  Ct = cos(tilt0); St = sin(tilt0);
+  Cr = cos(roll0); Sr = sin(roll0);
+
+  BeX =  Ct*u2[0] + St*Sr*u2[1] + St*Cr*u2[2];
+  BeY =               -Cr*u2[1] +    Sr*u2[2];
+
+  /* pan in radians */
+  /* No need to normalize because atan2 is a ratio */
+  pan0 = atan2(BeY, BeX);
+
+
+  /* Initialize DCM algorithm */
+  /* ======================== */
+  /* ======================== */
   /* Initialize DCM */
   /* ============== */
+  Cp = cos(pan0); Sp = sin(pan0);
+
   /* xe in body frame */
-  rmat[0] = cos(pan) * cos(tilt);
-  rmat[1] = -sin(pan) * cos(roll) + cos(pan) * sin(tilt) * sin(roll);
-  rmat[2] = sin(pan) * sin(roll) + cos(pan) * sin(tilt) * cos(roll);
+  rmat[0] =  Cp * Ct;
+  rmat[1] = -Sp * Cr + Cp * St * Sr;
+  rmat[2] =  Sp * Sr + Cp * St * Cr;
   /* ye in body frame */
-  rmat[3] = sin(pan) * cos(tilt);
-  rmat[4] = cos(pan) * cos(roll) + sin(pan) * sin(tilt) * sin(roll);
-  rmat[5] = -cos(pan) * sin(roll) + sin(pan) * sin(tilt) * cos(roll);
+  rmat[3] =  Sp * Ct;
+  rmat[4] =  Cp * Cr + Sp * St * Sr;
+  rmat[5] = -Cp * Sr + Sp * St * Cr;
   /* ze in body frame */
-  rmat[6] = -sin(tilt);
-  rmat[7] = cos(tilt) * sin(roll);
-  rmat[8] = cos(tilt) * cos(roll);
+  rmat[6] = -St;
+  rmat[7] =  Ct * Sr;
+  rmat[8] =  Ct * Cr;
 
   /* Update matrix rup = identity */
   /* ============================ */
-  for (int i = 0; i < 9; i++) {
-    rup[i] = 0.;
-    rzero[i] = 0.f;
-  }
-  rup[0] = 1.;
-  rup[4] = 1.;
-  rup[8] = 1.;
-  rzero[0] = 1.0f;
-  rzero[4] = 1.0f;
-  rzero[8] = 1.0f;
+  rup[0] = 1.; rup[4] = 1.; rup[8] = 1.;
+
+  /* Zero matrix */
+  /* Thus at the first DcmCalculate call tilt = roll = pan = 0 */
+  /* ========================================================= */
+  for (int i = 0; i < 9; i++) rzero[i] = rmat[i];
 
   /* tilt-roll correction */
   /* ===================== */
@@ -191,14 +233,10 @@ void DcmAHRSInitialize()
 
   /* Gyros bias */
   /* ========== */
-  for (int i = 0; i < 3; i++) biasGyros[i] = 0.;
-
-  // -------------------------------------------------------------------------
-  // -------------------------------------------------------------------------
-  // -------------------------------------------------------------------------
-  // -------------------------------------------------------------------------
-  // -------------------------------------------------------------------------
+  for (int i = 0; i < 3; i++) biasGyros[i] = -u0[i];
 }
+
+/*----------------------------------------------------------------------------*/
 
 void DCMOneSecThread()
 {
@@ -251,6 +289,13 @@ void DcmCalculate(float u0[3], float u1[3], float u2[3], float deltat)
   // Don't do calulations if no accel or mag data, will result in Nan
   if (fabs(u1[0] + u1[1] + u1[2]) < 0.0001) return;
   if (fabs(u2[0] + u2[1] + u2[2]) < 0.0001) return;
+
+    /* R matrix initialization */
+  /* ======================= */
+  if (DCMInitFlag == true) {
+    DcmAHRSInitialize(u0, u1, u2);
+    DCMInitFlag = false;
+  }
 
   /* R matrix update */
   /* =============== */

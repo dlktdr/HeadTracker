@@ -50,6 +50,9 @@ static float tilt = 0, roll = 0, pan = 0;
 static float magxoff = 0, magyoff = 0, magzoff = 0;
 static float accxoff = 0, accyoff = 0, acczoff = 0;
 static float gyrxoff = 0, gyryoff = 0, gyrzoff = 0;
+static float faccx = 0, faccy = 0, faccz = 0;
+static float fmagx = 0, fmagy = 0, fmagz = 0;
+static float fgyrx = 0, fgyry = 0, fgyrz = 0;
 static bool trpOutputEnabled = false;  // Default to disabled T/R/P output
 volatile bool gyro_calibrated = false;
 
@@ -115,8 +118,6 @@ int sense_Init()
     SF1eFilterInit(anFilter[i]);
   }
 
-  DcmAHRSInitialize();
-
   // setLEDFlag(LED_GYROCAL);
   gyro_calibrated = true;
   senseTreadRun = true;
@@ -158,15 +159,15 @@ void calculate_Thread()
     //    Y axis is the lateral one, pointing in such a way that the frame is right-handed.
     // PAUL's acceleration from accelerometer sign convention is opposite of used by rest of program
     float u0[3], u1[3], u2[3];
-    u0[0] =       gyrx * DEG_TO_RAD;
-    u0[1] = -1. * gyry * DEG_TO_RAD;
-    u0[2] = -1. * gyrz * DEG_TO_RAD;
-    u1[0] = -1. * accx * 9.80665;
-    u1[1] =       accy * 9.80665;
-    u1[2] =       accz * 9.80665;
-    u2[0] =       magx * 10;
-    u2[1] = -1. * magy * 10;
-    u2[2] = -1. * magz * 10;
+    u0[0] =  fgyrx * DEG_TO_RAD;
+    u0[1] = -fgyry * DEG_TO_RAD;
+    u0[2] = -fgyrz * DEG_TO_RAD;
+    u1[0] = -faccx;
+    u1[1] =  faccy;
+    u1[2] =  faccz;
+    u2[0] =  fmagx;
+    u2[1] = -fmagy;
+    u2[2] = -fmagz;
 
     DcmCalculate(u0, u1, u2, deltat);
 
@@ -595,11 +596,51 @@ void sensor_Thread()
   bool initrun = true;
   int passcount = GYRO_STABLE_SAMPLES;
 
+  // Sensors filtering
+  float LPalpha, LPalphaC;
+  float lacc[3]  = {0, 0, 0};
+  float lgyr[3]  = {0, 0, 0};
+  float lmag[3]  = {0, 0, 0};
+  bool initLPfilter = true;
+  int i;
+
   while (1) {
     rt_sleep_us(SENSOR_PERIOD);
 
     if (!senseTreadRun || pauseForFlash) {
       continue;
+    }
+
+    // Filtering
+    if (initLPfilter) {
+      for (i=0;i<3;i++) {
+        //T_0 = (unsigned long) (millis64()); ??
+        LPalpha = exp(-(float)(SENSOR_PERIOD)/(float)(SENSOR_LP_TIME_CST)); // low pass filter coefficient
+        LPalphaC = 0.5*(1. - LPalpha);                                      // complementary
+        faccx = accx; faccy = accy; faccz = accz;
+        fgyrx = gyrx; fgyry = gyry; fgyrz = gyrz;
+        fmagx = magx; fmagy = magy; fmagz = magz;
+        lacc[0] = accx; lacc[1] = accy; lacc[2] = accz;
+        lgyr[0] = gyrx; lgyr[1] = gyry; lgyr[2] = gyrz;
+        lmag[0] = magx; lmag[1] = magy; lmag[2] = magz;
+        initLPfilter = false;
+      }
+    } else {
+      faccx = faccx * LPalpha + LPalphaC * (accx + lacc[0]);
+      faccy = faccy * LPalpha + LPalphaC * (accy + lacc[1]);
+      faccz = faccz * LPalpha + LPalphaC * (accz + lacc[2]);
+
+      fgyrx = fgyrx * LPalpha + LPalphaC * (gyrx + lgyr[0]);
+      fgyry = fgyry * LPalpha + LPalphaC * (gyry + lgyr[1]);
+      fgyrz = fgyrz * LPalpha + LPalphaC * (gyrz + lgyr[2]);
+
+      fmagx = fmagx * LPalpha + LPalphaC * (magx + lmag[0]);
+      fmagy = fmagy * LPalpha + LPalphaC * (magy + lmag[1]);
+      fmagz = fmagz * LPalpha + LPalphaC * (magz + lmag[2]);
+
+      lacc[0] = accx; lacc[1] = accy; lacc[2] = accz;
+      lgyr[0] = gyrx; lgyr[1] = gyry; lgyr[2] = gyrz;
+      lmag[0] = magx; lmag[1] = magy; lmag[2] = magz;
     }
 
     // Reset Center on Proximity, Don't need to update this often
