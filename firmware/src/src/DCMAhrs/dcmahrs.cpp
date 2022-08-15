@@ -417,6 +417,3 @@ void DcmAhrsResetCenter()
 float DcmGetTilt() { return tilt; }
 float DcmGetRoll() { return roll; }
 float DcmGetPan() { return pan; }
-
-K_THREAD_DEFINE(DCMOneSecThread_id, 1024, DCMOneSecThread, NULL, NULL, NULL, CALCULATE_THREAD_PRIO,
-                K_FP_REGS, 1000);
