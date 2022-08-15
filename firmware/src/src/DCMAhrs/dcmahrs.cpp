@@ -158,7 +158,6 @@ void DcmAHRSInitialize(float u0[3], float u1[3], float u2[3])
   float BeX, BeY;
   float Ct, St, Cr, Sr, Cp, Sp;
 
-
   /* Compute initial orientation relatively to Earth NED frame */
   /* X local Magnetic North                                    */
   /* Y east                                                    */
@@ -183,40 +182,44 @@ void DcmAHRSInitialize(float u0[3], float u1[3], float u2[3])
   /* Compute pan with Magnetic North vector */
   /* ====================================== */
   /* Straighten Magnetometer x and y (remove tilt and roll) */
-  Ct = cos(tilt0); St = sin(tilt0);
-  Cr = cos(roll0); Sr = sin(roll0);
+  Ct = cos(tilt0);
+  St = sin(tilt0);
+  Cr = cos(roll0);
+  Sr = sin(roll0);
 
-  BeX =  Ct*u2[0] + St*Sr*u2[1] + St*Cr*u2[2];
-  BeY =               -Cr*u2[1] +    Sr*u2[2];
+  BeX = Ct * u2[0] + St * Sr * u2[1] + St * Cr * u2[2];
+  BeY = -Cr * u2[1] + Sr * u2[2];
 
   /* pan in radians */
   /* No need to normalize because atan2 is a ratio */
   pan0 = atan2(BeY, BeX);
-
 
   /* Initialize DCM algorithm */
   /* ======================== */
   /* ======================== */
   /* Initialize DCM */
   /* ============== */
-  Cp = cos(pan0); Sp = sin(pan0);
+  Cp = cos(pan0);
+  Sp = sin(pan0);
 
   /* xe in body frame */
-  rmat[0] =  Cp * Ct;
+  rmat[0] = Cp * Ct;
   rmat[1] = -Sp * Cr + Cp * St * Sr;
-  rmat[2] =  Sp * Sr + Cp * St * Cr;
+  rmat[2] = Sp * Sr + Cp * St * Cr;
   /* ye in body frame */
-  rmat[3] =  Sp * Ct;
-  rmat[4] =  Cp * Cr + Sp * St * Sr;
+  rmat[3] = Sp * Ct;
+  rmat[4] = Cp * Cr + Sp * St * Sr;
   rmat[5] = -Cp * Sr + Sp * St * Cr;
   /* ze in body frame */
   rmat[6] = -St;
-  rmat[7] =  Ct * Sr;
-  rmat[8] =  Ct * Cr;
+  rmat[7] = Ct * Sr;
+  rmat[8] = Ct * Cr;
 
   /* Update matrix rup = identity */
   /* ============================ */
-  rup[0] = 1.; rup[4] = 1.; rup[8] = 1.;
+  rup[0] = 1.;
+  rup[4] = 1.;
+  rup[8] = 1.;
 
   /* Zero matrix */
   /* Thus at the first DcmCalculate call tilt = roll = pan = 0 */
@@ -290,7 +293,7 @@ void DcmCalculate(float u0[3], float u1[3], float u2[3], float deltat)
   if (fabs(u1[0] + u1[1] + u1[2]) < 0.0001) return;
   if (fabs(u2[0] + u2[1] + u2[2]) < 0.0001) return;
 
-    /* R matrix initialization */
+  /* R matrix initialization */
   /* ======================= */
   if (DCMInitFlag == true) {
     DcmAHRSInitialize(u0, u1, u2);
