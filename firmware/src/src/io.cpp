@@ -68,10 +68,7 @@ void io_Thread()
     if (!ioThreadRun || pauseForFlash) continue;
 
     // LEDS
-    if (_ledmode & LED_GYROCAL) {
-      led_on_time = 200;
-      led_off_time = 25;
-    } else if (_ledmode & LED_BTCONNECTED) {
+    if (_ledmode & LED_BTCONNECTED) {
       led_on_time = 800;
       led_off_time = 200;
     } else if (_ledmode & LED_MAGCAL) {
@@ -112,13 +109,6 @@ void io_Thread()
       led_sequence[2].time = 200;
       led_sequence[3].time = 0;  // End Sequence
 
-      // Gyro Calibration Mode - Long Red, Flashing
-    } else if (_ledmode & LED_GYROCAL) {
-      led_sequence[0].RGB = RGB_RED;
-      led_sequence[0].time = 400;
-      led_sequence[1].RGB = 0;
-      led_sequence[1].time = 200;
-      led_sequence[2].time = 0;  // End Sequence
     } else {
       rgb_sequence_no = 0;
       led_sequence[0].time = 0;

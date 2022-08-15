@@ -865,18 +865,6 @@ void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
   }
 
   // Calibrarion Values
-  // Disabled. Now done on boot
-  /*    v = json["gyrxoff"];
-      v1 =json["gyryoff"];
-      v2 =json["gyrzoff"];
-
-      if(!v.isNull() && !v1.isNull() && !v2.isNull())
-      {
-          setGyroOffset(v,v1,v2);
-      }
-      */
-
-  // Calibrarion Values
   v = json["accxoff"];
   v1 = json["accyoff"];
   v2 = json["acczoff"];
@@ -988,10 +976,6 @@ void TrackerSettings::setJSONSettings(DynamicJsonDocument &json)
   json["accxoff"] = accxoff;
   json["accyoff"] = accyoff;
   json["acczoff"] = acczoff;
-
-  json["gyrxoff"] = gyrxoff;
-  json["gyryoff"] = gyryoff;
-  json["gyrzoff"] = gyrzoff;
 
   json["magxoff"] = magxoff;
   json["magyoff"] = magyoff;

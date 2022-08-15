@@ -127,14 +127,6 @@ extern volatile bool gyro_calibrated;
 #define DEG_TO_RAD 0.017453295199
 #define RAD_TO_DEG 57.29577951308
 
-// Gyro Calibration Defines
-#define GYRO_STABLE_SAMPLES 100  // samples to average of not moving for a success gyro cal
-#define GYRO_PASS_DIFF 24.0      // Differential less than this deg/sec^2 considered stable
-#define GYRO_LP_BETA 0.9         // Gyro Sample Moving Average Beta (0.0-1
-
-// Magnetometer, Initial Orientation, Samples to average
-#define MADGSTART_SAMPLES 15
-
 // RTOS Specifics
 #if defined(RTOS_ZEPHYR)
 #define micros() k_cyc_to_us_floor32(k_cycle_get_32())

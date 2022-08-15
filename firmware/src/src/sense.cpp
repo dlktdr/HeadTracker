@@ -19,11 +19,11 @@
 
 #include <device.h>
 #include <drivers/sensor.h>
+#include <math.h>
 
 #include "APDS9960/APDS9960.h"
 #include "DCMAhrs/dcmahrs.h"
 #include "LSM9DS1/LSM9DS1.h"
-#include "MadgwickAHRS/MadgwickAHRS.h"
 #include "SBUS/sbus.h"
 #include "analog.h"
 #include "ble.h"
@@ -54,7 +54,6 @@ static float faccx = 0, faccy = 0, faccz = 0;
 static float fmagx = 0, fmagy = 0, fmagz = 0;
 static float fgyrx = 0, fgyry = 0, fgyrz = 0;
 static bool trpOutputEnabled = false;  // Default to disabled T/R/P output
-volatile bool gyro_calibrated = false;
 
 // Input Channel Data
 static uint16_t ppm_in_chans[16];
@@ -64,8 +63,6 @@ static float bt_chansf[BT_CHANNELS];
 
 // Output channel data
 static uint16_t channel_data[16];
-
-Madgwick madgwick;
 
 K_MUTEX_DEFINE(sensor_mutex);
 
@@ -118,8 +115,6 @@ int sense_Init()
     SF1eFilterInit(anFilter[i]);
   }
 
-  // setLEDFlag(LED_GYROCAL);
-  gyro_calibrated = true;
   senseTreadRun = true;
 
   return 0;
@@ -159,13 +154,13 @@ void calculate_Thread()
     //    Y axis is the lateral one, pointing in such a way that the frame is right-handed.
     // PAUL's acceleration from accelerometer sign convention is opposite of used by rest of program
     float u0[3], u1[3], u2[3];
-    u0[0] =  fgyrx * DEG_TO_RAD;
+    u0[0] = fgyrx * DEG_TO_RAD;
     u0[1] = -fgyry * DEG_TO_RAD;
     u0[2] = -fgyrz * DEG_TO_RAD;
     u1[0] = -faccx;
-    u1[1] =  faccy;
-    u1[2] =  faccz;
-    u2[0] =  fmagx;
+    u1[1] = faccy;
+    u1[2] = faccz;
+    u2[0] = fmagx;
     u2[1] = -fmagy;
     u2[2] = -fmagz;
 
@@ -177,12 +172,6 @@ void calculate_Thread()
     tilt = DcmGetTilt();
     roll = DcmGetRoll();
     pan = DcmGetPan();
-
-    // Re-apply inital orientation as soon as the gyro calibration is done
-    // As is is a good time to be known sitting still.
-    static bool lastgyrcal = false;
-    if (gyro_calibrated == true && lastgyrcal == false) reset_fusion();
-    lastgyrcal = gyro_calibrated;
 
     // Toggles output on and off if long pressed
     bool butlngdwn = false;
@@ -220,20 +209,18 @@ void calculate_Thread()
     }
 
     // Tilt output
-    float tiltout =
-        tilt * trkset.Tlt_gain() * (trkset.isTiltReversed() ? -1.0 : 1.0);
+    float tiltout = tilt * trkset.Tlt_gain() * (trkset.isTiltReversed() ? -1.0 : 1.0);
     uint16_t tiltout_ui = tiltout + trkset.Tlt_cnt();                       // Apply Center Offset
     tiltout_ui = MAX(MIN(tiltout_ui, trkset.Tlt_max()), trkset.Tlt_min());  // Limit Output
 
     // Roll output
-    float rollout =
-        roll * trkset.Rll_gain() * (trkset.isRollReversed() ? -1.0 : 1.0);
+    float rollout = roll * trkset.Rll_gain() * (trkset.isRollReversed() ? -1.0 : 1.0);
     uint16_t rollout_ui = rollout + trkset.Rll_cnt();                       // Apply Center Offset
     rollout_ui = MAX(MIN(rollout_ui, trkset.Rll_max()), trkset.Rll_min());  // Limit Output
 
     // Pan output, Normalize to +/- 180 Degrees
-    float panout = normalize((pan), -180, 180) * trkset.Pan_gain() *
-                   (trkset.isPanReversed() ? -1.0 : 1.0);
+    float panout =
+        normalize((pan), -180, 180) * trkset.Pan_gain() * (trkset.isPanReversed() ? -1.0 : 1.0);
     uint16_t panout_ui = panout + trkset.Pan_cnt();                       // Apply Center Offset
     panout_ui = MAX(MIN(panout_ui, trkset.Pan_max()), trkset.Pan_min());  // Limit Output
 
@@ -466,9 +453,6 @@ void calculate_Thread()
     }
     lastbutmode = buttonpresmode;
 
-    // If gyro isn't calibrated, don't output TRP
-    if (!gyro_calibrated) trpOutputEnabled = false;
-
     int tltch = trkset.tiltCh();
     int rllch = trkset.rollCh();
     int panch = trkset.panCh();
@@ -536,8 +520,7 @@ void calculate_Thread()
       trkset.setOffMag(magx, magy, magz);
 
       trkset.setRawOrient(tilt, roll, pan);
-      trkset.setOffOrient(tilt, roll,
-                          normalize(pan, -180, 180)); // TODO Remove Me
+      trkset.setOffOrient(tilt, roll, normalize(pan, -180, 180));  // TODO Remove Me
       trkset.setPPMOut(tiltout_ui, rollout_ui, panout_ui);
 
       // PPM Input Values
@@ -547,11 +530,9 @@ void calculate_Thread()
       trkset.setChannelOutValues(channel_data);
       trkset.setTRPEnabled(trpOutputEnabled);
 
-      trkset.setGyroCalibrated(gyro_calibrated);
-
       // Qauterion Data
-      float *qd = madgwick.getQuat();
-      trkset.setQuaternion(qd);
+      /*float *qd = madgwick.getQuat();
+      trkset.setQuaternion(qd);*/
 
       // Bluetooth connected
       trkset.setBlueToothConnected(bleconnected);
@@ -590,17 +571,11 @@ void calculate_Thread()
 
 void sensor_Thread()
 {
-  // Gyro Calibration
-  float avg[3] = {0, 0, 0};
-  float lavg[3] = {0, 0, 0};
-  bool initrun = true;
-  int passcount = GYRO_STABLE_SAMPLES;
-
   // Sensors filtering
   float LPalpha, LPalphaC;
-  float lacc[3]  = {0, 0, 0};
-  float lgyr[3]  = {0, 0, 0};
-  float lmag[3]  = {0, 0, 0};
+  float lacc[3] = {0, 0, 0};
+  float lgyr[3] = {0, 0, 0};
+  float lmag[3] = {0, 0, 0};
   bool initLPfilter = true;
   int i;
 
@@ -613,16 +588,29 @@ void sensor_Thread()
 
     // Filtering
     if (initLPfilter) {
-      for (i=0;i<3;i++) {
-        //T_0 = (unsigned long) (millis64()); ??
-        LPalpha = exp(-(float)(SENSOR_PERIOD)/(float)(SENSOR_LP_TIME_CST)); // low pass filter coefficient
-        LPalphaC = 0.5*(1. - LPalpha);                                      // complementary
-        faccx = accx; faccy = accy; faccz = accz;
-        fgyrx = gyrx; fgyry = gyry; fgyrz = gyrz;
-        fmagx = magx; fmagy = magy; fmagz = magz;
-        lacc[0] = accx; lacc[1] = accy; lacc[2] = accz;
-        lgyr[0] = gyrx; lgyr[1] = gyry; lgyr[2] = gyrz;
-        lmag[0] = magx; lmag[1] = magy; lmag[2] = magz;
+      for (i = 0; i < 3; i++) {
+        // T_0 = (unsigned long) (millis64()); // TODO
+        LPalpha = exp(-(float)(SENSOR_PERIOD) /
+                      (float)(SENSOR_LP_TIME_CST));  // low pass filter coefficient
+        LPalphaC = 0.5 * (1. - LPalpha);             // complementary
+        faccx = accx;
+        faccy = accy;
+        faccz = accz;
+        fgyrx = gyrx;
+        fgyry = gyry;
+        fgyrz = gyrz;
+        fmagx = magx;
+        fmagy = magy;
+        fmagz = magz;
+        lacc[0] = accx;
+        lacc[1] = accy;
+        lacc[2] = accz;
+        lgyr[0] = gyrx;
+        lgyr[1] = gyry;
+        lgyr[2] = gyrz;
+        lmag[0] = magx;
+        lmag[1] = magy;
+        lmag[2] = magz;
         initLPfilter = false;
       }
     } else {
@@ -638,9 +626,15 @@ void sensor_Thread()
       fmagy = fmagy * LPalpha + LPalphaC * (magy + lmag[1]);
       fmagz = fmagz * LPalpha + LPalphaC * (magz + lmag[2]);
 
-      lacc[0] = accx; lacc[1] = accy; lacc[2] = accz;
-      lgyr[0] = gyrx; lgyr[1] = gyry; lgyr[2] = gyrz;
-      lmag[0] = magx; lmag[1] = magy; lmag[2] = magz;
+      lacc[0] = accx;
+      lacc[1] = accy;
+      lacc[2] = accz;
+      lgyr[0] = gyrx;
+      lgyr[1] = gyry;
+      lgyr[2] = gyrz;
+      lmag[0] = magx;
+      lmag[1] = magy;
+      lmag[2] = magz;
     }
 
     // Reset Center on Proximity, Don't need to update this often
@@ -733,68 +727,22 @@ void sensor_Thread()
       IMU.readRawGyro(rgyrx, rgyry, rgyrz);
       rgyrx *= -1.0;  // Flip X to match other sensors
 
-      if (!gyro_calibrated) {
-        if (initrun) {  // Preload on first read
-          avg[0] = rgyrx;
-          avg[1] = rgyry;
-          avg[2] = rgyrz;
-          lavg[0] = rgyrx;
-          lavg[1] = rgyry;
-          lavg[2] = rgyrz;
-          initrun = false;
-        } else {
-          avg[0] = (avg[0] * GYRO_LP_BETA) + (rgyrx * (1.0 - GYRO_LP_BETA));
-          avg[1] = (avg[1] * GYRO_LP_BETA) + (rgyry * (1.0 - GYRO_LP_BETA));
-          avg[2] = (avg[2] * GYRO_LP_BETA) + (rgyrz * (1.0 - GYRO_LP_BETA));
+      trkset.gyroOffset(gyrxoff, gyryoff, gyrzoff);
 
-          // Calculate differential of signal
-          float diff[3];
-          static int64_t lastUpdate = 0;
-          int64_t now = micros64();
+      k_mutex_lock(&sensor_mutex, K_FOREVER);
 
-          float deltat = ((now - lastUpdate) / 1000000.0f);  // set integration time by time elapsed
-                                                             // since last filter update
-          lastUpdate = now;
+      gyrx = rgyrx - gyrxoff;
+      gyry = rgyry - gyryoff;
+      gyrz = rgyrz - gyrzoff;
 
-          for (int i = 0; i < 3; i++) {
-            diff[i] = fabs(avg[i] - lavg[i]) / deltat;
-            lavg[i] = avg[i];
-          }
+      // Apply Rotation
+      float tmpgyr[3] = {gyrx, gyry, gyrz};
+      rotate(tmpgyr, rotation);
+      gyrx = tmpgyr[0];
+      gyry = tmpgyr[1];
+      gyrz = tmpgyr[2];
 
-          // If rate of change low then decrement the counter
-          if (diff[0] < GYRO_PASS_DIFF && diff[1] < GYRO_PASS_DIFF && diff[2] < GYRO_PASS_DIFF)
-            passcount--;
-          // Otherwise start over
-          else {
-            passcount = GYRO_STABLE_SAMPLES;
-            initrun = true;
-          }
-
-          // If enough samples taken at low motion, Success
-          if (passcount == 0) {
-            trkset.setGyroOffset(avg[0], avg[1], avg[2]);
-            clearLEDFlag(LED_GYROCAL);
-            gyro_calibrated = true;
-          }
-        }
-      } else {
-        trkset.gyroOffset(gyrxoff, gyryoff, gyrzoff);
-
-        k_mutex_lock(&sensor_mutex, K_FOREVER);
-
-        gyrx = rgyrx - gyrxoff;
-        gyry = rgyry - gyryoff;
-        gyrz = rgyrz - gyrzoff;
-
-        // Apply Rotation
-        float tmpgyr[3] = {gyrx, gyry, gyrz};
-        rotate(tmpgyr, rotation);
-        gyrx = tmpgyr[0];
-        gyry = tmpgyr[1];
-        gyrz = tmpgyr[2];
-
-        k_mutex_unlock(&sensor_mutex);
-      }
+      k_mutex_unlock(&sensor_mutex);
     }
 
     // Magnetometer

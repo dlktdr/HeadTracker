@@ -40,7 +40,6 @@
   DV(uint16_t, rollout, 1, -1)  \
   DV(uint16_t, panout, 1, -1)   \
   DV(bool, isCalibrated, 2, -1) \
-  DV(bool, gyroCal, 2, -1)      \
   DV(bool, btcon, 10, -1)       \
   DV(bool, isSense, 10, -1)     \
   DV(bool, trpenabled, 10, -1)  \
@@ -365,7 +364,6 @@ class TrackerSettings
   void setChannelOutValues(uint16_t vals[16]);
   void setQuaternion(float q[4]);
   void setDataItemSend(const char *var, bool enabled);
-  void setGyroCalibrated(bool gc) { gyroCal = gc; }
   void stopAllData();
   void setJSONDataList(DynamicJsonDocument &json);
 
