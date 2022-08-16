@@ -687,12 +687,11 @@ void sensor_Thread()
       }
       acount++;
 #endif
+      k_mutex_lock(&sensor_mutex, K_FOREVER);
 
       IMU.readRawAccel(raccx, raccy, raccz);
       raccx *= -1.0;  // Flip X to make classic cartesian (+X Right, +Y Up, +Z Vert)
       trkset.accOffset(accxoff, accyoff, acczoff);
-
-      k_mutex_lock(&sensor_mutex, K_FOREVER);
 
       accx = raccx - accxoff;
       accy = raccy - accyoff;
@@ -723,13 +722,11 @@ void sensor_Thread()
       }
       gcount++;
 #endif
-
+      k_mutex_lock(&sensor_mutex, K_FOREVER);
       IMU.readRawGyro(rgyrx, rgyry, rgyrz);
       rgyrx *= -1.0;  // Flip X to match other sensors
 
       trkset.gyroOffset(gyrxoff, gyryoff, gyrzoff);
-
-      k_mutex_lock(&sensor_mutex, K_FOREVER);
 
       gyrx = rgyrx - gyrxoff;
       gyry = rgyry - gyryoff;
@@ -758,14 +755,14 @@ void sensor_Thread()
       mcount++;
 #endif
 
+      k_mutex_lock(&sensor_mutex, K_FOREVER);
+
       IMU.readRawMagnet(rmagx, rmagy, rmagz);
       // On first read set the min/max values to this reading
       // Get Offsets + Soft Iron Offesets
       float magsioff[9];
       trkset.magOffset(magxoff, magyoff, magzoff);
       trkset.magSiOffset(magsioff);
-
-      k_mutex_lock(&sensor_mutex, K_FOREVER);
 
       // Calibrate Hard Iron Offsets
       magx = rmagx - magxoff;
