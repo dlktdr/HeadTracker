@@ -164,6 +164,10 @@ void calculate_Thread()
     u2[1] = -fmagy;
     u2[2] = -fmagz;
 
+    printk("%.3f,", rgyrx);
+    printk("%.3f,", rgyry);
+    printk("%.3f\r\n", rgyrz);
+
     DcmCalculate(u0, u1, u2, deltat);
 
     // Free Mutex Lock, Allow sensor updates
