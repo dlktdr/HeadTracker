@@ -77,9 +77,7 @@ QByteArray BoardNano33BLE::dataout()
 
 void BoardNano33BLE::requestHardware()
 {
-    sendSerialJSON("FW"); // Sort of flush our receive buffers
     sendSerialJSON("FW"); // Get the firmware
-    sendSerialJSON("IH"); // Start Data Transfer right away (Im here)
 }
 
 void BoardNano33BLE::saveToRAM()

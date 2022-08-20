@@ -34,9 +34,8 @@
 #include "log.h"
 #include "nano33ble.h"
 #include "pmw.h"
+#include "soc_flash.h"
 #include "trackersettings.h"
-
-#define DEBUG_SENSOR_RATES
 
 static float auxdata[10];
 static float raccx = 0, raccy = 0, raccz = 0;
@@ -131,7 +130,7 @@ int sense_Init()
 void calculate_Thread()
 {
   while (1) {
-    if (!senseTreadRun) {
+    if (!senseTreadRun || pauseForFlash) {
       rt_sleep_ms(10);
       continue;
     }
@@ -419,7 +418,7 @@ void calculate_Thread()
     int aux0ch = trkset.auxFunc0Ch();
     int aux1ch = trkset.auxFunc1Ch();
     int aux2ch = trkset.auxFunc2Ch();
-    if (aux0ch > 0 || aux1ch > 0) {
+    if (aux0ch > 0 || aux1ch > 0 || aux2ch > 0) {
       buildAuxData();
       if (aux0ch > 0) channel_data[aux0ch - 1] = auxdata[trkset.auxFunc0()];
       if (aux1ch > 0) channel_data[aux1ch - 1] = auxdata[trkset.auxFunc1()];
@@ -625,7 +624,7 @@ void sensor_Thread()
   while (1) {
     rt_sleep_us(SENSOR_PERIOD);
 
-    if (!senseTreadRun) {
+    if (!senseTreadRun || pauseForFlash) {
       continue;
     }
 

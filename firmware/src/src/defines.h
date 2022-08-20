@@ -18,6 +18,12 @@
 #define FW_VERSION STRINGIFY(VERSION)
 #define FW_BOARD "NANO33BLE"
 
+#if defined(DEBUG)
+#define DEFAULT_LOG_LEVEL DEBUG
+#else
+#define DEFAULT_LOG_LEVEL INFO
+#endif
+
 #define BUTTON_HOLD_TIME 1           // How long should the button be held for a normal press (ms)
 #define BUTTON_LONG_PRESS_TIME 1000  // How long to hold button Enable/Disables Tilt/Roll/Pan (ms)
 
@@ -29,7 +35,7 @@
 #define SENSOR_PERIOD 4000       // (us) 100hz Read Sensors
 #define CALCULATE_PERIOD 6000    // (us) 166hz IMU calculations
 #define PWM_FREQUENCY 50         // (ms) PWM Period
-#define UIRESPONSIVE_TIME 10000  // (ms) 10Seconds without an ack data will stop;
+#define PAUSE_BEFORE_FLASH 60    // (ms) Time to pause all threads before Flash writing
 
 // Analog Filters 1 Euro Filter
 #define AN_CH_CNT 4
@@ -80,14 +86,15 @@ extern volatile bool gyro_calibrated;
 // and can't be used by Zephyr
 // Cannot use GPIOTE interrupt as I override the interrupt handler in PPMIN
 
-// Known good 16,17,18,19
-// 14/15 used for BT LNA
-#define SERIALIN1_PPICH 16
-#define SERIALIN2_PPICH 15
-#define SERIALOUT_PPICH 1
-#define PPMIN_PPICH1 17
-#define PPMIN_PPICH2 18
-#define PPMOUT_PPICH 19
+#define PPMOUT_PPICH 0
+#define SERIALIN1_PPICH 1
+#define SERIALIN2_PPICH 2
+#define SERIALOUT_PPICH 3
+#define PPMIN_PPICH1 4
+#define PPMIN_PPICH2 5
+// 6 Used
+// 7 Enable always gets flipped off
+// 8+ ??
 
 #define SERIAL_UARTE_CH 1
 
