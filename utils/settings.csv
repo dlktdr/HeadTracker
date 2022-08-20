@@ -1,76 +1,102 @@
-"Setting Type (bool, u8 s8 u16 s16 u32 s32 float double)",Setting / Data,Name,Default,Min,Max,Description
-,,,,,,
-float,Const,FLOAT_MIN,-1000000,,,
-float,Const,FLOAT_MAX,1000000,,,
-u16,Const,MIN_PWM,988,,,
-u16,Const,MAX_PWM,2012,,,
-u16,Const,DEF_MIN_PWM,1050,,,
-u16,Const,DEF_MAX_PWM,1950,,,
-u16,Const,PPM_CENTER,1500,,,
-float,Const,MIN_GAIN,0.01,,,
-float,Const,MAX_GAIN,35,,,
-u8,Const,BT_CHANNELS,8,,,
-u8,Const,MAX_CHANNELS,16,,,
-,,,,,,
-,,,,,,
-float,Data,magx,,,,Raw Sensor Mag X
-float ,Data,magy,,,,Raw Sensor Mag Y
-float ,Data,magz,,,,Raw Sensor Mag Z
-float,Data,gyrox,,,,Raw Sensor Gyro X
-float,Data,gyroy,,,,Raw Sensor Gyro Y
-float,Data,gyroz,,,,Raw Sensor Gyro Z
-float,Data,accx,,,,Raw Sensor Accel X
-float,Data,accy,,,,Raw Sensor Accel Y
-float,Data,accz,,,,Raw Sensor Accel Z
-u16,Data,chout[16],,,,Channel Outputs
-u16,Data,btch[BT_CHANNELS],,,,Bluetooth Inputs
-u16,Data,ppmch[16],,,,PPM Inputs
-u16,Data,sbusch[16],,,,SBUS Channels
-float,Data,quat[4],,,,Quaternion Output (Tilt / Roll / Pan)
-u8,Data,btaddr[18],,,,Local Bluetooth Address
-u8,Data,btrmt[18],,,,Remote Bluetooth Address
-float,Data,offmagx,,,,Calibrated Mag X
-float,Data,offmagy,,,,Calibrated Mag Y
-float,Data,offmagz,,,,Calibrated Mag Z
-float,Data,offgyrx,,,,Calibrated Gyro X
-float,Data,offgyry,,,,Calibrated Gyro Y
-float,Data,offgyrz,,,,Calibrated Gyro Z
-float,Data,offaccx,,,,Calibrated Accel X
-float,Data,offaccy,,,,Calibrated Accel Y
-float,Data,offaccz,,,,Calibrated Accel Z
-u16,Data,tiltout,,,,Board Tilt Output (us)
-u16,Data,rollout,,,,Board Roll Output (us)
-u16,Data,panout,,,,Board Pan Output (us)
-bool,Data,iscal,,,,Has the board been Calibrated
-bool,Data,btcon,,,,Bluetooth is connected
-u8,Data,brdtype,,,,"Board Type (0=Unknown, 1=Nano3Ble 2=Nano33BleSense, 3=Leele)"
-bool,Data,trpenable,,,,Tilt/Roll/Pan Output Enabled
-,,,,,,
-,,,,,,
-u16,Setting,rll_min,DEF_MIN_PWM,MIN_PWM,MAX_PWM,Roll Minimum
-u16,Setting,rll_max,DEF_MAX_PWM,MIN_PWM,MAX_PWM,Roll Maximum
-u16,Setting,rll_cnt,PPM_CENTER,MIN_PWM,MAX_PWM,Roll Center
-u16,Setting,rll_gain,5,MIN_GAIN,MAX_GAIN,Roll Gain
-u16,Setting,tlt_min,DEF_MIN_PWM,MIN_PWM,MAX_PWM,Tilt Minimum
-u16,Setting,tlt_max,DEF_MAX_PWM,MIN_PWM,MAX_PWM,Tilt Maximum
-u16,Setting,tlt_cnt,PPM_CENTER,MIN_PWM,MAX_PWM,Tilt Center
-u16,Setting,tlt_gain,5,MIN_GAIN,MAX_GAIN,Tilt Gain
-u16,Setting,pan_min,DEF_MIN_PWM,MIN_PWM,MAX_PWM,Pan Minimum
-u16,Setting,pan_max,DEF_MAX_PWM,MIN_PWM,MAX_PWM,Pan Maximum
-u16,Setting,pan_cnt,PPM_CENTER,MIN_PWM,MAX_PWM,Pan Center
-u16,Setting,pan_gain,5,MIN_GAIN,MAX_GAIN,Pan Gain
-u8,Setting,tltch,0,0,MAX_CHANNELS,Tilt Output Channel
-u8,Setting,rllch,0,0,MAX_CHANNELS,Roll Output Channel
-u8,Setting,panch,0,0,MAX_CHANNELS,Pan Output Channel
-u8,Setting,alertch,0,0,MAX_CHANNELS,Alert Output Channel
-u8,Setting,servorev,0,0,7,Servo Reverse (BitMask)
-float,Setting,magxoff,0,FLOAT_MIN,FLOAT_MAX,Magnetometer X Calibration Offset
-float,Setting,magyoff,0,FLOAT_MIN,FLOAT_MAX,Magnetometer Y Calibration Offset
-float,Setting,magzoff,0,FLOAT_MIN,FLOAT_MAX,Magnetometer Z Calibration Offset
-float,Setting,magsioff[9],0,FLOAT_MIN,FLOAT_MAX,Magnetometer Soft Iron Offset Matrix
-float,Setting,accxoff,0,FLOAT_MIN,FLOAT_MAX,Accelerometer X Calibration Offset
-float,Setting,accyoff,0,FLOAT_MIN,FLOAT_MAX,Accelerometer Y Calibration Offset
-float,Setting,acczoff,0,FLOAT_MIN,FLOAT_MAX,Accelerometer Z Calibration Offset
-float,Setting,gyrxoff,0,FLOAT_MIN,FLOAT_MAX,Gyrometer X Calibration Offset
-float,Setting,gyryoff,0,FLOAT_MIN,FLOAT_MAX,Gyrometer Y Calibration Offset
-float,Setting,gyrzoff,0,FLOAT_MIN,FLOAT_MAX,Gyrometer Z Calibration Offset
+"Setting Type (bool, u8 s8 u16 s16 u32 s32 float double)",Setting / Data,Name,Default,Min,Max,Description,Firmware onChange()
+,,,,,,,
+float,Const,FLOAT_MIN,-1000000,,,,
+float,Const,FLOAT_MAX,1000000,,,,
+u16,Const,MIN_PWM,988,,,,
+u16,Const,MAX_PWM,2012,,,,
+u16,Const,DEF_MIN_PWM,1050,,,,
+u16,Const,DEF_MAX_PWM,1950,,,,
+u16,Const,PPM_CENTER,1500,,,,
+float,Const,MIN_GAIN,0.01,,,,
+float,Const,MAX_GAIN,35,,,,
+u8,Const,BT_CHANNELS,8,,,,
+u8,Const,MAX_CHANNELS,16,,,,
+,,,,,,,
+,,,,,,,
+float,Data,MagX,,,,Raw Sensor Mag X,
+float ,Data,MagY,,,,Raw Sensor Mag Y,
+float ,Data,MagZ,,,,Raw Sensor Mag Z,
+float,Data,GyroX,,,,Raw Sensor Gyro X,
+float,Data,GyroY,,,,Raw Sensor Gyro Y,
+float,Data,GyroZ,,,,Raw Sensor Gyro Z,
+float,Data,AccX,,,,Raw Sensor Accel X,
+float,Data,AccY,,,,Raw Sensor Accel Y,
+float,Data,AccZ,,,,Raw Sensor Accel Z,
+u16,Data,ChOut[16],,,,Channel Outputs,
+u16,Data,BtCh[BT_CHANNELS],,,,Bluetooth Inputs,
+u16,Data,PpmCh[16],,,,PPM Inputs,
+u16,Data,SbusCh[16],,,,SBUS Channels,
+float,Data,Quat[4],,,,Quaternion Output (Tilt / Roll / Pan),
+u8,Data,BtAddr[18],,,,Local Bluetooth Address,
+u8,Data,BtRmt[18],,,,Remote Bluetooth Address,
+float,Data,Off_MagX,,,,Calibrated Mag X,
+float,Data,Off_MagY,,,,Calibrated Mag Y,
+float,Data,Off_MagZ,,,,Calibrated Mag Z,
+float,Data,Off_GyrX,,,,Calibrated Gyro X,
+float,Data,Off_GyrY,,,,Calibrated Gyro Y,
+float,Data,Off_GyrZ,,,,Calibrated Gyro Z,
+float,Data,Off_AccX,,,,Calibrated Accel X,
+float,Data,Off_AccY,,,,Calibrated Accel Y,
+float,Data,Off_AccZ,,,,Calibrated Accel Z,
+u16,Data,TiltOut,,,,Board Tilt Output (us),
+u16,Data,RollOut,,,,Board Roll Output (us),
+u16,Data,PanOut,,,,Board Pan Output (us),
+bool,Data,IsCal,,,,Has the board been Calibrated,
+bool,Data,BtCon,,,,Bluetooth is connected,
+u8,Data,BrdType,,,,"Board Type (0=Unknown, 1=Nano3Ble 2=Nano33BleSense, 3=Leele)",
+bool,Data,TrpEnabled,,,,Tilt/Roll/Pan Output Enabled,
+,,,,,,,
+Tilt Roll Pan Limits,,,,,,,
+u16,Setting,Rll_Min,DEF_MIN_PWM,MIN_PWM,MAX_PWM,Roll Minimum,
+u16,Setting,Rll_Max,DEF_MAX_PWM,MIN_PWM,MAX_PWM,Roll Maximum,
+u16,Setting,Rll_Cnt,PPM_CENTER,MIN_PWM,MAX_PWM,Roll Center,
+u16,Setting,Rll_Gain,5,MIN_GAIN,MAX_GAIN,Roll Gain,
+u16,Setting,Tlt_Min,DEF_MIN_PWM,MIN_PWM,MAX_PWM,Tilt Minimum,
+u16,Setting,Tlt_Max,DEF_MAX_PWM,MIN_PWM,MAX_PWM,Tilt Maximum,
+u16,Setting,Tlt_Cnt,PPM_CENTER,MIN_PWM,MAX_PWM,Tilt Center,
+u16,Setting,Tlt_Gain,5,MIN_GAIN,MAX_GAIN,Tilt Gain,
+u16,Setting,Pan_Min,DEF_MIN_PWM,MIN_PWM,MAX_PWM,Pan Minimum,
+u16,Setting,Pan_Max,DEF_MAX_PWM,MIN_PWM,MAX_PWM,Pan Maximum,
+u16,Setting,Pan_Cnt,PPM_CENTER,MIN_PWM,MAX_PWM,Pan Center,
+u16,Setting,Pan_Gain,5,MIN_GAIN,MAX_GAIN,Pan Gain,
+,,,,,,,
+Output Channels,,,,,,,
+u8,Setting,TltCh,0,0,MAX_CHANNELS,Tilt Output Channel,
+u8,Setting,RllCh,0,0,MAX_CHANNELS,Roll Output Channel,
+u8,Setting,PanCh,0,0,MAX_CHANNELS,Pan Output Channel,
+u8,Setting,AlertCh,0,0,MAX_CHANNELS,Alert Output Channel,
+u8,Setting,Pwm0,0,0,MAX_CHANNELS,PWM 0 Channel,
+u8,Setting,Pwm1,0,0,MAX_CHANNELS,PWM 1 Channel,
+u8,Setting,Pwm2,0,0,MAX_CHANNELS,PWM 2 Channel,
+u8,Setting,Pwm3,0,0,MAX_CHANNELS,PWM 3 Channel,
+u8,Setting,An0Ch,0,0,MAX_CHANNELS,Analog 0 Channel,
+u8,Setting,An1Ch,0,0,MAX_CHANNELS,Analog 1 Channel,
+u8,Setting,An2Ch,0,0,MAX_CHANNELS,Analog 2 Channel,
+u8,Setting,An3Ch,0,0,MAX_CHANNELS,Analog 3 Channel,
+,,,,,,,
+,,,,,,,
+u8,Setting,ServoRev,0,0,7,Servo Reverse (BitMask),
+,,,,,,,
+Calibration data,,,,,,,
+float,Setting,MagXOff,0,FLOAT_MIN,FLOAT_MAX,Magnetometer X Calibration Offset,
+float,Setting,MagYOff,0,FLOAT_MIN,FLOAT_MAX,Magnetometer Y Calibration Offset,
+float,Setting,MagZOff,0,FLOAT_MIN,FLOAT_MAX,Magnetometer Z Calibration Offset,
+float,Setting,MagSiOff[9],0,FLOAT_MIN,FLOAT_MAX,Magnetometer Soft Iron Offset Matrix,
+float,Setting,AccXOff,0,FLOAT_MIN,FLOAT_MAX,Accelerometer X Calibration Offset,
+float,Setting,AccYOff,0,FLOAT_MIN,FLOAT_MAX,Accelerometer Y Calibration Offset,
+float,Setting,AccZOff,0,FLOAT_MIN,FLOAT_MAX,Accelerometer Z Calibration Offset,
+float,Setting,GyrXOff,0,FLOAT_MIN,FLOAT_MAX,Gyrometer X Calibration Offset,
+float,Setting,GyrYOff,0,FLOAT_MIN,FLOAT_MAX,Gyrometer Y Calibration Offset,
+float,Setting,GyrZOff,0,FLOAT_MIN,FLOAT_MAX,Gyrometer Z Calibration Offset,
+,,,,,,,
+IO Pin Settings,,,,,,,
+s8,Setting,ButtonPin,-1,64,-1,Button Pin,buttonChanged()
+s8,Setting,PpmOutPin,-1,64,-1,PPM Output Pin,buttonChanged()
+s8,Setting,PpmInPin,-1,64,-1,PPM Input Pin,buttonChanged()
+s8,Setting,UartRxPin,-1,64,-1,UART Receive Pin,buttonChanged()
+s8,Setting,UartTxPin,-1,64,-1,UART Transmit Pin,buttonChanged()
+,,,,,,,
+Serial Settings,,,,,,,
+u8,Setting,SbRate,30,150,80,SBUS Transmit Freqency,
+bool,Setting,UartRxInv,TRUE,0,1,UART Receieve Inverted,
+bool,Setting,UartTxInv,TRUE,0,1,UART Transmit Inverted,
