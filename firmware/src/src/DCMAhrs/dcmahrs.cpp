@@ -173,7 +173,7 @@ void DcmAHRSInitialize(float u0[3], float u1[3], float u2[3])
   VectorDotProduct(V_buff, V_buff, &f_buff);
   f_buff = 1. / sqrt(f_buff);
   if (f_buff > 0.001)
-    for (int i = 0; i < 3; i++) V_buff[i] *= sqrt(f_buff);
+    for (int i = 0; i < 3; i++) V_buff[i] *= f_buff;
 
   /* Tilt and roll in radians */
   tilt0 = -asin(V_buff[0]);
@@ -336,7 +336,7 @@ void DcmCalculate(float u0[3], float u1[3], float u2[3], float deltat)
   VectorDotProduct(V_buff, V_buff, &f_buff);
   f_buff = 1. / sqrt(f_buff);
   if (f_buff > 0.001)
-    for (int i = 0; i < 3; i++) V_buff[i] *= sqrt(f_buff);
+    for (int i = 0; i < 3; i++) V_buff[i] *= f_buff;
 
   /* Compute the roll-pitch error vector: cross product of measured */
   /* earth Z vector with estimated earth vector expressed in body   */
