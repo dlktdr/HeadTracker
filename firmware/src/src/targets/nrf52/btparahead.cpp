@@ -56,7 +56,7 @@ static constexpr uint8_t START_STOP = 0x7E;
 static constexpr uint8_t BYTE_STUFF = 0x7D;
 static constexpr uint8_t STUFF_MASK = 0x20;
 static uint8_t buffer[BLUETOOTH_LINE_LENGTH + 1];
-static uint16_t chan_vals[BT_CHANNELS];
+static uint16_t chan_vals[TrackerSettings::BT_CHANNELS];
 static uint8_t bufferIndex;
 static uint8_t crc;
 static uint8_t ct[40];
@@ -148,7 +148,7 @@ void BTHeadStart()
   bleconnected = false;
 
   // Center all Channels
-  for (int i = 0; i < BT_CHANNELS; i++) {
+  for (int i = 0; i < TrackerSettings::BT_CHANNELS; i++) {
     chan_vals[i] = TrackerSettings::PPM_CENTER;
   }
 
@@ -215,7 +215,7 @@ void BTHeadSetChannel(int channel, const uint16_t value)
 {
   static uint16_t lovch = 0xFFFF;
 
-  if (channel >= BT_CHANNELS) return;
+  if (channel >= TrackerSettings::BT_CHANNELS) return;
 
   // If channel disabled, make a note for overriden characteristic
   // Actually send it at center so PARA still works
@@ -451,7 +451,7 @@ int setTrainer(uint8_t *addr)
 
   buffer[bufferIndex++] = START_STOP;  // start byte
   pushByte(0x80);                      // trainer frame type?
-  for (int channel = 0; channel < BT_CHANNELS; channel += 2, cur += 3) {
+  for (int channel = 0; channel < TrackerSettings::BT_CHANNELS; channel += 2, cur += 3) {
     uint16_t channelValue1 = chan_vals[channel];
     uint16_t channelValue2 = chan_vals[channel + 1];
 

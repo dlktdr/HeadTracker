@@ -158,7 +158,7 @@ void io_Thread()
     if (_counter > 10000) _counter = 0;
 
     static bool lastButtonDown = false;
-    butpin = trkset.buttonPin();
+    butpin = trkset.getButtonPin();
 
     // Make sure button pin is enabled
     if (butpin < 1 || butpin > 13) continue;
