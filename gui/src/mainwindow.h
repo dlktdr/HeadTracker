@@ -26,6 +26,9 @@ const QString version="2.20"; // Current Version Number
 const QString versionsuffix=""; // Version Suffix
 const QStringList firmwares={"BNO055","NANO33BLE"}; // Allowable hardware types
 const QUrl helpurl("https://headtracker.gitbook.io/head-tracker/settings/gui-settings");
+const QUrl discordurl("https://discord.gg/ux5hEaNSPQ");
+const QUrl githuburl("https://github.com/dlktdr/HeadTracker");
+const QUrl donateurl("https://www.paypal.com/donate?hosted_button_id=NMU3B9Z82JB3A");
 
 constexpr int IMHERETIME=8000; // milliseconds before sending another I'm Here Message to keep communication open
 constexpr int MAX_TX_FAULTS=8; // Number of times to try re-sending data
@@ -92,6 +95,7 @@ protected:
 private slots:
     void addToLog(QString log, int ll=0);
     void findSerialPorts();
+    void connectDisconnectClicked();
     void serialConnect();
     void serialDisconnect();
     void serialError(QSerialPort::SerialPortError);
@@ -125,6 +129,9 @@ private slots:
     void BTModeChanged();
     void reboot();
     void openHelp();
+    void openDiscord();
+    void openDonate();
+    void openGitHub();
     void showPinView();
 
 

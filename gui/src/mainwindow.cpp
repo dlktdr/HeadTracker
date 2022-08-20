@@ -98,9 +98,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(serialcon, SIGNAL(errorOccurred(QSerialPort::SerialPortError)),this,SLOT(serialError(QSerialPort::SerialPortError)));
 
     // Buttons
-    connect(ui->cmdConnect,SIGNAL(clicked()),this,SLOT(serialConnect()));
-    connect(ui->cmdDisconnect,SIGNAL(clicked()),this,SLOT(serialDisconnect()));
-    connect(ui->cmdStore,SIGNAL(clicked()),this,SLOT(storeToRAM()));
+    connect(ui->cmdConnect,&QPushButton::clicked,this,&MainWindow::connectDisconnectClicked);
     connect(ui->cmdSend,SIGNAL(clicked()),this,SLOT(manualSend()));
     //connect(ui->cmdStartGraph,SIGNAL(clicked()),this,SLOT(startGraph()));
     //connect(ui->cmdStopGraph,SIGNAL(clicked()),this,SLOT(stopGraph()));
@@ -216,10 +214,13 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->actionFirmware_Wizard,SIGNAL(triggered()),this,SLOT(uploadFirmwareWizard()));
     connect(ui->actionShow_Data,SIGNAL(triggered()),this,SLOT(showDiagsClicked()));
     connect(ui->actionShow_Serial_Transmissions,SIGNAL(triggered()),this,SLOT(showSerialDiagClicked()));
-    connect(ui->actionChannel_Viewer,SIGNAL(triggered()),this,SLOT(showChannelViewerClicked()));
-    connect(ui->actionOnline_Help, SIGNAL(triggered()),this, SLOT(openHelp()));
+    connect(ui->actionChannel_Viewer,SIGNAL(triggered()),this,SLOT(showChannelViewerClicked()));    
     connect(ui->actionPinout, SIGNAL(triggered()),this, SLOT(showPinView()));
     connect(ui->actionEraseFlash, SIGNAL(triggered()),this, SLOT(eraseFlash()));
+    connect(ui->actionOnline_Help, SIGNAL(triggered()),this, SLOT(openHelp()));
+    connect(ui->actionDonate, SIGNAL(triggered()),this, SLOT(openDonate()));
+    connect(ui->action_GitHub, SIGNAL(triggered()),this, SLOT(openGitHub()));
+    connect(ui->action_Discord_Chat, SIGNAL(triggered()),this, SLOT(openDiscord()));
 
     // Tab Widget
     connect(ui->tabBLE,&QTabWidget::currentChanged,this,&MainWindow::BLE33tabChanged);
@@ -252,6 +253,15 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+
+void MainWindow::connectDisconnectClicked()
+{
+  if(serialcon->isOpen())
+    serialDisconnect();
+  else
+    serialConnect();
+}
+
 // Connects to the serial port
 
 void MainWindow::serialConnect()
@@ -263,6 +273,9 @@ void MainWindow::serialConnect()
     // If open close it first
     if(serialcon->isOpen())
         serialDisconnect();
+
+    ui->cmdConnect->setText(tr(" Disconnect"));
+    ui->cmdConnect->setIcon(QIcon(":/Icons/images/disconnect.svg"));
 
     // Setup serial port 8N1, 57600 Baud
     serialcon->setPortName(port);
@@ -282,8 +295,6 @@ void MainWindow::serialConnect()
     serialDebug->clear();
     trkset.clear();
 
-    ui->cmdDisconnect->setEnabled(true);
-    ui->cmdConnect->setEnabled(false);
     ui->cmdChannelViewer->setEnabled(false);
     ui->actionEraseFlash->setEnabled(true);
     addToLog(tr("Connected to ") + serialcon->portName());
@@ -319,19 +330,19 @@ void MainWindow::serialDisconnect()
     }
 
     statusMessage(tr("Disconnected"));
-    ui->cmdDisconnect->setEnabled(false);
+    ui->cmdConnect->setText(tr(" Connect"));
+    ui->cmdConnect->setIcon(QIcon(":/Icons/images/connect.svg"));
     ui->cmdChannelViewer->setEnabled(false);
-    ui->cmdConnect->setEnabled(true);
     ui->cmdStopGraph->setEnabled(false);
     ui->cmdStartGraph->setEnabled(false);
     ui->cmdSaveNVM->setEnabled(false);
     ui->cmdReboot->setEnabled(false);
-    ui->cmdStore->setEnabled(false);
     ui->servoPan->setShowActualPosition(true);
     ui->servoTilt->setShowActualPosition(true);
     ui->servoRoll->setShowActualPosition(true);
     ui->cmdSend->setEnabled(false);
     ui->cmdCalibrate->setEnabled(false);
+    ui->cmdResetCenter->setEnabled(false);
     ui->stackedWidget->setCurrentIndex(0);
     ui->servoPan->setShowActualPosition(false);
     ui->servoTilt->setShowActualPosition(false);
@@ -864,8 +875,6 @@ void MainWindow::updateFromUI()
     trkset.setInvertedPpmIn(ui->chkInvertedPPMIn->isChecked());
     trkset.setResetOnWave(ui->chkResetCenterWave->isChecked());
 
-
-    ui->cmdStore->setEnabled(true);
     ui->cmdSaveNVM->setEnabled(true);
 
     // Use timer to prevent too many writes while drags, etc.. happen
@@ -1074,7 +1083,7 @@ void MainWindow::requestTimeout()
 
     // Otherwise increment to the next board and try again
     if(boardRequestIndex == boards.length()) {
-        msgbox->setText(tr("Was unable to determine the board type"));
+        msgbox->setText(tr("Was unable to determine the board type\n\nHave you written the firmware to the board yet?"));
         msgbox->setWindowTitle("Error");
         msgbox->show();
         statusMessage(tr("Board discovery failed"));
@@ -1101,7 +1110,6 @@ void MainWindow::saveToRAMTimeout()
     // Request hardware from all board types
     foreach(BoardType *brd, boards) {
         brd->_saveToRAM();
-        ui->cmdStore->setEnabled(false);
     }
 }
 
@@ -1287,7 +1295,22 @@ void MainWindow::reboot()
 
 void MainWindow::openHelp()
 {
-    QDesktopServices::openUrl(helpurl);
+  QDesktopServices::openUrl(helpurl);
+}
+
+void MainWindow::openDiscord()
+{
+  QDesktopServices::openUrl(discordurl);
+}
+
+void MainWindow::openDonate()
+{
+  QDesktopServices::openUrl(donateurl);
+}
+
+void MainWindow::openGitHub()
+{
+  QDesktopServices::openUrl(githuburl);
 }
 
 void MainWindow::showPinView()
@@ -1303,7 +1326,6 @@ void MainWindow::paramSendStart()
 void MainWindow::paramSendComplete()
 {
     statusMessage(tr("Parameter(s) saved"), 5000);
-    ui->cmdStore->setEnabled(false);
 }
 
 void MainWindow::paramSendFailure(int)
@@ -1382,6 +1404,7 @@ void MainWindow::boardDiscovered(BoardType *brd)
         ui->cmdSend->setEnabled(true);
         ui->cmdSaveNVM->setEnabled(true);
         ui->cmdCalibrate->setEnabled(true);
+        ui->cmdResetCenter->setEnabled(true);
         ui->cmdReboot->setEnabled(true);
         ui->stackedWidget->setCurrentIndex(3);
         ui->cmdChannelViewer->setEnabled(true);
