@@ -587,6 +587,9 @@
                <layout class="QGridLayout" name="gridLayout_7">
                 <item row="1" column="0">
                  <widget class="QLabel" name="label_45">
+                  <property name="toolTip">
+                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Please see the video online &lt;span style=&quot; font-weight:700;&quot;&gt;Help-&amp;gt;Online Help -&amp;gt; GUI Setup -&amp;gt; General&lt;/span&gt; for an explanation&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  </property>
                   <property name="text">
                    <string>Tilt (X)</string>
                   </property>
@@ -594,6 +597,9 @@
                 </item>
                 <item row="2" column="0">
                  <widget class="QSpinBox" name="spnRotX">
+                  <property name="toolTip">
+                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Please see the video online &lt;span style=&quot; font-weight:700;&quot;&gt;Help-&amp;gt;Online Help -&amp;gt; GUI Setup -&amp;gt; General&lt;/span&gt; for an explanation&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  </property>
                   <property name="suffix">
                    <string>°</string>
                   </property>
@@ -607,6 +613,9 @@
                 </item>
                 <item row="1" column="1">
                  <widget class="QLabel" name="label_46">
+                  <property name="toolTip">
+                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Please see the video online &lt;span style=&quot; font-weight:700;&quot;&gt;Help-&amp;gt;Online Help -&amp;gt; GUI Setup -&amp;gt; General&lt;/span&gt; for an explanation&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  </property>
                   <property name="text">
                    <string>Roll (Y)</string>
                   </property>
@@ -614,6 +623,9 @@
                 </item>
                 <item row="2" column="1">
                  <widget class="QSpinBox" name="spnRotY">
+                  <property name="toolTip">
+                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Please see the video online &lt;span style=&quot; font-weight:700;&quot;&gt;Help-&amp;gt;Online Help -&amp;gt; GUI Setup -&amp;gt; General&lt;/span&gt; for an explanation&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  </property>
                   <property name="suffix">
                    <string>°</string>
                   </property>
@@ -627,6 +639,9 @@
                 </item>
                 <item row="2" column="2">
                  <widget class="QSpinBox" name="spnRotZ">
+                  <property name="toolTip">
+                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Please see the video online &lt;span style=&quot; font-weight:700;&quot;&gt;Help-&amp;gt;Online Help -&amp;gt; GUI Setup -&amp;gt; General&lt;/span&gt; for an explanation&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  </property>
                   <property name="suffix">
                    <string>°</string>
                   </property>
@@ -640,6 +655,9 @@
                 </item>
                 <item row="1" column="2">
                  <widget class="QLabel" name="label_47">
+                  <property name="toolTip">
+                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Please see the video online &lt;span style=&quot; font-weight:700;&quot;&gt;Help-&amp;gt;Online Help -&amp;gt; GUI Setup -&amp;gt; General&lt;/span&gt; for an explanation&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  </property>
                   <property name="text">
                    <string>Pan (Z)</string>
                   </property>
@@ -656,6 +674,9 @@
               </item>
               <item row="6" column="0" colspan="2">
                <widget class="QCheckBox" name="chkResetCenterWave">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sets the output channel you want tilt on&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
                 <property name="text">
                  <string>Center on Proximity Detect (BLE Sense Only)</string>
                 </property>
@@ -689,6 +710,9 @@
               </item>
               <item row="0" column="1" colspan="2">
                <widget class="QComboBox" name="cmbButtonPin">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Choose the pin you want to wire your center button to here&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
                 <item>
                  <property name="text">
                   <string>Disabled</string>
@@ -823,6 +847,9 @@
               </item>
               <item row="1" column="1" colspan="2">
                <widget class="QComboBox" name="cmbalertchn">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When center is pressed this will pulse this channel. Used to notify your radio when centered.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
                 <item>
                  <property name="text">
                   <string>Off</string>
@@ -3303,7 +3330,7 @@
           </size>
          </property>
          <property name="toolTip">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sets the output channel you would want this to be set to&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sets the output channel you want tilt on&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <item>
           <property name="text">
@@ -3539,7 +3566,7 @@
           </size>
          </property>
          <property name="toolTip">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sets the output channel you would want this to be set to&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sets the output channel you want pan on&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <item>
           <property name="text">
@@ -3722,7 +3749,7 @@
           </size>
          </property>
          <property name="toolTip">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sets the output channel you would want this to be set to&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sets the output channel you want roll on&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <item>
           <property name="text">
