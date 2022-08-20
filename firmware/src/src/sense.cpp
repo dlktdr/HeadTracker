@@ -595,6 +595,17 @@ void calculate_Thread()
     } else {
       rt_sleep_us(CALCULATE_PERIOD - usduration);
     }
+
+#if defined(DEBUG_SENSOR_RATES)
+    static int mcount = 0;
+    static int64_t mmic = millis64() + 1000;
+    if (mmic < millis64()) {  // Every Second
+      mmic = millis64() + 1000;
+      LOGI("Calc Rate = %d", mcount);
+      mcount = 0;
+    }
+    mcount++;
+#endif
   }
 }
 
@@ -657,6 +668,17 @@ void sensor_Thread()
 
     // Accelerometer
     if (IMU.accelerationAvailable()) {
+#if defined(DEBUG_SENSOR_RATES)
+      static int acount = 0;
+      static int64_t mic = millis64() + 1000;
+      if (mic < millis64()) {  // Every Second
+        mic = millis64() + 1000;
+        LOGI("ACC Rate = %d", acount);
+        acount = 0;
+      }
+      acount++;
+#endif
+
       IMU.readRawAccel(raccx, raccy, raccz);
       raccx *= -1.0;  // Flip X to make classic cartesian (+X Right, +Y Up, +Z Vert)
       trkset.accOffset(accxoff, accyoff, acczoff);
@@ -682,6 +704,17 @@ void sensor_Thread()
 
     // Gyrometer
     if (IMU.gyroscopeAvailable()) {
+#if defined(DEBUG_SENSOR_RATES)
+      static int gcount = 0;
+      static int64_t gmic = millis64() + 1000;
+      if (gmic < millis64()) {  // Every Second
+        gmic = millis64() + 1000;
+        LOGI("GYR Rate = %d", gcount);
+        gcount = 0;
+      }
+      gcount++;
+#endif
+
       IMU.readRawGyro(rgyrx, rgyry, rgyrz);
       rgyrx *= -1.0;  // Flip X to match other sensors
 
@@ -701,8 +734,15 @@ void sensor_Thread()
 
           // Calculate differential of signal
           float diff[3];
+          static int64_t lastUpdate = 0;
+          int64_t now = micros64();
+
+          float deltat = ((now - lastUpdate) / 1000000.0f);  // set integration time by time elapsed
+                                                             // since last filter update
+          lastUpdate = now;
+
           for (int i = 0; i < 3; i++) {
-            diff[i] = fabs(avg[i] - lavg[i]) / (SENSOR_PERIOD / 1000000.0);
+            diff[i] = fabs(avg[i] - lavg[i]) / deltat;
             lavg[i] = avg[i];
           }
 
@@ -744,6 +784,17 @@ void sensor_Thread()
 
     // Magnetometer
     if (IMU.magneticFieldAvailable()) {
+#if defined(DEBUG_SENSOR_RATES)
+      static int mcount = 0;
+      static int64_t mmic = millis64() + 1000;
+      if (mmic < millis64()) {  // Every Second
+        mmic = millis64() + 1000;
+        LOGI("MAG Rate = %d", mcount);
+        mcount = 0;
+      }
+      mcount++;
+#endif
+
       IMU.readRawMagnet(rmagx, rmagy, rmagz);
       // On first read set the min/max values to this reading
       // Get Offsets + Soft Iron Offesets
