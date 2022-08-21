@@ -65,7 +65,8 @@ HEADERS += \
     servominmax.h \
     signalbars.h \
     trackersettings.h \
-    ucrc16lib.h
+    ucrc16lib.h \
+    basetrackersettings.h
 
 FORMS += \
     calibrateble.ui \

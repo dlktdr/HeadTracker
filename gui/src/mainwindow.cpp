@@ -531,31 +531,31 @@ void MainWindow::updateToUI()
     foreach(GainSlider *wid, sliderWidgets)
         wid->blockSignals(true);
 
-    ui->servoTilt->setCenter(trkset.Tlt_cnt());
-    ui->servoTilt->setMaximum(trkset.Tlt_max());
-    ui->servoTilt->setMinimum(trkset.Tlt_min());
+    ui->servoTilt->setCenter(trkset.getTlt_Cnt());
+    ui->servoTilt->setMaximum(trkset.getTlt_Max());
+    ui->servoTilt->setMinimum(trkset.getTlt_Min());
 
-    ui->servoPan->setCenter(trkset.Pan_cnt());
-    ui->servoPan->setMaximum(trkset.Pan_max());
-    ui->servoPan->setMinimum(trkset.Pan_min());
+    ui->servoPan->setCenter(trkset.getPan_Cnt());
+    ui->servoPan->setMaximum(trkset.getPan_Max());
+    ui->servoPan->setMinimum(trkset.getPan_Min());
 
-    ui->servoRoll->setCenter(trkset.Rll_cnt());
-    ui->servoRoll->setMaximum(trkset.Rll_max());
-    ui->servoRoll->setMinimum(trkset.Rll_min());
+    ui->servoRoll->setCenter(trkset.getRll_Cnt());
+    ui->servoRoll->setMaximum(trkset.getRll_Max());
+    ui->servoRoll->setMinimum(trkset.getRll_Min());
 
-    ui->chkpanrev->setChecked(trkset.isPanReversed());
+    ui->chkpanrev->setChecked(trkset.isPanReversed() );
     ui->chkrllrev->setChecked(trkset.isRollReversed());
     ui->chktltrev->setChecked(trkset.isTiltReversed());
-    ui->chkInvertedPPM->setChecked(trkset.invertedPpmOut());
-    ui->chkInvertedPPMIn->setChecked(trkset.invertedPpmIn());
-    ui->chkResetCenterWave->setChecked(trkset.resetOnWave());
-    ui->chkSbusInInv->setChecked(trkset.invertedSBUSIn());
-    ui->chkSbusOutInv->setChecked(trkset.invertedSBUSOut());
-    ui->chkLngBttnPress->setChecked(trkset.buttonPressMode());
-    ui->chkRstOnTlt->setChecked(trkset.resetOnTiltMode());
+    ui->chkInvertedPPM->setChecked(trkset.getPpmOutInvert());
+    ui->chkInvertedPPMIn->setChecked(trkset.getPpmInInvert());
+    ui->chkResetCenterWave->setChecked(trkset.getRstOnWave());
+    ui->chkSbusInInv->setChecked(trkset.getSbInInv());
+    ui->chkSbusOutInv->setChecked(trkset.getSbOutInv());
+    ui->chkLngBttnPress->setChecked(trkset.getButLngPs());
+    ui->chkRstOnTlt->setChecked(trkset.getRstOnTlt());
 
     // Button Press Mode - Enable/Disable on long press (Disable if no button pin selected)
-    if(trkset.buttonPin() > 0)
+    if(trkset.getButtonPin() > 0)
         ui->chkLngBttnPress->setEnabled(true);
     else
         ui->chkLngBttnPress->setEnabled(false);
@@ -563,35 +563,36 @@ void MainWindow::updateToUI()
     ui->spnPPMFrameLen->setMinimum((double)TrackerSettings::PPM_MIN_FRAME / 1000.0);
     ui->spnPPMFrameLen->setMaximum((double)TrackerSettings::PPM_MAX_FRAME / 1000.0);
 
-    ui->spnLPTiltRoll->setValue(trkset.lpTiltRoll());
-    ui->spnLPPan->setValue(trkset.lpPan());
-    ui->spnLPTiltRoll2->setValue(trkset.lpTiltRoll());
-    ui->spnLPPan2->setValue(trkset.lpPan());
-    ui->spnA4Gain->setValue(trkset.analog4Gain());
-    ui->spnA4Off->setValue(trkset.analog4Offset());
-    ui->spnA5Gain->setValue(trkset.analog5Gain());
-    ui->spnA5Off->setValue(trkset.analog5Offset());
-    ui->spnA6Gain->setValue(trkset.analog6Gain());
-    ui->spnA6Off->setValue(trkset.analog6Offset());
-    ui->spnA7Off->setValue(trkset.analog7Offset());
-    ui->spnA7Gain->setValue(trkset.analog7Gain());
-    ui->spnSBUSRate->setValue(trkset.SBUSRate());
+    ui->spnLPTiltRoll->setValue(trkset.getLpTiltRoll());
+    ui->spnLPPan->setValue(trkset.getLpPan());
+    ui->spnLPTiltRoll2->setValue(trkset.getLpTiltRoll());
+    ui->spnLPPan2->setValue(trkset.getLpPan());
+    ui->spnA4Gain->setValue(trkset.getAn0Gain());
+    ui->spnA4Off->setValue(trkset.getAn0Off());
+    ui->spnA5Gain->setValue(trkset.getAn1Gain());
+    ui->spnA5Off->setValue(trkset.getAn1Off());
+    ui->spnA6Gain->setValue(trkset.getAn2Gain());
+    ui->spnA6Off->setValue(trkset.getAn2Off());
+    ui->spnA7Gain->setValue(trkset.getAn3Gain());
+    ui->spnA7Off->setValue(trkset.getAn3Off());
 
-    int panCh = trkset.panCh();
-    int rllCh = trkset.rollCh();
-    int tltCh = trkset.tiltCh();
-    int alertCh = trkset.alertCh();
-    int a4Ch = trkset.analog4Ch();
-    int a5Ch = trkset.analog5Ch();
-    int a6Ch = trkset.analog6Ch();
-    int a7Ch = trkset.analog7Ch();
-    int auxF0Ch = trkset.auxFunc0Ch();
-    int auxF1Ch = trkset.auxFunc1Ch();
-    int auxF2Ch = trkset.auxFunc2Ch();
-    int pwm0Ch = trkset.pwmCh(0);
-    int pwm1Ch = trkset.pwmCh(1);
-    int pwm2Ch = trkset.pwmCh(2);
-    int pwm3Ch = trkset.pwmCh(3);
+    ui->spnSBUSRate->setValue(trkset.getSbRate());
+
+    int panCh = trkset.getPanCh();
+    int rllCh = trkset.getRllCh();
+    int tltCh = trkset.getTltCh();
+    int alertCh = trkset.getAlertCh();
+    int a4Ch = trkset.getAn0Ch();
+    int a5Ch = trkset.getAn1Ch();
+    int a6Ch = trkset.getAn2Ch();
+    int a7Ch = trkset.getAn3Ch();
+    int auxF0Ch = trkset.getAux0Ch();
+    int auxF1Ch = trkset.getAux1Ch();
+    int auxF2Ch = trkset.getAux2Ch();
+    int pwm0Ch = trkset.getPwm0();
+    int pwm1Ch = trkset.getPwm1();
+    int pwm2Ch = trkset.getPwm2();
+    int pwm3Ch = trkset.getPwm3();
 
     // Tilt/Rll/Pan Ch
     ui->cmbpanchn->setCurrentIndex(panCh==-1?0:panCh);
@@ -607,9 +608,9 @@ void MainWindow::updateToUI()
     ui->cmbAuxFn0Ch->setCurrentIndex(auxF0Ch==-1?0:auxF0Ch);
     ui->cmbAuxFn1Ch->setCurrentIndex(auxF1Ch==-1?0:auxF1Ch);
     ui->cmbAuxFn2Ch->setCurrentIndex(auxF2Ch==-1?0:auxF2Ch);
-    ui->cmbAuxFn0->setCurrentIndex(trkset.auxFunc0());
-    ui->cmbAuxFn1->setCurrentIndex(trkset.auxFunc1());
-    ui->cmbAuxFn2->setCurrentIndex(trkset.auxFunc2());
+    ui->cmbAuxFn0->setCurrentIndex(trkset.getAux0Func());
+    ui->cmbAuxFn1->setCurrentIndex(trkset.getAux1Func());
+    ui->cmbAuxFn2->setCurrentIndex(trkset.getAux2Func());
 
     // PWM Chs
     ui->cmbPWM0->setCurrentIndex(pwm0Ch==-1?0:pwm0Ch);
@@ -619,20 +620,20 @@ void MainWindow::updateToUI()
 
     ui->cmbRemap->setCurrentIndex(ui->cmbRemap->findData(trkset.axisRemap()));
     ui->cmbSigns->setCurrentIndex(trkset.axisSign());
-    ui->cmbBtMode->setCurrentIndex(trkset.blueToothMode());
+    ui->cmbBtMode->setCurrentIndex(trkset.getBtMode());
     int rot[3];
     trkset.orientation(rot[0],rot[1],rot[2]);
     ui->spnRotX->setValue(rot[0]);
     ui->spnRotY->setValue(rot[1]);
     ui->spnRotZ->setValue(rot[2]);
 
-    ui->til_gain->setValue(trkset.Tlt_gain()*10);
-    ui->pan_gain->setValue(trkset.Pan_gain()*10);
-    ui->rll_gain->setValue(trkset.Rll_gain()*10);
+    ui->til_gain->setValue(trkset.getTlt_Gain()*10);
+    ui->pan_gain->setValue(trkset.getPan_Gain()*10);
+    ui->rll_gain->setValue(trkset.getRll_Gain()*10);
 
-    int ppout_index = trkset.ppmOutPin()-1;
-    int ppin_index = trkset.ppmInPin()-1;
-    int but_index = trkset.buttonPin()-1;
+    int ppout_index = trkset.getPpmOutPin()-1;
+    int ppin_index = trkset.getPpmInPin()-1;
+    int but_index = trkset.getButtonPin()-1;
     //int resppm_index = trkset.resetCntPPM();
     ui->cmbPpmOutPin->setCurrentIndex(ppout_index < 1 ? 0 : ppout_index);
     ui->cmbPpmInPin->setCurrentIndex(ppin_index < 1 ? 0 : ppin_index);
@@ -640,11 +641,11 @@ void MainWindow::updateToUI()
     //ui->cmbResetOnPPM->setCurrentIndex(resppm_index < 0 ? 0: resppm_index);
 
     // PPM Output Settings
-    int channels = trkset.ppmChCount();
+    int channels = trkset.getPpmChCnt();
     ui->cmbPPMChCount->setCurrentIndex(channels-1);
-    uint16_t setframelen = trkset.ppmFrame();
+    uint16_t setframelen = trkset.getPpmFrame();
     ui->spnPPMFrameLen->setValue(static_cast<double>(setframelen)/1000.0f);
-    ui->spnPPMSync->setValue(trkset.ppmSync());
+    ui->spnPPMSync->setValue(trkset.getPpmSync());
     uint32_t maxframelen = TrackerSettings::PPM_MIN_FRAMESYNC + (channels * TrackerSettings::MAX_PWM);
     if(maxframelen > setframelen) {
         ui->lblPPMOut->setText(tr("<b>Warning!</b> PPM Frame length possibly too short to support channel data"));
@@ -653,10 +654,10 @@ void MainWindow::updateToUI()
     }
 
     // BT Pair Address
-    if(trkset.pairedBTAddress().isEmpty()) {
+    if(trkset.getBtPairedAddress().isEmpty()) {
         ui->cmbBTRmtMode->setCurrentIndex(0);
     } else {
-        ui->cmbBTRmtMode->setCurrentText(trkset.pairedBTAddress());
+        ui->cmbBTRmtMode->setCurrentText(trkset.getBtPairedAddress());
     }
 
     if(ui->cmbBtMode->currentIndex() > 1) // Remote or Scanner Mode
@@ -695,72 +696,72 @@ void MainWindow::updateFromUI()
     int tltCh = ui->cmbtiltchn->currentIndex();
     int alertCh = ui->cmbalertchn->currentIndex();
     trkset.setPanCh(panCh==0?-1:panCh);
-    trkset.setRollCh(rllCh==0?-1:rllCh);
-    trkset.setTiltCh(tltCh==0?-1:tltCh);
+    trkset.setRllCh(rllCh==0?-1:rllCh);
+    trkset.setTltCh(tltCh==0?-1:tltCh);
     trkset.setAlertCh(alertCh==0?-1:alertCh);
     trkset.setRollReversed(ui->chkrllrev->isChecked());
     trkset.setPanReversed(ui->chkpanrev->isChecked());
     trkset.setTiltReversed(ui->chktltrev->isChecked());
-    trkset.setPan_cnt(ui->servoPan->centerValue());
-    trkset.setPan_min(ui->servoPan->minimumValue());
-    trkset.setPan_max(ui->servoPan->maximumValue());
-    trkset.setPan_gain(static_cast<float>(ui->pan_gain->value())/10.0f);
-    trkset.setTlt_cnt(ui->servoTilt->centerValue());
-    trkset.setTlt_min(ui->servoTilt->minimumValue());
-    trkset.setTlt_max(ui->servoTilt->maximumValue());
-    trkset.setTlt_gain(static_cast<float>(ui->til_gain->value())/10.0f);
-    trkset.setRll_cnt(ui->servoRoll->centerValue());
-    trkset.setRll_min(ui->servoRoll->minimumValue());
-    trkset.setRll_max(ui->servoRoll->maximumValue());
-    trkset.setRll_gain(static_cast<float>(ui->rll_gain->value())/10.0f);
+    trkset.setPan_Cnt(ui->servoPan->centerValue());
+    trkset.setPan_Min(ui->servoPan->minimumValue());
+    trkset.setPan_Max(ui->servoPan->maximumValue());
+    trkset.setPan_Gain(static_cast<float>(ui->pan_gain->value())/10.0f);
+    trkset.setTlt_Cnt(ui->servoTilt->centerValue());
+    trkset.setTlt_Min(ui->servoTilt->minimumValue());
+    trkset.setTlt_Max(ui->servoTilt->maximumValue());
+    trkset.setTlt_Gain(static_cast<float>(ui->til_gain->value())/10.0f);
+    trkset.setRll_Cnt(ui->servoRoll->centerValue());
+    trkset.setRll_Min(ui->servoRoll->minimumValue());
+    trkset.setRll_Max(ui->servoRoll->maximumValue());
+    trkset.setRll_Gain(static_cast<float>(ui->rll_gain->value())/10.0f);
 
     // Filters
     if(trkset.hardware() == "NANO33BLE") {
-        trkset.setLPTiltRoll(ui->spnLPTiltRoll->value());
-        trkset.setLPPan(ui->spnLPPan->value());
+        trkset.setLpTiltRoll(ui->spnLPTiltRoll->value());
+        trkset.setLpPan(ui->spnLPPan->value());
     } else if (trkset.hardware() == "BNO055") {
-        trkset.setLPTiltRoll(ui->spnLPTiltRoll2->value());
-        trkset.setLPPan(ui->spnLPPan2->value());
+        trkset.setLpTiltRoll(ui->spnLPTiltRoll2->value());
+        trkset.setLpPan(ui->spnLPPan2->value());
     }
 
     // Analog
-    trkset.setAnalog4Gain(ui->spnA4Gain->value());
-    trkset.setAnalog4Offset(ui->spnA4Off->value());
-    trkset.setAnalog5Gain(ui->spnA5Gain->value());
-    trkset.setAnalog5Offset(ui->spnA5Off->value());
-    trkset.setAnalog6Gain(ui->spnA6Gain->value());
-    trkset.setAnalog6Offset(ui->spnA6Off->value());
-    trkset.setAnalog7Gain(ui->spnA7Gain->value());
-    trkset.setAnalog7Offset(ui->spnA7Off->value());
+    trkset.setAn0Gain(ui->spnA4Gain->value());
+    trkset.setAn0Off(ui->spnA4Off->value());
+    trkset.setAn1Gain(ui->spnA5Gain->value());
+    trkset.setAn1Off(ui->spnA5Off->value());
+    trkset.setAn2Gain(ui->spnA6Gain->value());
+    trkset.setAn2Off(ui->spnA6Off->value());
+    trkset.setAn3Gain(ui->spnA7Gain->value());
+    trkset.setAn3Off(ui->spnA7Off->value());
     int an4Ch = ui->cmbA4Ch->currentIndex();
     int an5Ch = ui->cmbA5Ch->currentIndex();
     int an6Ch = ui->cmbA6Ch->currentIndex();
     int an7Ch = ui->cmbA7Ch->currentIndex();
-    trkset.setAnalog4Ch(an4Ch==0?-1:an4Ch);
-    trkset.setAnalog5Ch(an5Ch==0?-1:an5Ch);
-    trkset.setAnalog6Ch(an6Ch==0?-1:an6Ch);
-    trkset.setAnalog7Ch(an7Ch==0?-1:an7Ch);
+    trkset.setAn0Ch(an4Ch==0?-1:an4Ch);
+    trkset.setAn1Ch(an5Ch==0?-1:an5Ch);
+    trkset.setAn2Ch(an6Ch==0?-1:an6Ch);
+    trkset.setAn3Ch(an7Ch==0?-1:an7Ch);
 
     // Aux
     int auxF0Ch = ui->cmbAuxFn0Ch->currentIndex();
     int auxF1Ch = ui->cmbAuxFn1Ch->currentIndex();
     int auxF2Ch = ui->cmbAuxFn2Ch->currentIndex();
-    trkset.setAuxFunc0Ch(auxF0Ch==0?-1:auxF0Ch);
-    trkset.setAuxFunc1Ch(auxF1Ch==0?-1:auxF1Ch);
-    trkset.setAuxFunc2Ch(auxF2Ch==0?-1:auxF2Ch);
-    trkset.setAuxFunc0(ui->cmbAuxFn0->currentIndex());
-    trkset.setAuxFunc1(ui->cmbAuxFn1->currentIndex());
-    trkset.setAuxFunc2(ui->cmbAuxFn2->currentIndex());
+    trkset.setAux0Ch(auxF0Ch==0?-1:auxF0Ch);
+    trkset.setAux1Ch(auxF1Ch==0?-1:auxF1Ch);
+    trkset.setAux2Ch(auxF2Ch==0?-1:auxF2Ch);
+    trkset.setAux0Func(ui->cmbAuxFn0->currentIndex());
+    trkset.setAux1Func(ui->cmbAuxFn1->currentIndex());
+    trkset.setAux2Func(ui->cmbAuxFn2->currentIndex());
 
     // PWM
     int pwmCh0 = ui->cmbPWM0->currentIndex();
     int pwmCh1 = ui->cmbPWM1->currentIndex();
     int pwmCh2 = ui->cmbPWM2->currentIndex();
     int pwmCh3 = ui->cmbPWM3->currentIndex();
-    trkset.setPWMCh(0,pwmCh0==0?-1:pwmCh0);
-    trkset.setPWMCh(1,pwmCh1==0?-1:pwmCh1);
-    trkset.setPWMCh(2,pwmCh2==0?-1:pwmCh2);
-    trkset.setPWMCh(3,pwmCh3==0?-1:pwmCh3);
+    trkset.setPwm0(pwmCh0==0?-1:pwmCh0);
+    trkset.setPwm1(pwmCh1==0?-1:pwmCh1);
+    trkset.setPwm2(pwmCh2==0?-1:pwmCh2);
+    trkset.setPwm3(pwmCh3==0?-1:pwmCh3);
 
     // BNO Axis Remapping
     trkset.setAxisRemap(ui->cmbRemap->currentData().toUInt());
@@ -805,10 +806,10 @@ void MainWindow::updateFromUI()
         QMessageBox::information(this,tr("Error"), message);
 
         // Reset gui to old values
-        ppout_index = trkset.ppmOutPin()-1;
-        ppin_index = trkset.ppmInPin()-1;
-        but_index = trkset.buttonPin()-1;
-        sbusinchecked = trkset.invertedSBUSIn();
+        ppout_index = trkset.getPpmOutPin()-1;
+        ppin_index = trkset.getPpmInPin()-1;
+        but_index = trkset.getButtonPin()-1;
+        sbusinchecked = trkset.getSbInInv();
         ui->cmbPpmOutPin->setCurrentIndex(ppout_index < 1 ? 0 : ppout_index);
         ui->cmbPpmInPin->setCurrentIndex(ppin_index < 1 ? 0 : ppin_index);
         ui->cmbButtonPin->setCurrentIndex(but_index < 1 ? 0 : but_index);
@@ -818,26 +819,26 @@ void MainWindow::updateFromUI()
         trkset.setPpmOutPin(pins[PIN_PPMOUT]);
         trkset.setPpmInPin(pins[PIN_PPMIN]);
         trkset.setButtonPin(pins[PIN_BUTRESET]);
-        trkset.setInvertedSBUSIn(sbusinchecked);
+        trkset.setSbInInv(sbusinchecked);
     }
 
     // Button Press Mode - Enable/Disable on long press (Disable if no button pin selected)
-    if(trkset.buttonPin() > 0)
+    if(trkset.getButtonPin() > 0)
         ui->chkLngBttnPress->setEnabled(true);
     else
         ui->chkLngBttnPress->setEnabled(false);
 
-    trkset.setButtonPressMode(ui->chkLngBttnPress->isChecked());
-    trkset.setResetOnTilt(ui->chkRstOnTlt->isChecked());
+    trkset.setButLngPs(ui->chkLngBttnPress->isChecked());
+    trkset.setRstOnTlt(ui->chkRstOnTlt->isChecked());
 
-    trkset.setInvertedSBUSOut(ui->chkSbusOutInv->isChecked());
-    trkset.setSBUSRate(ui->spnSBUSRate->value());
+    trkset.setSbOutInv(ui->chkSbusOutInv->isChecked());
+    trkset.setSbRate(ui->spnSBUSRate->value());
 
     uint16_t setframelen = ui->spnPPMFrameLen->value() * 1000;
-    trkset.setPPMFrame(setframelen);
-    trkset.setPPMSync(ui->spnPPMSync->value());
+    trkset.setPpmFrame(setframelen);
+    trkset.setPpmSync(ui->spnPPMSync->value());
     int channels = ui->cmbPPMChCount->currentIndex()+1;
-    trkset.setPpmChCount(channels);
+    trkset.setPpmChCnt(channels);
     uint32_t maxframelen = TrackerSettings::PPM_MIN_FRAMESYNC + (channels * TrackerSettings::MAX_PWM);
     if(maxframelen > setframelen) {
         ui->lblPPMOut->setText(tr("<b>Warning!</b> PPM Frame length possibly too short to support channel data"));
@@ -848,21 +849,21 @@ void MainWindow::updateFromUI()
     //int rstppm_index = ui->cmbResetOnPPM->currentIndex();
   //  trkset.setResetCntPPM(rstppm_index==0?-1:rstppm_index);
 
-    trkset.setBlueToothMode(ui->cmbBtMode->currentIndex());
+    trkset.setBtMode(ui->cmbBtMode->currentIndex());
 
     if(ui->cmbBTRmtMode->currentIndex() == 0) {
-        trkset.setPairedBTAddress();
+        trkset.setBtPairedAddress(QString());
     } else {
-        trkset.setPairedBTAddress(ui->cmbBTRmtMode->currentText().simplified());
+        trkset.setBtPairedAddress(ui->cmbBTRmtMode->currentText().simplified());
     }
 
     trkset.setOrientation(ui->spnRotX->value(),
                           ui->spnRotY->value(),
                           ui->spnRotZ->value());
 
-    trkset.setInvertedPpmOut(ui->chkInvertedPPM->isChecked());
-    trkset.setInvertedPpmIn(ui->chkInvertedPPMIn->isChecked());
-    trkset.setResetOnWave(ui->chkResetCenterWave->isChecked());
+    trkset.setPpmOutInvert(ui->chkInvertedPPM->isChecked());
+    trkset.setPpmInInvert(ui->chkInvertedPPMIn->isChecked());
+    trkset.setRstOnWave(ui->chkResetCenterWave->isChecked());
 
 
     ui->cmdStore->setEnabled(true);
@@ -959,15 +960,15 @@ void MainWindow::bleAddressDiscovered(QString str)
 
 void MainWindow::liveDataChanged()
 {
-    ui->lblBLEAddress->setText(trkset.blueToothAddress());
-    ui->btLed->setState(trkset.blueToothConnected());
-    if(trkset.blueToothConnected())
+    ui->lblBLEAddress->setText(trkset.getDataBtAddr());
+    ui->btLed->setState(trkset.getDataBtCon());
+    if(trkset.getDataBtCon())
         ui->lblBTConnected->setText(tr("Connected"));
     else
         ui->lblBTConnected->setText(tr("Not connected"));
-    if(trkset.blueToothMode() == TrackerSettings::BTDISABLE)
+    if(trkset.getBtMode() == TrackerSettings::BTDISABLE)
         ui->lblBTConnected->setText("Disabled");
-    if(trkset.tiltRollPanEnabled()) {
+    if(trkset.getDataTrpEnabled()) {
       ui->servoPan->setShowActualPosition(true);
       ui->servoTilt->setShowActualPosition(true);
       ui->servoRoll->setShowActualPosition(true);
