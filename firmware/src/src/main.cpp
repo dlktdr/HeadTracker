@@ -5,7 +5,7 @@
 
 #include <drivers/uart.h>
 #include <nrfx_rtc.h>
-#include <power/power.h>
+#include <pm/pm.h>
 #include <string.h>
 #include <sys/printk.h>
 #include <sys/util.h>
