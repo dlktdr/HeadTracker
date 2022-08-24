@@ -5,6 +5,8 @@
 #include "soc_flash.h"
 #include "trackersettings.h"
 
+K_SEM_DEFINE(button_sem, 0, 1);
+K_SEM_DEFINE(lngbutton_sem, 0, 1);
 
 volatile bool ioThreadRun = false;
 const device *gpios[2];
@@ -28,27 +30,21 @@ int dpintopin[] = {3, 10, 11, 12, 15, 13, 14, 23, 21, 27, 2, 1, 8, 13};
 // Reset Button Pressed Flag on Read
 bool wasButtonPressed()
 {
-  if (buttonpressed) {
-    buttonpressed = false;
-    return true;
-  }
-  return false;
+  if (k_sem_take(&button_sem, K_NO_WAIT)) return false;
+  return true;
 }
 
 // Reset Button Pressed Flag on Read
 bool wasButtonLongPressed()
 {
-  if (longpressedbutton) {
-    longpressedbutton = false;
-    return true;
-  }
-  return false;
+  if (k_sem_take(&lngbutton_sem, K_NO_WAIT)) return false;
+  return true;
 }
 
 // Reset Center
-void pressButton() { buttonpressed = true; }
+void pressButton() { k_sem_give(&button_sem); }
 
-void longPressButton() { longpressedbutton = true; }
+void longPressButton() { k_sem_give(&lngbutton_sem); }
 
 void setLEDFlag(uint32_t ledMode) { _ledmode |= ledMode; }
 
