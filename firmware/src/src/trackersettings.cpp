@@ -663,7 +663,7 @@ void TrackerSettings::loadJSONSettings(DynamicJsonDocument &json)
 
   // Servo Reversed
   v = json["servoreverse"];
-  if (!v.isNull()) setServoreverse(v);
+  if (!v.isNull()) setServoreverse((uint8_t)v);
 
   // Roll
   v = json["rll_min"];
