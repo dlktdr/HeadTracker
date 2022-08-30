@@ -533,7 +533,7 @@ void calculate_Thread()
     SBUS_TX_BuildData(sbus_data);
 
     // 13) Set PWM Channels
-    uint16_t pwmchs[4] = {trkset.getPwm0(),trkset.getPwm1(),trkset.getPwm2(),trkset.getPwm3()};
+    int8_t pwmchs[4] = {trkset.getPwm0(),trkset.getPwm1(),trkset.getPwm2(),trkset.getPwm3()};
     for (int i = 0; i < 4; i++) {
       int pwmch = pwmchs[i] - 1;
       if (pwmch >= 0 && pwmch < 16) {

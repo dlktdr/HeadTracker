@@ -78,13 +78,13 @@ public:
     memset(btrmt,0,sizeof(char) * 18);
 
     // Call Virtual Events after initialization
-    resetFusion();
     pinsChanged();
+    resetFusion();
   }
 
   // Virtual Events
-  virtual void resetFusion() {};
   virtual void pinsChanged() {};
+  virtual void resetFusion() {};
 
   // Roll Minimum
   inline const uint16_t& getRll_Min() {return rll_min;}
@@ -991,8 +991,8 @@ public:
 
   void loadJSONSettings(DynamicJsonDocument &json) {
     JsonVariant v;
-    bool chresetfusion = false;
     bool chpinschanged = false;
+    bool chresetfusion = false;
     v = json["rll_min"]; if(!v.isNull()) {setRll_Min(v);}
     v = json["rll_max"]; if(!v.isNull()) {setRll_Max(v);}
     v = json["rll_cnt"]; if(!v.isNull()) {setRll_Cnt(v);}
@@ -1065,10 +1065,10 @@ public:
     v = json["ppmchcnt"]; if(!v.isNull()) {setPpmChCnt(v);}
     v = json["lppan"]; if(!v.isNull()) {setLpPan(v);}
     v = json["lptiltroll"]; if(!v.isNull()) {setLpTiltRoll(v);}
-    if(chresetfusion)
-      resetFusion();
     if(chpinschanged)
       pinsChanged();
+    if(chresetfusion)
+      resetFusion();
   }
 
   void setJSONDataList(DynamicJsonDocument &json)
