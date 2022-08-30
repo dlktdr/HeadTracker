@@ -2,7 +2,6 @@
 
 from array import array
 import csv
-from email.policy import strict
 
 f = open("../gui/src/basetrackersettings.h","w")
 f.write("""\

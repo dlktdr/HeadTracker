@@ -264,45 +264,76 @@ for row in dataarrays:
 f.write("  }\n")
 
 # Choose what items to send
-f.write("""\
+f.write("""\n\
   // Sets if a data item should be included while in data to GUI
   void setDataItemSend(const char *var, bool enabled)
   {
 """)
 id = 0
 for row in data:
+  _else = ""
+  if id > 0:
+    _else = "else "
   id += 1
   txt = """\
-    if (strcmp(var, \"{name}\") == 0) {{
+    {_else}if (strcmp(var, \"{name}\") == 0) {{
       enabled == true ? senddatavars |= 1 << {id} : senddatavars &= ~(1 << {id});
       return;
     }}
-""".format( name = row[colname].lower(), id = id)
+""".format(_else = _else, name = row[colname].lower(), id = id)
   f.write(txt)
 id = 0
 for row in dataarrays:
   start = row[colname].find("[")
   id += 1
   txt = """\
-    if (strcmp(var, \"{name}\") == 0) {{
+    else if (strcmp(var, \"{name}\") == 0) {{
       enabled == true ? senddataarray |= 1 << {id} : senddataarray &= ~(1 << {id});
       return;
     }}
-""".format( name = row[colname].lower()[:start], id = id)
+""".format(name = row[colname].lower()[:start], id = id)
   f.write(txt)
 f.write("  }\n")
+
+f.write("""\n\
+  void sendArray(DynamicJsonDocument &json,
+                 uint8_t bit,
+                 uint32_t counter,
+                 const char *name,
+                 void *item,
+                 void *lastitem,
+                 int size)
+  {
+    bool sendit = false;
+    char b64array[200];
+    if (senddataarray & (1 << bit)) {
+      if (1 < 0) {
+        if (memcmp(lastitem, item, size) != 0)
+          sendit = true;
+        else if (1 != -1 && counter % abs(1) == 0)
+          sendit = true;
+      } else {
+        if (counter % 1 == 0)
+          sendit = true;
+      }
+      if (sendit) {
+        encode_base64((unsigned char *)item, size, (unsigned char *)b64array);
+        json[name] = b64array;
+        memcpy(lastitem, item, size);
+      }
+    }
+  }
+  """)
 
 # Transmit Data items back to the gui
 f.write("\n  void setJSONData(DynamicJsonDocument &json)\n  {\n")
 f.write("""\
     // Sends only requested data items
     // Updates only as often as specified, 1 = every cycle
-    // Three Decimals is most precision of any data item req as of now.
-    // For most items ends up less bytes than base64 encoding everything
+    // Base64 only done on arrays as it ends up on avg more bytes to
+    //   do everything
 
-    static int counter = 0;
-    bool sendit = false;
-    char b64array[500];
+    static uint32_t counter = 0;
 
 """)
 id = 0
@@ -325,40 +356,43 @@ for row in data:
 """.format(vname = row[colname].lower(), value=valtxt, div= row[coldivisor], id=id)
   f.write(txt)
 
+f.write("\n")
+
 id = 0
 for row in dataarrays:
   id += 1
   start = row[colname].find("[")
   end = row[colname].find("]")
   arraylength = row[colname][start+1:end]
-  txt = """\
-
-    sendit = false;
-    if (senddataarray & (1 << {id})) {{
-      if ({div} < 0) {{
-        if (memcmp(last{name}, {name}, sizeof({name})) != 0)
-          sendit = true;
-        else if ({div} != -1 && counter % abs({div}) == 0)
-          sendit = true;
-      }} else {{
-        if (counter % {div} == 0)
-          sendit = true;
-      }}
-      if (sendit) {{
-        encode_base64((unsigned char *){name}, sizeof({ctype}) * {len}, (unsigned char *)b64array);
-        json["6{name}{jtype}"] = b64array;
-        memcpy(last{name}, {name}, sizeof({name}));
-      }}
-    }}
-""".format(name = row[colname].lower()[:start], div = row[coldivisor], id=id,ctype=typeToC(row[coltype].strip()), jtype = typeToJson(row[coltype].strip()), len = arraylength)
-  f.write(txt)
+  name = row[colname].lower()[:start]
+  name6 = "6" + name + typeToJson(row[coltype].strip())
+  ctype = typeToC(row[coltype].strip())
+  f.write("    sendArray(json," + str(id) + ",counter,\"" + name6 + "\",(void*)" + name + ",(void*)last" + row[colname].lower()[:start]  + ", sizeof(" + ctype + ") * " + arraylength + ");\n")
+#  txt = """\
+#
+#    sendit = false;
+#    if (senddataarray & (1 << {id})) {{
+#      if ({div} < 0) {{
+#        if (memcmp(last{name}, {name}, sizeof({name})) != 0)
+#          sendit = true;
+#        else if ({div} != -1 && counter % abs({div}) == 0)
+#          sendit = true;
+#      }} else {{
+#        if (counter % {div} == 0)
+#          sendit = true;
+#      }}
+#      if (sendit) {{
+#        encode_base64((unsigned char *){name}, sizeof({ctype}) * {len}, (unsigned char *)b64array);
+#        json["6{name}{jtype}"] = b64array;
+#        memcpy(last{name}, {name}, sizeof({name}));
+#      }}
+#    }}
+#""".format(name = row[colname].lower()[:start], div = row[coldivisor], id=id,ctype=typeToC(row[coltype].strip()), jtype = typeToJson(row[coltype].strip()), len = arraylength)
+#  f.write(txt)
 f.write("""\
 
     // Used for reduced data divisor
     counter++;
-    if (counter > 500) {
-      counter = 0;
-    }
   }\n\n""")
 
 

@@ -70,7 +70,7 @@ public:
     }
     strcpy(btpairedaddress,"00:00:00:00:00:00");
     memset(chout,0,sizeof(uint16_t) * 16);
-    memset(btch,0,sizeof(uint16_t) * BT_CHANNELS);
+    memset(btch,0,sizeof(uint16_t) * 8);
     memset(ppmch,0,sizeof(uint16_t) * 16);
     memset(sbusch,0,sizeof(uint16_t) * 16);
     memset(quat,0,sizeof(float) * 4);
@@ -78,13 +78,13 @@ public:
     memset(btrmt,0,sizeof(char) * 18);
 
     // Call Virtual Events after initialization
-    pinsChanged();
     resetFusion();
+    pinsChanged();
   }
 
   // Virtual Events
-  virtual void pinsChanged() {};
   virtual void resetFusion() {};
+  virtual void pinsChanged() {};
 
   // Roll Minimum
   inline const uint16_t& getRll_Min() {return rll_min;}
@@ -883,8 +883,8 @@ public:
   }
 
   // Bluetooth Inputs
-  void setDataBtCh(const uint16_t val[BT_CHANNELS]) {
-    memcpy(btch, val, BT_CHANNELS);
+  void setDataBtCh(const uint16_t val[8]) {
+    memcpy(btch, val, 8);
   }
 
   // PPM Inputs
@@ -991,8 +991,8 @@ public:
 
   void loadJSONSettings(DynamicJsonDocument &json) {
     JsonVariant v;
-    bool chpinschanged = false;
     bool chresetfusion = false;
+    bool chpinschanged = false;
     v = json["rll_min"]; if(!v.isNull()) {setRll_Min(v);}
     v = json["rll_max"]; if(!v.isNull()) {setRll_Max(v);}
     v = json["rll_cnt"]; if(!v.isNull()) {setRll_Cnt(v);}
@@ -1065,10 +1065,10 @@ public:
     v = json["ppmchcnt"]; if(!v.isNull()) {setPpmChCnt(v);}
     v = json["lppan"]; if(!v.isNull()) {setLpPan(v);}
     v = json["lptiltroll"]; if(!v.isNull()) {setLpTiltRoll(v);}
-    if(chpinschanged)
-      pinsChanged();
     if(chresetfusion)
       resetFusion();
+    if(chpinschanged)
+      pinsChanged();
   }
 
   void setJSONDataList(DynamicJsonDocument &json)
@@ -1113,6 +1113,7 @@ public:
     array.add("btaddr");
     array.add("btrmt");
   }
+
   // Sets if a data item should be included while in data to GUI
   void setDataItemSend(const char *var, bool enabled)
   {
@@ -1120,166 +1121,192 @@ public:
       enabled == true ? senddatavars |= 1 << 1 : senddatavars &= ~(1 << 1);
       return;
     }
-    if (strcmp(var, "magy") == 0) {
+    else if (strcmp(var, "magy") == 0) {
       enabled == true ? senddatavars |= 1 << 2 : senddatavars &= ~(1 << 2);
       return;
     }
-    if (strcmp(var, "magz") == 0) {
+    else if (strcmp(var, "magz") == 0) {
       enabled == true ? senddatavars |= 1 << 3 : senddatavars &= ~(1 << 3);
       return;
     }
-    if (strcmp(var, "gyrox") == 0) {
+    else if (strcmp(var, "gyrox") == 0) {
       enabled == true ? senddatavars |= 1 << 4 : senddatavars &= ~(1 << 4);
       return;
     }
-    if (strcmp(var, "gyroy") == 0) {
+    else if (strcmp(var, "gyroy") == 0) {
       enabled == true ? senddatavars |= 1 << 5 : senddatavars &= ~(1 << 5);
       return;
     }
-    if (strcmp(var, "gyroz") == 0) {
+    else if (strcmp(var, "gyroz") == 0) {
       enabled == true ? senddatavars |= 1 << 6 : senddatavars &= ~(1 << 6);
       return;
     }
-    if (strcmp(var, "accx") == 0) {
+    else if (strcmp(var, "accx") == 0) {
       enabled == true ? senddatavars |= 1 << 7 : senddatavars &= ~(1 << 7);
       return;
     }
-    if (strcmp(var, "accy") == 0) {
+    else if (strcmp(var, "accy") == 0) {
       enabled == true ? senddatavars |= 1 << 8 : senddatavars &= ~(1 << 8);
       return;
     }
-    if (strcmp(var, "accz") == 0) {
+    else if (strcmp(var, "accz") == 0) {
       enabled == true ? senddatavars |= 1 << 9 : senddatavars &= ~(1 << 9);
       return;
     }
-    if (strcmp(var, "off_magx") == 0) {
+    else if (strcmp(var, "off_magx") == 0) {
       enabled == true ? senddatavars |= 1 << 10 : senddatavars &= ~(1 << 10);
       return;
     }
-    if (strcmp(var, "off_magy") == 0) {
+    else if (strcmp(var, "off_magy") == 0) {
       enabled == true ? senddatavars |= 1 << 11 : senddatavars &= ~(1 << 11);
       return;
     }
-    if (strcmp(var, "off_magz") == 0) {
+    else if (strcmp(var, "off_magz") == 0) {
       enabled == true ? senddatavars |= 1 << 12 : senddatavars &= ~(1 << 12);
       return;
     }
-    if (strcmp(var, "off_gyrox") == 0) {
+    else if (strcmp(var, "off_gyrox") == 0) {
       enabled == true ? senddatavars |= 1 << 13 : senddatavars &= ~(1 << 13);
       return;
     }
-    if (strcmp(var, "off_gyroy") == 0) {
+    else if (strcmp(var, "off_gyroy") == 0) {
       enabled == true ? senddatavars |= 1 << 14 : senddatavars &= ~(1 << 14);
       return;
     }
-    if (strcmp(var, "off_gyroz") == 0) {
+    else if (strcmp(var, "off_gyroz") == 0) {
       enabled == true ? senddatavars |= 1 << 15 : senddatavars &= ~(1 << 15);
       return;
     }
-    if (strcmp(var, "off_accx") == 0) {
+    else if (strcmp(var, "off_accx") == 0) {
       enabled == true ? senddatavars |= 1 << 16 : senddatavars &= ~(1 << 16);
       return;
     }
-    if (strcmp(var, "off_accy") == 0) {
+    else if (strcmp(var, "off_accy") == 0) {
       enabled == true ? senddatavars |= 1 << 17 : senddatavars &= ~(1 << 17);
       return;
     }
-    if (strcmp(var, "off_accz") == 0) {
+    else if (strcmp(var, "off_accz") == 0) {
       enabled == true ? senddatavars |= 1 << 18 : senddatavars &= ~(1 << 18);
       return;
     }
-    if (strcmp(var, "tiltout") == 0) {
+    else if (strcmp(var, "tiltout") == 0) {
       enabled == true ? senddatavars |= 1 << 19 : senddatavars &= ~(1 << 19);
       return;
     }
-    if (strcmp(var, "rollout") == 0) {
+    else if (strcmp(var, "rollout") == 0) {
       enabled == true ? senddatavars |= 1 << 20 : senddatavars &= ~(1 << 20);
       return;
     }
-    if (strcmp(var, "panout") == 0) {
+    else if (strcmp(var, "panout") == 0) {
       enabled == true ? senddatavars |= 1 << 21 : senddatavars &= ~(1 << 21);
       return;
     }
-    if (strcmp(var, "iscal") == 0) {
+    else if (strcmp(var, "iscal") == 0) {
       enabled == true ? senddatavars |= 1 << 22 : senddatavars &= ~(1 << 22);
       return;
     }
-    if (strcmp(var, "btcon") == 0) {
+    else if (strcmp(var, "btcon") == 0) {
       enabled == true ? senddatavars |= 1 << 23 : senddatavars &= ~(1 << 23);
       return;
     }
-    if (strcmp(var, "trpenabled") == 0) {
+    else if (strcmp(var, "trpenabled") == 0) {
       enabled == true ? senddatavars |= 1 << 24 : senddatavars &= ~(1 << 24);
       return;
     }
-    if (strcmp(var, "tilt") == 0) {
+    else if (strcmp(var, "tilt") == 0) {
       enabled == true ? senddatavars |= 1 << 25 : senddatavars &= ~(1 << 25);
       return;
     }
-    if (strcmp(var, "roll") == 0) {
+    else if (strcmp(var, "roll") == 0) {
       enabled == true ? senddatavars |= 1 << 26 : senddatavars &= ~(1 << 26);
       return;
     }
-    if (strcmp(var, "pan") == 0) {
+    else if (strcmp(var, "pan") == 0) {
       enabled == true ? senddatavars |= 1 << 27 : senddatavars &= ~(1 << 27);
       return;
     }
-    if (strcmp(var, "tiltoff") == 0) {
+    else if (strcmp(var, "tiltoff") == 0) {
       enabled == true ? senddatavars |= 1 << 28 : senddatavars &= ~(1 << 28);
       return;
     }
-    if (strcmp(var, "rolloff") == 0) {
+    else if (strcmp(var, "rolloff") == 0) {
       enabled == true ? senddatavars |= 1 << 29 : senddatavars &= ~(1 << 29);
       return;
     }
-    if (strcmp(var, "panoff") == 0) {
+    else if (strcmp(var, "panoff") == 0) {
       enabled == true ? senddatavars |= 1 << 30 : senddatavars &= ~(1 << 30);
       return;
     }
-    if (strcmp(var, "issense") == 0) {
+    else if (strcmp(var, "issense") == 0) {
       enabled == true ? senddatavars |= 1 << 31 : senddatavars &= ~(1 << 31);
       return;
     }
-    if (strcmp(var, "chout") == 0) {
+    else if (strcmp(var, "chout") == 0) {
       enabled == true ? senddataarray |= 1 << 1 : senddataarray &= ~(1 << 1);
       return;
     }
-    if (strcmp(var, "btch") == 0) {
+    else if (strcmp(var, "btch") == 0) {
       enabled == true ? senddataarray |= 1 << 2 : senddataarray &= ~(1 << 2);
       return;
     }
-    if (strcmp(var, "ppmch") == 0) {
+    else if (strcmp(var, "ppmch") == 0) {
       enabled == true ? senddataarray |= 1 << 3 : senddataarray &= ~(1 << 3);
       return;
     }
-    if (strcmp(var, "sbusch") == 0) {
+    else if (strcmp(var, "sbusch") == 0) {
       enabled == true ? senddataarray |= 1 << 4 : senddataarray &= ~(1 << 4);
       return;
     }
-    if (strcmp(var, "quat") == 0) {
+    else if (strcmp(var, "quat") == 0) {
       enabled == true ? senddataarray |= 1 << 5 : senddataarray &= ~(1 << 5);
       return;
     }
-    if (strcmp(var, "btaddr") == 0) {
+    else if (strcmp(var, "btaddr") == 0) {
       enabled == true ? senddataarray |= 1 << 6 : senddataarray &= ~(1 << 6);
       return;
     }
-    if (strcmp(var, "btrmt") == 0) {
+    else if (strcmp(var, "btrmt") == 0) {
       enabled == true ? senddataarray |= 1 << 7 : senddataarray &= ~(1 << 7);
       return;
     }
   }
 
+  void sendArray(DynamicJsonDocument &json,
+                 uint8_t bit,
+                 uint32_t counter,
+                 const char *name,
+                 void *item,
+                 void *lastitem,
+                 int size)
+  {
+    bool sendit = false;
+    char b64array[200];
+    if (senddataarray & (1 << bit)) {
+      if (1 < 0) {
+        if (memcmp(lastitem, item, size) != 0)
+          sendit = true;
+        else if (1 != -1 && counter % abs(1) == 0)
+          sendit = true;
+      } else {
+        if (counter % 1 == 0)
+          sendit = true;
+      }
+      if (sendit) {
+        encode_base64((unsigned char *)item, size, (unsigned char *)b64array);
+        json[name] = b64array;
+        memcpy(lastitem, item, size);
+      }
+    }
+  }
+  
   void setJSONData(DynamicJsonDocument &json)
   {
     // Sends only requested data items
     // Updates only as often as specified, 1 = every cycle
-    // Three Decimals is most precision of any data item req as of now.
-    // For most items ends up less bytes than base64 encoding everything
+    // Base64 only done on arrays as it ends up on avg more bytes to
+    //   do everything
 
-    static int counter = 0;
-    bool sendit = false;
-    char b64array[500];
+    static uint32_t counter = 0;
 
     if (senddatavars & (1 << 1) && (counter % 1) == 0)
       json["magx"] = roundf(((float)magx * 1000)) / 1000;
@@ -1344,137 +1371,16 @@ public:
     if (senddatavars & (1 << 31) && (counter % 10) == 0)
       json["issense"] = issense;
 
-    sendit = false;
-    if (senddataarray & (1 << 1)) {
-      if (1 < 0) {
-        if (memcmp(lastchout, chout, sizeof(chout)) != 0)
-          sendit = true;
-        else if (1 != -1 && counter % abs(1) == 0)
-          sendit = true;
-      } else {
-        if (counter % 1 == 0)
-          sendit = true;
-      }
-      if (sendit) {
-        encode_base64((unsigned char *)chout, sizeof(uint16_t) * 16, (unsigned char *)b64array);
-        json["6choutu16"] = b64array;
-        memcpy(lastchout, chout, sizeof(chout));
-      }
-    }
-
-    sendit = false;
-    if (senddataarray & (1 << 2)) {
-      if (1 < 0) {
-        if (memcmp(lastbtch, btch, sizeof(btch)) != 0)
-          sendit = true;
-        else if (1 != -1 && counter % abs(1) == 0)
-          sendit = true;
-      } else {
-        if (counter % 1 == 0)
-          sendit = true;
-      }
-      if (sendit) {
-        encode_base64((unsigned char *)btch, sizeof(uint16_t) * BT_CHANNELS, (unsigned char *)b64array);
-        json["6btchu16"] = b64array;
-        memcpy(lastbtch, btch, sizeof(btch));
-      }
-    }
-
-    sendit = false;
-    if (senddataarray & (1 << 3)) {
-      if (1 < 0) {
-        if (memcmp(lastppmch, ppmch, sizeof(ppmch)) != 0)
-          sendit = true;
-        else if (1 != -1 && counter % abs(1) == 0)
-          sendit = true;
-      } else {
-        if (counter % 1 == 0)
-          sendit = true;
-      }
-      if (sendit) {
-        encode_base64((unsigned char *)ppmch, sizeof(uint16_t) * 16, (unsigned char *)b64array);
-        json["6ppmchu16"] = b64array;
-        memcpy(lastppmch, ppmch, sizeof(ppmch));
-      }
-    }
-
-    sendit = false;
-    if (senddataarray & (1 << 4)) {
-      if (1 < 0) {
-        if (memcmp(lastsbusch, sbusch, sizeof(sbusch)) != 0)
-          sendit = true;
-        else if (1 != -1 && counter % abs(1) == 0)
-          sendit = true;
-      } else {
-        if (counter % 1 == 0)
-          sendit = true;
-      }
-      if (sendit) {
-        encode_base64((unsigned char *)sbusch, sizeof(uint16_t) * 16, (unsigned char *)b64array);
-        json["6sbuschu16"] = b64array;
-        memcpy(lastsbusch, sbusch, sizeof(sbusch));
-      }
-    }
-
-    sendit = false;
-    if (senddataarray & (1 << 5)) {
-      if (1 < 0) {
-        if (memcmp(lastquat, quat, sizeof(quat)) != 0)
-          sendit = true;
-        else if (1 != -1 && counter % abs(1) == 0)
-          sendit = true;
-      } else {
-        if (counter % 1 == 0)
-          sendit = true;
-      }
-      if (sendit) {
-        encode_base64((unsigned char *)quat, sizeof(float) * 4, (unsigned char *)b64array);
-        json["6quatflt"] = b64array;
-        memcpy(lastquat, quat, sizeof(quat));
-      }
-    }
-
-    sendit = false;
-    if (senddataarray & (1 << 6)) {
-      if (10 < 0) {
-        if (memcmp(lastbtaddr, btaddr, sizeof(btaddr)) != 0)
-          sendit = true;
-        else if (10 != -1 && counter % abs(10) == 0)
-          sendit = true;
-      } else {
-        if (counter % 10 == 0)
-          sendit = true;
-      }
-      if (sendit) {
-        encode_base64((unsigned char *)btaddr, sizeof(char) * 18, (unsigned char *)b64array);
-        json["6btaddrchr"] = b64array;
-        memcpy(lastbtaddr, btaddr, sizeof(btaddr));
-      }
-    }
-
-    sendit = false;
-    if (senddataarray & (1 << 7)) {
-      if (10 < 0) {
-        if (memcmp(lastbtrmt, btrmt, sizeof(btrmt)) != 0)
-          sendit = true;
-        else if (10 != -1 && counter % abs(10) == 0)
-          sendit = true;
-      } else {
-        if (counter % 10 == 0)
-          sendit = true;
-      }
-      if (sendit) {
-        encode_base64((unsigned char *)btrmt, sizeof(char) * 18, (unsigned char *)b64array);
-        json["6btrmtchr"] = b64array;
-        memcpy(lastbtrmt, btrmt, sizeof(btrmt));
-      }
-    }
+    sendArray(json,1,counter,"6choutu16",(void*)chout,(void*)lastchout, sizeof(uint16_t) * 16);
+    sendArray(json,2,counter,"6btchu16",(void*)btch,(void*)lastbtch, sizeof(uint16_t) * 8);
+    sendArray(json,3,counter,"6ppmchu16",(void*)ppmch,(void*)lastppmch, sizeof(uint16_t) * 16);
+    sendArray(json,4,counter,"6sbuschu16",(void*)sbusch,(void*)lastsbusch, sizeof(uint16_t) * 16);
+    sendArray(json,5,counter,"6quatflt",(void*)quat,(void*)lastquat, sizeof(float) * 4);
+    sendArray(json,6,counter,"6btaddrchr",(void*)btaddr,(void*)lastbtaddr, sizeof(char) * 18);
+    sendArray(json,7,counter,"6btrmtchr",(void*)btrmt,(void*)lastbtrmt, sizeof(char) * 18);
 
     // Used for reduced data divisor
     counter++;
-    if (counter > 500) {
-      counter = 0;
-    }
   }
 
   void stopAllData()
@@ -1602,8 +1508,8 @@ protected:
   // Real Time Data Arrays
   uint16_t chout[16]; // Channel Outputs
   uint16_t lastchout[16]; // Channel Outputs
-  uint16_t btch[BT_CHANNELS]; // Bluetooth Inputs
-  uint16_t lastbtch[BT_CHANNELS]; // Bluetooth Inputs
+  uint16_t btch[8]; // Bluetooth Inputs
+  uint16_t lastbtch[8]; // Bluetooth Inputs
   uint16_t ppmch[16]; // PPM Inputs
   uint16_t lastppmch[16]; // PPM Inputs
   uint16_t sbusch[16]; // SBUS Channels

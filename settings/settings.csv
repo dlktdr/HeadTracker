@@ -1,7 +1,7 @@
 "Setting Type (bool, char, u8 s8 u16 s16 u32 s32 float double)",Setting / Data,Name,Default,Min,Max,Description,Firmware onChange() Call Event,Update Divisor - Data Only,Data Round To (Decimal Places)
 ,,,,,,,,,
 "Below is all the settings that are transferred back and forth from the GUI, saved to the .ini and in JSON format into the boards flash",,,,,,,,,
-,,,,,,,,,
+Run the python script to regerenate the header files after changes here,,,,,,,,,
 ,,,,,,,,,
 float,Const,FLOAT_MIN,-1000000,,,,,,
 float,Const,FLOAT_MAX,1000000,,,,,,
