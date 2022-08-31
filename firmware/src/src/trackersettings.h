@@ -41,20 +41,10 @@ class TrackerSettings : public BaseTrackerSettings
   void saveToEEPROM();
   void loadFromEEPROM();
 
-  // Setting of data to be returned to the GUI
-  /*void setRawGyro(float x, float y, float z);
-  void setRawAccel(float x, float y, float z);
-  void setRawMag(float x, float y, float z);
-  void setRawOrient(float t, float r, float p);
-  void setOffGyro(float x, float y, float z);
-  void setOffAccel(float x, float y, float z);
-  void setOffMag(float x, float y, float z);
-  void setOffOrient(float t, float r, float p);
-  void setPPMOut(uint16_t t, uint16_t r, uint16_t p);*/
 
  private:
   bool freshProgram;
-
+  bool settingsModified;
 };
 
 extern TrackerSettings trkset;

@@ -68,36 +68,6 @@ void TrackerSettings::pinsChanged() {
 
 }
 
-/*void TrackerSettings::setButtonPin(int value)
-{
-  if (value > 1 && value < 13) {
-    if (buttonpin > 0) pinMode(D_TO_32X_PIN(buttonpin), GPIO_INPUT);  // Disable old button pin
-    pinMode(D_TO_32X_PIN(value), INPUT_PULLUP);                       // Button as Input
-    buttonpin = value;                                                // Save
-
-    // Disable the Button Pin
-  } else if (value < 0) {
-    if (buttonpin > 0) pinMode(D_TO_32X_PIN(buttonpin), GPIO_INPUT);  // Disable old button pin
-    buttonpin = -1;
-  }
-}
-
-void TrackerSettings::setPpmOutPin(int value)
-{
-  if ((value > 1 && value < 13) || value == -1) {
-    PpmOut_setPin(value);
-    ppmoutpin = value;
-  }
-}
-
-void TrackerSettings::setPpmInPin(int value)
-{
-  if ((value > 1 && value < 13) || value == -1) {
-    PpmIn_setPin(value);
-    ppminpin = value;
-  }
-}*/
-
 // Saves current data to flash
 void TrackerSettings::saveToEEPROM()
 {
