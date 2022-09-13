@@ -1,0 +1,51 @@
+name: HT Linux GUI
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - '.github/workflows/build-gui_linux.yml'
+      - 'gui/src/**'
+
+  pull_request:
+    branches:
+      - master
+    paths:
+      - '.github/workflows/build-gui_linux.yml'
+      - 'gui/src/**'
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+          version: '5.15.2'
+          target: 'desktop'
+          modules: 'qtserial'
+          install-deps: 'true'
+
+      - name: Build
+        working-directory: ${{github.workspace}}        
+        run: |
+          cd gui/src
+          dir
+          qmake HeadTracker.pro
+          make
+
+      - name: Archive production artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: headtracker_mac
+          path: ${{github.workspace}}/output
+          retention-days: 60
