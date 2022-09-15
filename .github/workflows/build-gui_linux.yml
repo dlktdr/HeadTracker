@@ -19,7 +19,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
 
     steps:
       - name: Check out the repo
@@ -43,9 +43,34 @@ jobs:
           qmake HeadTracker.pro
           make
 
+      - name: LinDeployQT
+        working-directory: ${{github.workspace}}
+        run: |
+          mkdir output
+          cd output
+          mkdir bin
+          mkdir share
+          mkdir share/applications          
+          mkdir share/icons
+          mkdir share/icons/hicolor
+          mkdir share/icons/hicolor/256x256
+          mkdir share/icons/hicolor/256x256/apps
+          cp ../gui/src/HeadTracker bin/
+          cp ../gui/src/css/stylesheet.css bin/
+          cp ../gui/src/css/Background.svg bin/
+          cp ../gui/src/images/Icon256.png share/icons/hicolor/256x256/apps/default.png
+          echo -e "[Desktop Entry]\nType=Application\nName=HeadTracker\nExec=HeadTracker\nIcon=default" > share/applications/headtracker.desktop
+          wget https://github.com/dlktdr/HeadTracker/raw/master/gui/bin/bossac_lin
+          chmod a+x ./bossac_lin
+          mv ./bossac_lin bin/
+          cd ..
+          wget https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage
+          chmod a+x ./linuxdeployqt-continuous-x86_64.AppImage
+          ./linuxdeployqt-continuous-x86_64.AppImage output/share/applications/headtracker.desktop -appimage                   
+          
       - name: Archive production artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: headtracker_mac
+          name: headtracker_linux_appimage
           path: ${{github.workspace}}/output
           retention-days: 60
