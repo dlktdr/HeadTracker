@@ -40,6 +40,9 @@
 // Sensors LP filter time constant
 #define SENSOR_LP_TIME_CST 60000 // (us) Low pass filter time constant
 
+// Proximity Sensor
+#define APDS_HYSTERISIS 10
+
 // Analog Filters 1 Euro Filter
 #define AN_CH_CNT 4
 #define AN_FILT_FREQ 150

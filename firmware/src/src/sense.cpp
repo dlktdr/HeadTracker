@@ -37,8 +37,6 @@
 #include "soc_flash.h"
 #include "trackersettings.h"
 
-//#define DEBUG_SENSOR_RATES
-
 static float auxdata[10];
 static float raccx = 0, raccy = 0, raccz = 0;
 static float rmagx = 0, rmagy = 0, rmagz = 0;
@@ -66,8 +64,6 @@ static uint16_t channel_data[16];
 
 K_MUTEX_DEFINE(sensor_mutex);
 
-int64_t usduration = 0;
-
 static bool blesenseboard = false;
 static bool lastproximity = false;
 
@@ -78,9 +74,6 @@ LSM9DS1Class IMU;
 #define MADGINIT_MAG 0x02
 
 #define MADGINIT_READY (MADGINIT_ACCEL | MADGINIT_MAG)
-static int madgreads = 0;
-static uint8_t madgsensbits = 0;
-static volatile bool firstrun = true;
 static float aacc[3] = {0, 0, 0};
 static float amag[3] = {0, 0, 0};
 
@@ -120,58 +113,16 @@ int sense_Init()
   return 0;
 }
 
-void calculate_Thread()
+void main_Thread()
 {
-  float lastUpdate = 0;
-
   while (1) {
-    if (!senseTreadRun || !gyro_calibrated) {
+
+    rt_sleep_us(CALCULATE_PERIOD);
+
+    if (!senseTreadRun) {
       rt_sleep_ms(10);
       continue;
     }
-
-    usduration = micros64();
-
-    // Period Between Samples
-
-    // Use a mutex so sensor data can't be updated part way
-    k_mutex_lock(&sensor_mutex, K_FOREVER);
-
-#ifdef DEBUG_PERIOD
-    pinMode(D_TO_32X_PIN(2), GPIO_OUTPUT);
-    digitalWrite(D_TO_32X_PIN(2), HIGH);
-#endif
-
-    float Now = micros();
-    float deltat = ((Now - lastUpdate) /
-                    1000000.0f);  // set integration time by time elapsed since last filter update
-    lastUpdate = Now;
-
-    // Scale properly for DCM algorithm
-    // PAUL's reference frame is standard aeronautical:
-    //    X axis is the longitudinal axis pointing ahead,
-    //    Z axis is the vertical axis pointing downwards,
-    //    Y axis is the lateral one, pointing in such a way that the frame is right-handed.
-    // PAUL's acceleration from accelerometer sign convention is opposite of used by rest of program
-    float u0[3], u1[3], u2[3];
-    u0[0] = fgyrx * DEG_TO_RAD;
-    u0[1] = -fgyry * DEG_TO_RAD;
-    u0[2] = -fgyrz * DEG_TO_RAD;
-    u1[0] = -faccx;
-    u1[1] = faccy;
-    u1[2] = faccz;
-    u2[0] = fmagx;
-    u2[1] = -fmagy;
-    u2[2] = -fmagz;
-
-    printk("%.3f,", rgyrx);
-    printk("%.3f,", rgyry);
-    printk("%.3f\r\n", rgyrz);
-
-    DcmCalculate(u0, u1, u2, deltat);
-
-    // Free Mutex Lock, Allow sensor updates
-    k_mutex_unlock(&sensor_mutex);
 
     tilt = DcmGetTilt();
     roll = DcmGetRoll();
@@ -280,6 +231,40 @@ void calculate_Thread()
         pressButton();
       }
       timetoreset += (float)CALCULATE_PERIOD / 1000000.0;
+    }
+
+    // Reset Center on Proximity, Don't need to update this often
+    static int sensecount = 0;
+    static int minproximity = 100;  // Keeps smallest proximity read.
+    static int maxproximity = 0;    // Keeps largest proximity value read.
+    if (blesenseboard && sensecount++ == 10) {
+      sensecount = 0;
+      if (trkset.resetOnWave()) {
+        // Reset on Proximity
+        if (APDS.proximityAvailable()) {
+          int proximity = APDS.readProximity();
+
+          LOGT("Prox=%d", proximity);
+
+          // Store High and Low Values, Generate reset thresholds
+          maxproximity = MAX(proximity, maxproximity);
+          minproximity = MIN(proximity, minproximity);
+          int lowthreshold = minproximity + APDS_HYSTERISIS;
+          int highthreshold = maxproximity - APDS_HYSTERISIS;
+
+          // Don't allow reset if high and low thresholds are too close
+          if (highthreshold - lowthreshold > APDS_HYSTERISIS * 2) {
+            if (proximity < lowthreshold && lastproximity == false) {
+              pressButton();
+              LOGI("Reset center from a close proximity");
+              lastproximity = true;
+            } else if (proximity > highthreshold) {
+              // Clear flag on proximity clear
+              lastproximity = false;
+            }
+          }
+        }
+      }
     }
 
     /* ************************************************************
@@ -543,19 +528,6 @@ void calculate_Thread()
       k_mutex_unlock(&data_mutex);
     }
 
-#ifdef DEBUG_PERIOD
-    digitalWrite(D_TO_32X_PIN(2), LOW);
-#endif
-    // Adjust sleep for a more accurate period
-    usduration = micros64() - usduration;
-    if (CALCULATE_PERIOD - usduration <
-        CALCULATE_PERIOD * 0.7) {  // Took a long time. Will crash if sleep is too short
-
-      rt_sleep_us(CALCULATE_PERIOD);
-    } else {
-      rt_sleep_us(CALCULATE_PERIOD - usduration);
-    }
-
 #if defined(DEBUG_SENSOR_RATES)
     static int mcount = 0;
     static int64_t mmic = millis64() + 1000;
@@ -575,6 +547,9 @@ void calculate_Thread()
 
 void sensor_Thread()
 {
+  float lastUpdate = 0;
+  int64_t usduration = 0;
+
   // Sensors filtering
   float LPalpha, LPalphaC;
   float lacc[3] = {0, 0, 0};
@@ -584,16 +559,16 @@ void sensor_Thread()
   int i;
 
   while (1) {
-    rt_sleep_us(SENSOR_PERIOD);
+    usduration = micros64();
 
     if (!senseTreadRun || pauseForFlash) {
+      rt_sleep_ms(10);
       continue;
     }
 
     // Filtering
     if (initLPfilter) {
       for (i = 0; i < 3; i++) {
-        // T_0 = (unsigned long) (millis64()); // TODO
         LPalpha = exp(-(float)(SENSOR_PERIOD) /
                       (float)(SENSOR_LP_TIME_CST));  // low pass filter coefficient
         LPalphaC = 0.5 * (1. - LPalpha);             // complementary
@@ -641,40 +616,6 @@ void sensor_Thread()
       lmag[2] = magz;
     }
 
-    // Reset Center on Proximity, Don't need to update this often
-    static int sensecount = 0;
-    static int minproximity = 100;  // Keeps smallest proximity read.
-    static int maxproximity = 0;    // Keeps largest proximity value read.
-    if (blesenseboard && sensecount++ == 10) {
-      sensecount = 0;
-      if (trkset.resetOnWave()) {
-        // Reset on Proximity
-        if (APDS.proximityAvailable()) {
-          int proximity = APDS.readProximity();
-
-          LOGT("Prox=%d", proximity);
-
-          // Store High and Low Values, Generate reset thresholds
-          maxproximity = MAX(proximity, maxproximity);
-          minproximity = MIN(proximity, minproximity);
-          int lowthreshold = minproximity + APDS_HYSTERISIS;
-          int highthreshold = maxproximity - APDS_HYSTERISIS;
-
-          // Don't allow reset if high and low thresholds are too close
-          if (highthreshold - lowthreshold > APDS_HYSTERISIS * 2) {
-            if (proximity < lowthreshold && lastproximity == false) {
-              pressButton();
-              LOGI("Reset center from a close proximity");
-              lastproximity = true;
-            } else if (proximity > highthreshold) {
-              // Clear flag on proximity clear
-              lastproximity = false;
-            }
-          }
-        }
-      }
-    }
-
     // Setup Rotations
     float rotation[3];
     trkset.orientRotations(rotation);
@@ -711,9 +652,6 @@ void sensor_Thread()
       accx = tmpacc[0];
       accy = tmpacc[1];
       accz = tmpacc[2];
-
-      // For intial orientation setup
-      madgsensbits |= MADGINIT_ACCEL;
 
       k_mutex_unlock(&sensor_mutex);
     }
@@ -796,11 +734,45 @@ void sensor_Thread()
       magy = tmpmag[1];
       magz = tmpmag[2];
 
-      // For inital orientation setup
-      madgsensbits |= MADGINIT_MAG;
-
       k_mutex_unlock(&sensor_mutex);
     }
+
+    // Scale properly for DCM algorithm
+    // PAUL's reference frame is standard aeronautical:
+    //    X axis is the longitudinal axis pointing ahead,
+    //    Z axis is the vertical axis pointing downwards,
+    //    Y axis is the lateral one, pointing in such a way that the frame is right-handed.
+    // PAUL's acceleration from accelerometer sign convention is opposite of used by rest of program
+    float u0[3], u1[3], u2[3];
+    u0[0] = fgyrx * DEG_TO_RAD;
+    u0[1] = -fgyry * DEG_TO_RAD;
+    u0[2] = -fgyrz * DEG_TO_RAD;
+    u1[0] = -faccx;
+    u1[1] = faccy;
+    u1[2] = faccz;
+    u2[0] = fmagx;
+    u2[1] = -fmagy;
+    u2[2] = -fmagz;
+
+    float now = micros();
+    float deltat = ((now - lastUpdate) / 1000000.0f);
+    lastUpdate = now;
+
+    k_mutex_lock(&sensor_mutex, K_FOREVER);
+    DcmCalculate(u0, u1, u2, deltat);
+    k_mutex_unlock(&sensor_mutex);
+
+    // Adjust sleep for a more accurate period
+    usduration = micros64() - usduration;
+
+    // Don't allow low delays, will crash RTOS
+    if (SENSOR_PERIOD - usduration <  SENSOR_PERIOD * 0.7) {
+      rt_sleep_us(SENSOR_PERIOD);
+    } else {
+      rt_sleep_us(SENSOR_PERIOD - usduration);
+    }
+
+
   }  // END THREAD
 }
 
@@ -861,9 +833,6 @@ void rotate(float pn[3], const float rotation[3])
 
 void reset_fusion()
 {
-  madgreads = 0;
-  madgsensbits = 0;
-  firstrun = true;
   aacc[0] = 0;
   aacc[1] = 0;
   aacc[2] = 0;
