@@ -26,7 +26,7 @@
 #include "defines.h"
 #include "io.h"
 #include "log.h"
-
+#include "trackersettings.h"
 
 #define PPMIN_PPICH1_MSK CONCAT(CONCAT(PPI_CHENSET_CH, PPMIN_PPICH1), _Msk)
 #define PPMIN_PPICH2_MSK CONCAT(CONCAT(PPI_CHENSET_CH, PPMIN_PPICH2), _Msk)
@@ -228,6 +228,12 @@ void PpmIn_execute()
         sentconn = false;
       }
     }
+  }
+
+  // Check if Inverted state has changed
+  if(ppminverted != trkset.getPpmInInvert())
+  {
+    PpmIn_setInverted(trkset.getPpmInInvert());
   }
 }
 

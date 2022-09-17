@@ -60,12 +60,12 @@ void sbus_Thread()
       rt_sleep_ms(50);
       continue;
     }
-    rt_sleep_us((1.0 / (float)trkset.SBUSRate()) * 1.0e6);
+    rt_sleep_us((1.0 / (float)trkset.getSbRate()) * 1.0e6);
 
     // Has the SBUS inverted status changed
-    if (sbusoutinv != !trkset.invertedSBUSOut() || sbusininv != !trkset.invertedSBUSIn()) {
-      sbusininv = !trkset.invertedSBUSIn();
-      sbusoutinv = !trkset.invertedSBUSOut();
+    if (sbusoutinv != !trkset.getSbInInv() || sbusininv != !trkset.getSbOutInv()) {
+      sbusininv = !trkset.getSbInInv();
+      sbusoutinv = !trkset.getSbOutInv();
 
       // Close and re-open port with new settings
       AuxSerial_Close();
@@ -140,7 +140,7 @@ uint64_t bytesread = 0;
 
 bool SBUS_Read_Data(uint16_t ch_[16])
 {
-#ifdef DEBUG
+#ifdef DEBUG_SBUS
   static bool toggle = false;
   pinMode(D_TO_32X_PIN(8), GPIO_OUTPUT);
   digitalWrite(D_TO_32X_PIN(8), toggle);
@@ -174,7 +174,7 @@ bool SBUS_Read_Data(uint16_t ch_[16])
       if (ch_[i] < TrackerSettings::MIN_PWM) ch_[i] = TrackerSettings::MIN_PWM;
     }
 
-#ifdef DEBUG
+#ifdef DEBUG_SBUS
     static bool toggle = false;
     pinMode(D_TO_32X_PIN(7), GPIO_OUTPUT);
     digitalWrite(D_TO_32X_PIN(7), toggle);
@@ -206,8 +206,8 @@ void SBUS_TX_Start()
 
 void sbus_init()
 {
-  sbusininv = !trkset.invertedSBUSIn();
-  sbusoutinv = !trkset.invertedSBUSOut();
+  sbusininv = !trkset.getSbInInv();
+  sbusoutinv = !trkset.getSbOutInv();
   uint8_t inversion = 0;
   if (sbusininv) inversion |= CONFINV_RX;
   if (sbusoutinv) inversion |= CONFINV_TX;

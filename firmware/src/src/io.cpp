@@ -154,11 +154,12 @@ void io_Thread()
     if (_counter > 10000) _counter = 0;
 
     static bool lastButtonDown = false;
-    butpin = trkset.buttonPin();
+    butpin = trkset.getButtonPin();
 
     // Make sure button pin is enabled
     if (butpin < 1 || butpin > 13) continue;
 
+    pinMode(D_TO_32X_PIN(butpin), INPUT_PULLUP);
     bool buttonDown = digitalRead(D_TO_32X_PIN(butpin)) == 0;
 
     // Button pressed down
