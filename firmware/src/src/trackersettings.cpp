@@ -33,7 +33,7 @@ void TrackerSettings::setRollReversed(bool value)
   if (value)
     servoreverse |= ROLL_REVERSE_BIT;
   else
-    servoreverse &= (ROLL_REVERSE_BIT ^ 0xFFFF);
+    servoreverse &= ~ROLL_REVERSE_BIT;
 }
 
 void TrackerSettings::setPanReversed(bool value)
@@ -41,7 +41,7 @@ void TrackerSettings::setPanReversed(bool value)
   if (value)
     servoreverse |= PAN_REVERSE_BIT;
   else
-    servoreverse &= (PAN_REVERSE_BIT ^ 0xFFFF);
+    servoreverse &= ~PAN_REVERSE_BIT;
 }
 
 void TrackerSettings::setTiltReversed(bool value)
@@ -49,7 +49,7 @@ void TrackerSettings::setTiltReversed(bool value)
   if (value)
     servoreverse |= TILT_REVERSE_BIT;
   else
-    servoreverse &= (TILT_REVERSE_BIT ^ 0xFFFF);
+    servoreverse &= ~TILT_REVERSE_BIT;
 }
 
 bool TrackerSettings::isRollReversed() { return (servoreverse & ROLL_REVERSE_BIT); }
