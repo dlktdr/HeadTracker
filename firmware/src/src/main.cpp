@@ -15,7 +15,6 @@
 #include "io.h"
 #include "nano33ble.h"
 
-
 #ifdef DISABLE_SLEEP_STATES
 
 static int disable_ds_1(const struct device *dev)

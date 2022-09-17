@@ -75,13 +75,13 @@ public:
     memset(btrmt,0,sizeof(char) * 18);
 
     // Call Virtual Events after initialization
-    resetFusion();
     pinsChanged();
+    resetFusion();
   }
 
   // Virtual Events
-  virtual void resetFusion() {};
   virtual void pinsChanged() {};
+  virtual void resetFusion() {};
 
   // Roll Minimum
   inline const uint16_t& getRll_Min() {return rll_min;}
@@ -474,10 +474,10 @@ public:
   }
 
   // Servo Reverse (BitMask)
-  inline const uint8_t& getServoRev() {return servorev;}
-  bool setServoRev(uint8_t val=0) {
+  inline const uint8_t& getServoReverse() {return servoreverse;}
+  bool setServoReverse(uint8_t val=0) {
     if(val >= 0 && val <= 7) {
-      servorev = val;
+      servoreverse = val;
       return true;
     }
     return false;
@@ -718,26 +718,6 @@ public:
   bool setPpmInPin(int8_t val=-1) {
     if(val >= -1 && val <= 64) {
       ppminpin = val;
-      return true;
-    }
-    return false;
-  }
-
-  // UART Receive Pin
-  inline const int8_t& getUartRxPin() {return uartrxpin;}
-  bool setUartRxPin(int8_t val=-1) {
-    if(val >= -1 && val <= 64) {
-      uartrxpin = val;
-      return true;
-    }
-    return false;
-  }
-
-  // UART Transmit Pin
-  inline const int8_t& getUartTxPin() {return uarttxpin;}
-  bool setUartTxPin(int8_t val=-1) {
-    if(val >= -1 && val <= 64) {
-      uarttxpin = val;
       return true;
     }
     return false;
@@ -1028,7 +1008,7 @@ public:
     json["an1off"] = an1off;
     json["an2off"] = an2off;
     json["an3off"] = an3off;
-    json["servorev"] = servorev;
+    json["servoreverse"] = servoreverse;
     json["magxoff"] = magxoff;
     json["magyoff"] = magyoff;
     json["magzoff"] = magzoff;
@@ -1053,8 +1033,6 @@ public:
     json["buttonpin"] = buttonpin;
     json["ppmoutpin"] = ppmoutpin;
     json["ppminpin"] = ppminpin;
-    json["uartrxpin"] = uartrxpin;
-    json["uarttxpin"] = uarttxpin;
     json["sermode"] = sermode;
     json["sbrate"] = sbrate;
     json["sbininv"] = sbininv;
@@ -1074,8 +1052,8 @@ public:
 
   void loadJSONSettings(DynamicJsonDocument &json) {
     JsonVariant v;
-    bool chresetfusion = false;
     bool chpinschanged = false;
+    bool chresetfusion = false;
     v = json["rll_min"]; if(!v.isNull()) {setRll_Min(v);}
     v = json["rll_max"]; if(!v.isNull()) {setRll_Max(v);}
     v = json["rll_cnt"]; if(!v.isNull()) {setRll_Cnt(v);}
@@ -1115,7 +1093,7 @@ public:
     v = json["an1off"]; if(!v.isNull()) {setAn1Off(v);}
     v = json["an2off"]; if(!v.isNull()) {setAn2Off(v);}
     v = json["an3off"]; if(!v.isNull()) {setAn3Off(v);}
-    v = json["servorev"]; if(!v.isNull()) {setServoRev(v);}
+    v = json["servoreverse"]; if(!v.isNull()) {setServoReverse(v);}
     v = json["magxoff"]; if(!v.isNull()) {setMagXOff(v); chresetfusion = true;}
     v = json["magyoff"]; if(!v.isNull()) {setMagYOff(v); chresetfusion = true;}
     v = json["magzoff"]; if(!v.isNull()) {setMagZOff(v); chresetfusion = true;}
@@ -1140,11 +1118,9 @@ public:
     v = json["buttonpin"]; if(!v.isNull()) {setButtonPin(v); chpinschanged = true;}
     v = json["ppmoutpin"]; if(!v.isNull()) {setPpmOutPin(v); chpinschanged = true;}
     v = json["ppminpin"]; if(!v.isNull()) {setPpmInPin(v); chpinschanged = true;}
-    v = json["uartrxpin"]; if(!v.isNull()) {setUartRxPin(v); chpinschanged = true;}
-    v = json["uarttxpin"]; if(!v.isNull()) {setUartTxPin(v); chpinschanged = true;}
     v = json["sermode"]; if(!v.isNull()) {setSerMode(v);}
     v = json["sbrate"]; if(!v.isNull()) {setSbRate(v);}
-    v = json["sbininv"]; if(!v.isNull()) {setSbInInv(v);}
+    v = json["sbininv"]; if(!v.isNull()) {setSbInInv(v); chpinschanged = true;}
     v = json["sboutinv"]; if(!v.isNull()) {setSbOutInv(v);}
     v = json["btmode"]; if(!v.isNull()) {setBtMode(v);}
     v = json["rstonwave"]; if(!v.isNull()) {setRstOnWave(v);}
@@ -1157,10 +1133,10 @@ public:
     v = json["ppmchcnt"]; if(!v.isNull()) {setPpmChCnt(v);}
     v = json["lppan"]; if(!v.isNull()) {setLpPan(v);}
     v = json["lptiltroll"]; if(!v.isNull()) {setLpTiltRoll(v);}
-    if(chresetfusion)
-      resetFusion();
     if(chpinschanged)
       pinsChanged();
+    if(chresetfusion)
+      resetFusion();
   }
 
   void setJSONDataList(DynamicJsonDocument &json)
@@ -1526,7 +1502,7 @@ protected:
   float an1off = 0; // Analog 1 Offset
   float an2off = 0; // Analog 2 Offset
   float an3off = 0; // Analog 3 Offset
-  uint8_t servorev = 0; // Servo Reverse (BitMask)
+  uint8_t servoreverse = 0; // Servo Reverse (BitMask)
   float magxoff = 0; // Magnetometer X Calibration Offset
   float magyoff = 0; // Magnetometer Y Calibration Offset
   float magzoff = 0; // Magnetometer Z Calibration Offset
@@ -1551,8 +1527,6 @@ protected:
   int8_t buttonpin = 2; // Button Pin
   int8_t ppmoutpin = 10; // PPM Output Pin
   int8_t ppminpin = -1; // PPM Input Pin
-  int8_t uartrxpin = -1; // UART Receive Pin
-  int8_t uarttxpin = -1; // UART Transmit Pin
   uint8_t sermode = 0; // Serial Mode (0- Off, 1-SBUS, 2-CRSF)
   uint8_t sbrate = 80; // SBUS Transmit Freqency
   bool sbininv = true; // SBUS Receieve Inverted

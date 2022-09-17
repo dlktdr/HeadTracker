@@ -22,50 +22,75 @@
 #include <string.h>
 
 #include "SBUS/sbus.h"
+#include "base64.h"
 #include "io.h"
 #include "log.h"
 #include "sense.h"
 #include "soc_flash.h"
-#include "base64.h"
-
 
 void TrackerSettings::setRollReversed(bool value)
 {
   if (value)
-    servorev |= ROLL_REVERSE_BIT;
+    servoreverse |= ROLL_REVERSE_BIT;
   else
-    servorev &= (ROLL_REVERSE_BIT ^ 0xFFFF);
+    servoreverse &= (ROLL_REVERSE_BIT ^ 0xFFFF);
 }
 
 void TrackerSettings::setPanReversed(bool value)
 {
   if (value)
-    servorev |= PAN_REVERSE_BIT;
+    servoreverse |= PAN_REVERSE_BIT;
   else
-    servorev &= (PAN_REVERSE_BIT ^ 0xFFFF);
+    servoreverse &= (PAN_REVERSE_BIT ^ 0xFFFF);
 }
 
 void TrackerSettings::setTiltReversed(bool value)
 {
   if (value)
-    servorev |= TILT_REVERSE_BIT;
+    servoreverse |= TILT_REVERSE_BIT;
   else
-    servorev &= (TILT_REVERSE_BIT ^ 0xFFFF);
+    servoreverse &= (TILT_REVERSE_BIT ^ 0xFFFF);
 }
 
-bool TrackerSettings::isRollReversed() { return (servorev & ROLL_REVERSE_BIT); }
+bool TrackerSettings::isRollReversed() { return (servoreverse & ROLL_REVERSE_BIT); }
 
-bool TrackerSettings::isTiltReversed() { return (servorev & TILT_REVERSE_BIT); }
+bool TrackerSettings::isTiltReversed() { return (servoreverse & TILT_REVERSE_BIT); }
 
-bool TrackerSettings::isPanReversed() { return (servorev & PAN_REVERSE_BIT); }
+bool TrackerSettings::isPanReversed() { return (servoreverse & PAN_REVERSE_BIT); }
 
-void TrackerSettings::resetFusion() {
-  reset_fusion();
-}
+void TrackerSettings::resetFusion() { reset_fusion(); }
 
-void TrackerSettings::pinsChanged() {
-  // TODO. Check for duplicates, disable all pins, then re-enable
+void TrackerSettings::pinsChanged()
+{
+  enum { PIN_PPMIN, PIN_PPMOUT, PIN_BUTRESET, PIN_SBUSIN1, PIN_SBUSIN2 };
+  int pins[5]{-1, -1, -1, -1, -1};
+  pins[PIN_PPMOUT] = getPpmOutPin();
+  pins[PIN_PPMIN] = getPpmInPin();
+  pins[PIN_BUTRESET] = getButtonPin();
+  if (!getSbInInv()) {
+    pins[PIN_SBUSIN1] = 5;
+    pins[PIN_SBUSIN2] = 6;
+  }
 
+  // Loop through all possibilites checking for duplicates
+  bool duplicates = false;
+  for (int i = 0; i < 4; i++) {
+    for (int y = i + 1; y < 5; y++) {
+      if (pins[i] > 0 && pins[y] > 0 && pins[i] == pins[y]) {
+        duplicates = true;
+        break;
+      }
+    }
+  }
+
+  if (!duplicates) {
+    PpmIn_setPin(-1);
+    PpmOut_setPin(-1);
+    PpmIn_setPin(getPpmInPin());
+    PpmOut_setPin(getPpmOutPin());
+  } else {
+    LOGE("Cannot pick duplicate pins. Note: SBUS in uses D5+D6 when not inverted");
+  }
 }
 
 // Saves current data to flash
@@ -106,4 +131,3 @@ void TrackerSettings::loadFromEEPROM()
   }
   k_mutex_unlock(&data_mutex);
 }
-

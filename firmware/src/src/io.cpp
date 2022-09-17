@@ -5,7 +5,6 @@
 #include "soc_flash.h"
 #include "trackersettings.h"
 
-
 volatile bool ioThreadRun = false;
 const device *gpios[2];
 
@@ -163,6 +162,7 @@ void io_Thread()
     // Make sure button pin is enabled
     if (butpin < 1 || butpin > 13) continue;
 
+    pinMode(D_TO_32X_PIN(butpin), INPUT_PULLUP);
     bool buttonDown = digitalRead(D_TO_32X_PIN(butpin)) == 0;
 
     // Button pressed down

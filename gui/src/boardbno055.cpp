@@ -70,7 +70,7 @@ void BoardBNO055::saveToRAM()
     lst.append(QString::number(trkset->getTlt_Gain()*10));
     lst.append(QString::number(trkset->getPan_Gain()*10));
     lst.append(QString::number(trkset->getRll_Gain()*10));
-    lst.append(QString::number(trkset->getServoRev()));
+    lst.append(QString::number(trkset->getServoReverse()));
     lst.append(QString::number(trkset->getPan_Cnt()));
     lst.append(QString::number(trkset->getPan_Min()));
     lst.append(QString::number(trkset->getPan_Max()));
@@ -196,7 +196,7 @@ void BoardBNO055::parseIncomingHT(QString cmd)
             trkset->setTlt_Gain(setd.at(4).toFloat() /10);
             trkset->setPan_Gain(setd.at(5).toFloat()/10);
             trkset->setRll_Gain(setd.at(6).toFloat()/10);
-            trkset->setServoRev(setd.at(7).toInt());
+            trkset->setServoReverse(setd.at(7).toInt());
             trkset->setPan_Cnt(setd.at(8).toInt());
             trkset->setPan_Min(setd.at(9).toInt());
             trkset->setPan_Max(setd.at(10).toInt());

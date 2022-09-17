@@ -102,7 +102,7 @@ public:
     _setting["an1off"] = 0;
     _setting["an2off"] = 0;
     _setting["an3off"] = 0;
-    _setting["servorev"] = 0;
+    _setting["servoreverse"] = 0;
     _setting["magxoff"] = 0;
     _setting["magyoff"] = 0;
     _setting["magzoff"] = 0;
@@ -127,10 +127,8 @@ public:
     _setting["buttonpin"] = 2;
     _setting["ppmoutpin"] = 10;
     _setting["ppminpin"] = -1;
-    _setting["uartrxpin"] = -1;
-    _setting["uarttxpin"] = -1;
     _setting["sermode"] = 0;
-    _setting["sbrate"] = 30;
+    _setting["sbrate"] = 80;
     _setting["sbininv"] = true;
     _setting["sboutinv"] = true;
     _setting["btmode"] = 0;
@@ -663,12 +661,12 @@ public:
 
 
   // Servo Reverse (BitMask)
-  uint8_t getServoRev() {
-    return _setting["servorev"].toUInt();
+  uint8_t getServoReverse() {
+    return _setting["servoreverse"].toUInt();
   }
-  bool setServoRev(uint8_t val=0) {
+  bool setServoReverse(uint8_t val=0) {
     if(val <= 7) {
-      _setting["servorev"] = val;
+      _setting["servoreverse"] = val;
       return true;
     }
     return false;
@@ -978,30 +976,6 @@ public:
   bool setPpmInPin(int8_t val=-1) {
     if(val >= -1 && val <= 64) {
       _setting["ppminpin"] = val;
-      return true;
-    }
-    return false;
-  }
-
-  // UART Receive Pin
-  int8_t getUartRxPin() {
-    return _setting["uartrxpin"].toInt();
-  }
-  bool setUartRxPin(int8_t val=-1) {
-    if(val >= -1 && val <= 64) {
-      _setting["uartrxpin"] = val;
-      return true;
-    }
-    return false;
-  }
-
-  // UART Transmit Pin
-  int8_t getUartTxPin() {
-    return _setting["uarttxpin"].toInt();
-  }
-  bool setUartTxPin(int8_t val=-1) {
-    if(val >= -1 && val <= 64) {
-      _setting["uarttxpin"] = val;
       return true;
     }
     return false;
