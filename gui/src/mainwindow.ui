@@ -1428,7 +1428,7 @@
                         <number>30</number>
                        </property>
                        <property name="maximum">
-                        <number>150</number>
+                        <number>140</number>
                        </property>
                        <property name="value">
                         <number>60</number>
