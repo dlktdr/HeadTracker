@@ -75,13 +75,13 @@ public:
     memset(btrmt,0,sizeof(char) * 18);
 
     // Call Virtual Events after initialization
-    pinsChanged();
     resetFusion();
+    pinsChanged();
   }
 
   // Virtual Events
-  virtual void pinsChanged() {};
   virtual void resetFusion() {};
+  virtual void pinsChanged() {};
 
   // Roll Minimum
   inline const uint16_t& getRll_Min() {return rll_min;}
@@ -364,9 +364,9 @@ public:
   }
 
   // Auxilary Function 0
-  inline const int8_t& getAux0Func() {return aux0func;}
-  bool setAux0Func(int8_t val=-1) {
-    if(val >= -1 && val <= AUX_FUNCTIONS) {
+  inline const uint8_t& getAux0Func() {return aux0func;}
+  bool setAux0Func(uint8_t val=0) {
+    if(val >= 0 && val <= AUX_FUNCTIONS) {
       aux0func = val;
       return true;
     }
@@ -374,9 +374,9 @@ public:
   }
 
   // Auxilary Function 1
-  inline const int8_t& getAux1Func() {return aux1func;}
-  bool setAux1Func(int8_t val=-1) {
-    if(val >= -1 && val <= AUX_FUNCTIONS) {
+  inline const uint8_t& getAux1Func() {return aux1func;}
+  bool setAux1Func(uint8_t val=0) {
+    if(val >= 0 && val <= AUX_FUNCTIONS) {
       aux1func = val;
       return true;
     }
@@ -384,9 +384,9 @@ public:
   }
 
   // Auxilary Function 2
-  inline const int8_t& getAux2Func() {return aux2func;}
-  bool setAux2Func(int8_t val=-1) {
-    if(val >= -1 && val <= AUX_FUNCTIONS) {
+  inline const uint8_t& getAux2Func() {return aux2func;}
+  bool setAux2Func(uint8_t val=0) {
+    if(val >= 0 && val <= AUX_FUNCTIONS) {
       aux2func = val;
       return true;
     }
@@ -736,7 +736,7 @@ public:
   // SBUS Transmit Freqency
   inline const uint8_t& getSbRate() {return sbrate;}
   bool setSbRate(uint8_t val=80) {
-    if(val >= 30 && val <= 150) {
+    if(val >= 30 && val <= 140) {
       sbrate = val;
       return true;
     }
@@ -1052,8 +1052,8 @@ public:
 
   void loadJSONSettings(DynamicJsonDocument &json) {
     JsonVariant v;
-    bool chpinschanged = false;
     bool chresetfusion = false;
+    bool chpinschanged = false;
     v = json["rll_min"]; if(!v.isNull()) {setRll_Min(v);}
     v = json["rll_max"]; if(!v.isNull()) {setRll_Max(v);}
     v = json["rll_cnt"]; if(!v.isNull()) {setRll_Cnt(v);}
@@ -1133,10 +1133,10 @@ public:
     v = json["ppmchcnt"]; if(!v.isNull()) {setPpmChCnt(v);}
     v = json["lppan"]; if(!v.isNull()) {setLpPan(v);}
     v = json["lptiltroll"]; if(!v.isNull()) {setLpTiltRoll(v);}
-    if(chpinschanged)
-      pinsChanged();
     if(chresetfusion)
       resetFusion();
+    if(chpinschanged)
+      pinsChanged();
   }
 
   void setJSONDataList(DynamicJsonDocument &json)
@@ -1491,9 +1491,9 @@ protected:
   int8_t aux1ch = -1; // Auxilary Function 1 Channel
   int8_t aux2ch = -1; // Auxilary Function 2 Channel
   int8_t rstppm = -1; // Reset Center on PPM Input Channel
-  int8_t aux0func = -1; // Auxilary Function 0
-  int8_t aux1func = -1; // Auxilary Function 1
-  int8_t aux2func = -1; // Auxilary Function 2
+  uint8_t aux0func = 0; // Auxilary Function 0
+  uint8_t aux1func = 0; // Auxilary Function 1
+  uint8_t aux2func = 0; // Auxilary Function 2
   float an0gain = 310; // Analog 0 Gain
   float an1gain = 310; // Analog 1 Gain
   float an2gain = 310; // Analog 2 Gain

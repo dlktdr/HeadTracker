@@ -91,9 +91,9 @@ public:
     _setting["aux1ch"] = -1;
     _setting["aux2ch"] = -1;
     _setting["rstppm"] = -1;
-    _setting["aux0func"] = -1;
-    _setting["aux1func"] = -1;
-    _setting["aux2func"] = -1;
+    _setting["aux0func"] = 0;
+    _setting["aux1func"] = 0;
+    _setting["aux2func"] = 0;
     _setting["an0gain"] = 310;
     _setting["an1gain"] = 310;
     _setting["an2gain"] = 310;
@@ -521,11 +521,11 @@ public:
   }
 
   // Auxilary Function 0
-  int8_t getAux0Func() {
-    return _setting["aux0func"].toInt();
+  uint8_t getAux0Func() {
+    return _setting["aux0func"].toUInt();
   }
-  bool setAux0Func(int8_t val=-1) {
-    if(val >= -1 && val <= AUX_FUNCTIONS) {
+  bool setAux0Func(uint8_t val=0) {
+    if(val <= AUX_FUNCTIONS) {
       _setting["aux0func"] = val;
       return true;
     }
@@ -533,11 +533,11 @@ public:
   }
 
   // Auxilary Function 1
-  int8_t getAux1Func() {
-    return _setting["aux1func"].toInt();
+  uint8_t getAux1Func() {
+    return _setting["aux1func"].toUInt();
   }
-  bool setAux1Func(int8_t val=-1) {
-    if(val >= -1 && val <= AUX_FUNCTIONS) {
+  bool setAux1Func(uint8_t val=0) {
+    if(val <= AUX_FUNCTIONS) {
       _setting["aux1func"] = val;
       return true;
     }
@@ -545,11 +545,11 @@ public:
   }
 
   // Auxilary Function 2
-  int8_t getAux2Func() {
-    return _setting["aux2func"].toInt();
+  uint8_t getAux2Func() {
+    return _setting["aux2func"].toUInt();
   }
-  bool setAux2Func(int8_t val=-1) {
-    if(val >= -1 && val <= AUX_FUNCTIONS) {
+  bool setAux2Func(uint8_t val=0) {
+    if(val <= AUX_FUNCTIONS) {
       _setting["aux2func"] = val;
       return true;
     }
@@ -998,7 +998,7 @@ public:
     return _setting["sbrate"].toUInt();
   }
   bool setSbRate(uint8_t val=80) {
-    if(val >= 30 && val <= 150) {
+    if(val >= 30 && val <= 140) {
       _setting["sbrate"] = val;
       return true;
     }
