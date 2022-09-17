@@ -65,9 +65,6 @@ public:
   static constexpr float PPM_MAX_FRAME = 40000;
 
   BaseTrackerSettings() {
-    for(int i = 0; i < 9; i++) {
-      magsioff[i] = 0;
-    }
     strcpy(btpairedaddress,"00:00:00:00:00:00");
     memset(chout,0,sizeof(uint16_t) * 16);
     memset(btch,0,sizeof(uint16_t) * 8);
@@ -78,13 +75,13 @@ public:
     memset(btrmt,0,sizeof(char) * 18);
 
     // Call Virtual Events after initialization
-    pinsChanged();
     resetFusion();
+    pinsChanged();
   }
 
   // Virtual Events
-  virtual void pinsChanged() {};
   virtual void resetFusion() {};
+  virtual void pinsChanged() {};
 
   // Roll Minimum
   inline const uint16_t& getRll_Min() {return rll_min;}
@@ -576,6 +573,96 @@ public:
     return false;
   }
 
+  // Soft Iron Offset 00
+  inline const float& getso00() {return so00;}
+  bool setso00(float val=1) {
+    if(val >= FLOAT_MIN && val <= FLOAT_MAX) {
+      so00 = val;
+      return true;
+    }
+    return false;
+  }
+
+  // Soft Iron Offset 01
+  inline const float& getso01() {return so01;}
+  bool setso01(float val=0) {
+    if(val >= FLOAT_MIN && val <= FLOAT_MAX) {
+      so01 = val;
+      return true;
+    }
+    return false;
+  }
+
+  // Soft Iron Offset 02
+  inline const float& getso02() {return so02;}
+  bool setso02(float val=0) {
+    if(val >= FLOAT_MIN && val <= FLOAT_MAX) {
+      so02 = val;
+      return true;
+    }
+    return false;
+  }
+
+  // Soft Iron Offset 10
+  inline const float& getso10() {return so10;}
+  bool setso10(float val=0) {
+    if(val >= FLOAT_MIN && val <= FLOAT_MAX) {
+      so10 = val;
+      return true;
+    }
+    return false;
+  }
+
+  // Soft Iron Offset 11
+  inline const float& getso11() {return so11;}
+  bool setso11(float val=1) {
+    if(val >= FLOAT_MIN && val <= FLOAT_MAX) {
+      so11 = val;
+      return true;
+    }
+    return false;
+  }
+
+  // Soft Iron Offset 12
+  inline const float& getso12() {return so12;}
+  bool setso12(float val=0) {
+    if(val >= FLOAT_MIN && val <= FLOAT_MAX) {
+      so12 = val;
+      return true;
+    }
+    return false;
+  }
+
+  // Soft Iron Offset 20
+  inline const float& getso20() {return so20;}
+  bool setso20(float val=0) {
+    if(val >= FLOAT_MIN && val <= FLOAT_MAX) {
+      so20 = val;
+      return true;
+    }
+    return false;
+  }
+
+  // Soft Iron Offset 21
+  inline const float& getso21() {return so21;}
+  bool setso21(float val=0) {
+    if(val >= FLOAT_MIN && val <= FLOAT_MAX) {
+      so21 = val;
+      return true;
+    }
+    return false;
+  }
+
+  // Soft Iron Offset 22
+  inline const float& getso22() {return so22;}
+  bool setso22(float val=1) {
+    if(val >= FLOAT_MIN && val <= FLOAT_MAX) {
+      so22 = val;
+      return true;
+    }
+    return false;
+  }
+
   // Board Rotation X
   inline const float& getRotX() {return rotx;}
   bool setRotX(float val=0) {
@@ -762,19 +849,6 @@ public:
       return true;
     }
     return false;
-  }
-
-  // Magnetometer Soft Iron Offset Matrix
-  void getMagSiOff(float dest[9]) {memcpy(dest, magsioff, sizeof(float) * 9);}
-  bool setMagSiOff(const float val[9]) {
-    bool changed = false;
-    for(int i=0; i < 9; i++) {
-      if(magsioff[i] >= FLOAT_MIN && magsioff[i] <= FLOAT_MAX) {
-        magsioff[i] = val[i];
-        changed = true;
-      }
-    }
-    return changed;
   }
 
   // Bluetooth Remote address to Pair With
@@ -964,6 +1038,15 @@ public:
     json["gyrxoff"] = gyrxoff;
     json["gyryoff"] = gyryoff;
     json["gyrzoff"] = gyrzoff;
+    json["so00"] = so00;
+    json["so01"] = so01;
+    json["so02"] = so02;
+    json["so10"] = so10;
+    json["so11"] = so11;
+    json["so12"] = so12;
+    json["so20"] = so20;
+    json["so21"] = so21;
+    json["so22"] = so22;
     json["rotx"] = rotx;
     json["roty"] = roty;
     json["rotz"] = rotz;
@@ -991,8 +1074,8 @@ public:
 
   void loadJSONSettings(DynamicJsonDocument &json) {
     JsonVariant v;
-    bool chpinschanged = false;
     bool chresetfusion = false;
+    bool chpinschanged = false;
     v = json["rll_min"]; if(!v.isNull()) {setRll_Min(v);}
     v = json["rll_max"]; if(!v.isNull()) {setRll_Max(v);}
     v = json["rll_cnt"]; if(!v.isNull()) {setRll_Cnt(v);}
@@ -1042,6 +1125,15 @@ public:
     v = json["gyrxoff"]; if(!v.isNull()) {setGyrXOff(v); chresetfusion = true;}
     v = json["gyryoff"]; if(!v.isNull()) {setGyrYOff(v); chresetfusion = true;}
     v = json["gyrzoff"]; if(!v.isNull()) {setGyrZOff(v); chresetfusion = true;}
+    v = json["so00"]; if(!v.isNull()) {setso00(v); chresetfusion = true;}
+    v = json["so01"]; if(!v.isNull()) {setso01(v); chresetfusion = true;}
+    v = json["so02"]; if(!v.isNull()) {setso02(v); chresetfusion = true;}
+    v = json["so10"]; if(!v.isNull()) {setso10(v); chresetfusion = true;}
+    v = json["so11"]; if(!v.isNull()) {setso11(v); chresetfusion = true;}
+    v = json["so12"]; if(!v.isNull()) {setso12(v); chresetfusion = true;}
+    v = json["so20"]; if(!v.isNull()) {setso20(v); chresetfusion = true;}
+    v = json["so21"]; if(!v.isNull()) {setso21(v); chresetfusion = true;}
+    v = json["so22"]; if(!v.isNull()) {setso22(v); chresetfusion = true;}
     v = json["rotx"]; if(!v.isNull()) {setRotX(v); chresetfusion = true;}
     v = json["roty"]; if(!v.isNull()) {setRotY(v); chresetfusion = true;}
     v = json["rotz"]; if(!v.isNull()) {setRotZ(v); chresetfusion = true;}
@@ -1065,10 +1157,10 @@ public:
     v = json["ppmchcnt"]; if(!v.isNull()) {setPpmChCnt(v);}
     v = json["lppan"]; if(!v.isNull()) {setLpPan(v);}
     v = json["lptiltroll"]; if(!v.isNull()) {setLpTiltRoll(v);}
-    if(chpinschanged)
-      pinsChanged();
     if(chresetfusion)
       resetFusion();
+    if(chpinschanged)
+      pinsChanged();
   }
 
   void setJSONDataList(DynamicJsonDocument &json)
@@ -1444,6 +1536,15 @@ protected:
   float gyrxoff = 0; // Gyrometer X Calibration Offset
   float gyryoff = 0; // Gyrometer Y Calibration Offset
   float gyrzoff = 0; // Gyrometer Z Calibration Offset
+  float so00 = 1; // Soft Iron Offset 00
+  float so01 = 0; // Soft Iron Offset 01
+  float so02 = 0; // Soft Iron Offset 02
+  float so10 = 0; // Soft Iron Offset 10
+  float so11 = 1; // Soft Iron Offset 11
+  float so12 = 0; // Soft Iron Offset 12
+  float so20 = 0; // Soft Iron Offset 20
+  float so21 = 0; // Soft Iron Offset 21
+  float so22 = 1; // Soft Iron Offset 22
   float rotx = 0; // Board Rotation X
   float roty = 0; // Board Rotation Y
   float rotz = 0; // Board Rotation Z
@@ -1469,7 +1570,6 @@ protected:
   uint8_t lptiltroll = 0; // Low Pass filter For Tilt + Roll
 
   // Setting Arrays
-  float magsioff[9]; // Magnetometer Soft Iron Offset Matrix
   char btpairedaddress[19]; // Bluetooth Remote address to Pair With
 
   // Real Time Data

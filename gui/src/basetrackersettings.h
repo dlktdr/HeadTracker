@@ -112,6 +112,15 @@ public:
     _setting["gyrxoff"] = 0;
     _setting["gyryoff"] = 0;
     _setting["gyrzoff"] = 0;
+    _setting["so00"] = 1;
+    _setting["so01"] = 0;
+    _setting["so02"] = 0;
+    _setting["so10"] = 0;
+    _setting["so11"] = 1;
+    _setting["so12"] = 0;
+    _setting["so20"] = 0;
+    _setting["so21"] = 0;
+    _setting["so22"] = 1;
     _setting["rotx"] = 0;
     _setting["roty"] = 0;
     _setting["rotz"] = 0;
@@ -135,7 +144,6 @@ public:
     _setting["ppmchcnt"] = 8;
     _setting["lppan"] = 0;
     _setting["lptiltroll"] = 0;
-    _setting["magsioff"] = QVariantList();
     _setting["btpairedaddress[17]"] = QString("00:00:00:00:00:00");
     _dataItems["magx"] = false;
     _dataItems["magy"] = false;
@@ -777,6 +785,123 @@ public:
   bool setGyrZOff(float val=0) {
     if(val >= FLOAT_MIN && val <= FLOAT_MAX) {
       _setting["gyrzoff"] = QString::number(val,'g',4);
+      return true;
+    }
+    return false;
+  }
+
+
+  // Soft Iron Offset 00
+  float getso00() {
+    return _setting["so00"].toFloat();
+  }
+  bool setso00(float val=1) {
+    if(val >= FLOAT_MIN && val <= FLOAT_MAX) {
+      _setting["so00"] = QString::number(val,'g',4);
+      return true;
+    }
+    return false;
+  }
+
+
+  // Soft Iron Offset 01
+  float getso01() {
+    return _setting["so01"].toFloat();
+  }
+  bool setso01(float val=0) {
+    if(val >= FLOAT_MIN && val <= FLOAT_MAX) {
+      _setting["so01"] = QString::number(val,'g',4);
+      return true;
+    }
+    return false;
+  }
+
+
+  // Soft Iron Offset 02
+  float getso02() {
+    return _setting["so02"].toFloat();
+  }
+  bool setso02(float val=0) {
+    if(val >= FLOAT_MIN && val <= FLOAT_MAX) {
+      _setting["so02"] = QString::number(val,'g',4);
+      return true;
+    }
+    return false;
+  }
+
+
+  // Soft Iron Offset 10
+  float getso10() {
+    return _setting["so10"].toFloat();
+  }
+  bool setso10(float val=0) {
+    if(val >= FLOAT_MIN && val <= FLOAT_MAX) {
+      _setting["so10"] = QString::number(val,'g',4);
+      return true;
+    }
+    return false;
+  }
+
+
+  // Soft Iron Offset 11
+  float getso11() {
+    return _setting["so11"].toFloat();
+  }
+  bool setso11(float val=1) {
+    if(val >= FLOAT_MIN && val <= FLOAT_MAX) {
+      _setting["so11"] = QString::number(val,'g',4);
+      return true;
+    }
+    return false;
+  }
+
+
+  // Soft Iron Offset 12
+  float getso12() {
+    return _setting["so12"].toFloat();
+  }
+  bool setso12(float val=0) {
+    if(val >= FLOAT_MIN && val <= FLOAT_MAX) {
+      _setting["so12"] = QString::number(val,'g',4);
+      return true;
+    }
+    return false;
+  }
+
+
+  // Soft Iron Offset 20
+  float getso20() {
+    return _setting["so20"].toFloat();
+  }
+  bool setso20(float val=0) {
+    if(val >= FLOAT_MIN && val <= FLOAT_MAX) {
+      _setting["so20"] = QString::number(val,'g',4);
+      return true;
+    }
+    return false;
+  }
+
+
+  // Soft Iron Offset 21
+  float getso21() {
+    return _setting["so21"].toFloat();
+  }
+  bool setso21(float val=0) {
+    if(val >= FLOAT_MIN && val <= FLOAT_MAX) {
+      _setting["so21"] = QString::number(val,'g',4);
+      return true;
+    }
+    return false;
+  }
+
+
+  // Soft Iron Offset 22
+  float getso22() {
+    return _setting["so22"].toFloat();
+  }
+  bool setso22(float val=1) {
+    if(val >= FLOAT_MIN && val <= FLOAT_MAX) {
+      _setting["so22"] = QString::number(val,'g',4);
       return true;
     }
     return false;

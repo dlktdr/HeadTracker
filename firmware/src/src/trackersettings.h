@@ -38,6 +38,19 @@ class TrackerSettings : public BaseTrackerSettings
   bool isTiltReversed();
   bool isPanReversed();
 
+  void getMagSiOff(float dest[9])
+  {
+    dest[0] = getso00();
+    dest[1] = getso01();
+    dest[2] = getso02();
+    dest[3] = getso10();
+    dest[4] = getso11();
+    dest[5] = getso12();
+    dest[6] = getso20();
+    dest[7] = getso21();
+    dest[8] = getso22();
+  }
+
   void saveToEEPROM();
   void loadFromEEPROM();
 
