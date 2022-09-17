@@ -755,8 +755,8 @@ public:
 
   // SBUS Transmit Freqency
   inline const uint8_t& getSbRate() {return sbrate;}
-  bool setSbRate(uint8_t val=30) {
-    if(val >= 150 && val <= 80) {
+  bool setSbRate(uint8_t val=80) {
+    if(val >= 30 && val <= 150) {
       sbrate = val;
       return true;
     }
@@ -1554,7 +1554,7 @@ protected:
   int8_t uartrxpin = -1; // UART Receive Pin
   int8_t uarttxpin = -1; // UART Transmit Pin
   uint8_t sermode = 0; // Serial Mode (0- Off, 1-SBUS, 2-CRSF)
-  uint8_t sbrate = 30; // SBUS Transmit Freqency
+  uint8_t sbrate = 80; // SBUS Transmit Freqency
   bool sbininv = true; // SBUS Receieve Inverted
   bool sboutinv = true; // SBUS Transmit Inverted
   uint8_t btmode = 0; // Bluetooth Mode (0-Off, 1- Head, 2-Receive, 3-Scanner)

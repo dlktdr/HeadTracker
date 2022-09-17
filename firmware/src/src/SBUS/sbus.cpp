@@ -140,7 +140,7 @@ uint64_t bytesread = 0;
 
 bool SBUS_Read_Data(uint16_t ch_[16])
 {
-#ifdef DEBUG
+#ifdef DEBUG_SBUS
   static bool toggle = false;
   pinMode(D_TO_32X_PIN(8), GPIO_OUTPUT);
   digitalWrite(D_TO_32X_PIN(8), toggle);
@@ -174,7 +174,7 @@ bool SBUS_Read_Data(uint16_t ch_[16])
       if (ch_[i] < TrackerSettings::MIN_PWM) ch_[i] = TrackerSettings::MIN_PWM;
     }
 
-#ifdef DEBUG
+#ifdef DEBUG_SBUS
     static bool toggle = false;
     pinMode(D_TO_32X_PIN(7), GPIO_OUTPUT);
     digitalWrite(D_TO_32X_PIN(7), toggle);

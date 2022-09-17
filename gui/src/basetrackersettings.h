@@ -1023,8 +1023,8 @@ public:
   uint8_t getSbRate() {
     return _setting["sbrate"].toUInt();
   }
-  bool setSbRate(uint8_t val=30) {
-    if(val >= 150 && val <= 80) {
+  bool setSbRate(uint8_t val=80) {
+    if(val >= 30 && val <= 150) {
       _setting["sbrate"] = val;
       return true;
     }
