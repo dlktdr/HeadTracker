@@ -3,6 +3,8 @@
 from array import array
 import csv
 
+import set_common as s
+
 f = open("../gui/src/basetrackersettings.h","w")
 f.write("""\
 /*
@@ -41,123 +43,40 @@ class BaseTrackerSettings : public QObject
 public:
 """)
 
-# CSV Column's
-coltype = 0
-coldata = 1
-colname = 2
-coldefault = 3
-colmin = 4
-colmax = 5
-coldesc = 6
-colfwonevnt = 7
-coldivisor = 8
-colround = 9
-
-const = list()
-data = list()
-dataarrays = list()
-settings = list()
-settingsarrays = list()
-
-with open('settings.csv', newline='') as csvfile:
-    setns = csv.reader(csvfile, delimiter=',', quotechar='\"')
-    itersetns = iter(setns)
-    next(itersetns)
-    for row in setns:
-        if "const" in row[coldata].lower():
-          const.append(row)
-        if "setting" in row[coldata].lower():
-          if "[" in row[colname]:
-            settingsarrays.append(row)
-          else:
-            settings.append(row)
-        if "data" in row[coldata].lower():
-          if "[" in row[colname]:
-            dataarrays.append(row)
-          else:
-            data.append(row)
-
-def typeToJson(type) :
-  if type == "float":
-    return "flt"
-  if type == "double":
-    return "dbl"
-  if type == "char":
-    return "chr"
-  return type
-
-def typeToC(type) :
-  if type == "u8":
-    return "uint8_t"
-  if type == "s8":
-    return "int8_t"
-  if type == "u16":
-    return "uint16_t"
-  if type == "s16":
-    return "int16_t"
-  if type == "u32":
-    return "uint32_t"
-  if type == "s32":
-    return "int32_t"
-  if type == "char":
-    return "QString"
-  return type
-
-def QVariantRet(type):
-  if type == "u8":
-    return ".toUInt()"
-  if type == "s8":
-    return ".toInt()"
-  if type == "u16":
-    return ".toUInt()"
-  if type == "s16":
-    return ".toInt()"
-  if type == "u32":
-    return ".toUInt()"
-  if type == "s32":
-    return ".toInt()"
-  if type == "float":
-    return ".toFloat()"
-  if type == "double":
-    return ".toDouble()"
-  if type == "bool":
-    return ".toBool()"
-  if type == "char":
-    return ".toString()"
-
+s.readSettings()
 
 # Write the constants to the file
-for row in const:
-  f.write("  static constexpr "  + typeToC(row[coltype]) + " " + row[colname] + " = " + row[coldefault] + ";\n")
+for row in s.const:
+  f.write("  static constexpr "  + s.typeToC(row[s.coltype]) + " " + row[s.colname] + " = " + row[s.coldefault] + ";\n")
 
 # Write the Constructor
 f.write("\n  BaseTrackerSettings(QObject *parent=nullptr) : \n    QObject(parent)\n  {\n")
-for row in settings:
-  if "bool" in row[coltype]:
-    f.write("    _setting[\"" + row[colname].lower() + "\"] = " + row[coldefault].lower() + ";\n")
+for row in s.settings:
+  if "bool" in row[s.coltype]:
+    f.write("    _setting[\"" + row[s.colname].lower() + "\"] = " + row[s.coldefault].lower() + ";\n")
   else:
-    f.write("    _setting[\"" + row[colname].lower() + "\"] = " + row[coldefault] + ";\n")
+    f.write("    _setting[\"" + row[s.colname].lower() + "\"] = " + row[s.coldefault] + ";\n")
 
-for row in settingsarrays:
-  start = row[colname].find("[")
-  end = row[colname].find("]")
-  arraylength = row[colname][start+1:end]
-  name = row[colname][:start].lower()
+for row in s.settingsarrays:
+  start = row[s.colname].find("[")
+  end = row[s.colname].find("]")
+  arraylength = row[s.colname][start+1:end]
+  name = row[s.colname][:start].lower()
 
   # Fill arrays with the default values
-  if "char" in row[coltype]:
-    f.write("    _setting[\"" + row[colname].lower() + "\"] = QString(\"" + row[coldefault] + "\");\n")
+  if "char" in row[s.coltype]:
+    f.write("    _setting[\"" + row[s.colname].lower() + "\"] = QString(\"" + row[s.coldefault] + "\");\n")
   else:
-    f.write("    _setting[\"" + row[colname][:start].lower() + "\"] = QVariantList();\n")
+    f.write("    _setting[\"" + row[s.colname][:start].lower() + "\"] = QVariantList();\n")
 
-for row in data:
-  f.write("    _dataItems[\"" + row[colname].lower() + "\"] = false;\n")
+for row in s.data:
+  f.write("    _dataItems[\"" + row[s.colname].lower() + "\"] = false;\n")
 
-for row in dataarrays:
-  start = row[colname].find("[")
-  end = row[colname].find("]")
-  arraylength = row[colname][start+1:end]
-  name = row[colname][:start].lower()
+for row in s.dataarrays:
+  start = row[s.colname].find("[")
+  end = row[s.colname].find("]")
+  arraylength = row[s.colname][start+1:end]
+  name = row[s.colname][:start].lower()
   f.write("    _dataItems[\"" + name + "\"] = false;\n")
 
 f.write("    _deviceDataItems = _dataItems;\n")
@@ -165,14 +84,14 @@ f.write("    _deviceDataItems = _dataItems;\n")
 # Write the get + set functions
 f.write("  }\n\n")
 
-for row in settings:
-  if row[coltype].lower().strip() == "bool":
+for row in s.settings:
+  if row[s.coltype].lower().strip() == "bool":
     txt = """\
   // {desc}
   {dtype} get{cname}() {{return _setting[\"{name}\"]{vartype};}}
   void set{cname}({dtype} val={deflt}) {{ _setting["{name}"] = val; }}\n
-""".format(cname = row[colname], name = row[colname].lower(), dtype = typeToC(row[coltype]), deflt = row[coldefault].lower(), minv = row[colmin], maxv = row[colmax], desc = row[coldesc], vartype = QVariantRet(row[coltype].lower()))
-  elif row[coltype].lower().strip() == "float":
+""".format(cname = row[s.colname], name = row[s.colname].lower(), dtype = s.typeToC(row[s.coltype]), deflt = row[s.coldefault].lower(), minv = row[s.colmin], maxv = row[s.colmax], desc = row[s.coldesc], vartype = s.QVariantRet(row[s.coltype].lower()))
+  elif row[s.coltype].lower().strip() == "float":
     txt = """\
   // {desc}
   {dtype} get{cname}() {{
@@ -185,8 +104,8 @@ for row in settings:
     }}
     return false;
   }}\n\n
-""".format(cname = row[colname], name = row[colname].lower(), dtype = typeToC(row[coltype]), deflt = row[coldefault], minv = row[colmin], maxv = row[colmax], desc = row[coldesc], vartype = QVariantRet(row[coltype].lower()), round = row[colround])
-  elif (row[coltype].lower().strip()[:1] == 'u') and (row[colmin].strip() == "0"):
+""".format(cname = row[s.colname], name = row[s.colname].lower(), dtype = s.typeToC(row[s.coltype]), deflt = row[s.coldefault], minv = row[s.colmin], maxv = row[s.colmax], desc = row[s.coldesc], vartype = s.QVariantRet(row[s.coltype].lower()), round = row[s.colround])
+  elif (row[s.coltype].lower().strip()[:1] == 'u') and (row[s.colmin].strip() == "0"):
     txt = """\
   // {desc}
   {dtype} get{cname}() {{
@@ -198,7 +117,7 @@ for row in settings:
       return true;
     }}
     return false;
-  }}\n\n""".format(cname = row[colname], name = row[colname].lower(), dtype = typeToC(row[coltype]), deflt = row[coldefault], minv = row[colmin], maxv = row[colmax], desc = row[coldesc], vartype = QVariantRet(row[coltype].lower()), round = row[colround])
+  }}\n\n""".format(cname = row[s.colname], name = row[s.colname].lower(), dtype = s.typeToC(row[s.coltype]), deflt = row[s.coldefault], minv = row[s.colmin], maxv = row[s.colmax], desc = row[s.coldesc], vartype = s.QVariantRet(row[s.coltype].lower()), round = row[s.colround])
   else:
     txt = """\
   // {desc}
@@ -211,15 +130,15 @@ for row in settings:
       return true;
     }}
     return false;
-  }}\n\n""".format(cname = row[colname], name = row[colname].lower(), dtype = typeToC(row[coltype]), deflt = row[coldefault], minv = row[colmin], maxv = row[colmax], desc = row[coldesc], vartype = QVariantRet(row[coltype].lower()))
+  }}\n\n""".format(cname = row[s.colname], name = row[s.colname].lower(), dtype = s.typeToC(row[s.coltype]), deflt = row[s.coldefault], minv = row[s.colmin], maxv = row[s.colmax], desc = row[s.coldesc], vartype = s.QVariantRet(row[s.coltype].lower()))
   f.write(txt)
 
 # Get & Set for the Settings Arrays
-for row in settingsarrays:
-  start = row[colname].find("[")
-  end = row[colname].find("]")
-  arraylength = row[colname][start+1:end]
-  if row[coltype].lower().strip() != "char":
+for row in s.settingsarrays:
+  start = row[s.colname].find("[")
+  end = row[s.colname].find("]")
+  arraylength = row[s.colname][start+1:end]
+  if row[s.coltype].lower().strip() != "char":
     txt = ""
     a = 1
 #    txt = """\
@@ -234,7 +153,7 @@ for row in settingsarrays:
 #      }}
 #    }}
 #    return changed;
-#  }}\n\n""".format(cname = row[colname][:start], name = row[colname][:start].lower(), dtype = typeToC(row[coltype].strip()), deflt = row[coldefault], minv = row[colmin], maxv = row[colmax], desc = row[coldesc], len = arraylength )
+#  }}\n\n""".format(cname = row[s.colname][:start], name = row[s.colname][:start].lower(), dtype = s.typeToC(row[s.coltype].strip()), deflt = row[s.coldefault], minv = row[s.colmin], maxv = row[s.colmax], desc = row[s.coldesc], len = arraylength )
   else:
     txt = """\
   // {desc}
@@ -243,42 +162,42 @@ for row in settingsarrays:
   }}
   void set{cname}(const QString &val) {{
     _setting[\"{name}\"] = val;
-  }}\n\n""".format(cname = row[colname][:start], name = row[colname][:start].lower(), dtype = typeToC(row[coltype].strip()), deflt = row[coldefault], minv = row[colmin], maxv = row[colmax], desc = row[coldesc], len = arraylength, vartype = QVariantRet(row[coltype].lower()) )
+  }}\n\n""".format(cname = row[s.colname][:start], name = row[s.colname][:start].lower(), dtype = s.typeToC(row[s.coltype].strip()), deflt = row[s.coldefault], minv = row[s.colmin], maxv = row[s.colmax], desc = row[s.coldesc], len = arraylength, vartype = s.QVariantRet(row[s.coltype].lower()) )
 
   f.write(txt)
 
 # Get Functions for the Data Items
-for row in data:
+for row in s.data:
   txt = """\
   // {desc}
   {dtype} getData{cname}() {{ return _data[\"{name}\"]{vartype}; }}\n
-""".format(cname = row[colname], name = row[colname].lower(), dtype = typeToC(row[coltype].lower().strip()), deflt = row[coldefault], minv = row[colmin], maxv = row[colmax], desc = row[coldesc],vartype = QVariantRet(row[coltype].lower().strip()))
+""".format(cname = row[s.colname], name = row[s.colname].lower(), dtype = s.typeToC(row[s.coltype].lower().strip()), deflt = row[s.coldefault], minv = row[s.colmin], maxv = row[s.colmax], desc = row[s.coldesc],vartype = s.QVariantRet(row[s.coltype].lower().strip()))
   f.write(txt)
 
 # Get for the Data Arrays
-for row in dataarrays:
-  start = row[colname].find("[")
-  end = row[colname].find("]")
-  arraylength = row[colname][start+1:end]
-  if row[coltype].lower().strip() == "char":
+for row in s.dataarrays:
+  start = row[s.colname].find("[")
+  end = row[s.colname].find("]")
+  arraylength = row[s.colname][start+1:end]
+  if row[s.coltype].lower().strip() == "char":
     txt = """\
   // {desc}
   QString getData{cname}() {{ return _data[\"{name}\"].toString(); }}\n
-""".format(cname = row[colname][:start], name = row[colname][:start].lower(), desc = row[coldesc])
+""".format(cname = row[s.colname][:start], name = row[s.colname][:start].lower(), desc = row[s.coldesc])
     f.write(txt)
 
 f.write("  QStringList allDataItems() {\n    QStringList rv;\n")
-for row in data:
-  f.write("    rv.append(\"" + row[colname].lower() + "\");\n")
-for row in dataarrays:
-  start = row[colname].find("[")
-  end = row[colname].find("]")
-  arraylength = row[colname][start+1:end]
-  if row[coltype].strip() == "char":
-    f.write("    rv.append(\"" + row[colname][:start].lower() + "\");\n")
+for row in s.data:
+  f.write("    rv.append(\"" + row[s.colname].lower() + "\");\n")
+for row in s.dataarrays:
+  start = row[s.colname].find("[")
+  end = row[s.colname].find("]")
+  arraylength = row[s.colname][start+1:end]
+  if row[s.coltype].strip() == "char":
+    f.write("    rv.append(\"" + row[s.colname][:start].lower() + "\");\n")
   else:
     for x in range(int(arraylength)):
-      f.write("    rv.append(\"" + row[colname][:start].lower() + "[" + str(x) + "]\");\n")
+      f.write("    rv.append(\"" + row[s.colname][:start].lower() + "[" + str(x) + "]\");\n")
 
 f.write("    return rv;\n  }\n")
 
@@ -292,55 +211,6 @@ protected:
 
   \n""")
 
-#f.write("""\
-#  // Bit map of data to send to GUI, max 64 items
-#  uint64_t senddatavars;
-#  uint64_t senddataarray;
-#""")
-#
-#f.write("\n  // Settings\n")
-#for row in settings:
-#  f.write("  " + typeToC(row[coltype]) + " " + row[colname].lower())
-#  if row[coldefault] == "":
-#    f.write (";")
-#  else:
-#    f.write (" = " + row[coldefault] + ";")
-#
-#  f.write(" // " + row[coldesc] + "\n")
-#
-#f.write("\n  // Setting Arrays\n")
-#for row in settingsarrays:
-#  start = row[colname].find("[")
-#  end = row[colname].find("]")
-#  arlen = row[colname][start+1:end]
-#  if row[coltype].lower().strip() == "char":
-#    try:
-#      arlen = int(arraylength)
-#      arlen += 1 # Increment Storage Space For Null
-#      arlen = str(arlen)
-#    except ValueError:
-#      arlen = arraylength
-#  f.write("  " + typeToC(row[coltype]) + " " + row[colname][:start].lower() + "[" + arlen + "]; // " + row[coldesc] + "\n")
-#
-#f.write("\n  // Real Time Data\n")
-#for row in data:
-#  f.write("  " + typeToC(row[coltype]) + " " + row[colname].lower() + " = 0; // " + row[coldesc] + "\n")
-#
-#f.write("\n  // Real Time Data Arrays\n")
-#for row in dataarrays:
-#  start = row[colname].find("[")
-#  end = row[colname].find("]")
-#  arlen = row[colname][start+1:end]
-#  if row[coltype].lower().strip() == "char":
-#    try:
-#      arlen = int(arraylength)
-#      arlen += 1
-#      arlen = str(arlen)
-#    except ValueError:
-#      arlen = arraylength
-#  f.write("  " + typeToC(row[coltype]) + " " + row[colname][:start].lower() + "[" + arlen + "]; // " + row[coldesc] + "\n")
-#  f.write("  " + typeToC(row[coltype]) + " last" + row[colname][:start].lower() + "[" + arlen + "]; // " + row[coldesc] + "\n")
-#
 # Close Class
 f.write("};\n")
 

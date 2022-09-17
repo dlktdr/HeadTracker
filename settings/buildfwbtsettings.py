@@ -3,6 +3,8 @@
 from array import array
 import csv
 
+import set_common as s
+
 f = open("../firmware/src/src/targets/nrf52/blechars.cpp","w")
 f.write("""\
 /*
@@ -39,88 +41,30 @@ f.write("""\
 
 """)
 
-# CSV Column's
-coltype = 0
-coldata = 1
-colname = 2
-coldefault = 3
-colmin = 4
-colmax = 5
-coldesc = 6
-colfwonevnt = 7
-coldivisor = 8
-colround = 9
-colbleaddr = 10
-
-const = list()
-data = list()
-dataarrays = list()
-settings = list()
-settingsarrays = list()
-
-with open('settings.csv', newline='') as csvfile:
-    setns = csv.reader(csvfile, delimiter=',', quotechar='\"')
-    itersetns = iter(setns)
-    next(itersetns)
-    for row in setns:
-        if "const" in row[coldata].lower():
-          const.append(row)
-        if "setting" in row[coldata].lower():
-          if "[" in row[colname]:
-            settingsarrays.append(row)
-          else:
-            settings.append(row)
-        if "data" in row[coldata].lower():
-          if "[" in row[colname]:
-            dataarrays.append(row)
-          else:
-            data.append(row)
-
-def typeToJson(type) :
-  if type == "float":
-    return "flt"
-  if type == "double":
-    return "dbl"
-  if type == "char":
-    return "chr"
-  return type
-
-def typeToC(type) :
-  if type == "u8":
-    return "uint8_t"
-  if type == "s8":
-    return "int8_t"
-  if type == "u16":
-    return "uint16_t"
-  if type == "s16":
-    return "int16_t"
-  if type == "u32":
-    return "uint32_t"
-  if type == "s32":
-    return "int32_t"
-  return type
+# Read the settings
+s.readSettings()
 
 # Data Storage Variables
-for row in settings:
-  if row[colbleaddr].strip() != "":
-    name = row[colname].lower().strip()
-    addr = row[colbleaddr].upper().strip()
-    f.write(typeToC(row[coltype].strip()) + " bt_" + name + ";\n")
+for row in s.settings:
+  if row[s.colbleaddr].strip() != "":
+    name = row[s.colname].lower().strip()
+    addr = row[s.colbleaddr].upper().strip()
+    f.write(s.typeToC(row[s.coltype].strip()) + " bt_" + name + ";\n")
 
 f.write("\n")
 
-for row in settings:
-  if row[colbleaddr].strip() != "":
-    name = row[colname].lower().strip()
-    addr = row[colbleaddr].upper().strip()
+for row in s.settings:
+  if row[s.colbleaddr].strip() != "":
+    name = row[s.colname].lower().strip()
+    addr = row[s.colbleaddr].upper().strip()
     f.write("struct bt_uuid_16 bt_uuid_" + name + " = BT_UUID_INIT_16(0x" + addr + ");\n")
 
 f.write("\n")
 
-for row in settings:
-  if row[colbleaddr].strip() != "":
-    name = row[colname].strip()
-    addr = row[colbleaddr].upper().strip()
+for row in s.settings:
+  if row[s.colbleaddr].strip() != "":
+    name = row[s.colname].strip()
+    addr = row[s.colbleaddr].upper().strip()
     f.write("""\
 ssize_t btwr_{lowername}(struct bt_conn *conn, const struct bt_gatt_attr *attr, const void *buf, uint16_t len, uint16_t offset, uint8_t flags)
 {{
@@ -138,7 +82,7 @@ ssize_t btrd_{lowername}(struct bt_conn *conn, const struct bt_gatt_attr *attr, 
   return bt_gatt_attr_read(conn, attr, buf, len, offset, value, sizeof({ctype}));
 }}
 
-""".format(name = name, lowername = name.lower(), addr = addr, ctype = typeToC(row[coltype])))
+""".format(name = name, lowername = name.lower(), addr = addr, ctype = s.typeToC(row[s.coltype])))
 
 f.close()
 
@@ -185,42 +129,42 @@ f.write("""\
 """)
 
 # Data Storage Variables
-for row in settings:
-  if row[colbleaddr].strip() != "":
-    name = row[colname].lower().strip()
-    addr = row[colbleaddr].upper().strip()
-    f.write("extern " + typeToC(row[coltype].strip()) + " bt_" + name + ";\n")
+for row in s.settings:
+  if row[s.colbleaddr].strip() != "":
+    name = row[s.colname].lower().strip()
+    addr = row[s.colbleaddr].upper().strip()
+    f.write("extern " + s.typeToC(row[s.coltype].strip()) + " bt_" + name + ";\n")
 
 f.write("\n")
 
-for row in settings:
-  if row[colbleaddr].strip() != "":
-    name = row[colname].lower().strip()
-    addr = row[colbleaddr].upper().strip()
+for row in s.settings:
+  if row[s.colbleaddr].strip() != "":
+    name = row[s.colname].lower().strip()
+    addr = row[s.colbleaddr].upper().strip()
     f.write("extern struct bt_uuid_16 bt_uuid_" + name + ";\n")
 
 f.write("\n")
 
-for row in settings:
-  if row[colbleaddr].strip() != "":
-    name = row[colname].strip()
-    addr = row[colbleaddr].upper().strip()
+for row in s.settings:
+  if row[s.colbleaddr].strip() != "":
+    name = row[s.colname].strip()
+    addr = row[s.colbleaddr].upper().strip()
     f.write("""\
 ssize_t btwr_{lowername}(struct bt_conn *conn, const struct bt_gatt_attr *attr, const void *buf, uint16_t len, uint16_t offset, uint8_t flags);
 ssize_t btrd_{lowername}(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf, uint16_t len, uint16_t offset);
-""".format(name = name, lowername = name.lower(), addr = addr, ctype = typeToC(row[coltype])))
+""".format(name = name, lowername = name.lower(), addr = addr, ctype = s.typeToC(row[s.coltype])))
 
 f.write("\n#define AUTOGENERATED_CHARACTERISTICS \\\n")
 
-for row in settings:
-  if row[colbleaddr].strip() != "":
-    name = row[colname].lower().strip()
-    addr = row[colbleaddr].upper().strip()
+for row in s.settings:
+  if row[s.colbleaddr].strip() != "":
+    name = row[s.colname].lower().strip()
+    addr = row[s.colbleaddr].upper().strip()
     f.write("""\
     ,BT_GATT_CHARACTERISTIC(&bt_uuid_{lowername}.uuid, BT_GATT_CHRC_READ | BT_GATT_CHRC_WRITE, \\
                                                    BT_GATT_PERM_READ | BT_GATT_PERM_WRITE, \\
                                                    btrd_{lowername}, btwr_{lowername}, (void*)&bt_{lowername}) \\
-""".format(name = name, lowername = name.lower(), addr = addr, ctype = typeToC(row[coltype])))
+""".format(name = name, lowername = name.lower(), addr = addr, ctype = s.typeToC(row[s.coltype])))
 
 f.write("\n")
 
