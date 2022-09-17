@@ -41,6 +41,8 @@ class TrackerSettings : public BaseTrackerSettings
   void saveToEEPROM();
   void loadFromEEPROM();
 
+  void setSettingModified() {settingsModified = true;}
+  bool getSettingsModfied() {return settingsModified;}
 
  private:
   bool freshProgram;
