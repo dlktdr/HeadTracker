@@ -362,7 +362,7 @@ int APDS9960::gestureAvailable()
   if (!_gestureEnabled) enableGesture();
 
   if (_intPin > -1) {
-    if (digitalRead(_intPin) != LOW) {
+    if (digitalRead(IO_APDSINT) != 0) {
       return 0;
     }
   } else if (gestureFIFOAvailable() <= 0) {

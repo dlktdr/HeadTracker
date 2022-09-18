@@ -91,11 +91,11 @@ volatile bool senseTreadRun = false;
 
 int sense_Init()
 {
+#if defined(PCB_NANO33BLE)
   if (!IMU.begin()) {
     LOGE("Failed to initalize sensors");
     return -1;
   }
-
   // Initalize Gesture Sensor
   if (!APDS.begin()) {
     blesenseboard = false;
@@ -104,6 +104,9 @@ int sense_Init()
     blesenseboard = true;
     trkset.setDataisSense(true);
   }
+#elif defined(PCB_DTQSYS)
+
+#endif
 
   for (int i = 0; i < TrackerSettings::BT_CHANNELS; i++) {
     bt_chansf[i] = 0;

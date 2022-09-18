@@ -44,12 +44,6 @@
 #define AN_FILT_SLOPE 6
 #define AN_FILT_DERCO 1
 
-// SBUS
-#define SBUSIN_PIN 10  // RX Pin
-#define SBUSIN_PORT 1
-#define SBUSOUT_PIN 3
-#define SBUSOUT_PORT 1
-
 // Bluetooth
 #define BT_MIN_CONN_INTER_MASTER 10  // When run as para master
 #define BT_MAX_CONN_INTER_MASTER 10
@@ -151,4 +145,10 @@ extern volatile bool gyro_calibrated;
 #define rt_sleep_us(x)
 #else
 #error("NO RTOS DECLARED")
+#endif
+
+#if defined(PCB_NANO33BLE)
+#include "boards/nano33board.h"
+#elif defined(PCB_DTQSYS)
+#include "boards/dtqsys.h"
 #endif

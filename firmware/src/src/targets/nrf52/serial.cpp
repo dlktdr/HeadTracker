@@ -151,7 +151,7 @@ void serial_Thread()
       continue;
     }
 
-    digitalWrite(LEDG, LOW);
+    digitalWrite(IO_LEDG, 0);
 
     // If serial not open, abort all transfers, clear buffer
     uint32_t new_dtr = 0;
@@ -197,7 +197,7 @@ void serial_Thread()
 
     serialrx_Process();
 
-    digitalWrite(LEDG, HIGH);
+    digitalWrite(IO_LEDG, 1);
 
     // Data output
     if (datacounter++ >= DATA_PERIOD) {
