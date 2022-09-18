@@ -18,6 +18,12 @@
 #define AN7 1
 
 // Pins (name, number, description)
+// NOTE: These pins are an enum entry. e.g. IO_D2 = 0
+//     - Use PIN_NAME_TO_NUM(IO_D2) to get actual the pin number
+//     - The pin number can be converted back into the NRF port/pin
+//       using functions PIN_TO_NRFPORT & PIN_TO_NRFPIN
+//     - The string descrition for D2 would be StrPins[IO_D2]
+
 #define PIN_X \
   PIN(D2,      NRFPIN(1, 11), "Gen Purpose IO") \
   PIN(D3,      NRFPIN(1, 12), "Gen Purpose IO" ) \
@@ -79,5 +85,3 @@ const int dpintoenum[] = {0,  0, IO_D2, IO_D3, IO_D4, IO_D5, IO_D6, IO_D7, IO_D8
 #define D_TO_PORT(x) (dpintoport[x])
 #define D_TO_32X_PIN(x) ((D_TO_PORT(x) * 32) + D_TO_PIN(x))
 #define D_TO_ENUM(x) (dpintoenum[x])
-
-extern const char* StrPins[];

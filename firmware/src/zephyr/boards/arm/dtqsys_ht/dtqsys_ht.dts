@@ -7,8 +7,8 @@
 #include <nordic/nrf52840_qiaa.dtsi>
 
 / {
-	model = "Arduino Nano 33 BLE (Sense)";
-	compatible = "arduino,arduino_nano_33_ble";
+	model = "DTQSYS Head Tracker";
+	compatible = "dtqsys_ht";
 
 	chosen {
 		zephyr,console = &uart0;
@@ -21,18 +21,7 @@
 		zephyr,code-partition = &code_partition;
 	};
 
-	leds {
-		compatible = "gpio-leds";
-		led0: led_0 {
-			gpios = <&gpio0 24 0>;
-			label = "Red LED";
-		};
-	};
-
-	/* These aliases are provided for compatibility with samples */
 	aliases {
-		led0 = &led0;
-		spi = &spi2;
 	};
 };
 
@@ -62,29 +51,21 @@
 &uart0 {
 	compatible = "nordic,nrf-uart";
 	current-speed = <115200>;
-	status = "okay";
-	tx-pin = <35>; //P1.03
-	rx-pin = <42>; //P1.10
+	status = "disabled";
 };
 &i2c0 {
 	compatible = "nordic,nrf-twim";
-	status = "okay";
-	sda-pin = <31>; //P0.31
-	scl-pin = <2>; //P0.02
+	status = "disabled";
 };
 &i2c1 {
 	compatible = "nordic,nrf-twim";
 	status = "okay";
-	sda-pin = <14>; //P0.14
-	scl-pin = <15>; //P0.15
+	sda-pin = <5>; //P0.05
+	scl-pin = <42>; //P1.09
 };
-// we use SPI2 because SPI1/0 shares conflicts with I2C1/0
 &spi2 {
 	compatible = "nordic,nrf-spim";
-	status = "okay";
-	sck-pin = <13>; //P0.13
-	mosi-pin = <33>; //P1.01
-	miso-pin = <40>; //P1.08
+	status = "disabled";
 };
 &gpio0 {
 	status = "okay";
@@ -96,30 +77,19 @@
 	compatible = "nordic,nrf-usbd";
 	status = "okay";
 };
-// All PWM's should be enaled
+
 &pwm0 {
-	status = "okay";
+	status = "disabled";
 };
 &pwm1 {
-	status = "okay";
+	status = "disabled";
 };
 &pwm2 {
-	status = "okay";
+	status = "disabled";
 };
 &pwm3 {
-	status = "okay";
+	status = "disabled";
 };
-/*
- * NOTE: curiously, there is no PDM (microphone) interface in the
- * nordic DTSI file.
- * You'll need to use the nordic-specific PDM libraries.
- */
-
-/*
- * the following sets up the peripherals according to this file:
- * https://github.com/arduino/ArduinoCore-nRF528x-mbedos/blob/19ddd214d255ca20b233eefa76662b360595c146/variants/ARDUINO_NANO33BLE/variant.cpp#L136
- * The bootloader will conflict with RTC1
- */
 &rtc1 {
 	status = "disabled";
 };
