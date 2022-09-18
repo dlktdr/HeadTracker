@@ -46,7 +46,7 @@ static constexpr uint8_t FAILSAFE_MASK_ = 0x08;
 static bool failsafe_ = false, lost_frame_ = false, ch17_ = false, ch18_ = false;
 
 volatile bool sbusTreadRun = false;
-volatile bool sbusBuildingData = false;
+volatile bool sbusBuildingData = false; // TODO Replace me with a mutex
 volatile bool sbusoutinv = false;
 volatile bool sbusininv = false;
 volatile bool sbusinsof = false;  // Start of Frame
@@ -63,7 +63,8 @@ void sbus_Thread()
     rt_sleep_us((1.0 / (float)trkset.getSbRate()) * 1.0e6);
 
     // Has the SBUS inverted status changed
-    if (sbusoutinv != !trkset.getSbInInv() || sbusininv != !trkset.getSbOutInv()) {
+    if (sbusininv != !trkset.getSbInInv() ||
+        sbusoutinv != !trkset.getSbOutInv()) {
       sbusininv = !trkset.getSbInInv();
       sbusoutinv = !trkset.getSbOutInv();
 

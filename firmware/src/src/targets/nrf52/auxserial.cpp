@@ -56,25 +56,22 @@ static bool invertRX = false;
 
 volatile bool isTransmitting = false;
 
-void Serial_Start_TX(bool disableint = true)
+void Serial_Start_TX()
 {
   size_t len = MIN(serialTxBuf.getOccupied(), sizeof(serialDMATx));
   if (len == 0) return;
 
-  if (disableint) {
-    irq_disable(SERIAL_UARTE_IRQ);
-    if (isTransmitting) {  // Already sending. Then skip, the ISR will load the payload.
-      irq_enable(SERIAL_UARTE_IRQ);
-      return;
-    }
+  // If currently sending data, ISR will load the next payload
+  //  otherwise, load the buffer and initiat the transfer
+  irq_disable(SERIAL_UARTE_IRQ);
+  if(isTransmitting == false) {
+    isTransmitting = true;
+    serialTxBuf.read(serialDMATx, len);
+    SERIAL_UARTE->EVENTS_ENDTX = 0;
+    SERIAL_UARTE->TXD.MAXCNT = len;
+    SERIAL_UARTE->TASKS_STARTTX = 1;
   }
-
-  // Load the TX buffer
-  serialTxBuf.read(serialDMATx, len);
-  if (disableint) irq_enable(SERIAL_UARTE_IRQ);
-  isTransmitting = true;
-  SERIAL_UARTE->TXD.MAXCNT = len;
-  SERIAL_UARTE->TASKS_STARTTX = 1;
+  irq_enable(SERIAL_UARTE_IRQ);
 }
 
 void SerialTX_isr()
@@ -82,7 +79,6 @@ void SerialTX_isr()
   // Transmission End
   if (SERIAL_UARTE->EVENTS_ENDTX) {
     SERIAL_UARTE->EVENTS_ENDTX = 0;
-    isTransmitting = false;
 
     // Below is done to be sure every cycle invert pin is at the correct level
     NRF_PPI->CHENCLR = SERIALOUT_PPICH_MSK;
@@ -94,14 +90,22 @@ void SerialTX_isr()
                        (GPIOTE_CONFIG_POLARITY_Toggle << GPIOTE_CONFIG_POLARITY_Pos) |
                        (SBUSOUT_PIN << GPIOTE_CONFIG_PSEL_Pos) |
                        (SBUSOUT_PORT << GPIOTE_CONFIG_PORT_Pos);
-    if (!invertTX) confreg |= GPIOTE_CONFIG_OUTINIT_High << GPIOTE_CONFIG_OUTINIT_Pos;
+    if (!invertTX)
+      confreg |= GPIOTE_CONFIG_OUTINIT_High << GPIOTE_CONFIG_OUTINIT_Pos;
     NRF_GPIOTE->CONFIG[SERIALOUT1_GPIOTE] = confreg;  // Initial value of pin low
 
     // Enable PPI
     NRF_PPI->CHENSET = SERIALOUT_PPICH_MSK;
 
-    // If there is more data send it.
-    Serial_Start_TX(false);
+    // If there is more data, load and send it
+    size_t len = MIN(serialTxBuf.getOccupied(), sizeof(serialDMATx));
+    if (len > 0) {
+      serialTxBuf.read(serialDMATx, len);
+      SERIAL_UARTE->TXD.MAXCNT = len;
+      SERIAL_UARTE->TASKS_STARTTX = 1;
+    } else {
+      isTransmitting = false;
+    }
   }
 }
 
@@ -318,8 +322,6 @@ SBUS_UARTE->TASKS_STARTRX = 1;
 
 void AuxSerial_Close()
 {
-  if (!serialopened) return;
-
   // Stop Interrupts
   irq_disable(UART0_IRQn);
   irq_disable(SERIAL_UARTE_IRQ);
@@ -328,9 +330,9 @@ void AuxSerial_Close()
   NRF_PPI->CHENCLR = SERIALIN1_PPICH_MSK | SERIALIN2_PPICH_MSK | SERIALOUT_PPICH_MSK;
 
   // Disable UART
+  NRF_UART0->ENABLE = 0;
   NRF_UART0->TASKS_STOPRX = 1;
   NRF_UART0->TASKS_STOPTX = 1;
-  NRF_UART0->ENABLE = 0;
   NRF_UART0->CONFIG = 0;
   NRF_UART0->PSEL.TXD = UART_PSEL_TXD_CONNECT_Disconnected << UART_PSEL_TXD_CONNECT_Pos;
   NRF_UART0->PSEL.RXD = UART_PSEL_RXD_CONNECT_Disconnected << UART_PSEL_RXD_CONNECT_Pos;
@@ -340,6 +342,7 @@ void AuxSerial_Close()
   NRF_UART0->ERRORSRC = 0;
 
   // Disable UARTE
+  SERIAL_UARTE->ENABLE = 0;
   SERIAL_UARTE->TASKS_STOPRX = 1;
   SERIAL_UARTE->TASKS_STOPTX = 1;
   SERIAL_UARTE->INTENCLR = 0xFFFFFFFF;
@@ -351,7 +354,8 @@ void AuxSerial_Close()
                            << UARTE_PSEL_TXD_CONNECT_Disconnected;
   SERIAL_UARTE->PSEL.RXD = UARTE_PSEL_RXD_CONNECT_Disconnected
                            << UARTE_PSEL_RXD_CONNECT_Disconnected;
-  SERIAL_UARTE->ENABLE = 0;
+  SERIAL_UARTE->EVENTS_ENDTX = 0;
+  SERIAL_UARTE->EVENTS_ENDRX = 0;
   SERIAL_UARTE->ERRORSRC = 0;
 
   // Disable GPIOTE
