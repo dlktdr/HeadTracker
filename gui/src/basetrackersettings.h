@@ -140,8 +140,8 @@ public:
     _setting["ppmframe"] = 22500;
     _setting["ppmsync"] = 350;
     _setting["ppmchcnt"] = 8;
-    _setting["lppan"] = 0;
-    _setting["lptiltroll"] = 0;
+    _setting["lppan"] = 100;
+    _setting["lptiltroll"] = 100;
     _setting["btpairedaddress[17]"] = QString("00:00:00:00:00:00");
     _dataItems["magx"] = false;
     _dataItems["magy"] = false;
@@ -1085,8 +1085,8 @@ public:
   uint8_t getLpPan() {
     return _setting["lppan"].toUInt();
   }
-  bool setLpPan(uint8_t val=0) {
-    if(val <= 100) {
+  bool setLpPan(uint8_t val=100) {
+    if(val >= 1 && val <= 100) {
       _setting["lppan"] = val;
       return true;
     }
@@ -1097,8 +1097,8 @@ public:
   uint8_t getLpTiltRoll() {
     return _setting["lptiltroll"].toUInt();
   }
-  bool setLpTiltRoll(uint8_t val=0) {
-    if(val <= 100) {
+  bool setLpTiltRoll(uint8_t val=100) {
+    if(val >= 1 && val <= 100) {
       _setting["lptiltroll"] = val;
       return true;
     }

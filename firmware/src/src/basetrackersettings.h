@@ -75,13 +75,13 @@ public:
     memset(btrmt,0,sizeof(char) * 18);
 
     // Call Virtual Events after initialization
-    resetFusion();
     pinsChanged();
+    resetFusion();
   }
 
   // Virtual Events
-  virtual void resetFusion() {};
   virtual void pinsChanged() {};
+  virtual void resetFusion() {};
 
   // Roll Minimum
   inline const uint16_t& getRll_Min() {return rll_min;}
@@ -813,8 +813,8 @@ public:
 
   // Low Pass filter For Pan
   inline const uint8_t& getLpPan() {return lppan;}
-  bool setLpPan(uint8_t val=0) {
-    if(val >= 0 && val <= 100) {
+  bool setLpPan(uint8_t val=100) {
+    if(val >= 1 && val <= 100) {
       lppan = val;
       return true;
     }
@@ -823,8 +823,8 @@ public:
 
   // Low Pass filter For Tilt + Roll
   inline const uint8_t& getLpTiltRoll() {return lptiltroll;}
-  bool setLpTiltRoll(uint8_t val=0) {
-    if(val >= 0 && val <= 100) {
+  bool setLpTiltRoll(uint8_t val=100) {
+    if(val >= 1 && val <= 100) {
       lptiltroll = val;
       return true;
     }
@@ -1052,8 +1052,8 @@ public:
 
   void loadJSONSettings(DynamicJsonDocument &json) {
     JsonVariant v;
-    bool chresetfusion = false;
     bool chpinschanged = false;
+    bool chresetfusion = false;
     v = json["rll_min"]; if(!v.isNull()) {setRll_Min(v);}
     v = json["rll_max"]; if(!v.isNull()) {setRll_Max(v);}
     v = json["rll_cnt"]; if(!v.isNull()) {setRll_Cnt(v);}
@@ -1133,10 +1133,10 @@ public:
     v = json["ppmchcnt"]; if(!v.isNull()) {setPpmChCnt(v);}
     v = json["lppan"]; if(!v.isNull()) {setLpPan(v);}
     v = json["lptiltroll"]; if(!v.isNull()) {setLpTiltRoll(v);}
-    if(chresetfusion)
-      resetFusion();
     if(chpinschanged)
       pinsChanged();
+    if(chresetfusion)
+      resetFusion();
   }
 
   void setJSONDataList(DynamicJsonDocument &json)
@@ -1540,8 +1540,8 @@ protected:
   uint16_t ppmframe = 22500; // PPM Frame Length (us)
   uint16_t ppmsync = 350; // PPM Sync Pulse Length (us)
   uint8_t ppmchcnt = 8; // PPM channels to output
-  uint8_t lppan = 0; // Low Pass filter For Pan
-  uint8_t lptiltroll = 0; // Low Pass filter For Tilt + Roll
+  uint8_t lppan = 100; // Low Pass filter For Pan
+  uint8_t lptiltroll = 100; // Low Pass filter For Tilt + Roll
 
   // Setting Arrays
   char btpairedaddress[19]; // Bluetooth Remote address to Pair With
