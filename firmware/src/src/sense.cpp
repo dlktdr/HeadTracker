@@ -508,6 +508,7 @@ void calculate_Thread()
       channel_data[panch - 1] = trpOutputEnabled == true ? panout_ui : trkset.getPan_Cnt();
 
     // 10) Set the PPM Outputs
+    PpmOut_execute();
     for (int i = 0; i < PpmOut_getChnCount(); i++) {
       uint16_t ppmout = channel_data[i];
       if (ppmout == 0) ppmout = TrackerSettings::PPM_CENTER;
