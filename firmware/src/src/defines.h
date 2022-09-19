@@ -32,7 +32,7 @@
 #define BT_PERIOD 12500          // (us) Bluetooth update rate
 #define SERIAL_PERIOD 30         // (ms) Serial processing
 #define DATA_PERIOD 2            // Multiplier of Serial Period (Live Data Transmission Speed)
-#define SENSOR_PERIOD 16666      // (us) 60hz Read Sensors
+#define SENSOR_PERIOD 4000       // (us) 100hz Read Sensors
 #define CALCULATE_PERIOD 6000    // (us) 166hz IMU calculations
 #define PWM_FREQUENCY 50         // (ms) PWM Period
 #define PAUSE_BEFORE_FLASH 60    // (ms) Time to pause all threads before Flash writing
@@ -86,14 +86,15 @@ extern volatile bool gyro_calibrated;
 // and can't be used by Zephyr
 // Cannot use GPIOTE interrupt as I override the interrupt handler in PPMIN
 
-// Known good 16,17,18,19
-// 14/15 used for BT LNA
-#define SERIALIN1_PPICH 16
-#define SERIALIN2_PPICH 15
-#define SERIALOUT_PPICH 1
-#define PPMIN_PPICH1 17
-#define PPMIN_PPICH2 18
-#define PPMOUT_PPICH 19
+#define PPMOUT_PPICH 0
+#define SERIALIN1_PPICH 1
+#define SERIALIN2_PPICH 2
+#define SERIALOUT_PPICH 3
+#define PPMIN_PPICH1 4
+#define PPMIN_PPICH2 5
+// 6 Used
+// 7 Enable always gets flipped off
+// 8+ ??
 
 #define SERIAL_UARTE_CH 1
 
@@ -124,9 +125,9 @@ extern volatile bool gyro_calibrated;
 #define RAD_TO_DEG 57.29577951308
 
 // Gyro Calibration Defines
-#define GYRO_STABLE_SAMPLES 50  // samples to average of not moving for a success gyro cal
-#define GYRO_PASS_DIFF 5.0      // Differential less than this deg/sec^2 considered stable
-#define GYRO_LP_BETA 0.9        // Gyro Sample Moving Average Beta (0.0-1
+#define GYRO_STABLE_SAMPLES 100  // samples to average of not moving for a success gyro cal
+#define GYRO_PASS_DIFF 24.0      // Differential less than this deg/sec^2 considered stable
+#define GYRO_LP_BETA 0.9         // Gyro Sample Moving Average Beta (0.0-1
 
 // Magnetometer, Initial Orientation, Samples to average
 #define MADGSTART_SAMPLES 15

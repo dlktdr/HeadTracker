@@ -32,7 +32,7 @@
 #include "trackersettings.h"
 
 
-static uint16_t chan_vals[BT_CHANNELS];
+static uint16_t chan_vals[TrackerSettings::BT_CHANNELS];
 uint16_t chanoverrides = 0xFFFF;  // Default to all enabled
 
 static void start_scan(void);
@@ -97,7 +97,7 @@ static uint8_t notify_func(struct bt_conn *conn, struct bt_gatt_subscribe_params
   }
 
   // Store all channels
-  for (int i = 0; i < BT_CHANNELS; i++) {
+  for (int i = 0; i < TrackerSettings::BT_CHANNELS; i++) {
     // Only set the data on channels that are allowed to be overriden
     chan_vals[i] = BtChannelsIn[i];
   }
@@ -292,7 +292,7 @@ static bool eir_found(struct bt_data *data, void *user_data)
       // Find all advertised UUID16 services
       for (i = 0; i < data->data_len; i += sizeof(uint16_t)) {
         uint16_t u16v;
-        memcpy(&u16v, &data->data[i], sizeof(u16));
+        memcpy(&u16v, &data->data[i], sizeof(uint16_t));
 
         if (u16v != 0xFFF0) {
           continue;
@@ -305,15 +305,17 @@ static bool eir_found(struct bt_data *data, void *user_data)
         LOGD("Has a FrSky Service on %s", addrstr);
 
         // Notify GUI that a valid BT device was discovered
-        trkset.setDiscoveredBTHead(addrstr);
+        trkset.setDataBtRmt(addrstr);
 
         // Scan only Mode, don't connect
         if (btscanonly) continue;
 
         // Only connect to a specific device?
         bool okaytocon = false;
-        if (strlen(trkset.pairedBTAddress()) > 0) {
-          if (strcmp(addrstr, trkset.pairedBTAddress()) == 0) {
+        char btpairedaddress[18];
+        trkset.getBtPairedAddress(btpairedaddress);
+        if (strlen(btpairedaddress) > 0) {
+          if (strcmp(addrstr, btpairedaddress) == 0) {
             okaytocon = true;
           } else {
             LOGW("FRSky device found. Not connecting. Incorrect Address");
@@ -466,7 +468,7 @@ void BTRmtStart()
   chanoverrides = 0xFFFF;
 
   // Reset all BT channels to disabled
-  for (int i = 0; i < BT_CHANNELS; i++) chan_vals[i] = 0;
+  for (int i = 0; i < TrackerSettings::BT_CHANNELS; i++) chan_vals[i] = 0;
 
   LOGI("Starting Remote Para Bluetooth");
 
@@ -501,7 +503,7 @@ void BTRmtStop()
   bt_conn_foreach(BT_CONN_TYPE_ALL, closeConnection, NULL);
 
   // Reset all BT channels to center
-  for (int i = 0; i < BT_CHANNELS; i++) chan_vals[i] = TrackerSettings::PPM_CENTER;
+  for (int i = 0; i < TrackerSettings::BT_CHANNELS; i++) chan_vals[i] = TrackerSettings::PPM_CENTER;
 
   bt_conn_cb_register(NULL);
 }
@@ -513,7 +515,7 @@ void BTRmtSetChannel(int channel, const uint16_t value)
 
 uint16_t BTRmtGetChannel(int channel)
 {
-  if (channel >= 0 && channel < BT_CHANNELS && bleconnected == true &&
+  if (channel >= 0 && channel < TrackerSettings::BT_CHANNELS && bleconnected == true &&
       (1 << channel) & chanoverrides)
     return chan_vals[channel];
   return 0;

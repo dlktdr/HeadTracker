@@ -1,6 +1,6 @@
 QMainWindow {
     background-color: white;
-    border-image: url("background.svg") 0 0 0 0 stretch stretch;
+    border-image: url("Background.svg") 0 0 0 0 stretch stretch;
     }
 
 QTableWidget {

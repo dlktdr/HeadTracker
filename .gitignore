@@ -76,4 +76,6 @@ Release/
 # Compiled Output Folders, But include Zips
 /gui/bin/*
 !/gui/bin/*.zip
+!/gui/bin/bossac*
 /gui/build*
+

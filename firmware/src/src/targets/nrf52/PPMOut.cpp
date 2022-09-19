@@ -41,11 +41,11 @@ static int setPin = -1;
 
 // Used to read data at once, read with isr disabled
 static uint16_t ch_values[16];
-static int ch_count = TrackerSettings::DEF_PPM_CHANNELS;
+static int ch_count;
 
 static uint16_t framesync = TrackerSettings::PPM_MIN_FRAMESYNC;  // Minimum Frame Sync Pulse
-static int32_t framelength = TrackerSettings::DEF_PPM_FRAME;     // Ideal frame length
-static uint16_t sync = TrackerSettings::DEF_PPM_SYNC;            // Sync Pulse Length
+static int32_t framelength;     // Ideal frame length
+static uint16_t sync;            // Sync Pulse Length
 
 // Local data - Only build with interrupts disabled
 static uint32_t chsteps[35]{framesync, sync};
@@ -64,9 +64,9 @@ void buildChannels()
   buildingdata = true;  // Prevent a read happing while this is building
 
   // Set user defined channel count, frame len, sync pulse
-  ch_count = trkset.ppmChCount();
-  sync = trkset.ppmSync();
-  framelength = trkset.ppmFrame();
+  ch_count = trkset.getPpmChCnt();
+  sync = trkset.getPpmSync();
+  framelength = trkset.getPpmFrame();
 
   int ch = 0;
   int i;
@@ -162,7 +162,7 @@ void PpmOut_setPin(int pinNum)
   PPMOUT_TIMER->EVENTS_COMPARE[PPMOUT_TMRCOMP_CH] = 0;
   NRF_GPIOTE->CONFIG[PPMOUT_GPIOTE] = 0;  // Disable Config
 
-  // Disable PPI 10
+  // Disable PPI
   NRF_PPI->CHENCLR = PPMOUT_PPICH_MSK;
 
   // Set current pin back to low drive  , if enabled
@@ -202,7 +202,7 @@ void PpmOut_setPin(int pinNum)
     NRF_PPI->CH[PPMOUT_PPICH].EEP = (uint32_t)&PPMOUT_TIMER->EVENTS_COMPARE[PPMOUT_TMRCOMP_CH];
     NRF_PPI->CH[PPMOUT_PPICH].TEP = (uint32_t)&NRF_GPIOTE->TASKS_OUT[PPMOUT_GPIOTE];
 
-    // Enable PPI 10
+    // Enable PPI
     NRF_PPI->CHENSET = PPMOUT_PPICH_MSK;
 
     // Start
@@ -228,13 +228,12 @@ void PpmOut_setPin(int pinNum)
   irq_unlock(key);
 }
 
-void PpmOut_setInverted(bool inv)
+void PpmOut_execute()
 {
-  /// Should cause the change on the next frame in the ISR
-  ppmoutinverted = inv;
+  if(trkset.getPpmOutInvert() != ppmoutinverted) {
+    ppmoutinverted = trkset.getPpmOutInvert();
+  }
 }
-
-void PpmOut_execute() {}
 
 void PpmOut_setChannel(int chan, uint16_t val)
 {
