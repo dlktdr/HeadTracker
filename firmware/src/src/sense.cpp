@@ -66,8 +66,10 @@ Madgwick madgwick;
 
 int64_t usduration = 0;
 
+#if defined(HAS_APDS9960)
 static bool blesenseboard = false;
 static bool lastproximity = false;
+#endif
 
 K_MUTEX_DEFINE(sensor_mutex);
 
@@ -429,41 +431,48 @@ void calculate_Thread()
     }
 
     // 7) Set Analog Channels
+#ifdef AN0
     if (trkset.getAn0Ch() > 0) {
-      float an4 = SF1eFilterDo(anFilter[0], analogRead(AN4));
+      float an4 = SF1eFilterDo(anFilter[0], analogRead(AN0));
       an4 *= trkset.getAn0Gain();
       an4 += trkset.getAn0Off();
       an4 += TrackerSettings::MIN_PWM;
       an4 = MAX(TrackerSettings::MIN_PWM, MIN(TrackerSettings::MAX_PWM, an4));
       channel_data[trkset.getAn0Ch() - 1] = an4;
     }
+#endif
+#ifdef AN1
     if (trkset.getAn1Ch() > 0) {
-      float an5 = SF1eFilterDo(anFilter[1], analogRead(AN5));
+      float an5 = SF1eFilterDo(anFilter[1], analogRead(AN1));
       an5 *= trkset.getAn1Gain();
       an5 += trkset.getAn1Off();
       an5 += TrackerSettings::MIN_PWM;
       an5 = MAX(TrackerSettings::MIN_PWM, MIN(TrackerSettings::MAX_PWM, an5));
       channel_data[trkset.getAn1Ch() - 1] = an5;
     }
+#endif
+#ifdef AN2
     if (trkset.getAn2Ch() > 0) {
-      float an6 = SF1eFilterDo(anFilter[2], analogRead(AN6));
+      float an6 = SF1eFilterDo(anFilter[2], analogRead(AN2));
       an6 *= trkset.getAn2Gain();
       an6 += trkset.getAn2Off();
       an6 += TrackerSettings::MIN_PWM;
       an6 = MAX(TrackerSettings::MIN_PWM, MIN(TrackerSettings::MAX_PWM, an6));
       channel_data[trkset.getAn2Ch() - 1] = an6;
     }
+#endif
+#ifdef AN3
     if (trkset.getAn3Ch() > 0) {
-      float an7 = SF1eFilterDo(anFilter[3], analogRead(AN7));
+      float an7 = SF1eFilterDo(anFilter[3], analogRead(AN3));
       an7 *= trkset.getAn3Gain();
       an7 += trkset.getAn3Off();
       an7 += TrackerSettings::MIN_PWM;
       an7 = MAX(TrackerSettings::MIN_PWM, MIN(TrackerSettings::MAX_PWM, an7));
       channel_data[trkset.getAn3Ch() - 1] = an7;
     }
+#endif
 
     // 8) First decide if 'reset center' pulse should be sent
-
     static float pulsetimer = 0;
     static bool sendingresetpulse = false;
     int alertch = trkset.getAlertCh();
@@ -653,6 +662,7 @@ void sensor_Thread()
       continue;
     }
 
+#if defined(HAS_APDS9960)
     // Reset Center on Proximity, Don't need to update this often
     static int sensecount = 0;
     static int minproximity = 100;  // Keeps smallest proximity read.
@@ -686,6 +696,7 @@ void sensor_Thread()
         }
       }
     }
+#endif
 
     // Setup Rotations
     float rotation[3] = {trkset.getRotX(), trkset.getRotY(), trkset.getRotZ()};

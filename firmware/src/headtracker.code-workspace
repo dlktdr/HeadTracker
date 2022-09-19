@@ -21,5 +21,15 @@
       "titleBar.activeBackground": "#020081",
       "titleBar.activeForeground": "#ffffff"
     },
+    "files.associations": {
+      "algorithm": "cpp",
+      "charconv": "cpp",
+      "iomanip": "cpp",
+      "xhash": "cpp",
+      "xlocmon": "cpp",
+      "xlocnum": "cpp",
+      "*.tcc": "cpp",
+      "cstdlib": "cpp"
+    },
   }
 }

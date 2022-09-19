@@ -46,16 +46,18 @@ void start(void)
   serial_init();
 
   // Actual Calculations - sense.cpp
-  sense_Init();
+//  sense_Init();
 
   // Start the BT Thread
-  bt_init();
+//  bt_init();
 
   // Start SBUS - SBUS/uarte_sbus.cpp (Pins D0/TX, D1/RX)
-  sbus_init();
+//  sbus_init();
 
   // PWM Outputs - Fixed to A0-A3
+#if defined(HAS_PWMOUTPUTS)
   PWM_Init(PWM_FREQUENCY);
+#endif
 
   // Load settings from flash - trackersettings.cpp
   trkset.loadFromEEPROM();

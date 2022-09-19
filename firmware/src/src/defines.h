@@ -16,7 +16,14 @@
 
 #define VERSION FW_MAJ.CONCAT(FW_MIN, FW_REV)
 #define FW_VERSION STRINGIFY(VERSION)
+
+#if defined(PCB_NANO33BLE)
 #define FW_BOARD "NANO33BLE"
+#elif defined(PCB_DTQSYS)
+#define FW_BOARD "DTQSYS"
+#else
+#error NO PCB DEFINED
+#endif
 
 #if defined(DEBUG)
 #define DEFAULT_LOG_LEVEL DEBUG
@@ -150,5 +157,5 @@ extern volatile bool gyro_calibrated;
 #if defined(PCB_NANO33BLE)
 #include "boards/nano33board.h"
 #elif defined(PCB_DTQSYS)
-#include "boards/dtqsys.h"
+#include "boards/dtqsys_ht.h"
 #endif

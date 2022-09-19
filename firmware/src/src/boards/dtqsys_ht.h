@@ -6,6 +6,9 @@
 
 // Pull up pin mode
 #define INPUT_PULLUP (GPIO_INPUT | GPIO_PULL_UP)
+#define RGBLED_IS_WS2812
+#define HAS_BUZZER
+#define AN0 0 // Battery V on analog 0
 
 // Pins (name, number, description)
 // NOTE: These pins are an enum entry. e.g. IO_AN0 = 0

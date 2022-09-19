@@ -6,16 +6,17 @@
 
 // Pull up pin mode
 #define INPUT_PULLUP (GPIO_INPUT | GPIO_PULL_UP)
+#define HAS_APDS9960
+#define RGBLED_IS_3LEDS
+#define HAS_POWERLED
+#define HAS_NOTIFYLED
+#define HAS_PWMOUTPUTS
 
-// Mapping NRF Analogs to Arduino Pins
-#define AN0 2
-#define AN1 3
-#define AN2 6
-#define AN3 5
-#define AN4 7
-#define AN5 0
-#define AN6 4
-#define AN7 1
+// Mapping Analog numbers to Analog pins
+#define AN0 7 // AN4 pin
+#define AN1 0 // AN5 pin
+#define AN2 4 // AN6 pin
+#define AN3 1 // AN7 pin
 
 // Pins (name, number, description)
 // NOTE: These pins are an enum entry. e.g. IO_D2 = 0

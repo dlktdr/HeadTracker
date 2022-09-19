@@ -29,10 +29,15 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Start the board interface
     nano33ble = new BoardNano33BLE(&trkset);
+    nano33ble->setBoardName("NANO33BLE");
+    dtqsys = new BoardNano33BLE(&trkset);
+    dtqsys->setBoardName("DTQSYS");
     bno055 = new BoardBNO055(&trkset);
+    bno055->setBoardName("BNO055");
 
     // Add it to the list of available boards
     boards.append(nano33ble);
+    boards.append(dtqsys);
     boards.append(bno055);
 
     // Once correct board is discovered this will be set to one of the above boards
@@ -727,7 +732,8 @@ void MainWindow::updateFromUI()
     trkset.setRll_Gain(static_cast<float>(ui->rll_gain->value())/10.0f);
 
     // Filters
-    if(trkset.hardware() == "NANO33BLE") {
+    if(trkset.hardware() == "NANO33BLE" ||
+       trkset.hardware() == "DTQSYS") {
         trkset.setLpTiltRoll(ui->spnLPTiltRoll->value());
         trkset.setLpPan(ui->spnLPPan->value());
     } else if (trkset.hardware() == "BNO055") {
@@ -1129,7 +1135,8 @@ void MainWindow::requestParamsTimeout()
  */
 void MainWindow::eraseFlash()
 {
-  if(currentboard && currentboard->boardName() == "NANO33BLE") {
+  if(currentboard && (currentboard->boardName() == "NANO33BLE" ||
+                      currentboard->boardName() == "DTQSYS")) {
     if(QMessageBox::question(this, tr("Set Defaults?"), tr("This will erase all settings to defaults\r\nAre you sure?")) == QMessageBox::Yes) {
       currentboard->_erase();
       currentboard->_reboot();
@@ -1392,7 +1399,8 @@ void MainWindow::boardDiscovered(BoardType *brd)
     currentboard = brd;
 
     // Stack widget changes to hide some info depending on board
-    if(brd->boardName() == "NANO33BLE") {
+    if(brd->boardName() == "NANO33BLE" ||
+       brd->boardName() == "DTQSYS") {
         addToLog(tr("Connected to a ") + brd->boardName() + "\n");
         ui->cmdStartGraph->setVisible(false);
         ui->cmdStopGraph->setVisible(false);
@@ -1409,6 +1417,17 @@ void MainWindow::boardDiscovered(BoardType *brd)
         ui->cmdReboot->setEnabled(true);
         ui->stackedWidget->setCurrentIndex(3);
         ui->cmdChannelViewer->setEnabled(true);
+
+        if(brd->boardName() == "DTQSYS") { // Pins are all fixed
+            ui->cmbPpmInPin->setVisible(false);
+            ui->lblPPMInPin->setVisible(false);
+            ui->cmbPpmOutPin->setVisible(false);
+            ui->lblPPMOutPin->setVisible(false);
+            ui->cmbButtonPin->setVisible(false);
+            ui->lblButtonPin->setVisible(false);
+            // TODO Remove PWM
+            //      Remove unused analogs
+        }
 
         // Check Firmware Version is Compatible
 
@@ -1450,10 +1469,6 @@ void MainWindow::boardDiscovered(BoardType *brd)
         ui->cmdSaveNVM->setEnabled(true);
         ui->cmdCalibrate->setEnabled(true);
         ui->stackedWidget->setCurrentIndex(2);
-
-    } else if (brd->boardName() == "NANO33REMOTE") {
-        addToLog(tr("Connected to a ") + brd->boardName() + "\n");
-
     } else {
         msgbox->setText(tr("Unknown board type"));
         msgbox->setWindowTitle(tr("Error"));

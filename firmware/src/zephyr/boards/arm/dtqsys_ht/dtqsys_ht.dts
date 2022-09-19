@@ -59,7 +59,7 @@
 };
 &i2c1 {
 	compatible = "nordic,nrf-twim";
-	status = "okay";
+	status = "okay"; sdasdf
 	sda-pin = <5>; //P0.05
 	scl-pin = <42>; //P1.09
 };

@@ -151,8 +151,6 @@ void serial_Thread()
       continue;
     }
 
-    digitalWrite(IO_LEDG, 0);
-
     // If serial not open, abort all transfers, clear buffer
     uint32_t new_dtr = 0;
     uart_line_ctrl_get(dev, UART_LINE_CTRL_DTR, &new_dtr);
@@ -196,8 +194,6 @@ void serial_Thread()
     dtr = new_dtr;
 
     serialrx_Process();
-
-    digitalWrite(IO_LEDG, 1);
 
     // Data output
     if (datacounter++ >= DATA_PERIOD) {

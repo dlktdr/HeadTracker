@@ -378,10 +378,12 @@ void BoardNano33BLE::parseIncomingJSON(const QVariantMap &map)
 
     // Firmware Hardware and Version
     } else if (map["Cmd"].toString() == "FW") {
-        trkset->setHardware(map["Vers"].toString(),
-                            map["Hard"].toString(),
-                            map["Git"].toString());
-        emit boardDiscovered(this);
+        if(map["Hard"].toString() == boardName()) {
+            trkset->setHardware(map["Vers"].toString(),
+                                map["Hard"].toString(),
+                                map["Git"].toString());
+            emit boardDiscovered(this);
+        }
     }
 }
 

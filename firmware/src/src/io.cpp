@@ -51,10 +51,13 @@ void clearAllFlags() { _ledmode = 0; }
 // Any IO Related Tasks, e.g. button, leds
 void io_Thread()
 {
-  int pressedtime = 0;
+#ifdef HAS_NOTIFYLED
   bool led_is_on = false;
   int led_on_time = 25;
   int led_off_time = 200;
+#endif
+
+  int pressedtime = 0;
   int rgb_sequence_no = 0;
   uint32_t rgb_timer = millis();
   uint32_t _counter = 0;
@@ -63,6 +66,7 @@ void io_Thread()
     rt_sleep_ms(IO_PERIOD);
     if (!ioThreadRun || pauseForFlash) continue;
 
+#if defined(PCB_NANO33BLE)
     // LEDS
     if (_ledmode & LED_GYROCAL) {
       led_on_time = 200;
@@ -83,7 +87,7 @@ void io_Thread()
       led_is_on = !led_is_on;
       digitalWrite(IO_LED, led_is_on);
     }
-
+#endif
     // Bluetooth Connected - Blue light on solid
     if (_ledmode & LED_BTCONNECTED) {
       led_sequence[0].RGB = RGB_BLUE;
@@ -124,7 +128,7 @@ void io_Thread()
     uint32_t curcolor = led_sequence[rgb_sequence_no].RGB;
     if (led_sequence[rgb_sequence_no].time == 0) curcolor = 0;
 
-#if defined(PCB_NANO33BLE)
+#if defined(RGBLED_IS_3LEDS)
     // TODO - Replace me with PWM control
     if (curcolor & RGB_RED)
       digitalWrite(IO_LEDR, 0);
@@ -138,7 +142,7 @@ void io_Thread()
       digitalWrite(IO_LEDB, 0);
     else
       digitalWrite(IO_LEDB, 1);
-#elif defined(PCB_DTQSYS)
+#elif defined(RGBLED_IS_WS2812)
     // TODO.. WS2812 led here
 #endif
 
@@ -163,8 +167,8 @@ void io_Thread()
     pinMode(D_TO_ENUM(butpin), INPUT_PULLUP);
     bool buttonDown = digitalRead(D_TO_ENUM(butpin)) == 0;
 #else
-    pinMode(IO_RESET_BTN, INPUT_PULLUP);
-    bool buttonDown = digitalRead(IO_RESET_BTN) == 0;
+    pinMode(IO_CENTER_BTN, INPUT_PULLUP);
+    bool buttonDown = digitalRead(IO_CENTER_BTN) == 0;
 #endif
 
 
@@ -190,37 +194,69 @@ void io_Thread()
 
 void io_init()
 {
-  if (ioThreadRun) return;
   gpios[0] = device_get_binding("GPIO_0");
   gpios[1] = device_get_binding("GPIO_1");
 
 #if defined(PCB_NANO33BLE)
   pinMode(IO_VDDENA, GPIO_OUTPUT);
   pinMode(IO_I2C_PU, GPIO_OUTPUT);
+  digitalWrite(IO_VDDENA, 1);
+  digitalWrite(IO_I2C_PU, 1);
+#else
+  pinMode(IO_CENTER_BTN, INPUT_PULLUP);
+#endif
+
+#if defined(HAS_BUZZER)
+  pinMode(IO_BUZZ, GPIO_OUTPUT);
+  // Startup beep, beep
+  digitalWrite(IO_BUZZ, 1);
+  k_busy_wait(100000);
+  digitalWrite(IO_BUZZ, 0);
+  k_busy_wait(100000);
+  digitalWrite(IO_BUZZ, 1);
+  k_busy_wait(100000);
+  digitalWrite(IO_BUZZ, 0);
+#endif
+
+#if defined(RGBLED_IS_3LEDS)
   pinMode(IO_LEDR, GPIO_OUTPUT);
   pinMode(IO_LEDG, GPIO_OUTPUT);
   pinMode(IO_LEDB, GPIO_OUTPUT);
-  digitalWrite(IO_VDDENA, 1);
-  digitalWrite(IO_I2C_PU, 1);
   digitalWrite(IO_LEDR, 1);
   digitalWrite(IO_LEDG, 1);
   digitalWrite(IO_LEDB, 1);
+#elif defined(RGBLED_IS_WS2812)
+  pinMode(IO_LEDWS, GPIO_OUTPUT);
 #endif
 
-  // Pins used to check timing
+#if defined(HAS_POWERLED)
+  pinMode(IO_PWR, GPIO_OUTPUT);
+  digitalWrite(IO_PWR, 1);
+#endif
+
+#if defined(HAS_NOTIFYLED)
+  pinMode(IO_LED, GPIO_OUTPUT);
+#endif
+
+#if defined(HAS_PWMOUTPUTS)
   pinMode(IO_PWM0, GPIO_OUTPUT);  // PWM 0
   pinMode(IO_PWM1, GPIO_OUTPUT);  // PWM 1
   pinMode(IO_PWM2, GPIO_OUTPUT);  // PWM 2
   pinMode(IO_PWM3, GPIO_OUTPUT);  // PWM 3
-  pinMode(IO_AN0, GPIO_INPUT);   // Analog input
-  pinMode(IO_AN1, GPIO_INPUT);   // Analog input
-  pinMode(IO_AN2, GPIO_INPUT);   // Analog input
-  pinMode(IO_AN3, GPIO_INPUT);   // Analog input
+#endif
 
-  // Leds
-  pinMode(IO_LED, GPIO_OUTPUT);
-  pinMode(IO_PWR, GPIO_OUTPUT);
-  digitalWrite(IO_PWR, 1);
+#if defined(AN0)
+  pinMode(IO_AN0, GPIO_INPUT);
+#endif
+#if defined(AN1)
+  pinMode(IO_AN1, GPIO_INPUT);
+#endif
+#if defined(AN2)
+  pinMode(IO_AN2, GPIO_INPUT);
+#endif
+#if defined(AN3)
+  pinMode(IO_AN3, GPIO_INPUT);
+#endif
 
   ioThreadRun = true;
 }

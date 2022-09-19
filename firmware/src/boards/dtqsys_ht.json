@@ -5,7 +5,7 @@
     },
     "core": "nRF5",
     "cpu": "cortex-m4",
-    "extra_flags": "-DARDUINO_ARCH_NRF52840 -DNRF52840_XXAA",
+    "extra_flags": "-DNRF52840_XXAA",
     "f_cpu": "64000000L",
     "hwids": [
       [
@@ -14,7 +14,10 @@
       ]
     ],
     "mcu": "nrf52840",
-    "variant": "dtqsys_ht"
+    "variant": "dtqsys_ht",
+    "zephyr": {
+      "variant": "dtqsys_ht"
+    }
   },
   "connectivity": [
     "bluetooth"
@@ -44,6 +47,6 @@
     "require_upload_port": true,
     "wait_for_upload_port": true
   },
-  "url": "https://headtracker.gitboot.io",
+  "url": "https://headtracker.gitbook.io",
   "vendor": "DTQ Sys"
 }

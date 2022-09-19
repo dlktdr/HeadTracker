@@ -4206,7 +4206,6 @@
   <tabstop>spnLPTiltRoll</tabstop>
   <tabstop>spnLPPan</tabstop>
   <tabstop>spnPPMFrameLen</tabstop>
-  <tabstop>chkInvertedPPM</tabstop>
   <tabstop>cmbPpmOutPin</tabstop>
   <tabstop>cmbBtMode</tabstop>
   <tabstop>cmbBTRmtMode</tabstop>

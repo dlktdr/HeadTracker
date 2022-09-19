@@ -361,11 +361,7 @@ int APDS9960::gestureAvailable()
 {
   if (!_gestureEnabled) enableGesture();
 
-  if (_intPin > -1) {
-    if (digitalRead(IO_APDSINT) != 0) {
-      return 0;
-    }
-  } else if (gestureFIFOAvailable() <= 0) {
+  if (gestureFIFOAvailable() <= 0) {
     return 0;
   }
 
@@ -462,4 +458,6 @@ int APDS9960::readProximity()
   return (255 - r);
 }
 
+#ifdef PCB_NANO33BLE
 APDS9960 APDS(-1);
+#endif
