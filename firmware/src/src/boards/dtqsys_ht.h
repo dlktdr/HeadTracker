@@ -8,6 +8,7 @@
 #define INPUT_PULLUP (GPIO_INPUT | GPIO_PULL_UP)
 #define RGBLED_IS_WS2812
 #define HAS_BUZZER
+#define HAS_MPU6500
 #define AN0 0 // Battery V on analog 0
 
 // Pins (name, number, description)
@@ -29,7 +30,10 @@
   PIN(TXINV,        NRFPIN(0, 15), "UART TX, Inv Pin") \
   PIN(RXINVO,       NRFPIN(1, 13), "UART RX, Out Inv") \
   PIN(RXINVI,       NRFPIN(0,  2), "UART RX, Inp Inv") \
+  PIN(I2CSDA,       NRFPIN(0,  5), "I2C - SDA") \
+  PIN(I2CSCL,       NRFPIN(1,  9), "I2C - SCL") \
   END_IO_PINS \
+
 
 typedef enum {
 #define PIN(NAME, PINNO, DESC) IO_##NAME,

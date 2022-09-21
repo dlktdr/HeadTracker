@@ -11,6 +11,7 @@
 #define HAS_POWERLED
 #define HAS_NOTIFYLED
 #define HAS_PWMOUTPUTS
+#define HAS_LSM9DS1
 
 // Mapping Analog numbers to Analog pins
 #define AN0 7 // AN4 pin

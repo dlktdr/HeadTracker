@@ -21,8 +21,13 @@
 #include <drivers/sensor.h>
 #include <zephyr.h>
 
+#if defined(PCB_NANO33BLE)
 #include "APDS9960/APDS9960.h"
 #include "LSM9DS1/LSM9DS1.h"
+#elif defined(PCB_DTQSYS)
+#include "MPU6xxx/inv_mpu.h"
+#endif
+
 #include "MadgwickAHRS/MadgwickAHRS.h"
 #include "SBUS/sbus.h"
 #include "analog.h"
@@ -51,7 +56,6 @@ static float accxoff = 0, accyoff = 0, acczoff = 0;
 static float gyrxoff = 0, gyryoff = 0, gyrzoff = 0;
 static float l_panout = 0, l_tiltout = 0, l_rollout = 0;
 static bool trpOutputEnabled = false;  // Default to disabled T/R/P output
-volatile bool gyro_calibrated = false;
 
 // Input Channel Data
 static uint16_t ppm_in_chans[16];
@@ -71,15 +75,17 @@ static bool blesenseboard = false;
 static bool lastproximity = false;
 #endif
 
-K_MUTEX_DEFINE(sensor_mutex);
-
+#if defined(PCB_NANO33BLE)
 LSM9DS1Class IMU;
+#endif
 
 // Initial Orientation Data+Vars
 #define MADGINIT_ACCEL 0x01
 #define MADGINIT_MAG 0x02
-
 #define MADGINIT_READY (MADGINIT_ACCEL | MADGINIT_MAG)
+
+K_MUTEX_DEFINE(sensor_mutex);
+
 static int madgreads = 0;
 static uint8_t madgsensbits = 0;
 static volatile bool firstrun = true;
@@ -93,11 +99,31 @@ volatile bool senseTreadRun = false;
 
 int sense_Init()
 {
-#if defined(PCB_NANO33BLE)
+#if defined(HAS_LSM9DS1)
   if (!IMU.begin()) {
     LOGE("Failed to initalize sensors");
     return -1;
   }
+#endif
+
+#if defined(HAS_MPU6500)
+  mpu_select_device(0);
+  mpu_init_structures();
+  mpu_init(NULL);
+  mpu_set_sensors(INV_XYZ_GYRO | INV_XYZ_ACCEL);
+  mpu_set_gyro_fsr(2000);
+  mpu_set_accel_fsr(2);
+  mpu_set_sample_rate(140);
+
+  // mpu_get_power_state((unsigned char *)&ret);
+  mpu_configure_fifo(INV_XYZ_GYRO | INV_XYZ_ACCEL);
+  unsigned short fsr;
+  if(mpu_get_gyro_fsr(&fsr)) {
+    LOGI("Gyp FSR = %d", fsr);
+  }
+#endif
+
+#if defined(HAS_APDS9960)
   // Initalize Gesture Sensor
   if (!APDS.begin()) {
     blesenseboard = false;
@@ -106,8 +132,6 @@ int sense_Init()
     blesenseboard = true;
     trkset.setDataisSense(true);
   }
-#elif defined(PCB_DTQSYS)
-
 #endif
 
   for (int i = 0; i < TrackerSettings::BT_CHANNELS; i++) {
@@ -120,9 +144,6 @@ int sense_Init()
     SF1eFilterInit(anFilter[i]);
   }
 
-  setLEDFlag(LED_GYROCAL);
-
-  gyro_calibrated = false;
   senseTreadRun = true;
 
   return 0;
@@ -205,12 +226,6 @@ void calculate_Thread()
     // Free Mutex Lock, Allow sensor updates
     k_mutex_unlock(&sensor_mutex);
 
-    // Re-apply inital orientation as soon as the gyro calibration is done
-    // As is is a good time to be known sitting still.
-    static bool lastgyrcal = false;
-    if (gyro_calibrated == true && lastgyrcal == false) reset_fusion();
-    lastgyrcal = gyro_calibrated;
-
     // Toggles output on and off if long pressed
     bool butlngdwn = false;
     if (wasButtonLongPressed()) {
@@ -253,21 +268,21 @@ void calculate_Thread()
         (tilt - tiltoffset) * trkset.getTlt_Gain() * (trkset.isTiltReversed() ? -1.0 : 1.0);
     float beta = (float)trkset.getLpTiltRoll() / 100;  // LP Beta
     filter_expAverage(&tiltout, beta, &l_tiltout);
-    uint16_t tiltout_ui = tiltout + trkset.getTlt_Cnt();                       // Apply Center Offset
+    uint16_t tiltout_ui = tiltout + trkset.getTlt_Cnt();  // Apply Center Offset
     tiltout_ui = MAX(MIN(tiltout_ui, trkset.getTlt_Max()), trkset.getTlt_Min());  // Limit Output
 
     // Roll output
     float rollout =
         (roll - rolloffset) * trkset.getRll_Gain() * (trkset.isRollReversed() ? -1.0 : 1.0);
     filter_expAverage(&rollout, beta, &l_rollout);
-    uint16_t rollout_ui = rollout + trkset.getRll_Cnt();                       // Apply Center Offset
+    uint16_t rollout_ui = rollout + trkset.getRll_Cnt();  // Apply Center Offset
     rollout_ui = MAX(MIN(rollout_ui, trkset.getRll_Max()), trkset.getRll_Min());  // Limit Output
 
     // Pan output, Normalize to +/- 180 Degrees
     float panout = normalize((pan - panoffset), -180, 180) * trkset.getPan_Gain() *
                    (trkset.isPanReversed() ? -1.0 : 1.0);
     filter_expAverage(&panout, (float)trkset.getLpPan() / 100, &l_panout);
-    uint16_t panout_ui = panout + trkset.getPan_Cnt();                       // Apply Center Offset
+    uint16_t panout_ui = panout + trkset.getPan_Cnt();  // Apply Center Offset
     panout_ui = MAX(MIN(panout_ui, trkset.getPan_Max()), trkset.getPan_Min());  // Limit Output
 
     // Reset on tilt
@@ -506,9 +521,6 @@ void calculate_Thread()
     }
     lastbutmode = buttonpresmode;
 
-    // If gyro isn't calibrated, don't output TRP
-    if (!gyro_calibrated) trpOutputEnabled = false;
-
     int tltch = trkset.getTltCh();
     int rllch = trkset.getRllCh();
     int panch = trkset.getPanCh();
@@ -546,7 +558,7 @@ void calculate_Thread()
     SBUS_TX_BuildData(sbus_data);
 
     // 13) Set PWM Channels
-    int8_t pwmchs[4] = {trkset.getPwm0(),trkset.getPwm1(),trkset.getPwm2(),trkset.getPwm3()};
+    int8_t pwmchs[4] = {trkset.getPwm0(), trkset.getPwm1(), trkset.getPwm2(), trkset.getPwm3()};
     for (int i = 0; i < 4; i++) {
       int pwmch = pwmchs[i] - 1;
       if (pwmch >= 0 && pwmch < 16) {
@@ -701,173 +713,119 @@ void sensor_Thread()
     // Setup Rotations
     float rotation[3] = {trkset.getRotX(), trkset.getRotY(), trkset.getRotZ()};
 
-    // Accelerometer
+    // Read the data from the sensors
+    float tacc[3], tgyr[3], tmag[3];
+#if defined(HAS_LSM9DS1)
     if (IMU.accelerationAvailable()) {
-#if defined(DEBUG_SENSOR_RATES)
-      static int acount = 0;
-      static int64_t mic = millis64() + 1000;
-      if (mic < millis64()) {  // Every Second
-        mic = millis64() + 1000;
-        LOGI("ACC Rate = %d", acount);
-        acount = 0;
-      }
-      acount++;
-#endif
-
-      IMU.readRawAccel(raccx, raccy, raccz);
-      raccx *= -1.0;  // Flip X to make classic cartesian (+X Right, +Y Up, +Z Vert)
-      accxoff = trkset.getAccXOff();
-      accyoff = trkset.getAccYOff();
-      acczoff = trkset.getAccZOff();
-
-      k_mutex_lock(&sensor_mutex, K_FOREVER);
-
-      accx = raccx - accxoff;
-      accy = raccy - accyoff;
-      accz = raccz - acczoff;
-
-      // Apply Rotation
-      float tmpacc[3] = {accx, accy, accz};
-      rotate(tmpacc, rotation);
-      accx = tmpacc[0];
-      accy = tmpacc[1];
-      accz = tmpacc[2];
-
-      // For intial orientation setup
-      madgsensbits |= MADGINIT_ACCEL;
-
-      k_mutex_unlock(&sensor_mutex);
+      IMU.readRawAccel(tacc[0], tacc[1], tacc[2]);
+      tacc[0] *= -1.0;  // Flip X
     }
-
-    // Gyrometer
-    if (IMU.gyroscopeAvailable()) {
-#if defined(DEBUG_SENSOR_RATES)
-      static int gcount = 0;
-      static int64_t gmic = millis64() + 1000;
-      if (gmic < millis64()) {  // Every Second
-        gmic = millis64() + 1000;
-        LOGI("GYR Rate = %d", gcount);
-        gcount = 0;
-      }
-      gcount++;
-#endif
-
-      IMU.readRawGyro(rgyrx, rgyry, rgyrz);
-      rgyrx *= -1.0;  // Flip X to match other sensors
-
-      if (!gyro_calibrated) {
-        if (initrun) {  // Preload on first read
-          avg[0] = rgyrx;
-          avg[1] = rgyry;
-          avg[2] = rgyrz;
-          lavg[0] = rgyrx;
-          lavg[1] = rgyry;
-          lavg[2] = rgyrz;
-          initrun = false;
-        } else {
-          avg[0] = (avg[0] * GYRO_LP_BETA) + (rgyrx * (1.0 - GYRO_LP_BETA));
-          avg[1] = (avg[1] * GYRO_LP_BETA) + (rgyry * (1.0 - GYRO_LP_BETA));
-          avg[2] = (avg[2] * GYRO_LP_BETA) + (rgyrz * (1.0 - GYRO_LP_BETA));
-
-          // Calculate differential of signal
-          float diff[3];
-          static int64_t lastUpdate = 0;
-          int64_t now = micros64();
-
-          float deltat = ((now - lastUpdate) / 1000000.0f);  // set integration time by time elapsed
-                                                             // since last filter update
-          lastUpdate = now;
-
-          for (int i = 0; i < 3; i++) {
-            diff[i] = fabs(avg[i] - lavg[i]) / deltat;
-            lavg[i] = avg[i];
-          }
-
-          // If rate of change low then decrement the counter
-          if (diff[0] < GYRO_PASS_DIFF && diff[1] < GYRO_PASS_DIFF && diff[2] < GYRO_PASS_DIFF)
-            passcount--;
-          // Otherwise start over
-          else {
-            passcount = GYRO_STABLE_SAMPLES;
-            initrun = true;
-          }
-
-          // If enough samples taken at low motion, Success
-          if (passcount == 0) {
-            trkset.setGyrXOff(avg[0]);
-            trkset.setGyrYOff(avg[1]);
-            trkset.setGyrZOff(avg[2]);
-            clearLEDFlag(LED_GYROCAL);
-            gyro_calibrated = true;
-          }
-        }
-      } else {
-        gyrxoff = trkset.getGyrXOff();
-        gyryoff = trkset.getGyrYOff();
-        gyrzoff = trkset.getGyrZOff();
-
-        k_mutex_lock(&sensor_mutex, K_FOREVER);
-
-        gyrx = rgyrx - gyrxoff;
-        gyry = rgyry - gyryoff;
-        gyrz = rgyrz - gyrzoff;
-
-        // Apply Rotation
-        float tmpgyr[3] = {gyrx, gyry, gyrz};
-        rotate(tmpgyr, rotation);
-        gyrx = tmpgyr[0];
-        gyry = tmpgyr[1];
-        gyrz = tmpgyr[2];
-
-        k_mutex_unlock(&sensor_mutex);
-      }
-    }
-
-    // Magnetometer
     if (IMU.magneticFieldAvailable()) {
-#if defined(DEBUG_SENSOR_RATES)
-      static int mcount = 0;
-      static int64_t mmic = millis64() + 1000;
-      if (mmic < millis64()) {  // Every Second
-        mmic = millis64() + 1000;
-        LOGI("MAG Rate = %d", mcount);
-        mcount = 0;
-      }
-      mcount++;
+      IMU.readRawMagnet(tmag[0], tmag[1], tmag[2]);
+    }
+    if (IMU.gyroscopeAvailable()) {
+      IMU.readRawGyro(tgyr[0], tgyr[1], tgyr[2]);
+      tgyr[0] *= -1.0;  // Flip X to match other sensors
+    }
+#endif
+#if defined(HAS_MPU6500)
+    // Read MPU6500
+    short _gyro[3];
+    short _accel[3];
+    unsigned long timestamp;
+    unsigned char more;
+    mpu_get_accel_reg(_accel, &timestamp);
+    unsigned short ascale = 1;;
+    mpu_get_accel_sens(&ascale);
+    tacc[0] = (float)_accel[0] / (float)ascale;
+    tacc[1] = (float)_accel[1] / (float)ascale;
+    tacc[2] = (float)_accel[2] / (float)ascale;
+    mpu_get_gyro_reg(_gyro, &timestamp);
+    float gscale = 1.0f;
+    mpu_get_gyro_sens(&gscale);
+    tgyr[0] = _gyro[0] / gscale;
+    tgyr[1] = _gyro[1] / gscale;
+    tgyr[2] = _gyro[2] / gscale;
+
 #endif
 
-      IMU.readRawMagnet(rmagx, rmagy, rmagz);
-      // On first read set the min/max values to this reading
-      // Get Offsets + Soft Iron Offesets
-      float magsioff[9];
-      magxoff = trkset.getMagXOff();
-      magyoff = trkset.getMagYOff();
-      magzoff = trkset.getMagZOff();
-      trkset.getMagSiOff(magsioff);
+#if defined(HAS_QMC5883)
 
-      k_mutex_lock(&sensor_mutex, K_FOREVER);
+#endif
 
-      // Calibrate Hard Iron Offsets
-      magx = rmagx - magxoff;
-      magy = rmagy - magyoff;
-      magz = rmagz - magzoff;
+    k_mutex_lock(&sensor_mutex, K_FOREVER);
 
-      magx = (magx * magsioff[0]) + (magy * magsioff[1]) + (magz * magsioff[2]);
-      magy = (magx * magsioff[3]) + (magy * magsioff[4]) + (magz * magsioff[5]);
-      magz = (magx * magsioff[6]) + (magy * magsioff[7]) + (magz * magsioff[8]);
+    // -- Accelerometer
+    raccx = tacc[0];
+    raccy = tacc[1];
+    raccz = tacc[2];
+    accxoff = trkset.getAccXOff();
+    accyoff = trkset.getAccYOff();
+    acczoff = trkset.getAccZOff();
 
-      // Apply Rotation
-      float tmpmag[3] = {magx, magy, magz};
-      rotate(tmpmag, rotation);
-      magx = tmpmag[0];
-      magy = tmpmag[1];
-      magz = tmpmag[2];
+    accx = raccx - accxoff;
+    accy = raccy - accyoff;
+    accz = raccz - acczoff;
 
-      // For inital orientation setup
-      madgsensbits |= MADGINIT_MAG;
+    // Apply Rotation
+    float tmpacc[3] = {accx, accy, accz};
+    rotate(tmpacc, rotation);
+    accx = tmpacc[0];
+    accy = tmpacc[1];
+    accz = tmpacc[2];
 
-      k_mutex_unlock(&sensor_mutex);
-    }
+    // For intial orientation setup
+    madgsensbits |= MADGINIT_ACCEL;
+
+    // --- Gyrometer Calcs
+    rgyrx = tgyr[0];
+    rgyry = tgyr[1];
+    rgyrz = tgyr[2];
+    gyrxoff = trkset.getGyrXOff();
+    gyryoff = trkset.getGyrYOff();
+    gyrzoff = trkset.getGyrZOff();
+
+    gyrx = rgyrx - gyrxoff;
+    gyry = rgyry - gyryoff;
+    gyrz = rgyrz - gyrzoff;
+
+    // Apply Rotation
+    float tmpgyr[3] = {gyrx, gyry, gyrz};
+    rotate(tmpgyr, rotation);
+    gyrx = tmpgyr[0];
+    gyry = tmpgyr[1];
+    gyrz = tmpgyr[2];
+
+    // --- Magnetometer Calcs
+    rmagx = tmag[0];
+    rmagy = tmag[1];
+    rmagz = tmag[2];
+    float magsioff[9];
+    magxoff = trkset.getMagXOff();
+    magyoff = trkset.getMagYOff();
+    magzoff = trkset.getMagZOff();
+    trkset.getMagSiOff(magsioff);
+
+    // Calibrate Hard Iron Offsets
+    magx = rmagx - magxoff;
+    magy = rmagy - magyoff;
+    magz = rmagz - magzoff;
+
+    magx = (magx * magsioff[0]) + (magy * magsioff[1]) + (magz * magsioff[2]);
+    magy = (magx * magsioff[3]) + (magy * magsioff[4]) + (magz * magsioff[5]);
+    magz = (magx * magsioff[6]) + (magy * magsioff[7]) + (magz * magsioff[8]);
+
+    // Apply Rotation
+    float tmpmag[3] = {magx, magy, magz};
+    rotate(tmpmag, rotation);
+    magx = tmpmag[0];
+    magy = tmpmag[1];
+    magz = tmpmag[2];
+
+    // For inital orientation setup
+    madgsensbits |= MADGINIT_MAG;
+
+    k_mutex_unlock(&sensor_mutex);
   }  // END THREAD
 }
 

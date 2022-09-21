@@ -81,7 +81,6 @@ extern volatile bool serialThreadRun;
 extern volatile bool btThreadRun;
 extern volatile bool senseTreadRun;
 extern volatile bool sbusTreadRun;
-extern volatile bool gyro_calibrated;
 
 // Perepherial Channels Used, Make sure no dupilcates here
 // and can't be used by Zephyr
@@ -130,11 +129,14 @@ extern volatile bool gyro_calibrated;
 #define GYRO_PASS_DIFF 24.0      // Differential less than this deg/sec^2 considered stable
 #define GYRO_LP_BETA 0.9         // Gyro Sample Moving Average Beta (0.0-1
 
+#define MPU6500
+
 // Magnetometer, Initial Orientation, Samples to average
 #define MADGSTART_SAMPLES 15
 
 // RTOS Specifics
 #if defined(RTOS_ZEPHYR)
+#include <zephyr.h>
 #define micros() k_cyc_to_us_floor32(k_cycle_get_32())
 #define millis64() k_uptime_get()
 #define micros64() k_cyc_to_us_floor64(k_cycle_get_32())

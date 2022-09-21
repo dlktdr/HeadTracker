@@ -66,8 +66,6 @@ int LSM9DS1Class::begin()
     return 0;
   }
 
-  i2c_configure(i2c_dev, I2C_SPEED_SET(I2C_SPEED_FAST) | I2C_MODE_MASTER);
-
   storedAccelFS = false;
   storedGyroFS = false;
   storedMagnetFS = false;

@@ -20,6 +20,10 @@
 #include "soc_flash.h"
 #include "trackersettings.h"
 
+// T
+#include <device.h>
+#include <drivers/i2c.h>
+#include <zephyr.h>
 
 #define CLOCK_NODE DT_INST(0, nordic_nrf_clock)
 static const struct device *clock0;
@@ -46,13 +50,13 @@ void start(void)
   serial_init();
 
   // Actual Calculations - sense.cpp
-//  sense_Init();
+  sense_Init();
 
   // Start the BT Thread
-//  bt_init();
+  bt_init();
 
   // Start SBUS - SBUS/uarte_sbus.cpp (Pins D0/TX, D1/RX)
-//  sbus_init();
+  sbus_init();
 
   // PWM Outputs - Fixed to A0-A3
 #if defined(HAS_PWMOUTPUTS)
