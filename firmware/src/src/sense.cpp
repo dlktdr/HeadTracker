@@ -129,13 +129,7 @@ int sense_Init()
   mpu_set_gyro_fsr(2000);
   mpu_set_accel_fsr(2);
   mpu_set_sample_rate(140);
-
-  // mpu_get_power_state((unsigned char *)&ret);
   mpu_configure_fifo(INV_XYZ_GYRO | INV_XYZ_ACCEL);
-  unsigned short fsr;
-  if(mpu_get_gyro_fsr(&fsr)) {
-    LOGI("Gyp FSR = %d", fsr);
-  }
 #endif
 
 #if defined(HAS_APDS9960)
@@ -595,8 +589,8 @@ void calculate_Thread()
     }
 
     // Update the settings for the GUI
-    // Both data and sensor threads will use this data. If data thread has it locked skip this
-    // reading.
+    // Serial also uses this data, make sure writes are complete.
+    //  If data thread has it locked just skip this reading
     if (k_mutex_lock(&data_mutex, K_NO_WAIT) == 0) {
       // Raw values for calibration
       trkset.setDataAccX(raccx);
@@ -680,12 +674,6 @@ void calculate_Thread()
 
 void sensor_Thread()
 {
-  // Gyro Calibration
-  float avg[3] = {0, 0, 0};
-  float lavg[3] = {0, 0, 0};
-  bool initrun = true;
-  int passcount = GYRO_STABLE_SAMPLES;
-
   while (1) {
     rt_sleep_us(SENSOR_PERIOD);
 
