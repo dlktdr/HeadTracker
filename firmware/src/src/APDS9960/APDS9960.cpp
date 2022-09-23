@@ -53,8 +53,6 @@ bool APDS9960::begin()
     return false;
   }
 
-  i2c_configure(i2c_dev, I2C_SPEED_SET(I2C_SPEED_FAST) | I2C_MODE_MASTER);
-
   // Check ID register
   uint8_t id;
   if (!getID(&id)) return false;

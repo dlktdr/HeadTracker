@@ -9,6 +9,7 @@
 #define RGBLED_IS_WS2812
 #define HAS_BUZZER
 #define HAS_MPU6500
+#define HAS_QMC5883
 #define AN0 0 // Battery V on analog 0
 
 // Pins (name, number, description)
@@ -34,7 +35,6 @@
   PIN(I2CSCL,       NRFPIN(1,  9), "I2C - SCL") \
   END_IO_PINS \
 
-
 typedef enum {
 #define PIN(NAME, PINNO, DESC) IO_##NAME,
   PIN_X
@@ -51,4 +51,3 @@ const int8_t PinNumber[] = {
 #define pinMode(pin, mode) gpio_pin_configure(gpios[PIN_TO_NRFPORT(PIN_NAME_TO_NUM(pin))], PIN_TO_NRFPIN(PIN_NAME_TO_NUM(pin)), mode)
 #define digitalWrite(pin, value) gpio_pin_set(gpios[PIN_TO_NRFPORT(PIN_NAME_TO_NUM(pin))], PIN_TO_NRFPIN(PIN_NAME_TO_NUM(pin)), value)
 #define digitalRead(pin) gpio_pin_get(gpios[PIN_TO_NRFPORT(PIN_NAME_TO_NUM(pin))], PIN_TO_NRFPIN(PIN_NAME_TO_NUM(pin)))
-

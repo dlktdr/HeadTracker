@@ -15,18 +15,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "sense.h"
-
 #include <device.h>
 #include <drivers/sensor.h>
+#include <drivers/i2c.h>
 #include <zephyr.h>
-
-#if defined(PCB_NANO33BLE)
-#include "APDS9960/APDS9960.h"
-#include "LSM9DS1/LSM9DS1.h"
-#elif defined(PCB_DTQSYS)
-#include "MPU6xxx/inv_mpu.h"
-#endif
 
 #include "MadgwickAHRS/MadgwickAHRS.h"
 #include "SBUS/sbus.h"
@@ -41,6 +33,21 @@
 #include "pmw.h"
 #include "soc_flash.h"
 #include "trackersettings.h"
+#include "defines.h"
+#include "sense.h"
+
+#if defined(HAS_APDS9960)
+#include "APDS9960/APDS9960.h"
+#endif
+#if defined(HAS_LSM9DS1)
+#include "LSM9DS1/LSM9DS1.h"
+#endif
+#if defined(HAS_MPU6500)
+#include "MPU6xxx/inv_mpu.h"
+#endif
+#if defined(HAS_QMC5883)
+#include "QMC5883/qmc5883.h"
+#endif
 
 static float auxdata[10];
 static float raccx = 0, raccy = 0, raccz = 0;
@@ -99,6 +106,14 @@ volatile bool senseTreadRun = false;
 
 int sense_Init()
 {
+  const struct device* i2c_dev = device_get_binding("I2C_1");
+  if (!i2c_dev) {
+    LOGE("Could not get device binding for I2C");
+    return false;
+  }
+
+  i2c_configure(i2c_dev, I2C_SPEED_SET(I2C_SPEED_FAST) | I2C_MODE_MASTER);
+
 #if defined(HAS_LSM9DS1)
   if (!IMU.begin()) {
     LOGE("Failed to initalize sensors");
@@ -132,6 +147,10 @@ int sense_Init()
     blesenseboard = true;
     trkset.setDataisSense(true);
   }
+#endif
+
+#if defined(HAS_QMC5883)
+  qmc5883Init();
 #endif
 
   for (int i = 0; i < TrackerSettings::BT_CHANNELS; i++) {
@@ -715,115 +734,131 @@ void sensor_Thread()
 
     // Read the data from the sensors
     float tacc[3], tgyr[3], tmag[3];
+    bool accValid=false;
+    bool gyrValid=false;
+    bool magValid=false;
+
 #if defined(HAS_LSM9DS1)
     if (IMU.accelerationAvailable()) {
       IMU.readRawAccel(tacc[0], tacc[1], tacc[2]);
       tacc[0] *= -1.0;  // Flip X
+      accValid = true;
     }
     if (IMU.magneticFieldAvailable()) {
       IMU.readRawMagnet(tmag[0], tmag[1], tmag[2]);
+      magValid = true;
     }
     if (IMU.gyroscopeAvailable()) {
       IMU.readRawGyro(tgyr[0], tgyr[1], tgyr[2]);
       tgyr[0] *= -1.0;  // Flip X to match other sensors
+      gyrValid = true;
     }
 #endif
+
+#if defined(HAS_QMC5883)
+    if(qmc5883Read(tmag)) {
+      magValid = true;
+    }
+#endif
+
 #if defined(HAS_MPU6500)
     // Read MPU6500
     short _gyro[3];
     short _accel[3];
     unsigned long timestamp;
-    unsigned char more;
-    mpu_get_accel_reg(_accel, &timestamp);
+    if(!mpu_get_accel_reg(_accel, &timestamp))
+      accValid = true;
     unsigned short ascale = 1;;
     mpu_get_accel_sens(&ascale);
     tacc[0] = (float)_accel[0] / (float)ascale;
     tacc[1] = (float)_accel[1] / (float)ascale;
     tacc[2] = (float)_accel[2] / (float)ascale;
-    mpu_get_gyro_reg(_gyro, &timestamp);
+    if(!mpu_get_gyro_reg(_gyro, &timestamp))
+      gyrValid = true;
     float gscale = 1.0f;
     mpu_get_gyro_sens(&gscale);
     tgyr[0] = _gyro[0] / gscale;
     tgyr[1] = _gyro[1] / gscale;
     tgyr[2] = _gyro[2] / gscale;
-
-#endif
-
-#if defined(HAS_QMC5883)
-
 #endif
 
     k_mutex_lock(&sensor_mutex, K_FOREVER);
 
     // -- Accelerometer
-    raccx = tacc[0];
-    raccy = tacc[1];
-    raccz = tacc[2];
-    accxoff = trkset.getAccXOff();
-    accyoff = trkset.getAccYOff();
-    acczoff = trkset.getAccZOff();
+    if(accValid) {
+      raccx = tacc[0];
+      raccy = tacc[1];
+      raccz = tacc[2];
+      accxoff = trkset.getAccXOff();
+      accyoff = trkset.getAccYOff();
+      acczoff = trkset.getAccZOff();
 
-    accx = raccx - accxoff;
-    accy = raccy - accyoff;
-    accz = raccz - acczoff;
+      accx = raccx - accxoff;
+      accy = raccy - accyoff;
+      accz = raccz - acczoff;
 
-    // Apply Rotation
-    float tmpacc[3] = {accx, accy, accz};
-    rotate(tmpacc, rotation);
-    accx = tmpacc[0];
-    accy = tmpacc[1];
-    accz = tmpacc[2];
+      // Apply Rotation
+      float tmpacc[3] = {accx, accy, accz};
+      rotate(tmpacc, rotation);
+      accx = tmpacc[0];
+      accy = tmpacc[1];
+      accz = tmpacc[2];
 
-    // For intial orientation setup
-    madgsensbits |= MADGINIT_ACCEL;
+      // For intial orientation setup
+      madgsensbits |= MADGINIT_ACCEL;
+    }
 
     // --- Gyrometer Calcs
-    rgyrx = tgyr[0];
-    rgyry = tgyr[1];
-    rgyrz = tgyr[2];
-    gyrxoff = trkset.getGyrXOff();
-    gyryoff = trkset.getGyrYOff();
-    gyrzoff = trkset.getGyrZOff();
+    if(gyrValid) {
+      rgyrx = tgyr[0];
+      rgyry = tgyr[1];
+      rgyrz = tgyr[2];
+      gyrxoff = trkset.getGyrXOff();
+      gyryoff = trkset.getGyrYOff();
+      gyrzoff = trkset.getGyrZOff();
 
-    gyrx = rgyrx - gyrxoff;
-    gyry = rgyry - gyryoff;
-    gyrz = rgyrz - gyrzoff;
+      gyrx = rgyrx - gyrxoff;
+      gyry = rgyry - gyryoff;
+      gyrz = rgyrz - gyrzoff;
 
-    // Apply Rotation
-    float tmpgyr[3] = {gyrx, gyry, gyrz};
-    rotate(tmpgyr, rotation);
-    gyrx = tmpgyr[0];
-    gyry = tmpgyr[1];
-    gyrz = tmpgyr[2];
+      // Apply Rotation
+      float tmpgyr[3] = {gyrx, gyry, gyrz};
+      rotate(tmpgyr, rotation);
+      gyrx = tmpgyr[0];
+      gyry = tmpgyr[1];
+      gyrz = tmpgyr[2];
+    }
 
-    // --- Magnetometer Calcs
-    rmagx = tmag[0];
-    rmagy = tmag[1];
-    rmagz = tmag[2];
-    float magsioff[9];
-    magxoff = trkset.getMagXOff();
-    magyoff = trkset.getMagYOff();
-    magzoff = trkset.getMagZOff();
-    trkset.getMagSiOff(magsioff);
+    if(magValid) {
+      // --- Magnetometer Calcs
+      rmagx = tmag[0];
+      rmagy = tmag[1];
+      rmagz = tmag[2];
+      float magsioff[9];
+      magxoff = trkset.getMagXOff();
+      magyoff = trkset.getMagYOff();
+      magzoff = trkset.getMagZOff();
+      trkset.getMagSiOff(magsioff);
 
-    // Calibrate Hard Iron Offsets
-    magx = rmagx - magxoff;
-    magy = rmagy - magyoff;
-    magz = rmagz - magzoff;
+      // Calibrate Hard Iron Offsets
+      magx = rmagx - magxoff;
+      magy = rmagy - magyoff;
+      magz = rmagz - magzoff;
 
-    magx = (magx * magsioff[0]) + (magy * magsioff[1]) + (magz * magsioff[2]);
-    magy = (magx * magsioff[3]) + (magy * magsioff[4]) + (magz * magsioff[5]);
-    magz = (magx * magsioff[6]) + (magy * magsioff[7]) + (magz * magsioff[8]);
+      magx = (magx * magsioff[0]) + (magy * magsioff[1]) + (magz * magsioff[2]);
+      magy = (magx * magsioff[3]) + (magy * magsioff[4]) + (magz * magsioff[5]);
+      magz = (magx * magsioff[6]) + (magy * magsioff[7]) + (magz * magsioff[8]);
 
-    // Apply Rotation
-    float tmpmag[3] = {magx, magy, magz};
-    rotate(tmpmag, rotation);
-    magx = tmpmag[0];
-    magy = tmpmag[1];
-    magz = tmpmag[2];
+      // Apply Rotation
+      float tmpmag[3] = {magx, magy, magz};
+      rotate(tmpmag, rotation);
+      magx = tmpmag[0];
+      magy = tmpmag[1];
+      magz = tmpmag[2];
 
-    // For inital orientation setup
-    madgsensbits |= MADGINIT_MAG;
+      // For inital orientation setup
+      madgsensbits |= MADGINIT_MAG;
+    }
 
     k_mutex_unlock(&sensor_mutex);
   }  // END THREAD
