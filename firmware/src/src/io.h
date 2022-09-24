@@ -33,4 +33,4 @@ extern volatile uint32_t _ledmode;
 
 void setLEDFlag(uint32_t ledMode);
 void clearLEDFlag(uint32_t ledMode);
-void clearAllFlags();
+void clearAllLEDFlags();

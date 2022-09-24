@@ -8,7 +8,7 @@ print(env)
 my_flags = env.ParseFlags(env['BUILD_FLAGS'])
 defines = {k: v for (k, v) in my_flags.get("CPPDEFINES")}
 print(defines)
-env.Replace(PROGNAME="%s%s v%s_%s%s_%s" % (defines.get("FNAME"),
+env.Replace(PROGNAME="%s%s_v%s_%s%s_%s" % (defines.get("FNAME"),
                                            defines.get("FW_EXTRA"),
                                            defines.get("FW_MAJ"),
                                            defines.get("FW_MIN"),

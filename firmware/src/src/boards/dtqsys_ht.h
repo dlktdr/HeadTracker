@@ -6,18 +6,20 @@
 
 // Pull up pin mode
 #define INPUT_PULLUP (GPIO_INPUT | GPIO_PULL_UP)
-#define RGBLED_IS_WS2812
+
+// Board features
+#define HAS_WS2812
 #define HAS_BUZZER
 #define HAS_MPU6500
 #define HAS_QMC5883
 #define AN0 0 // Battery V on analog 0
 
 // Pins (name, number, description)
-// NOTE: These pins are an enum entry. e.g. IO_AN0 = 0
+// NOTE: These pins are an enum entry. IO_ is prepended e.g. IO_AN0 = 0
 //     - Use PIN_NAME_TO_NUM(IO_AN0) to get actual the pin number
 //     - The pin number can be converted back into the NRF port/pin
 //       using functions PIN_TO_NRFPORT & PIN_TO_NRFPIN
-//     - The string descrition for AN0 would be StrPins[IO_AN)]
+//     - The string descrition for AN0 would be StrPins[IO_AN0]
 
 #define PIN_X \
   PIN(AN0,          NRFPIN(0,  3), "Analog Battery Voltage") \

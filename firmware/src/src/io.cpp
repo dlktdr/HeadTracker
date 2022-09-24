@@ -1,9 +1,18 @@
-#include "io.h"
-
 #include <zephyr.h>
+
+#include "io.h"
+#include "defines.h"
+
+#if defined(HAS_WS2812)
+#include <device.h>
+#include <drivers/led_strip.h>
+#include <drivers/spi.h>
+
+#endif
 
 #include "soc_flash.h"
 #include "trackersettings.h"
+#include "log.h"
 
 K_SEM_DEFINE(button_sem, 0, 1);
 K_SEM_DEFINE(lngbutton_sem, 0, 1);
@@ -46,7 +55,7 @@ void setLEDFlag(uint32_t ledMode) { _ledmode |= ledMode; }
 
 void clearLEDFlag(uint32_t ledMode) { _ledmode &= ~ledMode; }
 
-void clearAllFlags() { _ledmode = 0; }
+void clearAllLEDFlags() { _ledmode = 0; }
 
 // Any IO Related Tasks, e.g. button, leds
 void io_Thread()
@@ -128,7 +137,7 @@ void io_Thread()
     uint32_t curcolor = led_sequence[rgb_sequence_no].RGB;
     if (led_sequence[rgb_sequence_no].time == 0) curcolor = 0;
 
-#if defined(RGBLED_IS_3LEDS)
+#if defined(HAS_3DIODE_RGB)
     // TODO - Replace me with PWM control
     if (curcolor & RGB_RED)
       digitalWrite(IO_LEDR, 0);
@@ -142,8 +151,19 @@ void io_Thread()
       digitalWrite(IO_LEDB, 0);
     else
       digitalWrite(IO_LEDB, 1);
-#elif defined(RGBLED_IS_WS2812)
-    // TODO.. WS2812 led here
+#endif
+
+#if defined(HAS_WS2812)
+    const struct device *strip = DEVICE_DT_GET(DT_NODELABEL(led_strip0));
+    //strip = device_get_binding(DT_NODELABEL(led_strip0));
+	  if (strip) {
+      struct led_rgb pixel;
+      pixel.b = curcolor & 0xFF;
+      pixel.g = (curcolor >> 8) & 0xFF;
+      pixel.r = (curcolor >> 16) & 0xFF;
+      pixel.scratch = 0;
+      led_strip_update_rgb(strip, &pixel, 1);
+    }
 #endif
 
     if (millis() > rgb_timer + led_sequence[rgb_sequence_no].time) {
@@ -218,15 +238,13 @@ void io_init()
   digitalWrite(IO_BUZZ, 0);
 #endif
 
-#if defined(RGBLED_IS_3LEDS)
+#if defined(HAS_3DIODE_RGB)
   pinMode(IO_LEDR, GPIO_OUTPUT);
   pinMode(IO_LEDG, GPIO_OUTPUT);
   pinMode(IO_LEDB, GPIO_OUTPUT);
   digitalWrite(IO_LEDR, 1);
   digitalWrite(IO_LEDG, 1);
   digitalWrite(IO_LEDB, 1);
-#elif defined(RGBLED_IS_WS2812)
-  pinMode(IO_LEDWS, GPIO_OUTPUT);
 #endif
 
 #if defined(HAS_POWERLED)

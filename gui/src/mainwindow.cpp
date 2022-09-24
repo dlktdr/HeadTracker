@@ -252,6 +252,8 @@ MainWindow::~MainWindow()
 {
     delete serialcon;
     delete nano33ble;
+    delete bno055;
+    delete dtqsys;
     if(firmwareWizard != nullptr)
         delete firmwareWizard;
     delete serialDebug;

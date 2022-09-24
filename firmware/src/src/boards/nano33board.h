@@ -6,8 +6,10 @@
 
 // Pull up pin mode
 #define INPUT_PULLUP (GPIO_INPUT | GPIO_PULL_UP)
+
+// Board Features
 #define HAS_APDS9960
-#define RGBLED_IS_3LEDS
+#define HAS_3DIODE_RGB
 #define HAS_POWERLED
 #define HAS_NOTIFYLED
 #define HAS_PWMOUTPUTS

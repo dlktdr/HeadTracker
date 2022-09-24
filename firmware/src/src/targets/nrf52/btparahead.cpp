@@ -207,12 +207,18 @@ void BTHeadStop()
 void BTHeadExecute()
 {
   if (bleconnected) {
+    clearLEDFlag(LED_BTSCANNING);
+    setLEDFlag(LED_BTCONNECTED);
     // Send Trainer Data
     uint8_t output[BLUETOOTH_LINE_LENGTH + 1];
     int len;
     len = setTrainer(output);
 
     bt_gatt_notify(NULL, &bt_srv.attrs[1], output, len);
+  } else {
+    // Scanning
+    setLEDFlag(LED_BTSCANNING);
+    clearLEDFlag(LED_BTCONNECTED);
   }
 }
 
