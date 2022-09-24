@@ -119,7 +119,7 @@ void BTSetMode(btmodet mode)
       break;
   }
 
-  // Stop Bluetooth enabled LED Modes
+  // Stop Bluetooth LED Modes
   clearLEDFlag(LED_BTCONNECTED);
   clearLEDFlag(LED_BTSCANNING);
 

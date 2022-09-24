@@ -1427,8 +1427,23 @@ void MainWindow::boardDiscovered(BoardType *brd)
             ui->lblPPMOutPin->setVisible(false);
             ui->cmbButtonPin->setVisible(false);
             ui->lblButtonPin->setVisible(false);
-            // TODO Remove PWM
-            //      Remove unused analogs
+            ui->tabBLE->setTabVisible(4,false);
+            ui->lblAn4->setText(tr("Battery Voltage"));
+            ui->frmAnalog1->setVisible(false);
+            ui->frmAnalog2->setVisible(false);
+            ui->frmAnalog3->setVisible(false);
+        } else {
+            ui->cmbPpmInPin->setVisible(true);
+            ui->lblPPMInPin->setVisible(true);
+            ui->cmbPpmOutPin->setVisible(true);
+            ui->lblPPMOutPin->setVisible(true);
+            ui->cmbButtonPin->setVisible(true);
+            ui->lblButtonPin->setVisible(true);
+            ui->tabBLE->setTabVisible(4,true);
+            ui->lblAn4->setText(tr("Analog A4"));
+            ui->frmAnalog1->setVisible(true);
+            ui->frmAnalog2->setVisible(true);
+            ui->frmAnalog3->setVisible(true);
         }
 
         // Check Firmware Version is Compatible
