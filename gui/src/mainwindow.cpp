@@ -620,6 +620,7 @@ void MainWindow::updateToUI()
     ui->cmbalertchn->setCurrentIndex(alertCh==-1?0:alertCh);
     // Uart Mode
     ui->cmbUartMode->setCurrentIndex(trkset.getUartMode());
+    ui->stkUart->setCurrentIndex(trkset.getUartMode());
     // Analog CH
     ui->cmbA0Ch->setCurrentIndex(a0Ch==-1?0:a0Ch);
     ui->cmbA1Ch->setCurrentIndex(a1Ch==-1?0:a1Ch);

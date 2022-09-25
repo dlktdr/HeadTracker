@@ -4,6 +4,7 @@
 
 #include "defines.h"
 #include "log.h"
+#include "uart_mode.h"
 
 CrsfSerial *crsf;
 
@@ -12,7 +13,10 @@ static void crsfShiftyByte(uint8_t b)
   //LOGI("CRSF, shifty byte %c", b);
 }
 
-static void packetChannels() {}
+static void packetChannels()
+{
+  PacketCount++;
+}
 
 static void packetLinkStatistics(crsfLinkStatistics_t *link) {}
 
@@ -39,6 +43,7 @@ CrsfSerial::CrsfSerial(uint32_t baud) :
     _passthroughMode(false)
 {
   // Crsf serial is 420000 baud for V2
+  AuxSerial_Close();
   AuxSerial_Open(_baud, CONF8N1);
 }
 

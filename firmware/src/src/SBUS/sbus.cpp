@@ -28,6 +28,7 @@
 #include "log.h"
 #include "soc_flash.h"
 #include "trackersettings.h"
+#include "uart_mode.h"
 
 #define SBUS_FRAME_LEN 25
 
@@ -79,21 +80,11 @@ int8_t state_ = 0;
 uint8_t prev_byte_ = FOOTER_;
 uint8_t cur_byte_;
 
-#ifdef DEBUG
-uint64_t bytecount = 0;
-#endif
+// TODO: There is an issue here, only half of the SBUS packets are received
 bool SbusRx_Parse()
 {
   /* Parse messages */
   while (AuxSerial_Read(&cur_byte_, 1)) {
-    /*TODO fixme serialWriteHex(&cur_byte_,1);
-    if ((cur_byte_ == HEADER_) && ((prev_byte_ == FOOTER_) ||
-       ((prev_byte_ & 0x0F) == FOOTER2_))) {
-      serialWriteln();
-       }*/
-#ifdef DEBUG
-    bytecount++;
-#endif
     if (state_ == 0) {
       if ((cur_byte_ == HEADER_) &&
           ((prev_byte_ == FOOTER_) || ((prev_byte_ & 0x0F) == FOOTER2_))) {
@@ -119,11 +110,6 @@ bool SbusRx_Parse()
   return false;
 }
 
-#ifdef DEBUG
-uint8_t sbusrate = 0;
-uint64_t sbstarttime = 0;
-uint64_t bytesread = 0;
-#endif
 
 /* FROM -----
  * Brian R Taylor
@@ -136,6 +122,7 @@ bool SbusReadChannels(uint16_t ch_[16])
 {
   bool newdata = false;
   while (SbusRx_Parse()) {  // Get most recent data if more than 1 packet came in
+    PacketCount++;
     newdata = true;
   }
   if (newdata) {
@@ -178,7 +165,6 @@ bool SbusReadChannels(uint16_t ch_[16])
 
     return true;
   }
-
   return false;
 }
 

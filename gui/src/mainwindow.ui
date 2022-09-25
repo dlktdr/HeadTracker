@@ -1430,9 +1430,9 @@
                </layout>
               </item>
               <item>
-               <widget class="QStackedWidget" name="stkSerial">
+               <widget class="QStackedWidget" name="stkUart">
                 <property name="currentIndex">
-                 <number>3</number>
+                 <number>1</number>
                 </property>
                 <widget class="QWidget" name="page_2"/>
                 <widget class="QWidget" name="sbus">
@@ -1460,7 +1460,7 @@
                      <number>30</number>
                     </property>
                     <property name="maximum">
-                     <number>150</number>
+                     <number>140</number>
                     </property>
                     <property name="value">
                      <number>60</number>
@@ -1549,7 +1549,7 @@
                      <number>30</number>
                     </property>
                     <property name="maximum">
-                     <number>150</number>
+                     <number>140</number>
                     </property>
                     <property name="value">
                      <number>60</number>
@@ -4469,7 +4469,7 @@
   <connection>
    <sender>cmbUartMode</sender>
    <signal>currentIndexChanged(int)</signal>
-   <receiver>stkSerial</receiver>
+   <receiver>stkUart</receiver>
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">

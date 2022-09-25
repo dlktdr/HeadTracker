@@ -4,6 +4,8 @@
 
 typedef enum { UARTDISABLE = 0, UARTSBUSIO, UARTCRSFIN, UARTCRSFOUT } uartmodet;
 
+extern uint32_t PacketCount;
+
 void uart_init();
 void uartTx_Thread();
 void uartRx_Thread();

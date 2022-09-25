@@ -8,6 +8,7 @@
 
 enum eFailsafeAction { fsaNoPulses, fsaHold };
 
+
 class CrsfSerial
 {
 public:
