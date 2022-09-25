@@ -69,7 +69,7 @@ public:
     memset(chout,0,sizeof(uint16_t) * 16);
     memset(btch,0,sizeof(uint16_t) * 8);
     memset(ppmch,0,sizeof(uint16_t) * 16);
-    memset(sbusch,0,sizeof(uint16_t) * 16);
+    memset(uartch,0,sizeof(uint16_t) * 16);
     memset(quat,0,sizeof(float) * 4);
     memset(btaddr,0,sizeof(char) * 18);
     memset(btrmt,0,sizeof(char) * 18);
@@ -723,11 +723,11 @@ public:
     return false;
   }
 
-  // Serial Mode (0- Off, 1-SBUS, 2-CRSF)
-  inline const uint8_t& getSerMode() {return sermode;}
-  bool setSerMode(uint8_t val=0) {
-    if(val >= 0 && val <= 2) {
-      sermode = val;
+  // Uart Mode (0- Off, 1-SBUS, 2-CRSFIN, 3-CRSFOUT)
+  inline const uint8_t& getUartMode() {return uartmode;}
+  bool setUartMode(uint8_t val=0) {
+    if(val >= 0 && val <= 3) {
+      uartmode = val;
       return true;
     }
     return false;
@@ -1033,7 +1033,7 @@ public:
     json["buttonpin"] = buttonpin;
     json["ppmoutpin"] = ppmoutpin;
     json["ppminpin"] = ppminpin;
-    json["sermode"] = sermode;
+    json["uartmode"] = uartmode;
     json["sbrate"] = sbrate;
     json["sbininv"] = sbininv;
     json["sboutinv"] = sboutinv;
@@ -1118,7 +1118,7 @@ public:
     v = json["buttonpin"]; if(!v.isNull()) {setButtonPin(v); chpinschanged = true;}
     v = json["ppmoutpin"]; if(!v.isNull()) {setPpmOutPin(v); chpinschanged = true;}
     v = json["ppminpin"]; if(!v.isNull()) {setPpmInPin(v); chpinschanged = true;}
-    v = json["sermode"]; if(!v.isNull()) {setSerMode(v);}
+    v = json["uartmode"]; if(!v.isNull()) {setUartMode(v);}
     v = json["sbrate"]; if(!v.isNull()) {setSbRate(v);}
     v = json["sbininv"]; if(!v.isNull()) {setSbInInv(v); chpinschanged = true;}
     v = json["sboutinv"]; if(!v.isNull()) {setSbOutInv(v);}
@@ -1176,7 +1176,7 @@ public:
     array.add("chout");
     array.add("btch");
     array.add("ppmch");
-    array.add("sbusch");
+    array.add("uartch");
     array.add("quat");
     array.add("btaddr");
     array.add("btrmt");
@@ -1321,7 +1321,7 @@ public:
       enabled == true ? senddataarray |= 1 << 3 : senddataarray &= ~(1 << 3);
       return;
     }
-    else if (strcmp(var, "sbusch") == 0) {
+    else if (strcmp(var, "uartch") == 0) {
       enabled == true ? senddataarray |= 1 << 4 : senddataarray &= ~(1 << 4);
       return;
     }
@@ -1367,7 +1367,7 @@ public:
       }
     }
   }
-  
+
   void setJSONData(DynamicJsonDocument &json)
   {
     // Sends only requested data items
@@ -1443,7 +1443,7 @@ public:
     sendArray(json,1,counter,1,"6choutu16",(void*)chout,(void*)lastchout, sizeof(uint16_t) * 16);
     sendArray(json,2,counter,1,"6btchu16",(void*)btch,(void*)lastbtch, sizeof(uint16_t) * 8);
     sendArray(json,3,counter,1,"6ppmchu16",(void*)ppmch,(void*)lastppmch, sizeof(uint16_t) * 16);
-    sendArray(json,4,counter,1,"6sbuschu16",(void*)sbusch,(void*)lastsbusch, sizeof(uint16_t) * 16);
+    sendArray(json,4,counter,1,"6sbuschu16",(void*)uartch,(void*)lastuartch, sizeof(uint16_t) * 16);
     sendArray(json,5,counter,1,"6quatflt",(void*)quat,(void*)lastquat, sizeof(float) * 4);
     sendArray(json,6,counter,10,"6btaddrchr",(void*)btaddr,(void*)lastbtaddr, sizeof(char) * 18);
     sendArray(json,7,counter,10,"6btrmtchr",(void*)btrmt,(void*)lastbtrmt, sizeof(char) * 18);
@@ -1528,7 +1528,7 @@ protected:
   int8_t buttonpin = 2; // Button Pin
   int8_t ppmoutpin = 10; // PPM Output Pin
   int8_t ppminpin = -1; // PPM Input Pin
-  uint8_t sermode = 0; // Serial Mode (0- Off, 1-SBUS, 2-CRSF)
+  uint8_t uartmode = 0; // Uart Mode (0- Off, 1-SBUS, 2-CRSFIN, 3-CRSFOUT)
   uint8_t sbrate = 80; // SBUS Transmit Freqency
   bool sbininv = true; // SBUS Receieve Inverted
   bool sboutinv = true; // SBUS Transmit Inverted
@@ -1587,8 +1587,8 @@ protected:
   uint16_t lastbtch[8]; // Bluetooth Inputs
   uint16_t ppmch[16]; // PPM Inputs
   uint16_t lastppmch[16]; // PPM Inputs
-  uint16_t sbusch[16]; // SBUS Channels
-  uint16_t lastsbusch[16]; // SBUS Channels
+  uint16_t uartch[16]; // Uart Channels (Sbus/Crsf)
+  uint16_t lastuartch[16]; // Uart Channels (Sbus/Crsf)
   float quat[4]; // Quaternion Output (Tilt / Roll / Pan)
   float lastquat[4]; // Quaternion Output (Tilt / Roll / Pan)
   char btaddr[19]; // Local Bluetooth Address

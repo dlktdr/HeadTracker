@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stddef.h>
+
 #include "crc8.h"
 #include "auxserial.h"
 #include "crsf_protocol.h"
@@ -26,6 +28,12 @@ public:
     bool isLinkUp() const { return _linkIsUp; }
     bool getPassthroughMode() const { return _passthroughMode; }
     void setPassthroughMode(bool val, unsigned int baud = 0);
+
+    float map(float value, float inl, float inh, float outl, float outh) {
+      float rngin = inh-inl;
+      float rngout = outh-outl;
+      return ((value - inl) * rngout / rngin ) + outl;
+    }
 
     // Event Handlers
     void (*onLinkUp)();
@@ -60,3 +68,8 @@ private:
     void packetLinkStatistics(const crsf_header_t *p);
     void packetGps(const crsf_header_t *p);
 };
+
+void CrsfInInit();
+
+extern CrsfSerial *crsf;
+

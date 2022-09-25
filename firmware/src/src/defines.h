@@ -41,6 +41,7 @@
 #define DATA_PERIOD 2            // Multiplier of Serial Period (Live Data Transmission Speed)
 #define SENSOR_PERIOD 4000       // (us) Sensor Reads
 #define CALCULATE_PERIOD 7000    // (us) Channel Calculations
+#define UART_PERIOD 2000         // (us) Update rate of UART
 #define PWM_FREQUENCY 50         // (ms) PWM Period
 #define PAUSE_BEFORE_FLASH 60    // (ms) Time to pause all threads before Flash writing
 
@@ -71,9 +72,9 @@
 #define SERIAL_THREAD_PRIO PRIORITY_LOW
 #define DATA_THREAD_PRIO PRIORITY_LOW
 #define BT_THREAD_PRIO -15
-#define SENSOR_THREAD_PRIO PRIORITY_MED + 1
-#define CALCULATE_THREAD_PRIO PRIORITY_MED - 1
-#define SBUS_THREAD_PRIO PRIORITY_MED - 1
+#define SENSOR_THREAD_PRIO PRIORITY_MED
+#define CALCULATE_THREAD_PRIO PRIORITY_HIGH
+#define UART_THREAD_PRIO PRIORITY_MED + 1
 
 // Threads initialized flags
 extern volatile bool ioThreadRun;
@@ -131,7 +132,7 @@ extern volatile bool sbusTreadRun;
 
 // RTOS Specifics
 #if defined(RTOS_ZEPHYR)
-#include <zephyr.h>
+#include "zephyr.h"
 #define micros() k_cyc_to_us_floor32(k_cycle_get_32())
 #define millis64() k_uptime_get()
 #define micros64() k_cyc_to_us_floor64(k_cycle_get_32())

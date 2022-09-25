@@ -22,14 +22,16 @@
       "titleBar.activeForeground": "#ffffff"
     },
     "files.associations": {
-      "algorithm": "cpp",
-      "charconv": "cpp",
-      "iomanip": "cpp",
-      "xhash": "cpp",
+      "map": "cpp",
+      "format": "cpp",
+      "istream": "cpp",
+      "memory": "cpp",
+      "type_traits": "cpp",
+      "xlocmes": "cpp",
       "xlocmon": "cpp",
       "xlocnum": "cpp",
-      "*.tcc": "cpp",
-      "cstdlib": "cpp"
+      "xloctime": "cpp",
+      "functional": "cpp"
     },
   }
 }

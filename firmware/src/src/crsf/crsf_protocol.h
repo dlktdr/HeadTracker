@@ -4,7 +4,7 @@
 
 #define PACKED __attribute__((packed))
 
-#define CRSF_BAUDRATE           420000
+#define CRSF_BAUDRATE           BAUD420000
 #define CRSF_NUM_CHANNELS 16
 #define CRSF_CHANNEL_VALUE_MIN  172
 #define CRSF_CHANNEL_VALUE_1000 191

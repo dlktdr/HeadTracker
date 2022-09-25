@@ -377,7 +377,7 @@ void AuxSerial_Close()
   serialopened = false;
 }
 
-uint32_t AuxSerial_Write(uint8_t *buffer, uint32_t len)
+uint32_t AuxSerial_Write(const uint8_t *buffer, uint32_t len)
 {
   if (serialTxBuf.getFree() < len) return SERIAL_BUFFER_FULL;
   serialTxBuf.write(buffer, len);

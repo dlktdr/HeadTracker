@@ -211,6 +211,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->cmbPWM2,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbPWM3,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbBTRmtMode,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->cmbUartMode,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
 
     // Menu Actions
     connect(ui->action_Save_to_File,SIGNAL(triggered()),this,SLOT(saveSettings()));
@@ -617,6 +618,8 @@ void MainWindow::updateToUI()
     ui->cmbrllchn->setCurrentIndex(rllCh==-1?0:rllCh);
     ui->cmbtiltchn->setCurrentIndex(tltCh==-1?0:tltCh);
     ui->cmbalertchn->setCurrentIndex(alertCh==-1?0:alertCh);
+    // Uart Mode
+    ui->cmbUartMode->setCurrentIndex(trkset.getUartMode());
     // Analog CH
     ui->cmbA0Ch->setCurrentIndex(a0Ch==-1?0:a0Ch);
     ui->cmbA1Ch->setCurrentIndex(a1Ch==-1?0:a1Ch);
@@ -742,6 +745,9 @@ void MainWindow::updateFromUI()
         trkset.setLpTiltRoll(ui->spnLPTiltRoll2->value());
         trkset.setLpPan(ui->spnLPPan2->value());
     }
+
+    // Uart Mode
+    trkset.setUartMode(ui->cmbUartMode->currentIndex());
 
     // Analog
     trkset.setAn0Gain(ui->spnA0Gain->value());

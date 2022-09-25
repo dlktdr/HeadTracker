@@ -66,7 +66,7 @@ static bool trpOutputEnabled = false;  // Default to disabled T/R/P output
 
 // Input Channel Data
 static uint16_t ppm_in_chans[16];
-static uint16_t sbus_in_chans[16];
+static uint16_t uart_in_chans[16];
 static uint16_t bt_chans[TrackerSettings::BT_CHANNELS];
 static float bt_chansf[TrackerSettings::BT_CHANNELS];
 
@@ -335,27 +335,27 @@ void calculate_Thread()
       }
     }
 
-    // 3) Set all incoming SBUS values
+    // 3) Set all incoming UART values (Sbus/Crsf)
     static float sbustimer = TrackerSettings::SBUS_ACTIVE_TIME;
     static bool lostmsgsent = false;
     static bool recmsgsent = false;
     sbustimer += (float)CALCULATE_PERIOD / 1000000.0;
-    if (SBUS_Read_Data(sbus_in_chans)) {  // Valid SBUS packet received?
+    if (SBUS_Read_Data(uart_in_chans)) {  // Valid SBUS packet received?
       sbustimer = 0;
     }
     // SBUS not received within XX time, disable
     if (sbustimer > TrackerSettings::SBUS_ACTIVE_TIME) {
-      for (int i = 0; i < 16; i++) sbus_in_chans[i] = 0;
+      for (int i = 0; i < 16; i++) uart_in_chans[i] = 0;
       if (!lostmsgsent) {
-        LOGE("SBUS Data Lost");
+        LOGE("Uart(SBUS/CRSF) Data Lost");
         lostmsgsent = true;
       }
       recmsgsent = false;
       // SBUS data still valid, set the channel values to the last SBUS
     } else {
-      for (int i = 0; i < 16; i++) channel_data[i] = sbus_in_chans[i];
+      for (int i = 0; i < 16; i++) channel_data[i] = uart_in_chans[i];
       if (!recmsgsent) {
-        LOGD("SBUS Data Received");
+        LOGD("Uart(SBUS/CRSF) Data Received");
         recmsgsent = true;
       }
       lostmsgsent = false;
@@ -577,7 +577,7 @@ void calculate_Thread()
       // PPM Input Values
       trkset.setDataPpmCh(ppm_in_chans);
       trkset.setDataBtCh(bt_chans);
-      trkset.setDataSbusCh(sbus_in_chans);
+      trkset.setDataUartCh(uart_in_chans);
       trkset.setDataChOut(channel_data);
       trkset.setDataTrpEnabled(trpOutputEnabled);
 

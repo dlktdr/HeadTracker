@@ -25,7 +25,6 @@
 #include "defines.h"
 #include "ringbuffer.h"
 
-
 static bool serialopened = false;
 
 static uint8_t serialDMATx[SERIAL_TX_SIZE];  // DMA Access Buffer Write
@@ -55,11 +54,10 @@ int AuxSerial_Open(uint32_t baudrate, uint16_t prtset, uint8_t inversions)
 void AuxSerial_Close()
 {
   if (!serialopened) return;
-
   serialopened = false;
 }
 
-uint32_t AuxSerial_Write(uint8_t *buffer, uint32_t len)
+uint32_t AuxSerial_Write(const uint8_t* buffer , uint32_t len)
 {
   if (serialTxBuf.getFree() < len) return SERIAL_BUFFER_FULL;
   serialTxBuf.write(buffer, len);
@@ -67,7 +65,7 @@ uint32_t AuxSerial_Write(uint8_t *buffer, uint32_t len)
   return 0;
 }
 
-uint32_t AuxSerial_Read(uint8_t *buffer, uint32_t bufsize)
+uint32_t AuxSerial_Read(uint8_t* buffer, uint32_t bufsize)
 {
   return serialRxBuf.read(buffer, bufsize);
 }

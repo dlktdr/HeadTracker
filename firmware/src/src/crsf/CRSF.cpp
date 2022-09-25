@@ -1,8 +1,33 @@
+#include "crsf.h"
+
 #include <string.h>
 
-#include "CRSF.h"
 #include "defines.h"
+#include "log.h"
 
+CrsfSerial *crsf;
+
+static void crsfShiftyByte(uint8_t b) {
+  //LOGI("CRSF, shifty byte %c", b);
+  }
+
+static void packetChannels() {}
+
+static void packetLinkStatistics(crsfLinkStatistics_t *link) {}
+
+void crsfLinkUp() {}
+
+void crsfLinkDown() {}
+
+void CrsfInInit()
+{
+  crsf = new CrsfSerial;
+  crsf->onLinkUp = &crsfLinkUp;
+  crsf->onLinkDown = &crsfLinkDown;
+  crsf->onShiftyByte = &crsfShiftyByte;
+  crsf->onPacketChannels = &packetChannels;
+  crsf->onPacketLinkStatistics = &packetLinkStatistics;
+}
 
 CrsfSerial::CrsfSerial(uint32_t baud) :
     _crc(0xd5),
@@ -13,17 +38,19 @@ CrsfSerial::CrsfSerial(uint32_t baud) :
     _passthroughMode(false)
 {
   // Crsf serial is 420000 baud for V2
-  AuxSerial_Open(_baud, CONF8E2, 0);
+  AuxSerial_Open(_baud, CONF8N1);
 }
 
 // Call from main loop to update
-void CrsfSerial::loop() { handleSerialIn(); }
+void CrsfSerial::loop() {
+  handleSerialIn();
+}
 
 void CrsfSerial::handleSerialIn()
 {
   while (AuxSerial_Available()) {
     uint8_t b;
-    if(AuxSerial_Read(&b, 1) != 1) continue;
+    if (AuxSerial_Read(&b, 1) != 1) continue;
     _lastReceive = millis();
 
     if (_passthroughMode) {
@@ -146,8 +173,9 @@ void CrsfSerial::packetChannelsPacked(const crsf_header_t *p)
   _channels[14] = ch->ch14;
   _channels[15] = ch->ch15;
 
-  for (unsigned int i = 0; i < CRSF_NUM_CHANNELS; ++i)
+  for (unsigned int i = 0; i < CRSF_NUM_CHANNELS; ++i) {
     _channels[i] = map(_channels[i], CRSF_CHANNEL_VALUE_1000, CRSF_CHANNEL_VALUE_2000, 1000, 2000);
+  }
 
   if (!_linkIsUp && onLinkUp) onLinkUp();
   _linkIsUp = true;
@@ -177,9 +205,9 @@ void CrsfSerial::packetGps(const crsf_header_t *p)
   if (onPacketGps) onPacketGps(&_gpsSensor);
 }
 
-void CrsfSerial::write(uint8_t b) { _port.write(b); }
+void CrsfSerial::write(uint8_t b) { AuxSerial_Write(&b, 1); }
 
-void CrsfSerial::write(const uint8_t *buf, size_t len) { _port.write(buf, len); }
+void CrsfSerial::write(const uint8_t *buf, size_t len) { AuxSerial_Write(buf, len); }
 
 void CrsfSerial::queuePacket(uint8_t addr, uint8_t type, const void *payload, uint8_t len)
 {
@@ -203,9 +231,8 @@ void CrsfSerial::queuePacket(uint8_t addr, uint8_t type, const void *payload, ui
 void CrsfSerial::setPassthroughMode(bool val, unsigned int baud)
 {
   _passthroughMode = val;
-  _port.flush();
-  if (baud != 0)
-    _port.begin(baud);
+  if (baud == 0)
+    AuxSerial_Open(_baud, CONF8N1);
   else
-    _port.begin(_baud);
+    AuxSerial_Open(baud, CONF8N1);
 }

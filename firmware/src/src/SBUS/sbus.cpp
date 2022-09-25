@@ -46,38 +46,29 @@ static constexpr uint8_t FAILSAFE_MASK_ = 0x08;
 static bool failsafe_ = false, lost_frame_ = false, ch17_ = false, ch18_ = false;
 
 volatile bool sbusTreadRun = false;
-volatile bool sbusBuildingData = false; // TODO Replace me with a mutex
+volatile bool sbusBuildingData = false;  // TODO Replace me with a mutex
 volatile bool sbusoutinv = false;
 volatile bool sbusininv = false;
 volatile bool sbusinsof = false;  // Start of Frame
 
 uint8_t localTXBuffer[SBUS_FRAME_LEN];  // Local Buffer
 
-void sbus_Thread()
+void SbusExec()
 {
-  while (1) {
-    if (!sbusTreadRun || pauseForFlash) {
-      rt_sleep_ms(50);
-      continue;
-    }
-    rt_sleep_us((1.0 / (float)trkset.getSbRate()) * 1.0e6);
+  // Has the SBUS inverted status changed
+  if (sbusininv != !trkset.getSbInInv() || sbusoutinv != !trkset.getSbOutInv()) {
+    sbusininv = !trkset.getSbInInv();
+    sbusoutinv = !trkset.getSbOutInv();
 
-    // Has the SBUS inverted status changed
-    if (sbusininv != !trkset.getSbInInv() ||
-        sbusoutinv != !trkset.getSbOutInv()) {
-      sbusininv = !trkset.getSbInInv();
-      sbusoutinv = !trkset.getSbOutInv();
-
-      // Close and re-open port with new settings
-      AuxSerial_Close();
-      uint8_t inversion = 0;
-      if (sbusininv) inversion |= CONFINV_RX;
-      if (sbusoutinv) inversion |= CONFINV_TX;
-      AuxSerial_Open(BAUD100000, CONF8E2, inversion);
-    }
-    // Send SBUS Data
-    SBUS_TX_Start();
+    // Close and re-open port with new settings
+    AuxSerial_Close();
+    uint8_t inversion = 0;
+    if (sbusininv) inversion |= CONFINV_RX;
+    if (sbusoutinv) inversion |= CONFINV_TX;
+    AuxSerial_Open(BAUD100000, CONF8E2, inversion);
   }
+  // Send SBUS Data
+  SBUS_TX_Start();
 }
 
 uint8_t buf_[SBUS_FRAME_LEN];
@@ -195,7 +186,7 @@ void SBUS_TX_Start()
   AuxSerial_Write(localTXBuffer, SBUS_FRAME_LEN);
 }
 
-void sbus_init()
+void SbusInit()
 {
   sbusininv = !trkset.getSbInInv();
   sbusoutinv = !trkset.getSbOutInv();
