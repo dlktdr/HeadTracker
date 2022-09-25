@@ -29,54 +29,82 @@
 
 // Globals
 static uartmodet curmode = UARTDISABLE;
-static int64_t usduration;
+static uint32_t lastRead;
+static bool dataIsValid = false;
+
+// Incoming channels
+uint16_t uart_channels[18];
 
 // Switching modes, don't execute
 volatile bool uartThreadRun = false;
 
 void uart_init()
 {
+  for(int i=0; i < 18; i++) {
+    uart_channels[i] = 0;
+  }
+  lastRead = millis() + TrackerSettings::UART_ACTIVE_TIME; // Start timed out
   uartThreadRun = true;
 }
 
-void uart_Thread()
+void uartRx_Thread()
 {
   while (1) {
-    // Check if bluetooth mode has changed
+    rt_sleep_us(UART_PERIOD);
+    if (!uartThreadRun || pauseForFlash) {
+      continue;
+    }
+
     if(curmode != trkset.getUartMode())
       UartSetMode((uartmodet)trkset.getUartMode());
 
-    usduration = micros64();
+    switch (curmode) {
+      case UARTSBUSIO:
+        // TODO.. mutex here, between this and read the data
+        if(SbusReadChannels(uart_channels)) {
+          lastRead = millis();
+          dataIsValid = true;
+        } else {
+          if(lastRead + TrackerSettings::UART_ACTIVE_TIME < millis())
+            dataIsValid = true;
+          else
+            dataIsValid = false;
+        }
+        break;
+      case UARTCRSFIN:
+        if(crsf) {
+          crsf->loop();
+          dataIsValid = crsf->isLinkUp();
+          if(dataIsValid) {
+            for(int i=0; i < 16; i++)
+              uart_channels[i] = crsf->getChannel(i+1);
+          }
+        }
+        break;
+      default:
+        break;
+    }
+  }
+}
 
+void uartTx_Thread()
+{
+  while(1) {
+    rt_sleep_us((1.0 / (float)trkset.getUartTxRate()) * 1.0e6);
     if (!uartThreadRun || pauseForFlash) {
-      rt_sleep_ms(10);
       continue;
     }
 
     switch (curmode) {
       case UARTSBUSIO:
-        SbusExec();
+        SbusTx();
         break;
-      case UARTCRSFIN:
-        if(crsf)
-          crsf->loop();
+      case UARTCRSFOUT:
+        // Todo send a CRSF packet
         break;
       default:
         break;
     }
-
-    // Adjust sleep for a more accurate period
-    /*usduration = micros64() - usduration;
-    int64_t delay = UART_PERIOD;
-    if (delay - usduration <
-        delay * 0.7) {  // Took a long time. Will crash if sleep is too short
-      rt_sleep_us(delay);
-    } else {
-      rt_sleep_us(delay - usduration);
-    }
-
-    rt_sleep_us((1.0 / (float)trkset.getSbRate()) * 1.0e6);*/
-    rt_sleep_us(UART_PERIOD);
   }
 }
 
@@ -85,22 +113,9 @@ void UartSetMode(uartmodet mode)
   // Requested same mode, just return
   if (mode == curmode) return;
 
-  // Shut Down
-  /*switch (curmode) {
-    case :
-      BTHeadStop();
-      break;
-    case BTPARARMT:
-      BTRmtStop();
-      btscanonly = false;
-      break;
-    case BTSCANONLY:
-      BTRmtStop();
-      btscanonly = false;
-      break;
-    default:
-      break;
-  }*/
+  for(int i=0; i < 18; i++) {
+    uart_channels[i] = 0;
+  }
 
   // Start Up
   switch (mode) {
@@ -124,37 +139,40 @@ uartmodet UartGetMode() { return curmode; }
 
 bool UartGetConnected()
 {
-  if (curmode == UARTDISABLE) return false;
-  return true;
-  //return connected;
-}
-
-uint16_t UartGetChannel(int chno)
-{
   switch (curmode) {
     case UARTSBUSIO:
-      //return SbusGetChannel(chno);
-      break;
     case UARTCRSFIN:
-      //return BTRmtGetChannel(chno);
+      if(dataIsValid)
+        return true;
       break;
-    case BTSCANONLY:
-      return 0;
     default:
       break;
   }
-
-  return 0;
+  return false;
 }
 
-void UartSetChannel(int channel, const uint16_t value)
+bool UartGetChannels(uint16_t channels[16])
+{
+  for(int i=0; i < 16; i++) {
+    if(dataIsValid) {
+      channels[i] = uart_channels[i];
+    } else {
+      channels[i] = 0;
+    }
+  }
+
+  // TODO: Mutex here
+  return dataIsValid;
+}
+
+void UartSetChannels(uint16_t channels[16])
 {
   switch (curmode) {
     case UARTSBUSIO:
-      //BTHeadSetChannel(channel, value);
+      SbusWriteChannels(channels);
       break;
     case UARTCRSFOUT:
-//      BTRmtSetChannel(channel, value);
+
       break;
     default:
       break;

@@ -7,9 +7,10 @@
 
 CrsfSerial *crsf;
 
-static void crsfShiftyByte(uint8_t b) {
+static void crsfShiftyByte(uint8_t b)
+{
   //LOGI("CRSF, shifty byte %c", b);
-  }
+}
 
 static void packetChannels() {}
 

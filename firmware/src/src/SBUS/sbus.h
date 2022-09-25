@@ -21,9 +21,8 @@
 
 #include "defines.h"
 
-void SBUS_TX_BuildData(uint16_t ch_[16]);
-void SBUS_TX_Start();
 void SbusInit();
-void SbusExec();
-bool SBUS_Read_Data(uint16_t ch_[16]);
-void SBUSIn_SetInverted(bool sbusininv);
+void SbusTx();
+void SbusRx();
+bool SbusReadChannels(uint16_t ch_[16]);
+void SbusWriteChannels(uint16_t ch_[16]);

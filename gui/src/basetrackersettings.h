@@ -55,7 +55,7 @@ public:
   static constexpr float RESET_ON_TILT_TIME = 1.5;
   static constexpr float RESET_ON_TILT_AFTER = 1;
   static constexpr float RECENTER_PULSE_DURATION = 0.5;
-  static constexpr float SBUS_ACTIVE_TIME = 0.1;
+  static constexpr float UART_ACTIVE_TIME = 0.1;
   static constexpr float PPM_MIN_FRAMESYNC = 3000;
   static constexpr float PPM_MIN_FRAME = 6666;
   static constexpr float PPM_MAX_FRAME = 40000;
@@ -128,7 +128,7 @@ public:
     _setting["ppmoutpin"] = 10;
     _setting["ppminpin"] = -1;
     _setting["uartmode"] = 0;
-    _setting["sbrate"] = 80;
+    _setting["uarttxrate"] = 80;
     _setting["sbininv"] = true;
     _setting["sboutinv"] = true;
     _setting["btmode"] = 0;
@@ -994,12 +994,12 @@ public:
   }
 
   // SBUS Transmit Freqency
-  uint8_t getSbRate() {
-    return _setting["sbrate"].toUInt();
+  uint8_t getUartTxRate() {
+    return _setting["uarttxrate"].toUInt();
   }
-  bool setSbRate(uint8_t val=80) {
+  bool setUartTxRate(uint8_t val=80) {
     if(val >= 30 && val <= 140) {
-      _setting["sbrate"] = val;
+      _setting["uarttxrate"] = val;
       return true;
     }
     return false;

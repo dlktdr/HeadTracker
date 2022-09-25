@@ -72,7 +72,8 @@ K_THREAD_DEFINE(sensor_Thread_id, 4096, sensor_Thread, NULL, NULL, NULL, SENSOR_
                 K_FP_REGS, 500);
 K_THREAD_DEFINE(calculate_Thread_id, 4096, calculate_Thread, NULL, NULL, NULL,
                 CALCULATE_THREAD_PRIO, K_FP_REGS, 1000);
-K_THREAD_DEFINE(uart_Thread_ID, 1024, uart_Thread, NULL, NULL, NULL, UART_THREAD_PRIO, 0, 1000);
+K_THREAD_DEFINE(uartTx_Thread_ID, 1024, uartTx_Thread, NULL, NULL, NULL, UARTTX_THREAD_PRIO, 0, 1000);
+K_THREAD_DEFINE(uartRx_Thread_ID, 1024, uartRx_Thread, NULL, NULL, NULL, UARTRX_THREAD_PRIO, 0, 1000);
 
 #elif defined(RTOS_FREERTOS)
 #error "TODO... Add tasks for FreeRTOS"

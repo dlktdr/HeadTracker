@@ -595,7 +595,7 @@ void MainWindow::updateToUI()
     ui->spnA3Gain->setValue(trkset.getAn3Gain());
     ui->spnA3Off->setValue(trkset.getAn3Off());
 
-    ui->spnSBUSRate->setValue(trkset.getSbRate());
+    ui->spnSBUSRate->setValue(trkset.getUartTxRate());
 
     int panCh = trkset.getPanCh();
     int rllCh = trkset.getRllCh();
@@ -857,7 +857,7 @@ void MainWindow::updateFromUI()
     trkset.setRstOnTlt(ui->chkRstOnTlt->isChecked());
 
     trkset.setSbOutInv(ui->chkSbusOutInv->isChecked());
-    trkset.setSbRate(ui->spnSBUSRate->value());
+    trkset.setUartTxRate(ui->spnSBUSRate->value());
 
     uint16_t setframelen = ui->spnPPMFrameLen->value() * 1000;
     trkset.setPpmFrame(setframelen);

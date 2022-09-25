@@ -21,7 +21,7 @@
 #include <zephyr.h>
 
 #include "MadgwickAHRS/MadgwickAHRS.h"
-#include "SBUS/sbus.h"
+#include "uart_mode.h"
 #include "analog.h"
 #include "ble.h"
 #include "filters.h"
@@ -336,16 +336,10 @@ void calculate_Thread()
     }
 
     // 3) Set all incoming UART values (Sbus/Crsf)
-    static float sbustimer = TrackerSettings::SBUS_ACTIVE_TIME;
+    bool isUartValid = UartGetChannels(uart_in_chans);
     static bool lostmsgsent = false;
     static bool recmsgsent = false;
-    sbustimer += (float)CALCULATE_PERIOD / 1000000.0;
-    if (SBUS_Read_Data(uart_in_chans)) {  // Valid SBUS packet received?
-      sbustimer = 0;
-    }
-    // SBUS not received within XX time, disable
-    if (sbustimer > TrackerSettings::SBUS_ACTIVE_TIME) {
-      for (int i = 0; i < 16; i++) uart_in_chans[i] = 0;
+    if (!isUartValid) {
       if (!lostmsgsent) {
         LOGE("Uart(SBUS/CRSF) Data Lost");
         lostmsgsent = true;
@@ -353,7 +347,9 @@ void calculate_Thread()
       recmsgsent = false;
       // SBUS data still valid, set the channel values to the last SBUS
     } else {
-      for (int i = 0; i < 16; i++) channel_data[i] = uart_in_chans[i];
+      for (int i = 0; i < 16; i++) {
+        channel_data[i] = uart_in_chans[i];
+      }
       if (!recmsgsent) {
         LOGD("Uart(SBUS/CRSF) Data Received");
         recmsgsent = true;
@@ -504,16 +500,16 @@ void calculate_Thread()
       BTSetChannel(i, channel_data[i]);
     }
 
-    // 12) Set all SBUS output channels, if disabled set to center
-    uint16_t sbus_data[16];
+    // 12) Set all UART output channels, if disabled set to center
+    uint16_t uart_data[16];
     for (int i = 0; i < 16; i++) {
       uint16_t sbusout = channel_data[i];
       if (sbusout == 0) sbusout = TrackerSettings::PPM_CENTER;
-      sbus_data[i] = (static_cast<float>(sbusout) - TrackerSettings::PPM_CENTER) *
+      uart_data[i] = (static_cast<float>(sbusout) - TrackerSettings::PPM_CENTER) *
                          TrackerSettings::SBUS_SCALE +
                      TrackerSettings::SBUS_CENTER;
     }
-    SBUS_TX_BuildData(sbus_data);
+    UartSetChannels(uart_data);
 
     // 13) Set PWM Channels
     int8_t pwmchs[4] = {trkset.getPwm0(), trkset.getPwm1(), trkset.getPwm2(), trkset.getPwm3()};

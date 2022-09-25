@@ -31,6 +31,8 @@
 
 #define SBUS_FRAME_LEN 25
 
+static void SBUS_TX_Start();
+
 static constexpr uint8_t HEADER_ = 0x0F;
 static constexpr uint8_t FOOTER_ = 0x00;
 static constexpr uint8_t FOOTER2_ = 0x04;
@@ -53,7 +55,7 @@ volatile bool sbusinsof = false;  // Start of Frame
 
 uint8_t localTXBuffer[SBUS_FRAME_LEN];  // Local Buffer
 
-void SbusExec()
+void SbusTx()
 {
   // Has the SBUS inverted status changed
   if (sbusininv != !trkset.getSbInInv() || sbusoutinv != !trkset.getSbOutInv()) {
@@ -130,7 +132,7 @@ uint64_t bytesread = 0;
  * Copyright (c) 2021 Bolder Flight Systems Inc
  */
 
-bool SBUS_Read_Data(uint16_t ch_[16])
+bool SbusReadChannels(uint16_t ch_[16])
 {
   bool newdata = false;
   while (SbusRx_Parse()) {  // Get most recent data if more than 1 packet came in
@@ -206,7 +208,7 @@ void SbusInit()
  * Copyright (c) 2021 Bolder Flight Systems Inc
  */
 
-void SBUS_TX_BuildData(uint16_t ch_[16])
+void SbusWriteChannels(uint16_t ch_[16])
 {
   sbusBuildingData = true;
   uint8_t *buf_ = localTXBuffer;

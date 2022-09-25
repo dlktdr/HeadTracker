@@ -59,7 +59,7 @@ public:
   static constexpr float RESET_ON_TILT_TIME = 1.5;
   static constexpr float RESET_ON_TILT_AFTER = 1;
   static constexpr float RECENTER_PULSE_DURATION = 0.5;
-  static constexpr float SBUS_ACTIVE_TIME = 0.1;
+  static constexpr float UART_ACTIVE_TIME = 0.1;
   static constexpr float PPM_MIN_FRAMESYNC = 3000;
   static constexpr float PPM_MIN_FRAME = 6666;
   static constexpr float PPM_MAX_FRAME = 40000;
@@ -734,10 +734,10 @@ public:
   }
 
   // SBUS Transmit Freqency
-  inline const uint8_t& getSbRate() {return sbrate;}
-  bool setSbRate(uint8_t val=80) {
+  inline const uint8_t& getUartTxRate() {return uarttxrate;}
+  bool setUartTxRate(uint8_t val=80) {
     if(val >= 30 && val <= 140) {
-      sbrate = val;
+      uarttxrate = val;
       return true;
     }
     return false;
@@ -1034,7 +1034,7 @@ public:
     json["ppmoutpin"] = ppmoutpin;
     json["ppminpin"] = ppminpin;
     json["uartmode"] = uartmode;
-    json["sbrate"] = sbrate;
+    json["uarttxrate"] = uarttxrate;
     json["sbininv"] = sbininv;
     json["sboutinv"] = sboutinv;
     json["btmode"] = btmode;
@@ -1119,7 +1119,7 @@ public:
     v = json["ppmoutpin"]; if(!v.isNull()) {setPpmOutPin(v); chpinschanged = true;}
     v = json["ppminpin"]; if(!v.isNull()) {setPpmInPin(v); chpinschanged = true;}
     v = json["uartmode"]; if(!v.isNull()) {setUartMode(v);}
-    v = json["sbrate"]; if(!v.isNull()) {setSbRate(v);}
+    v = json["uarttxrate"]; if(!v.isNull()) {setUartTxRate(v);}
     v = json["sbininv"]; if(!v.isNull()) {setSbInInv(v); chpinschanged = true;}
     v = json["sboutinv"]; if(!v.isNull()) {setSbOutInv(v);}
     v = json["btmode"]; if(!v.isNull()) {setBtMode(v);}
@@ -1529,7 +1529,7 @@ protected:
   int8_t ppmoutpin = 10; // PPM Output Pin
   int8_t ppminpin = -1; // PPM Input Pin
   uint8_t uartmode = 0; // Uart Mode (0- Off, 1-SBUS, 2-CRSFIN, 3-CRSFOUT)
-  uint8_t sbrate = 80; // SBUS Transmit Freqency
+  uint8_t uarttxrate = 80; // SBUS Transmit Freqency
   bool sbininv = true; // SBUS Receieve Inverted
   bool sboutinv = true; // SBUS Transmit Inverted
   uint8_t btmode = 0; // Bluetooth Mode (0-Off, 1- Head, 2-Receive, 3-Scanner)
