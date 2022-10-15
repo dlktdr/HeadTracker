@@ -154,14 +154,13 @@ void io_Thread()
 #endif
 
 #if defined(HAS_WS2812)
-    const struct device *strip = DEVICE_DT_GET(DT_NODELABEL(led_strip0));
-    //strip = device_get_binding(DT_NODELABEL(led_strip0));
+    const struct device *strip = DEVICE_DT_GET(DT_NODELABEL(led_strip));
+    //strip = device_get_binding(DT_NODELABEL(led_strip));
 	  if (strip) {
       struct led_rgb pixel;
       pixel.b = curcolor & 0xFF;
       pixel.g = (curcolor >> 8) & 0xFF;
       pixel.r = (curcolor >> 16) & 0xFF;
-      pixel.scratch = 0;
       led_strip_update_rgb(strip, &pixel, 1);
     }
 #endif
@@ -222,7 +221,9 @@ void io_init()
   pinMode(IO_I2C_PU, GPIO_OUTPUT);
   digitalWrite(IO_VDDENA, 1);
   digitalWrite(IO_I2C_PU, 1);
-#else
+#endif
+
+#if defined(HAS_CENTERBTN)
   pinMode(IO_CENTER_BTN, INPUT_PULLUP);
 #endif
 
