@@ -14,7 +14,7 @@ BoardNano33BLE::BoardNano33BLE(TrackerSettings *ts)
     rxParamsTimer.setSingleShot(true);
     connect(bleCalibratorDialog,&CalibrateBLE::calibrationSave,this,&BoardNano33BLE::calibrationComplete);
     connect(bleCalibratorDialog,&CalibrateBLE::calibrationCancel,this, &BoardNano33BLE::calibrationCancel);
-    connect(trkset,SIGNAL(requestedDataItemChanged()),this,SLOT(reqDataItemChanged()));
+
     reqDataItemsChanged.setSingleShot(true);
     reqDataItemsChanged.setInterval(200);
     connect(&reqDataItemsChanged,SIGNAL(timeout()),this,SLOT(changeDataItems()));
@@ -242,8 +242,6 @@ void BoardNano33BLE::stopData()
 
 void BoardNano33BLE::allowAccessChanged(bool acc)
 {
-    Q_UNUSED(acc);
-
     // Access was just allowed/disallowed to this class
     // reset everything
     calmsgshowed = false;
@@ -258,7 +256,11 @@ void BoardNano33BLE::allowAccessChanged(bool acc)
     lastjson.clear();
     imheretimout.stop();
     updatesettingstmr.stop();
-    rxParamsTimer.stop();
+    rxParamsTimer.stop();    
+    if(acc)
+        connect(trkset,SIGNAL(requestedDataItemChanged()),this,SLOT(reqDataItemChanged()));
+    else
+        disconnect(trkset, SIGNAL(requestedDataItemChanged()), 0, 0);
 }
 
 void BoardNano33BLE::disconnected()

@@ -94,7 +94,7 @@ MainWindow::MainWindow(QWidget *parent)
         connect(brd,SIGNAL(serialTxReady()), this, SLOT(serialTxReady()));
         connect(brd,SIGNAL(addToLog(QString,int)),this,SLOT(addToLog(QString,int)));
         connect(brd,SIGNAL(needsCalibration()),this,SLOT(needsCalibration()));
-        connect(brd,SIGNAL(boardDiscovered(BoardType *)),this,SLOT(boardDiscovered(BoardType *)));
+        connect(brd,SIGNAL(boardDiscovered(BoardType*)),this,SLOT(boardDiscovered(BoardType*)));
         connect(brd,SIGNAL(statusMessage(QString,int)),this,SLOT(statusMessage(QString,int)));
     }
 
