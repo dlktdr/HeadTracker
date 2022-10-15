@@ -1,9 +1,18 @@
-#include "io.h"
-
 #include <zephyr.h>
+
+#include "io.h"
+#include "defines.h"
+
+#if defined(HAS_WS2812)
+#include <device.h>
+#include <drivers/led_strip.h>
+#include <drivers/spi.h>
+
+#endif
 
 #include "soc_flash.h"
 #include "trackersettings.h"
+#include "log.h"
 
 K_SEM_DEFINE(button_sem, 0, 1);
 K_SEM_DEFINE(lngbutton_sem, 0, 1);
@@ -22,10 +31,6 @@ typedef struct {
   uint16_t time = 0;
 } rgb_s;
 rgb_s led_sequence[LED_MAX_SEQUENCE_COUNT];
-
-//                  0 1  2  3  4  5  6  7  8  9  10 11 12 13
-int dpintoport[] = {1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0};
-int dpintopin[] = {3, 10, 11, 12, 15, 13, 14, 23, 21, 27, 2, 1, 8, 13};
 
 // Reset Button Pressed Flag on Read
 bool wasButtonPressed()
@@ -50,15 +55,18 @@ void setLEDFlag(uint32_t ledMode) { _ledmode |= ledMode; }
 
 void clearLEDFlag(uint32_t ledMode) { _ledmode &= ~ledMode; }
 
-void clearAllFlags() { _ledmode = 0; }
+void clearAllLEDFlags() { _ledmode = 0; }
 
 // Any IO Related Tasks, e.g. button, leds
 void io_Thread()
 {
-  int pressedtime = 0;
+#ifdef HAS_NOTIFYLED
   bool led_is_on = false;
   int led_on_time = 25;
   int led_off_time = 200;
+#endif
+
+  int pressedtime = 0;
   int rgb_sequence_no = 0;
   uint32_t rgb_timer = millis();
   uint32_t _counter = 0;
@@ -67,6 +75,7 @@ void io_Thread()
     rt_sleep_ms(IO_PERIOD);
     if (!ioThreadRun || pauseForFlash) continue;
 
+#if defined(PCB_NANO33BLE)
     // LEDS
     if (_ledmode & LED_GYROCAL) {
       led_on_time = 200;
@@ -85,9 +94,9 @@ void io_Thread()
     if ((!led_is_on && (_counter % led_off_time == 0)) ||
         (led_is_on && (_counter % led_on_time == 0))) {
       led_is_on = !led_is_on;
-      digitalWrite(LED_BUILTIN, led_is_on);
+      digitalWrite(IO_LED, led_is_on);
     }
-
+#endif
     // Bluetooth Connected - Blue light on solid
     if (_ledmode & LED_BTCONNECTED) {
       led_sequence[0].RGB = RGB_BLUE;
@@ -128,19 +137,33 @@ void io_Thread()
     uint32_t curcolor = led_sequence[rgb_sequence_no].RGB;
     if (led_sequence[rgb_sequence_no].time == 0) curcolor = 0;
 
+#if defined(HAS_3DIODE_RGB)
     // TODO - Replace me with PWM control
     if (curcolor & RGB_RED)
-      digitalWrite(LEDR, LOW);
+      digitalWrite(IO_LEDR, 0);
     else
-      digitalWrite(LEDR, HIGH);
+      digitalWrite(IO_LEDR, 1);
     if (curcolor & RGB_GREEN)
-      digitalWrite(LEDG, LOW);
+      digitalWrite(IO_LEDG, 0);
     else
-      digitalWrite(LEDG, HIGH);
+      digitalWrite(IO_LEDG, 1);
     if (curcolor & RGB_BLUE)
-      digitalWrite(LEDB, LOW);
+      digitalWrite(IO_LEDB, 0);
     else
-      digitalWrite(LEDB, HIGH);
+      digitalWrite(IO_LEDB, 1);
+#endif
+
+#if defined(HAS_WS2812)
+    const struct device *strip = DEVICE_DT_GET(DT_NODELABEL(led_strip));
+    //strip = device_get_binding(DT_NODELABEL(led_strip));
+	  if (strip) {
+      struct led_rgb pixel;
+      pixel.b = curcolor & 0xFF;
+      pixel.g = (curcolor >> 8) & 0xFF;
+      pixel.r = (curcolor >> 16) & 0xFF;
+      led_strip_update_rgb(strip, &pixel, 1);
+    }
+#endif
 
     if (millis() > rgb_timer + led_sequence[rgb_sequence_no].time) {
       if (rgb_sequence_no < LED_MAX_SEQUENCE_COUNT - 1 && led_sequence[rgb_sequence_no].time != 0)
@@ -159,8 +182,14 @@ void io_Thread()
     // Make sure button pin is enabled
     if (butpin < 1 || butpin > 13) continue;
 
-    pinMode(D_TO_32X_PIN(butpin), INPUT_PULLUP);
-    bool buttonDown = digitalRead(D_TO_32X_PIN(butpin)) == 0;
+#if defined(PCB_NANO33BLE)
+    pinMode(D_TO_ENUM(butpin), INPUT_PULLUP);
+    bool buttonDown = digitalRead(D_TO_ENUM(butpin)) == 0;
+#else
+    pinMode(IO_CENTER_BTN, INPUT_PULLUP);
+    bool buttonDown = digitalRead(IO_CENTER_BTN) == 0;
+#endif
+
 
     // Button pressed down
     if (buttonDown && !lastButtonDown) {
@@ -184,35 +213,69 @@ void io_Thread()
 
 void io_init()
 {
-  if (ioThreadRun) return;
   gpios[0] = device_get_binding("GPIO_0");
   gpios[1] = device_get_binding("GPIO_1");
 
-  pinMode(ARDUINO_INTERNAL_VDD_ENV_ENABLE, GPIO_OUTPUT);
-  pinMode(ARDUINO_INTERNAL_I2C_PULLUP, GPIO_OUTPUT);
-  digitalWrite(ARDUINO_INTERNAL_VDD_ENV_ENABLE, HIGH);
-  digitalWrite(ARDUINO_INTERNAL_I2C_PULLUP, HIGH);
+#if defined(PCB_NANO33BLE)
+  pinMode(IO_VDDENA, GPIO_OUTPUT);
+  pinMode(IO_I2C_PU, GPIO_OUTPUT);
+  digitalWrite(IO_VDDENA, 1);
+  digitalWrite(IO_I2C_PU, 1);
+#endif
 
-  // Pins used to check timing
-  pinMode(ARDUINO_A0, GPIO_OUTPUT);  // PWM 0
-  pinMode(ARDUINO_A1, GPIO_OUTPUT);  // PWM 1
-  pinMode(ARDUINO_A2, GPIO_OUTPUT);  // PWM 2
-  pinMode(ARDUINO_A3, GPIO_OUTPUT);  // PWM 3
-  pinMode(ARDUINO_A4, GPIO_INPUT);   // Analog input
-  pinMode(ARDUINO_A5, GPIO_INPUT);   // Analog input
-  pinMode(ARDUINO_A6, GPIO_INPUT);   // Analog input
-  pinMode(ARDUINO_A7, GPIO_INPUT);   // Analog input
+#if defined(HAS_CENTERBTN)
+  pinMode(IO_CENTER_BTN, INPUT_PULLUP);
+#endif
 
-  // Leds
-  pinMode(LED_BUILTIN, GPIO_OUTPUT);
-  pinMode(ARDUINO_LEDPWR, GPIO_OUTPUT);
-  pinMode(LEDR, GPIO_OUTPUT);
-  pinMode(LEDG, GPIO_OUTPUT);
-  pinMode(LEDB, GPIO_OUTPUT);
-  digitalWrite(ARDUINO_LEDPWR, HIGH);
-  digitalWrite(LEDR, HIGH);
-  digitalWrite(LEDG, HIGH);
-  digitalWrite(LEDB, HIGH);
+#if defined(HAS_BUZZER)
+  pinMode(IO_BUZZ, GPIO_OUTPUT);
+  // Startup beep, beep
+  digitalWrite(IO_BUZZ, 1);
+  k_busy_wait(100000);
+  digitalWrite(IO_BUZZ, 0);
+  k_busy_wait(100000);
+  digitalWrite(IO_BUZZ, 1);
+  k_busy_wait(100000);
+  digitalWrite(IO_BUZZ, 0);
+#endif
+
+#if defined(HAS_3DIODE_RGB)
+  pinMode(IO_LEDR, GPIO_OUTPUT);
+  pinMode(IO_LEDG, GPIO_OUTPUT);
+  pinMode(IO_LEDB, GPIO_OUTPUT);
+  digitalWrite(IO_LEDR, 1);
+  digitalWrite(IO_LEDG, 1);
+  digitalWrite(IO_LEDB, 1);
+#endif
+
+#if defined(HAS_POWERLED)
+  pinMode(IO_PWR, GPIO_OUTPUT);
+  digitalWrite(IO_PWR, 1);
+#endif
+
+#if defined(HAS_NOTIFYLED)
+  pinMode(IO_LED, GPIO_OUTPUT);
+#endif
+
+#if defined(HAS_PWMOUTPUTS)
+  pinMode(IO_PWM0, GPIO_OUTPUT);  // PWM 0
+  pinMode(IO_PWM1, GPIO_OUTPUT);  // PWM 1
+  pinMode(IO_PWM2, GPIO_OUTPUT);  // PWM 2
+  pinMode(IO_PWM3, GPIO_OUTPUT);  // PWM 3
+#endif
+
+#if defined(AN0)
+  pinMode(IO_AN0, GPIO_INPUT);
+#endif
+#if defined(AN1)
+  pinMode(IO_AN1, GPIO_INPUT);
+#endif
+#if defined(AN2)
+  pinMode(IO_AN2, GPIO_INPUT);
+#endif
+#if defined(AN3)
+  pinMode(IO_AN3, GPIO_INPUT);
+#endif
 
   ioThreadRun = true;
 }

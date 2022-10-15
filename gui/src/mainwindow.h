@@ -80,6 +80,7 @@ private:
     volatile bool sending;
 
     BoardNano33BLE *nano33ble;
+    BoardNano33BLE *dtqsys;
     BoardBNO055 *bno055;
     BoardType *currentboard;
     bool channelViewerOpen=false;

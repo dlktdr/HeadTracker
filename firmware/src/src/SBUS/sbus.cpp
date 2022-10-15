@@ -141,12 +141,6 @@ uint64_t bytesread = 0;
 
 bool SBUS_Read_Data(uint16_t ch_[16])
 {
-#ifdef DEBUG_SBUS
-  static bool toggle = false;
-  pinMode(D_TO_32X_PIN(8), GPIO_OUTPUT);
-  digitalWrite(D_TO_32X_PIN(8), toggle);
-  toggle = !toggle;
-#endif
   bool newdata = false;
   while (SbusRx_Parse()) {  // Get most recent data if more than 1 packet came in
     newdata = true;
@@ -177,10 +171,6 @@ bool SBUS_Read_Data(uint16_t ch_[16])
 
 #ifdef DEBUG_SBUS
     static bool toggle = false;
-    pinMode(D_TO_32X_PIN(7), GPIO_OUTPUT);
-    digitalWrite(D_TO_32X_PIN(7), toggle);
-    toggle = !toggle;
-
     if (sbusrate++ == 0) {
       sbstarttime = millis64();  // Store start time
       bytesread = bytecount;

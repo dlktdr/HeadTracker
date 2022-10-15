@@ -95,8 +95,17 @@ void PpmIn_setPin(int pinNum)
   // Same pin, just quit
   if (pinNum == setPin) return;
 
+#if defined(PCB_NANO33BLE) // Nano33, can pick D2-D12
   int pin = D_TO_PIN(pinNum);
   int port = D_TO_PORT(pinNum);
+  int setPin_pin = D_TO_PIN(setPin);
+  int setPin_port = D_TO_PORT(setPin);
+#else
+  int pin = PIN_TO_NRFPIN(PIN_NAME_TO_NUM(IO_PPMIN));
+  int port = PIN_TO_NRFPORT(PIN_NAME_TO_NUM(IO_PPMIN));
+  int setPin_pin = pin;
+  int setPin_port = port;
+#endif
 
   // Stop Interrupts
   uint32_t key = irq_lock();
@@ -116,13 +125,13 @@ void PpmIn_setPin(int pinNum)
     irq_disable(GPIOTE_IRQn);
 
     // Set current pin back floating
-    if (D_TO_PORT(setPin) == 0)
-      NRF_P0->PIN_CNF[D_TO_PIN(setPin)] =
-          (NRF_P0->PIN_CNF[D_TO_PIN(setPin)] & ~GPIO_PIN_CNF_PULL_Msk) |
+    if (setPin_port == 0)
+      NRF_P0->PIN_CNF[setPin_pin] =
+          (NRF_P0->PIN_CNF[setPin_pin] & ~GPIO_PIN_CNF_PULL_Msk) |
           GPIO_PIN_CNF_PULL_Disabled << GPIO_PIN_CNF_PULL_Pos;
-    else if (D_TO_PORT(setPin) == 1)
-      NRF_P1->PIN_CNF[D_TO_PIN(setPin)] =
-          (NRF_P1->PIN_CNF[D_TO_PIN(setPin)] & ~GPIO_PIN_CNF_PULL_Msk) |
+    else if (setPin_port == 1)
+      NRF_P1->PIN_CNF[setPin_pin] =
+          (NRF_P1->PIN_CNF[setPin_pin] & ~GPIO_PIN_CNF_PULL_Msk) |
           GPIO_PIN_CNF_PULL_Disabled << GPIO_PIN_CNF_PULL_Pos;
 
     // Set pin num and started flag

@@ -136,13 +136,22 @@ void PpmOut_setPin(int pinNum)
   // Same pin, just quit
   if (pinNum == setPin) return;
 
+#if defined(PCB_NANO33BLE) // Nano33, can pick D2-D12
+  int pin = D_TO_PIN(pinNum);
+  int port = D_TO_PORT(pinNum);
+  int setPin_pin = D_TO_PIN(setPin);
+  int setPin_port = D_TO_PORT(setPin);
+#else
+  int pin = PIN_TO_NRFPIN(PIN_NAME_TO_NUM(IO_PPMOUT));
+  int port = PIN_TO_NRFPORT(PIN_NAME_TO_NUM(IO_PPMOUT));
+  int setPin_pin = pin;
+  int setPin_port = port;
+#endif
+
   if (!ppmoutstarted) {
     resetChannels();
     buildChannels();
   }
-
-  int pin = D_TO_PIN(pinNum);
-  int port = D_TO_PORT(pinNum);
 
   // Start by disabling
 
@@ -167,13 +176,13 @@ void PpmOut_setPin(int pinNum)
 
   // Set current pin back to low drive  , if enabled
   if (setPin > 0) {
-    if (D_TO_PORT(setPin) == 0)
-      NRF_P0->PIN_CNF[D_TO_PIN(setPin)] =
-          (NRF_P0->PIN_CNF[D_TO_PIN(setPin)] & ~GPIO_PIN_CNF_DRIVE_Msk) |
+    if (setPin_port == 0)
+      NRF_P0->PIN_CNF[setPin_pin] =
+          (NRF_P0->PIN_CNF[setPin_pin] & ~GPIO_PIN_CNF_DRIVE_Msk) |
           GPIO_PIN_CNF_DRIVE_S0S1 << GPIO_PIN_CNF_DRIVE_Pos;
-    else if (D_TO_PORT(setPin) == 1)
-      NRF_P1->PIN_CNF[D_TO_PIN(setPin)] =
-          (NRF_P1->PIN_CNF[D_TO_PIN(setPin)] & ~GPIO_PIN_CNF_DRIVE_Msk) |
+    else if (setPin_port == 1)
+      NRF_P1->PIN_CNF[setPin_pin] =
+          (NRF_P1->PIN_CNF[setPin_pin] & ~GPIO_PIN_CNF_DRIVE_Msk) |
           GPIO_PIN_CNF_DRIVE_S0S1 << GPIO_PIN_CNF_DRIVE_Pos;
   }
 

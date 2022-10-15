@@ -35,15 +35,25 @@ static bool serialopened = false;
 #define SERIAL_UARTE CONCAT(NRF_UARTE, SERIAL_UARTE_CH)
 #define SERIAL_UARTE_IRQ CONCAT(CONCAT(UARTE, SERIAL_UARTE_CH), _IRQn)
 
-// Temp Pin, They are not broken out on the NANO33BLE
-#define SERIALOUT_TPIN 4
-#define SERIALOUT_TPORT 1
+// Aux Serial Output Pins
+#define AUXSERIALIN_PIN  PIN_TO_NRFPIN(PinNumber[IO_RX])
+#define AUXSERIALIN_PORT PIN_TO_NRFPORT(PinNumber[IO_RX])
 
-// Pin D5(1.13) + D6(1.14) must be soldered together for inverted SBUS input
-#define SERIALIN_TPIN_OUT 13
-#define SERIALIN_TPORT_OUT 1
-#define SERIALIN_TPIN_IN 14  // This is the actual port the UARTE RX input is hooked up to.
-#define SERIALIN_TPORT_IN 1
+// Aux Serial Output Pins
+#define AUXSERIALOUT_PIN  PIN_TO_NRFPIN(PinNumber[IO_TX])
+#define AUXSERIALOUT_PORT PIN_TO_NRFPORT(PinNumber[IO_TX])
+
+// Temp Pin, They are not broken out on the NANO33BLE
+#define SERIALOUT_TPIN  PIN_TO_NRFPIN(PinNumber[IO_TXINV])
+#define SERIALOUT_TPORT PIN_TO_NRFPORT(PinNumber[IO_TXINV])
+
+// Pin RXINVO + RXINVI must be soldered together for inverted SBUS input
+#define SERIALIN_TPIN_OUT  PIN_TO_NRFPIN(PinNumber[IO_RXINVO])
+#define SERIALIN_TPORT_OUT PIN_TO_NRFPORT(PinNumber[IO_RXINVO])
+
+// This is the pin the UARTE RX input is hooked up to.
+#define SERIALIN_TPIN_IN  PIN_TO_NRFPIN(PinNumber[IO_RXINVI])
+#define SERIALIN_TPORT_IN PIN_TO_NRFPORT(PinNumber[IO_RXINVI])
 
 static uint8_t serialDMATx[SERIAL_TX_SIZE];  // DMA Access Buffer Write
 
@@ -88,10 +98,9 @@ void SerialTX_isr()
     NRF_GPIOTE->CONFIG[SERIALOUT1_GPIOTE] = 0;
     uint32_t confreg = (GPIOTE_CONFIG_MODE_Task << GPIOTE_CONFIG_MODE_Pos) |
                        (GPIOTE_CONFIG_POLARITY_Toggle << GPIOTE_CONFIG_POLARITY_Pos) |
-                       (SBUSOUT_PIN << GPIOTE_CONFIG_PSEL_Pos) |
-                       (SBUSOUT_PORT << GPIOTE_CONFIG_PORT_Pos);
-    if (!invertTX)
-      confreg |= GPIOTE_CONFIG_OUTINIT_High << GPIOTE_CONFIG_OUTINIT_Pos;
+                       (AUXSERIALOUT_PIN << GPIOTE_CONFIG_PSEL_Pos) |
+                       (AUXSERIALOUT_PORT << GPIOTE_CONFIG_PORT_Pos);
+    if (!invertTX) confreg |= GPIOTE_CONFIG_OUTINIT_High << GPIOTE_CONFIG_OUTINIT_Pos;
     NRF_GPIOTE->CONFIG[SERIALOUT1_GPIOTE] = confreg;  // Initial value of pin low
 
     // Enable PPI
@@ -158,7 +167,7 @@ int AuxSerial_Open(uint32_t baudrate, uint16_t prtset, uint8_t inversions)
   NRF_GPIOTE->CONFIG[SERIALOUT1_GPIOTE] =
       (GPIOTE_CONFIG_MODE_Task << GPIOTE_CONFIG_MODE_Pos) |
       (GPIOTE_CONFIG_POLARITY_Toggle << GPIOTE_CONFIG_POLARITY_Pos) |
-      (SBUSOUT_PIN << GPIOTE_CONFIG_PSEL_Pos) | (SBUSOUT_PORT << GPIOTE_CONFIG_PORT_Pos);
+      (AUXSERIALOUT_PIN << GPIOTE_CONFIG_PSEL_Pos) | (AUXSERIALOUT_PORT << GPIOTE_CONFIG_PORT_Pos);
 
   // Toggle output pin on every input pin toggle (SBUS out)
   NRF_PPI->CH[SERIALOUT_PPICH].EEP = (uint32_t)&NRF_GPIOTE->EVENTS_IN[SERIALOUT0_GPIOTE];
@@ -182,12 +191,12 @@ int AuxSerial_Open(uint32_t baudrate, uint16_t prtset, uint8_t inversions)
     NRF_GPIOTE->CONFIG[SERIALIN0_GPIOTE] =
         (GPIOTE_CONFIG_MODE_Event << GPIOTE_CONFIG_MODE_Pos) |
         (GPIOTE_CONFIG_POLARITY_HiToLo << GPIOTE_CONFIG_POLARITY_Pos) |
-        (SBUSIN_PIN << GPIOTE_CONFIG_PSEL_Pos) | (SBUSIN_PORT << GPIOTE_CONFIG_PORT_Pos);
+        (AUXSERIALIN_PIN << GPIOTE_CONFIG_PSEL_Pos) | (AUXSERIALIN_PORT << GPIOTE_CONFIG_PORT_Pos);
 
     NRF_GPIOTE->CONFIG[SERIALIN1_GPIOTE] =
         (GPIOTE_CONFIG_MODE_Event << GPIOTE_CONFIG_MODE_Pos) |
         (GPIOTE_CONFIG_POLARITY_LoToHi << GPIOTE_CONFIG_POLARITY_Pos) |
-        (SBUSIN_PIN << GPIOTE_CONFIG_PSEL_Pos) | (SBUSIN_PORT << GPIOTE_CONFIG_PORT_Pos);
+        (AUXSERIALIN_PIN << GPIOTE_CONFIG_PSEL_Pos) | (AUXSERIALIN_PORT << GPIOTE_CONFIG_PORT_Pos);
 
     // Output Pin. One gpiote sets it, one clears it
     NRF_GPIOTE->CONFIG[SERIALIN2_GPIOTE] = (GPIOTE_CONFIG_MODE_Task << GPIOTE_CONFIG_MODE_Pos) |
@@ -216,7 +225,7 @@ int AuxSerial_Open(uint32_t baudrate, uint16_t prtset, uint8_t inversions)
     NRF_PPI->CHENCLR = SERIALIN1_PPICH_MSK | SERIALIN2_PPICH_MSK;
 
     NRF_UART0->PSEL.RXD =
-        (SBUSIN_PIN << UARTE_PSEL_RXD_PIN_Pos) | (SBUSIN_PORT << UARTE_PSEL_RXD_PORT_Pos);
+        (AUXSERIALIN_PIN << UARTE_PSEL_RXD_PIN_Pos) | (AUXSERIALIN_PORT << UARTE_PSEL_RXD_PORT_Pos);
     // Set the pin D5 + D6 back to floating inputs
     //        nrf_gpio_cfg_input(SERIALIN_TPORT_OUT * 32 + SERIALIN_TPIN_OUT,NRF_GPIO_PIN_NOPULL);
     //        nrf_gpio_cfg_input(SERIALIN_TPORT_IN * 32 + SERIALIN_TPIN_IN, NRF_GPIO_PIN_NOPULL);
@@ -289,7 +298,7 @@ if(sbusininv) {
     // Disable the GPIOTE
     NRF_GPIOTE->CONFIG[SBUSIN2_GPIOTE] = 0;
     // Set the UARTE to use the RX Pin directly
-    NRF_UART0->PSEL.RXD = (SBUSIN_PIN << UARTE_PSEL_RXD_PIN_Pos) | (SBUSIN_PORT <<
+    NRF_UART0->PSEL.RXD = (AUXSERIALIN_PIN << UARTE_PSEL_RXD_PIN_Pos) | (AUXSERIALIN_PORT <<
 UARTE_PSEL_RXD_PORT_Pos);
     // Set the pin D5 + D6 back to floating inputs
     nrf_gpio_cfg_input(SBUSIN_TPORT_OUT * 32 + SBUSIN_TPIN_OUT,NRF_GPIO_PIN_NOPULL);

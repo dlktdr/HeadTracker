@@ -15,14 +15,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "sense.h"
-
 #include <device.h>
 #include <drivers/sensor.h>
+#include <drivers/i2c.h>
 #include <zephyr.h>
 
-#include "APDS9960/APDS9960.h"
-#include "LSM9DS1/LSM9DS1.h"
 #include "MadgwickAHRS/MadgwickAHRS.h"
 #include "SBUS/sbus.h"
 #include "analog.h"
@@ -36,6 +33,21 @@
 #include "pmw.h"
 #include "soc_flash.h"
 #include "trackersettings.h"
+#include "defines.h"
+#include "sense.h"
+
+#if defined(HAS_APDS9960)
+#include "APDS9960/APDS9960.h"
+#endif
+#if defined(HAS_LSM9DS1)
+#include "LSM9DS1/LSM9DS1.h"
+#endif
+#if defined(HAS_MPU6500)
+#include "MPU6xxx/inv_mpu.h"
+#endif
+#if defined(HAS_QMC5883)
+#include "QMC5883/qmc5883.h"
+#endif
 
 static float auxdata[10];
 static float raccx = 0, raccy = 0, raccz = 0;
@@ -51,7 +63,6 @@ static float accxoff = 0, accyoff = 0, acczoff = 0;
 static float gyrxoff = 0, gyryoff = 0, gyrzoff = 0;
 static float l_panout = 0, l_tiltout = 0, l_rollout = 0;
 static bool trpOutputEnabled = false;  // Default to disabled T/R/P output
-volatile bool gyro_calibrated = false;
 
 // Input Channel Data
 static uint16_t ppm_in_chans[16];
@@ -65,19 +76,24 @@ static uint16_t channel_data[16];
 Madgwick madgwick;
 
 int64_t usduration = 0;
+int64_t senseUsDuration = 0;
 
+#if defined(HAS_APDS9960)
 static bool blesenseboard = false;
 static bool lastproximity = false;
+#endif
 
-K_MUTEX_DEFINE(sensor_mutex);
-
+#if defined(PCB_NANO33BLE)
 LSM9DS1Class IMU;
+#endif
 
 // Initial Orientation Data+Vars
 #define MADGINIT_ACCEL 0x01
 #define MADGINIT_MAG 0x02
-
 #define MADGINIT_READY (MADGINIT_ACCEL | MADGINIT_MAG)
+
+K_MUTEX_DEFINE(sensor_mutex);
+
 static int madgreads = 0;
 static uint8_t madgsensbits = 0;
 static volatile bool firstrun = true;
@@ -91,11 +107,33 @@ volatile bool senseTreadRun = false;
 
 int sense_Init()
 {
+  const struct device* i2c_dev = device_get_binding("I2C_1"); // DEVICE_DT_GET(DT_NODELABEL(I2C_1));
+  if (!i2c_dev) {
+    LOGE("Could not get device binding for I2C");
+    return false;
+  }
+
+  i2c_configure(i2c_dev, I2C_SPEED_SET(I2C_SPEED_FAST) | I2C_MODE_MASTER);
+
+#if defined(HAS_LSM9DS1)
   if (!IMU.begin()) {
     LOGE("Failed to initalize sensors");
     return -1;
   }
+#endif
 
+#if defined(HAS_MPU6500)
+  mpu_select_device(0);
+  mpu_init_structures();
+  mpu_init(NULL);
+  mpu_set_sensors(INV_XYZ_GYRO | INV_XYZ_ACCEL);
+  mpu_set_gyro_fsr(2000);
+  mpu_set_accel_fsr(2);
+  mpu_set_sample_rate(140);
+  mpu_configure_fifo(INV_XYZ_GYRO | INV_XYZ_ACCEL);
+#endif
+
+#if defined(HAS_APDS9960)
   // Initalize Gesture Sensor
   if (!APDS.begin()) {
     blesenseboard = false;
@@ -104,6 +142,11 @@ int sense_Init()
     blesenseboard = true;
     trkset.setDataisSense(true);
   }
+#endif
+
+#if defined(HAS_QMC5883)
+  qmc5883Init();
+#endif
 
   for (int i = 0; i < TrackerSettings::BT_CHANNELS; i++) {
     bt_chansf[i] = 0;
@@ -115,9 +158,6 @@ int sense_Init()
     SF1eFilterInit(anFilter[i]);
   }
 
-  setLEDFlag(LED_GYROCAL);
-
-  gyro_calibrated = false;
   senseTreadRun = true;
 
   return 0;
@@ -137,74 +177,12 @@ void calculate_Thread()
 
     usduration = micros64();
 
-    // Period Between Samples
-    float deltat = madgwick.deltatUpdate();
-
     // Use a mutex so sensor data can't be updated part way
     k_mutex_lock(&sensor_mutex, K_FOREVER);
-
-    // Only do this update after the first mag and accel data have been read.
-    if (madgreads == 0) {
-      if (madgsensbits == MADGINIT_READY) {
-        madgsensbits = 0;
-        madgreads++;
-        aacc[0] = accx;
-        aacc[1] = accy;
-        aacc[2] = accz;
-        amag[0] = magx;
-        amag[1] = magy;
-        amag[2] = magz;
-      }
-
-      // Average samples
-    } else if (madgreads < MADGSTART_SAMPLES - 1) {
-      if (madgsensbits == MADGINIT_READY) {
-        madgsensbits = 0;
-        madgreads++;
-        aacc[0] += accx;
-        aacc[1] += accy;
-        aacc[2] += accz;
-        aacc[0] /= 2;
-        aacc[1] /= 2;
-        aacc[2] /= 2;
-        amag[0] += magx;
-        amag[1] += magy;
-        amag[2] += magz;
-        amag[0] /= 2;
-        amag[1] /= 2;
-        amag[2] /= 2;
-      }
-
-      // Got the averaged values, apply the initial orientation.
-    } else if (madgreads == MADGSTART_SAMPLES - 1) {
-      // Pass it averaged values
-      madgwick.begin(aacc[0], aacc[1], aacc[2], amag[0], amag[1], amag[2]);
-      panoffset = pan;
-      madgreads = MADGSTART_SAMPLES;
-    }
-
-    // Do the AHRS calculations
-    if (madgreads == MADGSTART_SAMPLES) {
-      madgwick.update(gyrx * DEG_TO_RAD, gyry * DEG_TO_RAD, gyrz * DEG_TO_RAD, accx, accy, accz,
-                      magx, magy, magz, deltat);
-      roll = madgwick.getPitch();
-      tilt = madgwick.getRoll();
-      pan = madgwick.getYaw();
-
-      if (firstrun) {
-        panoffset = pan;
-        firstrun = false;
-      }
-    }
-
-    // Free Mutex Lock, Allow sensor updates
+    roll = madgwick.getPitch();
+    tilt = madgwick.getRoll();
+    pan = madgwick.getYaw();
     k_mutex_unlock(&sensor_mutex);
-
-    // Re-apply inital orientation as soon as the gyro calibration is done
-    // As is is a good time to be known sitting still.
-    static bool lastgyrcal = false;
-    if (gyro_calibrated == true && lastgyrcal == false) reset_fusion();
-    lastgyrcal = gyro_calibrated;
 
     // Toggles output on and off if long pressed
     bool butlngdwn = false;
@@ -248,21 +226,21 @@ void calculate_Thread()
         (tilt - tiltoffset) * trkset.getTlt_Gain() * (trkset.isTiltReversed() ? -1.0 : 1.0);
     float beta = (float)trkset.getLpTiltRoll() / 100;  // LP Beta
     filter_expAverage(&tiltout, beta, &l_tiltout);
-    uint16_t tiltout_ui = tiltout + trkset.getTlt_Cnt();                       // Apply Center Offset
+    uint16_t tiltout_ui = tiltout + trkset.getTlt_Cnt();  // Apply Center Offset
     tiltout_ui = MAX(MIN(tiltout_ui, trkset.getTlt_Max()), trkset.getTlt_Min());  // Limit Output
 
     // Roll output
     float rollout =
         (roll - rolloffset) * trkset.getRll_Gain() * (trkset.isRollReversed() ? -1.0 : 1.0);
     filter_expAverage(&rollout, beta, &l_rollout);
-    uint16_t rollout_ui = rollout + trkset.getRll_Cnt();                       // Apply Center Offset
+    uint16_t rollout_ui = rollout + trkset.getRll_Cnt();  // Apply Center Offset
     rollout_ui = MAX(MIN(rollout_ui, trkset.getRll_Max()), trkset.getRll_Min());  // Limit Output
 
     // Pan output, Normalize to +/- 180 Degrees
     float panout = normalize((pan - panoffset), -180, 180) * trkset.getPan_Gain() *
                    (trkset.isPanReversed() ? -1.0 : 1.0);
     filter_expAverage(&panout, (float)trkset.getLpPan() / 100, &l_panout);
-    uint16_t panout_ui = panout + trkset.getPan_Cnt();                       // Apply Center Offset
+    uint16_t panout_ui = panout + trkset.getPan_Cnt();  // Apply Center Offset
     panout_ui = MAX(MIN(panout_ui, trkset.getPan_Max()), trkset.getPan_Min());  // Limit Output
 
     // Reset on tilt
@@ -426,41 +404,48 @@ void calculate_Thread()
     }
 
     // 7) Set Analog Channels
+#ifdef AN0
     if (trkset.getAn0Ch() > 0) {
-      float an4 = SF1eFilterDo(anFilter[0], analogRead(AN4));
+      float an4 = SF1eFilterDo(anFilter[0], analogRead(AN0));
       an4 *= trkset.getAn0Gain();
       an4 += trkset.getAn0Off();
       an4 += TrackerSettings::MIN_PWM;
       an4 = MAX(TrackerSettings::MIN_PWM, MIN(TrackerSettings::MAX_PWM, an4));
       channel_data[trkset.getAn0Ch() - 1] = an4;
     }
+#endif
+#ifdef AN1
     if (trkset.getAn1Ch() > 0) {
-      float an5 = SF1eFilterDo(anFilter[1], analogRead(AN5));
+      float an5 = SF1eFilterDo(anFilter[1], analogRead(AN1));
       an5 *= trkset.getAn1Gain();
       an5 += trkset.getAn1Off();
       an5 += TrackerSettings::MIN_PWM;
       an5 = MAX(TrackerSettings::MIN_PWM, MIN(TrackerSettings::MAX_PWM, an5));
       channel_data[trkset.getAn1Ch() - 1] = an5;
     }
+#endif
+#ifdef AN2
     if (trkset.getAn2Ch() > 0) {
-      float an6 = SF1eFilterDo(anFilter[2], analogRead(AN6));
+      float an6 = SF1eFilterDo(anFilter[2], analogRead(AN2));
       an6 *= trkset.getAn2Gain();
       an6 += trkset.getAn2Off();
       an6 += TrackerSettings::MIN_PWM;
       an6 = MAX(TrackerSettings::MIN_PWM, MIN(TrackerSettings::MAX_PWM, an6));
       channel_data[trkset.getAn2Ch() - 1] = an6;
     }
+#endif
+#ifdef AN3
     if (trkset.getAn3Ch() > 0) {
-      float an7 = SF1eFilterDo(anFilter[3], analogRead(AN7));
+      float an7 = SF1eFilterDo(anFilter[3], analogRead(AN3));
       an7 *= trkset.getAn3Gain();
       an7 += trkset.getAn3Off();
       an7 += TrackerSettings::MIN_PWM;
       an7 = MAX(TrackerSettings::MIN_PWM, MIN(TrackerSettings::MAX_PWM, an7));
       channel_data[trkset.getAn3Ch() - 1] = an7;
     }
+#endif
 
     // 8) First decide if 'reset center' pulse should be sent
-
     static float pulsetimer = 0;
     static bool sendingresetpulse = false;
     int alertch = trkset.getAlertCh();
@@ -493,9 +478,6 @@ void calculate_Thread()
       trpOutputEnabled = false;
     }
     lastbutmode = buttonpresmode;
-
-    // If gyro isn't calibrated, don't output TRP
-    if (!gyro_calibrated) trpOutputEnabled = false;
 
     int tltch = trkset.getTltCh();
     int rllch = trkset.getRllCh();
@@ -534,7 +516,7 @@ void calculate_Thread()
     SBUS_TX_BuildData(sbus_data);
 
     // 13) Set PWM Channels
-    int8_t pwmchs[4] = {trkset.getPwm0(),trkset.getPwm1(),trkset.getPwm2(),trkset.getPwm3()};
+    int8_t pwmchs[4] = {trkset.getPwm0(), trkset.getPwm1(), trkset.getPwm2(), trkset.getPwm3()};
     for (int i = 0; i < 4; i++) {
       int pwmch = pwmchs[i] - 1;
       if (pwmch >= 0 && pwmch < 16) {
@@ -552,8 +534,8 @@ void calculate_Thread()
     }
 
     // Update the settings for the GUI
-    // Both data and sensor threads will use this data. If data thread has it locked skip this
-    // reading.
+    // Serial also uses this data, make sure writes are complete.
+    //  If data thread has it locked just skip this reading
     if (k_mutex_lock(&data_mutex, K_NO_WAIT) == 0) {
       // Raw values for calibration
       trkset.setDataAccX(raccx);
@@ -637,19 +619,15 @@ void calculate_Thread()
 
 void sensor_Thread()
 {
-  // Gyro Calibration
-  float avg[3] = {0, 0, 0};
-  float lavg[3] = {0, 0, 0};
-  bool initrun = true;
-  int passcount = GYRO_STABLE_SAMPLES;
-
   while (1) {
-    rt_sleep_us(SENSOR_PERIOD);
-
     if (!senseTreadRun || pauseForFlash) {
+      rt_sleep_ms(10);
       continue;
     }
 
+    senseUsDuration = micros64();
+
+#if defined(HAS_APDS9960)
     // Reset Center on Proximity, Don't need to update this often
     static int sensecount = 0;
     static int minproximity = 100;  // Keeps smallest proximity read.
@@ -683,30 +661,71 @@ void sensor_Thread()
         }
       }
     }
+#endif
 
     // Setup Rotations
     float rotation[3] = {trkset.getRotX(), trkset.getRotY(), trkset.getRotZ()};
 
-    // Accelerometer
+    // Read the data from the sensors
+    float tacc[3], tgyr[3], tmag[3];
+    bool accValid=false;
+    bool gyrValid=false;
+    bool magValid=false;
+
+#if defined(HAS_LSM9DS1)
     if (IMU.accelerationAvailable()) {
-#if defined(DEBUG_SENSOR_RATES)
-      static int acount = 0;
-      static int64_t mic = millis64() + 1000;
-      if (mic < millis64()) {  // Every Second
-        mic = millis64() + 1000;
-        LOGI("ACC Rate = %d", acount);
-        acount = 0;
-      }
-      acount++;
+      IMU.readRawAccel(tacc[0], tacc[1], tacc[2]);
+      tacc[0] *= -1.0;  // Flip X
+      accValid = true;
+    }
+    if (IMU.magneticFieldAvailable()) {
+      IMU.readRawMagnet(tmag[0], tmag[1], tmag[2]);
+      magValid = true;
+    }
+    if (IMU.gyroscopeAvailable()) {
+      IMU.readRawGyro(tgyr[0], tgyr[1], tgyr[2]);
+      tgyr[0] *= -1.0;  // Flip X to match other sensors
+      gyrValid = true;
+    }
 #endif
 
-      IMU.readRawAccel(raccx, raccy, raccz);
-      raccx *= -1.0;  // Flip X to make classic cartesian (+X Right, +Y Up, +Z Vert)
+#if defined(HAS_QMC5883)
+    if(qmc5883Read(tmag)) {
+      magValid = true;
+    }
+#endif
+
+#if defined(HAS_MPU6500)
+    // Read MPU6500
+    short _gyro[3];
+    short _accel[3];
+    unsigned long timestamp;
+    if(!mpu_get_accel_reg(_accel, &timestamp))
+      accValid = true;
+    unsigned short ascale = 1;;
+    mpu_get_accel_sens(&ascale);
+    tacc[0] = (float)_accel[0] / (float)ascale;
+    tacc[1] = (float)_accel[1] / (float)ascale;
+    tacc[2] = (float)_accel[2] / (float)ascale;
+    if(!mpu_get_gyro_reg(_gyro, &timestamp))
+      gyrValid = true;
+    float gscale = 1.0f;
+    mpu_get_gyro_sens(&gscale);
+    tgyr[0] = _gyro[0] / gscale;
+    tgyr[1] = _gyro[1] / gscale;
+    tgyr[2] = _gyro[2] / gscale;
+#endif
+
+    k_mutex_lock(&sensor_mutex, K_FOREVER);
+
+    // -- Accelerometer
+    if(accValid) {
+      raccx = tacc[0];
+      raccy = tacc[1];
+      raccz = tacc[2];
       accxoff = trkset.getAccXOff();
       accyoff = trkset.getAccYOff();
       acczoff = trkset.getAccZOff();
-
-      k_mutex_lock(&sensor_mutex, K_FOREVER);
 
       accx = raccx - accxoff;
       accy = raccy - accyoff;
@@ -721,117 +740,39 @@ void sensor_Thread()
 
       // For intial orientation setup
       madgsensbits |= MADGINIT_ACCEL;
-
-      k_mutex_unlock(&sensor_mutex);
     }
 
-    // Gyrometer
-    if (IMU.gyroscopeAvailable()) {
-#if defined(DEBUG_SENSOR_RATES)
-      static int gcount = 0;
-      static int64_t gmic = millis64() + 1000;
-      if (gmic < millis64()) {  // Every Second
-        gmic = millis64() + 1000;
-        LOGI("GYR Rate = %d", gcount);
-        gcount = 0;
-      }
-      gcount++;
-#endif
+    // --- Gyrometer Calcs
+    if(gyrValid) {
+      rgyrx = tgyr[0];
+      rgyry = tgyr[1];
+      rgyrz = tgyr[2];
+      gyrxoff = trkset.getGyrXOff();
+      gyryoff = trkset.getGyrYOff();
+      gyrzoff = trkset.getGyrZOff();
 
-      IMU.readRawGyro(rgyrx, rgyry, rgyrz);
-      rgyrx *= -1.0;  // Flip X to match other sensors
+      gyrx = rgyrx - gyrxoff;
+      gyry = rgyry - gyryoff;
+      gyrz = rgyrz - gyrzoff;
 
-      if (!gyro_calibrated) {
-        if (initrun) {  // Preload on first read
-          avg[0] = rgyrx;
-          avg[1] = rgyry;
-          avg[2] = rgyrz;
-          lavg[0] = rgyrx;
-          lavg[1] = rgyry;
-          lavg[2] = rgyrz;
-          initrun = false;
-        } else {
-          avg[0] = (avg[0] * GYRO_LP_BETA) + (rgyrx * (1.0 - GYRO_LP_BETA));
-          avg[1] = (avg[1] * GYRO_LP_BETA) + (rgyry * (1.0 - GYRO_LP_BETA));
-          avg[2] = (avg[2] * GYRO_LP_BETA) + (rgyrz * (1.0 - GYRO_LP_BETA));
-
-          // Calculate differential of signal
-          float diff[3];
-          static int64_t lastUpdate = 0;
-          int64_t now = micros64();
-
-          float deltat = ((now - lastUpdate) / 1000000.0f);  // set integration time by time elapsed
-                                                             // since last filter update
-          lastUpdate = now;
-
-          for (int i = 0; i < 3; i++) {
-            diff[i] = fabs(avg[i] - lavg[i]) / deltat;
-            lavg[i] = avg[i];
-          }
-
-          // If rate of change low then decrement the counter
-          if (diff[0] < GYRO_PASS_DIFF && diff[1] < GYRO_PASS_DIFF && diff[2] < GYRO_PASS_DIFF)
-            passcount--;
-          // Otherwise start over
-          else {
-            passcount = GYRO_STABLE_SAMPLES;
-            initrun = true;
-          }
-
-          // If enough samples taken at low motion, Success
-          if (passcount == 0) {
-            trkset.setGyrXOff(avg[0]);
-            trkset.setGyrYOff(avg[1]);
-            trkset.setGyrZOff(avg[2]);
-            clearLEDFlag(LED_GYROCAL);
-            gyro_calibrated = true;
-          }
-        }
-      } else {
-        gyrxoff = trkset.getGyrXOff();
-        gyryoff = trkset.getGyrYOff();
-        gyrzoff = trkset.getGyrZOff();
-
-        k_mutex_lock(&sensor_mutex, K_FOREVER);
-
-        gyrx = rgyrx - gyrxoff;
-        gyry = rgyry - gyryoff;
-        gyrz = rgyrz - gyrzoff;
-
-        // Apply Rotation
-        float tmpgyr[3] = {gyrx, gyry, gyrz};
-        rotate(tmpgyr, rotation);
-        gyrx = tmpgyr[0];
-        gyry = tmpgyr[1];
-        gyrz = tmpgyr[2];
-
-        k_mutex_unlock(&sensor_mutex);
-      }
+      // Apply Rotation
+      float tmpgyr[3] = {gyrx, gyry, gyrz};
+      rotate(tmpgyr, rotation);
+      gyrx = tmpgyr[0];
+      gyry = tmpgyr[1];
+      gyrz = tmpgyr[2];
     }
 
-    // Magnetometer
-    if (IMU.magneticFieldAvailable()) {
-#if defined(DEBUG_SENSOR_RATES)
-      static int mcount = 0;
-      static int64_t mmic = millis64() + 1000;
-      if (mmic < millis64()) {  // Every Second
-        mmic = millis64() + 1000;
-        LOGI("MAG Rate = %d", mcount);
-        mcount = 0;
-      }
-      mcount++;
-#endif
-
-      IMU.readRawMagnet(rmagx, rmagy, rmagz);
-      // On first read set the min/max values to this reading
-      // Get Offsets + Soft Iron Offesets
+    if(magValid) {
+      // --- Magnetometer Calcs
+      rmagx = tmag[0];
+      rmagy = tmag[1];
+      rmagz = tmag[2];
       float magsioff[9];
       magxoff = trkset.getMagXOff();
       magyoff = trkset.getMagYOff();
       magzoff = trkset.getMagZOff();
       trkset.getMagSiOff(magsioff);
-
-      k_mutex_lock(&sensor_mutex, K_FOREVER);
 
       // Calibrate Hard Iron Offsets
       magx = rmagx - magxoff;
@@ -851,9 +792,71 @@ void sensor_Thread()
 
       // For inital orientation setup
       madgsensbits |= MADGINIT_MAG;
-
-      k_mutex_unlock(&sensor_mutex);
     }
+
+    // Only do this update after the first mag and accel data have been read.
+    if (madgreads == 0) {
+      if (madgsensbits == MADGINIT_READY) {
+        madgsensbits = 0;
+        madgreads++;
+        aacc[0] = accx;
+        aacc[1] = accy;
+        aacc[2] = accz;
+        amag[0] = magx;
+        amag[1] = magy;
+        amag[2] = magz;
+      }
+
+      // Average samples
+    } else if (madgreads < MADGSTART_SAMPLES - 1) {
+      if (madgsensbits == MADGINIT_READY) {
+        madgsensbits = 0;
+        madgreads++;
+        aacc[0] += accx;
+        aacc[1] += accy;
+        aacc[2] += accz;
+        aacc[0] /= 2;
+        aacc[1] /= 2;
+        aacc[2] /= 2;
+        amag[0] += magx;
+        amag[1] += magy;
+        amag[2] += magz;
+        amag[0] /= 2;
+        amag[1] /= 2;
+        amag[2] /= 2;
+      }
+
+      // Got the averaged values, apply the initial orientation.
+    } else if (madgreads == MADGSTART_SAMPLES - 1) {
+      // Pass it averaged values
+      madgwick.begin(aacc[0], aacc[1], aacc[2], amag[0], amag[1], amag[2]);
+      panoffset = pan;
+      madgreads = MADGSTART_SAMPLES;
+    }
+
+    // Do the AHRS calculations
+    if (madgreads == MADGSTART_SAMPLES) {
+      // Period Between Samples
+      madgwick.update(gyrx * DEG_TO_RAD, gyry * DEG_TO_RAD, gyrz * DEG_TO_RAD, accx, accy, accz,
+                      magx, magy, magz, madgwick.deltatUpdate());
+      if (firstrun) {
+        panoffset = pan;
+        firstrun = false;
+      }
+    }
+
+    k_mutex_unlock(&sensor_mutex);
+
+    // Adjust sleep for a more accurate period
+    senseUsDuration = micros64() - senseUsDuration;
+    if (SENSOR_PERIOD - senseUsDuration <
+        SENSOR_PERIOD * 0.7) {  // Took a long time. Will crash if sleep is too short
+
+      rt_sleep_us(SENSOR_PERIOD);
+    } else {
+      rt_sleep_us(SENSOR_PERIOD - senseUsDuration);
+    }
+
   }  // END THREAD
 }
 

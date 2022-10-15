@@ -84,11 +84,6 @@ void bt_Thread()
         break;
     }
 
-    if (bleconnected)
-      setLEDFlag(LED_BTCONNECTED);
-    else
-      clearLEDFlag(LED_BTCONNECTED);
-
     // Adjust sleep for a more accurate period
     usduration = micros64() - usduration;
     if (BT_PERIOD - usduration <
@@ -123,6 +118,10 @@ void BTSetMode(btmodet mode)
     default:
       break;
   }
+
+  // Stop Bluetooth LED Modes
+  clearLEDFlag(LED_BTCONNECTED);
+  clearLEDFlag(LED_BTSCANNING);
 
   // Start Up
   switch (mode) {

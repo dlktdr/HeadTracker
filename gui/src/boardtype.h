@@ -18,7 +18,8 @@ public:
     void setTracker(TrackerSettings *t);
 
     // Returns the board name
-    virtual QString boardName()=0;
+    void setBoardName(QString name) {_boardName = name;}
+    QString boardName() {return _boardName;}
 
     // Enables or disables the base classes methods based on alwacces
     virtual void allowAccessChanged(bool access)=0;
@@ -47,6 +48,7 @@ public:
 
 protected:
     TrackerSettings *trkset;
+    QString _boardName;
 
 private:
     bool alwaccess;

@@ -560,4 +560,11 @@ void BTRmtSendButtonPress(bool longpress)
 void BTRmtExecute()
 {
   // All Async, Nothing Here
+  if(bleconnected) {
+    setLEDFlag(LED_BTCONNECTED);
+    clearLEDFlag(LED_BTSCANNING);
+  } else {
+    setLEDFlag(LED_BTSCANNING);
+    clearLEDFlag(LED_BTCONNECTED);
+  }
 }

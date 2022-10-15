@@ -66,8 +66,6 @@ int LSM9DS1Class::begin()
     return 0;
   }
 
-  i2c_configure(i2c_dev, I2C_SPEED_SET(I2C_SPEED_FAST) | I2C_MODE_MASTER);
-
   storedAccelFS = false;
   storedGyroFS = false;
   storedMagnetFS = false;
@@ -513,9 +511,6 @@ int LSM9DS1Class::setMagnetODR(
 float LSM9DS1Class::getMagnetODR()  // Output {0.625, 1.25, 2.5, 5.0, 10.0, 20.0, 40.0 , 80.0}; //Hz
 {
   return magnetODR;  // return previously measured value
-  //	const float ranges[] ={0.625, 1.25,2.5, 5.0, 10.0, 20.0, 40.0 , 80.0}; //Hz
-  //  uint8_t setting = (readRegister(LSM9DS1_ADDRESS_M, LSM9DS1_CTRL_REG1_M) & 0b00011100) >> 2;
-  //  return ranges[setting];
 }
 
 //************************************      Private functions
@@ -545,12 +540,6 @@ void LSM9DS1Class::measureODRcombined()  // Combined measurement for faster star
       if (countM == 0) startM = lastEventTimeM;
     }
   }
-  //    Serial.println("measure combined " );
-  //    Serial.println("countA= "+String(countA)   );
-  //    Serial.println("countM= "+String(countM)   );
-  //    Serial.println("countiter= "+String(countiter)   );
-  //    Serial.println("dTa= "+String(lastEventTimeA-startA)   );
-  //    Serial.println("dTb= "+String(lastEventTimeM-startM)   );
 
   accelODR = (1000000.0 * float(countA) / float(lastEventTimeA - startA));
   gyroODR = accelODR;
@@ -574,9 +563,7 @@ float LSM9DS1Class::measureAccelGyroODR()
       if (count <= 0) start = lastEventTime;
     }
   }
-  //    Serial.println("measureAccelGyroODR Count "+String( count ) );
-  //    Serial.println("dTa= "+String(lastEventTime-start)   );
-  //    Serial.println("ODR= "+String(1000000.0*float(count)/float(lastEventTime-start))   );
+
   if (fifoEna) setContinuousMode();
   return (1000000.0 * float(count) / float(lastEventTime - start));
 }
@@ -596,9 +583,7 @@ float LSM9DS1Class::measureMagnetODR(unsigned long duration)
       if (count <= 0) start = lastEventTime;
     }
   }
-  //   Serial.println("MeasureMagnetODR Count "+String( count ) );
-  //   Serial.println("dTa= "+String(lastEventTime-start)   );
-  //   Serial.println("ODR= "+String(1000000.0*float(count)/float(lastEventTime-start) )) ;
+
   return (1000000.0 * float(count) / float(lastEventTime - start));
 }
 
