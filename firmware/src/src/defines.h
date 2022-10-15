@@ -39,8 +39,8 @@
 #define BT_PERIOD 12500          // (us) Bluetooth update rate
 #define SERIAL_PERIOD 30         // (ms) Serial processing
 #define DATA_PERIOD 2            // Multiplier of Serial Period (Live Data Transmission Speed)
-#define SENSOR_PERIOD 4000       // (us) 100hz Read Sensors
-#define CALCULATE_PERIOD 6000    // (us) 166hz IMU calculations
+#define SENSOR_PERIOD 4000       // (us) Sensor Reads
+#define CALCULATE_PERIOD 7000    // (us) Channel Calculations
 #define PWM_FREQUENCY 50         // (ms) PWM Period
 #define PAUSE_BEFORE_FLASH 60    // (ms) Time to pause all threads before Flash writing
 
@@ -71,9 +71,9 @@
 #define SERIAL_THREAD_PRIO PRIORITY_LOW
 #define DATA_THREAD_PRIO PRIORITY_LOW
 #define BT_THREAD_PRIO -15
-#define SENSOR_THREAD_PRIO PRIORITY_MED
-#define CALCULATE_THREAD_PRIO PRIORITY_HIGH
-#define SBUS_THREAD_PRIO PRIORITY_MED + 1
+#define SENSOR_THREAD_PRIO PRIORITY_MED + 1
+#define CALCULATE_THREAD_PRIO PRIORITY_MED - 1
+#define SBUS_THREAD_PRIO PRIORITY_MED - 1
 
 // Threads initialized flags
 extern volatile bool ioThreadRun;
@@ -124,12 +124,7 @@ extern volatile bool sbusTreadRun;
 #define DEG_TO_RAD 0.017453295199
 #define RAD_TO_DEG 57.29577951308
 
-// Gyro Calibration Defines
-#define GYRO_STABLE_SAMPLES 100  // samples to average of not moving for a success gyro cal
-#define GYRO_PASS_DIFF 24.0      // Differential less than this deg/sec^2 considered stable
-#define GYRO_LP_BETA 0.9         // Gyro Sample Moving Average Beta (0.0-1
 
-#define MPU6500
 
 // Magnetometer, Initial Orientation, Samples to average
 #define MADGSTART_SAMPLES 15

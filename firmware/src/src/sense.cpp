@@ -76,6 +76,7 @@ static uint16_t channel_data[16];
 Madgwick madgwick;
 
 int64_t usduration = 0;
+int64_t senseUsDuration = 0;
 
 #if defined(HAS_APDS9960)
 static bool blesenseboard = false;
@@ -106,7 +107,7 @@ volatile bool senseTreadRun = false;
 
 int sense_Init()
 {
-  const struct device* i2c_dev = device_get_binding("I2C_1");
+  const struct device* i2c_dev = device_get_binding("I2C_1"); // DEVICE_DT_GET(DT_NODELABEL(I2C_1));
   if (!i2c_dev) {
     LOGE("Could not get device binding for I2C");
     return false;
@@ -176,67 +177,11 @@ void calculate_Thread()
 
     usduration = micros64();
 
-    // Period Between Samples
-    float deltat = madgwick.deltatUpdate();
-
     // Use a mutex so sensor data can't be updated part way
     k_mutex_lock(&sensor_mutex, K_FOREVER);
-
-    // Only do this update after the first mag and accel data have been read.
-    if (madgreads == 0) {
-      if (madgsensbits == MADGINIT_READY) {
-        madgsensbits = 0;
-        madgreads++;
-        aacc[0] = accx;
-        aacc[1] = accy;
-        aacc[2] = accz;
-        amag[0] = magx;
-        amag[1] = magy;
-        amag[2] = magz;
-      }
-
-      // Average samples
-    } else if (madgreads < MADGSTART_SAMPLES - 1) {
-      if (madgsensbits == MADGINIT_READY) {
-        madgsensbits = 0;
-        madgreads++;
-        aacc[0] += accx;
-        aacc[1] += accy;
-        aacc[2] += accz;
-        aacc[0] /= 2;
-        aacc[1] /= 2;
-        aacc[2] /= 2;
-        amag[0] += magx;
-        amag[1] += magy;
-        amag[2] += magz;
-        amag[0] /= 2;
-        amag[1] /= 2;
-        amag[2] /= 2;
-      }
-
-      // Got the averaged values, apply the initial orientation.
-    } else if (madgreads == MADGSTART_SAMPLES - 1) {
-      // Pass it averaged values
-      madgwick.begin(aacc[0], aacc[1], aacc[2], amag[0], amag[1], amag[2]);
-      panoffset = pan;
-      madgreads = MADGSTART_SAMPLES;
-    }
-
-    // Do the AHRS calculations
-    if (madgreads == MADGSTART_SAMPLES) {
-      madgwick.update(gyrx * DEG_TO_RAD, gyry * DEG_TO_RAD, gyrz * DEG_TO_RAD, accx, accy, accz,
-                      magx, magy, magz, deltat);
-      roll = madgwick.getPitch();
-      tilt = madgwick.getRoll();
-      pan = madgwick.getYaw();
-
-      if (firstrun) {
-        panoffset = pan;
-        firstrun = false;
-      }
-    }
-
-    // Free Mutex Lock, Allow sensor updates
+    roll = madgwick.getPitch();
+    tilt = madgwick.getRoll();
+    pan = madgwick.getYaw();
     k_mutex_unlock(&sensor_mutex);
 
     // Toggles output on and off if long pressed
@@ -675,11 +620,12 @@ void calculate_Thread()
 void sensor_Thread()
 {
   while (1) {
-    rt_sleep_us(SENSOR_PERIOD);
-
     if (!senseTreadRun || pauseForFlash) {
+      rt_sleep_ms(10);
       continue;
     }
+
+    senseUsDuration = micros64();
 
 #if defined(HAS_APDS9960)
     // Reset Center on Proximity, Don't need to update this often
@@ -848,7 +794,69 @@ void sensor_Thread()
       madgsensbits |= MADGINIT_MAG;
     }
 
+    // Only do this update after the first mag and accel data have been read.
+    if (madgreads == 0) {
+      if (madgsensbits == MADGINIT_READY) {
+        madgsensbits = 0;
+        madgreads++;
+        aacc[0] = accx;
+        aacc[1] = accy;
+        aacc[2] = accz;
+        amag[0] = magx;
+        amag[1] = magy;
+        amag[2] = magz;
+      }
+
+      // Average samples
+    } else if (madgreads < MADGSTART_SAMPLES - 1) {
+      if (madgsensbits == MADGINIT_READY) {
+        madgsensbits = 0;
+        madgreads++;
+        aacc[0] += accx;
+        aacc[1] += accy;
+        aacc[2] += accz;
+        aacc[0] /= 2;
+        aacc[1] /= 2;
+        aacc[2] /= 2;
+        amag[0] += magx;
+        amag[1] += magy;
+        amag[2] += magz;
+        amag[0] /= 2;
+        amag[1] /= 2;
+        amag[2] /= 2;
+      }
+
+      // Got the averaged values, apply the initial orientation.
+    } else if (madgreads == MADGSTART_SAMPLES - 1) {
+      // Pass it averaged values
+      madgwick.begin(aacc[0], aacc[1], aacc[2], amag[0], amag[1], amag[2]);
+      panoffset = pan;
+      madgreads = MADGSTART_SAMPLES;
+    }
+
+    // Do the AHRS calculations
+    if (madgreads == MADGSTART_SAMPLES) {
+      // Period Between Samples
+      madgwick.update(gyrx * DEG_TO_RAD, gyry * DEG_TO_RAD, gyrz * DEG_TO_RAD, accx, accy, accz,
+                      magx, magy, magz, madgwick.deltatUpdate());
+      if (firstrun) {
+        panoffset = pan;
+        firstrun = false;
+      }
+    }
+
     k_mutex_unlock(&sensor_mutex);
+
+    // Adjust sleep for a more accurate period
+    senseUsDuration = micros64() - senseUsDuration;
+    if (SENSOR_PERIOD - senseUsDuration <
+        SENSOR_PERIOD * 0.7) {  // Took a long time. Will crash if sleep is too short
+
+      rt_sleep_us(SENSOR_PERIOD);
+    } else {
+      rt_sleep_us(SENSOR_PERIOD - senseUsDuration);
+    }
+
   }  // END THREAD
 }
 
