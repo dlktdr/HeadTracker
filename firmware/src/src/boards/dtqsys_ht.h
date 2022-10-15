@@ -13,7 +13,7 @@
 #define HAS_MPU6500
 #define HAS_QMC5883
 #define HAS_CENTERBTN
-#define AN0 0 // Battery V on analog 0
+#define AN0 1 // Battery V on analog 0
 
 // Pins (name, number, description)
 // NOTE: These pins are an enum entry. IO_ is prepended e.g. IO_AN0 = 0
