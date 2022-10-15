@@ -59,7 +59,7 @@ jobs:
           cp ../gui/src/css/stylesheet.css bin/
           cp ../gui/src/css/Background.svg bin/
           cp ../gui/src/images/Icon256.png share/icons/hicolor/256x256/apps/default.png
-          echo -e "[Desktop Entry]\nType=Application\nName=HeadTracker\nExec=HeadTracker\nIcon=default" > share/applications/headtracker.desktop
+          echo -e "[Desktop Entry]\nType=Application\nName=HeadTracker\nExec=HeadTracker\nIcon=default\nCategories=Utility" > share/applications/headtracker.desktop
           wget https://github.com/dlktdr/HeadTracker/raw/master/gui/bin/bossac_lin
           chmod a+x ./bossac_lin
           mv ./bossac_lin bin/
