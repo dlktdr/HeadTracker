@@ -243,7 +243,8 @@ f.write("  }\n")
 f.write("""\n\
   void sendArray(DynamicJsonDocument &json,
                  uint8_t bit,
-                 uint32_t counter,
+                 const uint32_t counter,
+                 int divisor,
                  const char *name,
                  void *item,
                  void *lastitem,
@@ -252,13 +253,13 @@ f.write("""\n\
     bool sendit = false;
     char b64array[200];
     if (senddataarray & (1 << bit)) {
-      if (1 < 0) {
+      if (divisor < 0) {
         if (memcmp(lastitem, item, size) != 0)
           sendit = true;
-        else if (1 != -1 && counter % abs(1) == 0)
+        else if (divisor != -1 && counter % abs(divisor) == 0)
           sendit = true;
       } else {
-        if (counter % 1 == 0)
+        if (counter % divisor == 0)
           sendit = true;
       }
       if (sendit) {
@@ -312,7 +313,7 @@ for row in s.dataarrays:
   name = row[s.colname].lower()[:start]
   name6 = "6" + name + s.typeToJson(row[s.coltype].strip())
   ctype = s.typeToC(row[s.coltype].strip())
-  f.write("    sendArray(json," + str(id) + ",counter,\"" + name6 + "\",(void*)" + name + ",(void*)last" + row[s.colname].lower()[:start]  + ", sizeof(" + ctype + ") * " + arraylength + ");\n")
+  f.write("    sendArray(json," + str(id) + ",counter," + row[s.coldivisor] + ",\"" + name6 + "\",(void*)" + name + ",(void*)last" + row[s.colname].lower()[:start]  + ", sizeof(" + ctype + ") * " + arraylength + ");\n")
 f.write("""\
 
     // Used for reduced data divisor

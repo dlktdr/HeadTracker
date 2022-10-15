@@ -1341,7 +1341,8 @@ public:
 
   void sendArray(DynamicJsonDocument &json,
                  uint8_t bit,
-                 uint32_t counter,
+                 const uint32_t counter,
+                 int divisor,
                  const char *name,
                  void *item,
                  void *lastitem,
@@ -1350,13 +1351,13 @@ public:
     bool sendit = false;
     char b64array[200];
     if (senddataarray & (1 << bit)) {
-      if (1 < 0) {
+      if (divisor < 0) {
         if (memcmp(lastitem, item, size) != 0)
           sendit = true;
-        else if (1 != -1 && counter % abs(1) == 0)
+        else if (divisor != -1 && counter % abs(divisor) == 0)
           sendit = true;
       } else {
-        if (counter % 1 == 0)
+        if (counter % divisor == 0)
           sendit = true;
       }
       if (sendit) {
@@ -1439,13 +1440,13 @@ public:
     if (senddatavars & (1 << 31) && (counter % 10) == 0)
       json["issense"] = issense;
 
-    sendArray(json,1,counter,"6choutu16",(void*)chout,(void*)lastchout, sizeof(uint16_t) * 16);
-    sendArray(json,2,counter,"6btchu16",(void*)btch,(void*)lastbtch, sizeof(uint16_t) * 8);
-    sendArray(json,3,counter,"6ppmchu16",(void*)ppmch,(void*)lastppmch, sizeof(uint16_t) * 16);
-    sendArray(json,4,counter,"6sbuschu16",(void*)sbusch,(void*)lastsbusch, sizeof(uint16_t) * 16);
-    sendArray(json,5,counter,"6quatflt",(void*)quat,(void*)lastquat, sizeof(float) * 4);
-    sendArray(json,6,counter,"6btaddrchr",(void*)btaddr,(void*)lastbtaddr, sizeof(char) * 18);
-    sendArray(json,7,counter,"6btrmtchr",(void*)btrmt,(void*)lastbtrmt, sizeof(char) * 18);
+    sendArray(json,1,counter,1,"6choutu16",(void*)chout,(void*)lastchout, sizeof(uint16_t) * 16);
+    sendArray(json,2,counter,1,"6btchu16",(void*)btch,(void*)lastbtch, sizeof(uint16_t) * 8);
+    sendArray(json,3,counter,1,"6ppmchu16",(void*)ppmch,(void*)lastppmch, sizeof(uint16_t) * 16);
+    sendArray(json,4,counter,1,"6sbuschu16",(void*)sbusch,(void*)lastsbusch, sizeof(uint16_t) * 16);
+    sendArray(json,5,counter,1,"6quatflt",(void*)quat,(void*)lastquat, sizeof(float) * 4);
+    sendArray(json,6,counter,10,"6btaddrchr",(void*)btaddr,(void*)lastbtaddr, sizeof(char) * 18);
+    sendArray(json,7,counter,10,"6btrmtchr",(void*)btrmt,(void*)lastbtrmt, sizeof(char) * 18);
 
     // Used for reduced data divisor
     counter++;
