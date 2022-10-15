@@ -11,7 +11,6 @@
 #define HAS_WS2812
 #define HAS_BUZZER
 #define HAS_MPU6500
-#define MPU6500 // For MPULib
 #define HAS_QMC5883
 #define HAS_CENTERBTN
 #define AN0 1 // Battery V on analog 0

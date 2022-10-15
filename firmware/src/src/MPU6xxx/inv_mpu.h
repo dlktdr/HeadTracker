@@ -23,6 +23,8 @@
 
 #include "defines.h"
 
+#define MPU6500
+
 //  Define this symbol to get debug messages
 
 //#define  MPU_DEBUG
