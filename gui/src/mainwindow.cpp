@@ -1429,9 +1429,9 @@ void MainWindow::boardDiscovered(BoardType *brd)
             ui->lblButtonPin->setVisible(false);
             ui->tabBLE->setTabVisible(4,false);
             ui->lblAn4->setText(tr("Battery Voltage"));
-            ui->frmAnalog1->setVisible(false);
-            ui->frmAnalog2->setVisible(false);
-            ui->frmAnalog3->setVisible(false);
+            ui->lblAn5->setText(tr("Analog 1 (0.29)"));
+            ui->lblAn6->setText(tr("Analog 2 (0.02)"));
+            ui->lblAn7->setText(tr("Analog 3 (0.28)"));
         } else {
             ui->cmbPpmInPin->setVisible(true);
             ui->lblPPMInPin->setVisible(true);
@@ -1441,9 +1441,9 @@ void MainWindow::boardDiscovered(BoardType *brd)
             ui->lblButtonPin->setVisible(true);
             ui->tabBLE->setTabVisible(4,true);
             ui->lblAn4->setText(tr("Analog A4"));
-            ui->frmAnalog1->setVisible(true);
-            ui->frmAnalog2->setVisible(true);
-            ui->frmAnalog3->setVisible(true);
+            ui->lblAn5->setText(tr("Analog A5"));
+            ui->lblAn6->setText(tr("Analog A6"));
+            ui->lblAn7->setText(tr("Analog A7"));
         }
 
         // Check Firmware Version is Compatible

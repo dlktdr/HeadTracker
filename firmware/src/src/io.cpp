@@ -75,7 +75,7 @@ void io_Thread()
     rt_sleep_ms(IO_PERIOD);
     if (!ioThreadRun || pauseForFlash) continue;
 
-#if defined(PCB_NANO33BLE)
+#if defined(HAS_NOTIFYLED)
     // LEDS
     if (_ledmode & LED_GYROCAL) {
       led_on_time = 200;
