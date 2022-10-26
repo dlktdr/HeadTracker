@@ -129,6 +129,7 @@ void FirmwareWizard::startPortDiscovery(const QString &filename)
 
     if(data.startsWith(BLE33HEADER_BIN_MBED) ||
        QFileInfo(file).fileName().startsWith("BLE") ||
+       QFileInfo(file).fileName().startsWith("DTQ") ||
        data.mid(2,2) == BLE33HEADER_BIN_ZEPHER) {
         addToLog("  Firmware is for the Arduino Nano BLE 33 in bin format");
         boardType = BRD_NANO33BLE;
