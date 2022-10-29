@@ -65,7 +65,7 @@ public:
   static constexpr float PPM_MAX_FRAME = 40000;
 
   BaseTrackerSettings() {
-    strcpy(btpairedaddress,"00:00:00:00:00:00");
+    strcpy(btpairedaddress,"");
     memset(chout,0,sizeof(uint16_t) * 16);
     memset(btch,0,sizeof(uint16_t) * 8);
     memset(ppmch,0,sizeof(uint16_t) * 16);
