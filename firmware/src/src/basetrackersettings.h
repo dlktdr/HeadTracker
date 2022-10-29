@@ -75,13 +75,13 @@ public:
     memset(btrmt,0,sizeof(char) * 18);
 
     // Call Virtual Events after initialization
-    pinsChanged();
     resetFusion();
+    pinsChanged();
   }
 
   // Virtual Events
-  virtual void pinsChanged() {};
   virtual void resetFusion() {};
+  virtual void pinsChanged() {};
 
   // Roll Minimum
   inline const uint16_t& getRll_Min() {return rll_min;}
@@ -933,27 +933,27 @@ public:
 
   // Channel Outputs
   void setDataChOut(const uint16_t val[16]) {
-    memcpy(chout, val, 16);
+    memcpy(chout, val, sizeof(uint16_t) * 16);
   }
 
   // Bluetooth Inputs
   void setDataBtCh(const uint16_t val[8]) {
-    memcpy(btch, val, 8);
+    memcpy(btch, val, sizeof(uint16_t) * 8);
   }
 
   // PPM Inputs
   void setDataPpmCh(const uint16_t val[16]) {
-    memcpy(ppmch, val, 16);
+    memcpy(ppmch, val, sizeof(uint16_t) * 16);
   }
 
   // SBUS Channels
   void setDataSbusCh(const uint16_t val[16]) {
-    memcpy(sbusch, val, 16);
+    memcpy(sbusch, val, sizeof(uint16_t) * 16);
   }
 
   // Quaternion Output (Tilt / Roll / Pan)
   void setDataQuat(const float val[4]) {
-    memcpy(quat, val, 4);
+    memcpy(quat, val, sizeof(float) * 4);
   }
 
   // Local Bluetooth Address
@@ -1052,8 +1052,8 @@ public:
 
   void loadJSONSettings(DynamicJsonDocument &json) {
     JsonVariant v;
-    bool chpinschanged = false;
     bool chresetfusion = false;
+    bool chpinschanged = false;
     v = json["rll_min"]; if(!v.isNull()) {setRll_Min(v);}
     v = json["rll_max"]; if(!v.isNull()) {setRll_Max(v);}
     v = json["rll_cnt"]; if(!v.isNull()) {setRll_Cnt(v);}
@@ -1133,10 +1133,10 @@ public:
     v = json["ppmchcnt"]; if(!v.isNull()) {setPpmChCnt(v);}
     v = json["lppan"]; if(!v.isNull()) {setLpPan(v);}
     v = json["lptiltroll"]; if(!v.isNull()) {setLpTiltRoll(v);}
-    if(chpinschanged)
-      pinsChanged();
     if(chresetfusion)
       resetFusion();
+    if(chpinschanged)
+      pinsChanged();
   }
 
   void setJSONDataList(DynamicJsonDocument &json)

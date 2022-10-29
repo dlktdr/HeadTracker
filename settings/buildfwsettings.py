@@ -164,7 +164,7 @@ for row in s.dataarrays:
     txt = """\
   // {desc}
   void setData{cname}(const {dtype} val[{len}]) {{
-    memcpy({name}, val, {len});
+    memcpy({name}, val, sizeof({dtype}) * {len});
   }}\n\n""".format(cname = row[s.colname][:start], name = row[s.colname][:start].lower(), dtype = s.typeToC(row[s.coltype].strip()), deflt = row[s.coldefault], minv = row[s.colmin], maxv = row[s.colmax], desc = row[s.coldesc], len = arraylength )
   else:
     txt = """\
