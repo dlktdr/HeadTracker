@@ -135,14 +135,14 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->spnLPTiltRoll2,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->spnPPMSync,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->spnPPMFrameLen,SIGNAL(valueChanged(double)),this,SLOT(updateFromUI()));
-    connect(ui->spnA4Gain,SIGNAL(valueChanged(double)),this,SLOT(updateFromUI()));
-    connect(ui->spnA4Off,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->spnA5Gain,SIGNAL(valueChanged(double)),this,SLOT(updateFromUI()));
-    connect(ui->spnA5Off,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->spnA6Gain,SIGNAL(valueChanged(double)),this,SLOT(updateFromUI()));
-    connect(ui->spnA6Off,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->spnA7Gain,SIGNAL(valueChanged(double)),this,SLOT(updateFromUI()));
-    connect(ui->spnA7Off,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->spnA0Gain,SIGNAL(valueChanged(double)),this,SLOT(updateFromUI()));
+    connect(ui->spnA0Off,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->spnA1Gain,SIGNAL(valueChanged(double)),this,SLOT(updateFromUI()));
+    connect(ui->spnA1Off,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->spnA2Gain,SIGNAL(valueChanged(double)),this,SLOT(updateFromUI()));
+    connect(ui->spnA2Off,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->spnA3Gain,SIGNAL(valueChanged(double)),this,SLOT(updateFromUI()));
+    connect(ui->spnA3Off,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->spnRotX,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->spnRotY,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->spnRotZ,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
@@ -196,10 +196,10 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->cmbBtMode,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     //connect(ui->cmbResetOnPPM,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbPPMChCount,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->cmbA4Ch,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->cmbA5Ch,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->cmbA6Ch,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->cmbA7Ch,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->cmbA0Ch,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->cmbA1Ch,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->cmbA2Ch,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->cmbA3Ch,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbAuxFn0,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbAuxFn1,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbAuxFn2,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
@@ -585,14 +585,14 @@ void MainWindow::updateToUI()
     ui->spnLPPan->setValue(trkset.getLpPan());
     ui->spnLPTiltRoll2->setValue(trkset.getLpTiltRoll());
     ui->spnLPPan2->setValue(trkset.getLpPan());
-    ui->spnA4Gain->setValue(trkset.getAn0Gain());
-    ui->spnA4Off->setValue(trkset.getAn0Off());
-    ui->spnA5Gain->setValue(trkset.getAn1Gain());
-    ui->spnA5Off->setValue(trkset.getAn1Off());
-    ui->spnA6Gain->setValue(trkset.getAn2Gain());
-    ui->spnA6Off->setValue(trkset.getAn2Off());
-    ui->spnA7Gain->setValue(trkset.getAn3Gain());
-    ui->spnA7Off->setValue(trkset.getAn3Off());
+    ui->spnA0Gain->setValue(trkset.getAn0Gain());
+    ui->spnA0Off->setValue(trkset.getAn0Off());
+    ui->spnA1Gain->setValue(trkset.getAn1Gain());
+    ui->spnA1Off->setValue(trkset.getAn1Off());
+    ui->spnA2Gain->setValue(trkset.getAn2Gain());
+    ui->spnA2Off->setValue(trkset.getAn2Off());
+    ui->spnA3Gain->setValue(trkset.getAn3Gain());
+    ui->spnA3Off->setValue(trkset.getAn3Off());
 
     ui->spnSBUSRate->setValue(trkset.getSbRate());
 
@@ -600,10 +600,10 @@ void MainWindow::updateToUI()
     int rllCh = trkset.getRllCh();
     int tltCh = trkset.getTltCh();
     int alertCh = trkset.getAlertCh();
-    int a4Ch = trkset.getAn0Ch();
-    int a5Ch = trkset.getAn1Ch();
-    int a6Ch = trkset.getAn2Ch();
-    int a7Ch = trkset.getAn3Ch();
+    int a0Ch = trkset.getAn0Ch();
+    int a1Ch = trkset.getAn1Ch();
+    int a2Ch = trkset.getAn2Ch();
+    int a3Ch = trkset.getAn3Ch();
     int auxF0Ch = trkset.getAux0Ch();
     int auxF1Ch = trkset.getAux1Ch();
     int auxF2Ch = trkset.getAux2Ch();
@@ -618,10 +618,10 @@ void MainWindow::updateToUI()
     ui->cmbtiltchn->setCurrentIndex(tltCh==-1?0:tltCh);
     ui->cmbalertchn->setCurrentIndex(alertCh==-1?0:alertCh);
     // Analog CH
-    ui->cmbA4Ch->setCurrentIndex(a5Ch==-1?0:a4Ch);
-    ui->cmbA5Ch->setCurrentIndex(a5Ch==-1?0:a5Ch);
-    ui->cmbA6Ch->setCurrentIndex(a6Ch==-1?0:a6Ch);
-    ui->cmbA7Ch->setCurrentIndex(a7Ch==-1?0:a7Ch);
+    ui->cmbA0Ch->setCurrentIndex(a0Ch==-1?0:a0Ch);
+    ui->cmbA1Ch->setCurrentIndex(a1Ch==-1?0:a1Ch);
+    ui->cmbA2Ch->setCurrentIndex(a2Ch==-1?0:a2Ch);
+    ui->cmbA3Ch->setCurrentIndex(a3Ch==-1?0:a3Ch);
     // Aux Funcs
     ui->cmbAuxFn0Ch->setCurrentIndex(auxF0Ch==-1?0:auxF0Ch);
     ui->cmbAuxFn1Ch->setCurrentIndex(auxF1Ch==-1?0:auxF1Ch);
@@ -744,22 +744,22 @@ void MainWindow::updateFromUI()
     }
 
     // Analog
-    trkset.setAn0Gain(ui->spnA4Gain->value());
-    trkset.setAn0Off(ui->spnA4Off->value());
-    trkset.setAn1Gain(ui->spnA5Gain->value());
-    trkset.setAn1Off(ui->spnA5Off->value());
-    trkset.setAn2Gain(ui->spnA6Gain->value());
-    trkset.setAn2Off(ui->spnA6Off->value());
-    trkset.setAn3Gain(ui->spnA7Gain->value());
-    trkset.setAn3Off(ui->spnA7Off->value());
-    int an4Ch = ui->cmbA4Ch->currentIndex();
-    int an5Ch = ui->cmbA5Ch->currentIndex();
-    int an6Ch = ui->cmbA6Ch->currentIndex();
-    int an7Ch = ui->cmbA7Ch->currentIndex();
-    trkset.setAn0Ch(an4Ch==0?-1:an4Ch);
-    trkset.setAn1Ch(an5Ch==0?-1:an5Ch);
-    trkset.setAn2Ch(an6Ch==0?-1:an6Ch);
-    trkset.setAn3Ch(an7Ch==0?-1:an7Ch);
+    trkset.setAn0Gain(ui->spnA0Gain->value());
+    trkset.setAn0Off(ui->spnA0Off->value());
+    trkset.setAn1Gain(ui->spnA1Gain->value());
+    trkset.setAn1Off(ui->spnA1Off->value());
+    trkset.setAn2Gain(ui->spnA2Gain->value());
+    trkset.setAn2Off(ui->spnA2Off->value());
+    trkset.setAn3Gain(ui->spnA3Gain->value());
+    trkset.setAn3Off(ui->spnA3Off->value());
+    int an0Ch = ui->cmbA0Ch->currentIndex();
+    int an1Ch = ui->cmbA1Ch->currentIndex();
+    int an2Ch = ui->cmbA2Ch->currentIndex();
+    int an3Ch = ui->cmbA3Ch->currentIndex();
+    trkset.setAn0Ch(an0Ch==0?-1:an0Ch);
+    trkset.setAn1Ch(an1Ch==0?-1:an1Ch);
+    trkset.setAn2Ch(an2Ch==0?-1:an2Ch);
+    trkset.setAn3Ch(an3Ch==0?-1:an3Ch);
 
     // Aux
     int auxF0Ch = ui->cmbAuxFn0Ch->currentIndex();

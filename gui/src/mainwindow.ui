@@ -532,7 +532,7 @@
              <bool>false</bool>
             </property>
             <property name="currentIndex">
-             <number>1</number>
+             <number>5</number>
             </property>
             <widget class="QWidget" name="tabGeneral">
              <attribute name="title">
@@ -2209,7 +2209,7 @@
                     </widget>
                    </item>
                    <item>
-                    <widget class="QDoubleSpinBox" name="spnA4Gain">
+                    <widget class="QDoubleSpinBox" name="spnA0Gain">
                      <property name="decimals">
                       <number>1</number>
                      </property>
@@ -2222,7 +2222,7 @@
                     </widget>
                    </item>
                    <item>
-                    <widget class="QSpinBox" name="spnA4Off">
+                    <widget class="QSpinBox" name="spnA0Off">
                      <property name="minimum">
                       <number>-2048</number>
                      </property>
@@ -2232,7 +2232,7 @@
                     </widget>
                    </item>
                    <item>
-                    <widget class="QComboBox" name="cmbA4Ch">
+                    <widget class="QComboBox" name="cmbA0Ch">
                      <property name="sizePolicy">
                       <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
                        <horstretch>0</horstretch>
@@ -2367,7 +2367,7 @@
                     </widget>
                    </item>
                    <item>
-                    <widget class="QDoubleSpinBox" name="spnA5Gain">
+                    <widget class="QDoubleSpinBox" name="spnA1Gain">
                      <property name="decimals">
                       <number>1</number>
                      </property>
@@ -2380,7 +2380,7 @@
                     </widget>
                    </item>
                    <item>
-                    <widget class="QSpinBox" name="spnA5Off">
+                    <widget class="QSpinBox" name="spnA1Off">
                      <property name="minimum">
                       <number>-2048</number>
                      </property>
@@ -2390,7 +2390,7 @@
                     </widget>
                    </item>
                    <item>
-                    <widget class="QComboBox" name="cmbA5Ch">
+                    <widget class="QComboBox" name="cmbA1Ch">
                      <property name="sizePolicy">
                       <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
                        <horstretch>0</horstretch>
@@ -2525,7 +2525,7 @@
                     </widget>
                    </item>
                    <item>
-                    <widget class="QDoubleSpinBox" name="spnA6Gain">
+                    <widget class="QDoubleSpinBox" name="spnA2Gain">
                      <property name="decimals">
                       <number>1</number>
                      </property>
@@ -2538,7 +2538,7 @@
                     </widget>
                    </item>
                    <item>
-                    <widget class="QSpinBox" name="spnA6Off">
+                    <widget class="QSpinBox" name="spnA2Off">
                      <property name="minimum">
                       <number>-2012</number>
                      </property>
@@ -2548,7 +2548,7 @@
                     </widget>
                    </item>
                    <item>
-                    <widget class="QComboBox" name="cmbA6Ch">
+                    <widget class="QComboBox" name="cmbA2Ch">
                      <property name="sizePolicy">
                       <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
                        <horstretch>0</horstretch>
@@ -2683,7 +2683,7 @@
                     </widget>
                    </item>
                    <item>
-                    <widget class="QDoubleSpinBox" name="spnA7Gain">
+                    <widget class="QDoubleSpinBox" name="spnA3Gain">
                      <property name="decimals">
                       <number>1</number>
                      </property>
@@ -2696,7 +2696,7 @@
                     </widget>
                    </item>
                    <item>
-                    <widget class="QSpinBox" name="spnA7Off">
+                    <widget class="QSpinBox" name="spnA3Off">
                      <property name="minimum">
                       <number>-2012</number>
                      </property>
@@ -2706,7 +2706,7 @@
                     </widget>
                    </item>
                    <item>
-                    <widget class="QComboBox" name="cmbA7Ch">
+                    <widget class="QComboBox" name="cmbA3Ch">
                      <property name="sizePolicy">
                       <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
                        <horstretch>0</horstretch>
