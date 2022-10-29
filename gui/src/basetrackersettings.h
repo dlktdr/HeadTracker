@@ -333,7 +333,7 @@ public:
     return _setting["tltch"].toInt();
   }
   bool setTltCh(int8_t val=-1) {
-    if(val >= 0 && val <= MAX_CHANNELS) {
+    if(val >= -1 && val <= MAX_CHANNELS) {
       _setting["tltch"] = val;
       return true;
     }
@@ -345,7 +345,7 @@ public:
     return _setting["rllch"].toInt();
   }
   bool setRllCh(int8_t val=-1) {
-    if(val >= 0 && val <= MAX_CHANNELS) {
+    if(val >= -1 && val <= MAX_CHANNELS) {
       _setting["rllch"] = val;
       return true;
     }
@@ -357,7 +357,7 @@ public:
     return _setting["panch"].toInt();
   }
   bool setPanCh(int8_t val=-1) {
-    if(val >= 0 && val <= MAX_CHANNELS) {
+    if(val >= -1 && val <= MAX_CHANNELS) {
       _setting["panch"] = val;
       return true;
     }
@@ -369,7 +369,7 @@ public:
     return _setting["alertch"].toInt();
   }
   bool setAlertCh(int8_t val=-1) {
-    if(val >= 0 && val <= MAX_CHANNELS) {
+    if(val >= -1 && val <= MAX_CHANNELS) {
       _setting["alertch"] = val;
       return true;
     }
@@ -381,7 +381,7 @@ public:
     return _setting["pwm0"].toInt();
   }
   bool setPwm0(int8_t val=-1) {
-    if(val >= 0 && val <= MAX_CHANNELS) {
+    if(val >= -1 && val <= MAX_CHANNELS) {
       _setting["pwm0"] = val;
       return true;
     }
@@ -393,7 +393,7 @@ public:
     return _setting["pwm1"].toInt();
   }
   bool setPwm1(int8_t val=-1) {
-    if(val >= 0 && val <= MAX_CHANNELS) {
+    if(val >= -1 && val <= MAX_CHANNELS) {
       _setting["pwm1"] = val;
       return true;
     }
@@ -405,7 +405,7 @@ public:
     return _setting["pwm2"].toInt();
   }
   bool setPwm2(int8_t val=-1) {
-    if(val >= 0 && val <= MAX_CHANNELS) {
+    if(val >= -1 && val <= MAX_CHANNELS) {
       _setting["pwm2"] = val;
       return true;
     }
@@ -417,7 +417,7 @@ public:
     return _setting["pwm3"].toInt();
   }
   bool setPwm3(int8_t val=-1) {
-    if(val >= 0 && val <= MAX_CHANNELS) {
+    if(val >= -1 && val <= MAX_CHANNELS) {
       _setting["pwm3"] = val;
       return true;
     }
@@ -429,7 +429,7 @@ public:
     return _setting["an0ch"].toInt();
   }
   bool setAn0Ch(int8_t val=-1) {
-    if(val >= 0 && val <= MAX_CHANNELS) {
+    if(val >= -1 && val <= MAX_CHANNELS) {
       _setting["an0ch"] = val;
       return true;
     }
@@ -441,7 +441,7 @@ public:
     return _setting["an1ch"].toInt();
   }
   bool setAn1Ch(int8_t val=-1) {
-    if(val >= 0 && val <= MAX_CHANNELS) {
+    if(val >= -1 && val <= MAX_CHANNELS) {
       _setting["an1ch"] = val;
       return true;
     }
@@ -453,7 +453,7 @@ public:
     return _setting["an2ch"].toInt();
   }
   bool setAn2Ch(int8_t val=-1) {
-    if(val >= 0 && val <= MAX_CHANNELS) {
+    if(val >= -1 && val <= MAX_CHANNELS) {
       _setting["an2ch"] = val;
       return true;
     }
@@ -465,7 +465,7 @@ public:
     return _setting["an3ch"].toInt();
   }
   bool setAn3Ch(int8_t val=-1) {
-    if(val >= 0 && val <= MAX_CHANNELS) {
+    if(val >= -1 && val <= MAX_CHANNELS) {
       _setting["an3ch"] = val;
       return true;
     }
@@ -477,7 +477,7 @@ public:
     return _setting["aux0ch"].toInt();
   }
   bool setAux0Ch(int8_t val=-1) {
-    if(val >= 0 && val <= MAX_CHANNELS) {
+    if(val >= -1 && val <= MAX_CHANNELS) {
       _setting["aux0ch"] = val;
       return true;
     }
@@ -489,7 +489,7 @@ public:
     return _setting["aux1ch"].toInt();
   }
   bool setAux1Ch(int8_t val=-1) {
-    if(val >= 0 && val <= MAX_CHANNELS) {
+    if(val >= -1 && val <= MAX_CHANNELS) {
       _setting["aux1ch"] = val;
       return true;
     }
@@ -501,7 +501,7 @@ public:
     return _setting["aux2ch"].toInt();
   }
   bool setAux2Ch(int8_t val=-1) {
-    if(val >= 0 && val <= MAX_CHANNELS) {
+    if(val >= -1 && val <= MAX_CHANNELS) {
       _setting["aux2ch"] = val;
       return true;
     }
@@ -513,7 +513,7 @@ public:
     return _setting["rstppm"].toInt();
   }
   bool setRstPpm(int8_t val=-1) {
-    if(val >= 0 && val <= MAX_CHANNELS) {
+    if(val >= -1 && val <= MAX_CHANNELS) {
       _setting["rstppm"] = val;
       return true;
     }

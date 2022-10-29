@@ -206,7 +206,7 @@ public:
   // Tilt Output Channel
   inline const int8_t& getTltCh() {return tltch;}
   bool setTltCh(int8_t val=-1) {
-    if(val >= 0 && val <= MAX_CHANNELS) {
+    if(val >= -1 && val <= MAX_CHANNELS) {
       tltch = val;
       return true;
     }
@@ -216,7 +216,7 @@ public:
   // Roll Output Channel
   inline const int8_t& getRllCh() {return rllch;}
   bool setRllCh(int8_t val=-1) {
-    if(val >= 0 && val <= MAX_CHANNELS) {
+    if(val >= -1 && val <= MAX_CHANNELS) {
       rllch = val;
       return true;
     }
@@ -226,7 +226,7 @@ public:
   // Pan Output Channel
   inline const int8_t& getPanCh() {return panch;}
   bool setPanCh(int8_t val=-1) {
-    if(val >= 0 && val <= MAX_CHANNELS) {
+    if(val >= -1 && val <= MAX_CHANNELS) {
       panch = val;
       return true;
     }
@@ -236,7 +236,7 @@ public:
   // Alert Output Channel
   inline const int8_t& getAlertCh() {return alertch;}
   bool setAlertCh(int8_t val=-1) {
-    if(val >= 0 && val <= MAX_CHANNELS) {
+    if(val >= -1 && val <= MAX_CHANNELS) {
       alertch = val;
       return true;
     }
@@ -246,7 +246,7 @@ public:
   // PWM 0 Channel
   inline const int8_t& getPwm0() {return pwm0;}
   bool setPwm0(int8_t val=-1) {
-    if(val >= 0 && val <= MAX_CHANNELS) {
+    if(val >= -1 && val <= MAX_CHANNELS) {
       pwm0 = val;
       return true;
     }
@@ -256,7 +256,7 @@ public:
   // PWM 1 Channel
   inline const int8_t& getPwm1() {return pwm1;}
   bool setPwm1(int8_t val=-1) {
-    if(val >= 0 && val <= MAX_CHANNELS) {
+    if(val >= -1 && val <= MAX_CHANNELS) {
       pwm1 = val;
       return true;
     }
@@ -266,7 +266,7 @@ public:
   // PWM 2 Channel
   inline const int8_t& getPwm2() {return pwm2;}
   bool setPwm2(int8_t val=-1) {
-    if(val >= 0 && val <= MAX_CHANNELS) {
+    if(val >= -1 && val <= MAX_CHANNELS) {
       pwm2 = val;
       return true;
     }
@@ -276,7 +276,7 @@ public:
   // PWM 3 Channel
   inline const int8_t& getPwm3() {return pwm3;}
   bool setPwm3(int8_t val=-1) {
-    if(val >= 0 && val <= MAX_CHANNELS) {
+    if(val >= -1 && val <= MAX_CHANNELS) {
       pwm3 = val;
       return true;
     }
@@ -286,7 +286,7 @@ public:
   // Analog 0 Channel
   inline const int8_t& getAn0Ch() {return an0ch;}
   bool setAn0Ch(int8_t val=-1) {
-    if(val >= 0 && val <= MAX_CHANNELS) {
+    if(val >= -1 && val <= MAX_CHANNELS) {
       an0ch = val;
       return true;
     }
@@ -296,7 +296,7 @@ public:
   // Analog 1 Channel
   inline const int8_t& getAn1Ch() {return an1ch;}
   bool setAn1Ch(int8_t val=-1) {
-    if(val >= 0 && val <= MAX_CHANNELS) {
+    if(val >= -1 && val <= MAX_CHANNELS) {
       an1ch = val;
       return true;
     }
@@ -306,7 +306,7 @@ public:
   // Analog 2 Channel
   inline const int8_t& getAn2Ch() {return an2ch;}
   bool setAn2Ch(int8_t val=-1) {
-    if(val >= 0 && val <= MAX_CHANNELS) {
+    if(val >= -1 && val <= MAX_CHANNELS) {
       an2ch = val;
       return true;
     }
@@ -316,7 +316,7 @@ public:
   // Analog 3 Channel
   inline const int8_t& getAn3Ch() {return an3ch;}
   bool setAn3Ch(int8_t val=-1) {
-    if(val >= 0 && val <= MAX_CHANNELS) {
+    if(val >= -1 && val <= MAX_CHANNELS) {
       an3ch = val;
       return true;
     }
@@ -326,7 +326,7 @@ public:
   // Auxilary Function 0 Channel
   inline const int8_t& getAux0Ch() {return aux0ch;}
   bool setAux0Ch(int8_t val=-1) {
-    if(val >= 0 && val <= MAX_CHANNELS) {
+    if(val >= -1 && val <= MAX_CHANNELS) {
       aux0ch = val;
       return true;
     }
@@ -336,7 +336,7 @@ public:
   // Auxilary Function 1 Channel
   inline const int8_t& getAux1Ch() {return aux1ch;}
   bool setAux1Ch(int8_t val=-1) {
-    if(val >= 0 && val <= MAX_CHANNELS) {
+    if(val >= -1 && val <= MAX_CHANNELS) {
       aux1ch = val;
       return true;
     }
@@ -346,7 +346,7 @@ public:
   // Auxilary Function 2 Channel
   inline const int8_t& getAux2Ch() {return aux2ch;}
   bool setAux2Ch(int8_t val=-1) {
-    if(val >= 0 && val <= MAX_CHANNELS) {
+    if(val >= -1 && val <= MAX_CHANNELS) {
       aux2ch = val;
       return true;
     }
@@ -356,7 +356,7 @@ public:
   // Reset Center on PPM Input Channel
   inline const int8_t& getRstPpm() {return rstppm;}
   bool setRstPpm(int8_t val=-1) {
-    if(val >= 0 && val <= MAX_CHANNELS) {
+    if(val >= -1 && val <= MAX_CHANNELS) {
       rstppm = val;
       return true;
     }

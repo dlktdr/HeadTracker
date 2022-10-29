@@ -86,22 +86,22 @@ u16,Setting,Pan_Cnt,PPM_CENTER,MIN_PWM,MAX_PWM,Pan Center,,,,F010
 u16,Setting,Pan_Gain,5,MIN_GAIN,MAX_GAIN,Pan Gain,,,,F011
 ,,,,,,,,,,
 Output Channels,,,,,,,,,,
-s8,Setting,TltCh,-1,0,MAX_CHANNELS,Tilt Output Channel,,,,F100
-s8,Setting,RllCh,-1,0,MAX_CHANNELS,Roll Output Channel,,,,F101
-s8,Setting,PanCh,-1,0,MAX_CHANNELS,Pan Output Channel,,,,F102
-s8,Setting,AlertCh,-1,0,MAX_CHANNELS,Alert Output Channel,,,,F103
-s8,Setting,Pwm0,-1,0,MAX_CHANNELS,PWM 0 Channel,,,,F104
-s8,Setting,Pwm1,-1,0,MAX_CHANNELS,PWM 1 Channel,,,,F105
-s8,Setting,Pwm2,-1,0,MAX_CHANNELS,PWM 2 Channel,,,,F106
-s8,Setting,Pwm3,-1,0,MAX_CHANNELS,PWM 3 Channel,,,,F107
-s8,Setting,An0Ch,-1,0,MAX_CHANNELS,Analog 0 Channel,,,,F108
-s8,Setting,An1Ch,-1,0,MAX_CHANNELS,Analog 1 Channel,,,,F109
-s8,Setting,An2Ch,-1,0,MAX_CHANNELS,Analog 2 Channel,,,,F10A
-s8,Setting,An3Ch,-1,0,MAX_CHANNELS,Analog 3 Channel,,,,F10B
-s8,Setting,Aux0Ch,-1,0,MAX_CHANNELS,Auxilary Function 0 Channel,,,,F10C
-s8,Setting,Aux1Ch,-1,0,MAX_CHANNELS,Auxilary Function 1 Channel,,,,F10D
-s8,Setting,Aux2Ch,-1,0,MAX_CHANNELS,Auxilary Function 2 Channel,,,,F10E
-s8,Setting,RstPpm,-1,0,MAX_CHANNELS,Reset Center on PPM Input Channel,,,,F10F
+s8,Setting,TltCh,-1,-1,MAX_CHANNELS,Tilt Output Channel,,,,F100
+s8,Setting,RllCh,-1,-1,MAX_CHANNELS,Roll Output Channel,,,,F101
+s8,Setting,PanCh,-1,-1,MAX_CHANNELS,Pan Output Channel,,,,F102
+s8,Setting,AlertCh,-1,-1,MAX_CHANNELS,Alert Output Channel,,,,F103
+s8,Setting,Pwm0,-1,-1,MAX_CHANNELS,PWM 0 Channel,,,,F104
+s8,Setting,Pwm1,-1,-1,MAX_CHANNELS,PWM 1 Channel,,,,F105
+s8,Setting,Pwm2,-1,-1,MAX_CHANNELS,PWM 2 Channel,,,,F106
+s8,Setting,Pwm3,-1,-1,MAX_CHANNELS,PWM 3 Channel,,,,F107
+s8,Setting,An0Ch,-1,-1,MAX_CHANNELS,Analog 0 Channel,,,,F108
+s8,Setting,An1Ch,-1,-1,MAX_CHANNELS,Analog 1 Channel,,,,F109
+s8,Setting,An2Ch,-1,-1,MAX_CHANNELS,Analog 2 Channel,,,,F10A
+s8,Setting,An3Ch,-1,-1,MAX_CHANNELS,Analog 3 Channel,,,,F10B
+s8,Setting,Aux0Ch,-1,-1,MAX_CHANNELS,Auxilary Function 0 Channel,,,,F10C
+s8,Setting,Aux1Ch,-1,-1,MAX_CHANNELS,Auxilary Function 1 Channel,,,,F10D
+s8,Setting,Aux2Ch,-1,-1,MAX_CHANNELS,Auxilary Function 2 Channel,,,,F10E
+s8,Setting,RstPpm,-1,-1,MAX_CHANNELS,Reset Center on PPM Input Channel,,,,F10F
 ,,,,,,,,,,
 Auxilary Functions,,,,,,,,,,
 u8,Setting,Aux0Func,0,0,AUX_FUNCTIONS,Auxilary Function 0,,,,
