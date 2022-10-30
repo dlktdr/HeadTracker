@@ -63,6 +63,10 @@ public:
   static constexpr float PPM_MIN_FRAMESYNC = 3000;
   static constexpr float PPM_MIN_FRAME = 6666;
   static constexpr float PPM_MAX_FRAME = 40000;
+  static constexpr uint8_t UART_MODE_OFF = 0;
+  static constexpr uint8_t UART_MODE_SBUS = 1;
+  static constexpr uint8_t UART_MODE_CRSFIN = 2;
+  static constexpr uint8_t UART_MODE_CRSFOUT = 3;
 
   BaseTrackerSettings() {
     strcpy(btpairedaddress,"");
@@ -75,13 +79,13 @@ public:
     memset(btrmt,0,sizeof(char) * 18);
 
     // Call Virtual Events after initialization
-    pinsChanged();
     resetFusion();
+    pinsChanged();
   }
 
   // Virtual Events
-  virtual void pinsChanged() {};
   virtual void resetFusion() {};
+  virtual void pinsChanged() {};
 
   // Roll Minimum
   inline const uint16_t& getRll_Min() {return rll_min;}
@@ -1052,8 +1056,8 @@ public:
 
   void loadJSONSettings(DynamicJsonDocument &json) {
     JsonVariant v;
-    bool chpinschanged = false;
     bool chresetfusion = false;
+    bool chpinschanged = false;
     v = json["rll_min"]; if(!v.isNull()) {setRll_Min(v);}
     v = json["rll_max"]; if(!v.isNull()) {setRll_Max(v);}
     v = json["rll_cnt"]; if(!v.isNull()) {setRll_Cnt(v);}
@@ -1133,10 +1137,10 @@ public:
     v = json["ppmchcnt"]; if(!v.isNull()) {setPpmChCnt(v);}
     v = json["lppan"]; if(!v.isNull()) {setLpPan(v);}
     v = json["lptiltroll"]; if(!v.isNull()) {setLpTiltRoll(v);}
-    if(chpinschanged)
-      pinsChanged();
     if(chresetfusion)
       resetFusion();
+    if(chpinschanged)
+      pinsChanged();
   }
 
   void setJSONDataList(DynamicJsonDocument &json)
@@ -1367,7 +1371,7 @@ public:
       }
     }
   }
-
+  
   void setJSONData(DynamicJsonDocument &json)
   {
     // Sends only requested data items

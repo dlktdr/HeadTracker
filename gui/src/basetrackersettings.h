@@ -59,6 +59,10 @@ public:
   static constexpr float PPM_MIN_FRAMESYNC = 3000;
   static constexpr float PPM_MIN_FRAME = 6666;
   static constexpr float PPM_MAX_FRAME = 40000;
+  static constexpr uint8_t UART_MODE_OFF = 0;
+  static constexpr uint8_t UART_MODE_SBUS = 1;
+  static constexpr uint8_t UART_MODE_CRSFIN = 2;
+  static constexpr uint8_t UART_MODE_CRSFOUT = 3;
 
   BaseTrackerSettings(QObject *parent=nullptr) : 
     QObject(parent)

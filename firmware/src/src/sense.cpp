@@ -485,6 +485,11 @@ void calculate_Thread()
     if (panch > 0)
       channel_data[panch - 1] = trpOutputEnabled == true ? panout_ui : trkset.getPan_Cnt();
 
+    // If uart output set to CRSR_OUT, force channel 5 (AUX1/ARM) to high, will override all other channels
+    if(trkset.getUartMode() == TrackerSettings::UART_MODE_CRSFOUT) {
+      channel_data[4] = 2000;
+    }
+
     // 10) Set the PPM Outputs
     PpmOut_execute();
     for (int i = 0; i < PpmOut_getChnCount(); i++) {
