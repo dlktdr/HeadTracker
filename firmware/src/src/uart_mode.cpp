@@ -19,7 +19,7 @@
 
 #include <zephyr.h>
 
-#include "CRSF/crsf.h"
+#include "CRSF/crsfin.h"
 #include "SBUS/sbus.h"
 #include "defines.h"
 #include "io.h"

@@ -17,6 +17,12 @@
 // Clashes with CRSF_ADDRESS_FLIGHT_CONTROLLER
 #define CRSF_SYNC_BYTE 0XC8
 
+float map(float value, float inl, float inh, float outl, float outh) {
+  float rngin = inh-inl;
+  float rngout = outh-outl;
+  return ((value - inl) * rngout / rngin ) + outl;
+}
+
 enum {
     CRSF_FRAME_LENGTH_ADDRESS = 1, // length of ADDRESS field
     CRSF_FRAME_LENGTH_FRAMELENGTH = 1, // length of FRAMELENGTH field

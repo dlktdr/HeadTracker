@@ -1,4 +1,9 @@
-#include "crsf.h"
+/* This code below is from CapnBry https://github.com/CapnBry/CRServoF
+ *
+ * It was modified for use in HT. Sep 25, 2022
+ */
+
+#include "crsfin.h"
 
 #include <string.h>
 
@@ -242,3 +247,4 @@ void CrsfSerial::setPassthroughMode(bool val, unsigned int baud)
   else
     AuxSerial_Open(baud, CONF8N1);
 }
+
