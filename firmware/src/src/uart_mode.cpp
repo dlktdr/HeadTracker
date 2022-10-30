@@ -20,6 +20,7 @@
 #include <zephyr.h>
 
 #include "CRSF/crsfin.h"
+#include "CRSF/crsfout.h"
 #include "SBUS/sbus.h"
 #include "defines.h"
 #include "io.h"
@@ -82,13 +83,22 @@ void uartRx_Thread()
         }
         break;
       case UARTCRSFIN:
-        if (crsf) {
+        if (crsfin) {
+          crsfin->loop();
+          dataIsValid = crsfin->isLinkUp();
+          if (dataIsValid) {
+            for (int i = 0; i < 16; i++) uart_channels[i] = crsfin->getChannel(i + 1);
+          }
+        }
+        break;
+      case UARTCRSFOUT:
+        /*if (crsf) {
           crsf->loop();
           dataIsValid = crsf->isLinkUp();
           if (dataIsValid) {
             for (int i = 0; i < 16; i++) uart_channels[i] = crsf->getChannel(i + 1);
           }
-        }
+        }*/
         break;
       default:
         break;
@@ -132,9 +142,13 @@ void UartSetMode(uartmodet mode)
       SbusInit();
       break;
     case UARTCRSFIN:
-      if (crsf) delete crsf;
+      if (crsfin) delete crsfin;
       CrsfInInit();
       break;
+    case UARTCRSFOUT:
+      CrsfOutInit();
+      break;
+
     default:
       break;
   }
@@ -179,7 +193,23 @@ void UartSetChannels(uint16_t channels[16])
       SbusWriteChannels(channels);
       break;
     case UARTCRSFOUT:
-
+      crsfout.PackedRCdataOut.ch0 = US_to_CRSF(channels[0]);
+      crsfout.PackedRCdataOut.ch1 = US_to_CRSF(channels[1]);
+      crsfout.PackedRCdataOut.ch2 = US_to_CRSF(channels[2]);
+      crsfout.PackedRCdataOut.ch3 = US_to_CRSF(channels[3]);
+      crsfout.PackedRCdataOut.ch4 = US_to_CRSF(channels[4]);
+      crsfout.PackedRCdataOut.ch5 = US_to_CRSF(channels[5]);
+      crsfout.PackedRCdataOut.ch6 = US_to_CRSF(channels[6]);
+      crsfout.PackedRCdataOut.ch7 = US_to_CRSF(channels[7]);
+      crsfout.PackedRCdataOut.ch8 = US_to_CRSF(channels[8]);
+      crsfout.PackedRCdataOut.ch9 = US_to_CRSF(channels[9]);
+      crsfout.PackedRCdataOut.ch10 = US_to_CRSF(channels[10]);
+      crsfout.PackedRCdataOut.ch11 = US_to_CRSF(channels[11]);
+      crsfout.PackedRCdataOut.ch12 = US_to_CRSF(channels[12]);
+      crsfout.PackedRCdataOut.ch13 = US_to_CRSF(channels[13]);
+      crsfout.PackedRCdataOut.ch14 = US_to_CRSF(channels[14]);
+      crsfout.PackedRCdataOut.ch15 = US_to_CRSF(channels[15]);
+      crsfout.sendRCFrameToFC();
       break;
     default:
       break;

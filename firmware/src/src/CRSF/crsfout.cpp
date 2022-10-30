@@ -1,4 +1,13 @@
 #include "crsfout.h"
+#include "auxserial.h"
+#include "crc8.h"
+
+CRSF crsfout;
+
+void CrsfOutInit()
+{
+  crsfout.Begin();
+}
 
 volatile bool CRSF::ignoreSerialData = false;
 volatile bool CRSF::CRSFframeActive = false; //since we get a copy of the serial data use this flag to know when to ignore it
@@ -29,11 +38,10 @@ volatile uint8_t CRSF::ParameterUpdateData[2] = {0};
 volatile crsf_channels_s CRSF::PackedRCdataOut;
 volatile crsfPayloadLinkstatistics_s CRSF::LinkStatistics;
 
-//CRSF::CRSF(HardwareSerial &serial) : CRSF_SERIAL(serial){};
-
 void CRSF::Begin()
 {
-  CRSF::Port.begin(CRSF_RX_BAUDRATE, SERIAL_8N1, CSFR_RXpin_Module, CSFR_TXpin_Module, uartCRSFinverted);
+  AuxSerial_Close();
+  AuxSerial_Open(BAUD420000, CONF8N1);
 }
 
 void CRSF::sendLinkStatisticsToFC()
@@ -44,13 +52,14 @@ void CRSF::sendLinkStatisticsToFC()
   outBuffer[1] = LinkStatisticsFrameLength + 2;
   outBuffer[2] = CRSF_FRAMETYPE_LINK_STATISTICS;
 
-  memcpy(outBuffer + 3, (byte *)&LinkStatistics, LinkStatisticsFrameLength);
+  memcpy(outBuffer + 3, (void *)&LinkStatistics, LinkStatisticsFrameLength);
 
-  uint8_t crc = CalcCRC(&outBuffer[2], LinkStatisticsFrameLength + 1);
+  Crc8 _crc(0xd5);
+  uint8_t crc = _crc.calc(&outBuffer[2], LinkStatisticsFrameLength + 1);
 
   outBuffer[LinkStatisticsFrameLength + 3] = crc;
 
-  CRSF::Port.write(outBuffer, LinkStatisticsFrameLength + 4);
+  AuxSerial_Write(outBuffer, LinkStatisticsFrameLength + 4);
 }
 
 void CRSF::sendRCFrameToFC()
@@ -61,16 +70,11 @@ void CRSF::sendRCFrameToFC()
   outBuffer[1] = RCframeLength + 2;
   outBuffer[2] = CRSF_FRAMETYPE_RC_CHANNELS_PACKED;
 
-  memcpy(outBuffer + 3, (byte *)&PackedRCdataOut, RCframeLength);
-
-  uint8_t crc = CalcCRC(&outBuffer[2], RCframeLength + 1);
+  memcpy(outBuffer + 3, (void *)&PackedRCdataOut, RCframeLength);
+  Crc8 _crc(0xd5);
+  uint8_t crc = _crc.calc(&outBuffer[2], RCframeLength + 1);
 
   outBuffer[RCframeLength + 3] = crc;
 
-  CRSF::Port.write(outBuffer, RCframeLength + 4);
-}
-
-void CRSF::FlushSerial()
-{
-  CRSF::Port.flush();
+  AuxSerial_Write(outBuffer, RCframeLength + 4);
 }

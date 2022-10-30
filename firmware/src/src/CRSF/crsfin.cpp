@@ -4,6 +4,7 @@
  */
 
 #include "crsfin.h"
+#include "crsfout.h"
 
 #include <string.h>
 
@@ -11,7 +12,7 @@
 #include "log.h"
 #include "uart_mode.h"
 
-CrsfSerial *crsf;
+CrsfSerial *crsfin = nullptr;
 
 static void crsfShiftyByte(uint8_t b)
 {
@@ -31,12 +32,12 @@ void crsfLinkDown() {}
 
 void CrsfInInit()
 {
-  crsf = new CrsfSerial;
-  crsf->onLinkUp = &crsfLinkUp;
-  crsf->onLinkDown = &crsfLinkDown;
-  crsf->onShiftyByte = &crsfShiftyByte;
-  crsf->onPacketChannels = &packetChannels;
-  crsf->onPacketLinkStatistics = &packetLinkStatistics;
+  crsfin = new CrsfSerial;
+  crsfin->onLinkUp = &crsfLinkUp;
+  crsfin->onLinkDown = &crsfLinkDown;
+  crsfin->onShiftyByte = &crsfShiftyByte;
+  crsfin->onPacketChannels = &packetChannels;
+  crsfin->onPacketLinkStatistics = &packetLinkStatistics;
 }
 
 CrsfSerial::CrsfSerial(uint32_t baud) :
@@ -185,7 +186,7 @@ void CrsfSerial::packetChannelsPacked(const crsf_header_t *p)
   _channels[15] = ch->ch15;
 
   for (unsigned int i = 0; i < CRSF_NUM_CHANNELS; ++i) {
-    _channels[i] = map(_channels[i], CRSF_CHANNEL_VALUE_1000, CRSF_CHANNEL_VALUE_2000, 1000, 2000);
+    _channels[i] = fmap(_channels[i], CRSF_CHANNEL_VALUE_1000, CRSF_CHANNEL_VALUE_2000, 1000, 2000);
   }
 
   if (!_linkIsUp && onLinkUp) onLinkUp();
