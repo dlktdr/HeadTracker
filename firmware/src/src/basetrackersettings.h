@@ -75,13 +75,13 @@ public:
     memset(btrmt,0,sizeof(char) * 18);
 
     // Call Virtual Events after initialization
-    resetFusion();
     pinsChanged();
+    resetFusion();
   }
 
   // Virtual Events
-  virtual void resetFusion() {};
   virtual void pinsChanged() {};
+  virtual void resetFusion() {};
 
   // Roll Minimum
   inline const uint16_t& getRll_Min() {return rll_min;}
@@ -946,9 +946,9 @@ public:
     memcpy(ppmch, val, sizeof(uint16_t) * 16);
   }
 
-  // SBUS Channels
-  void setDataSbusCh(const uint16_t val[16]) {
-    memcpy(sbusch, val, sizeof(uint16_t) * 16);
+  // Uart Channels (Sbus/Crsf)
+  void setDataUartCh(const uint16_t val[16]) {
+    memcpy(uartch, val, sizeof(uint16_t) * 16);
   }
 
   // Quaternion Output (Tilt / Roll / Pan)
@@ -1052,8 +1052,8 @@ public:
 
   void loadJSONSettings(DynamicJsonDocument &json) {
     JsonVariant v;
-    bool chresetfusion = false;
     bool chpinschanged = false;
+    bool chresetfusion = false;
     v = json["rll_min"]; if(!v.isNull()) {setRll_Min(v);}
     v = json["rll_max"]; if(!v.isNull()) {setRll_Max(v);}
     v = json["rll_cnt"]; if(!v.isNull()) {setRll_Cnt(v);}
@@ -1133,10 +1133,10 @@ public:
     v = json["ppmchcnt"]; if(!v.isNull()) {setPpmChCnt(v);}
     v = json["lppan"]; if(!v.isNull()) {setLpPan(v);}
     v = json["lptiltroll"]; if(!v.isNull()) {setLpTiltRoll(v);}
-    if(chresetfusion)
-      resetFusion();
     if(chpinschanged)
       pinsChanged();
+    if(chresetfusion)
+      resetFusion();
   }
 
   void setJSONDataList(DynamicJsonDocument &json)
@@ -1443,7 +1443,7 @@ public:
     sendArray(json,1,counter,1,"6choutu16",(void*)chout,(void*)lastchout, sizeof(uint16_t) * 16);
     sendArray(json,2,counter,1,"6btchu16",(void*)btch,(void*)lastbtch, sizeof(uint16_t) * 8);
     sendArray(json,3,counter,1,"6ppmchu16",(void*)ppmch,(void*)lastppmch, sizeof(uint16_t) * 16);
-    sendArray(json,4,counter,1,"6sbuschu16",(void*)uartch,(void*)lastuartch, sizeof(uint16_t) * 16);
+    sendArray(json,4,counter,1,"6uartchu16",(void*)uartch,(void*)lastuartch, sizeof(uint16_t) * 16);
     sendArray(json,5,counter,1,"6quatflt",(void*)quat,(void*)lastquat, sizeof(float) * 4);
     sendArray(json,6,counter,10,"6btaddrchr",(void*)btaddr,(void*)lastbtaddr, sizeof(char) * 18);
     sendArray(json,7,counter,10,"6btrmtchr",(void*)btrmt,(void*)lastbtrmt, sizeof(char) * 18);
