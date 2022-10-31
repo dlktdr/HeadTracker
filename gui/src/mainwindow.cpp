@@ -125,6 +125,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->chkSbusOutInv,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
     connect(ui->chkLngBttnPress,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
     connect(ui->chkRstOnTlt,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
+    connect(ui->chkCh5Arm,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
 
     //connect(ui->chkRawData,SIGNAL(clicked(bool)),this,SLOT(setDataMode(bool)));
 
@@ -621,6 +622,7 @@ void MainWindow::updateToUI()
     // Uart Mode
     ui->cmbUartMode->setCurrentIndex(trkset.getUartMode());
     ui->stkUart->setCurrentIndex(trkset.getUartMode());
+    ui->chkCh5Arm->setChecked(trkset.getCh5Arm());
     // Analog CH
     ui->cmbA0Ch->setCurrentIndex(a0Ch==-1?0:a0Ch);
     ui->cmbA1Ch->setCurrentIndex(a1Ch==-1?0:a1Ch);
@@ -749,6 +751,7 @@ void MainWindow::updateFromUI()
 
     // Uart Mode
     trkset.setUartMode(ui->cmbUartMode->currentIndex());
+    trkset.setCh5Arm(ui->chkCh5Arm->isChecked());
 
     // Analog
     trkset.setAn0Gain(ui->spnA0Gain->value());

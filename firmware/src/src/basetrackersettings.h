@@ -79,13 +79,13 @@ public:
     memset(btrmt,0,sizeof(char) * 18);
 
     // Call Virtual Events after initialization
-    resetFusion();
     pinsChanged();
+    resetFusion();
   }
 
   // Virtual Events
-  virtual void resetFusion() {};
   virtual void pinsChanged() {};
+  virtual void resetFusion() {};
 
   // Roll Minimum
   inline const uint16_t& getRll_Min() {return rll_min;}
@@ -755,6 +755,10 @@ public:
   inline const bool& getSbOutInv() {return sboutinv;}
   void setSbOutInv(bool val=true) { sboutinv = val; }
 
+  // Channel 5 
+  inline const bool& getCh5Arm() {return ch5arm;}
+  void setCh5Arm(bool val=true) { ch5arm = val; }
+
   // Bluetooth Mode (0-Off, 1- Head, 2-Receive, 3-Scanner)
   inline const uint8_t& getBtMode() {return btmode;}
   bool setBtMode(uint8_t val=0) {
@@ -1041,6 +1045,7 @@ public:
     json["uarttxrate"] = uarttxrate;
     json["sbininv"] = sbininv;
     json["sboutinv"] = sboutinv;
+    json["ch5arm"] = ch5arm;
     json["btmode"] = btmode;
     json["rstonwave"] = rstonwave;
     json["butlngps"] = butlngps;
@@ -1056,8 +1061,8 @@ public:
 
   void loadJSONSettings(DynamicJsonDocument &json) {
     JsonVariant v;
-    bool chresetfusion = false;
     bool chpinschanged = false;
+    bool chresetfusion = false;
     v = json["rll_min"]; if(!v.isNull()) {setRll_Min(v);}
     v = json["rll_max"]; if(!v.isNull()) {setRll_Max(v);}
     v = json["rll_cnt"]; if(!v.isNull()) {setRll_Cnt(v);}
@@ -1126,6 +1131,7 @@ public:
     v = json["uarttxrate"]; if(!v.isNull()) {setUartTxRate(v);}
     v = json["sbininv"]; if(!v.isNull()) {setSbInInv(v); chpinschanged = true;}
     v = json["sboutinv"]; if(!v.isNull()) {setSbOutInv(v);}
+    v = json["ch5arm"]; if(!v.isNull()) {setCh5Arm(v);}
     v = json["btmode"]; if(!v.isNull()) {setBtMode(v);}
     v = json["rstonwave"]; if(!v.isNull()) {setRstOnWave(v);}
     v = json["butlngps"]; if(!v.isNull()) {setButLngPs(v);}
@@ -1137,10 +1143,10 @@ public:
     v = json["ppmchcnt"]; if(!v.isNull()) {setPpmChCnt(v);}
     v = json["lppan"]; if(!v.isNull()) {setLpPan(v);}
     v = json["lptiltroll"]; if(!v.isNull()) {setLpTiltRoll(v);}
-    if(chresetfusion)
-      resetFusion();
     if(chpinschanged)
       pinsChanged();
+    if(chresetfusion)
+      resetFusion();
   }
 
   void setJSONDataList(DynamicJsonDocument &json)
@@ -1536,6 +1542,7 @@ protected:
   uint8_t uarttxrate = 80; // SBUS Transmit Freqency
   bool sbininv = true; // SBUS Receieve Inverted
   bool sboutinv = true; // SBUS Transmit Inverted
+  bool ch5arm = true; // Channel 5 
   uint8_t btmode = 0; // Bluetooth Mode (0-Off, 1- Head, 2-Receive, 3-Scanner)
   bool rstonwave = false; // Reset on Proximity Sense
   bool butlngps = false; // Long Press on the Button to Enable/Disable Tilt Roll and Pan

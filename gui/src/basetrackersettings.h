@@ -135,6 +135,7 @@ public:
     _setting["uarttxrate"] = 80;
     _setting["sbininv"] = true;
     _setting["sboutinv"] = true;
+    _setting["ch5arm"] = true;
     _setting["btmode"] = 0;
     _setting["rstonwave"] = false;
     _setting["butlngps"] = false;
@@ -1016,6 +1017,10 @@ public:
   // SBUS Transmit Inverted
   bool getSbOutInv() {return _setting["sboutinv"].toBool();}
   void setSbOutInv(bool val=true) { _setting["sboutinv"] = val; }
+
+  // Channel 5 
+  bool getCh5Arm() {return _setting["ch5arm"].toBool();}
+  void setCh5Arm(bool val=true) { _setting["ch5arm"] = val; }
 
   // Bluetooth Mode (0-Off, 1- Head, 2-Receive, 3-Scanner)
   uint8_t getBtMode() {

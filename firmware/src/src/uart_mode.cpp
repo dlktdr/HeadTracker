@@ -120,7 +120,6 @@ void uartTx_Thread()
         break;
       case UARTCRSFOUT:
         crsfout.sendRCFrameToFC();
-        // Todo send a CRSF packet
         break;
       default:
         break;

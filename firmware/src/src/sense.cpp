@@ -487,7 +487,8 @@ void calculate_Thread()
 
     // If uart output set to CRSR_OUT, force channel 5 (AUX1/ARM) to high, will override all other channels
     if(trkset.getUartMode() == TrackerSettings::UART_MODE_CRSFOUT) {
-      channel_data[4] = 2000;
+      if(trkset.getCh5Arm())
+        channel_data[4] = 2000;
     }
 
     // 10) Set the PPM Outputs
