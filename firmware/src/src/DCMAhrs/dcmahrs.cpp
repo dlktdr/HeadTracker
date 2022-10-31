@@ -287,8 +287,8 @@ void DCMnormalization_Thread()
 
 void DcmCalculate(float u0[3], float u1[3], float u2[3], float deltat)
 {
-  float kp = trkset.Kp();
-  float ki = trkset.Ki();
+  float kp = trkset.getKp();
+  float ki = trkset.getKi();
   // Don't do calulations if no accel or mag data, will result in Nan
   if (fabs(u1[0] + u1[1] + u1[2]) < 0.0001) return;
   if (fabs(u2[0] + u2[1] + u2[2]) < 0.0001) return;

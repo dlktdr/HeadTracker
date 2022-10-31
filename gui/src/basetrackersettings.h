@@ -146,8 +146,8 @@ public:
     _setting["ppmframe"] = 22500;
     _setting["ppmsync"] = 350;
     _setting["ppmchcnt"] = 8;
-    _setting["lppan"] = 100;
-    _setting["lptiltroll"] = 100;
+    _setting["kp"] = 1;
+    _setting["ki"] = 1;
     _setting["btpairedaddress[17]"] = QString("");
     _dataItems["magx"] = false;
     _dataItems["magy"] = false;
@@ -1103,29 +1103,31 @@ public:
     return false;
   }
 
-  // Low Pass filter For Pan
-  uint8_t getLpPan() {
-    return _setting["lppan"].toUInt();
+  // Kp Value for DCM Algorithm
+  float getKp() {
+    return _setting["kp"].toFloat();
   }
-  bool setLpPan(uint8_t val=100) {
-    if(val >= 1 && val <= 100) {
-      _setting["lppan"] = val;
+  bool setKp(float val=1) {
+    if(val >= FLOAT_MIN && val <= FLOAT_MAX) {
+      _setting["kp"] = QString::number(val,'g',);
       return true;
     }
     return false;
   }
 
-  // Low Pass filter For Tilt + Roll
-  uint8_t getLpTiltRoll() {
-    return _setting["lptiltroll"].toUInt();
+
+  // Ki Value for DCM Algorithm
+  float getKi() {
+    return _setting["ki"].toFloat();
   }
-  bool setLpTiltRoll(uint8_t val=100) {
-    if(val >= 1 && val <= 100) {
-      _setting["lptiltroll"] = val;
+  bool setKi(float val=1) {
+    if(val >= FLOAT_MIN && val <= FLOAT_MAX) {
+      _setting["ki"] = QString::number(val,'g',);
       return true;
     }
     return false;
   }
+
 
   // Bluetooth Remote address to Pair With
   QString getBtPairedAddress() {
