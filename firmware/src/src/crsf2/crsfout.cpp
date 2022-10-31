@@ -1,6 +1,6 @@
 #include "crsfout.h"
 #include "auxserial.h"
-#include "CRSF/crc8.h"
+#include "crc8.h"
 
 CRSF crsfout;
 

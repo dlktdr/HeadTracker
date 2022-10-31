@@ -2,7 +2,7 @@
 
 #include <stddef.h>
 
-#include "CRSF/crc8.h"
+#include "crc8.h"
 #include "auxserial.h"
 #include "crsf_protocol.h"
 #include "map.h"
