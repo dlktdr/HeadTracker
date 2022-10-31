@@ -45,6 +45,9 @@
 #define PWM_FREQUENCY 50         // (ms) PWM Period
 #define PAUSE_BEFORE_FLASH 60    // (ms) Time to pause all threads before Flash writing
 
+// Sensors LP filter time constant
+#define SENSOR_LP_TIME_CST 60000 // (us) Low pass filter time constant
+
 // Analog Filters 1 Euro Filter
 #define AN_CH_CNT 4
 #define AN_FILT_FREQ 150
@@ -125,8 +128,6 @@ extern volatile bool sbusTreadRun;
 // Math Defines
 #define DEG_TO_RAD 0.017453295199
 #define RAD_TO_DEG 57.29577951308
-
-
 
 // Magnetometer, Initial Orientation, Samples to average
 #define MADGSTART_SAMPLES 15
