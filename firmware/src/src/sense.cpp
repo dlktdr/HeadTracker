@@ -506,14 +506,13 @@ void calculate_Thread()
       BTSetChannel(i, channel_data[i]);
     }
 
-    // 12) Set all UART output channels, if disabled set to center
+    // 12) Set all UART output channels, if disabled(0) set to center
     uint16_t uart_data[16];
     for (int i = 0; i < 16; i++) {
-      uint16_t sbusout = channel_data[i];
-      if (sbusout == 0) sbusout = TrackerSettings::PPM_CENTER;
-      uart_data[i] = (static_cast<float>(sbusout) - TrackerSettings::PPM_CENTER) *
-                         TrackerSettings::SBUS_SCALE +
-                     TrackerSettings::SBUS_CENTER;
+      if (channel_data[i] == 0)
+        uart_data[i] = TrackerSettings::PPM_CENTER;
+      else
+        uart_data[i] = channel_data[i];
     }
     UartSetChannels(uart_data);
 

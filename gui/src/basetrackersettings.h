@@ -132,7 +132,8 @@ public:
     _setting["ppmoutpin"] = 10;
     _setting["ppminpin"] = -1;
     _setting["uartmode"] = 0;
-    _setting["uarttxrate"] = 80;
+    _setting["crsftxrate"] = 140;
+    _setting["sbustxrate"] = 80;
     _setting["sbininv"] = true;
     _setting["sboutinv"] = true;
     _setting["ch5arm"] = true;
@@ -998,13 +999,25 @@ public:
     return false;
   }
 
-  // SBUS Transmit Freqency
-  uint8_t getUartTxRate() {
-    return _setting["uarttxrate"].toUInt();
+  // CRSF Transmit Frequncy
+  uint8_t getCrsfTxRate() {
+    return _setting["crsftxrate"].toUInt();
   }
-  bool setUartTxRate(uint8_t val=80) {
+  bool setCrsfTxRate(uint8_t val=140) {
     if(val >= 30 && val <= 140) {
-      _setting["uarttxrate"] = val;
+      _setting["crsftxrate"] = val;
+      return true;
+    }
+    return false;
+  }
+
+  // SBUS Transmit Freqency
+  uint8_t getSbusTxRate() {
+    return _setting["sbustxrate"].toUInt();
+  }
+  bool setSbusTxRate(uint8_t val=80) {
+    if(val >= 30 && val <= 140) {
+      _setting["sbustxrate"] = val;
       return true;
     }
     return false;

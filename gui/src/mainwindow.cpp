@@ -148,6 +148,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->spnRotY,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->spnRotZ,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->spnSBUSRate,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->spnCRSFRate,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
 
     // Gain Sliders
     connect(ui->til_gain,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
@@ -596,7 +597,8 @@ void MainWindow::updateToUI()
     ui->spnA3Gain->setValue(trkset.getAn3Gain());
     ui->spnA3Off->setValue(trkset.getAn3Off());
 
-    ui->spnSBUSRate->setValue(trkset.getUartTxRate());
+    ui->spnSBUSRate->setValue(trkset.getSbusTxRate());
+    ui->spnCRSFRate->setValue(trkset.getCrsfTxRate());
 
     int panCh = trkset.getPanCh();
     int rllCh = trkset.getRllCh();
@@ -861,7 +863,8 @@ void MainWindow::updateFromUI()
     trkset.setRstOnTlt(ui->chkRstOnTlt->isChecked());
 
     trkset.setSbOutInv(ui->chkSbusOutInv->isChecked());
-    trkset.setUartTxRate(ui->spnSBUSRate->value());
+    trkset.setSbusTxRate(ui->spnSBUSRate->value());
+    trkset.setCrsfTxRate(ui->spnCRSFRate->value());
 
     uint16_t setframelen = ui->spnPPMFrameLen->value() * 1000;
     trkset.setPpmFrame(setframelen);

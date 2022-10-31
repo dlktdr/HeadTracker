@@ -41,7 +41,7 @@ volatile crsfPayloadLinkstatistics_s CRSF::LinkStatistics;
 void CRSF::Begin()
 {
   AuxSerial_Close();
-  AuxSerial_Open(BAUD420000, CONF8N1);
+  AuxSerial_Open(BAUD400000, CONF8N1);
 }
 
 void CRSF::sendLinkStatisticsToFC()

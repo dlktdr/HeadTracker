@@ -79,13 +79,13 @@ public:
     memset(btrmt,0,sizeof(char) * 18);
 
     // Call Virtual Events after initialization
-    pinsChanged();
     resetFusion();
+    pinsChanged();
   }
 
   // Virtual Events
-  virtual void pinsChanged() {};
   virtual void resetFusion() {};
+  virtual void pinsChanged() {};
 
   // Roll Minimum
   inline const uint16_t& getRll_Min() {return rll_min;}
@@ -737,11 +737,21 @@ public:
     return false;
   }
 
-  // SBUS Transmit Freqency
-  inline const uint8_t& getUartTxRate() {return uarttxrate;}
-  bool setUartTxRate(uint8_t val=80) {
+  // CRSF Transmit Frequncy
+  inline const uint8_t& getCrsfTxRate() {return crsftxrate;}
+  bool setCrsfTxRate(uint8_t val=140) {
     if(val >= 30 && val <= 140) {
-      uarttxrate = val;
+      crsftxrate = val;
+      return true;
+    }
+    return false;
+  }
+
+  // SBUS Transmit Freqency
+  inline const uint8_t& getSbusTxRate() {return sbustxrate;}
+  bool setSbusTxRate(uint8_t val=80) {
+    if(val >= 30 && val <= 140) {
+      sbustxrate = val;
       return true;
     }
     return false;
@@ -1042,7 +1052,8 @@ public:
     json["ppmoutpin"] = ppmoutpin;
     json["ppminpin"] = ppminpin;
     json["uartmode"] = uartmode;
-    json["uarttxrate"] = uarttxrate;
+    json["crsftxrate"] = crsftxrate;
+    json["sbustxrate"] = sbustxrate;
     json["sbininv"] = sbininv;
     json["sboutinv"] = sboutinv;
     json["ch5arm"] = ch5arm;
@@ -1061,8 +1072,8 @@ public:
 
   void loadJSONSettings(DynamicJsonDocument &json) {
     JsonVariant v;
-    bool chpinschanged = false;
     bool chresetfusion = false;
+    bool chpinschanged = false;
     v = json["rll_min"]; if(!v.isNull()) {setRll_Min(v);}
     v = json["rll_max"]; if(!v.isNull()) {setRll_Max(v);}
     v = json["rll_cnt"]; if(!v.isNull()) {setRll_Cnt(v);}
@@ -1128,7 +1139,8 @@ public:
     v = json["ppmoutpin"]; if(!v.isNull()) {setPpmOutPin(v); chpinschanged = true;}
     v = json["ppminpin"]; if(!v.isNull()) {setPpmInPin(v); chpinschanged = true;}
     v = json["uartmode"]; if(!v.isNull()) {setUartMode(v);}
-    v = json["uarttxrate"]; if(!v.isNull()) {setUartTxRate(v);}
+    v = json["crsftxrate"]; if(!v.isNull()) {setCrsfTxRate(v);}
+    v = json["sbustxrate"]; if(!v.isNull()) {setSbusTxRate(v);}
     v = json["sbininv"]; if(!v.isNull()) {setSbInInv(v); chpinschanged = true;}
     v = json["sboutinv"]; if(!v.isNull()) {setSbOutInv(v);}
     v = json["ch5arm"]; if(!v.isNull()) {setCh5Arm(v);}
@@ -1143,10 +1155,10 @@ public:
     v = json["ppmchcnt"]; if(!v.isNull()) {setPpmChCnt(v);}
     v = json["lppan"]; if(!v.isNull()) {setLpPan(v);}
     v = json["lptiltroll"]; if(!v.isNull()) {setLpTiltRoll(v);}
-    if(chpinschanged)
-      pinsChanged();
     if(chresetfusion)
       resetFusion();
+    if(chpinschanged)
+      pinsChanged();
   }
 
   void setJSONDataList(DynamicJsonDocument &json)
@@ -1539,7 +1551,8 @@ protected:
   int8_t ppmoutpin = 10; // PPM Output Pin
   int8_t ppminpin = -1; // PPM Input Pin
   uint8_t uartmode = 0; // Uart Mode (0- Off, 1-SBUS, 2-CRSFIN, 3-CRSFOUT)
-  uint8_t uarttxrate = 80; // SBUS Transmit Freqency
+  uint8_t crsftxrate = 140; // CRSF Transmit Frequncy
+  uint8_t sbustxrate = 80; // SBUS Transmit Freqency
   bool sbininv = true; // SBUS Receieve Inverted
   bool sboutinv = true; // SBUS Transmit Inverted
   bool ch5arm = true; // Channel 5 
