@@ -38,6 +38,7 @@
 #include "soc_flash.h"
 #include "trackersettings.h"
 
+#define DEBUG_SENSOR_RATES
 
 #if defined(HAS_APDS9960)
 #include "APDS9960/APDS9960.h"
@@ -633,56 +634,6 @@ void sensor_Thread()
 
     senseUsDuration = micros64();
 
-    // Filtering
-    if (initLPfilter) {
-      for (int i = 0; i < 3; i++) {
-        LPalpha = exp(-(float)(SENSOR_PERIOD) /
-                      (float)(SENSOR_LP_TIME_CST));  // low pass filter coefficient
-        LPalphaC = 0.5 * (1. - LPalpha);             // complementary
-        faccx = accx;
-        faccy = accy;
-        faccz = accz;
-        fgyrx = gyrx;
-        fgyry = gyry;
-        fgyrz = gyrz;
-        fmagx = magx;
-        fmagy = magy;
-        fmagz = magz;
-        lacc[0] = accx;
-        lacc[1] = accy;
-        lacc[2] = accz;
-        lgyr[0] = gyrx;
-        lgyr[1] = gyry;
-        lgyr[2] = gyrz;
-        lmag[0] = magx;
-        lmag[1] = magy;
-        lmag[2] = magz;
-        initLPfilter = false;
-      }
-    } else {
-      faccx = faccx * LPalpha + LPalphaC * (accx + lacc[0]);
-      faccy = faccy * LPalpha + LPalphaC * (accy + lacc[1]);
-      faccz = faccz * LPalpha + LPalphaC * (accz + lacc[2]);
-
-      fgyrx = fgyrx * LPalpha + LPalphaC * (gyrx + lgyr[0]);
-      fgyry = fgyry * LPalpha + LPalphaC * (gyry + lgyr[1]);
-      fgyrz = fgyrz * LPalpha + LPalphaC * (gyrz + lgyr[2]);
-
-      fmagx = fmagx * LPalpha + LPalphaC * (magx + lmag[0]);
-      fmagy = fmagy * LPalpha + LPalphaC * (magy + lmag[1]);
-      fmagz = fmagz * LPalpha + LPalphaC * (magz + lmag[2]);
-
-      lacc[0] = accx;
-      lacc[1] = accy;
-      lacc[2] = accz;
-      lgyr[0] = gyrx;
-      lgyr[1] = gyry;
-      lgyr[2] = gyrz;
-      lmag[0] = magx;
-      lmag[1] = magy;
-      lmag[2] = magz;
-    }
-
 #if defined(HAS_APDS9960)
     // Reset Center on Proximity, Don't need to update this often
     static int sensecount = 0;
@@ -834,9 +785,9 @@ void sensor_Thread()
       magy = rmagy - magyoff;
       magz = rmagz - magzoff;
 
-      magx = (magx * magsioff[0]) + (magy * magsioff[1]) + (magz * magsioff[2]);
+      /*magx = (magx * magsioff[0]) + (magy * magsioff[1]) + (magz * magsioff[2]);
       magy = (magx * magsioff[3]) + (magy * magsioff[4]) + (magz * magsioff[5]);
-      magz = (magx * magsioff[6]) + (magy * magsioff[7]) + (magz * magsioff[8]);
+      magz = (magx * magsioff[6]) + (magy * magsioff[7]) + (magz * magsioff[8]);*/
 
       // Apply Rotation
       float tmpmag[3] = {magx, magy, magz};
@@ -846,7 +797,71 @@ void sensor_Thread()
       magz = tmpmag[2];
     }
 
-        // Scale properly for DCM algorithm
+    // Filtering
+#ifdef DO_FILTER
+    if (magValid && gyrValid && accValid && initLPfilter) {
+      LPalpha = exp(-(float)(SENSOR_PERIOD) /
+                    (float)(SENSOR_LP_TIME_CST));  // low pass filter coefficient
+      LPalphaC = 0.5 * (1. - LPalpha);             // complementary
+      faccx = accx;
+      faccy = accy;
+      faccz = accz;
+      fgyrx = gyrx;
+      fgyry = gyry;
+      fgyrz = gyrz;
+      fmagx = magx;
+      fmagy = magy;
+      fmagz = magz;
+      lacc[0] = accx;
+      lacc[1] = accy;
+      lacc[2] = accz;
+      lgyr[0] = gyrx;
+      lgyr[1] = gyry;
+      lgyr[2] = gyrz;
+      lmag[0] = magx;
+      lmag[1] = magy;
+      lmag[2] = magz;
+      initLPfilter = false;
+    } else if (initLPfilter == false) {
+      if (accValid) {
+        faccx = faccx * LPalpha + LPalphaC * (accx + lacc[0]);
+        faccy = faccy * LPalpha + LPalphaC * (accy + lacc[1]);
+        faccz = faccz * LPalpha + LPalphaC * (accz + lacc[2]);
+        lacc[0] = accx;
+        lacc[1] = accy;
+        lacc[2] = accz;
+      }
+
+      if (gyrValid) {
+        fgyrx = fgyrx * LPalpha + LPalphaC * (gyrx + lgyr[0]);
+        fgyry = fgyry * LPalpha + LPalphaC * (gyry + lgyr[1]);
+        fgyrz = fgyrz * LPalpha + LPalphaC * (gyrz + lgyr[2]);
+        lgyr[0] = gyrx;
+        lgyr[1] = gyry;
+        lgyr[2] = gyrz;
+      }
+
+      if (magValid) {
+        fmagx = fmagx * LPalpha + LPalphaC * (magx + lmag[0]);
+        fmagy = fmagy * LPalpha + LPalphaC * (magy + lmag[1]);
+        fmagz = fmagz * LPalpha + LPalphaC * (magz + lmag[2]);
+        lmag[0] = magx;
+        lmag[1] = magy;
+        lmag[2] = magz;
+      }
+    }
+#else
+    faccx = accx;
+    faccy = accy;
+    faccz = accx;
+    fgyrx = gyrx;
+    fgyry = gyry;
+    fgyrz = gyrz;
+    fmagx = magx;
+    fmagy = magy;
+    fmagz = magz;
+#endif
+    // Scale properly for DCM algorithm
     // PAUL's reference frame is standard aeronautical:
     //    X axis is the longitudinal axis pointing ahead,
     //    Z axis is the vertical axis pointing downwards,
@@ -867,13 +882,31 @@ void sensor_Thread()
     float deltat = ((now - lastUpdate) / 1000000.0f);
     lastUpdate = now;
 
-    k_mutex_lock(&sensor_mutex, K_FOREVER);
     DcmCalculate(u0, u1, u2, deltat);
     k_mutex_unlock(&sensor_mutex);
 
+#if defined(DEBUG_SENSOR_RATES)
+    static int mcount = 1;
+    static int mcounta = 1;
+    static int mcountg = 1;
+    static int mcountm = 1;
+    static int64_t mmic = millis64() + 1000;
+    if (mmic < millis64()) {  // Every Second
+      mmic = millis64() + 1000;
+      LOGI("Sens Rate = %d, Acc=%d, Gyr=%d, Mag=%d", mcount, mcounta, mcountg, mcountm);
+      mcount = 1;
+      mcounta = 1;
+      mcountg = 1;
+      mcountm = 1;
+    }
+    mcount++;
+    if (accValid) mcounta++;
+    if (magValid) mcountm++;
+    if (gyrValid) mcountg++;
+#endif
+
     // Adjust sleep for a more accurate period
     usduration = micros64() - usduration;
-
 
     // Adjust sleep for a more accurate period
     senseUsDuration = micros64() - senseUsDuration;

@@ -146,8 +146,10 @@ public:
     _setting["ppmframe"] = 22500;
     _setting["ppmsync"] = 350;
     _setting["ppmchcnt"] = 8;
-    _setting["kp"] = 1;
-    _setting["ki"] = 1;
+    _setting["lppan"] = 100;
+    _setting["lptiltroll"] = 100;
+    _setting["kp"] = 0.2;
+    _setting["ki"] = 0.01;
     _setting["btpairedaddress[17]"] = QString("");
     _dataItems["magx"] = false;
     _dataItems["magy"] = false;
@@ -1103,13 +1105,37 @@ public:
     return false;
   }
 
+  // Low Pass filter For Pan
+  uint8_t getLpPan() {
+    return _setting["lppan"].toUInt();
+  }
+  bool setLpPan(uint8_t val=100) {
+    if(val >= 1 && val <= 100) {
+      _setting["lppan"] = val;
+      return true;
+    }
+    return false;
+  }
+
+  // Low Pass filter For Tilt + Roll
+  uint8_t getLpTiltRoll() {
+    return _setting["lptiltroll"].toUInt();
+  }
+  bool setLpTiltRoll(uint8_t val=100) {
+    if(val >= 1 && val <= 100) {
+      _setting["lptiltroll"] = val;
+      return true;
+    }
+    return false;
+  }
+
   // Kp Value for DCM Algorithm
   float getKp() {
     return _setting["kp"].toFloat();
   }
-  bool setKp(float val=1) {
+  bool setKp(float val=0.2) {
     if(val >= FLOAT_MIN && val <= FLOAT_MAX) {
-      _setting["kp"] = QString::number(val,'g',);
+      _setting["kp"] = QString::number(val,'g',4);
       return true;
     }
     return false;
@@ -1120,9 +1146,9 @@ public:
   float getKi() {
     return _setting["ki"].toFloat();
   }
-  bool setKi(float val=1) {
+  bool setKi(float val=0.01) {
     if(val >= FLOAT_MIN && val <= FLOAT_MAX) {
-      _setting["ki"] = QString::number(val,'g',);
+      _setting["ki"] = QString::number(val,'g',4);
       return true;
     }
     return false;

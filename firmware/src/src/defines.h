@@ -46,7 +46,7 @@
 #define PAUSE_BEFORE_FLASH 60    // (ms) Time to pause all threads before Flash writing
 
 // Sensors LP filter time constant
-#define SENSOR_LP_TIME_CST 60000 // (us) Low pass filter time constant
+#define SENSOR_LP_TIME_CST 15000 // (us) Low pass filter time constant
 
 // Analog Filters 1 Euro Filter
 #define AN_CH_CNT 4

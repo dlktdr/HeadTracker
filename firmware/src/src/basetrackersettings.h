@@ -829,9 +829,29 @@ public:
     return false;
   }
 
+  // Low Pass filter For Pan
+  inline const uint8_t& getLpPan() {return lppan;}
+  bool setLpPan(uint8_t val=100) {
+    if(val >= 1 && val <= 100) {
+      lppan = val;
+      return true;
+    }
+    return false;
+  }
+
+  // Low Pass filter For Tilt + Roll
+  inline const uint8_t& getLpTiltRoll() {return lptiltroll;}
+  bool setLpTiltRoll(uint8_t val=100) {
+    if(val >= 1 && val <= 100) {
+      lptiltroll = val;
+      return true;
+    }
+    return false;
+  }
+
   // Kp Value for DCM Algorithm
   inline const float& getKp() {return kp;}
-  bool setKp(float val=1) {
+  bool setKp(float val=0.2) {
     if(val >= FLOAT_MIN && val <= FLOAT_MAX) {
       kp = val;
       return true;
@@ -841,7 +861,7 @@ public:
 
   // Ki Value for DCM Algorithm
   inline const float& getKi() {return ki;}
-  bool setKi(float val=1) {
+  bool setKi(float val=0.01) {
     if(val >= FLOAT_MIN && val <= FLOAT_MAX) {
       ki = val;
       return true;
@@ -1066,6 +1086,8 @@ public:
     json["ppmframe"] = ppmframe;
     json["ppmsync"] = ppmsync;
     json["ppmchcnt"] = ppmchcnt;
+    json["lppan"] = lppan;
+    json["lptiltroll"] = lptiltroll;
     json["kp"] = kp;
     json["ki"] = ki;
   }
@@ -1153,6 +1175,8 @@ public:
     v = json["ppmframe"]; if(!v.isNull()) {setPpmFrame(v);}
     v = json["ppmsync"]; if(!v.isNull()) {setPpmSync(v);}
     v = json["ppmchcnt"]; if(!v.isNull()) {setPpmChCnt(v);}
+    v = json["lppan"]; if(!v.isNull()) {setLpPan(v);}
+    v = json["lptiltroll"]; if(!v.isNull()) {setLpTiltRoll(v);}
     v = json["kp"]; if(!v.isNull()) {setKp(v);}
     v = json["ki"]; if(!v.isNull()) {setKi(v);}
     if(chresetfusion)
@@ -1565,8 +1589,10 @@ protected:
   uint16_t ppmframe = 22500; // PPM Frame Length (us)
   uint16_t ppmsync = 350; // PPM Sync Pulse Length (us)
   uint8_t ppmchcnt = 8; // PPM channels to output
-  float kp = 1; // Kp Value for DCM Algorithm
-  float ki = 1; // Ki Value for DCM Algorithm
+  uint8_t lppan = 100; // Low Pass filter For Pan
+  uint8_t lptiltroll = 100; // Low Pass filter For Tilt + Roll
+  float kp = 0.2; // Kp Value for DCM Algorithm
+  float ki = 0.01; // Ki Value for DCM Algorithm
 
   // Setting Arrays
   char btpairedaddress[19]; // Bluetooth Remote address to Pair With
