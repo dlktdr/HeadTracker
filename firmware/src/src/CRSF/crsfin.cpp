@@ -4,27 +4,71 @@
  */
 
 #include "crsfin.h"
-#include "crsfout.h"
 
 #include <string.h>
 
+#include "crsfout.h"
 #include "defines.h"
 #include "log.h"
 #include "uart_mode.h"
+
+#define CRSF_LOG_RATE 500 // 500mS
 
 CrsfSerial *crsfin = nullptr;
 
 static void crsfShiftyByte(uint8_t b)
 {
-  //LOGI("CRSF, shifty byte %c", b);
+  // LOGI("CRSF, shifty byte %c", b);
 }
 
-static void packetChannels()
+static void packetChannels() { PacketCount++; }
+
+// V3.0 ELRS
+static const char *getELRSMode(uint8_t mode)
 {
-  PacketCount++;
+  switch (mode) {
+    case RATE_LORA_4HZ:
+      return "LORA 4HZ";
+    case RATE_LORA_25HZ:
+      return "LORA 25HZ";
+    case RATE_LORA_50HZ:
+      return "LORA 50HZ";
+    case RATE_LORA_100HZ:
+      return "LORA 100HZ";
+    case RATE_LORA_100HZ_8CH:
+      return "LORA 100HZ_8CH";
+    case RATE_LORA_150HZ:
+      return "LORA 150HZ";
+    case RATE_LORA_200HZ:
+      return "LORA_200HZ";
+    case RATE_LORA_250HZ:
+      return "LORA_250HZ";
+    case RATE_LORA_333HZ_8CH:
+      return "LORA 333HZ_8CH";
+    case RATE_LORA_500HZ:
+      return "LORA 500HZ";
+    case RATE_DVDA_250HZ:
+      return "DVDA 250HZ";
+    case RATE_DVDA_500HZ:
+      return "DVDA 500HZ";
+    case RATE_FLRC_500HZ:
+      return "FLRC 500HZ";
+    case RATE_FLRC_1000HZ:
+      return "FLRC 1000HZ";
+    default:
+      return "UNKNOWN";
+  }
 }
 
-static void packetLinkStatistics(crsfLinkStatistics_t *link) {}
+static void packetLinkStatistics(crsfLinkStatistics_t *link)
+{
+  static int64_t mmic = millis64() + CRSF_LOG_RATE;
+  if (mmic < millis64()) {
+    LOGI("CRSF Qlty %d%%, Mode(%d) %s, Rssi %d, SNR %d", link->uplink_Link_quality, link->rf_Mode,
+         getELRSMode(link->rf_Mode), link->uplink_RSSI_1, link->uplink_SNR);
+    mmic = millis64() + CRSF_LOG_RATE;
+  }
+}
 
 void crsfLinkUp() {}
 
@@ -54,9 +98,7 @@ CrsfSerial::CrsfSerial(uint32_t baud) :
 }
 
 // Call from main loop to update
-void CrsfSerial::loop() {
-  handleSerialIn();
-}
+void CrsfSerial::loop() { handleSerialIn(); }
 
 void CrsfSerial::handleSerialIn()
 {
@@ -248,4 +290,3 @@ void CrsfSerial::setPassthroughMode(bool val, unsigned int baud)
   else
     AuxSerial_Open(baud, CONF8N1);
 }
-

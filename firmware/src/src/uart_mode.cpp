@@ -91,13 +91,6 @@ void uartRx_Thread()
         }
         break;
       case UARTCRSFOUT:
-        /*if (crsf) {
-          crsf->loop();
-          dataIsValid = crsf->isLinkUp();
-          if (dataIsValid) {
-            for (int i = 0; i < 16; i++) uart_channels[i] = crsf->getChannel(i + 1);
-          }
-        }*/
         break;
       default:
         break;
@@ -121,6 +114,8 @@ void uartTx_Thread()
       case UARTCRSFOUT:
         rt_sleep_us((1.0 / (float)trkset.getCrsfTxRate()) * 1.0e6);
         crsfout.sendRCFrameToFC();
+        crsfout.sendLinkStatisticsToFC();
+
         break;
       default:
         rt_sleep_ms(1000);
@@ -216,6 +211,7 @@ void UartSetChannels(uint16_t channels[16])
       crsfout.PackedRCdataOut.ch13 = US_to_CRSF(channels[13]);
       crsfout.PackedRCdataOut.ch14 = US_to_CRSF(channels[14]);
       crsfout.PackedRCdataOut.ch15 = US_to_CRSF(channels[15]);
+      crsfout.LinkStatistics.rf_Mode = RATE_LORA_100HZ_8CH;
       break;
     default:
       break;
