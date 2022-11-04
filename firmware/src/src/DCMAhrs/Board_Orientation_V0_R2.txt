@@ -1,0 +1,319 @@
+/*----------------------------------------------------------------------------*/
+void Board_Orientation(float *a1, float *m1, float *a2, float *m2, float *a3,
+                       float *m3, float *R)
+/*----------------------------------------------------------------------------*/
+/* Author: Paul BIZARD 11/20/2022                                             */
+/* Version 1 Revision 2                                                       */
+/*----------------------------------------------------------------------------*/
+/* This routine computes the orientation (rotation) matrix R of the head      */
+/* tracker board relatively to the operator's head. The board can be attached */
+/* to the operator's headset in any possible manner                           */
+/*                                                                            */
+/* Process: the operator takes 3 snapshots of the accelerometer ax ay az      */
+/* (vector a) and magnetometer mx my mz values (vector m)                     */
+/*                                                                            */
+/* 1st snapshot: the operator's head is level and looking straight ahead.     */
+/* Related accelerometer and magnetometer vectors are a1 and m1               */
+/*                                                                            */
+/* 2nd snapshot: the operator's head is tilted upward relatively to the 1st   */
+/* snapshot. Tilt angle value should be +45° or more.                         */
+/* Related accelerometer and magnetometer vectors are a2 and m2               */
+/*                                                                            */
+/* 3rd snapshot: the operator's head is kept level but panned to the left     */
+/* relatively to the 1st snapshot. Pan angle value should be +45° or more.    */
+/* Related accelerometer and magnetometer vectors are a3 and m3               */
+/*                                                                            */
+/* The output of this routine is a rotation matrix R                          */
+/*                                                            x    y    z     */
+/* 1st column is x board vector expressed in operator frame  R[0] R[1] R[2]   */
+/* 2nd...        y                                           R[3] R[4] R[5]   */
+/* 3rd...        z                                           R[6] R[7] R[8]   */
+/*                                                                            */
+/* This matrix is used to rotate the accelerometer, magnetometer and          */
+/* gyrometer sensors values from the board frame to the operator's frame      */
+/* Example:                                                                   */
+/* az acceleration as read by board in its own frame of reference             */
+/* Az acceleration in operator's frame of reference                           */
+/* Ax = R[0]*ax + R[1]*ay + R[2]*az                                           */
+/* Ay = R[3]*ax + R[4]*ay + R[5]*az                                           */
+/* Az = R[6]*ax + R[7]*ay + R[8]*az                                           */
+/*                                                                            */
+/* Note: in what follows the DCM matix is the transpose of the R matrix       */
+/*                                                                            */
+/* Frames conventions: see Cliff Blackburn's Head Tracker video:              */
+/* https://www.youtube.com/watch?v=DwtC1GqwQ4U&t=234s                         */
+/* x right                                                                    */
+/* y forward                                                                  */
+/* z up                                                                       */
+/* Sign of angles: right hand rule                                            */
+/*----------------------------------------------------------------------------*/
+{
+  /* Declarations */
+  float DCM1[9], DCM2[9], DCM3[9];
+  float DCM_T[9], DCM_P[9];
+  float f_buff1, f_buff2, M_buff[9];
+  float Q_T[4], Q_P[4];
+  float angle_T, angle_P;
+  float T[3], P[3], TpP[3], TmP[3];
+  float Xo[3], Yo[3], Zo[3];
+  int i;
+
+
+  /* Compute the DCM matrices related to the 3 snapshots */
+  snapshotDCM(a1, m1, DCM1);
+  snapshotDCM(a2, m2, DCM2);
+  snapshotDCM(a3, m3, DCM3);
+
+  /* Tilt procedure DCM */
+  TransposeMatrix(DCM1, M_buff);
+  MatrixMultiply2(DCM2, M_buff, DCM_T);
+
+  /* Pan procedure DCM */
+  MatrixMultiply2(DCM3, M_buff, DCM_P);
+
+  /* Tilt procedure quaternion */
+  DCM2QUAT(DCM_T, Q_T);
+
+  /* Pan procedure quaternion */
+  DCM2QUAT(DCM_P, Q_P);
+
+  /* Tilt and pan unit vectors expressed in board frame.   */
+  /* Associated tilt and pan angles could be compared to a */
+  /* minimum value (e.g. 30°). TBD: Should test fail the   */
+  /* orientation procedure would be undertaken again       */
+  QUAT2AXIS(Q_T, T, &angle_T);
+  QUAT2AXIS(Q_P, P, &angle_P);
+
+  /* Tilt and pan unit vectors must be orthonormalized to */
+  /* eventually become the operator's frame x and z axis  */
+  /* expressed in the board frame of reference            */
+
+  /* Orthogonalization */
+  for (i=0; i<3; i++)
+  {
+    TpP[i] = T[i] + P[i];
+    TmP[i] = T[i] - P[i];
+  }
+
+  VectorDotProduct(TpP, TpP, &f_buff1);
+  VectorDotProduct(TmP, TmP, &f_buff2);
+  f_buff1 = sqrt(f_buff1/f_buff2);
+
+  for (i=0; i<3; i++)
+  {
+    T[i] = 0.5*(TpP[i] + TmP[i]*f_buff1);
+    P[i] = 0.5*(TpP[i] - TmP[i]*f_buff1);
+  }
+
+  /* Normalization */
+  VectorDotProduct(T, T, &f_buff1);
+  if (f_buff1 > 0.001) f_buff1 = 1. / sqrt(f_buff1);
+  for (i=0; i<3; i++) Xo[i] = T[i] * f_buff1;
+
+  VectorDotProduct(P, P, &f_buff1);
+  if (f_buff1 > 0.001) f_buff1 = 1. / sqrt(f_buff1);
+  for (i=0; i<3; i++) Zo[i] = P[i] * f_buff1;
+
+  /* Now compute Yo as the cross product of Zo and Xo.       */
+  /* So now we have the operator's reference frame expressed */
+  /* in the board frame of reference                         */
+  VectorCross(Zo, Xo, Yo);
+
+  /* Now here is the rotation matrix we were looking for */
+  /* Note that it is the inverse of a DCM matrix         */
+  R[0] = Xo[0]; R[1] = Xo[1]; R[2] = Xo[2];  
+  R[3] = Yo[0]; R[4] = Yo[1]; R[5] = Yo[2];  
+  R[6] = Zo[0]; R[7] = Zo[1]; R[8] = Zo[2];  
+}
+
+/*----------------------------------------------------------------------------*/
+void snapshotDCM(float *acc, float *mag, float *DCM)
+/*----------------------------------------------------------------------------*/
+/* Author: Paul BIZARD 11/20/2022                                             */
+/* Version 1 Revision 0                                                       */
+/*----------------------------------------------------------------------------*/
+/* This routine computes the DCM matrix associated to the rotation of the     */
+/* board with respect to the frame of reference of the Earth                  */
+/* It computes the DCM matrix from the accelerometer and magnetometer vectors */
+/* The DCM matrix translates from a vector expressed in the earth frame to    */
+/* the same vector but expressed in the board frame                           */
+/*                                                        x      y      z     */
+/* 1st column is x earth vector expressed in board frame DCM[0] DCM[1] DCM[2] */
+/* 2nd...        y                                       DCM[3] DCM[4] DCM[5] */
+/* 3rd...        z                                       DCM[6] DCM[7] DCM[8] */
+/*                                                                            */
+/* Note & convention: the DCM matix is the transpose/inverse of the           */
+/* associated R matrix                                                        */
+/*                                                                            */
+/* Frames conventions: see Cliff Blackburn's Head Tracker video:              */
+/* https://www.youtube.com/watch?v=DwtC1GqwQ4U&t=234s                         */
+/* Board frame of reference:                                                  */
+/* x right                                                                    */
+/* y forward                                                                  */
+/* z up                                                                       */
+/* Earth frame of reference:                                                  */
+/* x east                                                                     */
+/* y magnetic north                                                           */
+/* z up                                                                       */
+/* Sign of angles: right hand rule                                            */
+/*----------------------------------------------------------------------------*/
+{
+  int i, j;
+  float tilt, roll, pan;
+  float BeX, BeY;
+  float Ct, St, Cr, Sr, Cp, Sp;
+  float f_buff;
+  float V_buff[3];
+
+
+  /* Compute tilt and roll with acceleration vector */
+  /* ============================================== */
+  /* Normalize acceleration vector */
+  VectorDotProduct(acc, acc, &f_buff);
+
+  if (f_buff > 0.001) f_buff = 1. / sqrt(f_buff);
+
+  for (i=0; i<3; i++) V_buff[i] = acc[i] * f_buff;
+
+  /* Tilt and roll in radians */
+  tilt =  atan2(V_buff[1], V_buff[2]);
+  roll = -asin(V_buff[0]);
+
+
+  /* Compute pan with magnetic field vector */
+  /* ====================================== */
+  /* Straighten magnetic field x and y (remove tilt and roll) */
+  Ct = cos(tilt); St = sin(tilt);
+  Cr = cos(roll); Sr = sin(roll);
+
+  BeX =  Cr*mag[0] + St*Sr*mag[1] + Sr*Ct*mag[2];
+  BeY =                 Ct*mag[1] -    St*mag[2];
+
+  /* Pan in radians */
+  /* No need to normalize because atan2 is a ratio */
+  pan = atan2(BeX, BeY);
+
+  Cp = cos(pan); Sp = sin(pan);
+
+  DCM[0] = Cp*Cr ;         DCM[1] = Sp*Cr;          DCM[2] = -Sr;
+  DCM[3] = Cp*Sr*St-Sp*Ct; DCM[4] = Sp*Sr*St+Cp*Ct; DCM[5] = Cr*St;
+  DCM[6] = Cp*Sr*Ct+Sp*St; DCM[7] = Sp*Sr*Ct-Cp*St; DCM[8] = Cr*Ct;
+}
+
+/*----------------------------------------------------------------------------*/
+static void DCM2QUAT(float *DCM, float *Q)
+/*----------------------------------------------------------------------------*/
+/* This routine computes the quaternion associated to a DCM matrix            */
+/* The DCM matrix translates from a vector expressed in the earth frame to    */
+/* this same vector expressed in the board frame                              */
+/*                                                        x      y      z     */
+/* 1st column is x earth vector expressed in earth frame DCM[0] DCM[3] DCM[6] */
+/* 2nd...        y                                       DCM[1] DCM[4] DCM[7] */
+/* 3rd...        z                                       DCM[2] DCM[5] DCM[8] */
+/*----------------------------------------------------------------------------*/
+{
+  float ST1, ST2, ST3 ,ST4;
+  float maxST;
+
+
+  ST1 = sqrt(1. + DCM[0] + DCM[4] + DCM[8]);
+  ST2 = sqrt(1. + DCM[0] - DCM[4] - DCM[8]);
+  ST3 = sqrt(1. - DCM[0] + DCM[4] - DCM[8]);
+  ST4 = sqrt(1. - DCM[0] - DCM[4] + DCM[8]);
+
+  maxST = max(ST1, max(ST2, max(ST3, ST4)));
+
+  if (ST1 == maxST)
+  {
+    Q[0] = 0.5*ST1;
+    Q[1] = 0.5*(DCM[5] - DCM[7])/ST1;
+    Q[2] = 0.5*(DCM[6] - DCM[2])/ST1;
+    Q[3] = 0.5*(DCM[1] - DCM[3])/ST1;
+  }
+  else if (ST2 == maxST) 
+  {
+    Q[0] = 0.5*(DCM[5] - DCM[7])/ST2;
+    Q[1] = 0.5*ST2;
+    Q[2] = 0.5*(DCM[1] + DCM[3])/ST2;
+    Q[3] = 0.5*(DCM[6] + DCM[2])/ST2;    
+  }
+  else if (ST3 == maxST) 
+  {
+    Q[0] = 0.5*(DCM[6] - DCM[2])/ST3;
+    Q[1] = 0.5*(DCM[1] + DCM[3])/ST3;
+    Q[2] = 0.5*ST3;
+    Q[3] = 0.5*(DCM[5] + DCM[7])/ST3;        
+  }
+  else
+  {
+    Q[0] = 0.5*(DCM[1] - DCM[3])/ST4;
+    Q[1] = 0.5*(DCM[6] + DCM[2])/ST4;
+    Q[2] = 0.5*(DCM[5] + DCM[7])/ST4;
+    Q[3] = 0.5*ST4;            
+  }
+}
+
+/*----------------------------------------------------------------------------*/
+static void QUAT2AXIS(float *Q, float *V, float *angle)
+/*----------------------------------------------------------------------------*/
+{
+  float f_buff = sqrt(1. - Q[0]*Q[0]);
+
+
+  V[0] = Q[1]/f_buff;
+  V[1] = Q[2]/f_buff;
+  V[2] = Q[3]/f_buff;
+
+  *angle = 2.*atan2(f_buff, Q[0]);
+}
+
+/*----------------------------------------------------------------------------*/
+static void VectorCross(float *V1, float *V2, float *V3)
+/*----------------------------------------------------------------------------*/
+/* V3 = V1xV2                                                                 */
+/*----------------------------------------------------------------------------*/
+{
+   V3[0] = V1[1]*V2[2] - V1[2]*V2[1];
+   V3[1] = V1[2]*V2[0] - V1[0]*V2[2];
+   V3[2] = V1[0]*V2[1] - V1[1]*V2[0];
+}
+
+/*----------------------------------------------------------------------------*/
+static void VectorDotProduct(float *V1, float *V2, float *Scalar_Product)
+/*----------------------------------------------------------------------------*/
+/* Scalar_Product = V1.V2                                                     */
+/*----------------------------------------------------------------------------*/
+{
+  *Scalar_Product = 0.;
+  for (int i = 0; i < 3; i++) *Scalar_Product += V1[i] * V2[i];
+}
+
+/*----------------------------------------------------------------------------*/
+static void TransposeMatrix(float *M1, float *M2)
+/*----------------------------------------------------------------------------*/
+/* M2 = Transpose M1                                                          */
+/*----------------------------------------------------------------------------*/
+{
+   M2[0] = M1[0]; M2[1] = M1[3]; M2[2] = M1[6];
+   M2[3] = M1[1]; M2[4] = M1[4]; M2[5] = M1[7];
+   M2[6] = M1[2]; M2[7] = M1[5]; M2[8] = M1[8];
+}
+
+/*----------------------------------------------------------------------------*/
+static void MatrixMultiply2(float *M1, float *M2, float *M3)
+/*----------------------------------------------------------------------------*/
+/* M3 = M1*M2                                                                 */
+/*----------------------------------------------------------------------------*/
+{
+   M3[0] = M1[0]*M2[0] + M1[1]*M2[3] + M1[2]*M2[6];
+   M3[3] = M1[3]*M2[0] + M1[4]*M2[3] + M1[5]*M2[6];
+   M3[6] = M1[6]*M2[0] + M1[7]*M2[3] + M1[8]*M2[6];
+
+   M3[1] = M1[0]*M2[1] + M1[1]*M2[4] + M1[2]*M2[7];
+   M3[4] = M1[3]*M2[1] + M1[4]*M2[4] + M1[5]*M2[7];
+   M3[7] = M1[6]*M2[1] + M1[7]*M2[4] + M1[8]*M2[7];
+
+   M3[2] = M1[0]*M2[2] + M1[1]*M2[5] + M1[2]*M2[8];
+   M3[5] = M1[3]*M2[2] + M1[4]*M2[5] + M1[5]*M2[8];
+   M3[8] = M1[6]*M2[2] + M1[7]*M2[5] + M1[8]*M2[8];
+}
