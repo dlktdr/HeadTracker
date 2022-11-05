@@ -41,13 +41,13 @@ jobs:
           cd gui/src
           dir
           qmake HeadTracker.pro
-          make
+          make -j `nproc`
 
       - name: LinDeployQT
         working-directory: ${{github.workspace}}
         run: |
-          mkdir output
-          cd output
+          mkdir usr
+          cd usr
           mkdir bin
           mkdir share
           mkdir share/applications          
@@ -59,15 +59,15 @@ jobs:
           cp ../gui/src/css/stylesheet.css bin/
           cp ../gui/src/css/Background.svg bin/
           cp ../gui/src/images/Icon256.png share/icons/hicolor/256x256/apps/default.png
-          echo -e "[Desktop Entry]\nType=Application\nName=HeadTracker\nExec=HeadTracker\nIcon=default\nCategories=Utility" > share/applications/headtracker.desktop
+          echo -e "[Desktop Entry]\nType=Application\nName=HeadTracker\nExec=HeadTracker\nIcon=default\nCategories=Utility;" > share/applications/headtracker.desktop
           wget https://github.com/dlktdr/HeadTracker/raw/master/gui/bin/bossac_lin
           chmod a+x ./bossac_lin
           mv ./bossac_lin bin/
           cd ..
           wget https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage
           chmod a+x ./linuxdeployqt-continuous-x86_64.AppImage
-          ./linuxdeployqt-continuous-x86_64.AppImage output/share/applications/headtracker.desktop -appimage                   
-          
+          ./linuxdeployqt-continuous-x86_64.AppImage usr/share/applications/headtracker.desktop -appimage -verbose=2
+		            
       - name: Archive production artifacts
         uses: actions/upload-artifact@v2
         with:
