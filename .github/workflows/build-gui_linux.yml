@@ -67,7 +67,7 @@ jobs:
           wget https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage
           chmod a+x ./linuxdeployqt-continuous-x86_64.AppImage
           ./linuxdeployqt-continuous-x86_64.AppImage usr/share/applications/headtracker.desktop -appimage -verbose=2
-		            
+
       - name: Archive production artifacts
         uses: actions/upload-artifact@v2
         with:
