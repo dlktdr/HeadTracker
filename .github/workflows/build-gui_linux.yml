@@ -46,23 +46,22 @@ jobs:
       - name: LinDeployQT
         working-directory: ${{github.workspace}}
         run: |
-          mkdir usr
-          cd usr
-          mkdir bin
-          mkdir share
-          mkdir share/applications          
-          mkdir share/icons
-          mkdir share/icons/hicolor
-          mkdir share/icons/hicolor/256x256
-          mkdir share/icons/hicolor/256x256/apps
-          cp ../gui/src/HeadTracker bin/
-          cp ../gui/src/css/stylesheet.css bin/
-          cp ../gui/src/css/Background.svg bin/
-          cp ../gui/src/images/Icon256.png share/icons/hicolor/256x256/apps/default.png
-          echo -e "[Desktop Entry]\nType=Application\nName=HeadTracker\nExec=HeadTracker\nIcon=default\nCategories=Utility;" > share/applications/headtracker.desktop
+          mkdir ../usr
+          mkdir ../usr/bin
+          mkdir ../usr/share
+          mkdir ../usr/share/applications          
+          mkdir ../usr/share/icons
+          mkdir ../usr/share/icons/hicolor
+          mkdir ../usr/share/icons/hicolor/256x256
+          mkdir ../usr/share/icons/hicolor/256x256/apps
+          cp gui/src/HeadTracker ../usr/bin/
+          cp gui/src/css/stylesheet.css ../usr/bin/
+          cp gui/src/css/Background.svg ../usr/bin/
+          cp gui/src/images/Icon256.png ../usr/share/icons/hicolor/256x256/apps/default.png
+          echo -e "[Desktop Entry]\nType=Application\nName=HeadTracker\nExec=HeadTracker\nIcon=default\nCategories=Utility;" > ../usr/share/applications/headtracker.desktop
           wget https://github.com/dlktdr/HeadTracker/raw/master/gui/bin/bossac_lin
           chmod a+x ./bossac_lin
-          mv ./bossac_lin bin/
+          mv ./bossac_lin ../usr/bin/
           cd ..
           wget https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage
           chmod a+x ./linuxdeployqt-continuous-x86_64.AppImage
