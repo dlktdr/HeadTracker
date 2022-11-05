@@ -8,27 +8,6 @@
 
 #define PACKED __attribute__((packed))
 
-#define CRSF_RX_BAUDRATE 420000
-#define CRSF_OPENTX_BAUDRATE 400000
-#define CRSF_OPENTX_SLOW_BAUDRATE 115200 // Used for QX7 not supporting 400kbps
-#define CRSF_NUM_CHANNELS 16
-#define CRSF_CHANNEL_VALUE_MIN 172
-#define CRSF_CHANNEL_VALUE_MID 992
-#define CRSF_CHANNEL_VALUE_MAX 1811
-#define CRSF_MAX_PACKET_LEN 64
-
-#define RCframeLength 22             // length of the RC data packed bytes frame. 16 channels in 11 bits each.
-#define LinkStatisticsFrameLength 10 // length of the RC data packed bytes frame. 16 channels in 11 bits each.
-#define OpenTXsyncFrameLength 11     //
-#define BattSensorFrameLength 8      //
-#define VTXcontrolFrameLength 12     //
-
-#define CRSF_PAYLOAD_SIZE_MAX 62
-#define CRSF_FRAME_NOT_COUNTED_BYTES 2
-#define CRSF_FRAME_SIZE(payload_size) ((payload_size) + 2) // See crsf_header_t.frame_size
-#define CRSF_EXT_FRAME_SIZE(payload_size) (CRSF_FRAME_SIZE(payload_size) + 2)
-#define CRSF_FRAME_SIZE_MAX (CRSF_PAYLOAD_SIZE_MAX + CRSF_FRAME_NOT_COUNTED_BYTES)
-
 // Macros for big-endian (assume little endian host for now) etc
 #define CRSF_DEC_U16(x) ((uint16_t)__builtin_bswap16(x))
 #define CRSF_DEC_I16(x) ((int16_t)CRSF_DEC_U16(x))
@@ -36,15 +15,7 @@
 #define CRSF_DEC_U32(x) ((uint32_t)__builtin_bswap32(x))
 #define CRSF_DEC_I32(x) ((int32_t)CRSF_DEC_U32(x))
 
-//////////////////////////////////////////////////////////////
-
-#define CRSF_MSP_REQ_PAYLOAD_SIZE 8
-#define CRSF_MSP_RESP_PAYLOAD_SIZE 58
-#define CRSF_MSP_MAX_PAYLOAD_SIZE (CRSF_MSP_REQ_PAYLOAD_SIZE > CRSF_MSP_RESP_PAYLOAD_SIZE ? CRSF_MSP_REQ_PAYLOAD_SIZE : CRSF_MSP_RESP_PAYLOAD_SIZE)
-
 void CrsfOutInit();
-
-//typedef struct crsf_addr_e asas;
 
 typedef enum
 {
@@ -157,6 +128,7 @@ public:
     /////Variables/////
 
     static volatile crsf_channels_s PackedRCdataOut;            // RC data in packed format for output.
+    static volatile crsf_attitude_s AttitudeDataOut;
     static volatile crsfPayloadLinkstatistics_s LinkStatistics; // Link Statisitics Stored as Struct
 
     static void Begin(); //setup timers etc
@@ -175,6 +147,7 @@ public:
     void sendRCFrameToFC();
     void sendLinkStatisticsToFC();
     void sendLinkStatisticsToTX();
+    void sendAttitideToFC();
 
     //static void BuildRCPacket(crsf_addr_e addr = CRSF_ADDRESS_FLIGHT_CONTROLLER); //build packet to send to the FC
 

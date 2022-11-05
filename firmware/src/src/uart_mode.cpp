@@ -114,8 +114,10 @@ void uartTx_Thread()
       case UARTCRSFOUT:
         rt_sleep_us((1.0 / (float)trkset.getCrsfTxRate()) * 1.0e6);
         crsfout.sendRCFrameToFC();
-        crsfout.sendLinkStatisticsToFC();
-
+        /*crsfout.AttitudeDataOut.pitch = 10;
+        crsfout.AttitudeDataOut.roll = 30;
+        crsfout.AttitudeDataOut.yaw += 1;
+        crsfout.sendAttitideToFC();*/
         break;
       default:
         rt_sleep_ms(1000);

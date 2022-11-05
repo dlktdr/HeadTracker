@@ -36,6 +36,7 @@ volatile uint16_t CRSF::ChannelDataInPrev[16] = {0};
 volatile uint8_t CRSF::ParameterUpdateData[2] = {0};
 
 volatile crsf_channels_s CRSF::PackedRCdataOut;
+volatile crsf_attitude_s CRSF::AttitudeDataOut;
 volatile crsfPayloadLinkstatistics_s CRSF::LinkStatistics;
 
 void CRSF::Begin()
@@ -71,10 +72,27 @@ void CRSF::sendRCFrameToFC()
   outBuffer[2] = CRSF_FRAMETYPE_RC_CHANNELS_PACKED;
 
   memcpy(outBuffer + 3, (void *)&PackedRCdataOut, RCframeLength);
-  Crc8 _crc(0xd5);
+  Crc8 _crc(CRSF_CRC_POLY);
   uint8_t crc = _crc.calc(&outBuffer[2], RCframeLength + 1);
 
   outBuffer[RCframeLength + 3] = crc;
 
   AuxSerial_Write(outBuffer, RCframeLength + 4);
+}
+
+void CRSF::sendAttitideToFC()
+{
+  uint8_t outBuffer[CRSF_FRAME_ATTITUDE_PAYLOAD_SIZE + 4] = {0};
+
+  outBuffer[0] = CRSF_ADDRESS_FLIGHT_CONTROLLER; // ??
+  outBuffer[1] = CRSF_FRAME_ATTITUDE_PAYLOAD_SIZE + 2;
+  outBuffer[2] = CRSF_FRAMETYPE_ATTITUDE;
+
+  memcpy(outBuffer + 3, (void *)&PackedRCdataOut, CRSF_FRAME_ATTITUDE_PAYLOAD_SIZE);
+  Crc8 _crc(CRSF_CRC_POLY);
+  uint8_t crc = _crc.calc(&outBuffer[2], CRSF_FRAME_ATTITUDE_PAYLOAD_SIZE + 1);
+
+  outBuffer[CRSF_FRAME_ATTITUDE_PAYLOAD_SIZE + 3] = crc;
+
+  AuxSerial_Write(outBuffer, CRSF_FRAME_ATTITUDE_PAYLOAD_SIZE + 4);
 }
