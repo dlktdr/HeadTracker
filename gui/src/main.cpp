@@ -8,12 +8,12 @@ int main(int argc, char *argv[])
     QApplication::setAttribute(Qt::AA_UseDesktopOpenGL);
     QApplication a(argc, argv);
 
-    QFile stylesheet("stylesheet.css");
+    QFile stylesheet(QCoreApplication::applicationDirPath() + "/stylesheet.css");
     if(stylesheet.open(QIODevice::ReadOnly| QIODevice::Text)) {
-        qDebug() << "Using stylesheet.css";
+        qDebug() << "Using " << QCoreApplication::applicationDirPath() + "/stylesheet.css";
         a.setStyleSheet(stylesheet.readAll());
     } else {
-        qDebug() << "stylesheet.css not found - " + stylesheet.errorString();
+        qDebug() << QCoreApplication::applicationDirPath() + "/stylesheet.css not found - " + stylesheet.errorString();
     }
 
     MainWindow w;
