@@ -72,5 +72,5 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: headtracker_linux_appimage
-          path: ${{github.workspace}}/output
+          path: ${{github.workspace}}/HeadTracker*.AppImage
           retention-days: 60
