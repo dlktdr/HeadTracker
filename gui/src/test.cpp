@@ -1,0 +1,6 @@
+// does nothing
+//
+//
+//
+void func() {
+}
