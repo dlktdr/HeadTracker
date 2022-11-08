@@ -1,4 +1,4 @@
-name: Windows GUI
+name: HeadTracker Windows GUI
 
 on:
   push:

@@ -1,4 +1,4 @@
-name: HT Linux GUI
+name: HeadTracker Linux GUI
 
 on:
   push:

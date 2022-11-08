@@ -1,4 +1,4 @@
-name: HT MacOS GUI
+name: HeadTracker MacOS GUI
 
 on:
   push:
