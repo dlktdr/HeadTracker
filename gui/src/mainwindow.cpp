@@ -295,6 +295,7 @@ void MainWindow::serialConnect()
     if(!serialcon->open(QIODevice::ReadWrite)) {
         QMessageBox::critical(this,tr("Error"),tr("Could not open Com ") + serialcon->portName());
         addToLog("Could not open " + serialcon->portName(),2);
+        serialDisconnect();
         return;
     }
 
