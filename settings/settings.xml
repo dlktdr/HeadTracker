@@ -141,6 +141,7 @@
       <type>u16</type>
       <default>def_min_pwm</default>
       <maximum>MAX_PWM</maximum>
+      <bleaddr>F000</bleaddr>
    </setting>
    <setting>
       <name>Rll_Max</name>
@@ -148,6 +149,7 @@
       <type>u16</type>
       <default>def_max_pwm</default>
       <maximum>MAX_PWM</maximum>
+      <bleaddr>F001</bleaddr>
    </setting>
    <setting>
       <name>Rll_Cnt</name>
@@ -155,6 +157,7 @@
       <type>u16</type>
       <default>ppm_center</default>
       <maximum>MAX_PWM</maximum>
+      <bleaddr>F002</bleaddr>
    </setting>
    <setting>
       <name>Rll_Gain</name>
@@ -162,6 +165,7 @@
       <type>u16</type>
       <default>5</default>
       <maximum>MAX_GAIN</maximum>
+      <bleaddr>F003</bleaddr>
    </setting>
    <setting>
       <name>Tlt_Min</name>
@@ -169,6 +173,7 @@
       <type>u16</type>
       <default>def_min_pwm</default>
       <maximum>MAX_PWM</maximum>
+      <bleaddr>F004</bleaddr>
    </setting>
    <setting>
       <name>Tlt_Max</name>
@@ -176,6 +181,7 @@
       <type>u16</type>
       <default>def_max_pwm</default>
       <maximum>MAX_PWM</maximum>
+      <bleaddr>F005</bleaddr>
    </setting>
    <setting>
       <name>Tlt_Cnt</name>
@@ -183,6 +189,7 @@
       <type>u16</type>
       <default>ppm_center</default>
       <maximum>MAX_PWM</maximum>
+      <bleaddr>F006</bleaddr>
    </setting>
    <setting>
       <name>Tlt_Gain</name>
@@ -190,6 +197,7 @@
       <type>u16</type>
       <default>5</default>
       <maximum>MAX_GAIN</maximum>
+      <bleaddr>F007</bleaddr>
    </setting>
    <setting>
       <name>Pan_Min</name>
@@ -197,6 +205,7 @@
       <type>u16</type>
       <default>def_min_pwm</default>
       <maximum>MAX_PWM</maximum>
+      <bleaddr>F008</bleaddr>
    </setting>
    <setting>
       <name>Pan_Max</name>
@@ -204,6 +213,7 @@
       <type>u16</type>
       <default>def_max_pwm</default>
       <maximum>MAX_PWM</maximum>
+      <bleaddr>F009</bleaddr>
    </setting>
    <setting>
       <name>Pan_Cnt</name>
@@ -211,6 +221,7 @@
       <type>u16</type>
       <default>ppm_center</default>
       <maximum>MAX_PWM</maximum>
+      <bleaddr>F010</bleaddr>
    </setting>
    <setting>
       <name>Pan_Gain</name>
@@ -218,6 +229,7 @@
       <type>u16</type>
       <default>5</default>
       <maximum>MAX_GAIN</maximum>
+      <bleaddr>F011</bleaddr>
    </setting>
    <setting>
       <name>TltCh</name>
@@ -225,6 +237,7 @@
       <type>s8</type>
       <default>-1</default>
       <maximum>MAX_CHANNELS</maximum>
+      <bleaddr>F100</bleaddr>
    </setting>
    <setting>
       <name>RllCh</name>
@@ -232,6 +245,7 @@
       <type>s8</type>
       <default>-1</default>
       <maximum>MAX_CHANNELS</maximum>
+      <bleaddr>F101</bleaddr>
    </setting>
    <setting>
       <name>PanCh</name>
@@ -239,6 +253,7 @@
       <type>s8</type>
       <default>-1</default>
       <maximum>MAX_CHANNELS</maximum>
+      <bleaddr>F102</bleaddr>
    </setting>
    <setting>
       <name>AlertCh</name>
@@ -246,6 +261,7 @@
       <type>s8</type>
       <default>-1</default>
       <maximum>MAX_CHANNELS</maximum>
+      <bleaddr>F103</bleaddr>
    </setting>
    <setting>
       <name>Pwm0</name>
@@ -253,6 +269,7 @@
       <type>s8</type>
       <default>-1</default>
       <maximum>MAX_CHANNELS</maximum>
+      <bleaddr>F104</bleaddr>
    </setting>
    <setting>
       <name>Pwm1</name>
@@ -260,6 +277,7 @@
       <type>s8</type>
       <default>-1</default>
       <maximum>MAX_CHANNELS</maximum>
+      <bleaddr>F105</bleaddr>
    </setting>
    <setting>
       <name>Pwm2</name>
@@ -267,6 +285,7 @@
       <type>s8</type>
       <default>-1</default>
       <maximum>MAX_CHANNELS</maximum>
+      <bleaddr>F106</bleaddr>
    </setting>
    <setting>
       <name>Pwm3</name>
@@ -274,6 +293,7 @@
       <type>s8</type>
       <default>-1</default>
       <maximum>MAX_CHANNELS</maximum>
+      <bleaddr>F107</bleaddr>
    </setting>
    <setting>
       <name>An0Ch</name>
@@ -281,6 +301,7 @@
       <type>s8</type>
       <default>-1</default>
       <maximum>MAX_CHANNELS</maximum>
+      <bleaddr>F108</bleaddr>
    </setting>
    <setting>
       <name>An1Ch</name>
@@ -288,6 +309,7 @@
       <type>s8</type>
       <default>-1</default>
       <maximum>MAX_CHANNELS</maximum>
+      <bleaddr>F109</bleaddr>
    </setting>
    <setting>
       <name>An2Ch</name>
@@ -295,6 +317,7 @@
       <type>s8</type>
       <default>-1</default>
       <maximum>MAX_CHANNELS</maximum>
+      <bleaddr>F10A</bleaddr>
    </setting>
    <setting>
       <name>An3Ch</name>
@@ -302,6 +325,7 @@
       <type>s8</type>
       <default>-1</default>
       <maximum>MAX_CHANNELS</maximum>
+      <bleaddr>F10B</bleaddr>
    </setting>
    <setting>
       <name>Aux0Ch</name>
@@ -309,6 +333,7 @@
       <type>s8</type>
       <default>-1</default>
       <maximum>MAX_CHANNELS</maximum>
+      <bleaddr>F10C</bleaddr>
    </setting>
    <setting>
       <name>Aux1Ch</name>
@@ -316,6 +341,7 @@
       <type>s8</type>
       <default>-1</default>
       <maximum>MAX_CHANNELS</maximum>
+      <bleaddr>F10D</bleaddr>
    </setting>
    <setting>
       <name>Aux2Ch</name>
@@ -323,6 +349,7 @@
       <type>s8</type>
       <default>-1</default>
       <maximum>MAX_CHANNELS</maximum>
+      <bleaddr>F10E</bleaddr>
    </setting>
    <setting>
       <name>RstPpm</name>
@@ -330,26 +357,27 @@
       <type>s8</type>
       <default>-1</default>
       <maximum>MAX_CHANNELS</maximum>
+      <bleaddr>F10F</bleaddr>
    </setting>
    <setting>
       <name>Aux0Func</name>
       <discription>Auxilary Function 0</discription>
-      <type>s8</type>
-      <default>-1</default>
+      <type>u8</type>
+      <default>0</default>
       <maximum>AUX_FUNCTIONS</maximum>
    </setting>
    <setting>
       <name>Aux1Func</name>
       <discription>Auxilary Function 1</discription>
-      <type>s8</type>
-      <default>-1</default>
+      <type>u8</type>
+      <default>0</default>
       <maximum>AUX_FUNCTIONS</maximum>
    </setting>
    <setting>
       <name>Aux2Func</name>
       <discription>Auxilary Function 2</discription>
-      <type>s8</type>
-      <default>-1</default>
+      <type>u8</type>
+      <default>0</default>
       <maximum>AUX_FUNCTIONS</maximum>
    </setting>
    <setting>
@@ -417,7 +445,7 @@
       <roundto>4</roundto>
    </setting>
    <setting>
-      <name>ServoRev</name>
+      <name>ServoReverse</name>
       <discription>Servo Reverse (BitMask)</discription>
       <type>u8</type>
       <default>0</default>
@@ -430,7 +458,7 @@
       <default>0</default>
       <maximum>FLOAT_MAX</maximum>
       <roundto>4</roundto>
-      <FWOnChangeFunc>resetFusion</FWOnChangeFunc>
+      <fwonchange>resetFusion</fwonchange>
    </setting>
    <setting>
       <name>MagYOff</name>
@@ -439,7 +467,7 @@
       <default>0</default>
       <maximum>FLOAT_MAX</maximum>
       <roundto>4</roundto>
-      <FWOnChangeFunc>resetFusion</FWOnChangeFunc>
+      <fwonchange>resetFusion</fwonchange>
    </setting>
    <setting>
       <name>MagZOff</name>
@@ -448,7 +476,7 @@
       <default>0</default>
       <maximum>FLOAT_MAX</maximum>
       <roundto>4</roundto>
-      <FWOnChangeFunc>resetFusion</FWOnChangeFunc>
+      <fwonchange>resetFusion</fwonchange>
    </setting>
    <setting>
       <name>AccXOff</name>
@@ -457,7 +485,7 @@
       <default>0</default>
       <maximum>FLOAT_MAX</maximum>
       <roundto>4</roundto>
-      <FWOnChangeFunc>resetFusion</FWOnChangeFunc>
+      <fwonchange>resetFusion</fwonchange>
    </setting>
    <setting>
       <name>AccYOff</name>
@@ -466,7 +494,7 @@
       <default>0</default>
       <maximum>FLOAT_MAX</maximum>
       <roundto>4</roundto>
-      <FWOnChangeFunc>resetFusion</FWOnChangeFunc>
+      <fwonchange>resetFusion</fwonchange>
    </setting>
    <setting>
       <name>AccZOff</name>
@@ -475,7 +503,7 @@
       <default>0</default>
       <maximum>FLOAT_MAX</maximum>
       <roundto>4</roundto>
-      <FWOnChangeFunc>resetFusion</FWOnChangeFunc>
+      <fwonchange>resetFusion</fwonchange>
    </setting>
    <setting>
       <name>GyrXOff</name>
@@ -484,7 +512,7 @@
       <default>0</default>
       <maximum>FLOAT_MAX</maximum>
       <roundto>4</roundto>
-      <FWOnChangeFunc>resetFusion</FWOnChangeFunc>
+      <fwonchange>resetFusion</fwonchange>
    </setting>
    <setting>
       <name>GyrYOff</name>
@@ -493,7 +521,7 @@
       <default>0</default>
       <maximum>FLOAT_MAX</maximum>
       <roundto>4</roundto>
-      <FWOnChangeFunc>resetFusion</FWOnChangeFunc>
+      <fwonchange>resetFusion</fwonchange>
    </setting>
    <setting>
       <name>GyrZOff</name>
@@ -502,7 +530,88 @@
       <default>0</default>
       <maximum>FLOAT_MAX</maximum>
       <roundto>4</roundto>
-      <FWOnChangeFunc>resetFusion</FWOnChangeFunc>
+      <fwonchange>resetFusion</fwonchange>
+   </setting>
+   <setting>
+      <name>so00</name>
+      <discription>Soft Iron Offset 00</discription>
+      <type>float</type>
+      <default>1</default>
+      <maximum>FLOAT_MAX</maximum>
+      <roundto>4</roundto>
+      <fwonchange>resetFusion</fwonchange>
+   </setting>
+   <setting>
+      <name>so01</name>
+      <discription>Soft Iron Offset 01</discription>
+      <type>float</type>
+      <default>0</default>
+      <maximum>FLOAT_MAX</maximum>
+      <roundto>4</roundto>
+      <fwonchange>resetFusion</fwonchange>
+   </setting>
+   <setting>
+      <name>so02</name>
+      <discription>Soft Iron Offset 02</discription>
+      <type>float</type>
+      <default>0</default>
+      <maximum>FLOAT_MAX</maximum>
+      <roundto>4</roundto>
+      <fwonchange>resetFusion</fwonchange>
+   </setting>
+   <setting>
+      <name>so10</name>
+      <discription>Soft Iron Offset 10</discription>
+      <type>float</type>
+      <default>0</default>
+      <maximum>FLOAT_MAX</maximum>
+      <roundto>4</roundto>
+      <fwonchange>resetFusion</fwonchange>
+   </setting>
+   <setting>
+      <name>so11</name>
+      <discription>Soft Iron Offset 11</discription>
+      <type>float</type>
+      <default>1</default>
+      <maximum>FLOAT_MAX</maximum>
+      <roundto>4</roundto>
+      <fwonchange>resetFusion</fwonchange>
+   </setting>
+   <setting>
+      <name>so12</name>
+      <discription>Soft Iron Offset 12</discription>
+      <type>float</type>
+      <default>0</default>
+      <maximum>FLOAT_MAX</maximum>
+      <roundto>4</roundto>
+      <fwonchange>resetFusion</fwonchange>
+   </setting>
+   <setting>
+      <name>so20</name>
+      <discription>Soft Iron Offset 20</discription>
+      <type>float</type>
+      <default>0</default>
+      <maximum>FLOAT_MAX</maximum>
+      <roundto>4</roundto>
+      <fwonchange>resetFusion</fwonchange>
+   </setting>
+   <setting>
+      <name>so21</name>
+      <discription>Soft Iron Offset 21</discription>
+      <type>float</type>
+      <default>0</default>
+      <maximum>FLOAT_MAX</maximum>
+      <roundto>4</roundto>
+      <fwonchange>resetFusion</fwonchange>
+   </setting>
+   <setting>
+      <name>so22</name>
+      <discription>Soft Iron Offset 22</discription>
+      <type>float</type>
+      <default>1</default>
+      <maximum>FLOAT_MAX</maximum>
+      <roundto>4</roundto>
+      <fwonchange>resetFusion</fwonchange>
    </setting>
    <setting>
       <name>RotX</name>
@@ -511,7 +620,7 @@
       <default>0</default>
       <maximum>360</maximum>
       <roundto>4</roundto>
-      <FWOnChangeFunc>resetFusion</FWOnChangeFunc>
+      <fwonchange>resetFusion</fwonchange>
    </setting>
    <setting>
       <name>RotY</name>
@@ -520,7 +629,7 @@
       <default>0</default>
       <maximum>360</maximum>
       <roundto>4</roundto>
-      <FWOnChangeFunc>resetFusion</FWOnChangeFunc>
+      <fwonchange>resetFusion</fwonchange>
    </setting>
    <setting>
       <name>RotZ</name>
@@ -529,7 +638,7 @@
       <default>0</default>
       <maximum>360</maximum>
       <roundto>4</roundto>
-      <FWOnChangeFunc>resetFusion</FWOnChangeFunc>
+      <fwonchange>resetFusion</fwonchange>
    </setting>
    <setting>
       <name>ButtonPin</name>
@@ -537,7 +646,7 @@
       <type>s8</type>
       <default>2</default>
       <maximum>64</maximum>
-      <FWOnChangeFunc>pinsChanged</FWOnChangeFunc>
+      <fwonchange>pinsChanged</fwonchange>
    </setting>
    <setting>
       <name>PpmOutPin</name>
@@ -545,7 +654,7 @@
       <type>s8</type>
       <default>10</default>
       <maximum>64</maximum>
-      <FWOnChangeFunc>pinsChanged</FWOnChangeFunc>
+      <fwonchange>pinsChanged</fwonchange>
    </setting>
    <setting>
       <name>PpmInPin</name>
@@ -553,23 +662,7 @@
       <type>s8</type>
       <default>-1</default>
       <maximum>64</maximum>
-      <FWOnChangeFunc>pinsChanged</FWOnChangeFunc>
-   </setting>
-   <setting>
-      <name>UartRxPin</name>
-      <discription>UART Receive Pin</discription>
-      <type>s8</type>
-      <default>-1</default>
-      <maximum>64</maximum>
-      <FWOnChangeFunc>pinsChanged</FWOnChangeFunc>
-   </setting>
-   <setting>
-      <name>UartTxPin</name>
-      <discription>UART Transmit Pin</discription>
-      <type>s8</type>
-      <default>-1</default>
-      <maximum>64</maximum>
-      <FWOnChangeFunc>pinsChanged</FWOnChangeFunc>
+      <fwonchange>pinsChanged</fwonchange>
    </setting>
    <setting>
       <name>SerMode</name>
@@ -582,8 +675,8 @@
       <name>SbRate</name>
       <discription>SBUS Transmit Freqency</discription>
       <type>u8</type>
-      <default>30</default>
-      <maximum>80</maximum>
+      <default>80</default>
+      <maximum>140</maximum>
    </setting>
    <setting>
       <name>SbInInv</name>
@@ -659,30 +752,21 @@
       <name>LpPan</name>
       <discription>Low Pass filter For Pan</discription>
       <type>u8</type>
-      <default>0</default>
+      <default>100</default>
       <maximum>100</maximum>
    </setting>
    <setting>
       <name>LpTiltRoll</name>
       <discription>Low Pass filter For Tilt + Roll</discription>
       <type>u8</type>
-      <default>0</default>
+      <default>100</default>
       <maximum>100</maximum>
-   </setting>
-   <setting>
-      <name>MagSiOff[9]</name>
-      <discription>Magnetometer Soft Iron Offset Matrix</discription>
-      <type>float</type>
-      <default>0</default>
-      <maximum>FLOAT_MAX</maximum>
-      <roundto>4</roundto>
-      <FWOnChangeFunc>resetFusion</FWOnChangeFunc>
    </setting>
    <setting>
       <name>BtPairedAddress[17]</name>
       <discription>Bluetooth Remote address to Pair With</discription>
       <type>char</type>
-      <default>00:00:00:00:00:00</default>
+      <default/>
    </setting>
    <data>
       <name>MagX</name>
