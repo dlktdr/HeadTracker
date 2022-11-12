@@ -1,4 +1,4 @@
-name: HT Linux GUI
+name: Linux GUI
 
 on:
   push:

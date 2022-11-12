@@ -12,101 +12,73 @@ import xml.etree.ElementTree as ET
 from xml.dom import minidom
 import os
 
-# CSV Column's
-coltype = 0
-coldata = 1
-colname = 2
-coldefault = 3
-colmin = 4
-colmax = 5
-coldesc = 6
-colfwonevnt = 7
-coldivisor = 8
-colround = 9
+import set_common as s
 
-const = list()
-data = list()
-dataarrays = list()
-settings = list()
-settingsarrays = list()
-
-with open('settings.csv', newline='') as csvfile:
-    setns = csv.reader(csvfile, delimiter=',', quotechar='\"')
-    itersetns = iter(setns)
-    next(itersetns)
-    for row in setns:
-        if "const" in row[coldata].lower():
-          const.append(row)
-        if "setting" in row[coldata].lower():
-          if "[" in row[colname]:
-            settingsarrays.append(row)
-          else:
-            settings.append(row)
-        if "data" in row[coldata].lower():
-          if "[" in row[colname]:
-            dataarrays.append(row)
-          else:
-            data.append(row)
+s.readSettings()
 
 root = ET.Element('HeadTracker')
-for row in const:
+for row in s.const:
   conste = ET.SubElement(root, "const")
   name = ET.SubElement(conste, "name")
-  name.text = row[colname]
-  if row[coldesc].strip() != "":
+  name.text = row[s.colname]
+  if row[s.coldesc].strip() != "":
     name = ET.SubElement(conste, "discription")
-    name.text = row[coldesc]
+    name.text = row[s.coldesc]
   name = ET.SubElement(conste, "type")
-  name.text = row[coltype]
+  name.text = row[s.coltype]
   name = ET.SubElement(conste, "value")
-  name.text = row[coldefault]
+  name.text = row[s.coldefault]
 
 def addSetting(row):
   conste = ET.SubElement(root, "setting")
   name = ET.SubElement(conste, "name")
-  name.text = row[colname]
+  name.text = row[s.colname]
   name = ET.SubElement(conste, "discription")
-  name.text = row[coldesc]
+  name.text = row[s.coldesc]
   name = ET.SubElement(conste, "type")
-  name.text = row[coltype].lower().strip()
+  name.text = row[s.coltype].lower().strip()
   name = ET.SubElement(conste, "default")
-  name.text = row[coldefault].lower().strip()
-  if row[coltype].lower().strip() != 'bool' and row[coltype].lower().strip() != 'char':
-    if row[coltype].lower().strip()[:1] != 'u' and row[colmin].strip() == 0:
+  name.text = row[s.coldefault].lower().strip()
+  if row[s.coltype].lower().strip() != 'bool' and row[s.coltype].lower().strip() != 'char':
+    if row[s.coltype].lower().strip()[:1] != 'u' and row[s.colmin].strip() == 0:
       name = ET.SubElement(conste, "minimum")
-      name.text = row[colmin]
+      name.text = row[s.colmin]
     name = ET.SubElement(conste, "maximum")
-    name.text = row[colmax]
-    if row[colround].strip() != "":
+    name.text = row[s.colmax]
+    if row[s.colround].strip() != "":
       name = ET.SubElement(conste, "roundto")
-      name.text = row[colround]
-    if row[colfwonevnt].strip() != "":
-      name = ET.SubElement(conste, "FWOnChangeFunc")
-      name.text = row[colfwonevnt]
+      name.text = row[s.colround]
+    if row[s.colfwonevnt].strip() != "":
+      name = ET.SubElement(conste, "fwonchange")
+      name.text = row[s.colfwonevnt]
+    if row[s.colbleaddr].strip() != "":
+      name = ET.SubElement(conste, "bleaddr")
+      name.text = row[s.colbleaddr]
+
 
 def addData(row):
   conste = ET.SubElement(root, "data")
   name = ET.SubElement(conste, "name")
-  name.text = row[colname]
+  name.text = row[s.colname]
   name = ET.SubElement(conste, "discription")
-  name.text = row[coldesc]
+  name.text = row[s.coldesc]
   name = ET.SubElement(conste, "type")
-  name.text = row[coltype].lower().strip()
-  if row[coltype].lower().strip() != 'bool' and row[coltype].lower().strip() != 'char':
-    if row[colround].strip() != "":
+  name.text = row[s.coltype].lower().strip()
+  if row[s.coltype].lower().strip() != 'bool' and row[s.coltype].lower().strip() != 'char':
+    if row[s.colround].strip() != "":
       name = ET.SubElement(conste, "round")
-      name.text = row[colround]
+      name.text = row[s.colround]
 
-for row in settings:
+for row in s.settings:
   addSetting(row)
 
-for row in settingsarrays:
+for row in s.settingsarrays:
   addSetting(row)
 
-for row in data:
+for row in s.data:
   addData(row)
 
-for row in dataarrays:
+for row in s.dataarrays:
   addData(row)
 
 xmlstr = minidom.parseString(ET.tostring(root)).toprettyxml(indent="   ",newl='\n')

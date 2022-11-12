@@ -1,4 +1,4 @@
-name: HT MacOS GUI
+name: MacOS GUI
 
 on:
   push:
@@ -25,7 +25,7 @@ jobs:
       - name: Select XCode version
         uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: '11.7'
+          xcode-version: '12.5.1'
 
       - name: Check out the repo
         uses: actions/checkout@v2
@@ -33,7 +33,7 @@ jobs:
           submodules: recursive
 
       - name: Install Qt
-        uses: jurplel/install-qt-action@v2.11.0
+        uses: jurplel/install-qt-action@v3
         with:
           version: '5.15.2'
           setup-python: false
@@ -42,12 +42,31 @@ jobs:
         working-directory: ${{github.workspace}}
         run: |
           cd gui/src
+          ls
           qmake HeadTracker.pro
           make
+
+#      - name: List Files
+#        working-directory: ${{github.workspace}}
+#        run: |
+#          ls -la gui/src/HeadTracker.app/
+#          ls -la gui/src/HeadTracker.app/Contents
+#          ls -la gui/src/HeadTracker.app/Contents/MacOs
+#          lipo -detailed_info gui/src/HeadTracker.app/Contents/MacOS/HeadTracker
+
+      - name: MacDeployQT
+        working-directory: ${{github.workspace}}
+        run: |
+          mkdir output
+          cp -R gui/src/HeadTracker.app output/HeadTracker.app
+          cp gui/src/css/stylesheet.css output/HeadTracker.app/Contents/MacOs
+          cp gui/src/css/Background.svg output/HeadTracker.app/Contents/MacOs
+          cd output
+          macdeployqt HeadTracker.app -verbose=2
 
       - name: Archive production artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: headtracker_mac
+          name: HeadTracker_MacOs
           path: ${{github.workspace}}/output
           retention-days: 60
