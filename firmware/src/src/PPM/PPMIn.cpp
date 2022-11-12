@@ -43,7 +43,7 @@ static int isrch_count=0;
 static uint16_t channels[16];
 static int ch_count=0;
 
-static volatile uint32_t runtime = 0;
+static volatile uint64_t runtime = 0;
 
 ISR_DIRECT_DECLARE(PPMInGPIOTE_ISR)
 {
@@ -67,7 +67,7 @@ ISR_DIRECT_DECLARE(PPMInGPIOTE_ISR)
             framestarted = true;
 
             // Used to check if a signal is here
-            runtime = micros();
+            runtime = micros64();
 
 
         // Valid Ch Range
