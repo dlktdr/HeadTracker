@@ -32,7 +32,7 @@
 
 // Globals
 static uartmodet curmode = UARTDISABLE;
-static uint32_t lastRead;
+static uint32_t lastRead = 0;
 static bool dataIsValid = false;
 
 // Incoming channels

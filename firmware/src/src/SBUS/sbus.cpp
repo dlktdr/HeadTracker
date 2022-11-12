@@ -32,11 +32,16 @@
 
 #define SBUS_FRAME_LEN 25
 
+//#define DEBUG_SBUS
+
 static void SBUS_TX_Start();
 
 static constexpr uint8_t HEADER_ = 0x0F;
 static constexpr uint8_t FOOTER_ = 0x00;
 static constexpr uint8_t FOOTER2_ = 0x04;
+static constexpr int8_t PAYLOAD_LEN_ = 23;
+static constexpr int8_t HEADER_LEN_ = 1;
+static constexpr int8_t FOOTER_LEN_ = 1;
 static constexpr uint8_t LEN_ = 25;
 static constexpr uint8_t CH17_ = 0x01;
 static constexpr uint8_t CH18_ = 0x02;
@@ -80,7 +85,13 @@ int8_t state_ = 0;
 uint8_t prev_byte_ = FOOTER_;
 uint8_t cur_byte_;
 
-// TODO: There is an issue here, only half of the SBUS packets are received
+/* FROM -----
+ * Brian R Taylor
+ * brian.taylor@bolderflight.com
+ *
+ * Copyright (c) 2021 Bolder Flight Systems Inc
+ */
+
 bool SbusRx_Parse()
 {
   /* Parse messages */
@@ -92,37 +103,30 @@ bool SbusRx_Parse()
       } else {
         state_ = 0;
       }
-    } else {
-      if (state_ < SBUS_FRAME_LEN) {
-        buf_[state_++] = cur_byte_;
+    } else if (state_ < PAYLOAD_LEN_ + HEADER_LEN_) {
+      buf_[state_++] = cur_byte_;
+    } else if (state_ < PAYLOAD_LEN_ + HEADER_LEN_ + FOOTER_LEN_) {
+      state_ = 0;
+      prev_byte_ = cur_byte_;
+      if ((cur_byte_ == FOOTER_) || ((cur_byte_ & 0x0F) == FOOTER2_)) {
+        return true;
       } else {
-        state_ = 0;
-        if ((buf_[SBUS_FRAME_LEN - 1] == FOOTER_) ||
-            ((buf_[SBUS_FRAME_LEN - 1] & 0x0F) == FOOTER2_)) {
-          return true;
-        } else {
-          return false;
-        }
+        return false;
       }
+    } else {
+      state_ = 0;
     }
     prev_byte_ = cur_byte_;
   }
   return false;
 }
 
-
-/* FROM -----
- * Brian R Taylor
- * brian.taylor@bolderflight.com
- *
- * Copyright (c) 2021 Bolder Flight Systems Inc
- */
-
 bool SbusReadChannels(uint16_t ch_[16])
 {
   bool newdata = false;
   while (SbusRx_Parse()) {  // Get most recent data if more than 1 packet came in
     PacketCount++;
+    //if (newdata) LOGE("Lost Sbus Data");
     newdata = true;
   }
   if (newdata) {
@@ -149,18 +153,15 @@ bool SbusReadChannels(uint16_t ch_[16])
       if (ch_[i] < TrackerSettings::MIN_PWM) ch_[i] = TrackerSettings::MIN_PWM;
     }
 
-#ifdef DEBUG_SBUS
-    static bool toggle = false;
-    if (sbusrate++ == 0) {
-      sbstarttime = millis64();  // Store start time
-      bytesread = bytecount;
-
-    } else if (sbusrate == 100) {  // After 100 samples, output the time taken
-      float elapsed = (float)(millis64() - sbstarttime) / 1000.0f;
-      uint32_t bytes = bytecount - bytesread;  // Bytes read in this time
-      sbusrate = 0;
-      LOGD("SBUS Rate - %d BytesRx - %d", (int)(elapsed * 1000.0f), (int)bytes);
+#if defined(DEBUG_SBUS)
+    static int mcount = 0;
+    static int64_t mmic = millis64() + 1000;
+    if (mmic < millis64()) {  // Every Second
+      mmic = millis64() + 1000;
+      LOGI("sbus rate = %d", mcount);
+      mcount = 0;
     }
+    mcount++;
 #endif
 
     return true;
