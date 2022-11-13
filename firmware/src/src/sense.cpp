@@ -21,7 +21,7 @@
 #include <zephyr.h>
 
 #include "MadgwickAHRS/MadgwickAHRS.h"
-#include "SBUS/sbus.h"
+#include "uart_mode.h"
 #include "analog.h"
 #include "ble.h"
 #include "filters.h"
@@ -66,7 +66,7 @@ static bool trpOutputEnabled = false;  // Default to disabled T/R/P output
 
 // Input Channel Data
 static uint16_t ppm_in_chans[16];
-static uint16_t sbus_in_chans[16];
+static uint16_t uart_in_chans[16];
 static uint16_t bt_chans[TrackerSettings::BT_CHANNELS];
 static float bt_chansf[TrackerSettings::BT_CHANNELS];
 
@@ -335,27 +335,23 @@ void calculate_Thread()
       }
     }
 
-    // 3) Set all incoming SBUS values
-    static float sbustimer = TrackerSettings::SBUS_ACTIVE_TIME;
+    // 3) Set all incoming UART values (Sbus/Crsf)
+    bool isUartValid = UartGetChannels(uart_in_chans);
     static bool lostmsgsent = false;
     static bool recmsgsent = false;
-    sbustimer += (float)CALCULATE_PERIOD / 1000000.0;
-    if (SBUS_Read_Data(sbus_in_chans)) {  // Valid SBUS packet received?
-      sbustimer = 0;
-    }
-    // SBUS not received within XX time, disable
-    if (sbustimer > TrackerSettings::SBUS_ACTIVE_TIME) {
-      for (int i = 0; i < 16; i++) sbus_in_chans[i] = 0;
+    if (!isUartValid) {
       if (!lostmsgsent) {
-        LOGE("SBUS Data Lost");
+        LOGE("Uart(SBUS/CRSF) Data Lost");
         lostmsgsent = true;
       }
       recmsgsent = false;
       // SBUS data still valid, set the channel values to the last SBUS
     } else {
-      for (int i = 0; i < 16; i++) channel_data[i] = sbus_in_chans[i];
+      for (int i = 0; i < 16; i++) {
+        channel_data[i] = uart_in_chans[i];
+      }
       if (!recmsgsent) {
-        LOGD("SBUS Data Received");
+        LOGD("Uart(SBUS/CRSF) Data Received");
         recmsgsent = true;
       }
       lostmsgsent = false;
@@ -489,6 +485,12 @@ void calculate_Thread()
     if (panch > 0)
       channel_data[panch - 1] = trpOutputEnabled == true ? panout_ui : trkset.getPan_Cnt();
 
+    // If uart output set to CRSR_OUT, force channel 5 (AUX1/ARM) to high, will override all other channels
+    if(trkset.getUartMode() == TrackerSettings::UART_MODE_CRSFOUT) {
+      if(trkset.getCh5Arm())
+        channel_data[4] = 2000;
+    }
+
     // 10) Set the PPM Outputs
     PpmOut_execute();
     for (int i = 0; i < PpmOut_getChnCount(); i++) {
@@ -504,16 +506,15 @@ void calculate_Thread()
       BTSetChannel(i, channel_data[i]);
     }
 
-    // 12) Set all SBUS output channels, if disabled set to center
-    uint16_t sbus_data[16];
+    // 12) Set all UART output channels, if disabled(0) set to center
+    uint16_t uart_data[16];
     for (int i = 0; i < 16; i++) {
-      uint16_t sbusout = channel_data[i];
-      if (sbusout == 0) sbusout = TrackerSettings::PPM_CENTER;
-      sbus_data[i] = (static_cast<float>(sbusout) - TrackerSettings::PPM_CENTER) *
-                         TrackerSettings::SBUS_SCALE +
-                     TrackerSettings::SBUS_CENTER;
+      if (channel_data[i] == 0)
+        uart_data[i] = TrackerSettings::PPM_CENTER;
+      else
+        uart_data[i] = channel_data[i];
     }
-    SBUS_TX_BuildData(sbus_data);
+    UartSetChannels(uart_data);
 
     // 13) Set PWM Channels
     int8_t pwmchs[4] = {trkset.getPwm0(), trkset.getPwm1(), trkset.getPwm2(), trkset.getPwm3()};
@@ -577,7 +578,7 @@ void calculate_Thread()
       // PPM Input Values
       trkset.setDataPpmCh(ppm_in_chans);
       trkset.setDataBtCh(bt_chans);
-      trkset.setDataSbusCh(sbus_in_chans);
+      trkset.setDataUartCh(uart_in_chans);
       trkset.setDataChOut(channel_data);
       trkset.setDataTrpEnabled(trpOutputEnabled);
 

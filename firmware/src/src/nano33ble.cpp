@@ -8,7 +8,7 @@
 
 #include "PPMIn.h"
 #include "PPMOut.h"
-#include "SBUS/sbus.h"
+#include "uart_mode.h"
 #include "analog.h"
 #include "ble.h"
 #include "io.h"
@@ -19,11 +19,6 @@
 #include "serial.h"
 #include "soc_flash.h"
 #include "trackersettings.h"
-
-// T
-#include <device.h>
-#include <drivers/i2c.h>
-#include <zephyr.h>
 
 #define CLOCK_NODE DT_INST(0, nordic_nrf_clock)
 static const struct device *clock0;
@@ -55,8 +50,8 @@ void start(void)
   // Start the BT Thread
   bt_init();
 
-  // Start SBUS - SBUS/uarte_sbus.cpp (Pins D0/TX, D1/RX)
-  sbus_init();
+  // Start Externam UART
+  uart_init();
 
   // PWM Outputs - Fixed to A0-A3
 #if defined(HAS_PWMOUTPUTS)
@@ -76,8 +71,9 @@ K_THREAD_DEFINE(bt_Thread_id, 4096, bt_Thread, NULL, NULL, NULL, BT_THREAD_PRIO,
 K_THREAD_DEFINE(sensor_Thread_id, 4096, sensor_Thread, NULL, NULL, NULL, SENSOR_THREAD_PRIO,
                 K_FP_REGS, 500);
 K_THREAD_DEFINE(calculate_Thread_id, 4096, calculate_Thread, NULL, NULL, NULL,
-                CALCULATE_THREAD_PRIO, K_FP_REGS, 500);
-K_THREAD_DEFINE(SBUS_Thread_id, 1024, sbus_Thread, NULL, NULL, NULL, SBUS_THREAD_PRIO, 0, 1000);
+                CALCULATE_THREAD_PRIO, K_FP_REGS, 1000);
+K_THREAD_DEFINE(uartTx_Thread_ID, 1024, uartTx_Thread, NULL, NULL, NULL, UARTTX_THREAD_PRIO, 0, 1000);
+K_THREAD_DEFINE(uartRx_Thread_ID, 1024, uartRx_Thread, NULL, NULL, NULL, UARTRX_THREAD_PRIO, 0, 1000);
 
 #elif defined(RTOS_FREERTOS)
 #error "TODO... Add tasks for FreeRTOS"

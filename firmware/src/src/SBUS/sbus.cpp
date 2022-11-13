@@ -28,12 +28,20 @@
 #include "log.h"
 #include "soc_flash.h"
 #include "trackersettings.h"
+#include "uart_mode.h"
 
 #define SBUS_FRAME_LEN 25
+
+//#define DEBUG_SBUS
+
+static void SBUS_TX_Start();
 
 static constexpr uint8_t HEADER_ = 0x0F;
 static constexpr uint8_t FOOTER_ = 0x00;
 static constexpr uint8_t FOOTER2_ = 0x04;
+static constexpr int8_t PAYLOAD_LEN_ = 23;
+static constexpr int8_t HEADER_LEN_ = 1;
+static constexpr int8_t FOOTER_LEN_ = 1;
 static constexpr uint8_t LEN_ = 25;
 static constexpr uint8_t CH17_ = 0x01;
 static constexpr uint8_t CH18_ = 0x02;
@@ -46,38 +54,29 @@ static constexpr uint8_t FAILSAFE_MASK_ = 0x08;
 static bool failsafe_ = false, lost_frame_ = false, ch17_ = false, ch18_ = false;
 
 volatile bool sbusTreadRun = false;
-volatile bool sbusBuildingData = false; // TODO Replace me with a mutex
+volatile bool sbusBuildingData = false;  // TODO Replace me with a mutex
 volatile bool sbusoutinv = false;
 volatile bool sbusininv = false;
 volatile bool sbusinsof = false;  // Start of Frame
 
 uint8_t localTXBuffer[SBUS_FRAME_LEN];  // Local Buffer
 
-void sbus_Thread()
+void SbusTx()
 {
-  while (1) {
-    if (!sbusTreadRun || pauseForFlash) {
-      rt_sleep_ms(50);
-      continue;
-    }
-    rt_sleep_us((1.0 / (float)trkset.getSbRate()) * 1.0e6);
+  // Has the SBUS inverted status changed
+  if (sbusininv != !trkset.getSbInInv() || sbusoutinv != !trkset.getSbOutInv()) {
+    sbusininv = !trkset.getSbInInv();
+    sbusoutinv = !trkset.getSbOutInv();
 
-    // Has the SBUS inverted status changed
-    if (sbusininv != !trkset.getSbInInv() ||
-        sbusoutinv != !trkset.getSbOutInv()) {
-      sbusininv = !trkset.getSbInInv();
-      sbusoutinv = !trkset.getSbOutInv();
-
-      // Close and re-open port with new settings
-      AuxSerial_Close();
-      uint8_t inversion = 0;
-      if (sbusininv) inversion |= CONFINV_RX;
-      if (sbusoutinv) inversion |= CONFINV_TX;
-      AuxSerial_Open(BAUD100000, CONF8E2, inversion);
-    }
-    // Send SBUS Data
-    SBUS_TX_Start();
+    // Close and re-open port with new settings
+    AuxSerial_Close();
+    uint8_t inversion = 0;
+    if (sbusininv) inversion |= CONFINV_RX;
+    if (sbusoutinv) inversion |= CONFINV_TX;
+    AuxSerial_Open(BAUD100000, CONF8E2, inversion);
   }
+  // Send SBUS Data
+  SBUS_TX_Start();
 }
 
 uint8_t buf_[SBUS_FRAME_LEN];
@@ -86,52 +85,6 @@ int8_t state_ = 0;
 uint8_t prev_byte_ = FOOTER_;
 uint8_t cur_byte_;
 
-#ifdef DEBUG
-uint64_t bytecount = 0;
-#endif
-bool SbusRx_Parse()
-{
-  /* Parse messages */
-  while (AuxSerial_Read(&cur_byte_, 1)) {
-    /*TODO fixme serialWriteHex(&cur_byte_,1);
-    if ((cur_byte_ == HEADER_) && ((prev_byte_ == FOOTER_) ||
-       ((prev_byte_ & 0x0F) == FOOTER2_))) {
-      serialWriteln();
-       }*/
-#ifdef DEBUG
-    bytecount++;
-#endif
-    if (state_ == 0) {
-      if ((cur_byte_ == HEADER_) &&
-          ((prev_byte_ == FOOTER_) || ((prev_byte_ & 0x0F) == FOOTER2_))) {
-        buf_[state_++] = cur_byte_;
-      } else {
-        state_ = 0;
-      }
-    } else {
-      if (state_ < SBUS_FRAME_LEN) {
-        buf_[state_++] = cur_byte_;
-      } else {
-        state_ = 0;
-        if ((buf_[SBUS_FRAME_LEN - 1] == FOOTER_) ||
-            ((buf_[SBUS_FRAME_LEN - 1] & 0x0F) == FOOTER2_)) {
-          return true;
-        } else {
-          return false;
-        }
-      }
-    }
-    prev_byte_ = cur_byte_;
-  }
-  return false;
-}
-
-#ifdef DEBUG
-uint8_t sbusrate = 0;
-uint64_t sbstarttime = 0;
-uint64_t bytesread = 0;
-#endif
-
 /* FROM -----
  * Brian R Taylor
  * brian.taylor@bolderflight.com
@@ -139,10 +92,41 @@ uint64_t bytesread = 0;
  * Copyright (c) 2021 Bolder Flight Systems Inc
  */
 
-bool SBUS_Read_Data(uint16_t ch_[16])
+bool SbusRx_Parse()
+{
+  /* Parse messages */
+  while (AuxSerial_Read(&cur_byte_, 1)) {
+    if (state_ == 0) {
+      if ((cur_byte_ == HEADER_) &&
+          ((prev_byte_ == FOOTER_) || ((prev_byte_ & 0x0F) == FOOTER2_))) {
+        buf_[state_++] = cur_byte_;
+      } else {
+        state_ = 0;
+      }
+    } else if (state_ < PAYLOAD_LEN_ + HEADER_LEN_) {
+      buf_[state_++] = cur_byte_;
+    } else if (state_ < PAYLOAD_LEN_ + HEADER_LEN_ + FOOTER_LEN_) {
+      state_ = 0;
+      prev_byte_ = cur_byte_;
+      if ((cur_byte_ == FOOTER_) || ((cur_byte_ & 0x0F) == FOOTER2_)) {
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      state_ = 0;
+    }
+    prev_byte_ = cur_byte_;
+  }
+  return false;
+}
+
+bool SbusReadChannels(uint16_t ch_[16])
 {
   bool newdata = false;
   while (SbusRx_Parse()) {  // Get most recent data if more than 1 packet came in
+    PacketCount++;
+    //if (newdata) LOGE("Lost Sbus Data");
     newdata = true;
   }
   if (newdata) {
@@ -169,23 +153,19 @@ bool SBUS_Read_Data(uint16_t ch_[16])
       if (ch_[i] < TrackerSettings::MIN_PWM) ch_[i] = TrackerSettings::MIN_PWM;
     }
 
-#ifdef DEBUG_SBUS
-    static bool toggle = false;
-    if (sbusrate++ == 0) {
-      sbstarttime = millis64();  // Store start time
-      bytesread = bytecount;
-
-    } else if (sbusrate == 100) {  // After 100 samples, output the time taken
-      float elapsed = (float)(millis64() - sbstarttime) / 1000.0f;
-      uint32_t bytes = bytecount - bytesread;  // Bytes read in this time
-      sbusrate = 0;
-      LOGD("SBUS Rate - %d BytesRx - %d", (int)(elapsed * 1000.0f), (int)bytes);
+#if defined(DEBUG_SBUS)
+    static int mcount = 0;
+    static int64_t mmic = millis64() + 1000;
+    if (mmic < millis64()) {  // Every Second
+      mmic = millis64() + 1000;
+      LOGI("sbus rate = %d", mcount);
+      mcount = 0;
     }
+    mcount++;
 #endif
 
     return true;
   }
-
   return false;
 }
 
@@ -195,7 +175,7 @@ void SBUS_TX_Start()
   AuxSerial_Write(localTXBuffer, SBUS_FRAME_LEN);
 }
 
-void sbus_init()
+void SbusInit()
 {
   sbusininv = !trkset.getSbInInv();
   sbusoutinv = !trkset.getSbOutInv();
@@ -215,7 +195,7 @@ void sbus_init()
  * Copyright (c) 2021 Bolder Flight Systems Inc
  */
 
-void SBUS_TX_BuildData(uint16_t ch_[16])
+void SbusWriteChannels(uint16_t ch_[16])
 {
   sbusBuildingData = true;
   uint8_t *buf_ = localTXBuffer;

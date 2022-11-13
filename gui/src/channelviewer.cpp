@@ -39,7 +39,7 @@ void ChannelViewer::tabChanged(int index)
     di["chout"] = false;
     di["btch"] = false;
     di["ppmch"] = false;
-    di["sbusch"] = false;
+    di["uartch"] = false;
 
     switch(index) {
     case 0: // Channel Outputs
@@ -51,7 +51,7 @@ void ChannelViewer::tabChanged(int index)
         trkset->setDataItemSend(di);
         break;
     case 2: // SBUS inputs
-        di["sbusch"] = true;
+        di["uartch"] = true;
         trkset->setDataItemSend(di);
         break;
     case 3: // BT inputs
@@ -67,7 +67,7 @@ void ChannelViewer::closeClicked()
     di["chout"] = false;
     di["btch"] = false;
     di["ppmch"] = false;
-    di["sbusch"] = false;
+    di["uartch"] = false;
     if(board != nullptr)
         trkset->setDataItemSend(di);
     hide();
@@ -117,7 +117,7 @@ void ChannelViewer::chDataUpdated()
     case 2: { // SBUS inputs
         bool lastch=true;
         for(int i=0;i<CHANNELS;i++) {
-            int sbusch = trkset->liveData(QString("sbusch[%1]").arg(i)).toInt();
+            int sbusch = trkset->liveData(QString("uartch[%1]").arg(i)).toInt();
             if(sbusch == 0)
                 lastch = false;
             if(i==0) {
@@ -241,7 +241,7 @@ void ChannelViewer::addBars()
     layoutsbusin->addWidget(lblSBUSin);
     lblSBUSin->setVisible(false);
     lblSBUSin->setAlignment(Qt::AlignHCenter|Qt::AlignVCenter);
-    lblSBUSin->setText("No SBUS input channels detected");
+    lblSBUSin->setText("No UART (Sbus/Crsf) input channels detected");
 
     // BT Inputs
     layoutbtin = new QVBoxLayout(ui->tabbtin);

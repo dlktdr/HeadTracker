@@ -55,10 +55,14 @@ public:
   static constexpr float RESET_ON_TILT_TIME = 1.5;
   static constexpr float RESET_ON_TILT_AFTER = 1;
   static constexpr float RECENTER_PULSE_DURATION = 0.5;
-  static constexpr float SBUS_ACTIVE_TIME = 0.1;
+  static constexpr float UART_ACTIVE_TIME = 0.1;
   static constexpr float PPM_MIN_FRAMESYNC = 3000;
   static constexpr float PPM_MIN_FRAME = 6666;
   static constexpr float PPM_MAX_FRAME = 40000;
+  static constexpr uint8_t UART_MODE_OFF = 0;
+  static constexpr uint8_t UART_MODE_SBUS = 1;
+  static constexpr uint8_t UART_MODE_CRSFIN = 2;
+  static constexpr uint8_t UART_MODE_CRSFOUT = 3;
 
   BaseTrackerSettings(QObject *parent=nullptr) : 
     QObject(parent)
@@ -127,10 +131,12 @@ public:
     _setting["buttonpin"] = 2;
     _setting["ppmoutpin"] = 10;
     _setting["ppminpin"] = -1;
-    _setting["sermode"] = 0;
-    _setting["sbrate"] = 80;
+    _setting["uartmode"] = 0;
+    _setting["crsftxrate"] = 140;
+    _setting["sbustxrate"] = 80;
     _setting["sbininv"] = true;
     _setting["sboutinv"] = true;
+    _setting["ch5arm"] = true;
     _setting["btmode"] = 0;
     _setting["rstonwave"] = false;
     _setting["butlngps"] = false;
@@ -177,7 +183,7 @@ public:
     _dataItems["chout"] = false;
     _dataItems["btch"] = false;
     _dataItems["ppmch"] = false;
-    _dataItems["sbusch"] = false;
+    _dataItems["uartch"] = false;
     _dataItems["quat"] = false;
     _dataItems["btaddr"] = false;
     _dataItems["btrmt"] = false;
@@ -981,25 +987,37 @@ public:
     return false;
   }
 
-  // Serial Mode (0- Off, 1-SBUS, 2-CRSF)
-  uint8_t getSerMode() {
-    return _setting["sermode"].toUInt();
+  // Uart Mode (0- Off, 1-SBUS, 2-CRSFIN, 3-CRSFOUT)
+  uint8_t getUartMode() {
+    return _setting["uartmode"].toUInt();
   }
-  bool setSerMode(uint8_t val=0) {
-    if(val <= 2) {
-      _setting["sermode"] = val;
+  bool setUartMode(uint8_t val=0) {
+    if(val <= 3) {
+      _setting["uartmode"] = val;
+      return true;
+    }
+    return false;
+  }
+
+  // CRSF Transmit Frequncy
+  uint8_t getCrsfTxRate() {
+    return _setting["crsftxrate"].toUInt();
+  }
+  bool setCrsfTxRate(uint8_t val=140) {
+    if(val >= 30 && val <= 140) {
+      _setting["crsftxrate"] = val;
       return true;
     }
     return false;
   }
 
   // SBUS Transmit Freqency
-  uint8_t getSbRate() {
-    return _setting["sbrate"].toUInt();
+  uint8_t getSbusTxRate() {
+    return _setting["sbustxrate"].toUInt();
   }
-  bool setSbRate(uint8_t val=80) {
+  bool setSbusTxRate(uint8_t val=80) {
     if(val >= 30 && val <= 140) {
-      _setting["sbrate"] = val;
+      _setting["sbustxrate"] = val;
       return true;
     }
     return false;
@@ -1012,6 +1030,10 @@ public:
   // SBUS Transmit Inverted
   bool getSbOutInv() {return _setting["sboutinv"].toBool();}
   void setSbOutInv(bool val=true) { _setting["sboutinv"] = val; }
+
+  // Channel 5 
+  bool getCh5Arm() {return _setting["ch5arm"].toBool();}
+  void setCh5Arm(bool val=true) { _setting["ch5arm"] = val; }
 
   // Bluetooth Mode (0-Off, 1- Head, 2-Receive, 3-Scanner)
   uint8_t getBtMode() {
@@ -1285,22 +1307,22 @@ public:
     rv.append("ppmch[13]");
     rv.append("ppmch[14]");
     rv.append("ppmch[15]");
-    rv.append("sbusch[0]");
-    rv.append("sbusch[1]");
-    rv.append("sbusch[2]");
-    rv.append("sbusch[3]");
-    rv.append("sbusch[4]");
-    rv.append("sbusch[5]");
-    rv.append("sbusch[6]");
-    rv.append("sbusch[7]");
-    rv.append("sbusch[8]");
-    rv.append("sbusch[9]");
-    rv.append("sbusch[10]");
-    rv.append("sbusch[11]");
-    rv.append("sbusch[12]");
-    rv.append("sbusch[13]");
-    rv.append("sbusch[14]");
-    rv.append("sbusch[15]");
+    rv.append("uartch[0]");
+    rv.append("uartch[1]");
+    rv.append("uartch[2]");
+    rv.append("uartch[3]");
+    rv.append("uartch[4]");
+    rv.append("uartch[5]");
+    rv.append("uartch[6]");
+    rv.append("uartch[7]");
+    rv.append("uartch[8]");
+    rv.append("uartch[9]");
+    rv.append("uartch[10]");
+    rv.append("uartch[11]");
+    rv.append("uartch[12]");
+    rv.append("uartch[13]");
+    rv.append("uartch[14]");
+    rv.append("uartch[15]");
     rv.append("quat[0]");
     rv.append("quat[1]");
     rv.append("quat[2]");

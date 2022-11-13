@@ -59,17 +59,21 @@ public:
   static constexpr float RESET_ON_TILT_TIME = 1.5;
   static constexpr float RESET_ON_TILT_AFTER = 1;
   static constexpr float RECENTER_PULSE_DURATION = 0.5;
-  static constexpr float SBUS_ACTIVE_TIME = 0.1;
+  static constexpr float UART_ACTIVE_TIME = 0.1;
   static constexpr float PPM_MIN_FRAMESYNC = 3000;
   static constexpr float PPM_MIN_FRAME = 6666;
   static constexpr float PPM_MAX_FRAME = 40000;
+  static constexpr uint8_t UART_MODE_OFF = 0;
+  static constexpr uint8_t UART_MODE_SBUS = 1;
+  static constexpr uint8_t UART_MODE_CRSFIN = 2;
+  static constexpr uint8_t UART_MODE_CRSFOUT = 3;
 
   BaseTrackerSettings() {
     strcpy(btpairedaddress,"");
     memset(chout,0,sizeof(uint16_t) * 16);
     memset(btch,0,sizeof(uint16_t) * 8);
     memset(ppmch,0,sizeof(uint16_t) * 16);
-    memset(sbusch,0,sizeof(uint16_t) * 16);
+    memset(uartch,0,sizeof(uint16_t) * 16);
     memset(quat,0,sizeof(float) * 4);
     memset(btaddr,0,sizeof(char) * 18);
     memset(btrmt,0,sizeof(char) * 18);
@@ -723,21 +727,31 @@ public:
     return false;
   }
 
-  // Serial Mode (0- Off, 1-SBUS, 2-CRSF)
-  inline const uint8_t& getSerMode() {return sermode;}
-  bool setSerMode(uint8_t val=0) {
-    if(val >= 0 && val <= 2) {
-      sermode = val;
+  // Uart Mode (0- Off, 1-SBUS, 2-CRSFIN, 3-CRSFOUT)
+  inline const uint8_t& getUartMode() {return uartmode;}
+  bool setUartMode(uint8_t val=0) {
+    if(val >= 0 && val <= 3) {
+      uartmode = val;
+      return true;
+    }
+    return false;
+  }
+
+  // CRSF Transmit Frequncy
+  inline const uint8_t& getCrsfTxRate() {return crsftxrate;}
+  bool setCrsfTxRate(uint8_t val=140) {
+    if(val >= 30 && val <= 140) {
+      crsftxrate = val;
       return true;
     }
     return false;
   }
 
   // SBUS Transmit Freqency
-  inline const uint8_t& getSbRate() {return sbrate;}
-  bool setSbRate(uint8_t val=80) {
+  inline const uint8_t& getSbusTxRate() {return sbustxrate;}
+  bool setSbusTxRate(uint8_t val=80) {
     if(val >= 30 && val <= 140) {
-      sbrate = val;
+      sbustxrate = val;
       return true;
     }
     return false;
@@ -750,6 +764,10 @@ public:
   // SBUS Transmit Inverted
   inline const bool& getSbOutInv() {return sboutinv;}
   void setSbOutInv(bool val=true) { sboutinv = val; }
+
+  // Channel 5 
+  inline const bool& getCh5Arm() {return ch5arm;}
+  void setCh5Arm(bool val=true) { ch5arm = val; }
 
   // Bluetooth Mode (0-Off, 1- Head, 2-Receive, 3-Scanner)
   inline const uint8_t& getBtMode() {return btmode;}
@@ -946,9 +964,9 @@ public:
     memcpy(ppmch, val, sizeof(uint16_t) * 16);
   }
 
-  // SBUS Channels
-  void setDataSbusCh(const uint16_t val[16]) {
-    memcpy(sbusch, val, sizeof(uint16_t) * 16);
+  // Uart Channels (Sbus/Crsf)
+  void setDataUartCh(const uint16_t val[16]) {
+    memcpy(uartch, val, sizeof(uint16_t) * 16);
   }
 
   // Quaternion Output (Tilt / Roll / Pan)
@@ -1033,10 +1051,12 @@ public:
     json["buttonpin"] = buttonpin;
     json["ppmoutpin"] = ppmoutpin;
     json["ppminpin"] = ppminpin;
-    json["sermode"] = sermode;
-    json["sbrate"] = sbrate;
+    json["uartmode"] = uartmode;
+    json["crsftxrate"] = crsftxrate;
+    json["sbustxrate"] = sbustxrate;
     json["sbininv"] = sbininv;
     json["sboutinv"] = sboutinv;
+    json["ch5arm"] = ch5arm;
     json["btmode"] = btmode;
     json["rstonwave"] = rstonwave;
     json["butlngps"] = butlngps;
@@ -1118,10 +1138,12 @@ public:
     v = json["buttonpin"]; if(!v.isNull()) {setButtonPin(v); chpinschanged = true;}
     v = json["ppmoutpin"]; if(!v.isNull()) {setPpmOutPin(v); chpinschanged = true;}
     v = json["ppminpin"]; if(!v.isNull()) {setPpmInPin(v); chpinschanged = true;}
-    v = json["sermode"]; if(!v.isNull()) {setSerMode(v);}
-    v = json["sbrate"]; if(!v.isNull()) {setSbRate(v);}
+    v = json["uartmode"]; if(!v.isNull()) {setUartMode(v);}
+    v = json["crsftxrate"]; if(!v.isNull()) {setCrsfTxRate(v);}
+    v = json["sbustxrate"]; if(!v.isNull()) {setSbusTxRate(v);}
     v = json["sbininv"]; if(!v.isNull()) {setSbInInv(v); chpinschanged = true;}
     v = json["sboutinv"]; if(!v.isNull()) {setSbOutInv(v);}
+    v = json["ch5arm"]; if(!v.isNull()) {setCh5Arm(v);}
     v = json["btmode"]; if(!v.isNull()) {setBtMode(v);}
     v = json["rstonwave"]; if(!v.isNull()) {setRstOnWave(v);}
     v = json["butlngps"]; if(!v.isNull()) {setButLngPs(v);}
@@ -1176,7 +1198,7 @@ public:
     array.add("chout");
     array.add("btch");
     array.add("ppmch");
-    array.add("sbusch");
+    array.add("uartch");
     array.add("quat");
     array.add("btaddr");
     array.add("btrmt");
@@ -1321,7 +1343,7 @@ public:
       enabled == true ? senddataarray |= 1 << 3 : senddataarray &= ~(1 << 3);
       return;
     }
-    else if (strcmp(var, "sbusch") == 0) {
+    else if (strcmp(var, "uartch") == 0) {
       enabled == true ? senddataarray |= 1 << 4 : senddataarray &= ~(1 << 4);
       return;
     }
@@ -1443,7 +1465,7 @@ public:
     sendArray(json,1,counter,1,"6choutu16",(void*)chout,(void*)lastchout, sizeof(uint16_t) * 16);
     sendArray(json,2,counter,1,"6btchu16",(void*)btch,(void*)lastbtch, sizeof(uint16_t) * 8);
     sendArray(json,3,counter,1,"6ppmchu16",(void*)ppmch,(void*)lastppmch, sizeof(uint16_t) * 16);
-    sendArray(json,4,counter,1,"6sbuschu16",(void*)sbusch,(void*)lastsbusch, sizeof(uint16_t) * 16);
+    sendArray(json,4,counter,1,"6uartchu16",(void*)uartch,(void*)lastuartch, sizeof(uint16_t) * 16);
     sendArray(json,5,counter,1,"6quatflt",(void*)quat,(void*)lastquat, sizeof(float) * 4);
     sendArray(json,6,counter,10,"6btaddrchr",(void*)btaddr,(void*)lastbtaddr, sizeof(char) * 18);
     sendArray(json,7,counter,10,"6btrmtchr",(void*)btrmt,(void*)lastbtrmt, sizeof(char) * 18);
@@ -1528,10 +1550,12 @@ protected:
   int8_t buttonpin = 2; // Button Pin
   int8_t ppmoutpin = 10; // PPM Output Pin
   int8_t ppminpin = -1; // PPM Input Pin
-  uint8_t sermode = 0; // Serial Mode (0- Off, 1-SBUS, 2-CRSF)
-  uint8_t sbrate = 80; // SBUS Transmit Freqency
+  uint8_t uartmode = 0; // Uart Mode (0- Off, 1-SBUS, 2-CRSFIN, 3-CRSFOUT)
+  uint8_t crsftxrate = 140; // CRSF Transmit Frequncy
+  uint8_t sbustxrate = 80; // SBUS Transmit Freqency
   bool sbininv = true; // SBUS Receieve Inverted
   bool sboutinv = true; // SBUS Transmit Inverted
+  bool ch5arm = true; // Channel 5 
   uint8_t btmode = 0; // Bluetooth Mode (0-Off, 1- Head, 2-Receive, 3-Scanner)
   bool rstonwave = false; // Reset on Proximity Sense
   bool butlngps = false; // Long Press on the Button to Enable/Disable Tilt Roll and Pan
@@ -1587,8 +1611,8 @@ protected:
   uint16_t lastbtch[8]; // Bluetooth Inputs
   uint16_t ppmch[16]; // PPM Inputs
   uint16_t lastppmch[16]; // PPM Inputs
-  uint16_t sbusch[16]; // SBUS Channels
-  uint16_t lastsbusch[16]; // SBUS Channels
+  uint16_t uartch[16]; // Uart Channels (Sbus/Crsf)
+  uint16_t lastuartch[16]; // Uart Channels (Sbus/Crsf)
   float quat[4]; // Quaternion Output (Tilt / Roll / Pan)
   float lastquat[4]; // Quaternion Output (Tilt / Roll / Pan)
   char btaddr[19]; // Local Bluetooth Address

@@ -125,6 +125,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->chkSbusOutInv,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
     connect(ui->chkLngBttnPress,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
     connect(ui->chkRstOnTlt,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
+    connect(ui->chkCh5Arm,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
 
     //connect(ui->chkRawData,SIGNAL(clicked(bool)),this,SLOT(setDataMode(bool)));
 
@@ -147,6 +148,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->spnRotY,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->spnRotZ,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->spnSBUSRate,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->spnCRSFRate,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
 
     // Gain Sliders
     connect(ui->til_gain,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
@@ -211,6 +213,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->cmbPWM2,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbPWM3,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbBTRmtMode,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->cmbUartMode,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
 
     // Menu Actions
     connect(ui->action_Save_to_File,SIGNAL(triggered()),this,SLOT(saveSettings()));
@@ -595,7 +598,8 @@ void MainWindow::updateToUI()
     ui->spnA3Gain->setValue(trkset.getAn3Gain());
     ui->spnA3Off->setValue(trkset.getAn3Off());
 
-    ui->spnSBUSRate->setValue(trkset.getSbRate());
+    ui->spnSBUSRate->setValue(trkset.getSbusTxRate());
+    ui->spnCRSFRate->setValue(trkset.getCrsfTxRate());
 
     int panCh = trkset.getPanCh();
     int rllCh = trkset.getRllCh();
@@ -618,6 +622,10 @@ void MainWindow::updateToUI()
     ui->cmbrllchn->setCurrentIndex(rllCh==-1?0:rllCh);
     ui->cmbtiltchn->setCurrentIndex(tltCh==-1?0:tltCh);
     ui->cmbalertchn->setCurrentIndex(alertCh==-1?0:alertCh);
+    // Uart Mode
+    ui->cmbUartMode->setCurrentIndex(trkset.getUartMode());
+    ui->stkUart->setCurrentIndex(trkset.getUartMode());
+    ui->chkCh5Arm->setChecked(trkset.getCh5Arm());
     // Analog CH
     ui->cmbA0Ch->setCurrentIndex(a0Ch==-1?0:a0Ch);
     ui->cmbA1Ch->setCurrentIndex(a1Ch==-1?0:a1Ch);
@@ -744,6 +752,10 @@ void MainWindow::updateFromUI()
         trkset.setLpPan(ui->spnLPPan2->value());
     }
 
+    // Uart Mode
+    trkset.setUartMode(ui->cmbUartMode->currentIndex());
+    trkset.setCh5Arm(ui->chkCh5Arm->isChecked());
+
     // Analog
     trkset.setAn0Gain(ui->spnA0Gain->value());
     trkset.setAn0Off(ui->spnA0Off->value());
@@ -852,7 +864,8 @@ void MainWindow::updateFromUI()
     trkset.setRstOnTlt(ui->chkRstOnTlt->isChecked());
 
     trkset.setSbOutInv(ui->chkSbusOutInv->isChecked());
-    trkset.setSbRate(ui->spnSBUSRate->value());
+    trkset.setSbusTxRate(ui->spnSBUSRate->value());
+    trkset.setCrsfTxRate(ui->spnCRSFRate->value());
 
     uint16_t setframelen = ui->spnPPMFrameLen->value() * 1000;
     trkset.setPpmFrame(setframelen);
