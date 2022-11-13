@@ -822,7 +822,7 @@ void MainWindow::updateFromUI()
     if(duplicates) {
         QString message = tr("Cannot pick dulplicate pins");
         if(!sbusinchecked)
-            message += tr("\n  ** SBUS input invert signal needs pins D5 and D6 connected together");
+            message += tr("\n  * non-inverted SBUS receive requires  D5 and D6 connected together");
         QMessageBox::information(this,tr("Error"), message);
 
         // Reset gui to old values
