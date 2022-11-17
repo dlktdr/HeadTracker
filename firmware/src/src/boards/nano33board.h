@@ -33,7 +33,7 @@
   PIN(D3,      NRFPIN(1, 12), "Gen Purpose IO" ) \
   PIN(D4,      NRFPIN(1, 15), "Gen Purpose IO" ) \
   PIN(D5,      NRFPIN(1, 13), "Gen Purpose IO" ) \
-  PIN(D6,      NRFPIN(0, 14), "Gen Purpose IO" ) \
+  PIN(D6,      NRFPIN(1, 14), "Gen Purpose IO" ) \
   PIN(D7,      NRFPIN(0, 23), "Gen Purpose IO" ) \
   PIN(D8,      NRFPIN(0, 21), "Gen Purpose IO" ) \
   PIN(D9,      NRFPIN(0, 27), "Gen Purpose IO" ) \
@@ -57,7 +57,7 @@
   PIN(RX,      NRFPIN(1, 10), "UART Receive") \
   PIN(TXINV,   NRFPIN(1,  4), "UART TX, Inv Pin") \
   PIN(RXINVO,  NRFPIN(1, 13), "UART RX, Output Inv Pin") \
-  PIN(RXINVI,  NRFPIN(1, 14), "UART TX, Input Inv Pin") \
+  PIN(RXINVI,  NRFPIN(1, 14), "UART RX, Input Inv Pin") \
   PIN(VDDENA,  NRFPIN(0, 22), "Internal Vdd Enable") \
   PIN(I2C_PU,  NRFPIN(1,  0), "Internal I2C Pull Up") \
   PIN(APDSINT, NRFPIN(0, 19), "APDS Interrupt Pin") \
