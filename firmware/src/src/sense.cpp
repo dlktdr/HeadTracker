@@ -15,15 +15,19 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "sense.h"
+
 #include <device.h>
-#include <drivers/sensor.h>
 #include <drivers/i2c.h>
+#include <drivers/sensor.h>
 #include <zephyr.h>
 
+#include "DCMAhrs/dcmahrs.h"
 #include "MadgwickAHRS/MadgwickAHRS.h"
 #include "uart_mode.h"
 #include "analog.h"
 #include "ble.h"
+#include "defines.h"
 #include "filters.h"
 #include "filters/SF1eFilter.h"
 #include "io.h"
@@ -33,8 +37,8 @@
 #include "pmw.h"
 #include "soc_flash.h"
 #include "trackersettings.h"
-#include "defines.h"
-#include "sense.h"
+
+#define DEBUG_SENSOR_RATES
 
 #if defined(HAS_APDS9960)
 #include "APDS9960/APDS9960.h"
@@ -61,7 +65,9 @@ static float rolloffset = 0, panoffset = 0, tiltoffset = 0;
 static float magxoff = 0, magyoff = 0, magzoff = 0;
 static float accxoff = 0, accyoff = 0, acczoff = 0;
 static float gyrxoff = 0, gyryoff = 0, gyrzoff = 0;
-static float l_panout = 0, l_tiltout = 0, l_rollout = 0;
+static float faccx = 0, faccy = 0, faccz = 0;
+static float fmagx = 0, fmagy = 0, fmagz = 0;
+static float fgyrx = 0, fgyry = 0, fgyrz = 0;
 static bool trpOutputEnabled = false;  // Default to disabled T/R/P output
 
 // Input Channel Data
@@ -107,7 +113,8 @@ volatile bool senseTreadRun = false;
 
 int sense_Init()
 {
-  const struct device* i2c_dev = device_get_binding("I2C_1"); // DEVICE_DT_GET(DT_NODELABEL(I2C_1));
+  const struct device *i2c_dev =
+      device_get_binding("I2C_1");  // DEVICE_DT_GET(DT_NODELABEL(I2C_1));
   if (!i2c_dev) {
     LOGE("Could not get device binding for I2C");
     return false;
@@ -179,9 +186,9 @@ void calculate_Thread()
 
     // Use a mutex so sensor data can't be updated part way
     k_mutex_lock(&sensor_mutex, K_FOREVER);
-    roll = madgwick.getPitch();
-    tilt = madgwick.getRoll();
-    pan = madgwick.getYaw();
+    tilt = DcmGetTilt();
+    roll = DcmGetRoll();
+    pan = DcmGetPan();
     k_mutex_unlock(&sensor_mutex);
 
     // Toggles output on and off if long pressed
@@ -204,9 +211,7 @@ void calculate_Thread()
     // Zero button was pressed, adjust all values to zero
     bool butdnw = false;
     if (wasButtonPressed()) {
-      rolloffset = roll;
-      panoffset = pan;
-      tiltoffset = tilt;
+      DcmAhrsResetCenter();
       butdnw = true;
     }
 
@@ -222,24 +227,18 @@ void calculate_Thread()
     }
 
     // Tilt output
-    float tiltout =
-        (tilt - tiltoffset) * trkset.getTlt_Gain() * (trkset.isTiltReversed() ? -1.0 : 1.0);
-    float beta = (float)trkset.getLpTiltRoll() / 100;  // LP Beta
-    filter_expAverage(&tiltout, beta, &l_tiltout);
+    float tiltout = tilt * trkset.getTlt_Gain() * (trkset.isTiltReversed() ? -1.0 : 1.0);
     uint16_t tiltout_ui = tiltout + trkset.getTlt_Cnt();  // Apply Center Offset
     tiltout_ui = MAX(MIN(tiltout_ui, trkset.getTlt_Max()), trkset.getTlt_Min());  // Limit Output
 
     // Roll output
-    float rollout =
-        (roll - rolloffset) * trkset.getRll_Gain() * (trkset.isRollReversed() ? -1.0 : 1.0);
-    filter_expAverage(&rollout, beta, &l_rollout);
+    float rollout = roll * trkset.getRll_Gain() * (trkset.isRollReversed() ? -1.0 : 1.0);
     uint16_t rollout_ui = rollout + trkset.getRll_Cnt();  // Apply Center Offset
     rollout_ui = MAX(MIN(rollout_ui, trkset.getRll_Max()), trkset.getRll_Min());  // Limit Output
 
     // Pan output, Normalize to +/- 180 Degrees
-    float panout = normalize((pan - panoffset), -180, 180) * trkset.getPan_Gain() *
-                   (trkset.isPanReversed() ? -1.0 : 1.0);
-    filter_expAverage(&panout, (float)trkset.getLpPan() / 100, &l_panout);
+    float panout =
+        normalize(pan, -180, 180) * trkset.getPan_Gain() * (trkset.isPanReversed() ? -1.0 : 1.0);
     uint16_t panout_ui = panout + trkset.getPan_Cnt();  // Apply Center Offset
     panout_ui = MAX(MIN(panout_ui, trkset.getPan_Max()), trkset.getPan_Min());  // Limit Output
 
@@ -620,6 +619,13 @@ void calculate_Thread()
 
 void sensor_Thread()
 {
+  float LPalpha, LPalphaC;
+  float lacc[3] = {0, 0, 0};
+  float lgyr[3] = {0, 0, 0};
+  float lmag[3] = {0, 0, 0};
+  bool initLPfilter = true;
+  float lastUpdate = 0;
+
   while (1) {
     if (!senseTreadRun || pauseForFlash) {
       rt_sleep_ms(10);
@@ -669,9 +675,9 @@ void sensor_Thread()
 
     // Read the data from the sensors
     float tacc[3], tgyr[3], tmag[3];
-    bool accValid=false;
-    bool gyrValid=false;
-    bool magValid=false;
+    bool accValid = false;
+    bool gyrValid = false;
+    bool magValid = false;
 
 #if defined(HAS_LSM9DS1)
     if (IMU.accelerationAvailable()) {
@@ -691,7 +697,7 @@ void sensor_Thread()
 #endif
 
 #if defined(HAS_QMC5883)
-    if(qmc5883Read(tmag)) {
+    if (qmc5883Read(tmag)) {
       magValid = true;
     }
 #endif
@@ -701,15 +707,14 @@ void sensor_Thread()
     short _gyro[3];
     short _accel[3];
     unsigned long timestamp;
-    if(!mpu_get_accel_reg(_accel, &timestamp))
-      accValid = true;
-    unsigned short ascale = 1;;
+    if (!mpu_get_accel_reg(_accel, &timestamp)) accValid = true;
+    unsigned short ascale = 1;
+    ;
     mpu_get_accel_sens(&ascale);
     tacc[0] = (float)_accel[0] / (float)ascale;
     tacc[1] = (float)_accel[1] / (float)ascale;
     tacc[2] = (float)_accel[2] / (float)ascale;
-    if(!mpu_get_gyro_reg(_gyro, &timestamp))
-      gyrValid = true;
+    if (!mpu_get_gyro_reg(_gyro, &timestamp)) gyrValid = true;
     float gscale = 1.0f;
     mpu_get_gyro_sens(&gscale);
     tgyr[0] = _gyro[0] / gscale;
@@ -720,7 +725,7 @@ void sensor_Thread()
     k_mutex_lock(&sensor_mutex, K_FOREVER);
 
     // -- Accelerometer
-    if(accValid) {
+    if (accValid) {
       raccx = tacc[0];
       raccy = tacc[1];
       raccz = tacc[2];
@@ -744,7 +749,7 @@ void sensor_Thread()
     }
 
     // --- Gyrometer Calcs
-    if(gyrValid) {
+    if (gyrValid) {
       rgyrx = tgyr[0];
       rgyry = tgyr[1];
       rgyrz = tgyr[2];
@@ -764,7 +769,7 @@ void sensor_Thread()
       gyrz = tmpgyr[2];
     }
 
-    if(magValid) {
+    if (magValid) {
       // --- Magnetometer Calcs
       rmagx = tmag[0];
       rmagy = tmag[1];
@@ -780,9 +785,9 @@ void sensor_Thread()
       magy = rmagy - magyoff;
       magz = rmagz - magzoff;
 
-      magx = (magx * magsioff[0]) + (magy * magsioff[1]) + (magz * magsioff[2]);
+      /*magx = (magx * magsioff[0]) + (magy * magsioff[1]) + (magz * magsioff[2]);
       magy = (magx * magsioff[3]) + (magy * magsioff[4]) + (magz * magsioff[5]);
-      magz = (magx * magsioff[6]) + (magy * magsioff[7]) + (magz * magsioff[8]);
+      magz = (magx * magsioff[6]) + (magy * magsioff[7]) + (magz * magsioff[8]);*/
 
       // Apply Rotation
       float tmpmag[3] = {magx, magy, magz};
@@ -790,63 +795,118 @@ void sensor_Thread()
       magx = tmpmag[0];
       magy = tmpmag[1];
       magz = tmpmag[2];
-
-      // For inital orientation setup
-      madgsensbits |= MADGINIT_MAG;
     }
 
-    // Only do this update after the first mag and accel data have been read.
-    if (madgreads == 0) {
-      if (madgsensbits == MADGINIT_READY) {
-        madgsensbits = 0;
-        madgreads++;
-        aacc[0] = accx;
-        aacc[1] = accy;
-        aacc[2] = accz;
-        amag[0] = magx;
-        amag[1] = magy;
-        amag[2] = magz;
+    // Filtering
+#ifdef DO_FILTER
+    if (magValid && gyrValid && accValid && initLPfilter) {
+      LPalpha = exp(-(float)(SENSOR_PERIOD) /
+                    (float)(SENSOR_LP_TIME_CST));  // low pass filter coefficient
+      LPalphaC = 0.5 * (1. - LPalpha);             // complementary
+      faccx = accx;
+      faccy = accy;
+      faccz = accz;
+      fgyrx = gyrx;
+      fgyry = gyry;
+      fgyrz = gyrz;
+      fmagx = magx;
+      fmagy = magy;
+      fmagz = magz;
+      lacc[0] = accx;
+      lacc[1] = accy;
+      lacc[2] = accz;
+      lgyr[0] = gyrx;
+      lgyr[1] = gyry;
+      lgyr[2] = gyrz;
+      lmag[0] = magx;
+      lmag[1] = magy;
+      lmag[2] = magz;
+      initLPfilter = false;
+    } else if (initLPfilter == false) {
+      if (accValid) {
+        faccx = faccx * LPalpha + LPalphaC * (accx + lacc[0]);
+        faccy = faccy * LPalpha + LPalphaC * (accy + lacc[1]);
+        faccz = faccz * LPalpha + LPalphaC * (accz + lacc[2]);
+        lacc[0] = accx;
+        lacc[1] = accy;
+        lacc[2] = accz;
       }
 
-      // Average samples
-    } else if (madgreads < MADGSTART_SAMPLES - 1) {
-      if (madgsensbits == MADGINIT_READY) {
-        madgsensbits = 0;
-        madgreads++;
-        aacc[0] += accx;
-        aacc[1] += accy;
-        aacc[2] += accz;
-        aacc[0] /= 2;
-        aacc[1] /= 2;
-        aacc[2] /= 2;
-        amag[0] += magx;
-        amag[1] += magy;
-        amag[2] += magz;
-        amag[0] /= 2;
-        amag[1] /= 2;
-        amag[2] /= 2;
+      if (gyrValid) {
+        fgyrx = fgyrx * LPalpha + LPalphaC * (gyrx + lgyr[0]);
+        fgyry = fgyry * LPalpha + LPalphaC * (gyry + lgyr[1]);
+        fgyrz = fgyrz * LPalpha + LPalphaC * (gyrz + lgyr[2]);
+        lgyr[0] = gyrx;
+        lgyr[1] = gyry;
+        lgyr[2] = gyrz;
       }
 
-      // Got the averaged values, apply the initial orientation.
-    } else if (madgreads == MADGSTART_SAMPLES - 1) {
-      // Pass it averaged values
-      madgwick.begin(aacc[0], aacc[1], aacc[2], amag[0], amag[1], amag[2]);
-      panoffset = pan;
-      madgreads = MADGSTART_SAMPLES;
+      if (magValid) {
+        fmagx = fmagx * LPalpha + LPalphaC * (magx + lmag[0]);
+        fmagy = fmagy * LPalpha + LPalphaC * (magy + lmag[1]);
+        fmagz = fmagz * LPalpha + LPalphaC * (magz + lmag[2]);
+        lmag[0] = magx;
+        lmag[1] = magy;
+        lmag[2] = magz;
+      }
     }
+#else
+    faccx = accx;
+    faccy = accy;
+    faccz = accx;
+    fgyrx = gyrx;
+    fgyry = gyry;
+    fgyrz = gyrz;
+    fmagx = magx;
+    fmagy = magy;
+    fmagz = magz;
+#endif
+    // Scale properly for DCM algorithm
+    // PAUL's reference frame is standard aeronautical:
+    //    X axis is the longitudinal axis pointing ahead,
+    //    Z axis is the vertical axis pointing downwards,
+    //    Y axis is the lateral one, pointing in such a way that the frame is right-handed.
+    // PAUL's acceleration from accelerometer sign convention is opposite of used by rest of program
+    float u0[3], u1[3], u2[3];
+    u0[0] = fgyrx * DEG_TO_RAD;
+    u0[1] = -fgyry * DEG_TO_RAD;
+    u0[2] = -fgyrz * DEG_TO_RAD;
+    u1[0] = -faccx;
+    u1[1] = faccy;
+    u1[2] = faccz;
+    u2[0] = fmagx;
+    u2[1] = -fmagy;
+    u2[2] = -fmagz;
 
-    // Do the AHRS calculations
-    if (madgreads == MADGSTART_SAMPLES) {
-      // Period Between Samples
-      madgwick.update(gyrx * DEG_TO_RAD, gyry * DEG_TO_RAD, gyrz * DEG_TO_RAD, accx, accy, accz,
-                      magx, magy, magz, madgwick.deltatUpdate());
-      if (firstrun) {
-        panoffset = pan;
-        firstrun = false;
-      }
-    }
+    float now = micros();
+    float deltat = ((now - lastUpdate) / 1000000.0f);
+    lastUpdate = now;
 
+    DcmCalculate(u0, u1, u2, deltat);
     k_mutex_unlock(&sensor_mutex);
+
+#if defined(DEBUG_SENSOR_RATES)
+    static int mcount = 1;
+    static int mcounta = 1;
+    static int mcountg = 1;
+    static int mcountm = 1;
+    static int64_t mmic = millis64() + 1000;
+    if (mmic < millis64()) {  // Every Second
+      mmic = millis64() + 1000;
+      LOGI("Sens Rate = %d, Acc=%d, Gyr=%d, Mag=%d", mcount, mcounta, mcountg, mcountm);
+      mcount = 1;
+      mcounta = 1;
+      mcountg = 1;
+      mcountm = 1;
+    }
+    mcount++;
+    if (accValid) mcounta++;
+    if (magValid) mcountm++;
+    if (gyrValid) mcountg++;
+#endif
+
+    // Adjust sleep for a more accurate period
+    usduration = micros64() - usduration;
 
     // Adjust sleep for a more accurate period
     senseUsDuration = micros64() - senseUsDuration;

@@ -148,6 +148,8 @@ public:
     _setting["ppmchcnt"] = 8;
     _setting["lppan"] = 100;
     _setting["lptiltroll"] = 100;
+    _setting["kp"] = 0.2;
+    _setting["ki"] = 0.01;
     _setting["btpairedaddress[17]"] = QString("");
     _dataItems["magx"] = false;
     _dataItems["magy"] = false;
@@ -1126,6 +1128,32 @@ public:
     }
     return false;
   }
+
+  // Kp Value for DCM Algorithm
+  float getKp() {
+    return _setting["kp"].toFloat();
+  }
+  bool setKp(float val=0.2) {
+    if(val >= FLOAT_MIN && val <= FLOAT_MAX) {
+      _setting["kp"] = QString::number(val,'g',4);
+      return true;
+    }
+    return false;
+  }
+
+
+  // Ki Value for DCM Algorithm
+  float getKi() {
+    return _setting["ki"].toFloat();
+  }
+  bool setKi(float val=0.01) {
+    if(val >= FLOAT_MIN && val <= FLOAT_MAX) {
+      _setting["ki"] = QString::number(val,'g',4);
+      return true;
+    }
+    return false;
+  }
+
 
   // Bluetooth Remote address to Pair With
   QString getBtPairedAddress() {

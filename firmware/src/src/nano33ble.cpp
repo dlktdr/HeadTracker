@@ -6,6 +6,7 @@
 #include <drivers/counter.h>
 #include <nrfx_clock.h>
 
+#include "DCMAhrs/dcmahrs.h"
 #include "PPMIn.h"
 #include "PPMOut.h"
 #include "uart_mode.h"
@@ -74,6 +75,8 @@ K_THREAD_DEFINE(calculate_Thread_id, 4096, calculate_Thread, NULL, NULL, NULL,
                 CALCULATE_THREAD_PRIO, K_FP_REGS, 1000);
 K_THREAD_DEFINE(uartTx_Thread_ID, 1024, uartTx_Thread, NULL, NULL, NULL, UARTTX_THREAD_PRIO, 0, 1000);
 K_THREAD_DEFINE(uartRx_Thread_ID, 1024, uartRx_Thread, NULL, NULL, NULL, UARTRX_THREAD_PRIO, 0, 1000);
+K_THREAD_DEFINE(DCMnormalization_Thread_id, 1024, DCMnormalization_Thread, NULL, NULL, NULL,
+                CALCULATE_THREAD_PRIO, K_FP_REGS, 3000);
 
 #elif defined(RTOS_FREERTOS)
 #error "TODO... Add tasks for FreeRTOS"

@@ -130,8 +130,6 @@ MainWindow::MainWindow(QWidget *parent)
     //connect(ui->chkRawData,SIGNAL(clicked(bool)),this,SLOT(setDataMode(bool)));
 
     // Spin Boxes
-    connect(ui->spnLPPan,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->spnLPTiltRoll,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->spnLPPan2,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->spnLPTiltRoll2,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->spnPPMSync,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
@@ -222,7 +220,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->actionFirmware_Wizard,SIGNAL(triggered()),this,SLOT(uploadFirmwareWizard()));
     connect(ui->actionShow_Data,SIGNAL(triggered()),this,SLOT(showDiagsClicked()));
     connect(ui->actionShow_Serial_Transmissions,SIGNAL(triggered()),this,SLOT(showSerialDiagClicked()));
-    connect(ui->actionChannel_Viewer,SIGNAL(triggered()),this,SLOT(showChannelViewerClicked()));    
+    connect(ui->actionChannel_Viewer,SIGNAL(triggered()),this,SLOT(showChannelViewerClicked()));
     connect(ui->actionPinout, SIGNAL(triggered()),this, SLOT(showPinView()));
     connect(ui->actionEraseFlash, SIGNAL(triggered()),this, SLOT(eraseFlash()));
     connect(ui->actionOnline_Help, SIGNAL(triggered()),this, SLOT(openHelp()));
@@ -585,8 +583,6 @@ void MainWindow::updateToUI()
     ui->spnPPMFrameLen->setMinimum((double)TrackerSettings::PPM_MIN_FRAME / 1000.0);
     ui->spnPPMFrameLen->setMaximum((double)TrackerSettings::PPM_MAX_FRAME / 1000.0);
 
-    ui->spnLPTiltRoll->setValue(trkset.getLpTiltRoll());
-    ui->spnLPPan->setValue(trkset.getLpPan());
     ui->spnLPTiltRoll2->setValue(trkset.getLpTiltRoll());
     ui->spnLPPan2->setValue(trkset.getLpPan());
     ui->spnA0Gain->setValue(trkset.getAn0Gain());
@@ -743,11 +739,7 @@ void MainWindow::updateFromUI()
     trkset.setRll_Gain(static_cast<float>(ui->rll_gain->value())/10.0f);
 
     // Filters
-    if(trkset.hardware() == "NANO33BLE" ||
-       trkset.hardware() == "DTQSYS") {
-        trkset.setLpTiltRoll(ui->spnLPTiltRoll->value());
-        trkset.setLpPan(ui->spnLPPan->value());
-    } else if (trkset.hardware() == "BNO055") {
+    if (trkset.hardware() == "BNO055") {
         trkset.setLpTiltRoll(ui->spnLPTiltRoll2->value());
         trkset.setLpPan(ui->spnLPPan2->value());
     }

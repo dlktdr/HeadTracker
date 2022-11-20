@@ -849,6 +849,26 @@ public:
     return false;
   }
 
+  // Kp Value for DCM Algorithm
+  inline const float& getKp() {return kp;}
+  bool setKp(float val=0.2) {
+    if(val >= FLOAT_MIN && val <= FLOAT_MAX) {
+      kp = val;
+      return true;
+    }
+    return false;
+  }
+
+  // Ki Value for DCM Algorithm
+  inline const float& getKi() {return ki;}
+  bool setKi(float val=0.01) {
+    if(val >= FLOAT_MIN && val <= FLOAT_MAX) {
+      ki = val;
+      return true;
+    }
+    return false;
+  }
+
   // Bluetooth Remote address to Pair With
   void getBtPairedAddress(char* dest) {strcpy(dest, btpairedaddress);}
   void setBtPairedAddress(const char *val) {
@@ -1068,6 +1088,8 @@ public:
     json["ppmchcnt"] = ppmchcnt;
     json["lppan"] = lppan;
     json["lptiltroll"] = lptiltroll;
+    json["kp"] = kp;
+    json["ki"] = ki;
   }
 
   void loadJSONSettings(DynamicJsonDocument &json) {
@@ -1155,6 +1177,8 @@ public:
     v = json["ppmchcnt"]; if(!v.isNull()) {setPpmChCnt(v);}
     v = json["lppan"]; if(!v.isNull()) {setLpPan(v);}
     v = json["lptiltroll"]; if(!v.isNull()) {setLpTiltRoll(v);}
+    v = json["kp"]; if(!v.isNull()) {setKp(v);}
+    v = json["ki"]; if(!v.isNull()) {setKi(v);}
     if(chresetfusion)
       resetFusion();
     if(chpinschanged)
@@ -1567,6 +1591,8 @@ protected:
   uint8_t ppmchcnt = 8; // PPM channels to output
   uint8_t lppan = 100; // Low Pass filter For Pan
   uint8_t lptiltroll = 100; // Low Pass filter For Tilt + Roll
+  float kp = 0.2; // Kp Value for DCM Algorithm
+  float ki = 0.01; // Ki Value for DCM Algorithm
 
   // Setting Arrays
   char btpairedaddress[19]; // Bluetooth Remote address to Pair With
