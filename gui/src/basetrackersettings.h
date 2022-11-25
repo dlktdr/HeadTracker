@@ -148,7 +148,7 @@ public:
     _setting["ppmchcnt"] = 8;
     _setting["lppan"] = 100;
     _setting["lptiltroll"] = 100;
-    _setting["btpairedaddress[17]"] = QString("");
+    _setting["btpairedaddress"] = QString("");
     _dataItems["magx"] = false;
     _dataItems["magy"] = false;
     _dataItems["magz"] = false;

@@ -65,7 +65,7 @@ for row in s.settingsarrays:
 
   # Fill arrays with the default values
   if "char" in row[s.coltype]:
-    f.write("    _setting[\"" + row[s.colname].lower() + "\"] = QString(\"" + row[s.coldefault] + "\");\n")
+    f.write("    _setting[\"" + row[s.colname][:start].lower() + "\"] = QString(\"" + row[s.coldefault] + "\");\n")
   else:
     f.write("    _setting[\"" + row[s.colname][:start].lower() + "\"] = QVariantList();\n")
 

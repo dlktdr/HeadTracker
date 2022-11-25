@@ -179,7 +179,19 @@ for row in s.dataarrays:
 # Write all JSON Settings
 f.write("  void setJSONSettings(DynamicJsonDocument &json) {\n")
 for row in s.settings:
-  f.write("    json[\"" + row[s.colname].lower() + "\"] = " + row[s.colname].lower() + ";\n");
+  f.write("    json[\"" + row[s.colname].lower() + "\"] = " + row[s.colname].lower() + ";\n")
+for row in s.settingsarrays:
+  start = row[s.colname].find("[")
+  end = row[s.colname].find("]")
+  arlen = row[s.colname][start+1:end]
+  if row[s.coltype].lower().strip() == "char":
+    try:
+      arlen = int(arraylength)
+      arlen += 1 # Increment Storage Space For Null
+      arlen = str(arlen)
+    except ValueError:
+      arlen = arraylength
+  f.write("    json[\"" + row[s.colname][:start].lower() + "\"] = " + row[s.colname][:start].lower() + ";\n")
 f.write("  }\n")
 
 # Read JSON Settings
@@ -189,6 +201,22 @@ for row in events: # On change call required
     f.write("    bool ch" + row.lower() + " = false;\n");
 for row in s.settings:
   f.write("    v = json[\"" + row[s.colname].lower() + "\"]; if(!v.isNull()) {set" + row[s.colname] + "(v);");
+  if row[s.colfwonevnt] == "":
+    f.write("}\n")
+  else:
+    f.write(" ch" + row[s.colfwonevnt].lower() + " = true;}\n")
+for row in s.settingsarrays:
+  start = row[s.colname].find("[")
+  end = row[s.colname].find("]")
+  arlen = row[s.colname][start+1:end]
+  if row[s.coltype].lower().strip() == "char":
+    try:
+      arlen = int(arraylength)
+      arlen += 1 # Increment Storage Space For Null
+      arlen = str(arlen)
+    except ValueError:
+      arlen = arraylength
+  f.write("    v = json[\"" + row[s.colname][:start].lower() + "\"]; if(!v.isNull()) {set" + row[s.colname][:start] + "(v);");
   if row[s.colfwonevnt] == "":
     f.write("}\n")
   else:
