@@ -377,6 +377,9 @@ void MainWindow::serialDisconnect()
         channelViewerOpen = false;
     }
     trkset.clearDataItems();
+    bleaddrs.clear();
+    ui->cmbBTRmtMode->clear();
+    ui->cmbBTRmtMode->addItem(tr("First Available Device"));
 
     // Notify all boards we have disconnected
 }
@@ -684,6 +687,7 @@ void MainWindow::updateToUI()
     if(trkset.getBtPairedAddress().isEmpty()) {
         ui->cmbBTRmtMode->setCurrentIndex(0);
     } else {
+        bleAddressDiscovered(trkset.getBtPairedAddress());
         ui->cmbBTRmtMode->setCurrentText(trkset.getBtPairedAddress());
     }
 
@@ -989,13 +993,10 @@ void MainWindow::ppmOutChanged(int t,int r,int p)
 
 void MainWindow::bleAddressDiscovered(QString str)
 {
-    // Add BLE address to discovered list
-    static QStringList bleaddrs;
     if(bleaddrs.contains(str))
         return;
     bleaddrs.append(str);
 
-    // Add all ble address
     ui->cmbBTRmtMode->addItem(str);
 }
 

@@ -75,6 +75,7 @@ private:
     QMessageBox *msgbox;
     QTextEdit *serialDebug;
     ImageViewer *imageViewer;
+    QStringList bleaddrs;
 
     QQueue<QByteArray> serialDataOut;
     volatile bool sending;
