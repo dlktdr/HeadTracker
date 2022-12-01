@@ -414,7 +414,7 @@ void BoardNano33BLE::nakError()
     // If too many faults, disconnect.
     if(jsonwaitingack > MAX_TX_FAULTS) {
         if(!paramTXErrorSent) {
-            emit addToLog("\r\nERROR: Critical - " + QString(MAX_TX_FAULTS)+ " transmission faults, disconnecting\r\n");
+            emit addToLog("\r\nERROR: Critical - " + QString::number(MAX_TX_FAULTS)+ " transmission faults, disconnecting\r\n");
             emit paramSendFailure(1);
             paramTXErrorSent = true;
         }
