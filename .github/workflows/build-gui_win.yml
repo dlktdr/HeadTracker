@@ -33,9 +33,9 @@ jobs:
           key: ${{ runner.os }}-QtCache
     
       - name: Install Qt
-        uses: jurplel/install-qt-action@v2
+        uses: jurplel/install-qt-action@v3
         with:
-          version: '5.15.2'
+          version: '6.4.1'
           target: 'desktop'
           #Targets - 'anroid' , 'ios'
           arch: 'win64_mingw81'
