@@ -35,10 +35,10 @@ jobs:
       - name: Install Qt
         uses: jurplel/install-qt-action@v3
         with:
+          aqtversion: '==2.1.*'
           version: '6.4.1'
           target: 'desktop'
-          #Targets - 'anroid' , 'ios'
-          arch: 'win64_mingw81'
+          arch: 'win64_msvc2019_64'
           dir: '${{ github.workspace }}/qt'
           install-deps: 'true'
           modules: 'qtserial'

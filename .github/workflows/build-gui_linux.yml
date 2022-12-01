@@ -30,6 +30,7 @@ jobs:
       - name: Install Qt
         uses: jurplel/install-qt-action@v3
         with:
+          aqtversion: '==2.1.*'
           version: '6.4.1'
           target: 'desktop'
           modules: 'qtserial'
