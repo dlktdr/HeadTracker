@@ -38,7 +38,8 @@ jobs:
           aqtversion: '==2.1.*'
           version: '6.4.1'
           target: 'desktop'
-          arch: 'win64_msvc2019_64'
+          arch: 'win64_mingw'
+          modules: 'qtserialport'
           dir: '${{ github.workspace }}/qt'
           install-deps: 'true'
           cached: ${{ steps.cache-qt.outputs.cache-hit }}

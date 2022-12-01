@@ -33,6 +33,7 @@ jobs:
           aqtversion: '==2.1.*'
           version: '6.4.1'
           target: 'desktop'
+          modules: 'qtserialport'
           install-deps: 'true'
 
       - name: Build
