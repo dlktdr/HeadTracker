@@ -108,3 +108,25 @@ def QVariantRet(type):
     return ".toBool()"
   if type == "char":
     return ".toString()"
+
+def JSDataView(type):
+  if type == "u8":
+    return ".getUint8(0, true)"
+  if type == "s8":
+    return ".getInt8(0, true)"
+  if type == "u16":
+    return ".getUint16(0, true)"
+  if type == "s16":
+    return ".getInt16(0, true)"
+  if type == "u32":
+    return ".getUint32(0, true)"
+  if type == "s32":
+    return ".getInt32(0, true)"
+  if type == "float":
+    return "TODO"
+  if type == "double":
+    return "TODO"
+  if type == "bool":
+    return "TODO"
+  if type == "char":
+    return "TODO"

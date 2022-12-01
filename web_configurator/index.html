@@ -1,0 +1,112 @@
+<!doctype html>
+<!--
+Copyright 2015 Google Inc. All Rights Reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<html>
+  <head>
+    <title>Head Tracker Configurator</title>
+    <meta name="description" content="Headtracker Config">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+
+    <style>
+      .loader {
+        border: 16px solid #f3f3f3; /* Light grey */
+        border-top: 16px solid #3498db; /* Blue */
+        border-radius: 50%;
+        width: 120px;
+        height: 120px;
+        animation: spin 2s linear infinite;
+      }
+
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+    </style>
+
+  </head>
+  <body is="dom-bind">
+    <button class="blue" id="connect">Connect</button>
+    <div class="loader" hidden></div>
+    <div id="no-bluetooth" hidden>
+      <h2>No Web Bluetooth</h2>
+      <p>The Web Bluetooth API is missing. Please enable it at
+      chrome://flags/#enable-web-bluetooth and try again.</p>
+      </div>
+
+    <div id="error" hidden>
+      <h2>Error</h2>
+      <p>Could not connect to bluetooth device!</p>
+    </div>
+
+    <button id="readrll_cnt" type="button">Read Roll Center</button></br>
+
+    Roll Min <input type="number" id="rll_min" min="988" max="2012"></br>
+    Roll Center <input type="number" id="rll_cnt" min="988" max="2012"></br>
+    Roll Max <input type="number" id="rll_max" min="988" max="2012"></br>
+
+    <script src="blechars.js"></script>
+    <script type="text/javascript">
+      'use strict';
+      document.addEventListener('WebComponentsReady', () => {
+        console.log("Starting");
+        $('.loader').show();
+        let progress = document.querySelector('#progress');
+
+        progress.hidden = true;
+
+        if (navigator.bluetooth == undefined) {
+          $("#no-bluetooth").show();
+        }
+
+        $("#readrll_cnt").click(function() {
+          let value = rll_cnt.readValue().then(value => {
+            let rllcntvalue = value.getUint16(0, true);
+            console.log(rllcntvalue);
+            $("#readrll_cnt").val(rllcntvalue);
+          });
+        });
+
+        function handleError(error) {
+          console.log(error);
+          progress.hidden = true;
+          gattServer = null;
+          radioService = null;
+          robotService = null;
+          dialog.open();
+        }
+
+        function sendCommand(did, cid, data) {
+        /*  return controlCharacteristic.writeValue(array).then(() => {
+            console.log('Command write done.');
+          });*/
+        }
+
+        // Connect and Get all Characteristics
+        $("#connect").click(function() {
+          console.log("Starting Connection");
+          connectToHT();
+        });
+        //connectToggle.addEventListener('click', connectToHT);
+
+      });
+    </script>
+  </body>
+</html>
