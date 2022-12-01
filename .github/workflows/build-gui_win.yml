@@ -41,7 +41,6 @@ jobs:
           arch: 'win64_msvc2019_64'
           dir: '${{ github.workspace }}/qt'
           install-deps: 'true'
-          modules: 'qtserial'
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
           
       - name: Set up MinGW

@@ -1,5 +1,6 @@
-QT       += core gui serialport network
+QT       += core gui network
 
+lessThan(QT_MAJOR_VERSION, 6): QT += serialport
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets opengl openglwidgets
 
 CONFIG += c++11 file_copies
