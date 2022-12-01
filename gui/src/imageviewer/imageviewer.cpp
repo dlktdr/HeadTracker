@@ -316,7 +316,7 @@ void ImageViewer::scaleImage(double factor)
 //! [23] //! [24]
 {
     scaleFactor *= factor;
-    imageLabel->resize(scaleFactor * imageLabel->pixmap()->size());
+    imageLabel->resize(scaleFactor * imageLabel->pixmap().size());
 
     adjustScrollBar(scrollArea->horizontalScrollBar(), factor);
     adjustScrollBar(scrollArea->verticalScrollBar(), factor);

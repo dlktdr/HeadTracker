@@ -187,7 +187,7 @@ void BoardBNO055::parseIncomingHT(QString cmd)
     }
     // Setting Data
     else if(cmd.left(5) == "$SET$") {
-        QStringList setd = cmd.right(cmd.length()-5).split(',',QString::KeepEmptyParts);
+        QStringList setd = cmd.right(cmd.length()-5).split(',',Qt::KeepEmptyParts);
         if(setd.length() == 22) {
             trkset->setLpTiltRoll(setd.at(0).toFloat());
             trkset->setLpPan(setd.at(1).toFloat());

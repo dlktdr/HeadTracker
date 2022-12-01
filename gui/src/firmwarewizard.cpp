@@ -112,8 +112,6 @@ void FirmwareWizard::startPortDiscovery(const QString &filename)
     discoverPorts(true);
 
     QFile file(filename);
-    QString sufix = QFileInfo(file).suffix().toUpper();
-    QStringList args;
     if(!file.open(QIODevice::ReadOnly)) {
         QMessageBox::critical(this,"Error","Unable to open firmware file " + filename);
         backClicked();
@@ -474,7 +472,7 @@ void FirmwareWizard::programClicked()
 
         // Relative hostname
         } else {
-            QStringList host = ui->cmbSource->currentData().toString().split('/',QString::KeepEmptyParts);
+            QStringList host = ui->cmbSource->currentData().toString().split('/',Qt::KeepEmptyParts);
             host.removeLast();
             host.append("");
             QString hostparentfolder = host.join('/');
@@ -494,17 +492,18 @@ void FirmwareWizard::programClicked()
 
 void FirmwareWizard::programmerSTDOUTReady()
 {
+    static QRegularExpression re("\\d+%");
+
     QByteArray ba = programmer->readAllStandardOutput();
     QString str(ba);
 
-    // Extract Percentage from bossac
-    QRegExp rx("(\\d+(\\.\\d+)?%)");
-    int pos = 0;
-    while ((pos = rx.indexIn(str, pos)) != -1) {
-        QString pc = rx.cap(1);
-        int percentage = pc.left(pc.length()-1).toInt();
-        ui->progressBar->setValue(percentage);
-        pos += rx.matchedLength();
+    //[================= ] 58% (35/60 pages)
+    // Match one or more digits and a %
+    QRegularExpressionMatch match = re.match(str);
+    if (match.hasMatch()) {
+      QString strPcnt = match.captured(0);
+      strPcnt.chop(1);
+      ui->progressBar->setValue(strPcnt.toInt());
     }
 
     addToLog(ba);
