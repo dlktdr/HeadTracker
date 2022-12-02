@@ -79,13 +79,13 @@ public:
     memset(btrmt,0,sizeof(char) * 18);
 
     // Call Virtual Events after initialization
-    resetFusion();
     pinsChanged();
+    resetFusion();
   }
 
   // Virtual Events
-  virtual void resetFusion() {};
   virtual void pinsChanged() {};
+  virtual void resetFusion() {};
 
   // Roll Minimum
   inline const uint16_t& getRll_Min() {return rll_min;}
@@ -118,8 +118,8 @@ public:
   }
 
   // Roll Gain
-  inline const uint16_t& getRll_Gain() {return rll_gain;}
-  bool setRll_Gain(uint16_t val=5) {
+  inline const float& getRll_Gain() {return rll_gain;}
+  bool setRll_Gain(float val=5) {
     if(val >= MIN_GAIN && val <= MAX_GAIN) {
       rll_gain = val;
       return true;
@@ -158,8 +158,8 @@ public:
   }
 
   // Tilt Gain
-  inline const uint16_t& getTlt_Gain() {return tlt_gain;}
-  bool setTlt_Gain(uint16_t val=5) {
+  inline const float& getTlt_Gain() {return tlt_gain;}
+  bool setTlt_Gain(float val=5) {
     if(val >= MIN_GAIN && val <= MAX_GAIN) {
       tlt_gain = val;
       return true;
@@ -198,8 +198,8 @@ public:
   }
 
   // Pan Gain
-  inline const uint16_t& getPan_Gain() {return pan_gain;}
-  bool setPan_Gain(uint16_t val=5) {
+  inline const float& getPan_Gain() {return pan_gain;}
+  bool setPan_Gain(float val=5) {
     if(val >= MIN_GAIN && val <= MAX_GAIN) {
       pan_gain = val;
       return true;
@@ -1073,8 +1073,8 @@ public:
 
   void loadJSONSettings(DynamicJsonDocument &json) {
     JsonVariant v;
-    bool chresetfusion = false;
     bool chpinschanged = false;
+    bool chresetfusion = false;
     v = json["rll_min"]; if(!v.isNull()) {setRll_Min(v);}
     v = json["rll_max"]; if(!v.isNull()) {setRll_Max(v);}
     v = json["rll_cnt"]; if(!v.isNull()) {setRll_Cnt(v);}
@@ -1157,10 +1157,10 @@ public:
     v = json["lppan"]; if(!v.isNull()) {setLpPan(v);}
     v = json["lptiltroll"]; if(!v.isNull()) {setLpTiltRoll(v);}
     v = json["btpairedaddress"]; if(!v.isNull()) {setBtPairedAddress(v);}
-    if(chresetfusion)
-      resetFusion();
     if(chpinschanged)
       pinsChanged();
+    if(chresetfusion)
+      resetFusion();
   }
 
   void setJSONDataList(DynamicJsonDocument &json)
@@ -1491,15 +1491,15 @@ protected:
   uint16_t rll_min = DEF_MIN_PWM; // Roll Minimum
   uint16_t rll_max = DEF_MAX_PWM; // Roll Maximum
   uint16_t rll_cnt = PPM_CENTER; // Roll Center
-  uint16_t rll_gain = 5; // Roll Gain
+  float rll_gain = 5; // Roll Gain
   uint16_t tlt_min = DEF_MIN_PWM; // Tilt Minimum
   uint16_t tlt_max = DEF_MAX_PWM; // Tilt Maximum
   uint16_t tlt_cnt = PPM_CENTER; // Tilt Center
-  uint16_t tlt_gain = 5; // Tilt Gain
+  float tlt_gain = 5; // Tilt Gain
   uint16_t pan_min = DEF_MIN_PWM; // Pan Minimum
   uint16_t pan_max = DEF_MAX_PWM; // Pan Maximum
   uint16_t pan_cnt = PPM_CENTER; // Pan Center
-  uint16_t pan_gain = 5; // Pan Gain
+  float pan_gain = 5; // Pan Gain
   int8_t tltch = -1; // Tilt Output Channel
   int8_t rllch = -1; // Roll Output Channel
   int8_t panch = -1; // Pan Output Channel

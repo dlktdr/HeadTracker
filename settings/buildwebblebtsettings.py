@@ -13,10 +13,10 @@ f.write("""\
 //
 //  Modify /utils/settings.csv and execute buildsettings.py to generate this source file
 //
-//  This file includes all the characteristics which are editable
-//   Copy and pasted them into code as required (TOOD, automate more)
 
 let radioService;
+let gattServer;
+let commandCharacteristic;
 """)
 
 # Read the settings
@@ -25,17 +25,29 @@ s.readSettings()
 # Data Storage Variables
 for row in s.settings:
   if row[s.colbleaddr].strip() != "":
-    name = row[s.colname].lower().strip()
+    name = row[s.colname].strip()
     addr = row[s.colbleaddr].upper().strip()
     f.write("let " + name + "_promise;\n")
     f.write("let " + name + "_value;\n")
 
+# Update Fields Function
+f.write("\nfunction updateFields()\n{\n")
+for row in s.settings:
+  if row[s.colbleaddr].strip() != "":
+    name = row[s.colname].strip()
+    f.write("  $(\"#inp_" + name + "\").val("+ name + "_value);\n")
+f.write("}\n\n")
+
+# Field Changed, Upload to Tracker
+for row in s.settings:
+  if row[s.colbleaddr].strip() != "":
+    name = row[s.colname].strip()
+    addr = row[s.colbleaddr].upper().strip()
+    f.write("$('#settings').on('change', '#inp_" + name + "', function() {updateParameter('" + name + "', " + name + "_promise, $('#inp_" + name + "').val())});\n");
+f.write("\n")
+
 f.write("""
 function connectToHT() {
-  progress.hidden = false;
-  // Can only send commands once device is in developer mode.
-  // Put device into developer mode by sending a special string to Anti DOS,
-  // 7 to TX Power and 1 to Wake CPU on radio service.
   if (radioService == null) {
     navigator.bluetooth.requestDevice({
       filters: [{
@@ -43,8 +55,8 @@ function connectToHT() {
       }]
     })
     .then(device => {
-      console.log('> Found ' + device.name);
-      console.log('Connecting to GATT Server...');
+      btConnectionStatus('Connecting to HeadTracker...');
+      showLoader();
       return device.gatt.connect();
     })
     .then(server => {
@@ -53,6 +65,11 @@ function connectToHT() {
     })
     .then(service => {
       radioService = service;
+      return radioService.getCharacteristic(0xFF00); // Get command characteristic
+    })
+    .then(characteristic => {
+      commandCharacteristic = characteristic;
+      btConnectionStatus('Got the Command Characteristic');
       return radioService.getCharacteristic(0xF000); // Get first characteristic
     })
 """)
@@ -63,20 +80,19 @@ _name = ""
 _addr = ""
 for row in s.settings:
   if row[s.colbleaddr].strip() != "":
-    _name = row[s.colname].lower().strip()
+    _name = row[s.colname].strip()
     _addr = row[s.colbleaddr].upper().strip()
     if first == True:
       first = False
     else:
       txt = """\
     .then(characteristic => {{
-      console.log(' Found {lname} Characteristic');
       {lname}_promise = characteristic;
       return {lname}_promise.readValue();
     }})
     .then(value => {{
+      btConnectionStatus(' Got {lname}');
       {lname}_value = value{jtype};
-      console.log({lname}_value);
       return radioService.getCharacteristic(0x{addr}); // Get {name} characteristic
     }})
 """.format(name = _name, lname = _lastname, addr = _addr, jtype = s.JSDataView(row[s.coltype]))
@@ -85,16 +101,16 @@ for row in s.settings:
 
 txt = """\
     .then(characteristic => {{
-      console.log(' Found {lname} Characteristic');
       {lname}_promise = characteristic;
       return {lname}_promise.readValue();
-      return false;
     }})
       .then(value => {{
       {lname}_value = value{jtype};
-      console.log({lname}_value);
+      btConnectionStatus("Completed");
+      connectionEstablished();
+      updateFields();
     }})
-    .catch(error => {{ console.error(error); return true;}});
+    .catch(error => {{ console.error(error); connectionFault(error); return true;}});
   }} else {{
     return true;
   }}
@@ -105,3 +121,22 @@ f.write("}\n")
 f.close()
 
 print("Generated WebBle Settings File blechars.js")
+
+
+# BUILD THE HTML SETTINGS LIST
+
+# Data Storage Variables
+f = open("../web_configurator/settings.html","w")
+f.write("<table id='settingsTable'>\n")
+for row in s.settings:
+  if row[s.colbleaddr].strip() != "":
+    name = row[s.colname].strip()
+    min = row[s.colmin]
+    max = row[s.colmax]
+    desc = row[s.coldesc]
+    type = row[s.coltype]
+    f.write("<tr><td>" + desc + "</td><td><input type='number' class='htInputField' id='inp_" + name + "'></td></tr>\n")
+f.write("</table>\n")
+f.close()
+
+print("Generated WebBle Settings File settings.html")

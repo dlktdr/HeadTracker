@@ -33,15 +33,15 @@
 uint16_t bt_rll_min;
 uint16_t bt_rll_max;
 uint16_t bt_rll_cnt;
-uint16_t bt_rll_gain;
+float bt_rll_gain;
 uint16_t bt_tlt_min;
 uint16_t bt_tlt_max;
 uint16_t bt_tlt_cnt;
-uint16_t bt_tlt_gain;
+float bt_tlt_gain;
 uint16_t bt_pan_min;
 uint16_t bt_pan_max;
 uint16_t bt_pan_cnt;
-uint16_t bt_pan_gain;
+float bt_pan_gain;
 int8_t bt_tltch;
 int8_t bt_rllch;
 int8_t bt_panch;
@@ -138,9 +138,9 @@ ssize_t btrd_rll_cnt(struct bt_conn *conn, const struct bt_gatt_attr *attr, void
 
 ssize_t btwr_rll_gain(struct bt_conn *conn, const struct bt_gatt_attr *attr, const void *buf, uint16_t len, uint16_t offset, uint8_t flags)
 {
-  if(len == sizeof(uint16_t)) {
+  if(len == sizeof(float)) {
     LOGD("BT_Wr Rll_Gain (0xF003)");
-    trkset.setRll_Gain(*(uint16_t*)buf);
+    trkset.setRll_Gain(*(float*)buf);
   }
   return len;
 }
@@ -149,7 +149,7 @@ ssize_t btrd_rll_gain(struct bt_conn *conn, const struct bt_gatt_attr *attr, voi
   char *value = (char *)attr->user_data;
   LOGD("BT_Rd Rll_Gain (0xF003)");
   bt_rll_gain = trkset.getRll_Gain();
-  return bt_gatt_attr_read(conn, attr, buf, len, offset, value, sizeof(uint16_t));
+  return bt_gatt_attr_read(conn, attr, buf, len, offset, value, sizeof(float));
 }
 
 ssize_t btwr_tlt_min(struct bt_conn *conn, const struct bt_gatt_attr *attr, const void *buf, uint16_t len, uint16_t offset, uint8_t flags)
@@ -202,9 +202,9 @@ ssize_t btrd_tlt_cnt(struct bt_conn *conn, const struct bt_gatt_attr *attr, void
 
 ssize_t btwr_tlt_gain(struct bt_conn *conn, const struct bt_gatt_attr *attr, const void *buf, uint16_t len, uint16_t offset, uint8_t flags)
 {
-  if(len == sizeof(uint16_t)) {
+  if(len == sizeof(float)) {
     LOGD("BT_Wr Tlt_Gain (0xF007)");
-    trkset.setTlt_Gain(*(uint16_t*)buf);
+    trkset.setTlt_Gain(*(float*)buf);
   }
   return len;
 }
@@ -213,7 +213,7 @@ ssize_t btrd_tlt_gain(struct bt_conn *conn, const struct bt_gatt_attr *attr, voi
   char *value = (char *)attr->user_data;
   LOGD("BT_Rd Tlt_Gain (0xF007)");
   bt_tlt_gain = trkset.getTlt_Gain();
-  return bt_gatt_attr_read(conn, attr, buf, len, offset, value, sizeof(uint16_t));
+  return bt_gatt_attr_read(conn, attr, buf, len, offset, value, sizeof(float));
 }
 
 ssize_t btwr_pan_min(struct bt_conn *conn, const struct bt_gatt_attr *attr, const void *buf, uint16_t len, uint16_t offset, uint8_t flags)
@@ -266,9 +266,9 @@ ssize_t btrd_pan_cnt(struct bt_conn *conn, const struct bt_gatt_attr *attr, void
 
 ssize_t btwr_pan_gain(struct bt_conn *conn, const struct bt_gatt_attr *attr, const void *buf, uint16_t len, uint16_t offset, uint8_t flags)
 {
-  if(len == sizeof(uint16_t)) {
+  if(len == sizeof(float)) {
     LOGD("BT_Wr Pan_Gain (0xF011)");
-    trkset.setPan_Gain(*(uint16_t*)buf);
+    trkset.setPan_Gain(*(float*)buf);
   }
   return len;
 }
@@ -277,7 +277,7 @@ ssize_t btrd_pan_gain(struct bt_conn *conn, const struct bt_gatt_attr *attr, voi
   char *value = (char *)attr->user_data;
   LOGD("BT_Rd Pan_Gain (0xF011)");
   bt_pan_gain = trkset.getPan_Gain();
-  return bt_gatt_attr_read(conn, attr, buf, len, offset, value, sizeof(uint16_t));
+  return bt_gatt_attr_read(conn, attr, buf, len, offset, value, sizeof(float));
 }
 
 ssize_t btwr_tltch(struct bt_conn *conn, const struct bt_gatt_attr *attr, const void *buf, uint16_t len, uint16_t offset, uint8_t flags)

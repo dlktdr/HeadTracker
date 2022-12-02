@@ -227,16 +227,17 @@ public:
   }
 
   // Roll Gain
-  uint16_t getRll_Gain() {
-    return _setting["rll_gain"].toUInt();
+  float getRll_Gain() {
+    return _setting["rll_gain"].toFloat();
   }
-  bool setRll_Gain(uint16_t val=5) {
+  bool setRll_Gain(float val=5) {
     if(val >= MIN_GAIN && val <= MAX_GAIN) {
-      _setting["rll_gain"] = val;
+      _setting["rll_gain"] = QString::number(val,'g',3);
       return true;
     }
     return false;
   }
+
 
   // Tilt Minimum
   uint16_t getTlt_Min() {
@@ -275,16 +276,17 @@ public:
   }
 
   // Tilt Gain
-  uint16_t getTlt_Gain() {
-    return _setting["tlt_gain"].toUInt();
+  float getTlt_Gain() {
+    return _setting["tlt_gain"].toFloat();
   }
-  bool setTlt_Gain(uint16_t val=5) {
+  bool setTlt_Gain(float val=5) {
     if(val >= MIN_GAIN && val <= MAX_GAIN) {
-      _setting["tlt_gain"] = val;
+      _setting["tlt_gain"] = QString::number(val,'g',3);
       return true;
     }
     return false;
   }
+
 
   // Pan Minimum
   uint16_t getPan_Min() {
@@ -323,16 +325,17 @@ public:
   }
 
   // Pan Gain
-  uint16_t getPan_Gain() {
-    return _setting["pan_gain"].toUInt();
+  float getPan_Gain() {
+    return _setting["pan_gain"].toFloat();
   }
-  bool setPan_Gain(uint16_t val=5) {
+  bool setPan_Gain(float val=5) {
     if(val >= MIN_GAIN && val <= MAX_GAIN) {
-      _setting["pan_gain"] = val;
+      _setting["pan_gain"] = QString::number(val,'g',3);
       return true;
     }
     return false;
   }
+
 
   // Tilt Output Channel
   int8_t getTltCh() {

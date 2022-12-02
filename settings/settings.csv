@@ -79,15 +79,15 @@ Tilt Roll Pan Limits,,,,,,,,,,
 u16,Setting,Rll_Min,DEF_MIN_PWM,MIN_PWM,MAX_PWM,Roll Minimum,,,,F000
 u16,Setting,Rll_Max,DEF_MAX_PWM,MIN_PWM,MAX_PWM,Roll Maximum,,,,F001
 u16,Setting,Rll_Cnt,PPM_CENTER,MIN_PWM,MAX_PWM,Roll Center,,,,F002
-u16,Setting,Rll_Gain,5,MIN_GAIN,MAX_GAIN,Roll Gain,,,,F003
+float,Setting,Rll_Gain,5,MIN_GAIN,MAX_GAIN,Roll Gain,,,3,F003
 u16,Setting,Tlt_Min,DEF_MIN_PWM,MIN_PWM,MAX_PWM,Tilt Minimum,,,,F004
 u16,Setting,Tlt_Max,DEF_MAX_PWM,MIN_PWM,MAX_PWM,Tilt Maximum,,,,F005
 u16,Setting,Tlt_Cnt,PPM_CENTER,MIN_PWM,MAX_PWM,Tilt Center,,,,F006
-u16,Setting,Tlt_Gain,5,MIN_GAIN,MAX_GAIN,Tilt Gain,,,,F007
+float,Setting,Tlt_Gain,5,MIN_GAIN,MAX_GAIN,Tilt Gain,,,3,F007
 u16,Setting,Pan_Min,DEF_MIN_PWM,MIN_PWM,MAX_PWM,Pan Minimum,,,,F008
 u16,Setting,Pan_Max,DEF_MAX_PWM,MIN_PWM,MAX_PWM,Pan Maximum,,,,F009
 u16,Setting,Pan_Cnt,PPM_CENTER,MIN_PWM,MAX_PWM,Pan Center,,,,F010
-u16,Setting,Pan_Gain,5,MIN_GAIN,MAX_GAIN,Pan Gain,,,,F011
+float,Setting,Pan_Gain,5,MIN_GAIN,MAX_GAIN,Pan Gain,,,3,F011
 ,,,,,,,,,,
 Output Channels,,,,,,,,,,
 s8,Setting,TltCh,-1,-1,MAX_CHANNELS,Tilt Output Channel,,,,F100

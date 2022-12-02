@@ -36,5 +36,27 @@
       "xloctime": "cpp",
       "functional": "cpp"
     },
+  },
+  "launch": {
+    "configurations": [
+      {
+        "type": "chrome",
+        "name": "http://127.0.0.1:8080",
+        "request": "launch",
+        "url": "http://127.0.0.1:8080"
+      },
+      {
+        "type": "chrome",
+        "name": "http://127.0.0.1",
+        "request": "launch",
+        "url": "http://127.0.0.1"
+      },
+      {
+        "type": "chrome",
+        "name": "http://localhost:8080",
+        "request": "launch",
+        "url": "http://localhost:8080"
+      }
+    ]
   }
 }

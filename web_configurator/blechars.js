@@ -4,72 +4,130 @@
 //
 //  Modify /utils/settings.csv and execute buildsettings.py to generate this source file
 //
-//  This file includes all the characteristics which are editable
-//   Copy and pasted them into code as required (TOOD, automate more)
 
 let radioService;
-let rll_min_promise;
-let rll_min_value;
-let rll_max_promise;
-let rll_max_value;
-let rll_cnt_promise;
-let rll_cnt_value;
-let rll_gain_promise;
-let rll_gain_value;
-let tlt_min_promise;
-let tlt_min_value;
-let tlt_max_promise;
-let tlt_max_value;
-let tlt_cnt_promise;
-let tlt_cnt_value;
-let tlt_gain_promise;
-let tlt_gain_value;
-let pan_min_promise;
-let pan_min_value;
-let pan_max_promise;
-let pan_max_value;
-let pan_cnt_promise;
-let pan_cnt_value;
-let pan_gain_promise;
-let pan_gain_value;
-let tltch_promise;
-let tltch_value;
-let rllch_promise;
-let rllch_value;
-let panch_promise;
-let panch_value;
-let alertch_promise;
-let alertch_value;
-let pwm0_promise;
-let pwm0_value;
-let pwm1_promise;
-let pwm1_value;
-let pwm2_promise;
-let pwm2_value;
-let pwm3_promise;
-let pwm3_value;
-let an0ch_promise;
-let an0ch_value;
-let an1ch_promise;
-let an1ch_value;
-let an2ch_promise;
-let an2ch_value;
-let an3ch_promise;
-let an3ch_value;
-let aux0ch_promise;
-let aux0ch_value;
-let aux1ch_promise;
-let aux1ch_value;
-let aux2ch_promise;
-let aux2ch_value;
-let rstppm_promise;
-let rstppm_value;
+let gattServer;
+let commandCharacteristic;
+let Rll_Min_promise;
+let Rll_Min_value;
+let Rll_Max_promise;
+let Rll_Max_value;
+let Rll_Cnt_promise;
+let Rll_Cnt_value;
+let Rll_Gain_promise;
+let Rll_Gain_value;
+let Tlt_Min_promise;
+let Tlt_Min_value;
+let Tlt_Max_promise;
+let Tlt_Max_value;
+let Tlt_Cnt_promise;
+let Tlt_Cnt_value;
+let Tlt_Gain_promise;
+let Tlt_Gain_value;
+let Pan_Min_promise;
+let Pan_Min_value;
+let Pan_Max_promise;
+let Pan_Max_value;
+let Pan_Cnt_promise;
+let Pan_Cnt_value;
+let Pan_Gain_promise;
+let Pan_Gain_value;
+let TltCh_promise;
+let TltCh_value;
+let RllCh_promise;
+let RllCh_value;
+let PanCh_promise;
+let PanCh_value;
+let AlertCh_promise;
+let AlertCh_value;
+let Pwm0_promise;
+let Pwm0_value;
+let Pwm1_promise;
+let Pwm1_value;
+let Pwm2_promise;
+let Pwm2_value;
+let Pwm3_promise;
+let Pwm3_value;
+let An0Ch_promise;
+let An0Ch_value;
+let An1Ch_promise;
+let An1Ch_value;
+let An2Ch_promise;
+let An2Ch_value;
+let An3Ch_promise;
+let An3Ch_value;
+let Aux0Ch_promise;
+let Aux0Ch_value;
+let Aux1Ch_promise;
+let Aux1Ch_value;
+let Aux2Ch_promise;
+let Aux2Ch_value;
+let RstPpm_promise;
+let RstPpm_value;
+
+function updateFields()
+{
+  $("#inp_Rll_Min").val(Rll_Min_value);
+  $("#inp_Rll_Max").val(Rll_Max_value);
+  $("#inp_Rll_Cnt").val(Rll_Cnt_value);
+  $("#inp_Rll_Gain").val(Rll_Gain_value);
+  $("#inp_Tlt_Min").val(Tlt_Min_value);
+  $("#inp_Tlt_Max").val(Tlt_Max_value);
+  $("#inp_Tlt_Cnt").val(Tlt_Cnt_value);
+  $("#inp_Tlt_Gain").val(Tlt_Gain_value);
+  $("#inp_Pan_Min").val(Pan_Min_value);
+  $("#inp_Pan_Max").val(Pan_Max_value);
+  $("#inp_Pan_Cnt").val(Pan_Cnt_value);
+  $("#inp_Pan_Gain").val(Pan_Gain_value);
+  $("#inp_TltCh").val(TltCh_value);
+  $("#inp_RllCh").val(RllCh_value);
+  $("#inp_PanCh").val(PanCh_value);
+  $("#inp_AlertCh").val(AlertCh_value);
+  $("#inp_Pwm0").val(Pwm0_value);
+  $("#inp_Pwm1").val(Pwm1_value);
+  $("#inp_Pwm2").val(Pwm2_value);
+  $("#inp_Pwm3").val(Pwm3_value);
+  $("#inp_An0Ch").val(An0Ch_value);
+  $("#inp_An1Ch").val(An1Ch_value);
+  $("#inp_An2Ch").val(An2Ch_value);
+  $("#inp_An3Ch").val(An3Ch_value);
+  $("#inp_Aux0Ch").val(Aux0Ch_value);
+  $("#inp_Aux1Ch").val(Aux1Ch_value);
+  $("#inp_Aux2Ch").val(Aux2Ch_value);
+  $("#inp_RstPpm").val(RstPpm_value);
+}
+
+$('#settings').on('change', '#inp_Rll_Min', function() {updateParameter('Rll_Min', Rll_Min_promise, $('#inp_Rll_Min').val())});
+$('#settings').on('change', '#inp_Rll_Max', function() {updateParameter('Rll_Max', Rll_Max_promise, $('#inp_Rll_Max').val())});
+$('#settings').on('change', '#inp_Rll_Cnt', function() {updateParameter('Rll_Cnt', Rll_Cnt_promise, $('#inp_Rll_Cnt').val())});
+$('#settings').on('change', '#inp_Rll_Gain', function() {updateParameter('Rll_Gain', Rll_Gain_promise, $('#inp_Rll_Gain').val())});
+$('#settings').on('change', '#inp_Tlt_Min', function() {updateParameter('Tlt_Min', Tlt_Min_promise, $('#inp_Tlt_Min').val())});
+$('#settings').on('change', '#inp_Tlt_Max', function() {updateParameter('Tlt_Max', Tlt_Max_promise, $('#inp_Tlt_Max').val())});
+$('#settings').on('change', '#inp_Tlt_Cnt', function() {updateParameter('Tlt_Cnt', Tlt_Cnt_promise, $('#inp_Tlt_Cnt').val())});
+$('#settings').on('change', '#inp_Tlt_Gain', function() {updateParameter('Tlt_Gain', Tlt_Gain_promise, $('#inp_Tlt_Gain').val())});
+$('#settings').on('change', '#inp_Pan_Min', function() {updateParameter('Pan_Min', Pan_Min_promise, $('#inp_Pan_Min').val())});
+$('#settings').on('change', '#inp_Pan_Max', function() {updateParameter('Pan_Max', Pan_Max_promise, $('#inp_Pan_Max').val())});
+$('#settings').on('change', '#inp_Pan_Cnt', function() {updateParameter('Pan_Cnt', Pan_Cnt_promise, $('#inp_Pan_Cnt').val())});
+$('#settings').on('change', '#inp_Pan_Gain', function() {updateParameter('Pan_Gain', Pan_Gain_promise, $('#inp_Pan_Gain').val())});
+$('#settings').on('change', '#inp_TltCh', function() {updateParameter('TltCh', TltCh_promise, $('#inp_TltCh').val())});
+$('#settings').on('change', '#inp_RllCh', function() {updateParameter('RllCh', RllCh_promise, $('#inp_RllCh').val())});
+$('#settings').on('change', '#inp_PanCh', function() {updateParameter('PanCh', PanCh_promise, $('#inp_PanCh').val())});
+$('#settings').on('change', '#inp_AlertCh', function() {updateParameter('AlertCh', AlertCh_promise, $('#inp_AlertCh').val())});
+$('#settings').on('change', '#inp_Pwm0', function() {updateParameter('Pwm0', Pwm0_promise, $('#inp_Pwm0').val())});
+$('#settings').on('change', '#inp_Pwm1', function() {updateParameter('Pwm1', Pwm1_promise, $('#inp_Pwm1').val())});
+$('#settings').on('change', '#inp_Pwm2', function() {updateParameter('Pwm2', Pwm2_promise, $('#inp_Pwm2').val())});
+$('#settings').on('change', '#inp_Pwm3', function() {updateParameter('Pwm3', Pwm3_promise, $('#inp_Pwm3').val())});
+$('#settings').on('change', '#inp_An0Ch', function() {updateParameter('An0Ch', An0Ch_promise, $('#inp_An0Ch').val())});
+$('#settings').on('change', '#inp_An1Ch', function() {updateParameter('An1Ch', An1Ch_promise, $('#inp_An1Ch').val())});
+$('#settings').on('change', '#inp_An2Ch', function() {updateParameter('An2Ch', An2Ch_promise, $('#inp_An2Ch').val())});
+$('#settings').on('change', '#inp_An3Ch', function() {updateParameter('An3Ch', An3Ch_promise, $('#inp_An3Ch').val())});
+$('#settings').on('change', '#inp_Aux0Ch', function() {updateParameter('Aux0Ch', Aux0Ch_promise, $('#inp_Aux0Ch').val())});
+$('#settings').on('change', '#inp_Aux1Ch', function() {updateParameter('Aux1Ch', Aux1Ch_promise, $('#inp_Aux1Ch').val())});
+$('#settings').on('change', '#inp_Aux2Ch', function() {updateParameter('Aux2Ch', Aux2Ch_promise, $('#inp_Aux2Ch').val())});
+$('#settings').on('change', '#inp_RstPpm', function() {updateParameter('RstPpm', RstPpm_promise, $('#inp_RstPpm').val())});
+
 
 function connectToHT() {
-  progress.hidden = false;
-  // Can only send commands once device is in developer mode.
-  // Put device into developer mode by sending a special string to Anti DOS,
-  // 7 to TX Power and 1 to Wake CPU on radio service.
   if (radioService == null) {
     navigator.bluetooth.requestDevice({
       filters: [{
@@ -77,8 +135,8 @@ function connectToHT() {
       }]
     })
     .then(device => {
-      console.log('> Found ' + device.name);
-      console.log('Connecting to GATT Server...');
+      btConnectionStatus('Connecting to HeadTracker...');
+      showLoader();
       return device.gatt.connect();
     })
     .then(server => {
@@ -87,289 +145,267 @@ function connectToHT() {
     })
     .then(service => {
       radioService = service;
+      return radioService.getCharacteristic(0xFF00); // Get command characteristic
+    })
+    .then(characteristic => {
+      commandCharacteristic = characteristic;
+      btConnectionStatus('Got the Command Characteristic');
       return radioService.getCharacteristic(0xF000); // Get first characteristic
     })
     .then(characteristic => {
-      console.log(' Found rll_min Characteristic');
-      rll_min_promise = characteristic;
-      return rll_min_promise.readValue();
+      Rll_Min_promise = characteristic;
+      return Rll_Min_promise.readValue();
     })
     .then(value => {
-      rll_min_value = value.getUint16(0, true);
-      console.log(rll_min_value);
-      return radioService.getCharacteristic(0xF001); // Get rll_max characteristic
+      btConnectionStatus(' Got Rll_Min');
+      Rll_Min_value = value.getUint16(0, true);
+      return radioService.getCharacteristic(0xF001); // Get Rll_Max characteristic
     })
     .then(characteristic => {
-      console.log(' Found rll_max Characteristic');
-      rll_max_promise = characteristic;
-      return rll_max_promise.readValue();
+      Rll_Max_promise = characteristic;
+      return Rll_Max_promise.readValue();
     })
     .then(value => {
-      rll_max_value = value.getUint16(0, true);
-      console.log(rll_max_value);
-      return radioService.getCharacteristic(0xF002); // Get rll_cnt characteristic
+      btConnectionStatus(' Got Rll_Max');
+      Rll_Max_value = value.getUint16(0, true);
+      return radioService.getCharacteristic(0xF002); // Get Rll_Cnt characteristic
     })
     .then(characteristic => {
-      console.log(' Found rll_cnt Characteristic');
-      rll_cnt_promise = characteristic;
-      return rll_cnt_promise.readValue();
+      Rll_Cnt_promise = characteristic;
+      return Rll_Cnt_promise.readValue();
     })
     .then(value => {
-      rll_cnt_value = value.getUint16(0, true);
-      console.log(rll_cnt_value);
-      return radioService.getCharacteristic(0xF003); // Get rll_gain characteristic
+      btConnectionStatus(' Got Rll_Cnt');
+      Rll_Cnt_value = valueTODO;
+      return radioService.getCharacteristic(0xF003); // Get Rll_Gain characteristic
     })
     .then(characteristic => {
-      console.log(' Found rll_gain Characteristic');
-      rll_gain_promise = characteristic;
-      return rll_gain_promise.readValue();
+      Rll_Gain_promise = characteristic;
+      return Rll_Gain_promise.readValue();
     })
     .then(value => {
-      rll_gain_value = value.getUint16(0, true);
-      console.log(rll_gain_value);
-      return radioService.getCharacteristic(0xF004); // Get tlt_min characteristic
+      btConnectionStatus(' Got Rll_Gain');
+      Rll_Gain_value = value.getUint16(0, true);
+      return radioService.getCharacteristic(0xF004); // Get Tlt_Min characteristic
     })
     .then(characteristic => {
-      console.log(' Found tlt_min Characteristic');
-      tlt_min_promise = characteristic;
-      return tlt_min_promise.readValue();
+      Tlt_Min_promise = characteristic;
+      return Tlt_Min_promise.readValue();
     })
     .then(value => {
-      tlt_min_value = value.getUint16(0, true);
-      console.log(tlt_min_value);
-      return radioService.getCharacteristic(0xF005); // Get tlt_max characteristic
+      btConnectionStatus(' Got Tlt_Min');
+      Tlt_Min_value = value.getUint16(0, true);
+      return radioService.getCharacteristic(0xF005); // Get Tlt_Max characteristic
     })
     .then(characteristic => {
-      console.log(' Found tlt_max Characteristic');
-      tlt_max_promise = characteristic;
-      return tlt_max_promise.readValue();
+      Tlt_Max_promise = characteristic;
+      return Tlt_Max_promise.readValue();
     })
     .then(value => {
-      tlt_max_value = value.getUint16(0, true);
-      console.log(tlt_max_value);
-      return radioService.getCharacteristic(0xF006); // Get tlt_cnt characteristic
+      btConnectionStatus(' Got Tlt_Max');
+      Tlt_Max_value = value.getUint16(0, true);
+      return radioService.getCharacteristic(0xF006); // Get Tlt_Cnt characteristic
     })
     .then(characteristic => {
-      console.log(' Found tlt_cnt Characteristic');
-      tlt_cnt_promise = characteristic;
-      return tlt_cnt_promise.readValue();
+      Tlt_Cnt_promise = characteristic;
+      return Tlt_Cnt_promise.readValue();
     })
     .then(value => {
-      tlt_cnt_value = value.getUint16(0, true);
-      console.log(tlt_cnt_value);
-      return radioService.getCharacteristic(0xF007); // Get tlt_gain characteristic
+      btConnectionStatus(' Got Tlt_Cnt');
+      Tlt_Cnt_value = valueTODO;
+      return radioService.getCharacteristic(0xF007); // Get Tlt_Gain characteristic
     })
     .then(characteristic => {
-      console.log(' Found tlt_gain Characteristic');
-      tlt_gain_promise = characteristic;
-      return tlt_gain_promise.readValue();
+      Tlt_Gain_promise = characteristic;
+      return Tlt_Gain_promise.readValue();
     })
     .then(value => {
-      tlt_gain_value = value.getUint16(0, true);
-      console.log(tlt_gain_value);
-      return radioService.getCharacteristic(0xF008); // Get pan_min characteristic
+      btConnectionStatus(' Got Tlt_Gain');
+      Tlt_Gain_value = value.getUint16(0, true);
+      return radioService.getCharacteristic(0xF008); // Get Pan_Min characteristic
     })
     .then(characteristic => {
-      console.log(' Found pan_min Characteristic');
-      pan_min_promise = characteristic;
-      return pan_min_promise.readValue();
+      Pan_Min_promise = characteristic;
+      return Pan_Min_promise.readValue();
     })
     .then(value => {
-      pan_min_value = value.getUint16(0, true);
-      console.log(pan_min_value);
-      return radioService.getCharacteristic(0xF009); // Get pan_max characteristic
+      btConnectionStatus(' Got Pan_Min');
+      Pan_Min_value = value.getUint16(0, true);
+      return radioService.getCharacteristic(0xF009); // Get Pan_Max characteristic
     })
     .then(characteristic => {
-      console.log(' Found pan_max Characteristic');
-      pan_max_promise = characteristic;
-      return pan_max_promise.readValue();
+      Pan_Max_promise = characteristic;
+      return Pan_Max_promise.readValue();
     })
     .then(value => {
-      pan_max_value = value.getUint16(0, true);
-      console.log(pan_max_value);
-      return radioService.getCharacteristic(0xF010); // Get pan_cnt characteristic
+      btConnectionStatus(' Got Pan_Max');
+      Pan_Max_value = value.getUint16(0, true);
+      return radioService.getCharacteristic(0xF010); // Get Pan_Cnt characteristic
     })
     .then(characteristic => {
-      console.log(' Found pan_cnt Characteristic');
-      pan_cnt_promise = characteristic;
-      return pan_cnt_promise.readValue();
+      Pan_Cnt_promise = characteristic;
+      return Pan_Cnt_promise.readValue();
     })
     .then(value => {
-      pan_cnt_value = value.getUint16(0, true);
-      console.log(pan_cnt_value);
-      return radioService.getCharacteristic(0xF011); // Get pan_gain characteristic
+      btConnectionStatus(' Got Pan_Cnt');
+      Pan_Cnt_value = valueTODO;
+      return radioService.getCharacteristic(0xF011); // Get Pan_Gain characteristic
     })
     .then(characteristic => {
-      console.log(' Found pan_gain Characteristic');
-      pan_gain_promise = characteristic;
-      return pan_gain_promise.readValue();
+      Pan_Gain_promise = characteristic;
+      return Pan_Gain_promise.readValue();
     })
     .then(value => {
-      pan_gain_value = value.getInt8(0, true);
-      console.log(pan_gain_value);
-      return radioService.getCharacteristic(0xF100); // Get tltch characteristic
+      btConnectionStatus(' Got Pan_Gain');
+      Pan_Gain_value = value.getInt8(0, true);
+      return radioService.getCharacteristic(0xF100); // Get TltCh characteristic
     })
     .then(characteristic => {
-      console.log(' Found tltch Characteristic');
-      tltch_promise = characteristic;
-      return tltch_promise.readValue();
+      TltCh_promise = characteristic;
+      return TltCh_promise.readValue();
     })
     .then(value => {
-      tltch_value = value.getInt8(0, true);
-      console.log(tltch_value);
-      return radioService.getCharacteristic(0xF101); // Get rllch characteristic
+      btConnectionStatus(' Got TltCh');
+      TltCh_value = value.getInt8(0, true);
+      return radioService.getCharacteristic(0xF101); // Get RllCh characteristic
     })
     .then(characteristic => {
-      console.log(' Found rllch Characteristic');
-      rllch_promise = characteristic;
-      return rllch_promise.readValue();
+      RllCh_promise = characteristic;
+      return RllCh_promise.readValue();
     })
     .then(value => {
-      rllch_value = value.getInt8(0, true);
-      console.log(rllch_value);
-      return radioService.getCharacteristic(0xF102); // Get panch characteristic
+      btConnectionStatus(' Got RllCh');
+      RllCh_value = value.getInt8(0, true);
+      return radioService.getCharacteristic(0xF102); // Get PanCh characteristic
     })
     .then(characteristic => {
-      console.log(' Found panch Characteristic');
-      panch_promise = characteristic;
-      return panch_promise.readValue();
+      PanCh_promise = characteristic;
+      return PanCh_promise.readValue();
     })
     .then(value => {
-      panch_value = value.getInt8(0, true);
-      console.log(panch_value);
-      return radioService.getCharacteristic(0xF103); // Get alertch characteristic
+      btConnectionStatus(' Got PanCh');
+      PanCh_value = value.getInt8(0, true);
+      return radioService.getCharacteristic(0xF103); // Get AlertCh characteristic
     })
     .then(characteristic => {
-      console.log(' Found alertch Characteristic');
-      alertch_promise = characteristic;
-      return alertch_promise.readValue();
+      AlertCh_promise = characteristic;
+      return AlertCh_promise.readValue();
     })
     .then(value => {
-      alertch_value = value.getInt8(0, true);
-      console.log(alertch_value);
-      return radioService.getCharacteristic(0xF104); // Get pwm0 characteristic
+      btConnectionStatus(' Got AlertCh');
+      AlertCh_value = value.getInt8(0, true);
+      return radioService.getCharacteristic(0xF104); // Get Pwm0 characteristic
     })
     .then(characteristic => {
-      console.log(' Found pwm0 Characteristic');
-      pwm0_promise = characteristic;
-      return pwm0_promise.readValue();
+      Pwm0_promise = characteristic;
+      return Pwm0_promise.readValue();
     })
     .then(value => {
-      pwm0_value = value.getInt8(0, true);
-      console.log(pwm0_value);
-      return radioService.getCharacteristic(0xF105); // Get pwm1 characteristic
+      btConnectionStatus(' Got Pwm0');
+      Pwm0_value = value.getInt8(0, true);
+      return radioService.getCharacteristic(0xF105); // Get Pwm1 characteristic
     })
     .then(characteristic => {
-      console.log(' Found pwm1 Characteristic');
-      pwm1_promise = characteristic;
-      return pwm1_promise.readValue();
+      Pwm1_promise = characteristic;
+      return Pwm1_promise.readValue();
     })
     .then(value => {
-      pwm1_value = value.getInt8(0, true);
-      console.log(pwm1_value);
-      return radioService.getCharacteristic(0xF106); // Get pwm2 characteristic
+      btConnectionStatus(' Got Pwm1');
+      Pwm1_value = value.getInt8(0, true);
+      return radioService.getCharacteristic(0xF106); // Get Pwm2 characteristic
     })
     .then(characteristic => {
-      console.log(' Found pwm2 Characteristic');
-      pwm2_promise = characteristic;
-      return pwm2_promise.readValue();
+      Pwm2_promise = characteristic;
+      return Pwm2_promise.readValue();
     })
     .then(value => {
-      pwm2_value = value.getInt8(0, true);
-      console.log(pwm2_value);
-      return radioService.getCharacteristic(0xF107); // Get pwm3 characteristic
+      btConnectionStatus(' Got Pwm2');
+      Pwm2_value = value.getInt8(0, true);
+      return radioService.getCharacteristic(0xF107); // Get Pwm3 characteristic
     })
     .then(characteristic => {
-      console.log(' Found pwm3 Characteristic');
-      pwm3_promise = characteristic;
-      return pwm3_promise.readValue();
+      Pwm3_promise = characteristic;
+      return Pwm3_promise.readValue();
     })
     .then(value => {
-      pwm3_value = value.getInt8(0, true);
-      console.log(pwm3_value);
-      return radioService.getCharacteristic(0xF108); // Get an0ch characteristic
+      btConnectionStatus(' Got Pwm3');
+      Pwm3_value = value.getInt8(0, true);
+      return radioService.getCharacteristic(0xF108); // Get An0Ch characteristic
     })
     .then(characteristic => {
-      console.log(' Found an0ch Characteristic');
-      an0ch_promise = characteristic;
-      return an0ch_promise.readValue();
+      An0Ch_promise = characteristic;
+      return An0Ch_promise.readValue();
     })
     .then(value => {
-      an0ch_value = value.getInt8(0, true);
-      console.log(an0ch_value);
-      return radioService.getCharacteristic(0xF109); // Get an1ch characteristic
+      btConnectionStatus(' Got An0Ch');
+      An0Ch_value = value.getInt8(0, true);
+      return radioService.getCharacteristic(0xF109); // Get An1Ch characteristic
     })
     .then(characteristic => {
-      console.log(' Found an1ch Characteristic');
-      an1ch_promise = characteristic;
-      return an1ch_promise.readValue();
+      An1Ch_promise = characteristic;
+      return An1Ch_promise.readValue();
     })
     .then(value => {
-      an1ch_value = value.getInt8(0, true);
-      console.log(an1ch_value);
-      return radioService.getCharacteristic(0xF10A); // Get an2ch characteristic
+      btConnectionStatus(' Got An1Ch');
+      An1Ch_value = value.getInt8(0, true);
+      return radioService.getCharacteristic(0xF10A); // Get An2Ch characteristic
     })
     .then(characteristic => {
-      console.log(' Found an2ch Characteristic');
-      an2ch_promise = characteristic;
-      return an2ch_promise.readValue();
+      An2Ch_promise = characteristic;
+      return An2Ch_promise.readValue();
     })
     .then(value => {
-      an2ch_value = value.getInt8(0, true);
-      console.log(an2ch_value);
-      return radioService.getCharacteristic(0xF10B); // Get an3ch characteristic
+      btConnectionStatus(' Got An2Ch');
+      An2Ch_value = value.getInt8(0, true);
+      return radioService.getCharacteristic(0xF10B); // Get An3Ch characteristic
     })
     .then(characteristic => {
-      console.log(' Found an3ch Characteristic');
-      an3ch_promise = characteristic;
-      return an3ch_promise.readValue();
+      An3Ch_promise = characteristic;
+      return An3Ch_promise.readValue();
     })
     .then(value => {
-      an3ch_value = value.getInt8(0, true);
-      console.log(an3ch_value);
-      return radioService.getCharacteristic(0xF10C); // Get aux0ch characteristic
+      btConnectionStatus(' Got An3Ch');
+      An3Ch_value = value.getInt8(0, true);
+      return radioService.getCharacteristic(0xF10C); // Get Aux0Ch characteristic
     })
     .then(characteristic => {
-      console.log(' Found aux0ch Characteristic');
-      aux0ch_promise = characteristic;
-      return aux0ch_promise.readValue();
+      Aux0Ch_promise = characteristic;
+      return Aux0Ch_promise.readValue();
     })
     .then(value => {
-      aux0ch_value = value.getInt8(0, true);
-      console.log(aux0ch_value);
-      return radioService.getCharacteristic(0xF10D); // Get aux1ch characteristic
+      btConnectionStatus(' Got Aux0Ch');
+      Aux0Ch_value = value.getInt8(0, true);
+      return radioService.getCharacteristic(0xF10D); // Get Aux1Ch characteristic
     })
     .then(characteristic => {
-      console.log(' Found aux1ch Characteristic');
-      aux1ch_promise = characteristic;
-      return aux1ch_promise.readValue();
+      Aux1Ch_promise = characteristic;
+      return Aux1Ch_promise.readValue();
     })
     .then(value => {
-      aux1ch_value = value.getInt8(0, true);
-      console.log(aux1ch_value);
-      return radioService.getCharacteristic(0xF10E); // Get aux2ch characteristic
+      btConnectionStatus(' Got Aux1Ch');
+      Aux1Ch_value = value.getInt8(0, true);
+      return radioService.getCharacteristic(0xF10E); // Get Aux2Ch characteristic
     })
     .then(characteristic => {
-      console.log(' Found aux2ch Characteristic');
-      aux2ch_promise = characteristic;
-      return aux2ch_promise.readValue();
+      Aux2Ch_promise = characteristic;
+      return Aux2Ch_promise.readValue();
     })
     .then(value => {
-      aux2ch_value = value.getInt8(0, true);
-      console.log(aux2ch_value);
-      return radioService.getCharacteristic(0xF10F); // Get rstppm characteristic
+      btConnectionStatus(' Got Aux2Ch');
+      Aux2Ch_value = value.getInt8(0, true);
+      return radioService.getCharacteristic(0xF10F); // Get RstPpm characteristic
     })
     .then(characteristic => {
-      console.log(' Found rstppm Characteristic');
-      rstppm_promise = characteristic;
-      return rstppm_promise.readValue();
-      return false;
+      RstPpm_promise = characteristic;
+      return RstPpm_promise.readValue();
     })
       .then(value => {
-      rstppm_value = value.getUint8(0, true);
-      console.log(rstppm_value);
+      RstPpm_value = value.getUint8(0, true);
+      btConnectionStatus("Completed");
+      connectionEstablished();
+      updateFields();
     })
-    .catch(error => { console.error(error); return true;});
+    .catch(error => { console.error(error); connectionFault(error); return true;});
   } else {
     return true;
   }
