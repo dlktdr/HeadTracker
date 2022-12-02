@@ -176,7 +176,7 @@ function connectToHT() {
     })
     .then(value => {
       btConnectionStatus(' Got Rll_Cnt');
-      Rll_Cnt_value = valueTODO;
+      Rll_Cnt_value = value.getUint16(0, true);
       return radioService.getCharacteristic(0xF003); // Get Rll_Gain characteristic
     })
     .then(characteristic => {
@@ -185,7 +185,7 @@ function connectToHT() {
     })
     .then(value => {
       btConnectionStatus(' Got Rll_Gain');
-      Rll_Gain_value = value.getUint16(0, true);
+      Rll_Gain_value = value.getFloat32(0, true).toFixed(2);
       return radioService.getCharacteristic(0xF004); // Get Tlt_Min characteristic
     })
     .then(characteristic => {
@@ -212,7 +212,7 @@ function connectToHT() {
     })
     .then(value => {
       btConnectionStatus(' Got Tlt_Cnt');
-      Tlt_Cnt_value = valueTODO;
+      Tlt_Cnt_value = value.getUint16(0, true);
       return radioService.getCharacteristic(0xF007); // Get Tlt_Gain characteristic
     })
     .then(characteristic => {
@@ -221,7 +221,7 @@ function connectToHT() {
     })
     .then(value => {
       btConnectionStatus(' Got Tlt_Gain');
-      Tlt_Gain_value = value.getUint16(0, true);
+      Tlt_Gain_value = value.getFloat32(0, true).toFixed(2);
       return radioService.getCharacteristic(0xF008); // Get Pan_Min characteristic
     })
     .then(characteristic => {
@@ -248,7 +248,7 @@ function connectToHT() {
     })
     .then(value => {
       btConnectionStatus(' Got Pan_Cnt');
-      Pan_Cnt_value = valueTODO;
+      Pan_Cnt_value = value.getUint16(0, true);
       return radioService.getCharacteristic(0xF011); // Get Pan_Gain characteristic
     })
     .then(characteristic => {
@@ -257,7 +257,7 @@ function connectToHT() {
     })
     .then(value => {
       btConnectionStatus(' Got Pan_Gain');
-      Pan_Gain_value = value.getInt8(0, true);
+      Pan_Gain_value = value.getFloat32(0, true).toFixed(2);
       return radioService.getCharacteristic(0xF100); // Get TltCh characteristic
     })
     .then(characteristic => {

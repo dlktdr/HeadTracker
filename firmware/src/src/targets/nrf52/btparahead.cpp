@@ -291,7 +291,7 @@ static ssize_t write_cmd(struct bt_conn *conn, const struct bt_gatt_attr *attr, 
 
   if(strncmp((const char *)buf, "Flash", 5) == 0) {
     LOGI("Bluetooth Configurator Requested Flash");
-    trkset.saveToEEPROM();
+    k_sem_give(&saveToFlash_sem);
   }
 
   return len;

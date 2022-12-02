@@ -123,7 +123,7 @@ def JSDataView(type):
   if type == "s32":
     return ".getInt32(0, true)"
   if type == "float":
-    return "TODO"
+    return ".getFloat32(0, true)"
   if type == "double":
     return "TODO"
   if type == "bool":

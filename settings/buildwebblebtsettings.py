@@ -76,12 +76,20 @@ function connectToHT() {
 
 first = True
 _lastname = ""
+_lasttype = ""
+_lastround = ""
 _name = ""
 _addr = ""
 for row in s.settings:
   if row[s.colbleaddr].strip() != "":
     _name = row[s.colname].strip()
     _addr = row[s.colbleaddr].upper().strip()
+    _type = row[s.coltype]
+    _round = row[s.colround]
+    _roundto = ""
+    if _lasttype.lower() == "float":
+      _roundto = ".toFixed(" + str(int(_lastround) - 1) + ")"
+
     if first == True:
       first = False
     else:
@@ -92,12 +100,14 @@ for row in s.settings:
     }})
     .then(value => {{
       btConnectionStatus(' Got {lname}');
-      {lname}_value = value{jtype};
+      {lname}_value = value{jtype}{roundto};
       return radioService.getCharacteristic(0x{addr}); // Get {name} characteristic
     }})
-""".format(name = _name, lname = _lastname, addr = _addr, jtype = s.JSDataView(row[s.coltype]))
+""".format(name = _name, lname = _lastname, addr = _addr, jtype = s.JSDataView(_lasttype), roundto = _roundto)
       f.write(txt)
     _lastname = _name
+    _lasttype = _type
+    _lastround = _round
 
 txt = """\
     .then(characteristic => {{
@@ -135,7 +145,10 @@ for row in s.settings:
     max = row[s.colmax]
     desc = row[s.coldesc]
     type = row[s.coltype]
-    f.write("<tr><td>" + desc + "</td><td><input type='number' class='htInputField' id='inp_" + name + "'></td></tr>\n")
+    stepvalue = ""
+    if type.lower() == "float":
+      stepvalue = "step='" + str(1.0 / pow(10,int(row[s.colround])-1)) + "' "
+    f.write("<tr><td>" + desc + "</td><td><input type='number' class='htInputField' " + stepvalue +  "id='inp_" + name + "'></td></tr>\n")
 f.write("</table>\n")
 f.close()
 

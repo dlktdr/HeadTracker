@@ -27,6 +27,8 @@ bool led_is_on = false;
 
 TrackerSettings trkset;
 
+K_SEM_DEFINE(saveToFlash_sem, 0, 1);
+
 void start(void)
 {
   // Force High Accuracy Clock
@@ -60,6 +62,13 @@ void start(void)
 
   // Load settings from flash - trackersettings.cpp
   trkset.loadFromEEPROM();
+
+  // Monitor if saving to EEPROM is required
+  while(1) {
+    if (!k_sem_take(&saveToFlash_sem, K_FOREVER)) {
+      trkset.saveToEEPROM();
+    }
+  }
 }
 
 #if defined(RTOS_ZEPHYR)

@@ -13,6 +13,8 @@ $(function(){
 
   // Load the Generated Settings Table
   $("#settings").load("settings.html");
+
+  $("#saveButton").on('click', saveToFlash);
   });
 });
 
@@ -53,6 +55,19 @@ function updateParameter(name, promise, value)
 
   //promise.writeValue();
   parametersChanged();
+}
+
+function saveToFlash()
+{
+  console.log("Saving to Flash");
+  let encoder = new TextEncoder();
+  commandCharacteristic.writeValue(encoder.encode("Flash"))
+  .then(_ => {
+    console.log("Wrote Flash to Command Characteristic");
+  })
+  .catch(error => {
+    console.log("Bugger it didn't work");
+  });
 }
 
 function connectionFault(error)

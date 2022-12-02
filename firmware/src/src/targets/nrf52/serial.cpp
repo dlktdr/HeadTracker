@@ -35,6 +35,7 @@
 #include "soc_flash.h"
 #include "trackersettings.h"
 #include "ucrc16lib.h"
+#include "nano33ble.h"
 
 // Wait for serial connection before starting..
 //#define WAITFOR_DTR
@@ -308,7 +309,7 @@ void parseData(DynamicJsonDocument &json)
     // Save to Flash
   } else if (strcmp(command, "Flash") == 0) {
     LOGI("Saving to Flash");
-    trkset.saveToEEPROM();
+    k_sem_give(&saveToFlash_sem);
 
     // Erase
   } else if (strcmp(command, "Erase") == 0) {
