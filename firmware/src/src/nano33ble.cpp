@@ -49,9 +49,6 @@ void start(void)
   // Actual Calculations - sense.cpp
   sense_Init();
 
-  // Start the BT Thread
-  bt_init();
-
   // Start Externam UART
   uart_init();
 
@@ -62,6 +59,15 @@ void start(void)
 
   // Load settings from flash - trackersettings.cpp
   trkset.loadFromEEPROM();
+
+  // Check if center button is held down, force BT Configuration mode
+  if(readCenterButton()) {
+    trkset.setBtMode(BTPARAHEAD);
+    setLEDFlag(LED_BTCONFIGURATOR);
+  }
+
+  // Start the BT Thread
+  bt_init();
 
   // Monitor if saving to EEPROM is required
   while(1) {

@@ -24,6 +24,7 @@ extern volatile uint32_t _ledmode;
 #define LED_BTCONNECTED 1 << 2
 #define LED_BTSCANNING 1 << 3
 #define LED_MAGCAL 1 << 4
+#define LED_BTCONFIGURATOR 1 << 5
 
 #define RGB_RED 0xFF << 16
 #define RGB_GREEN 0xFF << 8
@@ -34,3 +35,4 @@ extern volatile uint32_t _ledmode;
 void setLEDFlag(uint32_t ledMode);
 void clearLEDFlag(uint32_t ledMode);
 void clearAllLEDFlags();
+bool readCenterButton();

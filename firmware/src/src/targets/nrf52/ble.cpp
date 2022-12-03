@@ -60,16 +60,16 @@ void bt_Thread()
 {
   int64_t usduration = 0;
   while (1) {
-    // Check if bluetooth mode has changed
-    if(curmode != trkset.getBtMode())
-      BTSetMode((btmodet)trkset.getBtMode());
-
-    usduration = micros64();
-
     if (!btThreadRun || pauseForFlash) {
       rt_sleep_ms(10);
       continue;
     }
+
+    usduration = micros64();
+
+    // Check if bluetooth mode has changed
+    if(curmode != trkset.getBtMode())
+      BTSetMode((btmodet)trkset.getBtMode());
 
     switch (curmode) {
       case BTPARAHEAD:

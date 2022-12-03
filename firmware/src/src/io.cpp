@@ -103,6 +103,15 @@ void io_Thread()
       led_sequence[0].time = 100;
       led_sequence[1].time = 0;  // End Sequence
 
+    } else if (_ledmode & LED_BTCONFIGURATOR) {
+      led_sequence[0].RGB = RGB_RED;
+      led_sequence[0].time = 300;
+      led_sequence[1].RGB = RGB_GREEN;
+      led_sequence[1].time = 300;
+      led_sequence[2].RGB = RGB_BLUE;
+      led_sequence[2].time = 300;
+      led_sequence[3].time = 0;  // End Sequence
+
       // Bluetooth Scanning, Blue light slow blinking
     } else if (_ledmode & LED_BTSCANNING) {
       led_sequence[0].RGB = RGB_BLUE;
@@ -177,19 +186,7 @@ void io_Thread()
     if (_counter > 10000) _counter = 0;
 
     static bool lastButtonDown = false;
-    butpin = trkset.getButtonPin();
-
-    // Make sure button pin is enabled
-    if (butpin < 1 || butpin > 13) continue;
-
-#if defined(PCB_NANO33BLE)
-    pinMode(D_TO_ENUM(butpin), INPUT_PULLUP);
-    bool buttonDown = digitalRead(D_TO_ENUM(butpin)) == 0;
-#else
-    pinMode(IO_CENTER_BTN, INPUT_PULLUP);
-    bool buttonDown = digitalRead(IO_CENTER_BTN) == 0;
-#endif
-
+    bool buttonDown = readCenterButton();
 
     // Button pressed down
     if (buttonDown && !lastButtonDown) {
@@ -209,6 +206,20 @@ void io_Thread()
     }
     lastButtonDown = buttonDown;
   }
+}
+
+bool readCenterButton()
+{
+#if defined(PCB_NANO33BLE)
+    int butpin = trkset.getButtonPin();
+    if (butpin < 1 || butpin > 13)
+      return false;
+    pinMode(D_TO_ENUM(butpin), INPUT_PULLUP);
+    return digitalRead(D_TO_ENUM(butpin)) == 0;
+#else
+    pinMode(IO_CENTER_BTN, INPUT_PULLUP);
+    return buttonDown = digitalRead(IO_CENTER_BTN) == 0;
+#endif
 }
 
 void io_init()
