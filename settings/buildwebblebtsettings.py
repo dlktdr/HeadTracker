@@ -80,7 +80,7 @@ for row in s.settings:
     name = row[s.colname].strip()
     addr = row[s.colbleaddr].upper().strip()
     txt = """\
-$('#settings').on('change', '#inp_{name}', function() {{
+$('#inp_{name}').on('change', function() {{
   const buffer = new ArrayBuffer({arrsize});
   new DataView(buffer).set{type}(0, $('#inp_{name}').val(), true)
   {name}_promise.writeValue(buffer);
