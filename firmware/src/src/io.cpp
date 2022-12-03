@@ -218,7 +218,7 @@ bool readCenterButton()
     return digitalRead(D_TO_ENUM(butpin)) == 0;
 #else
     pinMode(IO_CENTER_BTN, INPUT_PULLUP);
-    return buttonDown = digitalRead(IO_CENTER_BTN) == 0;
+    return digitalRead(IO_CENTER_BTN) == 0;
 #endif
 }
 
