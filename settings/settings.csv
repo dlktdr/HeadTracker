@@ -105,7 +105,7 @@ s8,Setting,An3Ch,-1,-1,MAX_CHANNELS,Analog 3 Channel,,,,F10B
 s8,Setting,Aux0Ch,-1,-1,MAX_CHANNELS,Auxilary Function 0 Channel,,,,F10C
 s8,Setting,Aux1Ch,-1,-1,MAX_CHANNELS,Auxilary Function 1 Channel,,,,F10D
 s8,Setting,Aux2Ch,-1,-1,MAX_CHANNELS,Auxilary Function 2 Channel,,,,F10E
-s8,Setting,RstPpm,-1,-1,MAX_CHANNELS,Reset Center on PPM Input Channel,,,,F10F
+s8,Setting,RstPpm,-1,-1,MAX_CHANNELS,Reset Center on PPM Input Channel,,,,
 ,,,,,,,,,,
 Auxilary Functions,,,,,,,,,,
 u8,Setting,Aux0Func,0,0,AUX_FUNCTIONS,Auxilary Function 0,,,,
@@ -113,14 +113,14 @@ u8,Setting,Aux1Func,0,0,AUX_FUNCTIONS,Auxilary Function 1,,,,
 u8,Setting,Aux2Func,0,0,AUX_FUNCTIONS,Auxilary Function 2,,,,
 ,,,,,,,,,,
 Analog Settings,,,,,,,,,,
-float,Setting,An0Gain,310,FLOAT_MIN,FLOAT_MAX,Analog 0 Gain,,,4,
-float,Setting,An1Gain,310,FLOAT_MIN,FLOAT_MAX,Analog 1 Gain,,,4,
-float,Setting,An2Gain,310,FLOAT_MIN,FLOAT_MAX,Analog 2 Gain,,,4,
-float,Setting,An3Gain,310,FLOAT_MIN,FLOAT_MAX,Analog 3 Gain,,,4,
-float,Setting,An0Off,0,FLOAT_MIN,FLOAT_MAX,Analog 0 Offset,,,4,
-float,Setting,An1Off,0,FLOAT_MIN,FLOAT_MAX,Analog 1 Offset,,,4,
-float,Setting,An2Off,0,FLOAT_MIN,FLOAT_MAX,Analog 2 Offset,,,4,
-float,Setting,An3Off,0,FLOAT_MIN,FLOAT_MAX,Analog 3 Offset,,,4,
+float,Setting,An0Gain,310,FLOAT_MIN,FLOAT_MAX,Analog 0 Gain,,,4,F10F
+float,Setting,An1Gain,310,FLOAT_MIN,FLOAT_MAX,Analog 1 Gain,,,4,F110
+float,Setting,An2Gain,310,FLOAT_MIN,FLOAT_MAX,Analog 2 Gain,,,4,F111
+float,Setting,An3Gain,310,FLOAT_MIN,FLOAT_MAX,Analog 3 Gain,,,4,F112
+float,Setting,An0Off,0,FLOAT_MIN,FLOAT_MAX,Analog 0 Offset,,,4,F113
+float,Setting,An1Off,0,FLOAT_MIN,FLOAT_MAX,Analog 1 Offset,,,4,F114
+float,Setting,An2Off,0,FLOAT_MIN,FLOAT_MAX,Analog 2 Offset,,,4,F115
+float,Setting,An3Off,0,FLOAT_MIN,FLOAT_MAX,Analog 3 Offset,,,4,F116
 ,,,,,,,,,,
 u8,Setting,ServoReverse,0,0,7,Servo Reverse (BitMask),,,,
 ,,,,,,,,,,

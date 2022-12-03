@@ -62,8 +62,22 @@ let Aux1Ch_promise;
 let Aux1Ch_value;
 let Aux2Ch_promise;
 let Aux2Ch_value;
-let RstPpm_promise;
-let RstPpm_value;
+let An0Gain_promise;
+let An0Gain_value;
+let An1Gain_promise;
+let An1Gain_value;
+let An2Gain_promise;
+let An2Gain_value;
+let An3Gain_promise;
+let An3Gain_value;
+let An0Off_promise;
+let An0Off_value;
+let An1Off_promise;
+let An1Off_value;
+let An2Off_promise;
+let An2Off_value;
+let An3Off_promise;
+let An3Off_value;
 
 function updateFields()
 {
@@ -94,37 +108,226 @@ function updateFields()
   $("#inp_Aux0Ch").val(Aux0Ch_value);
   $("#inp_Aux1Ch").val(Aux1Ch_value);
   $("#inp_Aux2Ch").val(Aux2Ch_value);
-  $("#inp_RstPpm").val(RstPpm_value);
+  $("#inp_An0Gain").val(An0Gain_value);
+  $("#inp_An1Gain").val(An1Gain_value);
+  $("#inp_An2Gain").val(An2Gain_value);
+  $("#inp_An3Gain").val(An3Gain_value);
+  $("#inp_An0Off").val(An0Off_value);
+  $("#inp_An1Off").val(An1Off_value);
+  $("#inp_An2Off").val(An2Off_value);
+  $("#inp_An3Off").val(An3Off_value);
 }
 
-$('#settings').on('change', '#inp_Rll_Min', function() {updateParameter('Rll_Min', Rll_Min_promise, $('#inp_Rll_Min').val())});
-$('#settings').on('change', '#inp_Rll_Max', function() {updateParameter('Rll_Max', Rll_Max_promise, $('#inp_Rll_Max').val())});
-$('#settings').on('change', '#inp_Rll_Cnt', function() {updateParameter('Rll_Cnt', Rll_Cnt_promise, $('#inp_Rll_Cnt').val())});
-$('#settings').on('change', '#inp_Rll_Gain', function() {updateParameter('Rll_Gain', Rll_Gain_promise, $('#inp_Rll_Gain').val())});
-$('#settings').on('change', '#inp_Tlt_Min', function() {updateParameter('Tlt_Min', Tlt_Min_promise, $('#inp_Tlt_Min').val())});
-$('#settings').on('change', '#inp_Tlt_Max', function() {updateParameter('Tlt_Max', Tlt_Max_promise, $('#inp_Tlt_Max').val())});
-$('#settings').on('change', '#inp_Tlt_Cnt', function() {updateParameter('Tlt_Cnt', Tlt_Cnt_promise, $('#inp_Tlt_Cnt').val())});
-$('#settings').on('change', '#inp_Tlt_Gain', function() {updateParameter('Tlt_Gain', Tlt_Gain_promise, $('#inp_Tlt_Gain').val())});
-$('#settings').on('change', '#inp_Pan_Min', function() {updateParameter('Pan_Min', Pan_Min_promise, $('#inp_Pan_Min').val())});
-$('#settings').on('change', '#inp_Pan_Max', function() {updateParameter('Pan_Max', Pan_Max_promise, $('#inp_Pan_Max').val())});
-$('#settings').on('change', '#inp_Pan_Cnt', function() {updateParameter('Pan_Cnt', Pan_Cnt_promise, $('#inp_Pan_Cnt').val())});
-$('#settings').on('change', '#inp_Pan_Gain', function() {updateParameter('Pan_Gain', Pan_Gain_promise, $('#inp_Pan_Gain').val())});
-$('#settings').on('change', '#inp_TltCh', function() {updateParameter('TltCh', TltCh_promise, $('#inp_TltCh').val())});
-$('#settings').on('change', '#inp_RllCh', function() {updateParameter('RllCh', RllCh_promise, $('#inp_RllCh').val())});
-$('#settings').on('change', '#inp_PanCh', function() {updateParameter('PanCh', PanCh_promise, $('#inp_PanCh').val())});
-$('#settings').on('change', '#inp_AlertCh', function() {updateParameter('AlertCh', AlertCh_promise, $('#inp_AlertCh').val())});
-$('#settings').on('change', '#inp_Pwm0', function() {updateParameter('Pwm0', Pwm0_promise, $('#inp_Pwm0').val())});
-$('#settings').on('change', '#inp_Pwm1', function() {updateParameter('Pwm1', Pwm1_promise, $('#inp_Pwm1').val())});
-$('#settings').on('change', '#inp_Pwm2', function() {updateParameter('Pwm2', Pwm2_promise, $('#inp_Pwm2').val())});
-$('#settings').on('change', '#inp_Pwm3', function() {updateParameter('Pwm3', Pwm3_promise, $('#inp_Pwm3').val())});
-$('#settings').on('change', '#inp_An0Ch', function() {updateParameter('An0Ch', An0Ch_promise, $('#inp_An0Ch').val())});
-$('#settings').on('change', '#inp_An1Ch', function() {updateParameter('An1Ch', An1Ch_promise, $('#inp_An1Ch').val())});
-$('#settings').on('change', '#inp_An2Ch', function() {updateParameter('An2Ch', An2Ch_promise, $('#inp_An2Ch').val())});
-$('#settings').on('change', '#inp_An3Ch', function() {updateParameter('An3Ch', An3Ch_promise, $('#inp_An3Ch').val())});
-$('#settings').on('change', '#inp_Aux0Ch', function() {updateParameter('Aux0Ch', Aux0Ch_promise, $('#inp_Aux0Ch').val())});
-$('#settings').on('change', '#inp_Aux1Ch', function() {updateParameter('Aux1Ch', Aux1Ch_promise, $('#inp_Aux1Ch').val())});
-$('#settings').on('change', '#inp_Aux2Ch', function() {updateParameter('Aux2Ch', Aux2Ch_promise, $('#inp_Aux2Ch').val())});
-$('#settings').on('change', '#inp_RstPpm', function() {updateParameter('RstPpm', RstPpm_promise, $('#inp_RstPpm').val())});
+$('#settings').on('change', '#inp_Rll_Min', function() {
+  const buffer = new ArrayBuffer(2);
+  new DataView(buffer).setUint16(0, $('#inp_Rll_Min').val(), true)
+  Rll_Min_promise.writeValue(buffer);
+  updateParameter('Rll_Min',$('#inp_Rll_Min').val())
+});
+$('#settings').on('change', '#inp_Rll_Max', function() {
+  const buffer = new ArrayBuffer(2);
+  new DataView(buffer).setUint16(0, $('#inp_Rll_Max').val(), true)
+  Rll_Max_promise.writeValue(buffer);
+  updateParameter('Rll_Max',$('#inp_Rll_Max').val())
+});
+$('#settings').on('change', '#inp_Rll_Cnt', function() {
+  const buffer = new ArrayBuffer(2);
+  new DataView(buffer).setUint16(0, $('#inp_Rll_Cnt').val(), true)
+  Rll_Cnt_promise.writeValue(buffer);
+  updateParameter('Rll_Cnt',$('#inp_Rll_Cnt').val())
+});
+$('#settings').on('change', '#inp_Rll_Gain', function() {
+  const buffer = new ArrayBuffer(4);
+  new DataView(buffer).setFloat32(0, $('#inp_Rll_Gain').val(), true)
+  Rll_Gain_promise.writeValue(buffer);
+  updateParameter('Rll_Gain',$('#inp_Rll_Gain').val())
+});
+$('#settings').on('change', '#inp_Tlt_Min', function() {
+  const buffer = new ArrayBuffer(2);
+  new DataView(buffer).setUint16(0, $('#inp_Tlt_Min').val(), true)
+  Tlt_Min_promise.writeValue(buffer);
+  updateParameter('Tlt_Min',$('#inp_Tlt_Min').val())
+});
+$('#settings').on('change', '#inp_Tlt_Max', function() {
+  const buffer = new ArrayBuffer(2);
+  new DataView(buffer).setUint16(0, $('#inp_Tlt_Max').val(), true)
+  Tlt_Max_promise.writeValue(buffer);
+  updateParameter('Tlt_Max',$('#inp_Tlt_Max').val())
+});
+$('#settings').on('change', '#inp_Tlt_Cnt', function() {
+  const buffer = new ArrayBuffer(2);
+  new DataView(buffer).setUint16(0, $('#inp_Tlt_Cnt').val(), true)
+  Tlt_Cnt_promise.writeValue(buffer);
+  updateParameter('Tlt_Cnt',$('#inp_Tlt_Cnt').val())
+});
+$('#settings').on('change', '#inp_Tlt_Gain', function() {
+  const buffer = new ArrayBuffer(4);
+  new DataView(buffer).setFloat32(0, $('#inp_Tlt_Gain').val(), true)
+  Tlt_Gain_promise.writeValue(buffer);
+  updateParameter('Tlt_Gain',$('#inp_Tlt_Gain').val())
+});
+$('#settings').on('change', '#inp_Pan_Min', function() {
+  const buffer = new ArrayBuffer(2);
+  new DataView(buffer).setUint16(0, $('#inp_Pan_Min').val(), true)
+  Pan_Min_promise.writeValue(buffer);
+  updateParameter('Pan_Min',$('#inp_Pan_Min').val())
+});
+$('#settings').on('change', '#inp_Pan_Max', function() {
+  const buffer = new ArrayBuffer(2);
+  new DataView(buffer).setUint16(0, $('#inp_Pan_Max').val(), true)
+  Pan_Max_promise.writeValue(buffer);
+  updateParameter('Pan_Max',$('#inp_Pan_Max').val())
+});
+$('#settings').on('change', '#inp_Pan_Cnt', function() {
+  const buffer = new ArrayBuffer(2);
+  new DataView(buffer).setUint16(0, $('#inp_Pan_Cnt').val(), true)
+  Pan_Cnt_promise.writeValue(buffer);
+  updateParameter('Pan_Cnt',$('#inp_Pan_Cnt').val())
+});
+$('#settings').on('change', '#inp_Pan_Gain', function() {
+  const buffer = new ArrayBuffer(4);
+  new DataView(buffer).setFloat32(0, $('#inp_Pan_Gain').val(), true)
+  Pan_Gain_promise.writeValue(buffer);
+  updateParameter('Pan_Gain',$('#inp_Pan_Gain').val())
+});
+$('#settings').on('change', '#inp_TltCh', function() {
+  const buffer = new ArrayBuffer(1);
+  new DataView(buffer).setInt8(0, $('#inp_TltCh').val(), true)
+  TltCh_promise.writeValue(buffer);
+  updateParameter('TltCh',$('#inp_TltCh').val())
+});
+$('#settings').on('change', '#inp_RllCh', function() {
+  const buffer = new ArrayBuffer(1);
+  new DataView(buffer).setInt8(0, $('#inp_RllCh').val(), true)
+  RllCh_promise.writeValue(buffer);
+  updateParameter('RllCh',$('#inp_RllCh').val())
+});
+$('#settings').on('change', '#inp_PanCh', function() {
+  const buffer = new ArrayBuffer(1);
+  new DataView(buffer).setInt8(0, $('#inp_PanCh').val(), true)
+  PanCh_promise.writeValue(buffer);
+  updateParameter('PanCh',$('#inp_PanCh').val())
+});
+$('#settings').on('change', '#inp_AlertCh', function() {
+  const buffer = new ArrayBuffer(1);
+  new DataView(buffer).setInt8(0, $('#inp_AlertCh').val(), true)
+  AlertCh_promise.writeValue(buffer);
+  updateParameter('AlertCh',$('#inp_AlertCh').val())
+});
+$('#settings').on('change', '#inp_Pwm0', function() {
+  const buffer = new ArrayBuffer(1);
+  new DataView(buffer).setInt8(0, $('#inp_Pwm0').val(), true)
+  Pwm0_promise.writeValue(buffer);
+  updateParameter('Pwm0',$('#inp_Pwm0').val())
+});
+$('#settings').on('change', '#inp_Pwm1', function() {
+  const buffer = new ArrayBuffer(1);
+  new DataView(buffer).setInt8(0, $('#inp_Pwm1').val(), true)
+  Pwm1_promise.writeValue(buffer);
+  updateParameter('Pwm1',$('#inp_Pwm1').val())
+});
+$('#settings').on('change', '#inp_Pwm2', function() {
+  const buffer = new ArrayBuffer(1);
+  new DataView(buffer).setInt8(0, $('#inp_Pwm2').val(), true)
+  Pwm2_promise.writeValue(buffer);
+  updateParameter('Pwm2',$('#inp_Pwm2').val())
+});
+$('#settings').on('change', '#inp_Pwm3', function() {
+  const buffer = new ArrayBuffer(1);
+  new DataView(buffer).setInt8(0, $('#inp_Pwm3').val(), true)
+  Pwm3_promise.writeValue(buffer);
+  updateParameter('Pwm3',$('#inp_Pwm3').val())
+});
+$('#settings').on('change', '#inp_An0Ch', function() {
+  const buffer = new ArrayBuffer(1);
+  new DataView(buffer).setInt8(0, $('#inp_An0Ch').val(), true)
+  An0Ch_promise.writeValue(buffer);
+  updateParameter('An0Ch',$('#inp_An0Ch').val())
+});
+$('#settings').on('change', '#inp_An1Ch', function() {
+  const buffer = new ArrayBuffer(1);
+  new DataView(buffer).setInt8(0, $('#inp_An1Ch').val(), true)
+  An1Ch_promise.writeValue(buffer);
+  updateParameter('An1Ch',$('#inp_An1Ch').val())
+});
+$('#settings').on('change', '#inp_An2Ch', function() {
+  const buffer = new ArrayBuffer(1);
+  new DataView(buffer).setInt8(0, $('#inp_An2Ch').val(), true)
+  An2Ch_promise.writeValue(buffer);
+  updateParameter('An2Ch',$('#inp_An2Ch').val())
+});
+$('#settings').on('change', '#inp_An3Ch', function() {
+  const buffer = new ArrayBuffer(1);
+  new DataView(buffer).setInt8(0, $('#inp_An3Ch').val(), true)
+  An3Ch_promise.writeValue(buffer);
+  updateParameter('An3Ch',$('#inp_An3Ch').val())
+});
+$('#settings').on('change', '#inp_Aux0Ch', function() {
+  const buffer = new ArrayBuffer(1);
+  new DataView(buffer).setInt8(0, $('#inp_Aux0Ch').val(), true)
+  Aux0Ch_promise.writeValue(buffer);
+  updateParameter('Aux0Ch',$('#inp_Aux0Ch').val())
+});
+$('#settings').on('change', '#inp_Aux1Ch', function() {
+  const buffer = new ArrayBuffer(1);
+  new DataView(buffer).setInt8(0, $('#inp_Aux1Ch').val(), true)
+  Aux1Ch_promise.writeValue(buffer);
+  updateParameter('Aux1Ch',$('#inp_Aux1Ch').val())
+});
+$('#settings').on('change', '#inp_Aux2Ch', function() {
+  const buffer = new ArrayBuffer(1);
+  new DataView(buffer).setInt8(0, $('#inp_Aux2Ch').val(), true)
+  Aux2Ch_promise.writeValue(buffer);
+  updateParameter('Aux2Ch',$('#inp_Aux2Ch').val())
+});
+$('#settings').on('change', '#inp_An0Gain', function() {
+  const buffer = new ArrayBuffer(4);
+  new DataView(buffer).setFloat32(0, $('#inp_An0Gain').val(), true)
+  An0Gain_promise.writeValue(buffer);
+  updateParameter('An0Gain',$('#inp_An0Gain').val())
+});
+$('#settings').on('change', '#inp_An1Gain', function() {
+  const buffer = new ArrayBuffer(4);
+  new DataView(buffer).setFloat32(0, $('#inp_An1Gain').val(), true)
+  An1Gain_promise.writeValue(buffer);
+  updateParameter('An1Gain',$('#inp_An1Gain').val())
+});
+$('#settings').on('change', '#inp_An2Gain', function() {
+  const buffer = new ArrayBuffer(4);
+  new DataView(buffer).setFloat32(0, $('#inp_An2Gain').val(), true)
+  An2Gain_promise.writeValue(buffer);
+  updateParameter('An2Gain',$('#inp_An2Gain').val())
+});
+$('#settings').on('change', '#inp_An3Gain', function() {
+  const buffer = new ArrayBuffer(4);
+  new DataView(buffer).setFloat32(0, $('#inp_An3Gain').val(), true)
+  An3Gain_promise.writeValue(buffer);
+  updateParameter('An3Gain',$('#inp_An3Gain').val())
+});
+$('#settings').on('change', '#inp_An0Off', function() {
+  const buffer = new ArrayBuffer(4);
+  new DataView(buffer).setFloat32(0, $('#inp_An0Off').val(), true)
+  An0Off_promise.writeValue(buffer);
+  updateParameter('An0Off',$('#inp_An0Off').val())
+});
+$('#settings').on('change', '#inp_An1Off', function() {
+  const buffer = new ArrayBuffer(4);
+  new DataView(buffer).setFloat32(0, $('#inp_An1Off').val(), true)
+  An1Off_promise.writeValue(buffer);
+  updateParameter('An1Off',$('#inp_An1Off').val())
+});
+$('#settings').on('change', '#inp_An2Off', function() {
+  const buffer = new ArrayBuffer(4);
+  new DataView(buffer).setFloat32(0, $('#inp_An2Off').val(), true)
+  An2Off_promise.writeValue(buffer);
+  updateParameter('An2Off',$('#inp_An2Off').val())
+});
+$('#settings').on('change', '#inp_An3Off', function() {
+  const buffer = new ArrayBuffer(4);
+  new DataView(buffer).setFloat32(0, $('#inp_An3Off').val(), true)
+  An3Off_promise.writeValue(buffer);
+  updateParameter('An3Off',$('#inp_An3Off').val())
+});
 
 
 function connectToHT() {
@@ -150,263 +353,342 @@ function connectToHT() {
     .then(characteristic => {
       commandCharacteristic = characteristic;
       btConnectionStatus('Got the Command Characteristic');
-      return radioService.getCharacteristic(0xF000); // Get first characteristic
+      readValues(btConnectionStatus, connectionEstablished);
     })
-    .then(characteristic => {
-      Rll_Min_promise = characteristic;
-      return Rll_Min_promise.readValue();
+    .catch(error => {
+      console.error(error);
+      connectionFault(error);
     })
-    .then(value => {
-      btConnectionStatus(' Got Rll_Min');
-      Rll_Min_value = value.getUint16(0, true);
-      return radioService.getCharacteristic(0xF001); // Get Rll_Max characteristic
-    })
-    .then(characteristic => {
-      Rll_Max_promise = characteristic;
-      return Rll_Max_promise.readValue();
-    })
-    .then(value => {
-      btConnectionStatus(' Got Rll_Max');
-      Rll_Max_value = value.getUint16(0, true);
-      return radioService.getCharacteristic(0xF002); // Get Rll_Cnt characteristic
-    })
-    .then(characteristic => {
-      Rll_Cnt_promise = characteristic;
-      return Rll_Cnt_promise.readValue();
-    })
-    .then(value => {
-      btConnectionStatus(' Got Rll_Cnt');
-      Rll_Cnt_value = value.getUint16(0, true);
-      return radioService.getCharacteristic(0xF003); // Get Rll_Gain characteristic
-    })
-    .then(characteristic => {
-      Rll_Gain_promise = characteristic;
-      return Rll_Gain_promise.readValue();
-    })
-    .then(value => {
-      btConnectionStatus(' Got Rll_Gain');
-      Rll_Gain_value = value.getFloat32(0, true).toFixed(2);
-      return radioService.getCharacteristic(0xF004); // Get Tlt_Min characteristic
-    })
-    .then(characteristic => {
-      Tlt_Min_promise = characteristic;
-      return Tlt_Min_promise.readValue();
-    })
-    .then(value => {
-      btConnectionStatus(' Got Tlt_Min');
-      Tlt_Min_value = value.getUint16(0, true);
-      return radioService.getCharacteristic(0xF005); // Get Tlt_Max characteristic
-    })
-    .then(characteristic => {
-      Tlt_Max_promise = characteristic;
-      return Tlt_Max_promise.readValue();
-    })
-    .then(value => {
-      btConnectionStatus(' Got Tlt_Max');
-      Tlt_Max_value = value.getUint16(0, true);
-      return radioService.getCharacteristic(0xF006); // Get Tlt_Cnt characteristic
-    })
-    .then(characteristic => {
-      Tlt_Cnt_promise = characteristic;
-      return Tlt_Cnt_promise.readValue();
-    })
-    .then(value => {
-      btConnectionStatus(' Got Tlt_Cnt');
-      Tlt_Cnt_value = value.getUint16(0, true);
-      return radioService.getCharacteristic(0xF007); // Get Tlt_Gain characteristic
-    })
-    .then(characteristic => {
-      Tlt_Gain_promise = characteristic;
-      return Tlt_Gain_promise.readValue();
-    })
-    .then(value => {
-      btConnectionStatus(' Got Tlt_Gain');
-      Tlt_Gain_value = value.getFloat32(0, true).toFixed(2);
-      return radioService.getCharacteristic(0xF008); // Get Pan_Min characteristic
-    })
-    .then(characteristic => {
-      Pan_Min_promise = characteristic;
-      return Pan_Min_promise.readValue();
-    })
-    .then(value => {
-      btConnectionStatus(' Got Pan_Min');
-      Pan_Min_value = value.getUint16(0, true);
-      return radioService.getCharacteristic(0xF009); // Get Pan_Max characteristic
-    })
-    .then(characteristic => {
-      Pan_Max_promise = characteristic;
-      return Pan_Max_promise.readValue();
-    })
-    .then(value => {
-      btConnectionStatus(' Got Pan_Max');
-      Pan_Max_value = value.getUint16(0, true);
-      return radioService.getCharacteristic(0xF010); // Get Pan_Cnt characteristic
-    })
-    .then(characteristic => {
-      Pan_Cnt_promise = characteristic;
-      return Pan_Cnt_promise.readValue();
-    })
-    .then(value => {
-      btConnectionStatus(' Got Pan_Cnt');
-      Pan_Cnt_value = value.getUint16(0, true);
-      return radioService.getCharacteristic(0xF011); // Get Pan_Gain characteristic
-    })
-    .then(characteristic => {
-      Pan_Gain_promise = characteristic;
-      return Pan_Gain_promise.readValue();
-    })
-    .then(value => {
-      btConnectionStatus(' Got Pan_Gain');
-      Pan_Gain_value = value.getFloat32(0, true).toFixed(2);
-      return radioService.getCharacteristic(0xF100); // Get TltCh characteristic
-    })
-    .then(characteristic => {
-      TltCh_promise = characteristic;
-      return TltCh_promise.readValue();
-    })
-    .then(value => {
-      btConnectionStatus(' Got TltCh');
-      TltCh_value = value.getInt8(0, true);
-      return radioService.getCharacteristic(0xF101); // Get RllCh characteristic
-    })
-    .then(characteristic => {
-      RllCh_promise = characteristic;
-      return RllCh_promise.readValue();
-    })
-    .then(value => {
-      btConnectionStatus(' Got RllCh');
-      RllCh_value = value.getInt8(0, true);
-      return radioService.getCharacteristic(0xF102); // Get PanCh characteristic
-    })
-    .then(characteristic => {
-      PanCh_promise = characteristic;
-      return PanCh_promise.readValue();
-    })
-    .then(value => {
-      btConnectionStatus(' Got PanCh');
-      PanCh_value = value.getInt8(0, true);
-      return radioService.getCharacteristic(0xF103); // Get AlertCh characteristic
-    })
-    .then(characteristic => {
-      AlertCh_promise = characteristic;
-      return AlertCh_promise.readValue();
-    })
-    .then(value => {
-      btConnectionStatus(' Got AlertCh');
-      AlertCh_value = value.getInt8(0, true);
-      return radioService.getCharacteristic(0xF104); // Get Pwm0 characteristic
-    })
-    .then(characteristic => {
-      Pwm0_promise = characteristic;
-      return Pwm0_promise.readValue();
-    })
-    .then(value => {
-      btConnectionStatus(' Got Pwm0');
-      Pwm0_value = value.getInt8(0, true);
-      return radioService.getCharacteristic(0xF105); // Get Pwm1 characteristic
-    })
-    .then(characteristic => {
-      Pwm1_promise = characteristic;
-      return Pwm1_promise.readValue();
-    })
-    .then(value => {
-      btConnectionStatus(' Got Pwm1');
-      Pwm1_value = value.getInt8(0, true);
-      return radioService.getCharacteristic(0xF106); // Get Pwm2 characteristic
-    })
-    .then(characteristic => {
-      Pwm2_promise = characteristic;
-      return Pwm2_promise.readValue();
-    })
-    .then(value => {
-      btConnectionStatus(' Got Pwm2');
-      Pwm2_value = value.getInt8(0, true);
-      return radioService.getCharacteristic(0xF107); // Get Pwm3 characteristic
-    })
-    .then(characteristic => {
-      Pwm3_promise = characteristic;
-      return Pwm3_promise.readValue();
-    })
-    .then(value => {
-      btConnectionStatus(' Got Pwm3');
-      Pwm3_value = value.getInt8(0, true);
-      return radioService.getCharacteristic(0xF108); // Get An0Ch characteristic
-    })
-    .then(characteristic => {
-      An0Ch_promise = characteristic;
-      return An0Ch_promise.readValue();
-    })
-    .then(value => {
-      btConnectionStatus(' Got An0Ch');
-      An0Ch_value = value.getInt8(0, true);
-      return radioService.getCharacteristic(0xF109); // Get An1Ch characteristic
-    })
-    .then(characteristic => {
-      An1Ch_promise = characteristic;
-      return An1Ch_promise.readValue();
-    })
-    .then(value => {
-      btConnectionStatus(' Got An1Ch');
-      An1Ch_value = value.getInt8(0, true);
-      return radioService.getCharacteristic(0xF10A); // Get An2Ch characteristic
-    })
-    .then(characteristic => {
-      An2Ch_promise = characteristic;
-      return An2Ch_promise.readValue();
-    })
-    .then(value => {
-      btConnectionStatus(' Got An2Ch');
-      An2Ch_value = value.getInt8(0, true);
-      return radioService.getCharacteristic(0xF10B); // Get An3Ch characteristic
-    })
-    .then(characteristic => {
-      An3Ch_promise = characteristic;
-      return An3Ch_promise.readValue();
-    })
-    .then(value => {
-      btConnectionStatus(' Got An3Ch');
-      An3Ch_value = value.getInt8(0, true);
-      return radioService.getCharacteristic(0xF10C); // Get Aux0Ch characteristic
-    })
-    .then(characteristic => {
-      Aux0Ch_promise = characteristic;
-      return Aux0Ch_promise.readValue();
-    })
-    .then(value => {
-      btConnectionStatus(' Got Aux0Ch');
-      Aux0Ch_value = value.getInt8(0, true);
-      return radioService.getCharacteristic(0xF10D); // Get Aux1Ch characteristic
-    })
-    .then(characteristic => {
-      Aux1Ch_promise = characteristic;
-      return Aux1Ch_promise.readValue();
-    })
-    .then(value => {
-      btConnectionStatus(' Got Aux1Ch');
-      Aux1Ch_value = value.getInt8(0, true);
-      return radioService.getCharacteristic(0xF10E); // Get Aux2Ch characteristic
-    })
-    .then(characteristic => {
-      Aux2Ch_promise = characteristic;
-      return Aux2Ch_promise.readValue();
-    })
-    .then(value => {
-      btConnectionStatus(' Got Aux2Ch');
-      Aux2Ch_value = value.getInt8(0, true);
-      return radioService.getCharacteristic(0xF10F); // Get RstPpm characteristic
-    })
-    .then(characteristic => {
-      RstPpm_promise = characteristic;
-      return RstPpm_promise.readValue();
-    })
-      .then(value => {
-      RstPpm_value = value.getUint8(0, true);
-      btConnectionStatus("Completed");
-      connectionEstablished();
-      updateFields();
-    })
-    .catch(error => { console.error(error); connectionFault(error); return true;});
-  } else {
-    return true;
   }
+}
+
+function readValues(messageFunc, onCompleted) {
+  if(gattServer == null) {
+    console.log("No Gatt Server");
+    return;
+  }
+
+  if(gattServer.connected == false) {
+    console.log("Gatt Server not Connected");
+    return;
+  }
+
+  radioService.getCharacteristic(0xF000)  .then(characteristic => {
+    Rll_Min_promise = characteristic;
+    return Rll_Min_promise.readValue();
+  })
+  .then(value => {
+    messageFunc(' Got Rll_Min');
+    Rll_Min_value = value.getUint16(0, true);
+    return radioService.getCharacteristic(0xF001); // Get Rll_Max characteristic
+  })
+  .then(characteristic => {
+    Rll_Max_promise = characteristic;
+    return Rll_Max_promise.readValue();
+  })
+  .then(value => {
+    messageFunc(' Got Rll_Max');
+    Rll_Max_value = value.getUint16(0, true);
+    return radioService.getCharacteristic(0xF002); // Get Rll_Cnt characteristic
+  })
+  .then(characteristic => {
+    Rll_Cnt_promise = characteristic;
+    return Rll_Cnt_promise.readValue();
+  })
+  .then(value => {
+    messageFunc(' Got Rll_Cnt');
+    Rll_Cnt_value = value.getUint16(0, true);
+    return radioService.getCharacteristic(0xF003); // Get Rll_Gain characteristic
+  })
+  .then(characteristic => {
+    Rll_Gain_promise = characteristic;
+    return Rll_Gain_promise.readValue();
+  })
+  .then(value => {
+    messageFunc(' Got Rll_Gain');
+    Rll_Gain_value = value.getFloat32(0, true).toFixed(2);
+    return radioService.getCharacteristic(0xF004); // Get Tlt_Min characteristic
+  })
+  .then(characteristic => {
+    Tlt_Min_promise = characteristic;
+    return Tlt_Min_promise.readValue();
+  })
+  .then(value => {
+    messageFunc(' Got Tlt_Min');
+    Tlt_Min_value = value.getUint16(0, true);
+    return radioService.getCharacteristic(0xF005); // Get Tlt_Max characteristic
+  })
+  .then(characteristic => {
+    Tlt_Max_promise = characteristic;
+    return Tlt_Max_promise.readValue();
+  })
+  .then(value => {
+    messageFunc(' Got Tlt_Max');
+    Tlt_Max_value = value.getUint16(0, true);
+    return radioService.getCharacteristic(0xF006); // Get Tlt_Cnt characteristic
+  })
+  .then(characteristic => {
+    Tlt_Cnt_promise = characteristic;
+    return Tlt_Cnt_promise.readValue();
+  })
+  .then(value => {
+    messageFunc(' Got Tlt_Cnt');
+    Tlt_Cnt_value = value.getUint16(0, true);
+    return radioService.getCharacteristic(0xF007); // Get Tlt_Gain characteristic
+  })
+  .then(characteristic => {
+    Tlt_Gain_promise = characteristic;
+    return Tlt_Gain_promise.readValue();
+  })
+  .then(value => {
+    messageFunc(' Got Tlt_Gain');
+    Tlt_Gain_value = value.getFloat32(0, true).toFixed(2);
+    return radioService.getCharacteristic(0xF008); // Get Pan_Min characteristic
+  })
+  .then(characteristic => {
+    Pan_Min_promise = characteristic;
+    return Pan_Min_promise.readValue();
+  })
+  .then(value => {
+    messageFunc(' Got Pan_Min');
+    Pan_Min_value = value.getUint16(0, true);
+    return radioService.getCharacteristic(0xF009); // Get Pan_Max characteristic
+  })
+  .then(characteristic => {
+    Pan_Max_promise = characteristic;
+    return Pan_Max_promise.readValue();
+  })
+  .then(value => {
+    messageFunc(' Got Pan_Max');
+    Pan_Max_value = value.getUint16(0, true);
+    return radioService.getCharacteristic(0xF010); // Get Pan_Cnt characteristic
+  })
+  .then(characteristic => {
+    Pan_Cnt_promise = characteristic;
+    return Pan_Cnt_promise.readValue();
+  })
+  .then(value => {
+    messageFunc(' Got Pan_Cnt');
+    Pan_Cnt_value = value.getUint16(0, true);
+    return radioService.getCharacteristic(0xF011); // Get Pan_Gain characteristic
+  })
+  .then(characteristic => {
+    Pan_Gain_promise = characteristic;
+    return Pan_Gain_promise.readValue();
+  })
+  .then(value => {
+    messageFunc(' Got Pan_Gain');
+    Pan_Gain_value = value.getFloat32(0, true).toFixed(2);
+    return radioService.getCharacteristic(0xF100); // Get TltCh characteristic
+  })
+  .then(characteristic => {
+    TltCh_promise = characteristic;
+    return TltCh_promise.readValue();
+  })
+  .then(value => {
+    messageFunc(' Got TltCh');
+    TltCh_value = value.getInt8(0, true);
+    return radioService.getCharacteristic(0xF101); // Get RllCh characteristic
+  })
+  .then(characteristic => {
+    RllCh_promise = characteristic;
+    return RllCh_promise.readValue();
+  })
+  .then(value => {
+    messageFunc(' Got RllCh');
+    RllCh_value = value.getInt8(0, true);
+    return radioService.getCharacteristic(0xF102); // Get PanCh characteristic
+  })
+  .then(characteristic => {
+    PanCh_promise = characteristic;
+    return PanCh_promise.readValue();
+  })
+  .then(value => {
+    messageFunc(' Got PanCh');
+    PanCh_value = value.getInt8(0, true);
+    return radioService.getCharacteristic(0xF103); // Get AlertCh characteristic
+  })
+  .then(characteristic => {
+    AlertCh_promise = characteristic;
+    return AlertCh_promise.readValue();
+  })
+  .then(value => {
+    messageFunc(' Got AlertCh');
+    AlertCh_value = value.getInt8(0, true);
+    return radioService.getCharacteristic(0xF104); // Get Pwm0 characteristic
+  })
+  .then(characteristic => {
+    Pwm0_promise = characteristic;
+    return Pwm0_promise.readValue();
+  })
+  .then(value => {
+    messageFunc(' Got Pwm0');
+    Pwm0_value = value.getInt8(0, true);
+    return radioService.getCharacteristic(0xF105); // Get Pwm1 characteristic
+  })
+  .then(characteristic => {
+    Pwm1_promise = characteristic;
+    return Pwm1_promise.readValue();
+  })
+  .then(value => {
+    messageFunc(' Got Pwm1');
+    Pwm1_value = value.getInt8(0, true);
+    return radioService.getCharacteristic(0xF106); // Get Pwm2 characteristic
+  })
+  .then(characteristic => {
+    Pwm2_promise = characteristic;
+    return Pwm2_promise.readValue();
+  })
+  .then(value => {
+    messageFunc(' Got Pwm2');
+    Pwm2_value = value.getInt8(0, true);
+    return radioService.getCharacteristic(0xF107); // Get Pwm3 characteristic
+  })
+  .then(characteristic => {
+    Pwm3_promise = characteristic;
+    return Pwm3_promise.readValue();
+  })
+  .then(value => {
+    messageFunc(' Got Pwm3');
+    Pwm3_value = value.getInt8(0, true);
+    return radioService.getCharacteristic(0xF108); // Get An0Ch characteristic
+  })
+  .then(characteristic => {
+    An0Ch_promise = characteristic;
+    return An0Ch_promise.readValue();
+  })
+  .then(value => {
+    messageFunc(' Got An0Ch');
+    An0Ch_value = value.getInt8(0, true);
+    return radioService.getCharacteristic(0xF109); // Get An1Ch characteristic
+  })
+  .then(characteristic => {
+    An1Ch_promise = characteristic;
+    return An1Ch_promise.readValue();
+  })
+  .then(value => {
+    messageFunc(' Got An1Ch');
+    An1Ch_value = value.getInt8(0, true);
+    return radioService.getCharacteristic(0xF10A); // Get An2Ch characteristic
+  })
+  .then(characteristic => {
+    An2Ch_promise = characteristic;
+    return An2Ch_promise.readValue();
+  })
+  .then(value => {
+    messageFunc(' Got An2Ch');
+    An2Ch_value = value.getInt8(0, true);
+    return radioService.getCharacteristic(0xF10B); // Get An3Ch characteristic
+  })
+  .then(characteristic => {
+    An3Ch_promise = characteristic;
+    return An3Ch_promise.readValue();
+  })
+  .then(value => {
+    messageFunc(' Got An3Ch');
+    An3Ch_value = value.getInt8(0, true);
+    return radioService.getCharacteristic(0xF10C); // Get Aux0Ch characteristic
+  })
+  .then(characteristic => {
+    Aux0Ch_promise = characteristic;
+    return Aux0Ch_promise.readValue();
+  })
+  .then(value => {
+    messageFunc(' Got Aux0Ch');
+    Aux0Ch_value = value.getInt8(0, true);
+    return radioService.getCharacteristic(0xF10D); // Get Aux1Ch characteristic
+  })
+  .then(characteristic => {
+    Aux1Ch_promise = characteristic;
+    return Aux1Ch_promise.readValue();
+  })
+  .then(value => {
+    messageFunc(' Got Aux1Ch');
+    Aux1Ch_value = value.getInt8(0, true);
+    return radioService.getCharacteristic(0xF10E); // Get Aux2Ch characteristic
+  })
+  .then(characteristic => {
+    Aux2Ch_promise = characteristic;
+    return Aux2Ch_promise.readValue();
+  })
+  .then(value => {
+    messageFunc(' Got Aux2Ch');
+    Aux2Ch_value = value.getInt8(0, true);
+    return radioService.getCharacteristic(0xF10F); // Get An0Gain characteristic
+  })
+  .then(characteristic => {
+    An0Gain_promise = characteristic;
+    return An0Gain_promise.readValue();
+  })
+  .then(value => {
+    messageFunc(' Got An0Gain');
+    An0Gain_value = value.getFloat32(0, true).toFixed(3);
+    return radioService.getCharacteristic(0xF110); // Get An1Gain characteristic
+  })
+  .then(characteristic => {
+    An1Gain_promise = characteristic;
+    return An1Gain_promise.readValue();
+  })
+  .then(value => {
+    messageFunc(' Got An1Gain');
+    An1Gain_value = value.getFloat32(0, true).toFixed(3);
+    return radioService.getCharacteristic(0xF111); // Get An2Gain characteristic
+  })
+  .then(characteristic => {
+    An2Gain_promise = characteristic;
+    return An2Gain_promise.readValue();
+  })
+  .then(value => {
+    messageFunc(' Got An2Gain');
+    An2Gain_value = value.getFloat32(0, true).toFixed(3);
+    return radioService.getCharacteristic(0xF112); // Get An3Gain characteristic
+  })
+  .then(characteristic => {
+    An3Gain_promise = characteristic;
+    return An3Gain_promise.readValue();
+  })
+  .then(value => {
+    messageFunc(' Got An3Gain');
+    An3Gain_value = value.getFloat32(0, true).toFixed(3);
+    return radioService.getCharacteristic(0xF113); // Get An0Off characteristic
+  })
+  .then(characteristic => {
+    An0Off_promise = characteristic;
+    return An0Off_promise.readValue();
+  })
+  .then(value => {
+    messageFunc(' Got An0Off');
+    An0Off_value = value.getFloat32(0, true).toFixed(3);
+    return radioService.getCharacteristic(0xF114); // Get An1Off characteristic
+  })
+  .then(characteristic => {
+    An1Off_promise = characteristic;
+    return An1Off_promise.readValue();
+  })
+  .then(value => {
+    messageFunc(' Got An1Off');
+    An1Off_value = value.getFloat32(0, true).toFixed(3);
+    return radioService.getCharacteristic(0xF115); // Get An2Off characteristic
+  })
+  .then(characteristic => {
+    An2Off_promise = characteristic;
+    return An2Off_promise.readValue();
+  })
+  .then(value => {
+    messageFunc(' Got An2Off');
+    An2Off_value = value.getFloat32(0, true).toFixed(3);
+    return radioService.getCharacteristic(0xF116); // Get An3Off characteristic
+  })
+  .then(characteristic => {
+    An3Off_promise = characteristic;
+    return An3Off_promise.readValue();
+  })
+    .then(value => {
+    An3Off_value = value.getFloat32(0, true).toFixed(3);
+    messageFunc("Completed");
+    if(onCompleted != null)
+      onCompleted()
+    updateFields();
+  })
+  .catch(error => { console.error(error); connectionFault(error); return true;});
 }

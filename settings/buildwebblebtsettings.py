@@ -5,6 +5,42 @@ import csv
 
 import set_common as s
 
+def JSDataView(type):
+  if type == "u8":
+    return "Uint8"
+  if type == "s8":
+    return "Int8"
+  if type == "u16":
+    return "Uint16"
+  if type == "s16":
+    return "Int16"
+  if type == "u32":
+    return "Uint32"
+  if type == "s32":
+    return "Int32"
+  if type == "float":
+    return "Float32"
+  if type == "double":
+    return "Float64"
+
+def JSDataViewSize(type):
+  if type == "u8":
+    return "1"
+  if type == "s8":
+    return "1"
+  if type == "u16":
+    return "2"
+  if type == "s16":
+    return "2"
+  if type == "u32":
+    return "4"
+  if type == "s32":
+    return "4"
+  if type == "float":
+    return "4"
+  if type == "double":
+    return "8"
+
 f = open("../web_configurator/blechars.js","w")
 f.write("""\
 //
@@ -43,7 +79,15 @@ for row in s.settings:
   if row[s.colbleaddr].strip() != "":
     name = row[s.colname].strip()
     addr = row[s.colbleaddr].upper().strip()
-    f.write("$('#settings').on('change', '#inp_" + name + "', function() {updateParameter('" + name + "', " + name + "_promise, $('#inp_" + name + "').val())});\n");
+    txt = """\
+$('#settings').on('change', '#inp_{name}', function() {{
+  const buffer = new ArrayBuffer({arrsize});
+  new DataView(buffer).set{type}(0, $('#inp_{name}').val(), true)
+  {name}_promise.writeValue(buffer);
+  updateParameter('{name}',$('#inp_{name}').val())
+}});
+""".format(name = name, type=JSDataView(row[s.coltype]), arrsize = JSDataViewSize(row[s.coltype]))
+    f.write(txt);
 f.write("\n")
 
 f.write("""
@@ -70,9 +114,27 @@ function connectToHT() {
     .then(characteristic => {
       commandCharacteristic = characteristic;
       btConnectionStatus('Got the Command Characteristic');
-      return radioService.getCharacteristic(0xF000); // Get first characteristic
+      readValues(btConnectionStatus, connectionEstablished);
     })
-""")
+    .catch(error => {
+      console.error(error);
+      connectionFault(error);
+    })
+  }
+}
+
+function readValues(messageFunc, onCompleted) {
+  if(gattServer == null) {
+    console.log("No Gatt Server");
+    return;
+  }
+
+  if(gattServer.connected == false) {
+    console.log("Gatt Server not Connected");
+    return;
+  }
+
+  radioService.getCharacteristic(0xF000)""")
 
 first = True
 _lastname = ""
@@ -94,37 +156,37 @@ for row in s.settings:
       first = False
     else:
       txt = """\
-    .then(characteristic => {{
-      {lname}_promise = characteristic;
-      return {lname}_promise.readValue();
-    }})
-    .then(value => {{
-      btConnectionStatus(' Got {lname}');
-      {lname}_value = value{jtype}{roundto};
-      return radioService.getCharacteristic(0x{addr}); // Get {name} characteristic
-    }})
-""".format(name = _name, lname = _lastname, addr = _addr, jtype = s.JSDataView(_lasttype), roundto = _roundto)
+  .then(characteristic => {{
+    {lname}_promise = characteristic;
+    return {lname}_promise.readValue();
+  }})
+  .then(value => {{
+    messageFunc(' Got {lname}');
+    {lname}_value = value.get{jtype}(0, true){roundto};
+    return radioService.getCharacteristic(0x{addr}); // Get {name} characteristic
+  }})
+""".format(name = _name, lname = _lastname, addr = _addr, jtype = JSDataView(_lasttype), roundto = _roundto)
       f.write(txt)
     _lastname = _name
     _lasttype = _type
     _lastround = _round
 
+if _lasttype.lower() == "float":
+  _lastround = ".toFixed(" + str(int(_lastround) - 1) + ")"
 txt = """\
-    .then(characteristic => {{
-      {lname}_promise = characteristic;
-      return {lname}_promise.readValue();
-    }})
-      .then(value => {{
-      {lname}_value = value{jtype};
-      btConnectionStatus("Completed");
-      connectionEstablished();
-      updateFields();
-    }})
-    .catch(error => {{ console.error(error); connectionFault(error); return true;}});
-  }} else {{
-    return true;
-  }}
-""".format(name = _name, lname = _lastname, addr = _addr, jtype = s.JSDataView(row[s.coltype]))
+  .then(characteristic => {{
+    {lname}_promise = characteristic;
+    return {lname}_promise.readValue();
+  }})
+    .then(value => {{
+    {lname}_value = value.get{jtype}(0, true){roundto};
+    messageFunc("Completed");
+    if(onCompleted != null)
+      onCompleted()
+    updateFields();
+  }})
+  .catch(error => {{ console.error(error); connectionFault(error); return true;}});
+""".format(name = _name, lname = _lastname, addr = _addr, jtype = JSDataView(_lasttype), roundto = _lastround)
 f.write(txt)
 
 f.write("}\n")

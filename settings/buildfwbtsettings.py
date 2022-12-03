@@ -69,15 +69,16 @@ for row in s.settings:
 ssize_t btwr_{lowername}(struct bt_conn *conn, const struct bt_gatt_attr *attr, const void *buf, uint16_t len, uint16_t offset, uint8_t flags)
 {{
   if(len == sizeof({ctype})) {{
-    LOGD("BT_Wr {name} (0x{addr})");
-    trkset.set{name}(*({ctype}*)buf);
+    {ctype} newvalue = *({ctype}*)buf;
+    //LOGD("BT_Wr {name} (0x{addr})");
+    trkset.set{name}(newvalue);
   }}
   return len;
 }}
 ssize_t btrd_{lowername}(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf, uint16_t len, uint16_t offset)
 {{
   char *value = (char *)attr->user_data;
-  LOGD("BT_Rd {name} (0x{addr})");
+  //LOGD("BT_Rd {name} (0x{addr})");
   bt_{lowername} = trkset.get{name}();
   return bt_gatt_attr_read(conn, attr, buf, len, offset, value, sizeof({ctype}));
 }}

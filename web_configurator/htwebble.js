@@ -14,7 +14,6 @@ $(function(){
   // Load the Generated Settings Table
   $("#settings").load("settings.html");
 
-  $("#saveButton").on('click', saveToFlash);
   });
 });
 
@@ -45,19 +44,14 @@ function setValues()
 
 }
 
-function updateParameter(name, promise, value)
+function updateParameter(name,value)
 {
-  if(!promise) {
-    console.log("no worky");
-    return;
-  }
   console.log("Updating " + name +  " = " + value);
 
-  //promise.writeValue();
   parametersChanged();
 }
 
-function saveToFlash()
+$("#saveButton").on('click', function()
 {
   console.log("Saving to Flash");
   let encoder = new TextEncoder();
@@ -68,6 +62,20 @@ function saveToFlash()
   .catch(error => {
     console.log("Bugger it didn't work");
   });
+});
+
+$(".disconnectButton").on('click', disconnect);
+
+function disconnect()
+{
+  console.log("Disconnecting");
+  if(gattServer != null)
+    gattServer.disconnect();
+  radioService = null;
+  gattServer = null;
+  $("#connectionFailedDialog").hide();
+  $("#loadingDialog").hide();
+  $("#connectDialog").show();
 }
 
 function connectionFault(error)
@@ -89,3 +97,12 @@ $("#bleconnect").on("click", function() {
   console.log("Starting Connection");
   connectToHT();
 });
+
+$("#refreshValues").on('click', function() {
+  readValues(refreshStatus);
+});
+
+function refreshStatus(message)
+{
+  console.log(message)
+}

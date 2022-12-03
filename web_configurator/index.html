@@ -71,6 +71,9 @@
             Unable to connect
             <p id="errorMessage"></p>
           </div>
+          <div class="modal-footer flex-column border-top-0">
+            <button type="button" class="btn btn-lg btn-primary w-50 mx-0 mb-2 disconnectButton">Close</button>
+          </div>
         </div>
       </div>
     </div>
@@ -98,6 +101,12 @@
                   Documentation
                 </a>
               </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">
+                  <span data-feather="file" class="align-text-bottom"></span>
+                  <button class="disconnectButton">Disconnect</button>
+                </a>
+              </li>
             </ul>
           </div>
         </nav>
@@ -105,9 +114,11 @@
         <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
           <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
             <h1 class="h2">Settings</h1>
+
           </div>
           <div id="settings"></div><br>
           <button class="btn btn-primary" id="saveButton" disabled>Save Changes to Flash</button>
+          <button class="btn btn-secondary" id="refreshValues">Reset</button>
         </main>
       </div>
     </div>
