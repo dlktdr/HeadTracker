@@ -56,7 +56,7 @@ jobs:
           cd gui/src
           dir
           qmake HeadTracker.pro
-          jom
+          qmake
 
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
