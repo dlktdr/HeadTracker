@@ -22,7 +22,6 @@ jobs:
     runs-on: windows-latest
 
     steps:  
-      - uses: ilammy/msvc-dev-cmd@v1
       - name: Check out repository code
         uses: actions/checkout@v2
         
@@ -56,7 +55,7 @@ jobs:
           cd gui/src
           dir
           qmake HeadTracker.pro
-          mingw32-make
+          mingw64-make
 
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
