@@ -50,12 +50,14 @@ jobs:
       #       platform: x64
                
       - name: Build
-        working-directory: ${{github.workspace}}        
+        working-directory: ${{github.workspace}}  
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          vsversion: 2019      
         run: |
           cd gui/src
           dir
           qmake HeadTracker.pro
-          nmake
 
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
