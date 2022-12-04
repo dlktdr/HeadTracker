@@ -23,6 +23,8 @@ jobs:
 
     steps:  
       - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          vsversion: 2019 
       - name: Check out repository code
         uses: actions/checkout@v2
         
@@ -51,9 +53,7 @@ jobs:
       #       platform: x64
                
       - name: Build
-        working-directory: ${{github.workspace}}  
-        with:
-          vsversion: 2019      
+        working-directory: ${{github.workspace}}       
         run: |
           cd gui/src
           dir
