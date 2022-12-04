@@ -21,7 +21,8 @@ jobs:
   build:
     runs-on: windows-latest
 
-    steps:     
+    steps:  
+      - uses: ilammy/msvc-dev-cmd@v1
       - name: Check out repository code
         uses: actions/checkout@v2
         
@@ -51,7 +52,6 @@ jobs:
                
       - name: Build
         working-directory: ${{github.workspace}}  
-        uses: ilammy/msvc-dev-cmd@v1
         with:
           vsversion: 2019      
         run: |
