@@ -39,16 +39,16 @@ jobs:
           aqtversion: '==2.1.*'
           version: '6.4.1'
           target: 'desktop'
-          arch: 'win64_msvc2019_64'
+          arch: 'win64_mingw'
           modules: 'qtserialport'
           dir: '${{ github.workspace }}/qt'
           install-deps: 'true'
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
           
-      # - name: Set up MinGW
-      #   uses: egor-tensin/setup-mingw@v2
-      #   with:
-      #       platform: x64
+      - name: Set up MinGW
+        uses: egor-tensin/setup-mingw@v2
+        with:
+            platform: x64
                
       - name: Build
         working-directory: ${{github.workspace}}       
@@ -56,13 +56,13 @@ jobs:
           cd gui/src
           dir
           qmake HeadTracker.pro
-          make release
+          mingw32-make
 
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
         with:
           limit-access-to-actor: true
-        # if: ${{ failure() }}
+        if: ${{ failure() }}
         timeout-minutes: 15
     
       - name: WinDeployQT
