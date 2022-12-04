@@ -55,8 +55,15 @@ jobs:
           cd gui/src
           dir
           qmake HeadTracker.pro
-          make
+          nmake
 
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        with:
+          limit-access-to-actor: true
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug_enabled }}
+        timeout-minutes: 15
+    
       - name: WinDeployQT
         working-directory: ${{github.workspace}}
         run: |
