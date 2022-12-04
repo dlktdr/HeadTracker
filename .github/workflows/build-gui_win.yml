@@ -23,8 +23,6 @@ jobs:
 
     steps:  
       - uses: ilammy/msvc-dev-cmd@v1
-        with:
-          vsversion: 2019 
       - name: Check out repository code
         uses: actions/checkout@v2
         
