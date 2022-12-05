@@ -45,7 +45,7 @@ jobs:
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
           
       - name: Set up MinGW
-        uses: egor-tensin/setup-mingw@v2
+        uses: gcmcnutt/setup-mingw@v2
         with:
             platform: x64
                
@@ -55,7 +55,7 @@ jobs:
           cd gui/src
           dir
           qmake HeadTracker.pro
-          mingw64-make
+          mingw32-make
 
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
