@@ -61,7 +61,7 @@ jobs:
           wget https://github.com/dlktdr/HeadTracker/raw/master/gui/bin/bossac_lin
           chmod a+x ./bossac_lin
           mv ./bossac_lin ../appdir/usr/bin/
-          wget https://github.com/gcmcnutt/linuxdeployqt/releases/tag/continuous/linuxdeployqt-continuous-x86_64.AppImage
+          wget https://github.com/gcmcnutt/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage
           chmod a+x ./linuxdeployqt-continuous-x86_64.AppImage
           ./linuxdeployqt-continuous-x86_64.AppImage ../appdir/usr/share/applications/HeadTracker.desktop -appimage -verbose=2
 
