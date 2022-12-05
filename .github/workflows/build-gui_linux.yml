@@ -65,6 +65,13 @@ jobs:
           chmod a+x ./linuxdeployqt-continuous-x86_64.AppImage
           ./linuxdeployqt-continuous-x86_64.AppImage ../appdir/usr/share/applications/HeadTracker.desktop -appimage -verbose=2  -unsupported-allow-new-glibc
 
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        with:
+          limit-access-to-actor: true
+        if: ${{ failure() }}
+        timeout-minutes: 15
+        
       - name: Archive production artifacts
         uses: actions/upload-artifact@v2
         with:
