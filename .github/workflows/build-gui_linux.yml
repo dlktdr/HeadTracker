@@ -19,7 +19,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
 
     steps:
       - name: Check out the repo
@@ -63,7 +63,7 @@ jobs:
           mv ./bossac_lin ../appdir/usr/bin/
           wget https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage
           chmod a+x ./linuxdeployqt-continuous-x86_64.AppImage
-          ./linuxdeployqt-continuous-x86_64.AppImage ../appdir/usr/share/applications/HeadTracker.desktop -appimage -verbose=2
+          ./linuxdeployqt-continuous-x86_64.AppImage ../appdir/usr/share/applications/HeadTracker.desktop -appimage -verbose=2 -unsupported-bundle-everything
 
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
