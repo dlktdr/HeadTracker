@@ -19,7 +19,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
 
     steps:
       - name: Check out the repo
@@ -41,9 +41,8 @@ jobs:
         run: |
           cd gui/src
           qmake HeadTracker.pro
-          make -j`nproc`
+          make -j`nproc` -unsupported-allow-new-glibc
           make INSTALL_ROOT=../../../appdir install
-          cd ../../
 
       - name: LinDeployQT
         working-directory: ${{github.workspace}}

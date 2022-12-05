@@ -45,7 +45,7 @@ jobs:
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
           
       - name: Set up MinGW
-        uses: gcmcnutt/setup-mingw@v2
+        uses: gcmcnutt/setup-mingw@v3
         with:
             platform: x64
                
