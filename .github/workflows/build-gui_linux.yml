@@ -41,7 +41,7 @@ jobs:
         run: |
           cd gui/src
           qmake HeadTracker.pro
-          make -j`nproc` -unsupported-allow-new-glibc
+          make -j`nproc`
           make INSTALL_ROOT=../../../appdir install
 
       - name: LinDeployQT
@@ -63,7 +63,7 @@ jobs:
           mv ./bossac_lin ../appdir/usr/bin/
           wget https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage
           chmod a+x ./linuxdeployqt-continuous-x86_64.AppImage
-          ./linuxdeployqt-continuous-x86_64.AppImage ../appdir/usr/share/applications/HeadTracker.desktop -appimage -verbose=2
+          ./linuxdeployqt-continuous-x86_64.AppImage ../appdir/usr/share/applications/HeadTracker.desktop -appimage -verbose=2  -unsupported-allow-new-glibc
 
       - name: Archive production artifacts
         uses: actions/upload-artifact@v2
