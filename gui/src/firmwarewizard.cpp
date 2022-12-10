@@ -450,6 +450,7 @@ void FirmwareWizard::programClicked()
 
     // Switch to programming window
     ui->stkWidget->setCurrentIndex(1);
+    ui->cmdProgram->setVisible(false);
     ui->cmdBack->setVisible(1);
     ui->ledDownloading->setBlink(true);
 
