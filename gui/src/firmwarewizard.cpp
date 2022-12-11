@@ -133,7 +133,7 @@ void FirmwareWizard::startPortDiscovery(const QString &filename)
        data.mid(2,2) == BLE33HEADER_BIN_ZEPHER) {
         addToLog("  Firmware is for the Arduino Nano BLE 33 in bin format");
         boardType = BRD_NANO33BLE;
-        programmercommand = "bossac.exe";        
+        programmercommand = bossac_programmer;
         arguments.clear();
         arguments += "-e";
         arguments += "-w";
@@ -144,7 +144,7 @@ void FirmwareWizard::startPortDiscovery(const QString &filename)
     else if(data.startsWith(BLE33HEADER_HEX)) {
             addToLog("  Firmware is for the Arduino Nano BLE 33 in hex format");
             boardType = BRD_NANO33BLE;
-            programmercommand = "bossac.exe";
+            programmercommand = bossac_programmer;
             arguments.clear();
             arguments += "-e";
             arguments += "-w";

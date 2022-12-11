@@ -14,6 +14,14 @@
 #include <QTimer>
 #include <QSettings>
 
+#if defined(LINUX)
+    constexpr char bossac_programmer[] = "bossac_lin";
+#elif defined(WINDOWS)
+    constexpr char bossac_programmer[] = "bossac.exe";
+#elif defined(MACOS)
+    constexpr char bossac_programmer[] = "bossac_mac";
+#endif
+
 const QString localfirmlist = "firmware.ini";
 const QString localfirmware = "online.fmw";
 
