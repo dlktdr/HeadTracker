@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - v2.2x
     paths:
       - '.github/workflows/build-gui_mac.yml'
       - 'gui/src/**'
