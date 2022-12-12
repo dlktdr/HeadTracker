@@ -8,22 +8,14 @@ int main(int argc, char *argv[])
     QApplication::setAttribute(Qt::AA_UseDesktopOpenGL);
     QApplication a(argc, argv);
 
-    // Check in two locations for stylesheet. Current Working Dir & Binary Directory
     QString cssFileName = "stylesheet.css";
-    bool fileOpen=false;
+
+    // Force Current Working Dir to Same location as the Executable
+    //  So we can find stylesheet and images easily on all platforms
+    QDir::setCurrent(QCoreApplication::applicationDirPath());
 
     QFile fileStyleSheet(cssFileName);
     if(fileStyleSheet.open(QIODevice::ReadOnly| QIODevice::Text)) {
-        fileOpen = true;
-    } else {
-      cssFileName = QCoreApplication::applicationDirPath() + "/stylesheet.css";
-      fileStyleSheet.setFileName(cssFileName);
-      if(fileStyleSheet.open(QIODevice::ReadOnly| QIODevice::Text)) {
-        fileOpen = true;
-      }
-    }
-
-    if(fileOpen) {
       a.setStyleSheet(fileStyleSheet.readAll());
       qDebug() << "Using stylesheet " << cssFileName;
       fileStyleSheet.close();

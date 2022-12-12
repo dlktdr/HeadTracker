@@ -21,7 +21,7 @@ jobs:
   build:
     runs-on: windows-latest
 
-    steps:     
+    steps:  
       - name: Check out repository code
         uses: actions/checkout@v2
         
@@ -33,30 +33,37 @@ jobs:
           key: ${{ runner.os }}-QtCache
     
       - name: Install Qt
-        uses: jurplel/install-qt-action@v2
+        uses: jurplel/install-qt-action@v3
         with:
-          version: '5.15.2'
+          aqtversion: '==2.1.*'
+          version: '6.4.1'
           target: 'desktop'
-          #Targets - 'anroid' , 'ios'
-          arch: 'win64_mingw81'
+          arch: 'win64_mingw'
+          modules: 'qtserialport'
           dir: '${{ github.workspace }}/qt'
           install-deps: 'true'
-          modules: 'qtserial'
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
           
       - name: Set up MinGW
-        uses: egor-tensin/setup-mingw@v2
+        uses: gcmcnutt/setup-mingw@v3
         with:
             platform: x64
                
       - name: Build
-        working-directory: ${{github.workspace}}        
+        working-directory: ${{github.workspace}}       
         run: |
           cd gui/src
           dir
           qmake HeadTracker.pro
           mingw32-make
 
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        with:
+          limit-access-to-actor: true
+        if: ${{ failure() }}
+        timeout-minutes: 15
+    
       - name: WinDeployQT
         working-directory: ${{github.workspace}}
         run: |

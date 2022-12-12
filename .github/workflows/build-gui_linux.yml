@@ -19,36 +19,34 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
 
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v2
-        with:
-          submodules: recursive
+        uses: actions/checkout@v3
 
       - name: Install Qt
-        uses: jurplel/install-qt-action@v2
+        uses: jurplel/install-qt-action@v3
         with:
-          version: '5.15.2'
+          aqtversion: '==2.1.*'
+          version: '6.4.1'
           target: 'desktop'
-          modules: 'qtserial'
+          modules: 'qtserialport'
           install-deps: 'true'
 
       - name: Build
-        working-directory: ${{github.workspace}}        
+        working-directory: ${{github.workspace}}
         run: |
           cd gui/src
           qmake HeadTracker.pro
           make -j`nproc`
           make INSTALL_ROOT=../../../appdir install
-          cd ../../
 
-      - name: LinDeployQT
+      - name: Linux Deploy
         working-directory: ${{github.workspace}}
         run: |
           mkdir ../appdir/usr/share
-          mkdir ../appdir/usr/share/applications          
+          mkdir ../appdir/usr/share/applications
           mkdir ../appdir/usr/share/icons
           mkdir ../appdir/usr/share/icons/hicolor
           mkdir ../appdir/usr/share/icons/hicolor/256x256
@@ -61,13 +59,21 @@ jobs:
           wget https://github.com/dlktdr/HeadTracker/raw/master/gui/bin/bossac_lin
           chmod a+x ./bossac_lin
           mv ./bossac_lin ../appdir/usr/bin/
-          wget https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage
-          chmod a+x ./linuxdeployqt-continuous-x86_64.AppImage
-          ./linuxdeployqt-continuous-x86_64.AppImage ../appdir/usr/share/applications/HeadTracker.desktop -appimage -verbose=2
+          wget https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+          wget https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage
+          chmod +x ./linuxdeploy-x86_64.AppImage
+          chmod +x ./linuxdeploy-plugin-qt-x86_64.AppImage
+          ./linuxdeploy-x86_64.AppImage --plugin qt -e ../appdir/usr/bin/HeadTracker --appdir ../appdir --output appimage
+
+#      - name: Setup tmate session
+#        uses: mxschmitt/action-tmate@v3
+#        if: ${{ failure() }}
+#        timeout-minutes: 15
 
       - name: Archive production artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: headtracker_linux_appimage
           path: ${{github.workspace}}/HeadTracker*.AppImage
           retention-days: 60
+

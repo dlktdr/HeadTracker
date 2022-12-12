@@ -35,7 +35,9 @@ jobs:
       - name: Install Qt
         uses: jurplel/install-qt-action@v3
         with:
-          version: '5.15.2'
+          aqtversion: '==2.1.*'
+          version: '6.4.1'
+          modules: 'qtserialport'
           setup-python: false
 
       - name: Build
@@ -63,6 +65,45 @@ jobs:
           cp gui/src/css/Background.svg output/HeadTracker.app/Contents/MacOs
           cd output
           macdeployqt HeadTracker.app -verbose=2
+
+# https://localazy.com/blog/how-to-automatically-sign-macos-apps-using-github-actions  
+# https://successfulsoftware.net/2018/11/16/how-to-notarize-your-software-on-macos/        
+
+      - name: Codesign executable
+        working-directory: ${{github.workspace}}/output
+        env: 
+          APPLE_DEV_IDENTITY: ${{ secrets.APPLE_DEV_IDENTITY}} 
+          APPLE_DEV_USER: ${{ secrets.DEV_USER }}
+          APPLE_DEV_PASS: ${{ secrets.DEV_PASS }}
+        run: |
+          macdeployqt HeadTracker.app -dmg -sign-for-notarization="${APPLE_DEV_IDENTITY}"
+          mv HeadTracker.dmg HeadTracker-${VERSION}.dmg
+
+          # echo "--> Start Notarization process"
+          # response=$(xcrun altool -t osx -f HeadTracker-${VERSION}.dmg --primary-bundle-id org.accelero.headtracker --notarize-app -u ${APPLE_DEV_USER} -p ${APPLE_DEV_PASS})
+          # requestUUID=$(echo "${response}" | tr ' ' '\n' | tail -1)
+
+          # while true; do
+          #   echo "--> Checking notarization status"
+
+          #   statusCheckResponse=$(xcrun altool --notarization-info ${requestUUID} -u ${APPLE_DEV_USER} -p ${APPLE_DEV_PASS})
+
+          #   isSuccess=$(echo "${statusCheckResponse}" | grep "success")
+          #   isFailure=$(echo "${statusCheckResponse}" | grep "invalid")
+
+          #   if [[ "${isSuccess}" != "" ]]; then
+          #       echo "Notarization done!"
+          #       xcrun stapler staple -v HeadTracker-${VERSION}.dmg
+          #       echo "Stapler done!"
+          #       break
+          #   fi
+          #   if [[ "${isFailure}" != "" ]]; then
+          #       echo "Notarization failed"
+          #       return 1
+          #   fi
+          #   echo "Notarization not finished yet, sleep 2m then check again..."
+          #   sleep 120
+          # done
 
       - name: Archive production artifacts
         uses: actions/upload-artifact@v2
