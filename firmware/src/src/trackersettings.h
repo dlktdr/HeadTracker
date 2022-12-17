@@ -30,6 +30,7 @@ class TrackerSettings : public BaseTrackerSettings
 
   void resetFusion() override;
   void pinsChanged() override;
+  void txPinModeChange() override;
 
   void setRollReversed(bool value);
   void setPanReversed(bool Value);

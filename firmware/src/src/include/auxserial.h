@@ -61,3 +61,4 @@ bool AuxSerial_Available();
 void AuxSerial_Close();
 uint32_t AuxSerial_Write(const uint8_t* buffer, uint32_t len);
 uint32_t AuxSerial_Read(uint8_t* buffer, uint32_t bufsize);
+void setTxPinDuplex();

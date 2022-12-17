@@ -24,7 +24,7 @@
 
 #include "defines.h"
 #include "ringbuffer.h"
-
+#include "trackersettings.h"
 
 static bool serialopened = false;
 
@@ -47,7 +47,7 @@ static bool serialopened = false;
 #define SERIALOUT_TPIN  PIN_TO_NRFPIN(PinNumber[IO_TXINV])
 #define SERIALOUT_TPORT PIN_TO_NRFPORT(PinNumber[IO_TXINV])
 
-// Pin RXINVO + RXINVI must be soldered together for inverted SBUS input
+// Pin RXINVO + RXINVI must be soldered together for inverted serial input
 #define SERIALIN_TPIN_OUT  PIN_TO_NRFPIN(PinNumber[IO_RXINVO])
 #define SERIALIN_TPORT_OUT PIN_TO_NRFPORT(PinNumber[IO_RXINVO])
 
@@ -125,6 +125,27 @@ void SerialRX_isr()
   uint8_t rxv = (uint8_t)NRF_UART0->RXD;
   serialRxBuf.write(&rxv, 1);
   ISR_DIRECT_FOOTER(1);
+}
+
+void setTxPinDuplex()
+{
+    // Set the TX pin Open Drain State
+  uint32_t txPortSetting = (GPIO_PIN_CNF_SENSE_Disabled << GPIO_PIN_CNF_SENSE_Pos) |
+                           (GPIO_PIN_CNF_PULL_Disabled << GPIO_PIN_CNF_PULL_Pos) |
+                           (GPIO_PIN_CNF_INPUT_Disconnect << GPIO_PIN_CNF_INPUT_Pos) |
+                           (GPIO_PIN_CNF_DIR_Output << GPIO_PIN_CNF_DIR_Pos);
+
+  if (trkset.getTXOpnDrn()) {
+    txPortSetting |= (GPIO_PIN_CNF_DRIVE_S0D1 << GPIO_PIN_CNF_DRIVE_Pos);
+  } else {
+    txPortSetting |= (GPIO_PIN_CNF_DRIVE_S0S1 << GPIO_PIN_CNF_DRIVE_Pos);
+  }
+
+  if (AUXSERIALOUT_PORT) {
+    NRF_P1->PIN_CNF[AUXSERIALOUT_PIN] = txPortSetting;
+  } else {
+    NRF_P0->PIN_CNF[AUXSERIALOUT_PIN] = txPortSetting;
+  }
 }
 
 int AuxSerial_Open(uint32_t baudrate, uint16_t prtset, uint8_t inversions)
@@ -259,6 +280,9 @@ int AuxSerial_Open(uint32_t baudrate, uint16_t prtset, uint8_t inversions)
 
   // Use UART for receive... Gave up on the UARTE RX DMA method.. maybe will re-visit one day. Would
   // be less interrupts, but the ISR is pretty simple.
+
+  // Set the TX Pins port Mode.
+  setTxPinDuplex();
 
   // Enable the interrupt vector in IRQ Controller
   IRQ_CONNECT(SERIAL_UARTE_IRQ, 2, SerialTX_isr, NULL, 0);

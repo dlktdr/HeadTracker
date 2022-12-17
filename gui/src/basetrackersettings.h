@@ -134,6 +134,7 @@ public:
     _setting["uartmode"] = 0;
     _setting["crsftxrate"] = 140;
     _setting["sbustxrate"] = 80;
+    _setting["txopndrn"] = false;
     _setting["sbininv"] = true;
     _setting["sboutinv"] = true;
     _setting["ch5arm"] = true;
@@ -1025,6 +1026,10 @@ public:
     }
     return false;
   }
+
+  // UART In Open Drain Mode, for bi-directional UART
+  bool getTXOpnDrn() {return _setting["txopndrn"].toBool();}
+  void setTXOpnDrn(bool val=false) { _setting["txopndrn"] = val; }
 
   // SBUS Receieve Inverted
   bool getSbInInv() {return _setting["sbininv"].toBool();}

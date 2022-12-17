@@ -79,11 +79,13 @@ public:
     memset(btrmt,0,sizeof(char) * 18);
 
     // Call Virtual Events after initialization
+    txPinModeChange();
     resetFusion();
     pinsChanged();
   }
 
   // Virtual Events
+  virtual void txPinModeChange() {};
   virtual void resetFusion() {};
   virtual void pinsChanged() {};
 
@@ -757,6 +759,10 @@ public:
     return false;
   }
 
+  // UART In Open Drain Mode, for bi-directional UART
+  inline const bool& getTXOpnDrn() {return txopndrn;}
+  void setTXOpnDrn(bool val=false) { txopndrn = val; }
+
   // SBUS Receieve Inverted
   inline const bool& getSbInInv() {return sbininv;}
   void setSbInInv(bool val=true) { sbininv = val; }
@@ -1054,6 +1060,7 @@ public:
     json["uartmode"] = uartmode;
     json["crsftxrate"] = crsftxrate;
     json["sbustxrate"] = sbustxrate;
+    json["txopndrn"] = txopndrn;
     json["sbininv"] = sbininv;
     json["sboutinv"] = sboutinv;
     json["ch5arm"] = ch5arm;
@@ -1073,6 +1080,7 @@ public:
 
   void loadJSONSettings(DynamicJsonDocument &json) {
     JsonVariant v;
+    bool chtxpinmodechange = false;
     bool chresetfusion = false;
     bool chpinschanged = false;
     v = json["rll_min"]; if(!v.isNull()) {setRll_Min(v);}
@@ -1142,6 +1150,7 @@ public:
     v = json["uartmode"]; if(!v.isNull()) {setUartMode(v);}
     v = json["crsftxrate"]; if(!v.isNull()) {setCrsfTxRate(v);}
     v = json["sbustxrate"]; if(!v.isNull()) {setSbusTxRate(v);}
+    v = json["txopndrn"]; if(!v.isNull()) {setTXOpnDrn(v); chtxpinmodechange = true;}
     v = json["sbininv"]; if(!v.isNull()) {setSbInInv(v); chpinschanged = true;}
     v = json["sboutinv"]; if(!v.isNull()) {setSbOutInv(v);}
     v = json["ch5arm"]; if(!v.isNull()) {setCh5Arm(v);}
@@ -1157,6 +1166,8 @@ public:
     v = json["lppan"]; if(!v.isNull()) {setLpPan(v);}
     v = json["lptiltroll"]; if(!v.isNull()) {setLpTiltRoll(v);}
     v = json["btpairedaddress"]; if(!v.isNull()) {setBtPairedAddress(v);}
+    if(chtxpinmodechange)
+      txPinModeChange();
     if(chresetfusion)
       resetFusion();
     if(chpinschanged)
@@ -1555,6 +1566,7 @@ protected:
   uint8_t uartmode = 0; // Uart Mode (0- Off, 1-SBUS, 2-CRSFIN, 3-CRSFOUT)
   uint8_t crsftxrate = 140; // CRSF Transmit Frequncy
   uint8_t sbustxrate = 80; // SBUS Transmit Freqency
+  bool txopndrn = false; // UART In Open Drain Mode, for bi-directional UART
   bool sbininv = true; // SBUS Receieve Inverted
   bool sboutinv = true; // SBUS Transmit Inverted
   bool ch5arm = true; // Channel 5 

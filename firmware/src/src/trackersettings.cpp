@@ -21,12 +21,12 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "SBUS/sbus.h"
 #include "base64.h"
 #include "io.h"
 #include "log.h"
 #include "sense.h"
 #include "soc_flash.h"
+#include "auxserial.h"
 
 void TrackerSettings::setRollReversed(bool value)
 {
@@ -59,6 +59,8 @@ bool TrackerSettings::isTiltReversed() { return (servoreverse & TILT_REVERSE_BIT
 bool TrackerSettings::isPanReversed() { return (servoreverse & PAN_REVERSE_BIT); }
 
 void TrackerSettings::resetFusion() { reset_fusion(); }
+
+void TrackerSettings::txPinModeChange() { setTxPinDuplex(); }
 
 void TrackerSettings::pinsChanged()
 {
