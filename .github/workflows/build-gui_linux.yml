@@ -25,6 +25,8 @@ jobs:
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v3
@@ -53,8 +55,8 @@ jobs:
           mkdir ../appdir/usr/share/icons/hicolor/256x256
           mkdir ../appdir/usr/share/icons/hicolor/256x256/apps
           cp gui/src/HeadTracker ../appdir/usr/bin/
-          cp gui/src/css/stylesheet.css ../appdir/usr/bin/
-          cp gui/src/css/Background.svg ../appdir/usr/bin/
+          # cp gui/src/css/stylesheet.css ../appdir/usr/bin/
+          # cp gui/src/css/Background.svg ../appdir/usr/bin/
           cp gui/src/images/Icon256.png ../appdir/usr/share/icons/hicolor/256x256/apps/default.png
           echo -e "[Desktop Entry]\nType=Application\nName=HeadTracker\nExec=HeadTracker\nIcon=default\nCategories=Utility;" > ../appdir/usr/share/applications/HeadTracker.desktop
           wget https://github.com/dlktdr/HeadTracker/raw/master/gui/bin/bossac_lin

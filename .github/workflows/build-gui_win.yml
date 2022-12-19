@@ -24,7 +24,9 @@ jobs:
 
     steps:  
       - name: Check out repository code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
         
       - name: Cache Qt
         id: cache-qt
@@ -70,8 +72,8 @@ jobs:
         run: |
           mkdir output
           cp gui/src/release/HeadTracker.exe output/
-          cp gui/src/css/stylesheet.css output/
-          cp gui/src/css/Background.svg output/
+          # cp gui/src/css/stylesheet.css output/
+          # cp gui/src/css/Background.svg output/
           cd output
           curl -L -o bossac.exe https://github.com/dlktdr/HeadTracker/raw/master/gui/bin/bossac.exe
           windeployqt HeadTracker.exe            

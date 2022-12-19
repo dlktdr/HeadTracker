@@ -1,4 +1,4 @@
-QT       += core gui serialport network
+QT       += core gui svg serialport network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets opengl openglwidgets
 
@@ -123,6 +123,7 @@ unix:!macx {
 #Mac Specific
 macx: {
     DEFINES += "MACOS=yes"
+    ICON = images/iconbuilder.icns
 }
 
 DISTFILES += \
