@@ -15,15 +15,17 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "sense.h"
+
 #include <device.h>
-#include <drivers/sensor.h>
 #include <drivers/i2c.h>
+#include <drivers/sensor.h>
 #include <zephyr.h>
 
 #include "MadgwickAHRS/MadgwickAHRS.h"
-#include "uart_mode.h"
 #include "analog.h"
 #include "ble.h"
+#include "defines.h"
 #include "filters.h"
 #include "filters/SF1eFilter.h"
 #include "io.h"
@@ -33,8 +35,7 @@
 #include "pmw.h"
 #include "soc_flash.h"
 #include "trackersettings.h"
-#include "defines.h"
-#include "sense.h"
+#include "uart_mode.h"
 
 #if defined(HAS_APDS9960)
 #include "APDS9960/APDS9960.h"
@@ -47,6 +48,9 @@
 #endif
 #if defined(HAS_QMC5883)
 #include "QMC5883/qmc5883.h"
+#endif
+#if defined(HAS_LSM6DS3)
+#include "LSM6DS3/lsm6ds3_reg.h"
 #endif
 
 static float auxdata[10];
@@ -104,10 +108,27 @@ static float amag[3] = {0, 0, 0};
 SF1eFilter *anFilter[AN_CH_CNT];
 
 volatile bool senseTreadRun = false;
+const struct device *i2c_dev = nullptr;
+
+// TODO.. Move me elsewhere. Also convert to the ST version of LSM9DS1?
+#if defined(HAS_LSM6DS3)
+#define BOOT_TIME 20
+stmdev_ctx_t dev_ctx;
+
+static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp, uint16_t len)
+{
+  return i2c_write_read(i2c_dev, LSM6DS3_I2C_ADD_L, &reg, 1, bufp, len);
+}
+
+static int32_t platform_write(void *handle, uint8_t reg, const uint8_t *bufp, uint16_t len)
+{
+  return i2c_write(i2c_dev, bufp, len, LSM6DS3_I2C_ADD_L);
+}
+#endif
 
 int sense_Init()
 {
-  const struct device* i2c_dev = device_get_binding("I2C_1"); // DEVICE_DT_GET(DT_NODELABEL(I2C_1));
+  i2c_dev = device_get_binding("I2C_1");  // DEVICE_DT_GET(DT_NODELABEL(I2C_1));
   if (!i2c_dev) {
     LOGE("Could not get device binding for I2C");
     return false;
@@ -120,6 +141,35 @@ int sense_Init()
     LOGE("Failed to initalize sensors");
     return -1;
   }
+#endif
+
+#if defined(HAS_LSM6DS3)
+  uint8_t whoamI;
+  dev_ctx.write_reg = platform_write;
+  dev_ctx.read_reg = platform_read;
+  dev_ctx.handle = 0;
+  // Wait sensor boot time
+  rt_sleep_ms(BOOT_TIME);
+  // Check device ID
+  lsm6ds3_device_id_get(&dev_ctx, &whoamI);
+  if (whoamI != LSM6DS3_ID) {
+    LOGE("ERROR, Couldn't find LSM6DS3");
+  }
+  /* Restore default configuration */
+  lsm6ds3_reset_set(&dev_ctx, PROPERTY_ENABLE);
+  uint8_t rst;
+  do {
+    lsm6ds3_reset_get(&dev_ctx, &rst);
+  } while (rst);
+  /*  Enable Block Data Update */
+  lsm6ds3_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
+  /* Set full scale */
+  lsm6ds3_xl_full_scale_set(&dev_ctx, LSM6DS3_2g);
+  lsm6ds3_gy_full_scale_set(&dev_ctx, LSM6DS3_2000dps);
+  /* Set Output Data Rate for Acc and Gyro */
+  lsm6ds3_xl_data_rate_set(&dev_ctx, LSM6DS3_XL_ODR_208Hz);
+  lsm6ds3_gy_data_rate_set(&dev_ctx, LSM6DS3_GY_ODR_208Hz);
+
 #endif
 
 #if defined(HAS_MPU6500)
@@ -485,10 +535,10 @@ void calculate_Thread()
     if (panch > 0)
       channel_data[panch - 1] = trpOutputEnabled == true ? panout_ui : trkset.getPan_Cnt();
 
-    // If uart output set to CRSR_OUT, force channel 5 (AUX1/ARM) to high, will override all other channels
-    if(trkset.getUartMode() == TrackerSettings::UART_MODE_CRSFOUT) {
-      if(trkset.getCh5Arm())
-        channel_data[4] = 2000;
+    // If uart output set to CRSR_OUT, force channel 5 (AUX1/ARM) to high, will override all other
+    // channels
+    if (trkset.getUartMode() == TrackerSettings::UART_MODE_CRSFOUT) {
+      if (trkset.getCh5Arm()) channel_data[4] = 2000;
     }
 
     // 10) Set the PPM Outputs
@@ -669,9 +719,9 @@ void sensor_Thread()
 
     // Read the data from the sensors
     float tacc[3], tgyr[3], tmag[3];
-    bool accValid=false;
-    bool gyrValid=false;
-    bool magValid=false;
+    bool accValid = false;
+    bool gyrValid = false;
+    bool magValid = false;
 
 #if defined(HAS_LSM9DS1)
     if (IMU.accelerationAvailable()) {
@@ -690,8 +740,28 @@ void sensor_Thread()
     }
 #endif
 
+#if defined(HAS_LSM6DS1)
+    int16_t data_raw_acceleration[3];
+    int16_t data_raw_angular_rate[3];
+    int16_t data_raw_temperature;
+    uint8_t reg;
+
+    lsm6ds3_xl_flag_data_ready_get(&dev_ctx, &reg);
+
+    if (reg) {
+      memset(data_raw_acceleration, 0x00, 3 * sizeof(int16_t));
+      lsm6ds3_acceleration_raw_get(&dev_ctx, data_raw_acceleration);
+      tacc[0] = lsm6ds3_from_fs2g_to_mg(data_raw_acceleration[0]) / 1000.0f;
+      tacc[1] = lsm6ds3_from_fs2g_to_mg(data_raw_acceleration[1]) / 1000.0f;
+      tacc[2] = lsm6ds3_from_fs2g_to_mg(data_raw_acceleration[2]) / 1000.0f;
+      LOGD("Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n", tacc[0], tacc[1], tacc[2]);
+      accValid = true;
+    }
+
+#endif
+
 #if defined(HAS_QMC5883)
-    if(qmc5883Read(tmag)) {
+    if (qmc5883Read(tmag)) {
       magValid = true;
     }
 #endif
@@ -701,15 +771,14 @@ void sensor_Thread()
     short _gyro[3];
     short _accel[3];
     unsigned long timestamp;
-    if(!mpu_get_accel_reg(_accel, &timestamp))
-      accValid = true;
-    unsigned short ascale = 1;;
+    if (!mpu_get_accel_reg(_accel, &timestamp)) accValid = true;
+    unsigned short ascale = 1;
+    ;
     mpu_get_accel_sens(&ascale);
     tacc[0] = (float)_accel[0] / (float)ascale;
     tacc[1] = (float)_accel[1] / (float)ascale;
     tacc[2] = (float)_accel[2] / (float)ascale;
-    if(!mpu_get_gyro_reg(_gyro, &timestamp))
-      gyrValid = true;
+    if (!mpu_get_gyro_reg(_gyro, &timestamp)) gyrValid = true;
     float gscale = 1.0f;
     mpu_get_gyro_sens(&gscale);
     tgyr[0] = _gyro[0] / gscale;
@@ -720,7 +789,7 @@ void sensor_Thread()
     k_mutex_lock(&sensor_mutex, K_FOREVER);
 
     // -- Accelerometer
-    if(accValid) {
+    if (accValid) {
       raccx = tacc[0];
       raccy = tacc[1];
       raccz = tacc[2];
@@ -744,7 +813,7 @@ void sensor_Thread()
     }
 
     // --- Gyrometer Calcs
-    if(gyrValid) {
+    if (gyrValid) {
       rgyrx = tgyr[0];
       rgyry = tgyr[1];
       rgyrz = tgyr[2];
@@ -764,7 +833,7 @@ void sensor_Thread()
       gyrz = tmpgyr[2];
     }
 
-    if(magValid) {
+    if (magValid) {
       // --- Magnetometer Calcs
       rmagx = tmag[0];
       rmagy = tmag[1];

@@ -34,7 +34,12 @@
       "xlocmon": "cpp",
       "xlocnum": "cpp",
       "xloctime": "cpp",
-      "functional": "cpp"
+      "functional": "cpp",
+      "array": "cpp",
+      "vector": "cpp",
+      "xstring": "cpp",
+      "xutility": "cpp",
+      "xlocale": "cpp"
     },
   },
   "launch": {

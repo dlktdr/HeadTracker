@@ -19,8 +19,13 @@
 
 #if defined(PCB_NANO33BLE)
 #define FW_BOARD "NANO33BLE"
+#include "boards/nano33board.h"
 #elif defined(PCB_DTQSYS)
 #define FW_BOARD "DTQSYS"
+#include "boards/dtqsys_ht.h"
+#elif defined(PCB_XIAOSENSE)
+#define FW_BOARD "XIAOSENSE"
+#include "boards/xiaosense.h"
 #else
 #error NO PCB DEFINED
 #endif
@@ -153,8 +158,3 @@ extern volatile bool sbusTreadRun;
 #error("NO RTOS DECLARED")
 #endif
 
-#if defined(PCB_NANO33BLE)
-#include "boards/nano33board.h"
-#elif defined(PCB_DTQSYS)
-#include "boards/dtqsys_ht.h"
-#endif
