@@ -740,7 +740,7 @@ void sensor_Thread()
     }
 #endif
 
-#if defined(HAS_LSM6DS1)
+#if defined(HAS_LSM6DS3)
     int16_t data_raw_acceleration[3];
     int16_t data_raw_angular_rate[3];
     int16_t data_raw_temperature;
