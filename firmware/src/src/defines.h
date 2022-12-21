@@ -35,15 +35,15 @@
 #define BUTTON_LONG_PRESS_TIME 1000  // How long to hold button Enable/Disables Tilt/Roll/Pan (ms)
 
 // Thread Periods
-#define IO_PERIOD 25             // (ms) IO Period (button reading)
-#define BT_PERIOD 12500          // (us) Bluetooth update rate
-#define SERIAL_PERIOD 30         // (ms) Serial processing
-#define DATA_PERIOD 2            // Multiplier of Serial Period (Live Data Transmission Speed)
-#define SENSOR_PERIOD 4000       // (us) Sensor Reads
-#define CALCULATE_PERIOD 7000    // (us) Channel Calculations
-#define UART_PERIOD 4000         // (us) Update rate of UART
-#define PWM_FREQUENCY 50         // (ms) PWM Period
-#define PAUSE_BEFORE_FLASH 60    // (ms) Time to pause all threads before Flash writing
+#define IO_PERIOD 25           // (ms) IO Period (button reading)
+#define BT_PERIOD 12500        // (us) Bluetooth update rate
+#define SERIAL_PERIOD 30       // (ms) Serial processing
+#define DATA_PERIOD 2          // Multiplier of Serial Period (Live Data Transmission Speed)
+#define SENSOR_PERIOD 4000     // (us) Sensor Reads
+#define CALCULATE_PERIOD 7000  // (us) Channel Calculations
+#define UART_PERIOD 4000       // (us) Update rate of UART
+#define PWM_FREQUENCY 50       // (ms) PWM Period
+#define PAUSE_BEFORE_FLASH 60  // (ms) Time to pause all threads before Flash writing
 
 // Analog Filters 1 Euro Filter
 #define AN_CH_CNT 4
@@ -74,7 +74,7 @@
 #define BT_THREAD_PRIO -15
 #define SENSOR_THREAD_PRIO PRIORITY_MED
 #define CALCULATE_THREAD_PRIO PRIORITY_HIGH
-#define UARTRX_THREAD_PRIO PRIORITY_LOW -2
+#define UARTRX_THREAD_PRIO PRIORITY_LOW - 2
 #define UARTTX_THREAD_PRIO PRIORITY_HIGH
 
 // Threads initialized flags
@@ -125,8 +125,6 @@ extern volatile bool sbusTreadRun;
 // Math Defines
 #define DEG_TO_RAD 0.017453295199
 #define RAD_TO_DEG 57.29577951308
-
-
 
 // Magnetometer, Initial Orientation, Samples to average
 #define MADGSTART_SAMPLES 15

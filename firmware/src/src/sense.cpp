@@ -15,15 +15,17 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "sense.h"
+
 #include <device.h>
-#include <drivers/sensor.h>
 #include <drivers/i2c.h>
+#include <drivers/sensor.h>
 #include <zephyr.h>
 
 #include "MadgwickAHRS/MadgwickAHRS.h"
-#include "uart_mode.h"
 #include "analog.h"
 #include "ble.h"
+#include "defines.h"
 #include "filters.h"
 #include "filters/SF1eFilter.h"
 #include "io.h"
@@ -33,8 +35,8 @@
 #include "pmw.h"
 #include "soc_flash.h"
 #include "trackersettings.h"
-#include "defines.h"
-#include "sense.h"
+#include "uart_mode.h"
+
 
 #if defined(HAS_APDS9960)
 #include "APDS9960/APDS9960.h"
@@ -107,7 +109,8 @@ volatile bool senseTreadRun = false;
 
 int sense_Init()
 {
-  const struct device* i2c_dev = device_get_binding("I2C_1"); // DEVICE_DT_GET(DT_NODELABEL(I2C_1));
+  const struct device *i2c_dev =
+      device_get_binding("I2C_1");  // DEVICE_DT_GET(DT_NODELABEL(I2C_1));
   if (!i2c_dev) {
     LOGE("Could not get device binding for I2C");
     return false;
@@ -485,10 +488,10 @@ void calculate_Thread()
     if (panch > 0)
       channel_data[panch - 1] = trpOutputEnabled == true ? panout_ui : trkset.getPan_Cnt();
 
-    // If uart output set to CRSR_OUT, force channel 5 (AUX1/ARM) to high, will override all other channels
-    if(trkset.getUartMode() == TrackerSettings::UART_MODE_CRSFOUT) {
-      if(trkset.getCh5Arm())
-        channel_data[4] = 2000;
+    // If uart output set to CRSF_OUT, force channel 5 (AUX1/ARM) to high, will override all other
+    // channels
+    if (trkset.getUartMode() == TrackerSettings::UART_MODE_CRSFOUT) {
+      if (trkset.getCh5Arm()) channel_data[4] = 2000;
     }
 
     // 10) Set the PPM Outputs
@@ -669,9 +672,9 @@ void sensor_Thread()
 
     // Read the data from the sensors
     float tacc[3], tgyr[3], tmag[3];
-    bool accValid=false;
-    bool gyrValid=false;
-    bool magValid=false;
+    bool accValid = false;
+    bool gyrValid = false;
+    bool magValid = false;
 
 #if defined(HAS_LSM9DS1)
     if (IMU.accelerationAvailable()) {
@@ -691,7 +694,7 @@ void sensor_Thread()
 #endif
 
 #if defined(HAS_QMC5883)
-    if(qmc5883Read(tmag)) {
+    if (qmc5883Read(tmag)) {
       magValid = true;
     }
 #endif
@@ -701,15 +704,14 @@ void sensor_Thread()
     short _gyro[3];
     short _accel[3];
     unsigned long timestamp;
-    if(!mpu_get_accel_reg(_accel, &timestamp))
-      accValid = true;
-    unsigned short ascale = 1;;
+    if (!mpu_get_accel_reg(_accel, &timestamp)) accValid = true;
+    unsigned short ascale = 1;
+    ;
     mpu_get_accel_sens(&ascale);
     tacc[0] = (float)_accel[0] / (float)ascale;
     tacc[1] = (float)_accel[1] / (float)ascale;
     tacc[2] = (float)_accel[2] / (float)ascale;
-    if(!mpu_get_gyro_reg(_gyro, &timestamp))
-      gyrValid = true;
+    if (!mpu_get_gyro_reg(_gyro, &timestamp)) gyrValid = true;
     float gscale = 1.0f;
     mpu_get_gyro_sens(&gscale);
     tgyr[0] = _gyro[0] / gscale;
@@ -720,7 +722,7 @@ void sensor_Thread()
     k_mutex_lock(&sensor_mutex, K_FOREVER);
 
     // -- Accelerometer
-    if(accValid) {
+    if (accValid) {
       raccx = tacc[0];
       raccy = tacc[1];
       raccz = tacc[2];
@@ -744,7 +746,7 @@ void sensor_Thread()
     }
 
     // --- Gyrometer Calcs
-    if(gyrValid) {
+    if (gyrValid) {
       rgyrx = tgyr[0];
       rgyry = tgyr[1];
       rgyrz = tgyr[2];
@@ -764,7 +766,7 @@ void sensor_Thread()
       gyrz = tmpgyr[2];
     }
 
-    if(magValid) {
+    if (magValid) {
       // --- Magnetometer Calcs
       rmagx = tmag[0];
       rmagy = tmag[1];
