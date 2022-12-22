@@ -145,9 +145,9 @@ float,Setting,so21,0,FLOAT_MIN,FLOAT_MAX,Soft Iron Offset 21,resetFusion,,4,
 float,Setting,so22,1,FLOAT_MIN,FLOAT_MAX,Soft Iron Offset 22,resetFusion,,4,
 ,,,,,,,,,,
 Board Rotation Settings,,,,,,,,,,
-float,Setting,RotX,0,-360,360,Board Rotation X,resetFusion,,4,
-float,Setting,RotY,0,-360,360,Board Rotation Y,resetFusion,,4,
-float,Setting,RotZ,0,-360,360,Board Rotation Z,resetFusion,,4,
+float,Setting,RotX,0,-360,360,Board Rotation X,resetFusion,,4,F117
+float,Setting,RotY,0,-360,360,Board Rotation Y,resetFusion,,4,F118
+float,Setting,RotZ,0,-360,360,Board Rotation Z,resetFusion,,4,F119
 ,,,,,,,,,,
 IO Pin Settings,,,,,,,,,,
 s8,Setting,ButtonPin,2,-1,64,Button Pin,pinsChanged,,,

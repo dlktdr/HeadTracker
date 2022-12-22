@@ -65,6 +65,9 @@ float bt_an0off;
 float bt_an1off;
 float bt_an2off;
 float bt_an3off;
+float bt_rotx;
+float bt_roty;
+float bt_rotz;
 
 struct bt_uuid_16 bt_uuid_rll_min = BT_UUID_INIT_16(0xF000);
 struct bt_uuid_16 bt_uuid_rll_max = BT_UUID_INIT_16(0xF001);
@@ -101,6 +104,9 @@ struct bt_uuid_16 bt_uuid_an0off = BT_UUID_INIT_16(0xF113);
 struct bt_uuid_16 bt_uuid_an1off = BT_UUID_INIT_16(0xF114);
 struct bt_uuid_16 bt_uuid_an2off = BT_UUID_INIT_16(0xF115);
 struct bt_uuid_16 bt_uuid_an3off = BT_UUID_INIT_16(0xF116);
+struct bt_uuid_16 bt_uuid_rotx = BT_UUID_INIT_16(0xF117);
+struct bt_uuid_16 bt_uuid_roty = BT_UUID_INIT_16(0xF118);
+struct bt_uuid_16 bt_uuid_rotz = BT_UUID_INIT_16(0xF119);
 
 ssize_t btwr_rll_min(struct bt_conn *conn, const struct bt_gatt_attr *attr, const void *buf, uint16_t len, uint16_t offset, uint8_t flags)
 {
@@ -694,6 +700,57 @@ ssize_t btrd_an3off(struct bt_conn *conn, const struct bt_gatt_attr *attr, void 
   char *value = (char *)attr->user_data;
   //LOGD("BT_Rd An3Off (0xF116)");
   bt_an3off = trkset.getAn3Off();
+  return bt_gatt_attr_read(conn, attr, buf, len, offset, value, sizeof(float));
+}
+
+ssize_t btwr_rotx(struct bt_conn *conn, const struct bt_gatt_attr *attr, const void *buf, uint16_t len, uint16_t offset, uint8_t flags)
+{
+  if(len == sizeof(float)) {
+    float newvalue = *(float*)buf;
+    //LOGD("BT_Wr RotX (0xF117)");
+    trkset.setRotX(newvalue);
+  }
+  return len;
+}
+ssize_t btrd_rotx(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf, uint16_t len, uint16_t offset)
+{
+  char *value = (char *)attr->user_data;
+  //LOGD("BT_Rd RotX (0xF117)");
+  bt_rotx = trkset.getRotX();
+  return bt_gatt_attr_read(conn, attr, buf, len, offset, value, sizeof(float));
+}
+
+ssize_t btwr_roty(struct bt_conn *conn, const struct bt_gatt_attr *attr, const void *buf, uint16_t len, uint16_t offset, uint8_t flags)
+{
+  if(len == sizeof(float)) {
+    float newvalue = *(float*)buf;
+    //LOGD("BT_Wr RotY (0xF118)");
+    trkset.setRotY(newvalue);
+  }
+  return len;
+}
+ssize_t btrd_roty(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf, uint16_t len, uint16_t offset)
+{
+  char *value = (char *)attr->user_data;
+  //LOGD("BT_Rd RotY (0xF118)");
+  bt_roty = trkset.getRotY();
+  return bt_gatt_attr_read(conn, attr, buf, len, offset, value, sizeof(float));
+}
+
+ssize_t btwr_rotz(struct bt_conn *conn, const struct bt_gatt_attr *attr, const void *buf, uint16_t len, uint16_t offset, uint8_t flags)
+{
+  if(len == sizeof(float)) {
+    float newvalue = *(float*)buf;
+    //LOGD("BT_Wr RotZ (0xF119)");
+    trkset.setRotZ(newvalue);
+  }
+  return len;
+}
+ssize_t btrd_rotz(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf, uint16_t len, uint16_t offset)
+{
+  char *value = (char *)attr->user_data;
+  //LOGD("BT_Rd RotZ (0xF119)");
+  bt_rotz = trkset.getRotZ();
   return bt_gatt_attr_read(conn, attr, buf, len, offset, value, sizeof(float));
 }
 
