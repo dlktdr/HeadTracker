@@ -66,7 +66,10 @@ DynamicJsonDocument json(JSON_BUF_SIZE);
 K_MUTEX_DEFINE(data_mutex);
 
 // Flag that serial has been initalized
-volatile bool serialThreadRun = false;
+static struct k_poll_signal serialThreadRunSignal = K_POLL_SIGNAL_INITIALIZER(serialThreadRunSignal);
+struct k_poll_event serialRunEvents[1] = {
+    K_POLL_EVENT_INITIALIZER(K_POLL_TYPE_SIGNAL, K_POLL_MODE_NOTIFY_ONLY, &serialThreadRunSignal),
+};
 
 const struct device *dev;
 
@@ -137,7 +140,8 @@ void serial_init()
   /* Enable rx interrupts */
   uart_irq_rx_enable(dev);
 
-  serialThreadRun = true;
+  // Start Serial Thread
+  k_poll_signal_raise(&serialThreadRunSignal, 1);
 }
 
 void serial_Thread()
@@ -146,9 +150,10 @@ void serial_Thread()
   static uint32_t datacounter = 0;
 
   while (1) {
+    k_poll(serialRunEvents, 1, K_FOREVER);
     rt_sleep_ms(SERIAL_PERIOD);
 
-    if (!serialThreadRun || pauseForFlash) {
+    if (pauseForFlash) {
       continue;
     }
 

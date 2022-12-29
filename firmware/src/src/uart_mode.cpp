@@ -39,7 +39,17 @@ static bool dataIsValid = false;
 uint16_t uart_channels[18];
 
 // Switching modes, don't execute
-volatile bool uartThreadRun = false;
+static struct k_poll_signal uartRxThreadRunSignal = K_POLL_SIGNAL_INITIALIZER(uartRxThreadRunSignal);
+struct k_poll_event uartRxRunEvents[1] = {
+    K_POLL_EVENT_INITIALIZER(K_POLL_TYPE_SIGNAL, K_POLL_MODE_NOTIFY_ONLY, &uartRxThreadRunSignal),
+};
+
+static struct k_poll_signal uartTxThreadRunSignal = K_POLL_SIGNAL_INITIALIZER(uartTxThreadRunSignal);
+struct k_poll_event uartTxRunEvents[1] = {
+    K_POLL_EVENT_INITIALIZER(K_POLL_TYPE_SIGNAL, K_POLL_MODE_NOTIFY_ONLY, &uartTxThreadRunSignal),
+};
+
+
 
 uint32_t PacketCount = 0;
 
@@ -49,14 +59,17 @@ void uart_init()
     uart_channels[i] = 0;
   }
   lastRead = millis() + TrackerSettings::UART_ACTIVE_TIME;  // Start timed out
-  uartThreadRun = true;
+  k_poll_signal_raise(&uartTxThreadRunSignal, 1);
+  k_poll_signal_raise(&uartRxThreadRunSignal, 1);
 }
 
 void uartRx_Thread()
 {
   while (1) {
+    k_poll(uartRxRunEvents, 1, K_FOREVER);
     rt_sleep_us(UART_PERIOD);
-    if (!uartThreadRun || pauseForFlash) {
+
+    if (pauseForFlash) {
       continue;
     }
 
@@ -101,7 +114,8 @@ void uartRx_Thread()
 void uartTx_Thread()
 {
   while (1) {
-    if (!uartThreadRun || pauseForFlash) {
+    k_poll(uartTxRunEvents, 1, K_FOREVER);
+    if (pauseForFlash) {
       rt_sleep_ms(1000);
       continue;
     }
@@ -152,7 +166,6 @@ void UartSetMode(uartmodet mode)
       break;
   }
 
-  uartThreadRun = true;
   curmode = mode;
 }
 
