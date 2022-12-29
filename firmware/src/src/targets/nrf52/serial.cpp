@@ -99,7 +99,7 @@ void serial_init()
 {
   int ret;
 
-  dev = DEVICE_DT_GET_ONE(zephyr_cdc_acm_uart);
+  dev = DEVICE_DT_GET(DT_N_INST_0_zephyr_cdc_acm_uart);
   if (!dev) {
     return;
   }
