@@ -132,9 +132,10 @@ extern volatile bool sbusTreadRun;
 // RTOS Specifics
 #if defined(RTOS_ZEPHYR)
 #include "zephyr.h"
-#define micros() k_cyc_to_us_floor32(k_cycle_get_32())
+#define millis() k_cyc_to_ms_floor32(k_cycle_get_32())
 #define millis64() k_uptime_get()
-#define micros64() k_cyc_to_us_near64(k_cycle_get_32())
+#define micros() k_cyc_to_us_floor32(k_cycle_get_32())
+#define micros64() k_cyc_to_us_floor64(k_cycle_get_32())
 #define rt_sleep_ms(x) k_msleep(x)
 #define rt_sleep_us(x) k_usleep(x)
 
