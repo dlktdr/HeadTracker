@@ -53,7 +53,9 @@ void set_JoystickChannels(uint16_t chans[16])
     report.channels[i] -= 988;  // Shift from center so it's 0-1024
   }
 
+#if defined(CONFIG_USB_DEVICE_HID)
   hid_int_ep_write(hdev, (uint8_t *)&report, sizeof(report), NULL);
+#endif
 }
 
 static const uint8_t hid_report_desc[] = {

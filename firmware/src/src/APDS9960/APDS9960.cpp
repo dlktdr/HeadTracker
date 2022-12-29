@@ -53,8 +53,6 @@ bool APDS9960::begin()
     return false;
   }
 
-  i2c_configure(i2c_dev, I2C_SPEED_SET(I2C_SPEED_FAST) | I2C_MODE_MASTER);
-
   // Check ID register
   uint8_t id;
   if (!getID(&id)) return false;
@@ -361,11 +359,7 @@ int APDS9960::gestureAvailable()
 {
   if (!_gestureEnabled) enableGesture();
 
-  if (_intPin > -1) {
-    if (digitalRead(_intPin) != LOW) {
-      return 0;
-    }
-  } else if (gestureFIFOAvailable() <= 0) {
+  if (gestureFIFOAvailable() <= 0) {
     return 0;
   }
 
@@ -462,4 +456,6 @@ int APDS9960::readProximity()
   return (255 - r);
 }
 
+#ifdef PCB_NANO33BLE
 APDS9960 APDS(-1);
+#endif

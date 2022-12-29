@@ -1,0 +1,80 @@
+name: Linux GUI
+
+on:
+  push:
+    branches:
+      - master
+      - v2.2x
+    paths:
+      - '.github/workflows/build-gui_linux.yml'
+      - 'gui/src/**'
+
+  pull_request:
+    branches:
+      - master
+    paths:
+      - '.github/workflows/build-gui_linux.yml'
+      - 'gui/src/**'
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          aqtversion: '==2.1.*'
+          version: '6.4.1'
+          target: 'desktop'
+          modules: 'qtserialport'
+          install-deps: 'true'
+
+      - name: Build
+        working-directory: ${{github.workspace}}
+        run: |
+          cd gui/src
+          qmake HeadTracker.pro
+          make -j`nproc`
+          make INSTALL_ROOT=../../../appdir install
+
+      - name: Linux Deploy
+        working-directory: ${{github.workspace}}
+        run: |
+          mkdir ../appdir/usr/share
+          mkdir ../appdir/usr/share/applications
+          mkdir ../appdir/usr/share/icons
+          mkdir ../appdir/usr/share/icons/hicolor
+          mkdir ../appdir/usr/share/icons/hicolor/256x256
+          mkdir ../appdir/usr/share/icons/hicolor/256x256/apps
+          cp gui/src/HeadTracker ../appdir/usr/bin/
+          cp gui/src/css/stylesheet.css ../appdir/usr/bin/
+          cp gui/src/css/Background.svg ../appdir/usr/bin/
+          cp gui/src/images/Icon256.png ../appdir/usr/share/icons/hicolor/256x256/apps/default.png
+          echo -e "[Desktop Entry]\nType=Application\nName=HeadTracker\nExec=HeadTracker\nIcon=default\nCategories=Utility;" > ../appdir/usr/share/applications/HeadTracker.desktop
+          wget https://github.com/dlktdr/HeadTracker/raw/master/gui/bin/bossac_lin
+          chmod a+x ./bossac_lin
+          mv ./bossac_lin ../appdir/usr/bin/
+          wget https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+          wget https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage
+          chmod +x ./linuxdeploy-x86_64.AppImage
+          chmod +x ./linuxdeploy-plugin-qt-x86_64.AppImage
+          ./linuxdeploy-x86_64.AppImage --plugin qt -e ../appdir/usr/bin/HeadTracker --appdir ../appdir --output appimage
+
+#      - name: Setup tmate session
+#        uses: mxschmitt/action-tmate@v3
+#        if: ${{ failure() }}
+#        timeout-minutes: 15
+
+      - name: Archive production artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: headtracker_linux_appimage
+          path: ${{github.workspace}}/HeadTracker*.AppImage
+          retention-days: 60
+

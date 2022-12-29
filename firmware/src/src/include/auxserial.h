@@ -38,10 +38,13 @@
 #define BAUD115200 UART_BAUDRATE_BAUDRATE_Baud115200
 #define BAUD230400 UART_BAUDRATE_BAUDRATE_Baud230400
 #define BAUD250000 UART_BAUDRATE_BAUDRATE_Baud250000
+#define BAUD400000 0x06666666
+#define BAUD420000 0x06B851EB
 #define BAUD460800 UART_BAUDRATE_BAUDRATE_Baud460800
 #define BAUD921600 UART_BAUDRATE_BAUDRATE_Baud921600
 #define BAUD1000000 UART_BAUDRATE_BAUDRATE_Baud1M
 
+#define CONF8N1 0x00000000
 #define CONF8E2 0x0000001E
 #define CONFINV_TX (1 << 0)
 #define CONFINV_RX (1 << 1)
@@ -56,5 +59,5 @@ enum SerialStatus {
 int AuxSerial_Open(uint32_t baudrate, uint16_t settings, uint8_t inversions = 0);
 bool AuxSerial_Available();
 void AuxSerial_Close();
-uint32_t AuxSerial_Write(uint8_t *buffer, uint32_t len);
-uint32_t AuxSerial_Read(uint8_t *buffer, uint32_t bufsize);
+uint32_t AuxSerial_Write(const uint8_t* buffer, uint32_t len);
+uint32_t AuxSerial_Read(uint8_t* buffer, uint32_t bufsize);

@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - v2.2x
     paths:
       - '.github/workflows/build-firmware.yml'
       - 'firmware/src/**'
@@ -19,7 +20,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     container:
       image: shaguarger/platformio
       volumes:
@@ -53,16 +54,21 @@ jobs:
           pip install --upgrade platformio
 
       # Runs a single command using the runners shell
-      - name: Build Firmware
+      - name: Build Firmware Nano 33 BLE
         run: |
           cd /src/firmware/src
-          pio run
+          pio run -e Head_Tracker-Nano33_BLE
+
+      - name: Build Firmware DTQSYS Ht
+        run: |
+          cd /src/firmware/src
+          pio run -e Head_Tracker-DTQSys
 
       # Runs a set of commands using the runners shell
       - name: Package Firmware
         uses: 'actions/upload-artifact@v2'
         with:
-          name: buildfirmware
+          name: Firmware_Binaries
           path: |
             /src/firmware/src/.pio/build/*/*.bin
           retention-days: 60

@@ -1,0 +1,3 @@
+[submodule "web_configurator"]
+	path = web_configurator
+	url = https://github.com/dlktdr/HeadTracker_WebBLE.git

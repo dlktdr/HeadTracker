@@ -10,7 +10,7 @@ constexpr uint8_t STUFF_MASK = 0x20;
 uint8_t otxbuffer[BLUETOOTH_LINE_LENGTH + 1];
 uint8_t otxbufferIndex = 0;
 uint8_t crc;
-uint16_t BtChannelsIn[BT_CHANNELS];
+uint16_t BtChannelsIn[TrackerSettings::BT_CHANNELS];
 
 /* From OpenTX 2.3.1
  */
@@ -29,7 +29,7 @@ void appendTrainerByte(uint8_t data)
 
 void processTrainerFrame(const uint8_t* otxbuffer)
 {
-  for (uint8_t channel = 0, i = 1; channel < BT_CHANNELS; channel += 2, i += 3) {
+  for (uint8_t channel = 0, i = 1; channel < TrackerSettings::BT_CHANNELS; channel += 2, i += 3) {
     // +-500 != 512, but close enough.
     BtChannelsIn[channel] = otxbuffer[i] + ((otxbuffer[i + 1] & 0xf0) << 4);
     BtChannelsIn[channel + 1] = ((otxbuffer[i + 1] & 0x0f) << 4) +

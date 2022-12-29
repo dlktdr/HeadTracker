@@ -1,0 +1,85 @@
+name: Windows GUI
+
+on:
+  push:
+    branches:
+      - master
+      - v2.2x
+    paths:
+      - '.github/workflows/build-gui.yml'
+      - 'gui/src/**'
+
+  pull_request:
+    branches:
+      - master
+    paths:
+      - '.github/workflows/build-gui.yml'
+      - 'gui/src/**'
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:  
+      - name: Check out repository code
+        uses: actions/checkout@v2
+        
+      - name: Cache Qt
+        id: cache-qt
+        uses: actions/cache@v1
+        with:
+          path: qt/
+          key: ${{ runner.os }}-QtCache
+    
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          aqtversion: '==2.1.*'
+          version: '6.4.1'
+          target: 'desktop'
+          arch: 'win64_mingw'
+          modules: 'qtserialport'
+          dir: '${{ github.workspace }}/qt'
+          install-deps: 'true'
+          cached: ${{ steps.cache-qt.outputs.cache-hit }}
+          
+      - name: Set up MinGW
+        uses: gcmcnutt/setup-mingw@v3
+        with:
+            platform: x64
+               
+      - name: Build
+        working-directory: ${{github.workspace}}       
+        run: |
+          cd gui/src
+          dir
+          qmake HeadTracker.pro
+          mingw32-make
+
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        with:
+          limit-access-to-actor: true
+        if: ${{ failure() }}
+        timeout-minutes: 15
+    
+      - name: WinDeployQT
+        working-directory: ${{github.workspace}}
+        run: |
+          mkdir output
+          cp gui/src/release/HeadTracker.exe output/
+          cp gui/src/css/stylesheet.css output/
+          cp gui/src/css/Background.svg output/
+          cd output
+          curl -L -o bossac.exe https://github.com/dlktdr/HeadTracker/raw/master/gui/bin/bossac.exe
+          windeployqt HeadTracker.exe            
+
+      - name: Archive production artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: headtracker_win
+          path: ${{github.workspace}}/output
+          retention-days: 60
+

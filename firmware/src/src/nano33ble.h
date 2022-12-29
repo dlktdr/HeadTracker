@@ -7,6 +7,10 @@ extern "C" {
 
 void start(void);
 
+#include "zephyr.h"
+
+extern struct k_sem saveToFlash_sem;
+
 #ifdef __cplusplus
 }
 #endif

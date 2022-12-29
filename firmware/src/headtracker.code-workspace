@@ -2,6 +2,12 @@
   "folders": [
     {
       "path": "."
+    },
+    {
+      "path": "../../settings"
+    },
+    {
+      "path": "../../web_configurator"
     }
   ],
   "extensions": {
@@ -18,5 +24,39 @@
       "titleBar.activeBackground": "#020081",
       "titleBar.activeForeground": "#ffffff"
     },
+    "files.associations": {
+      "map": "cpp",
+      "format": "cpp",
+      "istream": "cpp",
+      "memory": "cpp",
+      "type_traits": "cpp",
+      "xlocmes": "cpp",
+      "xlocmon": "cpp",
+      "xlocnum": "cpp",
+      "xloctime": "cpp",
+      "functional": "cpp"
+    },
+  },
+  "launch": {
+    "configurations": [
+      {
+        "type": "chrome",
+        "name": "http://127.0.0.1:8080",
+        "request": "launch",
+        "url": "http://127.0.0.1:8080"
+      },
+      {
+        "type": "chrome",
+        "name": "http://127.0.0.1",
+        "request": "launch",
+        "url": "http://127.0.0.1"
+      },
+      {
+        "type": "chrome",
+        "name": "http://localhost:8080",
+        "request": "launch",
+        "url": "http://localhost:8080"
+      }
+    ]
   }
 }

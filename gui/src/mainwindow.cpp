@@ -29,10 +29,15 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Start the board interface
     nano33ble = new BoardNano33BLE(&trkset);
+    nano33ble->setBoardName("NANO33BLE");
+    dtqsys = new BoardNano33BLE(&trkset);
+    dtqsys->setBoardName("DTQSYS");
     bno055 = new BoardBNO055(&trkset);
+    bno055->setBoardName("BNO055");
 
     // Add it to the list of available boards
     boards.append(nano33ble);
+    boards.append(dtqsys);
     boards.append(bno055);
 
     // Once correct board is discovered this will be set to one of the above boards
@@ -89,7 +94,7 @@ MainWindow::MainWindow(QWidget *parent)
         connect(brd,SIGNAL(serialTxReady()), this, SLOT(serialTxReady()));
         connect(brd,SIGNAL(addToLog(QString,int)),this,SLOT(addToLog(QString,int)));
         connect(brd,SIGNAL(needsCalibration()),this,SLOT(needsCalibration()));
-        connect(brd,SIGNAL(boardDiscovered(BoardType *)),this,SLOT(boardDiscovered(BoardType *)));
+        connect(brd,SIGNAL(boardDiscovered(BoardType*)),this,SLOT(boardDiscovered(BoardType*)));
         connect(brd,SIGNAL(statusMessage(QString,int)),this,SLOT(statusMessage(QString,int)));
     }
 
@@ -98,9 +103,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(serialcon, SIGNAL(errorOccurred(QSerialPort::SerialPortError)),this,SLOT(serialError(QSerialPort::SerialPortError)));
 
     // Buttons
-    connect(ui->cmdConnect,SIGNAL(clicked()),this,SLOT(serialConnect()));
-    connect(ui->cmdDisconnect,SIGNAL(clicked()),this,SLOT(serialDisconnect()));
-    connect(ui->cmdStore,SIGNAL(clicked()),this,SLOT(storeToRAM()));
+    connect(ui->cmdConnect,&QPushButton::clicked,this,&MainWindow::connectDisconnectClicked);
     connect(ui->cmdSend,SIGNAL(clicked()),this,SLOT(manualSend()));
     //connect(ui->cmdStartGraph,SIGNAL(clicked()),this,SLOT(startGraph()));
     //connect(ui->cmdStopGraph,SIGNAL(clicked()),this,SLOT(stopGraph()));
@@ -122,6 +125,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->chkSbusOutInv,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
     connect(ui->chkLngBttnPress,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
     connect(ui->chkRstOnTlt,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
+    connect(ui->chkCh5Arm,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
 
     //connect(ui->chkRawData,SIGNAL(clicked(bool)),this,SLOT(setDataMode(bool)));
 
@@ -132,18 +136,19 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->spnLPTiltRoll2,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->spnPPMSync,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->spnPPMFrameLen,SIGNAL(valueChanged(double)),this,SLOT(updateFromUI()));
-    connect(ui->spnA4Gain,SIGNAL(valueChanged(double)),this,SLOT(updateFromUI()));
-    connect(ui->spnA4Off,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->spnA5Gain,SIGNAL(valueChanged(double)),this,SLOT(updateFromUI()));
-    connect(ui->spnA5Off,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->spnA6Gain,SIGNAL(valueChanged(double)),this,SLOT(updateFromUI()));
-    connect(ui->spnA6Off,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->spnA7Gain,SIGNAL(valueChanged(double)),this,SLOT(updateFromUI()));
-    connect(ui->spnA7Off,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->spnA0Gain,SIGNAL(valueChanged(double)),this,SLOT(updateFromUI()));
+    connect(ui->spnA0Off,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->spnA1Gain,SIGNAL(valueChanged(double)),this,SLOT(updateFromUI()));
+    connect(ui->spnA1Off,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->spnA2Gain,SIGNAL(valueChanged(double)),this,SLOT(updateFromUI()));
+    connect(ui->spnA2Off,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->spnA3Gain,SIGNAL(valueChanged(double)),this,SLOT(updateFromUI()));
+    connect(ui->spnA3Off,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->spnRotX,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->spnRotY,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->spnRotZ,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->spnSBUSRate,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->spnCRSFRate,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
 
     // Gain Sliders
     connect(ui->til_gain,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
@@ -190,13 +195,13 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->cmbButtonPin,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbPpmInPin,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbPpmOutPin,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->cmbBtMode,SIGNAL(currentIndexChanged(int)),this,SLOT(BTModeChanged()));
+    connect(ui->cmbBtMode,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     //connect(ui->cmbResetOnPPM,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbPPMChCount,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->cmbA4Ch,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->cmbA5Ch,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->cmbA6Ch,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->cmbA7Ch,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->cmbA0Ch,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->cmbA1Ch,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->cmbA2Ch,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->cmbA3Ch,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbAuxFn0,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbAuxFn1,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbAuxFn2,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
@@ -208,6 +213,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->cmbPWM2,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbPWM3,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->cmbBTRmtMode,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->cmbUartMode,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
 
     // Menu Actions
     connect(ui->action_Save_to_File,SIGNAL(triggered()),this,SLOT(saveSettings()));
@@ -216,10 +222,13 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->actionFirmware_Wizard,SIGNAL(triggered()),this,SLOT(uploadFirmwareWizard()));
     connect(ui->actionShow_Data,SIGNAL(triggered()),this,SLOT(showDiagsClicked()));
     connect(ui->actionShow_Serial_Transmissions,SIGNAL(triggered()),this,SLOT(showSerialDiagClicked()));
-    connect(ui->actionChannel_Viewer,SIGNAL(triggered()),this,SLOT(showChannelViewerClicked()));
-    connect(ui->actionOnline_Help, SIGNAL(triggered()),this, SLOT(openHelp()));
+    connect(ui->actionChannel_Viewer,SIGNAL(triggered()),this,SLOT(showChannelViewerClicked()));    
     connect(ui->actionPinout, SIGNAL(triggered()),this, SLOT(showPinView()));
     connect(ui->actionEraseFlash, SIGNAL(triggered()),this, SLOT(eraseFlash()));
+    connect(ui->actionOnline_Help, SIGNAL(triggered()),this, SLOT(openHelp()));
+    connect(ui->actionDonate, SIGNAL(triggered()),this, SLOT(openDonate()));
+    connect(ui->action_GitHub, SIGNAL(triggered()),this, SLOT(openGitHub()));
+    connect(ui->action_Discord_Chat, SIGNAL(triggered()),this, SLOT(openDiscord()));
 
     // Tab Widget
     connect(ui->tabBLE,&QTabWidget::currentChanged,this,&MainWindow::BLE33tabChanged);
@@ -246,10 +255,21 @@ MainWindow::~MainWindow()
 {
     delete serialcon;
     delete nano33ble;
+    delete bno055;
+    delete dtqsys;
     if(firmwareWizard != nullptr)
         delete firmwareWizard;
     delete serialDebug;
     delete ui;
+}
+
+
+void MainWindow::connectDisconnectClicked()
+{
+  if(serialcon->isOpen())
+    serialDisconnect();
+  else
+    serialConnect();
 }
 
 // Connects to the serial port
@@ -264,6 +284,9 @@ void MainWindow::serialConnect()
     if(serialcon->isOpen())
         serialDisconnect();
 
+    ui->cmdConnect->setText(tr(" Disconnect"));
+    ui->cmdConnect->setIcon(QIcon(":/Icons/images/disconnect.svg"));
+
     // Setup serial port 8N1, 57600 Baud
     serialcon->setPortName(port);
     serialcon->setParity(QSerialPort::NoParity);
@@ -275,6 +298,7 @@ void MainWindow::serialConnect()
     if(!serialcon->open(QIODevice::ReadWrite)) {
         QMessageBox::critical(this,tr("Error"),tr("Could not open Com ") + serialcon->portName());
         addToLog("Could not open " + serialcon->portName(),2);
+        serialDisconnect();
         return;
     }
 
@@ -282,8 +306,6 @@ void MainWindow::serialConnect()
     serialDebug->clear();
     trkset.clear();
 
-    ui->cmdDisconnect->setEnabled(true);
-    ui->cmdConnect->setEnabled(false);
     ui->cmdChannelViewer->setEnabled(false);
     ui->actionEraseFlash->setEnabled(true);
     addToLog(tr("Connected to ") + serialcon->portName());
@@ -294,7 +316,7 @@ void MainWindow::serialConnect()
     serialcon->setDataTerminalReady(true);
 
     requestTimer.stop();
-    requestTimer.start(4000);
+    requestTimer.start(WAIT_FOR_BOARD_TO_BOOT);
 }
 
 // Disconnect from the serial port
@@ -319,19 +341,19 @@ void MainWindow::serialDisconnect()
     }
 
     statusMessage(tr("Disconnected"));
-    ui->cmdDisconnect->setEnabled(false);
+    ui->cmdConnect->setText(tr(" Connect"));
+    ui->cmdConnect->setIcon(QIcon(":/Icons/images/connect.svg"));
     ui->cmdChannelViewer->setEnabled(false);
-    ui->cmdConnect->setEnabled(true);
     ui->cmdStopGraph->setEnabled(false);
     ui->cmdStartGraph->setEnabled(false);
     ui->cmdSaveNVM->setEnabled(false);
     ui->cmdReboot->setEnabled(false);
-    ui->cmdStore->setEnabled(false);
     ui->servoPan->setShowActualPosition(true);
     ui->servoTilt->setShowActualPosition(true);
     ui->servoRoll->setShowActualPosition(true);
     ui->cmdSend->setEnabled(false);
     ui->cmdCalibrate->setEnabled(false);
+    ui->cmdResetCenter->setEnabled(false);
     ui->stackedWidget->setCurrentIndex(0);
     ui->servoPan->setShowActualPosition(false);
     ui->servoTilt->setShowActualPosition(false);
@@ -355,6 +377,9 @@ void MainWindow::serialDisconnect()
         channelViewerOpen = false;
     }
     trkset.clearDataItems();
+    bleaddrs.clear();
+    ui->cmbBTRmtMode->clear();
+    ui->cmbBTRmtMode->addItem(tr("First Available Device"));
 
     // Notify all boards we have disconnected
 }
@@ -531,31 +556,31 @@ void MainWindow::updateToUI()
     foreach(GainSlider *wid, sliderWidgets)
         wid->blockSignals(true);
 
-    ui->servoTilt->setCenter(trkset.Tlt_cnt());
-    ui->servoTilt->setMaximum(trkset.Tlt_max());
-    ui->servoTilt->setMinimum(trkset.Tlt_min());
+    ui->servoTilt->setCenter(trkset.getTlt_Cnt());
+    ui->servoTilt->setMaximum(trkset.getTlt_Max());
+    ui->servoTilt->setMinimum(trkset.getTlt_Min());
 
-    ui->servoPan->setCenter(trkset.Pan_cnt());
-    ui->servoPan->setMaximum(trkset.Pan_max());
-    ui->servoPan->setMinimum(trkset.Pan_min());
+    ui->servoPan->setCenter(trkset.getPan_Cnt());
+    ui->servoPan->setMaximum(trkset.getPan_Max());
+    ui->servoPan->setMinimum(trkset.getPan_Min());
 
-    ui->servoRoll->setCenter(trkset.Rll_cnt());
-    ui->servoRoll->setMaximum(trkset.Rll_max());
-    ui->servoRoll->setMinimum(trkset.Rll_min());
+    ui->servoRoll->setCenter(trkset.getRll_Cnt());
+    ui->servoRoll->setMaximum(trkset.getRll_Max());
+    ui->servoRoll->setMinimum(trkset.getRll_Min());
 
-    ui->chkpanrev->setChecked(trkset.isPanReversed());
+    ui->chkpanrev->setChecked(trkset.isPanReversed() );
     ui->chkrllrev->setChecked(trkset.isRollReversed());
     ui->chktltrev->setChecked(trkset.isTiltReversed());
-    ui->chkInvertedPPM->setChecked(trkset.invertedPpmOut());
-    ui->chkInvertedPPMIn->setChecked(trkset.invertedPpmIn());
-    ui->chkResetCenterWave->setChecked(trkset.resetOnWave());
-    ui->chkSbusInInv->setChecked(trkset.invertedSBUSIn());
-    ui->chkSbusOutInv->setChecked(trkset.invertedSBUSOut());
-    ui->chkLngBttnPress->setChecked(trkset.buttonPressMode());
-    ui->chkRstOnTlt->setChecked(trkset.resetOnTiltMode());
+    ui->chkInvertedPPM->setChecked(trkset.getPpmOutInvert());
+    ui->chkInvertedPPMIn->setChecked(trkset.getPpmInInvert());
+    ui->chkResetCenterWave->setChecked(trkset.getRstOnWave());
+    ui->chkSbusInInv->setChecked(trkset.getSbInInv());
+    ui->chkSbusOutInv->setChecked(trkset.getSbOutInv());
+    ui->chkLngBttnPress->setChecked(trkset.getButLngPs());
+    ui->chkRstOnTlt->setChecked(trkset.getRstOnTlt());
 
     // Button Press Mode - Enable/Disable on long press (Disable if no button pin selected)
-    if(trkset.buttonPin() > 0)
+    if(trkset.getButtonPin() > 0)
         ui->chkLngBttnPress->setEnabled(true);
     else
         ui->chkLngBttnPress->setEnabled(false);
@@ -563,53 +588,59 @@ void MainWindow::updateToUI()
     ui->spnPPMFrameLen->setMinimum((double)TrackerSettings::PPM_MIN_FRAME / 1000.0);
     ui->spnPPMFrameLen->setMaximum((double)TrackerSettings::PPM_MAX_FRAME / 1000.0);
 
-    ui->spnLPTiltRoll->setValue(trkset.lpTiltRoll());
-    ui->spnLPPan->setValue(trkset.lpPan());
-    ui->spnLPTiltRoll2->setValue(trkset.lpTiltRoll());
-    ui->spnLPPan2->setValue(trkset.lpPan());
-    ui->spnA4Gain->setValue(trkset.analog4Gain());
-    ui->spnA4Off->setValue(trkset.analog4Offset());
-    ui->spnA5Gain->setValue(trkset.analog5Gain());
-    ui->spnA5Off->setValue(trkset.analog5Offset());
-    ui->spnA6Gain->setValue(trkset.analog6Gain());
-    ui->spnA6Off->setValue(trkset.analog6Offset());
-    ui->spnA7Off->setValue(trkset.analog7Offset());
-    ui->spnA7Gain->setValue(trkset.analog7Gain());
-    ui->spnSBUSRate->setValue(trkset.SBUSRate());
+    ui->spnLPTiltRoll->setValue(trkset.getLpTiltRoll());
+    ui->spnLPPan->setValue(trkset.getLpPan());
+    ui->spnLPTiltRoll2->setValue(trkset.getLpTiltRoll());
+    ui->spnLPPan2->setValue(trkset.getLpPan());
+    ui->spnA0Gain->setValue(trkset.getAn0Gain());
+    ui->spnA0Off->setValue(trkset.getAn0Off());
+    ui->spnA1Gain->setValue(trkset.getAn1Gain());
+    ui->spnA1Off->setValue(trkset.getAn1Off());
+    ui->spnA2Gain->setValue(trkset.getAn2Gain());
+    ui->spnA2Off->setValue(trkset.getAn2Off());
+    ui->spnA3Gain->setValue(trkset.getAn3Gain());
+    ui->spnA3Off->setValue(trkset.getAn3Off());
 
-    int panCh = trkset.panCh();
-    int rllCh = trkset.rollCh();
-    int tltCh = trkset.tiltCh();
-    int alertCh = trkset.alertCh();
-    int a4Ch = trkset.analog4Ch();
-    int a5Ch = trkset.analog5Ch();
-    int a6Ch = trkset.analog6Ch();
-    int a7Ch = trkset.analog7Ch();
-    int auxF0Ch = trkset.auxFunc0Ch();
-    int auxF1Ch = trkset.auxFunc1Ch();
-    int auxF2Ch = trkset.auxFunc2Ch();
-    int pwm0Ch = trkset.pwmCh(0);
-    int pwm1Ch = trkset.pwmCh(1);
-    int pwm2Ch = trkset.pwmCh(2);
-    int pwm3Ch = trkset.pwmCh(3);
+    ui->spnSBUSRate->setValue(trkset.getSbusTxRate());
+    ui->spnCRSFRate->setValue(trkset.getCrsfTxRate());
+
+    int panCh = trkset.getPanCh();
+    int rllCh = trkset.getRllCh();
+    int tltCh = trkset.getTltCh();
+    int alertCh = trkset.getAlertCh();
+    int a0Ch = trkset.getAn0Ch();
+    int a1Ch = trkset.getAn1Ch();
+    int a2Ch = trkset.getAn2Ch();
+    int a3Ch = trkset.getAn3Ch();
+    int auxF0Ch = trkset.getAux0Ch();
+    int auxF1Ch = trkset.getAux1Ch();
+    int auxF2Ch = trkset.getAux2Ch();
+    int pwm0Ch = trkset.getPwm0();
+    int pwm1Ch = trkset.getPwm1();
+    int pwm2Ch = trkset.getPwm2();
+    int pwm3Ch = trkset.getPwm3();
 
     // Tilt/Rll/Pan Ch
     ui->cmbpanchn->setCurrentIndex(panCh==-1?0:panCh);
     ui->cmbrllchn->setCurrentIndex(rllCh==-1?0:rllCh);
     ui->cmbtiltchn->setCurrentIndex(tltCh==-1?0:tltCh);
     ui->cmbalertchn->setCurrentIndex(alertCh==-1?0:alertCh);
+    // Uart Mode
+    ui->cmbUartMode->setCurrentIndex(trkset.getUartMode());
+    ui->stkUart->setCurrentIndex(trkset.getUartMode());
+    ui->chkCh5Arm->setChecked(trkset.getCh5Arm());
     // Analog CH
-    ui->cmbA4Ch->setCurrentIndex(a5Ch==-1?0:a4Ch);
-    ui->cmbA5Ch->setCurrentIndex(a5Ch==-1?0:a5Ch);
-    ui->cmbA6Ch->setCurrentIndex(a6Ch==-1?0:a6Ch);
-    ui->cmbA7Ch->setCurrentIndex(a7Ch==-1?0:a7Ch);
+    ui->cmbA0Ch->setCurrentIndex(a0Ch==-1?0:a0Ch);
+    ui->cmbA1Ch->setCurrentIndex(a1Ch==-1?0:a1Ch);
+    ui->cmbA2Ch->setCurrentIndex(a2Ch==-1?0:a2Ch);
+    ui->cmbA3Ch->setCurrentIndex(a3Ch==-1?0:a3Ch);
     // Aux Funcs
     ui->cmbAuxFn0Ch->setCurrentIndex(auxF0Ch==-1?0:auxF0Ch);
     ui->cmbAuxFn1Ch->setCurrentIndex(auxF1Ch==-1?0:auxF1Ch);
     ui->cmbAuxFn2Ch->setCurrentIndex(auxF2Ch==-1?0:auxF2Ch);
-    ui->cmbAuxFn0->setCurrentIndex(trkset.auxFunc0());
-    ui->cmbAuxFn1->setCurrentIndex(trkset.auxFunc1());
-    ui->cmbAuxFn2->setCurrentIndex(trkset.auxFunc2());
+    ui->cmbAuxFn0->setCurrentIndex(trkset.getAux0Func());
+    ui->cmbAuxFn1->setCurrentIndex(trkset.getAux1Func());
+    ui->cmbAuxFn2->setCurrentIndex(trkset.getAux2Func());
 
     // PWM Chs
     ui->cmbPWM0->setCurrentIndex(pwm0Ch==-1?0:pwm0Ch);
@@ -619,20 +650,20 @@ void MainWindow::updateToUI()
 
     ui->cmbRemap->setCurrentIndex(ui->cmbRemap->findData(trkset.axisRemap()));
     ui->cmbSigns->setCurrentIndex(trkset.axisSign());
-    ui->cmbBtMode->setCurrentIndex(trkset.blueToothMode());
+    ui->cmbBtMode->setCurrentIndex(trkset.getBtMode());
     int rot[3];
     trkset.orientation(rot[0],rot[1],rot[2]);
     ui->spnRotX->setValue(rot[0]);
     ui->spnRotY->setValue(rot[1]);
     ui->spnRotZ->setValue(rot[2]);
 
-    ui->til_gain->setValue(trkset.Tlt_gain()*10);
-    ui->pan_gain->setValue(trkset.Pan_gain()*10);
-    ui->rll_gain->setValue(trkset.Rll_gain()*10);
+    ui->til_gain->setValue(trkset.getTlt_Gain()*10);
+    ui->pan_gain->setValue(trkset.getPan_Gain()*10);
+    ui->rll_gain->setValue(trkset.getRll_Gain()*10);
 
-    int ppout_index = trkset.ppmOutPin()-1;
-    int ppin_index = trkset.ppmInPin()-1;
-    int but_index = trkset.buttonPin()-1;
+    int ppout_index = trkset.getPpmOutPin()-1;
+    int ppin_index = trkset.getPpmInPin()-1;
+    int but_index = trkset.getButtonPin()-1;
     //int resppm_index = trkset.resetCntPPM();
     ui->cmbPpmOutPin->setCurrentIndex(ppout_index < 1 ? 0 : ppout_index);
     ui->cmbPpmInPin->setCurrentIndex(ppin_index < 1 ? 0 : ppin_index);
@@ -640,11 +671,11 @@ void MainWindow::updateToUI()
     //ui->cmbResetOnPPM->setCurrentIndex(resppm_index < 0 ? 0: resppm_index);
 
     // PPM Output Settings
-    int channels = trkset.ppmChCount();
+    int channels = trkset.getPpmChCnt();
     ui->cmbPPMChCount->setCurrentIndex(channels-1);
-    uint16_t setframelen = trkset.ppmFrame();
+    uint16_t setframelen = trkset.getPpmFrame();
     ui->spnPPMFrameLen->setValue(static_cast<double>(setframelen)/1000.0f);
-    ui->spnPPMSync->setValue(trkset.ppmSync());
+    ui->spnPPMSync->setValue(trkset.getPpmSync());
     uint32_t maxframelen = TrackerSettings::PPM_MIN_FRAMESYNC + (channels * TrackerSettings::MAX_PWM);
     if(maxframelen > setframelen) {
         ui->lblPPMOut->setText(tr("<b>Warning!</b> PPM Frame length possibly too short to support channel data"));
@@ -653,10 +684,11 @@ void MainWindow::updateToUI()
     }
 
     // BT Pair Address
-    if(trkset.pairedBTAddress().isEmpty()) {
+    if(trkset.getBtPairedAddress().isEmpty()) {
         ui->cmbBTRmtMode->setCurrentIndex(0);
     } else {
-        ui->cmbBTRmtMode->setCurrentText(trkset.pairedBTAddress());
+        bleAddressDiscovered(trkset.getBtPairedAddress());
+        ui->cmbBTRmtMode->setCurrentText(trkset.getBtPairedAddress());
     }
 
     if(ui->cmbBtMode->currentIndex() > 1) // Remote or Scanner Mode
@@ -695,72 +727,77 @@ void MainWindow::updateFromUI()
     int tltCh = ui->cmbtiltchn->currentIndex();
     int alertCh = ui->cmbalertchn->currentIndex();
     trkset.setPanCh(panCh==0?-1:panCh);
-    trkset.setRollCh(rllCh==0?-1:rllCh);
-    trkset.setTiltCh(tltCh==0?-1:tltCh);
+    trkset.setRllCh(rllCh==0?-1:rllCh);
+    trkset.setTltCh(tltCh==0?-1:tltCh);
     trkset.setAlertCh(alertCh==0?-1:alertCh);
     trkset.setRollReversed(ui->chkrllrev->isChecked());
     trkset.setPanReversed(ui->chkpanrev->isChecked());
     trkset.setTiltReversed(ui->chktltrev->isChecked());
-    trkset.setPan_cnt(ui->servoPan->centerValue());
-    trkset.setPan_min(ui->servoPan->minimumValue());
-    trkset.setPan_max(ui->servoPan->maximumValue());
-    trkset.setPan_gain(static_cast<float>(ui->pan_gain->value())/10.0f);
-    trkset.setTlt_cnt(ui->servoTilt->centerValue());
-    trkset.setTlt_min(ui->servoTilt->minimumValue());
-    trkset.setTlt_max(ui->servoTilt->maximumValue());
-    trkset.setTlt_gain(static_cast<float>(ui->til_gain->value())/10.0f);
-    trkset.setRll_cnt(ui->servoRoll->centerValue());
-    trkset.setRll_min(ui->servoRoll->minimumValue());
-    trkset.setRll_max(ui->servoRoll->maximumValue());
-    trkset.setRll_gain(static_cast<float>(ui->rll_gain->value())/10.0f);
+    trkset.setPan_Cnt(ui->servoPan->centerValue());
+    trkset.setPan_Min(ui->servoPan->minimumValue());
+    trkset.setPan_Max(ui->servoPan->maximumValue());
+    trkset.setPan_Gain(static_cast<float>(ui->pan_gain->value())/10.0f);
+    trkset.setTlt_Cnt(ui->servoTilt->centerValue());
+    trkset.setTlt_Min(ui->servoTilt->minimumValue());
+    trkset.setTlt_Max(ui->servoTilt->maximumValue());
+    trkset.setTlt_Gain(static_cast<float>(ui->til_gain->value())/10.0f);
+    trkset.setRll_Cnt(ui->servoRoll->centerValue());
+    trkset.setRll_Min(ui->servoRoll->minimumValue());
+    trkset.setRll_Max(ui->servoRoll->maximumValue());
+    trkset.setRll_Gain(static_cast<float>(ui->rll_gain->value())/10.0f);
 
     // Filters
-    if(trkset.hardware() == "NANO33BLE") {
-        trkset.setLPTiltRoll(ui->spnLPTiltRoll->value());
-        trkset.setLPPan(ui->spnLPPan->value());
+    if(trkset.hardware() == "NANO33BLE" ||
+       trkset.hardware() == "DTQSYS") {
+        trkset.setLpTiltRoll(ui->spnLPTiltRoll->value());
+        trkset.setLpPan(ui->spnLPPan->value());
     } else if (trkset.hardware() == "BNO055") {
-        trkset.setLPTiltRoll(ui->spnLPTiltRoll2->value());
-        trkset.setLPPan(ui->spnLPPan2->value());
+        trkset.setLpTiltRoll(ui->spnLPTiltRoll2->value());
+        trkset.setLpPan(ui->spnLPPan2->value());
     }
 
+    // Uart Mode
+    trkset.setUartMode(ui->cmbUartMode->currentIndex());
+    trkset.setCh5Arm(ui->chkCh5Arm->isChecked());
+
     // Analog
-    trkset.setAnalog4Gain(ui->spnA4Gain->value());
-    trkset.setAnalog4Offset(ui->spnA4Off->value());
-    trkset.setAnalog5Gain(ui->spnA5Gain->value());
-    trkset.setAnalog5Offset(ui->spnA5Off->value());
-    trkset.setAnalog6Gain(ui->spnA6Gain->value());
-    trkset.setAnalog6Offset(ui->spnA6Off->value());
-    trkset.setAnalog7Gain(ui->spnA7Gain->value());
-    trkset.setAnalog7Offset(ui->spnA7Off->value());
-    int an4Ch = ui->cmbA4Ch->currentIndex();
-    int an5Ch = ui->cmbA5Ch->currentIndex();
-    int an6Ch = ui->cmbA6Ch->currentIndex();
-    int an7Ch = ui->cmbA7Ch->currentIndex();
-    trkset.setAnalog4Ch(an4Ch==0?-1:an4Ch);
-    trkset.setAnalog5Ch(an5Ch==0?-1:an5Ch);
-    trkset.setAnalog6Ch(an6Ch==0?-1:an6Ch);
-    trkset.setAnalog7Ch(an7Ch==0?-1:an7Ch);
+    trkset.setAn0Gain(ui->spnA0Gain->value());
+    trkset.setAn0Off(ui->spnA0Off->value());
+    trkset.setAn1Gain(ui->spnA1Gain->value());
+    trkset.setAn1Off(ui->spnA1Off->value());
+    trkset.setAn2Gain(ui->spnA2Gain->value());
+    trkset.setAn2Off(ui->spnA2Off->value());
+    trkset.setAn3Gain(ui->spnA3Gain->value());
+    trkset.setAn3Off(ui->spnA3Off->value());
+    int an0Ch = ui->cmbA0Ch->currentIndex();
+    int an1Ch = ui->cmbA1Ch->currentIndex();
+    int an2Ch = ui->cmbA2Ch->currentIndex();
+    int an3Ch = ui->cmbA3Ch->currentIndex();
+    trkset.setAn0Ch(an0Ch==0?-1:an0Ch);
+    trkset.setAn1Ch(an1Ch==0?-1:an1Ch);
+    trkset.setAn2Ch(an2Ch==0?-1:an2Ch);
+    trkset.setAn3Ch(an3Ch==0?-1:an3Ch);
 
     // Aux
     int auxF0Ch = ui->cmbAuxFn0Ch->currentIndex();
     int auxF1Ch = ui->cmbAuxFn1Ch->currentIndex();
     int auxF2Ch = ui->cmbAuxFn2Ch->currentIndex();
-    trkset.setAuxFunc0Ch(auxF0Ch==0?-1:auxF0Ch);
-    trkset.setAuxFunc1Ch(auxF1Ch==0?-1:auxF1Ch);
-    trkset.setAuxFunc2Ch(auxF2Ch==0?-1:auxF2Ch);
-    trkset.setAuxFunc0(ui->cmbAuxFn0->currentIndex());
-    trkset.setAuxFunc1(ui->cmbAuxFn1->currentIndex());
-    trkset.setAuxFunc2(ui->cmbAuxFn2->currentIndex());
+    trkset.setAux0Ch(auxF0Ch==0?-1:auxF0Ch);
+    trkset.setAux1Ch(auxF1Ch==0?-1:auxF1Ch);
+    trkset.setAux2Ch(auxF2Ch==0?-1:auxF2Ch);
+    trkset.setAux0Func(ui->cmbAuxFn0->currentIndex());
+    trkset.setAux1Func(ui->cmbAuxFn1->currentIndex());
+    trkset.setAux2Func(ui->cmbAuxFn2->currentIndex());
 
     // PWM
     int pwmCh0 = ui->cmbPWM0->currentIndex();
     int pwmCh1 = ui->cmbPWM1->currentIndex();
     int pwmCh2 = ui->cmbPWM2->currentIndex();
     int pwmCh3 = ui->cmbPWM3->currentIndex();
-    trkset.setPWMCh(0,pwmCh0==0?-1:pwmCh0);
-    trkset.setPWMCh(1,pwmCh1==0?-1:pwmCh1);
-    trkset.setPWMCh(2,pwmCh2==0?-1:pwmCh2);
-    trkset.setPWMCh(3,pwmCh3==0?-1:pwmCh3);
+    trkset.setPwm0(pwmCh0==0?-1:pwmCh0);
+    trkset.setPwm1(pwmCh1==0?-1:pwmCh1);
+    trkset.setPwm2(pwmCh2==0?-1:pwmCh2);
+    trkset.setPwm3(pwmCh3==0?-1:pwmCh3);
 
     // BNO Axis Remapping
     trkset.setAxisRemap(ui->cmbRemap->currentData().toUInt());
@@ -801,14 +838,14 @@ void MainWindow::updateFromUI()
     if(duplicates) {
         QString message = tr("Cannot pick dulplicate pins");
         if(!sbusinchecked)
-            message += tr("\n  ** SBUS input invert signal needs pins D5 and D6 connected together");
+            message += tr("\n  * non-inverted SBUS receive requires  D5 and D6 connected together");
         QMessageBox::information(this,tr("Error"), message);
 
         // Reset gui to old values
-        ppout_index = trkset.ppmOutPin()-1;
-        ppin_index = trkset.ppmInPin()-1;
-        but_index = trkset.buttonPin()-1;
-        sbusinchecked = trkset.invertedSBUSIn();
+        ppout_index = trkset.getPpmOutPin()-1;
+        ppin_index = trkset.getPpmInPin()-1;
+        but_index = trkset.getButtonPin()-1;
+        sbusinchecked = trkset.getSbInInv();
         ui->cmbPpmOutPin->setCurrentIndex(ppout_index < 1 ? 0 : ppout_index);
         ui->cmbPpmInPin->setCurrentIndex(ppin_index < 1 ? 0 : ppin_index);
         ui->cmbButtonPin->setCurrentIndex(but_index < 1 ? 0 : but_index);
@@ -818,26 +855,27 @@ void MainWindow::updateFromUI()
         trkset.setPpmOutPin(pins[PIN_PPMOUT]);
         trkset.setPpmInPin(pins[PIN_PPMIN]);
         trkset.setButtonPin(pins[PIN_BUTRESET]);
-        trkset.setInvertedSBUSIn(sbusinchecked);
+        trkset.setSbInInv(sbusinchecked);
     }
 
     // Button Press Mode - Enable/Disable on long press (Disable if no button pin selected)
-    if(trkset.buttonPin() > 0)
+    if(trkset.getButtonPin() > 0)
         ui->chkLngBttnPress->setEnabled(true);
     else
         ui->chkLngBttnPress->setEnabled(false);
 
-    trkset.setButtonPressMode(ui->chkLngBttnPress->isChecked());
-    trkset.setResetOnTilt(ui->chkRstOnTlt->isChecked());
+    trkset.setButLngPs(ui->chkLngBttnPress->isChecked());
+    trkset.setRstOnTlt(ui->chkRstOnTlt->isChecked());
 
-    trkset.setInvertedSBUSOut(ui->chkSbusOutInv->isChecked());
-    trkset.setSBUSRate(ui->spnSBUSRate->value());
+    trkset.setSbOutInv(ui->chkSbusOutInv->isChecked());
+    trkset.setSbusTxRate(ui->spnSBUSRate->value());
+    trkset.setCrsfTxRate(ui->spnCRSFRate->value());
 
     uint16_t setframelen = ui->spnPPMFrameLen->value() * 1000;
-    trkset.setPPMFrame(setframelen);
-    trkset.setPPMSync(ui->spnPPMSync->value());
+    trkset.setPpmFrame(setframelen);
+    trkset.setPpmSync(ui->spnPPMSync->value());
     int channels = ui->cmbPPMChCount->currentIndex()+1;
-    trkset.setPpmChCount(channels);
+    trkset.setPpmChCnt(channels);
     uint32_t maxframelen = TrackerSettings::PPM_MIN_FRAMESYNC + (channels * TrackerSettings::MAX_PWM);
     if(maxframelen > setframelen) {
         ui->lblPPMOut->setText(tr("<b>Warning!</b> PPM Frame length possibly too short to support channel data"));
@@ -848,24 +886,30 @@ void MainWindow::updateFromUI()
     //int rstppm_index = ui->cmbResetOnPPM->currentIndex();
   //  trkset.setResetCntPPM(rstppm_index==0?-1:rstppm_index);
 
-    trkset.setBlueToothMode(ui->cmbBtMode->currentIndex());
+    trkset.setBtMode(ui->cmbBtMode->currentIndex());
+    if(ui->cmbBtMode->currentIndex() > 1) // Remote or Scanner Mode
+    {
+        ui->lblPairWith->setVisible(true);
+        ui->cmbBTRmtMode->setVisible(true);
+    } else {
+        ui->lblPairWith->setVisible(false);
+        ui->cmbBTRmtMode->setVisible(false);
+    }
 
     if(ui->cmbBTRmtMode->currentIndex() == 0) {
-        trkset.setPairedBTAddress();
+        trkset.setBtPairedAddress(QString());
     } else {
-        trkset.setPairedBTAddress(ui->cmbBTRmtMode->currentText().simplified());
+        trkset.setBtPairedAddress(ui->cmbBTRmtMode->currentText().simplified());
     }
 
     trkset.setOrientation(ui->spnRotX->value(),
                           ui->spnRotY->value(),
                           ui->spnRotZ->value());
 
-    trkset.setInvertedPpmOut(ui->chkInvertedPPM->isChecked());
-    trkset.setInvertedPpmIn(ui->chkInvertedPPMIn->isChecked());
-    trkset.setResetOnWave(ui->chkResetCenterWave->isChecked());
+    trkset.setPpmOutInvert(ui->chkInvertedPPM->isChecked());
+    trkset.setPpmInInvert(ui->chkInvertedPPMIn->isChecked());
+    trkset.setRstOnWave(ui->chkResetCenterWave->isChecked());
 
-
-    ui->cmdStore->setEnabled(true);
     ui->cmdSaveNVM->setEnabled(true);
 
     // Use timer to prevent too many writes while drags, etc.. happen
@@ -931,6 +975,9 @@ void MainWindow::manualSend()
 void MainWindow::offOrientChanged(float t,float r,float p)
 {
     ui->graphView->addDataPoints(t,r,p);
+    ui->lblTiltValue->setText(QString::number(t,'f',1) + "°");
+    ui->lblRollValue->setText(QString::number(r,'f',1) + "°");
+    ui->lblPanValue->setText(QString::number(p,'f',1) + "°");
 }
 
 void MainWindow::ppmOutChanged(int t,int r,int p)
@@ -939,7 +986,6 @@ void MainWindow::ppmOutChanged(int t,int r,int p)
     ui->servoRoll->setActualPosition(r);
     ui->servoPan->setActualPosition(p);
 
-    // Add a timer here so if no updates these disable
     ui->servoPan->setShowActualPosition(true);
     ui->servoTilt->setShowActualPosition(true);
     ui->servoRoll->setShowActualPosition(true);
@@ -947,27 +993,24 @@ void MainWindow::ppmOutChanged(int t,int r,int p)
 
 void MainWindow::bleAddressDiscovered(QString str)
 {
-    // Add BLE address to discovered list
-    static QStringList bleaddrs;
     if(bleaddrs.contains(str))
         return;
     bleaddrs.append(str);
 
-    // Add all ble address
     ui->cmbBTRmtMode->addItem(str);
 }
 
 void MainWindow::liveDataChanged()
 {
-    ui->lblBLEAddress->setText(trkset.blueToothAddress());
-    ui->btLed->setState(trkset.blueToothConnected());
-    if(trkset.blueToothConnected())
+    ui->lblBLEAddress->setText(trkset.getDataBtAddr());
+    ui->btLed->setState(trkset.getDataBtCon());
+    if(trkset.getDataBtCon())
         ui->lblBTConnected->setText(tr("Connected"));
     else
         ui->lblBTConnected->setText(tr("Not connected"));
-    if(trkset.blueToothMode() == TrackerSettings::BTDISABLE)
+    if(trkset.getBtMode() == TrackerSettings::BTDISABLE)
         ui->lblBTConnected->setText("Disabled");
-    if(trkset.tiltRollPanEnabled()) {
+    if(trkset.getDataTrpEnabled()) {
       ui->servoPan->setShowActualPosition(true);
       ui->servoTilt->setShowActualPosition(true);
       ui->servoRoll->setShowActualPosition(true);
@@ -1072,7 +1115,7 @@ void MainWindow::requestTimeout()
 
     // Otherwise increment to the next board and try again
     if(boardRequestIndex == boards.length()) {
-        msgbox->setText(tr("Was unable to determine the board type"));
+        msgbox->setText(tr("Was unable to determine the board type\n\nHave you written the firmware to the board yet?"));
         msgbox->setWindowTitle("Error");
         msgbox->show();
         statusMessage(tr("Board discovery failed"));
@@ -1088,7 +1131,7 @@ void MainWindow::requestTimeout()
     addToLog(tr("Trying to connect to ") + boards[boardRequestIndex]->boardName() + "\n");
     boards[boardRequestIndex]->allowAccess(true);
     boards[boardRequestIndex]->requestHardware();
-    requestTimer.start(300);
+    requestTimer.start(WAIT_BETWEEN_BOARD_CONNECTIONS);
 
     // Move to next board
     boardRequestIndex++;
@@ -1099,7 +1142,6 @@ void MainWindow::saveToRAMTimeout()
     // Request hardware from all board types
     foreach(BoardType *brd, boards) {
         brd->_saveToRAM();
-        ui->cmdStore->setEnabled(false);
     }
 }
 
@@ -1118,7 +1160,8 @@ void MainWindow::requestParamsTimeout()
  */
 void MainWindow::eraseFlash()
 {
-  if(currentboard && currentboard->boardName() == "NANO33BLE") {
+  if(currentboard && (currentboard->boardName() == "NANO33BLE" ||
+                      currentboard->boardName() == "DTQSYS")) {
     if(QMessageBox::question(this, tr("Set Defaults?"), tr("This will erase all settings to defaults\r\nAre you sure?")) == QMessageBox::Yes) {
       currentboard->_erase();
       currentboard->_reboot();
@@ -1241,7 +1284,7 @@ void MainWindow::BLE33tabChanged()
     trkset.setDataItemSend(dataitms);
 }
 
-void MainWindow::BTModeChanged()
+/*void MainWindow::BTModeChanged()
 {
     updateFromUI();
 
@@ -1257,7 +1300,7 @@ void MainWindow::BTModeChanged()
             QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
         reboot();
     }
-}
+}*/
 
 void MainWindow::reboot()
 {
@@ -1285,7 +1328,22 @@ void MainWindow::reboot()
 
 void MainWindow::openHelp()
 {
-    QDesktopServices::openUrl(helpurl);
+  QDesktopServices::openUrl(helpurl);
+}
+
+void MainWindow::openDiscord()
+{
+  QDesktopServices::openUrl(discordurl);
+}
+
+void MainWindow::openDonate()
+{
+  QDesktopServices::openUrl(donateurl);
+}
+
+void MainWindow::openGitHub()
+{
+  QDesktopServices::openUrl(githuburl);
 }
 
 void MainWindow::showPinView()
@@ -1301,7 +1359,6 @@ void MainWindow::paramSendStart()
 void MainWindow::paramSendComplete()
 {
     statusMessage(tr("Parameter(s) saved"), 5000);
-    ui->cmdStore->setEnabled(false);
 }
 
 void MainWindow::paramSendFailure(int)
@@ -1367,7 +1424,8 @@ void MainWindow::boardDiscovered(BoardType *brd)
     currentboard = brd;
 
     // Stack widget changes to hide some info depending on board
-    if(brd->boardName() == "NANO33BLE") {
+    if(brd->boardName() == "NANO33BLE" ||
+       brd->boardName() == "DTQSYS") {
         addToLog(tr("Connected to a ") + brd->boardName() + "\n");
         ui->cmdStartGraph->setVisible(false);
         ui->cmdStopGraph->setVisible(false);
@@ -1375,15 +1433,41 @@ void MainWindow::boardDiscovered(BoardType *brd)
         ui->cmbRemap->setVisible(false);
         ui->cmbSigns->setVisible(false);
         ui->cmdSaveNVM->setVisible(true);
-        ui->grbSettings->setTitle("Nano 33 BLE");
         ui->cmdStopGraph->setEnabled(true);
         ui->cmdStartGraph->setEnabled(true);
         ui->cmdSend->setEnabled(true);
         ui->cmdSaveNVM->setEnabled(true);
         ui->cmdCalibrate->setEnabled(true);
+        ui->cmdResetCenter->setEnabled(true);
         ui->cmdReboot->setEnabled(true);
         ui->stackedWidget->setCurrentIndex(3);
         ui->cmdChannelViewer->setEnabled(true);
+
+        if(brd->boardName() == "DTQSYS") { // Pins are all fixed
+            ui->cmbPpmInPin->setVisible(false);
+            ui->lblPPMInPin->setVisible(false);
+            ui->cmbPpmOutPin->setVisible(false);
+            ui->lblPPMOutPin->setVisible(false);
+            ui->cmbButtonPin->setVisible(false);
+            ui->lblButtonPin->setVisible(false);
+            ui->tabBLE->setTabVisible(4,false);
+            ui->lblAn4->setText(tr("Battery Voltage"));
+            ui->lblAn5->setText(tr("Analog 1 (0.29)"));
+            ui->lblAn6->setText(tr("Analog 2 (0.02)"));
+            ui->lblAn7->setText(tr("Analog 3 (0.28)"));
+        } else {
+            ui->cmbPpmInPin->setVisible(true);
+            ui->lblPPMInPin->setVisible(true);
+            ui->cmbPpmOutPin->setVisible(true);
+            ui->lblPPMOutPin->setVisible(true);
+            ui->cmbButtonPin->setVisible(true);
+            ui->lblButtonPin->setVisible(true);
+            ui->tabBLE->setTabVisible(4,true);
+            ui->lblAn4->setText(tr("Analog A4"));
+            ui->lblAn5->setText(tr("Analog A5"));
+            ui->lblAn6->setText(tr("Analog A6"));
+            ui->lblAn7->setText(tr("Analog A7"));
+        }
 
         // Check Firmware Version is Compatible
 
@@ -1419,17 +1503,12 @@ void MainWindow::boardDiscovered(BoardType *brd)
         ui->cmbSigns->setVisible(true);
         ui->chkRawData->setVisible(true);
         ui->cmdSaveNVM->setVisible(false);
-        ui->grbSettings->setTitle("BNO055");
         ui->cmdStopGraph->setEnabled(true);
         ui->cmdStartGraph->setEnabled(true);
         ui->cmdSend->setEnabled(true);
         ui->cmdSaveNVM->setEnabled(true);
         ui->cmdCalibrate->setEnabled(true);
         ui->stackedWidget->setCurrentIndex(2);
-
-    } else if (brd->boardName() == "NANO33REMOTE") {
-        addToLog(tr("Connected to a ") + brd->boardName() + "\n");
-
     } else {
         msgbox->setText(tr("Unknown board type"));
         msgbox->setWindowTitle(tr("Error"));

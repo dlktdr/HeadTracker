@@ -16,20 +16,34 @@
 
 #define VERSION FW_MAJ.CONCAT(FW_MIN, FW_REV)
 #define FW_VERSION STRINGIFY(VERSION)
+
+#if defined(PCB_NANO33BLE)
 #define FW_BOARD "NANO33BLE"
+#elif defined(PCB_DTQSYS)
+#define FW_BOARD "DTQSYS"
+#else
+#error NO PCB DEFINED
+#endif
+
+#if defined(DEBUG)
+#define DEFAULT_LOG_LEVEL DEBUG
+#else
+#define DEFAULT_LOG_LEVEL INFO
+#endif
 
 #define BUTTON_HOLD_TIME 1           // How long should the button be held for a normal press (ms)
 #define BUTTON_LONG_PRESS_TIME 1000  // How long to hold button Enable/Disables Tilt/Roll/Pan (ms)
 
 // Thread Periods
-#define IO_PERIOD 25             // (ms) IO Period (button reading)
-#define BT_PERIOD 12500          // (us) Bluetooth update rate
-#define SERIAL_PERIOD 30         // (ms) Serial processing
-#define DATA_PERIOD 2            // Multiplier of Serial Period (Live Data Transmission Speed)
-#define SENSOR_PERIOD 16666      // (us) 60hz Read Sensors
-#define CALCULATE_PERIOD 6000    // (us) 166hz IMU calculations
-#define PWM_FREQUENCY 50         // (ms) PWM Period
-#define UIRESPONSIVE_TIME 10000  // (ms) 10Seconds without an ack data will stop;
+#define IO_PERIOD 25           // (ms) IO Period (button reading)
+#define BT_PERIOD 12500        // (us) Bluetooth update rate
+#define SERIAL_PERIOD 30       // (ms) Serial processing
+#define DATA_PERIOD 2          // Multiplier of Serial Period (Live Data Transmission Speed)
+#define SENSOR_PERIOD 4000     // (us) Sensor Reads
+#define CALCULATE_PERIOD 7000  // (us) Channel Calculations
+#define UART_PERIOD 4000       // (us) Update rate of UART
+#define PWM_FREQUENCY 50       // (ms) PWM Period
+#define PAUSE_BEFORE_FLASH 60  // (ms) Time to pause all threads before Flash writing
 
 // Analog Filters 1 Euro Filter
 #define AN_CH_CNT 4
@@ -37,12 +51,6 @@
 #define AN_FILT_MINCO 0.02
 #define AN_FILT_SLOPE 6
 #define AN_FILT_DERCO 1
-
-// SBUS
-#define SBUSIN_PIN 10  // RX Pin
-#define SBUSIN_PORT 1
-#define SBUSOUT_PIN 3
-#define SBUSOUT_PORT 1
 
 // Bluetooth
 #define BT_MIN_CONN_INTER_MASTER 10  // When run as para master
@@ -66,7 +74,8 @@
 #define BT_THREAD_PRIO -15
 #define SENSOR_THREAD_PRIO PRIORITY_MED
 #define CALCULATE_THREAD_PRIO PRIORITY_HIGH
-#define SBUS_THREAD_PRIO PRIORITY_MED + 1
+#define UARTRX_THREAD_PRIO PRIORITY_LOW - 2
+#define UARTTX_THREAD_PRIO PRIORITY_HIGH
 
 // Threads initialized flags
 extern volatile bool ioThreadRun;
@@ -74,20 +83,20 @@ extern volatile bool serialThreadRun;
 extern volatile bool btThreadRun;
 extern volatile bool senseTreadRun;
 extern volatile bool sbusTreadRun;
-extern volatile bool gyro_calibrated;
 
 // Perepherial Channels Used, Make sure no dupilcates here
 // and can't be used by Zephyr
 // Cannot use GPIOTE interrupt as I override the interrupt handler in PPMIN
 
-// Known good 16,17,18,19
-// 14/15 used for BT LNA
-#define SERIALIN1_PPICH 16
-#define SERIALIN2_PPICH 15
-#define SERIALOUT_PPICH 1
-#define PPMIN_PPICH1 17
-#define PPMIN_PPICH2 18
-#define PPMOUT_PPICH 19
+#define PPMOUT_PPICH 0
+#define SERIALIN1_PPICH 1
+#define SERIALIN2_PPICH 2
+#define SERIALOUT_PPICH 3
+#define PPMIN_PPICH1 4
+#define PPMIN_PPICH2 5
+// 6 Used
+// 7 Enable always gets flipped off
+// 8+ ??
 
 #define SERIAL_UARTE_CH 1
 
@@ -117,18 +126,13 @@ extern volatile bool gyro_calibrated;
 #define DEG_TO_RAD 0.017453295199
 #define RAD_TO_DEG 57.29577951308
 
-// Gyro Calibration Defines
-#define GYRO_STABLE_SAMPLES 50  // samples to average of not moving for a success gyro cal
-#define GYRO_PASS_DIFF 5.0      // Differential less than this deg/sec^2 considered stable
-#define GYRO_LP_BETA 0.9        // Gyro Sample Moving Average Beta (0.0-1
-
 // Magnetometer, Initial Orientation, Samples to average
 #define MADGSTART_SAMPLES 15
 
 // RTOS Specifics
 #if defined(RTOS_ZEPHYR)
-#define micros() k_cyc_to_us_near32(k_cycle_get_32())
-#define millis() k_uptime_get()
+#include "zephyr.h"
+#define micros() k_cyc_to_us_floor32(k_cycle_get_32())
 #define millis64() k_uptime_get()
 #define micros64() k_cyc_to_us_near64(k_cycle_get_32())
 #define rt_sleep_ms(x) k_msleep(x)
@@ -144,4 +148,10 @@ extern volatile bool gyro_calibrated;
 #define rt_sleep_us(x)
 #else
 #error("NO RTOS DECLARED")
+#endif
+
+#if defined(PCB_NANO33BLE)
+#include "boards/nano33board.h"
+#elif defined(PCB_DTQSYS)
+#include "boards/dtqsys_ht.h"
 #endif

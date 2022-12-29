@@ -20,9 +20,6 @@ public:
     BoardNano33BLE(TrackerSettings *ts);
     ~BoardNano33BLE();
 
-    // Returns the board name
-    QString boardName() {return "NANO33BLE";}
-
     // Incoming and outgoing data from the board
     void dataIn(QByteArray &recdat);
     QByteArray dataout();

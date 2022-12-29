@@ -21,17 +21,22 @@
 #include "boardbno055.h"
 #include "imageviewer/imageviewer.h"
 
-const int MAX_LOG_LENGTH=6000; // How many bytes to keep of log data in the gui
+constexpr int MAX_LOG_LENGTH=6000; // How many bytes to keep of log data in the gui
 const QString version="2.20"; // Current Version Number
 const QString versionsuffix=""; // Version Suffix
 const QStringList firmwares={"BNO055","NANO33BLE"}; // Allowable hardware types
 const QUrl helpurl("https://headtracker.gitbook.io/head-tracker/settings/gui-settings");
+const QUrl discordurl("https://discord.gg/ux5hEaNSPQ");
+const QUrl githuburl("https://github.com/dlktdr/HeadTracker");
+const QUrl donateurl("https://www.paypal.com/donate?hosted_button_id=NMU3B9Z82JB3A");
 
-const int IMHERETIME=8000; // milliseconds before sending another I'm Here Message to keep communication open
-const int MAX_TX_FAULTS=8; // Number of times to try re-sending data
-const int TX_FAULT_PAUSE=750; // milliseconds wait before trying another send
-const int ACKNAK_TIMEOUT=500; // milliseconds without an ack/nak is a fault
-const int RECONNECT_AFT_REBT=3000; // (ms) time after a reboot to try to reconnect.
+constexpr int IMHERETIME=8000; // milliseconds before sending another I'm Here Message to keep communication open
+constexpr int MAX_TX_FAULTS=8; // Number of times to try re-sending data
+constexpr int TX_FAULT_PAUSE=750; // milliseconds wait before trying another send
+constexpr int ACKNAK_TIMEOUT=500; // milliseconds without an ack/nak is a fault
+constexpr int RECONNECT_AFT_REBT=3000; // (ms) time after a reboot to try to reconnect.
+constexpr int WAIT_FOR_BOARD_TO_BOOT=1000;
+constexpr int WAIT_BETWEEN_BOARD_CONNECTIONS=1500;
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -70,11 +75,13 @@ private:
     QMessageBox *msgbox;
     QTextEdit *serialDebug;
     ImageViewer *imageViewer;
+    QStringList bleaddrs;
 
     QQueue<QByteArray> serialDataOut;
     volatile bool sending;
 
     BoardNano33BLE *nano33ble;
+    BoardNano33BLE *dtqsys;
     BoardBNO055 *bno055;
     BoardType *currentboard;
     bool channelViewerOpen=false;
@@ -90,6 +97,7 @@ protected:
 private slots:
     void addToLog(QString log, int ll=0);
     void findSerialPorts();
+    void connectDisconnectClicked();
     void serialConnect();
     void serialDisconnect();
     void serialError(QSerialPort::SerialPortError);
@@ -120,9 +128,12 @@ private slots:
     void showSerialDiagClicked();
     void showChannelViewerClicked();
     void BLE33tabChanged();
-    void BTModeChanged();
+//    void BTModeChanged();
     void reboot();
     void openHelp();
+    void openDiscord();
+    void openDonate();
+    void openGitHub();
     void showPinView();
 
 

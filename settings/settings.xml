@@ -1,0 +1,986 @@
+<?xml version="1.0" ?>
+<HeadTracker>
+   <const>
+      <name>FLOAT_MIN</name>
+      <type>float</type>
+      <value>-1000000</value>
+   </const>
+   <const>
+      <name>FLOAT_MAX</name>
+      <type>float</type>
+      <value>1000000</value>
+   </const>
+   <const>
+      <name>MIN_PWM</name>
+      <type>u16</type>
+      <value>988</value>
+   </const>
+   <const>
+      <name>MAX_PWM</name>
+      <type>u16</type>
+      <value>2012</value>
+   </const>
+   <const>
+      <name>DEF_MIN_PWM</name>
+      <type>u16</type>
+      <value>1050</value>
+   </const>
+   <const>
+      <name>DEF_MAX_PWM</name>
+      <type>u16</type>
+      <value>1950</value>
+   </const>
+   <const>
+      <name>PPM_CENTER</name>
+      <type>u16</type>
+      <value>1500</value>
+   </const>
+   <const>
+      <name>MIN_GAIN</name>
+      <type>float</type>
+      <value>0.01</value>
+   </const>
+   <const>
+      <name>MAX_GAIN</name>
+      <type>float</type>
+      <value>35</value>
+   </const>
+   <const>
+      <name>MINMAX_RNG</name>
+      <type>u16</type>
+      <value>242</value>
+   </const>
+   <const>
+      <name>MIN_CNT</name>
+      <type>u16</type>
+      <value>(((MAX_PWM - MIN_PWM) / 2) + MIN_PWM - MINMAX_RNG)</value>
+   </const>
+   <const>
+      <name>MAX_CNT</name>
+      <type>u16</type>
+      <value>(((MAX_PWM - MIN_PWM) / 2) + MIN_PWM + MINMAX_RNG)</value>
+   </const>
+   <const>
+      <name>BT_CHANNELS</name>
+      <type>u8</type>
+      <value>8</value>
+   </const>
+   <const>
+      <name>MAX_CHANNELS</name>
+      <type>u8</type>
+      <value>16</value>
+   </const>
+   <const>
+      <name>AUX_FUNCTIONS</name>
+      <type>u8</type>
+      <value>7</value>
+   </const>
+   <const>
+      <name>TILT_REVERSE_BIT</name>
+      <type>u8</type>
+      <value>1</value>
+   </const>
+   <const>
+      <name>ROLL_REVERSE_BIT</name>
+      <type>u8</type>
+      <value>2</value>
+   </const>
+   <const>
+      <name>PAN_REVERSE_BIT</name>
+      <type>u8</type>
+      <value>4</value>
+   </const>
+   <const>
+      <name>SBUS_CENTER</name>
+      <type>u16</type>
+      <value>992</value>
+   </const>
+   <const>
+      <name>SBUS_SCALE</name>
+      <type>float</type>
+      <value>1.6</value>
+   </const>
+   <const>
+      <name>RESET_ON_TILT_TIME</name>
+      <type>float</type>
+      <value>1.5</value>
+   </const>
+   <const>
+      <name>RESET_ON_TILT_AFTER</name>
+      <type>float</type>
+      <value>1</value>
+   </const>
+   <const>
+      <name>RECENTER_PULSE_DURATION</name>
+      <type>float</type>
+      <value>0.5</value>
+   </const>
+   <const>
+      <name>SBUS_ACTIVE_TIME</name>
+      <type>float</type>
+      <value>0.1</value>
+   </const>
+   <const>
+      <name>PPM_MIN_FRAMESYNC</name>
+      <type>float</type>
+      <value>3000</value>
+   </const>
+   <const>
+      <name>PPM_MIN_FRAME</name>
+      <type>float</type>
+      <value>6666</value>
+   </const>
+   <const>
+      <name>PPM_MAX_FRAME</name>
+      <type>float</type>
+      <value>40000</value>
+   </const>
+   <setting>
+      <name>Rll_Min</name>
+      <discription>Roll Minimum</discription>
+      <type>u16</type>
+      <default>def_min_pwm</default>
+      <maximum>MAX_PWM</maximum>
+      <bleaddr>F000</bleaddr>
+   </setting>
+   <setting>
+      <name>Rll_Max</name>
+      <discription>Roll Maximum</discription>
+      <type>u16</type>
+      <default>def_max_pwm</default>
+      <maximum>MAX_PWM</maximum>
+      <bleaddr>F001</bleaddr>
+   </setting>
+   <setting>
+      <name>Rll_Cnt</name>
+      <discription>Roll Center</discription>
+      <type>u16</type>
+      <default>ppm_center</default>
+      <maximum>MAX_PWM</maximum>
+      <bleaddr>F002</bleaddr>
+   </setting>
+   <setting>
+      <name>Rll_Gain</name>
+      <discription>Roll Gain</discription>
+      <type>u16</type>
+      <default>5</default>
+      <maximum>MAX_GAIN</maximum>
+      <bleaddr>F003</bleaddr>
+   </setting>
+   <setting>
+      <name>Tlt_Min</name>
+      <discription>Tilt Minimum</discription>
+      <type>u16</type>
+      <default>def_min_pwm</default>
+      <maximum>MAX_PWM</maximum>
+      <bleaddr>F004</bleaddr>
+   </setting>
+   <setting>
+      <name>Tlt_Max</name>
+      <discription>Tilt Maximum</discription>
+      <type>u16</type>
+      <default>def_max_pwm</default>
+      <maximum>MAX_PWM</maximum>
+      <bleaddr>F005</bleaddr>
+   </setting>
+   <setting>
+      <name>Tlt_Cnt</name>
+      <discription>Tilt Center</discription>
+      <type>u16</type>
+      <default>ppm_center</default>
+      <maximum>MAX_PWM</maximum>
+      <bleaddr>F006</bleaddr>
+   </setting>
+   <setting>
+      <name>Tlt_Gain</name>
+      <discription>Tilt Gain</discription>
+      <type>u16</type>
+      <default>5</default>
+      <maximum>MAX_GAIN</maximum>
+      <bleaddr>F007</bleaddr>
+   </setting>
+   <setting>
+      <name>Pan_Min</name>
+      <discription>Pan Minimum</discription>
+      <type>u16</type>
+      <default>def_min_pwm</default>
+      <maximum>MAX_PWM</maximum>
+      <bleaddr>F008</bleaddr>
+   </setting>
+   <setting>
+      <name>Pan_Max</name>
+      <discription>Pan Maximum</discription>
+      <type>u16</type>
+      <default>def_max_pwm</default>
+      <maximum>MAX_PWM</maximum>
+      <bleaddr>F009</bleaddr>
+   </setting>
+   <setting>
+      <name>Pan_Cnt</name>
+      <discription>Pan Center</discription>
+      <type>u16</type>
+      <default>ppm_center</default>
+      <maximum>MAX_PWM</maximum>
+      <bleaddr>F010</bleaddr>
+   </setting>
+   <setting>
+      <name>Pan_Gain</name>
+      <discription>Pan Gain</discription>
+      <type>u16</type>
+      <default>5</default>
+      <maximum>MAX_GAIN</maximum>
+      <bleaddr>F011</bleaddr>
+   </setting>
+   <setting>
+      <name>TltCh</name>
+      <discription>Tilt Output Channel</discription>
+      <type>s8</type>
+      <default>-1</default>
+      <maximum>MAX_CHANNELS</maximum>
+      <bleaddr>F100</bleaddr>
+   </setting>
+   <setting>
+      <name>RllCh</name>
+      <discription>Roll Output Channel</discription>
+      <type>s8</type>
+      <default>-1</default>
+      <maximum>MAX_CHANNELS</maximum>
+      <bleaddr>F101</bleaddr>
+   </setting>
+   <setting>
+      <name>PanCh</name>
+      <discription>Pan Output Channel</discription>
+      <type>s8</type>
+      <default>-1</default>
+      <maximum>MAX_CHANNELS</maximum>
+      <bleaddr>F102</bleaddr>
+   </setting>
+   <setting>
+      <name>AlertCh</name>
+      <discription>Alert Output Channel</discription>
+      <type>s8</type>
+      <default>-1</default>
+      <maximum>MAX_CHANNELS</maximum>
+      <bleaddr>F103</bleaddr>
+   </setting>
+   <setting>
+      <name>Pwm0</name>
+      <discription>PWM 0 Channel</discription>
+      <type>s8</type>
+      <default>-1</default>
+      <maximum>MAX_CHANNELS</maximum>
+      <bleaddr>F104</bleaddr>
+   </setting>
+   <setting>
+      <name>Pwm1</name>
+      <discription>PWM 1 Channel</discription>
+      <type>s8</type>
+      <default>-1</default>
+      <maximum>MAX_CHANNELS</maximum>
+      <bleaddr>F105</bleaddr>
+   </setting>
+   <setting>
+      <name>Pwm2</name>
+      <discription>PWM 2 Channel</discription>
+      <type>s8</type>
+      <default>-1</default>
+      <maximum>MAX_CHANNELS</maximum>
+      <bleaddr>F106</bleaddr>
+   </setting>
+   <setting>
+      <name>Pwm3</name>
+      <discription>PWM 3 Channel</discription>
+      <type>s8</type>
+      <default>-1</default>
+      <maximum>MAX_CHANNELS</maximum>
+      <bleaddr>F107</bleaddr>
+   </setting>
+   <setting>
+      <name>An0Ch</name>
+      <discription>Analog 0 Channel</discription>
+      <type>s8</type>
+      <default>-1</default>
+      <maximum>MAX_CHANNELS</maximum>
+      <bleaddr>F108</bleaddr>
+   </setting>
+   <setting>
+      <name>An1Ch</name>
+      <discription>Analog 1 Channel</discription>
+      <type>s8</type>
+      <default>-1</default>
+      <maximum>MAX_CHANNELS</maximum>
+      <bleaddr>F109</bleaddr>
+   </setting>
+   <setting>
+      <name>An2Ch</name>
+      <discription>Analog 2 Channel</discription>
+      <type>s8</type>
+      <default>-1</default>
+      <maximum>MAX_CHANNELS</maximum>
+      <bleaddr>F10A</bleaddr>
+   </setting>
+   <setting>
+      <name>An3Ch</name>
+      <discription>Analog 3 Channel</discription>
+      <type>s8</type>
+      <default>-1</default>
+      <maximum>MAX_CHANNELS</maximum>
+      <bleaddr>F10B</bleaddr>
+   </setting>
+   <setting>
+      <name>Aux0Ch</name>
+      <discription>Auxilary Function 0 Channel</discription>
+      <type>s8</type>
+      <default>-1</default>
+      <maximum>MAX_CHANNELS</maximum>
+      <bleaddr>F10C</bleaddr>
+   </setting>
+   <setting>
+      <name>Aux1Ch</name>
+      <discription>Auxilary Function 1 Channel</discription>
+      <type>s8</type>
+      <default>-1</default>
+      <maximum>MAX_CHANNELS</maximum>
+      <bleaddr>F10D</bleaddr>
+   </setting>
+   <setting>
+      <name>Aux2Ch</name>
+      <discription>Auxilary Function 2 Channel</discription>
+      <type>s8</type>
+      <default>-1</default>
+      <maximum>MAX_CHANNELS</maximum>
+      <bleaddr>F10E</bleaddr>
+   </setting>
+   <setting>
+      <name>RstPpm</name>
+      <discription>Reset Center on PPM Input Channel</discription>
+      <type>s8</type>
+      <default>-1</default>
+      <maximum>MAX_CHANNELS</maximum>
+      <bleaddr>F10F</bleaddr>
+   </setting>
+   <setting>
+      <name>Aux0Func</name>
+      <discription>Auxilary Function 0</discription>
+      <type>u8</type>
+      <default>0</default>
+      <maximum>AUX_FUNCTIONS</maximum>
+   </setting>
+   <setting>
+      <name>Aux1Func</name>
+      <discription>Auxilary Function 1</discription>
+      <type>u8</type>
+      <default>0</default>
+      <maximum>AUX_FUNCTIONS</maximum>
+   </setting>
+   <setting>
+      <name>Aux2Func</name>
+      <discription>Auxilary Function 2</discription>
+      <type>u8</type>
+      <default>0</default>
+      <maximum>AUX_FUNCTIONS</maximum>
+   </setting>
+   <setting>
+      <name>An0Gain</name>
+      <discription>Analog 0 Gain</discription>
+      <type>float</type>
+      <default>310</default>
+      <maximum>FLOAT_MAX</maximum>
+      <roundto>4</roundto>
+   </setting>
+   <setting>
+      <name>An1Gain</name>
+      <discription>Analog 1 Gain</discription>
+      <type>float</type>
+      <default>310</default>
+      <maximum>FLOAT_MAX</maximum>
+      <roundto>4</roundto>
+   </setting>
+   <setting>
+      <name>An2Gain</name>
+      <discription>Analog 2 Gain</discription>
+      <type>float</type>
+      <default>310</default>
+      <maximum>FLOAT_MAX</maximum>
+      <roundto>4</roundto>
+   </setting>
+   <setting>
+      <name>An3Gain</name>
+      <discription>Analog 3 Gain</discription>
+      <type>float</type>
+      <default>310</default>
+      <maximum>FLOAT_MAX</maximum>
+      <roundto>4</roundto>
+   </setting>
+   <setting>
+      <name>An0Off</name>
+      <discription>Analog 0 Offset</discription>
+      <type>float</type>
+      <default>0</default>
+      <maximum>FLOAT_MAX</maximum>
+      <roundto>4</roundto>
+   </setting>
+   <setting>
+      <name>An1Off</name>
+      <discription>Analog 1 Offset</discription>
+      <type>float</type>
+      <default>0</default>
+      <maximum>FLOAT_MAX</maximum>
+      <roundto>4</roundto>
+   </setting>
+   <setting>
+      <name>An2Off</name>
+      <discription>Analog 2 Offset</discription>
+      <type>float</type>
+      <default>0</default>
+      <maximum>FLOAT_MAX</maximum>
+      <roundto>4</roundto>
+   </setting>
+   <setting>
+      <name>An3Off</name>
+      <discription>Analog 3 Offset</discription>
+      <type>float</type>
+      <default>0</default>
+      <maximum>FLOAT_MAX</maximum>
+      <roundto>4</roundto>
+   </setting>
+   <setting>
+      <name>ServoReverse</name>
+      <discription>Servo Reverse (BitMask)</discription>
+      <type>u8</type>
+      <default>0</default>
+      <maximum>7</maximum>
+   </setting>
+   <setting>
+      <name>MagXOff</name>
+      <discription>Magnetometer X Calibration Offset</discription>
+      <type>float</type>
+      <default>0</default>
+      <maximum>FLOAT_MAX</maximum>
+      <roundto>4</roundto>
+      <fwonchange>resetFusion</fwonchange>
+   </setting>
+   <setting>
+      <name>MagYOff</name>
+      <discription>Magnetometer Y Calibration Offset</discription>
+      <type>float</type>
+      <default>0</default>
+      <maximum>FLOAT_MAX</maximum>
+      <roundto>4</roundto>
+      <fwonchange>resetFusion</fwonchange>
+   </setting>
+   <setting>
+      <name>MagZOff</name>
+      <discription>Magnetometer Z Calibration Offset</discription>
+      <type>float</type>
+      <default>0</default>
+      <maximum>FLOAT_MAX</maximum>
+      <roundto>4</roundto>
+      <fwonchange>resetFusion</fwonchange>
+   </setting>
+   <setting>
+      <name>AccXOff</name>
+      <discription>Accelerometer X Calibration Offset</discription>
+      <type>float</type>
+      <default>0</default>
+      <maximum>FLOAT_MAX</maximum>
+      <roundto>4</roundto>
+      <fwonchange>resetFusion</fwonchange>
+   </setting>
+   <setting>
+      <name>AccYOff</name>
+      <discription>Accelerometer Y Calibration Offset</discription>
+      <type>float</type>
+      <default>0</default>
+      <maximum>FLOAT_MAX</maximum>
+      <roundto>4</roundto>
+      <fwonchange>resetFusion</fwonchange>
+   </setting>
+   <setting>
+      <name>AccZOff</name>
+      <discription>Accelerometer Z Calibration Offset</discription>
+      <type>float</type>
+      <default>0</default>
+      <maximum>FLOAT_MAX</maximum>
+      <roundto>4</roundto>
+      <fwonchange>resetFusion</fwonchange>
+   </setting>
+   <setting>
+      <name>GyrXOff</name>
+      <discription>Gyrometer X Calibration Offset</discription>
+      <type>float</type>
+      <default>0</default>
+      <maximum>FLOAT_MAX</maximum>
+      <roundto>4</roundto>
+      <fwonchange>resetFusion</fwonchange>
+   </setting>
+   <setting>
+      <name>GyrYOff</name>
+      <discription>Gyrometer Y Calibration Offset</discription>
+      <type>float</type>
+      <default>0</default>
+      <maximum>FLOAT_MAX</maximum>
+      <roundto>4</roundto>
+      <fwonchange>resetFusion</fwonchange>
+   </setting>
+   <setting>
+      <name>GyrZOff</name>
+      <discription>Gyrometer Z Calibration Offset</discription>
+      <type>float</type>
+      <default>0</default>
+      <maximum>FLOAT_MAX</maximum>
+      <roundto>4</roundto>
+      <fwonchange>resetFusion</fwonchange>
+   </setting>
+   <setting>
+      <name>so00</name>
+      <discription>Soft Iron Offset 00</discription>
+      <type>float</type>
+      <default>1</default>
+      <maximum>FLOAT_MAX</maximum>
+      <roundto>4</roundto>
+      <fwonchange>resetFusion</fwonchange>
+   </setting>
+   <setting>
+      <name>so01</name>
+      <discription>Soft Iron Offset 01</discription>
+      <type>float</type>
+      <default>0</default>
+      <maximum>FLOAT_MAX</maximum>
+      <roundto>4</roundto>
+      <fwonchange>resetFusion</fwonchange>
+   </setting>
+   <setting>
+      <name>so02</name>
+      <discription>Soft Iron Offset 02</discription>
+      <type>float</type>
+      <default>0</default>
+      <maximum>FLOAT_MAX</maximum>
+      <roundto>4</roundto>
+      <fwonchange>resetFusion</fwonchange>
+   </setting>
+   <setting>
+      <name>so10</name>
+      <discription>Soft Iron Offset 10</discription>
+      <type>float</type>
+      <default>0</default>
+      <maximum>FLOAT_MAX</maximum>
+      <roundto>4</roundto>
+      <fwonchange>resetFusion</fwonchange>
+   </setting>
+   <setting>
+      <name>so11</name>
+      <discription>Soft Iron Offset 11</discription>
+      <type>float</type>
+      <default>1</default>
+      <maximum>FLOAT_MAX</maximum>
+      <roundto>4</roundto>
+      <fwonchange>resetFusion</fwonchange>
+   </setting>
+   <setting>
+      <name>so12</name>
+      <discription>Soft Iron Offset 12</discription>
+      <type>float</type>
+      <default>0</default>
+      <maximum>FLOAT_MAX</maximum>
+      <roundto>4</roundto>
+      <fwonchange>resetFusion</fwonchange>
+   </setting>
+   <setting>
+      <name>so20</name>
+      <discription>Soft Iron Offset 20</discription>
+      <type>float</type>
+      <default>0</default>
+      <maximum>FLOAT_MAX</maximum>
+      <roundto>4</roundto>
+      <fwonchange>resetFusion</fwonchange>
+   </setting>
+   <setting>
+      <name>so21</name>
+      <discription>Soft Iron Offset 21</discription>
+      <type>float</type>
+      <default>0</default>
+      <maximum>FLOAT_MAX</maximum>
+      <roundto>4</roundto>
+      <fwonchange>resetFusion</fwonchange>
+   </setting>
+   <setting>
+      <name>so22</name>
+      <discription>Soft Iron Offset 22</discription>
+      <type>float</type>
+      <default>1</default>
+      <maximum>FLOAT_MAX</maximum>
+      <roundto>4</roundto>
+      <fwonchange>resetFusion</fwonchange>
+   </setting>
+   <setting>
+      <name>RotX</name>
+      <discription>Board Rotation X</discription>
+      <type>float</type>
+      <default>0</default>
+      <maximum>360</maximum>
+      <roundto>4</roundto>
+      <fwonchange>resetFusion</fwonchange>
+   </setting>
+   <setting>
+      <name>RotY</name>
+      <discription>Board Rotation Y</discription>
+      <type>float</type>
+      <default>0</default>
+      <maximum>360</maximum>
+      <roundto>4</roundto>
+      <fwonchange>resetFusion</fwonchange>
+   </setting>
+   <setting>
+      <name>RotZ</name>
+      <discription>Board Rotation Z</discription>
+      <type>float</type>
+      <default>0</default>
+      <maximum>360</maximum>
+      <roundto>4</roundto>
+      <fwonchange>resetFusion</fwonchange>
+   </setting>
+   <setting>
+      <name>ButtonPin</name>
+      <discription>Button Pin</discription>
+      <type>s8</type>
+      <default>2</default>
+      <maximum>64</maximum>
+      <fwonchange>pinsChanged</fwonchange>
+   </setting>
+   <setting>
+      <name>PpmOutPin</name>
+      <discription>PPM Output Pin</discription>
+      <type>s8</type>
+      <default>10</default>
+      <maximum>64</maximum>
+      <fwonchange>pinsChanged</fwonchange>
+   </setting>
+   <setting>
+      <name>PpmInPin</name>
+      <discription>PPM Input Pin</discription>
+      <type>s8</type>
+      <default>-1</default>
+      <maximum>64</maximum>
+      <fwonchange>pinsChanged</fwonchange>
+   </setting>
+   <setting>
+      <name>SerMode</name>
+      <discription>Serial Mode (0- Off, 1-SBUS, 2-CRSF)</discription>
+      <type>u8</type>
+      <default>0</default>
+      <maximum>2</maximum>
+   </setting>
+   <setting>
+      <name>SbRate</name>
+      <discription>SBUS Transmit Freqency</discription>
+      <type>u8</type>
+      <default>80</default>
+      <maximum>140</maximum>
+   </setting>
+   <setting>
+      <name>SbInInv</name>
+      <discription>SBUS Receieve Inverted</discription>
+      <type>bool</type>
+      <default>true</default>
+   </setting>
+   <setting>
+      <name>SbOutInv</name>
+      <discription>SBUS Transmit Inverted</discription>
+      <type>bool</type>
+      <default>true</default>
+   </setting>
+   <setting>
+      <name>BtMode</name>
+      <discription>Bluetooth Mode (0-Off, 1- Head, 2-Receive, 3-Scanner)</discription>
+      <type>u8</type>
+      <default>0</default>
+      <maximum>3</maximum>
+   </setting>
+   <setting>
+      <name>RstOnWave</name>
+      <discription>Reset on Proximity Sense</discription>
+      <type>bool</type>
+      <default>false</default>
+   </setting>
+   <setting>
+      <name>ButLngPs</name>
+      <discription>Long Press on the Button to Enable/Disable Tilt Roll and Pan</discription>
+      <type>bool</type>
+      <default>false</default>
+   </setting>
+   <setting>
+      <name>RstOnTlt</name>
+      <discription>Reset Center on a Head Tilt</discription>
+      <type>bool</type>
+      <default>false</default>
+   </setting>
+   <setting>
+      <name>PpmOutInvert</name>
+      <discription>Invert PPM Output</discription>
+      <type>bool</type>
+      <default>false</default>
+   </setting>
+   <setting>
+      <name>PpmInInvert</name>
+      <discription>Invert PPM Output</discription>
+      <type>bool</type>
+      <default>false</default>
+   </setting>
+   <setting>
+      <name>PpmFrame</name>
+      <discription>PPM Frame Length (us)</discription>
+      <type>u16</type>
+      <default>22500</default>
+      <maximum>PPM_MAX_FRAME</maximum>
+   </setting>
+   <setting>
+      <name>PpmSync</name>
+      <discription>PPM Sync Pulse Length (us)</discription>
+      <type>u16</type>
+      <default>350</default>
+      <maximum>800</maximum>
+   </setting>
+   <setting>
+      <name>PpmChCnt</name>
+      <discription>PPM channels to output</discription>
+      <type>u8</type>
+      <default>8</default>
+      <maximum>16</maximum>
+   </setting>
+   <setting>
+      <name>LpPan</name>
+      <discription>Low Pass filter For Pan</discription>
+      <type>u8</type>
+      <default>100</default>
+      <maximum>100</maximum>
+   </setting>
+   <setting>
+      <name>LpTiltRoll</name>
+      <discription>Low Pass filter For Tilt + Roll</discription>
+      <type>u8</type>
+      <default>100</default>
+      <maximum>100</maximum>
+   </setting>
+   <setting>
+      <name>BtPairedAddress[17]</name>
+      <discription>Bluetooth Remote address to Pair With</discription>
+      <type>char</type>
+      <default/>
+   </setting>
+   <data>
+      <name>MagX</name>
+      <discription>Raw Sensor Mag X</discription>
+      <type>float</type>
+      <round>3</round>
+   </data>
+   <data>
+      <name>MagY</name>
+      <discription>Raw Sensor Mag Y</discription>
+      <type>float</type>
+      <round>3</round>
+   </data>
+   <data>
+      <name>MagZ</name>
+      <discription>Raw Sensor Mag Z</discription>
+      <type>float</type>
+      <round>3</round>
+   </data>
+   <data>
+      <name>GyroX</name>
+      <discription>Raw Sensor Gyro X</discription>
+      <type>float</type>
+      <round>3</round>
+   </data>
+   <data>
+      <name>GyroY</name>
+      <discription>Raw Sensor Gyro Y</discription>
+      <type>float</type>
+      <round>3</round>
+   </data>
+   <data>
+      <name>GyroZ</name>
+      <discription>Raw Sensor Gyro Z</discription>
+      <type>float</type>
+      <round>3</round>
+   </data>
+   <data>
+      <name>AccX</name>
+      <discription>Raw Sensor Accel X</discription>
+      <type>float</type>
+      <round>3</round>
+   </data>
+   <data>
+      <name>AccY</name>
+      <discription>Raw Sensor Accel Y</discription>
+      <type>float</type>
+      <round>3</round>
+   </data>
+   <data>
+      <name>AccZ</name>
+      <discription>Raw Sensor Accel Z</discription>
+      <type>float</type>
+      <round>3</round>
+   </data>
+   <data>
+      <name>Off_MagX</name>
+      <discription>Calibrated Mag X</discription>
+      <type>float</type>
+      <round>3</round>
+   </data>
+   <data>
+      <name>Off_MagY</name>
+      <discription>Calibrated Mag Y</discription>
+      <type>float</type>
+      <round>3</round>
+   </data>
+   <data>
+      <name>Off_MagZ</name>
+      <discription>Calibrated Mag Z</discription>
+      <type>float</type>
+      <round>3</round>
+   </data>
+   <data>
+      <name>Off_GyroX</name>
+      <discription>Calibrated Gyro X</discription>
+      <type>float</type>
+      <round>3</round>
+   </data>
+   <data>
+      <name>Off_GyroY</name>
+      <discription>Calibrated Gyro Y</discription>
+      <type>float</type>
+      <round>3</round>
+   </data>
+   <data>
+      <name>Off_GyroZ</name>
+      <discription>Calibrated Gyro Z</discription>
+      <type>float</type>
+      <round>3</round>
+   </data>
+   <data>
+      <name>Off_AccX</name>
+      <discription>Calibrated Accel X</discription>
+      <type>float</type>
+      <round>3</round>
+   </data>
+   <data>
+      <name>Off_AccY</name>
+      <discription>Calibrated Accel Y</discription>
+      <type>float</type>
+      <round>3</round>
+   </data>
+   <data>
+      <name>Off_AccZ</name>
+      <discription>Calibrated Accel Z</discription>
+      <type>float</type>
+      <round>3</round>
+   </data>
+   <data>
+      <name>TiltOut</name>
+      <discription>Board Tilt Output (us)</discription>
+      <type>u16</type>
+   </data>
+   <data>
+      <name>RollOut</name>
+      <discription>Board Roll Output (us)</discription>
+      <type>u16</type>
+   </data>
+   <data>
+      <name>PanOut</name>
+      <discription>Board Pan Output (us)</discription>
+      <type>u16</type>
+   </data>
+   <data>
+      <name>IsCal</name>
+      <discription>Has the board been Calibrated</discription>
+      <type>bool</type>
+   </data>
+   <data>
+      <name>BtCon</name>
+      <discription>Bluetooth is connected</discription>
+      <type>bool</type>
+   </data>
+   <data>
+      <name>TrpEnabled</name>
+      <discription>Tilt/Roll/Pan Output Enabled</discription>
+      <type>bool</type>
+   </data>
+   <data>
+      <name>Tilt</name>
+      <discription>Raw Tilt in Degrees</discription>
+      <type>float</type>
+      <round>3</round>
+   </data>
+   <data>
+      <name>Roll</name>
+      <discription>Raw Roll in Degrees</discription>
+      <type>float</type>
+      <round>3</round>
+   </data>
+   <data>
+      <name>Pan</name>
+      <discription>Raw Pan in Degrees</discription>
+      <type>float</type>
+      <round>3</round>
+   </data>
+   <data>
+      <name>TiltOff</name>
+      <discription>Offset Tilt in Degrees</discription>
+      <type>float</type>
+      <round>3</round>
+   </data>
+   <data>
+      <name>RollOff</name>
+      <discription>Offset Roll in Degrees</discription>
+      <type>float</type>
+      <round>3</round>
+   </data>
+   <data>
+      <name>PanOff</name>
+      <discription>Offset Pan in Degrees</discription>
+      <type>float</type>
+      <round>3</round>
+   </data>
+   <data>
+      <name>isSense</name>
+      <discription>Is Board a Nano33 Sense Variant</discription>
+      <type>bool</type>
+   </data>
+   <data>
+      <name>ChOut[16]</name>
+      <discription>Channel Outputs</discription>
+      <type>u16</type>
+   </data>
+   <data>
+      <name>BtCh[8]</name>
+      <discription>Bluetooth Inputs</discription>
+      <type>u16</type>
+   </data>
+   <data>
+      <name>PpmCh[16]</name>
+      <discription>PPM Inputs</discription>
+      <type>u16</type>
+   </data>
+   <data>
+      <name>SbusCh[16]</name>
+      <discription>SBUS Channels</discription>
+      <type>u16</type>
+   </data>
+   <data>
+      <name>Quat[4]</name>
+      <discription>Quaternion Output (Tilt / Roll / Pan)</discription>
+      <type>float</type>
+      <round>3</round>
+   </data>
+   <data>
+      <name>BtAddr[18]</name>
+      <discription>Local Bluetooth Address</discription>
+      <type>char</type>
+   </data>
+   <data>
+      <name>BtRmt[18]</name>
+      <discription>Remote Bluetooth Address</discription>
+      <type>char</type>
+   </data>
+</HeadTracker>

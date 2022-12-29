@@ -35,6 +35,7 @@
 #include "soc_flash.h"
 #include "trackersettings.h"
 #include "ucrc16lib.h"
+#include "nano33ble.h"
 
 // Wait for serial connection before starting..
 //#define WAITFOR_DTR
@@ -66,10 +67,6 @@ K_MUTEX_DEFINE(data_mutex);
 
 // Flag that serial has been initalized
 volatile bool serialThreadRun = false;
-
-// Timers, Initially start timed out
-volatile int64_t uiResponsive = k_uptime_get();
-bool uiconnected = false;
 
 const struct device *dev;
 
@@ -151,11 +148,9 @@ void serial_Thread()
   while (1) {
     rt_sleep_ms(SERIAL_PERIOD);
 
-    if (!serialThreadRun) {
+    if (!serialThreadRun || pauseForFlash) {
       continue;
     }
-
-    digitalWrite(LEDG, LOW);
 
     // If serial not open, abort all transfers, clear buffer
     uint32_t new_dtr = 0;
@@ -167,7 +162,6 @@ void serial_Thread()
     if (dtr && !new_dtr) {
       ring_buf_reset(&ringbuf_tx);
       uart_tx_abort(dev);
-      uiResponsive = k_uptime_get() - 1;
       trkset.stopAllData();
     }
 
@@ -185,46 +179,36 @@ void serial_Thread()
       }*/
     }
 
-    // Port is now open or still open, send data
-    if ((new_dtr || dtr) && uiconnected) {
+    // Port is open, send data
+    if (new_dtr) {
       int rb_len = ring_buf_get(&ringbuf_tx, buffer, sizeof(buffer));
       if (rb_len) {
         int send_len = uart_fifo_fill(dev, buffer, rb_len);
         if (send_len < rb_len) {
-          LOG_ERR("USB CDC Ring Buffer Full, Dropped data");
+          // LOG_ERR("USB CDC Ring Buffer Full, Dropped data");
         }
       }
+    } else {
+      ring_buf_reset(&ringbuf_tx);  // Clear buffer
     }
     k_mutex_unlock(&ring_tx_mutex);
     dtr = new_dtr;
 
     serialrx_Process();
 
-    digitalWrite(LEDG, HIGH);
-
     // Data output
     if (datacounter++ >= DATA_PERIOD) {
       datacounter = 0;
-      // Is the UI Still responsive?
-      int64_t curtime = k_uptime_get();
 
-      // TODO we can probably remove or utilize this test alongside dtr transitions
-      if (uiResponsive > curtime) {
-        uiconnected = true;
-
-        // If sense thread is writing, wait until complete
-        k_mutex_lock(&data_mutex, K_FOREVER);
-        json.clear();
-        trkset.setJSONData(json);
-        if (json.size()) {
-          json["Cmd"] = "Data";
-          serialWriteJSON(json);
-        }
-        k_mutex_unlock(&data_mutex);
-
-      } else {
-        uiconnected = false;
+      // If sense thread is writing, wait until complete
+      k_mutex_lock(&data_mutex, K_FOREVER);
+      json.clear();
+      trkset.setJSONData(json);
+      if (json.size()) {
+        json["Cmd"] = "Data";
+        serialWriteJSON(json);
       }
+      k_mutex_unlock(&data_mutex);
     }
   }
 }
@@ -325,7 +309,7 @@ void parseData(DynamicJsonDocument &json)
     // Save to Flash
   } else if (strcmp(command, "Flash") == 0) {
     LOGI("Saving to Flash");
-    trkset.saveToEEPROM();
+    k_sem_give(&saveToFlash_sem);
 
     // Erase
   } else if (strcmp(command, "Erase") == 0) {
@@ -389,9 +373,6 @@ void parseData(DynamicJsonDocument &json)
     LOGW("Unknown Command");
     return;
   }
-
-  // GUI responsive, update connected timer
-  uiResponsive = k_uptime_get() + UIRESPONSIVE_TIME;
 }
 
 // Remove any of the escape characters

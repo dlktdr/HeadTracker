@@ -1,0 +1,20 @@
+identifier: dtqsys_ht
+name: DTQSYS Head Tracker
+type: mcu
+arch: arm
+toolchain:
+  - zephyr
+  - gnuarmemb
+  - xtools
+supported:
+  - adc
+  - ble
+  - i2c
+  - ieee802154
+  - pwm
+  - serial
+  - spi
+  - uart
+  - usb_cdc
+  - usb_device
+  - watchdog

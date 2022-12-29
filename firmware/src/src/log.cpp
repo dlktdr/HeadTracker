@@ -21,7 +21,6 @@
 
 #include "serial.h"
 
-
 // protect the preallocated buffer
 K_MUTEX_DEFINE(log_buffer_mutex);
 char log_buffer1[LOG_BUFFER1_SIZE];
@@ -74,8 +73,9 @@ int ht_serial_logger(const log_level level, ...)
   int len2 = 0;
 
   // level filter -- only render if needed
-  if (global_log_level >= level) {
-    k_mutex_lock(&log_buffer_mutex, K_FOREVER);
+  if (global_log_level <= level) {
+    // Don't allow hang in logging, skip message
+    if (k_mutex_lock(&log_buffer_mutex, K_MSEC(MAX_MUTEX_WAIT_DELAY)) == -EAGAIN) return 0;
 
     va_list vArg;
     va_start(vArg, level);

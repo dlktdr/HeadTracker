@@ -1,6 +1,6 @@
 QT       += core gui serialport network
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets opengl
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets opengl openglwidgets
 
 CONFIG += c++11 file_copies
 
@@ -65,7 +65,8 @@ HEADERS += \
     servominmax.h \
     signalbars.h \
     trackersettings.h \
-    ucrc16lib.h
+    ucrc16lib.h \
+    basetrackersettings.h
 
 FORMS += \
     calibrateble.ui \
@@ -77,7 +78,7 @@ FORMS += \
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
-else: unix:!android: target.path = /opt/$${TARGET}/bin
+else: unix:!android: target.path = /usr/bin
 !isEmpty(target.path): INSTALLS += target
 
 RESOURCES += \

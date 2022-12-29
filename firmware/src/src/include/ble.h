@@ -9,7 +9,6 @@
 #define LEN_BLUETOOTH_ADDR 16
 #define MAX_BLUETOOTH_DISTANT_ADDR 6
 #define BLUETOOTH_LINE_LENGTH 32
-#define BT_CHANNELS 8
 
 extern volatile bool bleconnected;
 extern volatile bool btscanonly;

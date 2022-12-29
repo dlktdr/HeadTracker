@@ -25,7 +25,8 @@
 #include "io.h"
 #include "log.h"
 #include "nano33ble.h"
-
+#include "soc_flash.h"
+#include "trackersettings.h"
 
 // Globals
 volatile bool bleconnected = false;
@@ -59,12 +60,16 @@ void bt_Thread()
 {
   int64_t usduration = 0;
   while (1) {
-    usduration = micros64();
-
-    if (!btThreadRun) {
+    if (!btThreadRun || pauseForFlash) {
       rt_sleep_ms(10);
       continue;
     }
+
+    usduration = micros64();
+
+    // Check if bluetooth mode has changed
+    if(curmode != trkset.getBtMode())
+      BTSetMode((btmodet)trkset.getBtMode());
 
     switch (curmode) {
       case BTPARAHEAD:
@@ -78,11 +83,6 @@ void bt_Thread()
       default:
         break;
     }
-
-    if (bleconnected)
-      setLEDFlag(LED_BTCONNECTED);
-    else
-      clearLEDFlag(LED_BTCONNECTED);
 
     // Adjust sleep for a more accurate period
     usduration = micros64() - usduration;
@@ -118,6 +118,10 @@ void BTSetMode(btmodet mode)
     default:
       break;
   }
+
+  // Stop Bluetooth LED Modes
+  clearLEDFlag(LED_BTCONNECTED);
+  clearLEDFlag(LED_BTSCANNING);
 
   // Start Up
   switch (mode) {

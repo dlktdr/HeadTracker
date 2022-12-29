@@ -112,8 +112,6 @@ void FirmwareWizard::startPortDiscovery(const QString &filename)
     discoverPorts(true);
 
     QFile file(filename);
-    QString sufix = QFileInfo(file).suffix().toUpper();
-    QStringList args;
     if(!file.open(QIODevice::ReadOnly)) {
         QMessageBox::critical(this,"Error","Unable to open firmware file " + filename);
         backClicked();
@@ -129,10 +127,11 @@ void FirmwareWizard::startPortDiscovery(const QString &filename)
 
     if(data.startsWith(BLE33HEADER_BIN_MBED) ||
        QFileInfo(file).fileName().startsWith("BLE") ||
+       QFileInfo(file).fileName().startsWith("DTQ") ||
        data.mid(2,2) == BLE33HEADER_BIN_ZEPHER) {
         addToLog("  Firmware is for the Arduino Nano BLE 33 in bin format");
         boardType = BRD_NANO33BLE;
-        programmercommand = "bossac.exe";        
+        programmercommand = bossac_programmer;
         arguments.clear();
         arguments += "-e";
         arguments += "-w";
@@ -143,7 +142,7 @@ void FirmwareWizard::startPortDiscovery(const QString &filename)
     else if(data.startsWith(BLE33HEADER_HEX)) {
             addToLog("  Firmware is for the Arduino Nano BLE 33 in hex format");
             boardType = BRD_NANO33BLE;
-            programmercommand = "bossac.exe";
+            programmercommand = bossac_programmer;
             arguments.clear();
             arguments += "-e";
             arguments += "-w";
@@ -449,6 +448,7 @@ void FirmwareWizard::programClicked()
 
     // Switch to programming window
     ui->stkWidget->setCurrentIndex(1);
+    ui->cmdProgram->setVisible(false);
     ui->cmdBack->setVisible(1);
     ui->ledDownloading->setBlink(true);
 
@@ -472,7 +472,7 @@ void FirmwareWizard::programClicked()
 
         // Relative hostname
         } else {
-            QStringList host = ui->cmbSource->currentData().toString().split('/',QString::KeepEmptyParts);
+            QStringList host = ui->cmbSource->currentData().toString().split('/',Qt::KeepEmptyParts);
             host.removeLast();
             host.append("");
             QString hostparentfolder = host.join('/');
@@ -492,17 +492,18 @@ void FirmwareWizard::programClicked()
 
 void FirmwareWizard::programmerSTDOUTReady()
 {
+    static QRegularExpression re("\\d+%");
+
     QByteArray ba = programmer->readAllStandardOutput();
     QString str(ba);
 
-    // Extract Percentage from bossac
-    QRegExp rx("(\\d+(\\.\\d+)?%)");
-    int pos = 0;
-    while ((pos = rx.indexIn(str, pos)) != -1) {
-        QString pc = rx.cap(1);
-        int percentage = pc.left(pc.length()-1).toInt();
-        ui->progressBar->setValue(percentage);
-        pos += rx.matchedLength();
+    //[================= ] 58% (35/60 pages)
+    // Match one or more digits and a %
+    QRegularExpressionMatch match = re.match(str);
+    if (match.hasMatch()) {
+      QString strPcnt = match.captured(0);
+      strPcnt.chop(1);
+      ui->progressBar->setValue(strPcnt.toInt());
     }
 
     addToLog(ba);

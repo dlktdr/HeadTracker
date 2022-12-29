@@ -35,15 +35,25 @@ static bool serialopened = false;
 #define SERIAL_UARTE CONCAT(NRF_UARTE, SERIAL_UARTE_CH)
 #define SERIAL_UARTE_IRQ CONCAT(CONCAT(UARTE, SERIAL_UARTE_CH), _IRQn)
 
-// Temp Pin, They are not broken out on the NANO33BLE
-#define SERIALOUT_TPIN 4
-#define SERIALOUT_TPORT 1
+// Aux Serial Output Pins
+#define AUXSERIALIN_PIN  PIN_TO_NRFPIN(PinNumber[IO_RX])
+#define AUXSERIALIN_PORT PIN_TO_NRFPORT(PinNumber[IO_RX])
 
-// Pin D5(1.13) + D6(1.14) must be soldered together for inverted SBUS input
-#define SERIALIN_TPIN_OUT 13
-#define SERIALIN_TPORT_OUT 1
-#define SERIALIN_TPIN_IN 14  // This is the actual port the UARTE RX input is hooked up to.
-#define SERIALIN_TPORT_IN 1
+// Aux Serial Output Pins
+#define AUXSERIALOUT_PIN  PIN_TO_NRFPIN(PinNumber[IO_TX])
+#define AUXSERIALOUT_PORT PIN_TO_NRFPORT(PinNumber[IO_TX])
+
+// Temp Pin, They are not broken out on the NANO33BLE
+#define SERIALOUT_TPIN  PIN_TO_NRFPIN(PinNumber[IO_TXINV])
+#define SERIALOUT_TPORT PIN_TO_NRFPORT(PinNumber[IO_TXINV])
+
+// Pin RXINVO + RXINVI must be soldered together for inverted SBUS input
+#define SERIALIN_TPIN_OUT  PIN_TO_NRFPIN(PinNumber[IO_RXINVO])
+#define SERIALIN_TPORT_OUT PIN_TO_NRFPORT(PinNumber[IO_RXINVO])
+
+// This is the pin the UARTE RX input is hooked up to.
+#define SERIALIN_TPIN_IN  PIN_TO_NRFPIN(PinNumber[IO_RXINVI])
+#define SERIALIN_TPORT_IN PIN_TO_NRFPORT(PinNumber[IO_RXINVI])
 
 static uint8_t serialDMATx[SERIAL_TX_SIZE];  // DMA Access Buffer Write
 
@@ -56,25 +66,22 @@ static bool invertRX = false;
 
 volatile bool isTransmitting = false;
 
-void Serial_Start_TX(bool disableint = true)
+void Serial_Start_TX()
 {
   size_t len = MIN(serialTxBuf.getOccupied(), sizeof(serialDMATx));
   if (len == 0) return;
 
-  if (disableint) {
-    irq_disable(SERIAL_UARTE_IRQ);
-    if (isTransmitting) {  // Already sending. Then skip, the ISR will load the payload.
-      irq_enable(SERIAL_UARTE_IRQ);
-      return;
-    }
+  // If currently sending data, ISR will load the next payload
+  //  otherwise, load the buffer and initiat the transfer
+  irq_disable(SERIAL_UARTE_IRQ);
+  if(isTransmitting == false) {
+    isTransmitting = true;
+    serialTxBuf.read(serialDMATx, len);
+    SERIAL_UARTE->EVENTS_ENDTX = 0;
+    SERIAL_UARTE->TXD.MAXCNT = len;
+    SERIAL_UARTE->TASKS_STARTTX = 1;
   }
-
-  // Load the TX buffer
-  serialTxBuf.read(serialDMATx, len);
-  if (disableint) irq_enable(SERIAL_UARTE_IRQ);
-  isTransmitting = true;
-  SERIAL_UARTE->TXD.MAXCNT = len;
-  SERIAL_UARTE->TASKS_STARTTX = 1;
+  irq_enable(SERIAL_UARTE_IRQ);
 }
 
 void SerialTX_isr()
@@ -82,7 +89,6 @@ void SerialTX_isr()
   // Transmission End
   if (SERIAL_UARTE->EVENTS_ENDTX) {
     SERIAL_UARTE->EVENTS_ENDTX = 0;
-    isTransmitting = false;
 
     // Below is done to be sure every cycle invert pin is at the correct level
     NRF_PPI->CHENCLR = SERIALOUT_PPICH_MSK;
@@ -92,16 +98,23 @@ void SerialTX_isr()
     NRF_GPIOTE->CONFIG[SERIALOUT1_GPIOTE] = 0;
     uint32_t confreg = (GPIOTE_CONFIG_MODE_Task << GPIOTE_CONFIG_MODE_Pos) |
                        (GPIOTE_CONFIG_POLARITY_Toggle << GPIOTE_CONFIG_POLARITY_Pos) |
-                       (SBUSOUT_PIN << GPIOTE_CONFIG_PSEL_Pos) |
-                       (SBUSOUT_PORT << GPIOTE_CONFIG_PORT_Pos);
+                       (AUXSERIALOUT_PIN << GPIOTE_CONFIG_PSEL_Pos) |
+                       (AUXSERIALOUT_PORT << GPIOTE_CONFIG_PORT_Pos);
     if (!invertTX) confreg |= GPIOTE_CONFIG_OUTINIT_High << GPIOTE_CONFIG_OUTINIT_Pos;
     NRF_GPIOTE->CONFIG[SERIALOUT1_GPIOTE] = confreg;  // Initial value of pin low
 
     // Enable PPI
     NRF_PPI->CHENSET = SERIALOUT_PPICH_MSK;
 
-    // If there is more data send it.
-    Serial_Start_TX(false);
+    // If there is more data, load and send it
+    size_t len = MIN(serialTxBuf.getOccupied(), sizeof(serialDMATx));
+    if (len > 0) {
+      serialTxBuf.read(serialDMATx, len);
+      SERIAL_UARTE->TXD.MAXCNT = len;
+      SERIAL_UARTE->TASKS_STARTTX = 1;
+    } else {
+      isTransmitting = false;
+    }
   }
 }
 
@@ -154,7 +167,7 @@ int AuxSerial_Open(uint32_t baudrate, uint16_t prtset, uint8_t inversions)
   NRF_GPIOTE->CONFIG[SERIALOUT1_GPIOTE] =
       (GPIOTE_CONFIG_MODE_Task << GPIOTE_CONFIG_MODE_Pos) |
       (GPIOTE_CONFIG_POLARITY_Toggle << GPIOTE_CONFIG_POLARITY_Pos) |
-      (SBUSOUT_PIN << GPIOTE_CONFIG_PSEL_Pos) | (SBUSOUT_PORT << GPIOTE_CONFIG_PORT_Pos);
+      (AUXSERIALOUT_PIN << GPIOTE_CONFIG_PSEL_Pos) | (AUXSERIALOUT_PORT << GPIOTE_CONFIG_PORT_Pos);
 
   // Toggle output pin on every input pin toggle (SBUS out)
   NRF_PPI->CH[SERIALOUT_PPICH].EEP = (uint32_t)&NRF_GPIOTE->EVENTS_IN[SERIALOUT0_GPIOTE];
@@ -178,12 +191,12 @@ int AuxSerial_Open(uint32_t baudrate, uint16_t prtset, uint8_t inversions)
     NRF_GPIOTE->CONFIG[SERIALIN0_GPIOTE] =
         (GPIOTE_CONFIG_MODE_Event << GPIOTE_CONFIG_MODE_Pos) |
         (GPIOTE_CONFIG_POLARITY_HiToLo << GPIOTE_CONFIG_POLARITY_Pos) |
-        (SBUSIN_PIN << GPIOTE_CONFIG_PSEL_Pos) | (SBUSIN_PORT << GPIOTE_CONFIG_PORT_Pos);
+        (AUXSERIALIN_PIN << GPIOTE_CONFIG_PSEL_Pos) | (AUXSERIALIN_PORT << GPIOTE_CONFIG_PORT_Pos);
 
     NRF_GPIOTE->CONFIG[SERIALIN1_GPIOTE] =
         (GPIOTE_CONFIG_MODE_Event << GPIOTE_CONFIG_MODE_Pos) |
         (GPIOTE_CONFIG_POLARITY_LoToHi << GPIOTE_CONFIG_POLARITY_Pos) |
-        (SBUSIN_PIN << GPIOTE_CONFIG_PSEL_Pos) | (SBUSIN_PORT << GPIOTE_CONFIG_PORT_Pos);
+        (AUXSERIALIN_PIN << GPIOTE_CONFIG_PSEL_Pos) | (AUXSERIALIN_PORT << GPIOTE_CONFIG_PORT_Pos);
 
     // Output Pin. One gpiote sets it, one clears it
     NRF_GPIOTE->CONFIG[SERIALIN2_GPIOTE] = (GPIOTE_CONFIG_MODE_Task << GPIOTE_CONFIG_MODE_Pos) |
@@ -212,7 +225,7 @@ int AuxSerial_Open(uint32_t baudrate, uint16_t prtset, uint8_t inversions)
     NRF_PPI->CHENCLR = SERIALIN1_PPICH_MSK | SERIALIN2_PPICH_MSK;
 
     NRF_UART0->PSEL.RXD =
-        (SBUSIN_PIN << UARTE_PSEL_RXD_PIN_Pos) | (SBUSIN_PORT << UARTE_PSEL_RXD_PORT_Pos);
+        (AUXSERIALIN_PIN << UARTE_PSEL_RXD_PIN_Pos) | (AUXSERIALIN_PORT << UARTE_PSEL_RXD_PORT_Pos);
     // Set the pin D5 + D6 back to floating inputs
     //        nrf_gpio_cfg_input(SERIALIN_TPORT_OUT * 32 + SERIALIN_TPIN_OUT,NRF_GPIO_PIN_NOPULL);
     //        nrf_gpio_cfg_input(SERIALIN_TPORT_IN * 32 + SERIALIN_TPIN_IN, NRF_GPIO_PIN_NOPULL);
@@ -285,7 +298,7 @@ if(sbusininv) {
     // Disable the GPIOTE
     NRF_GPIOTE->CONFIG[SBUSIN2_GPIOTE] = 0;
     // Set the UARTE to use the RX Pin directly
-    NRF_UART0->PSEL.RXD = (SBUSIN_PIN << UARTE_PSEL_RXD_PIN_Pos) | (SBUSIN_PORT <<
+    NRF_UART0->PSEL.RXD = (AUXSERIALIN_PIN << UARTE_PSEL_RXD_PIN_Pos) | (AUXSERIALIN_PORT <<
 UARTE_PSEL_RXD_PORT_Pos);
     // Set the pin D5 + D6 back to floating inputs
     nrf_gpio_cfg_input(SBUSIN_TPORT_OUT * 32 + SBUSIN_TPIN_OUT,NRF_GPIO_PIN_NOPULL);
@@ -318,8 +331,6 @@ SBUS_UARTE->TASKS_STARTRX = 1;
 
 void AuxSerial_Close()
 {
-  if (!serialopened) return;
-
   // Stop Interrupts
   irq_disable(UART0_IRQn);
   irq_disable(SERIAL_UARTE_IRQ);
@@ -328,9 +339,9 @@ void AuxSerial_Close()
   NRF_PPI->CHENCLR = SERIALIN1_PPICH_MSK | SERIALIN2_PPICH_MSK | SERIALOUT_PPICH_MSK;
 
   // Disable UART
+  NRF_UART0->ENABLE = 0;
   NRF_UART0->TASKS_STOPRX = 1;
   NRF_UART0->TASKS_STOPTX = 1;
-  NRF_UART0->ENABLE = 0;
   NRF_UART0->CONFIG = 0;
   NRF_UART0->PSEL.TXD = UART_PSEL_TXD_CONNECT_Disconnected << UART_PSEL_TXD_CONNECT_Pos;
   NRF_UART0->PSEL.RXD = UART_PSEL_RXD_CONNECT_Disconnected << UART_PSEL_RXD_CONNECT_Pos;
@@ -340,6 +351,7 @@ void AuxSerial_Close()
   NRF_UART0->ERRORSRC = 0;
 
   // Disable UARTE
+  SERIAL_UARTE->ENABLE = 0;
   SERIAL_UARTE->TASKS_STOPRX = 1;
   SERIAL_UARTE->TASKS_STOPTX = 1;
   SERIAL_UARTE->INTENCLR = 0xFFFFFFFF;
@@ -351,7 +363,8 @@ void AuxSerial_Close()
                            << UARTE_PSEL_TXD_CONNECT_Disconnected;
   SERIAL_UARTE->PSEL.RXD = UARTE_PSEL_RXD_CONNECT_Disconnected
                            << UARTE_PSEL_RXD_CONNECT_Disconnected;
-  SERIAL_UARTE->ENABLE = 0;
+  SERIAL_UARTE->EVENTS_ENDTX = 0;
+  SERIAL_UARTE->EVENTS_ENDRX = 0;
   SERIAL_UARTE->ERRORSRC = 0;
 
   // Disable GPIOTE
@@ -364,7 +377,7 @@ void AuxSerial_Close()
   serialopened = false;
 }
 
-uint32_t AuxSerial_Write(uint8_t *buffer, uint32_t len)
+uint32_t AuxSerial_Write(const uint8_t *buffer, uint32_t len)
 {
   if (serialTxBuf.getFree() < len) return SERIAL_BUFFER_FULL;
   serialTxBuf.write(buffer, len);
