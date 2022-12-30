@@ -69,7 +69,8 @@ for row in s.settings:
 ssize_t btwr_{lowername}(struct bt_conn *conn, const struct bt_gatt_attr *attr, const void *buf, uint16_t len, uint16_t offset, uint8_t flags)
 {{
   if(len == sizeof({ctype})) {{
-    {ctype} newvalue = *({ctype}*)buf;
+    {ctype} newvalue;
+    memcpy(&newvalue, buf, len);
     //LOGD("BT_Wr {name} (0x{addr})");
     trkset.set{name}(newvalue);
   }}
