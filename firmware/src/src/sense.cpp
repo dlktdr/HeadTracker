@@ -937,6 +937,7 @@ void rotate(float pn[3], const float rotation[3])
 
 void reset_fusion()
 {
+  // TODO add a mutex here.
   madgreads = 0;
   madgsensbits = 0;
   firstrun = true;
