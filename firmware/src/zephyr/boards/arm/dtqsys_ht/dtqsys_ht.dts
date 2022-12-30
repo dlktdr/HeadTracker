@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 /dts-v1/;
+#include <dt-bindings/led/led.h>
 #include <nordic/nrf52840_qiaa.dtsi>
 
 / {
@@ -74,7 +75,8 @@
 	    compatible = "worldsemi,ws2812-spi";
 		label = "ledstrip";
 		reg = <0>;
-        spi-max-frequency = <4000000>;
+    spi-max-frequency = <4000000>;
+    color-mapping = <LED_COLOR_ID_GREEN LED_COLOR_ID_RED LED_COLOR_ID_BLUE>;
 		chain-length = <1>;
 		spi-one-frame = <0x70>;
 		spi-zero-frame = <0x40>;
@@ -111,4 +113,14 @@
 };
 &timer4 {
     status = "disabled";
+};
+
+/* USB CDC Device */
+zephyr_udc0: &usbd {
+  compatible = "nordic,nrf-usbd";
+	status = "okay";
+	cdc_acm_uart0 {
+		compatible = "zephyr,cdc-acm-uart";
+		label = "CDC_ACM_0";
+	};
 };

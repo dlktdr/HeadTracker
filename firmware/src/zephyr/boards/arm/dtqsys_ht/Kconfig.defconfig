@@ -5,13 +5,6 @@ if BOARD_DTQSYS_HT
 config BOARD
 	default "dtqsys_ht"
 
-if USB
-config USB_NRFX
-	default y
-config USB_DEVICE_STACK
-	default y
-endif # USB
-
 config BT_CTLR
 	default BT
 
@@ -29,8 +22,6 @@ endif #I2C
 config SPI_NRFX
 	default y
 config NRFX_SPIM
-	default y
-config SPI_2
 	default y
 config SPI_2_NRF_SPIM
 	default y
