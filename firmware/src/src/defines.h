@@ -77,13 +77,6 @@
 #define UARTRX_THREAD_PRIO PRIORITY_LOW - 2
 #define UARTTX_THREAD_PRIO PRIORITY_HIGH
 
-// Threads initialized flags
-extern volatile bool ioThreadRun;
-extern volatile bool serialThreadRun;
-extern volatile bool btThreadRun;
-extern volatile bool senseTreadRun;
-extern volatile bool sbusTreadRun;
-
 // Perepherial Channels Used, Make sure no dupilcates here
 // and can't be used by Zephyr
 // Cannot use GPIOTE interrupt as I override the interrupt handler in PPMIN

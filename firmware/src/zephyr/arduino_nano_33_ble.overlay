@@ -36,11 +36,11 @@
 			read-only;
 		};
 
-        datapt_partition: partition@FC000 {
-            label = "datapt";
-            reg = <0xFC000 0x4000>;
-        };
-	};
+    datapt_partition: partition@FC000 {
+        label = "datapt";
+        reg = <0xFC000 0x4000>;
+    };
+  };
 };
 
 &adc {
@@ -72,9 +72,5 @@
 	cdc_acm_uart0 {
 		compatible = "zephyr,cdc-acm-uart";
 		label = "CDC_ACM_0";
-	};
-  cdc_acm_uart1 {
-		compatible = "zephyr,cdc-acm-uart";
-		label = "CDC_ACM_1";
 	};
 };

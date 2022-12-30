@@ -23,8 +23,6 @@ struct k_poll_event ioRunEvents[1] = {
 };
 const device *gpios[2];
 
-volatile bool buttonpressed = false;
-volatile bool longpressedbutton = false;
 volatile int butpin;
 volatile uint32_t _ledmode = 0;
 

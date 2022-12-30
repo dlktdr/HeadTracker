@@ -32,13 +32,14 @@
 
 #include "io.h"
 #include "log.h"
+#include "nano33ble.h"
 #include "soc_flash.h"
 #include "trackersettings.h"
 #include "ucrc16lib.h"
-#include "nano33ble.h"
+
 
 // Wait for serial connection before starting..
-//#define WAITFOR_DTR
+// #define WAITFOR_DTR
 
 void serialrx_Process();
 char *getJSONBuffer();
@@ -66,7 +67,8 @@ DynamicJsonDocument json(JSON_BUF_SIZE);
 K_MUTEX_DEFINE(data_mutex);
 
 // Flag that serial has been initalized
-static struct k_poll_signal serialThreadRunSignal = K_POLL_SIGNAL_INITIALIZER(serialThreadRunSignal);
+static struct k_poll_signal serialThreadRunSignal =
+    K_POLL_SIGNAL_INITIALIZER(serialThreadRunSignal);
 struct k_poll_event serialRunEvents[1] = {
     K_POLL_EVENT_INITIALIZER(K_POLL_TYPE_SIGNAL, K_POLL_MODE_NOTIFY_ONLY, &serialThreadRunSignal),
 };
@@ -100,8 +102,9 @@ void serial_init()
   int ret;
 
   dev = DEVICE_DT_GET(DT_N_INST_0_zephyr_cdc_acm_uart);
-  if (!dev) {
-    return;
+  if (!device_is_ready(dev)) {
+		//LOG_ERR("CDC ACM device not ready");
+		return;
   }
 
   ret = usb_enable(NULL);
