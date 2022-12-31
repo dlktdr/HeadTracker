@@ -1,3 +1,6 @@
 [submodule "web_configurator"]
 	path = web_configurator
 	url = https://github.com/dlktdr/HeadTracker_WebBLE.git
+[submodule "firmware/src/src/LSM6DS3"]
+	path = firmware/src/src/LSM6DS3
+	url = https://github.com/STMicroelectronics/lsm6ds3-pid.git

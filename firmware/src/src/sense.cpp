@@ -49,6 +49,9 @@
 #if defined(HAS_QMC5883)
 #include "QMC5883/qmc5883.h"
 #endif
+#if defined(HAS_LSM6DS3)
+#include "LSM6DS3/lsm6ds3_reg.h"
+#endif
 
 static float auxdata[10];
 static float raccx = 0, raccy = 0, raccz = 0;
@@ -130,6 +133,35 @@ int sense_Init()
     LOGE("Failed to initalize sensors");
     return -1;
   }
+#endif
+
+#if defined(HAS_LSM6DS3)
+  uint8_t whoamI;
+  dev_ctx.write_reg = platform_write;
+  dev_ctx.read_reg = platform_read;
+  dev_ctx.handle = 0;
+  // Wait sensor boot time
+  rt_sleep_ms(BOOT_TIME);
+  // Check device ID
+  lsm6ds3_device_id_get(&dev_ctx, &whoamI);
+  if (whoamI != LSM6DS3_ID) {
+    LOGE("ERROR, Couldn't find LSM6DS3");
+  }
+  /* Restore default configuration */
+  lsm6ds3_reset_set(&dev_ctx, PROPERTY_ENABLE);
+  uint8_t rst;
+  do {
+    lsm6ds3_reset_get(&dev_ctx, &rst);
+  } while (rst);
+  /*  Enable Block Data Update */
+  lsm6ds3_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
+  /* Set full scale */
+  lsm6ds3_xl_full_scale_set(&dev_ctx, LSM6DS3_2g);
+  lsm6ds3_gy_full_scale_set(&dev_ctx, LSM6DS3_2000dps);
+  /* Set Output Data Rate for Acc and Gyro */
+  lsm6ds3_xl_data_rate_set(&dev_ctx, LSM6DS3_XL_ODR_208Hz);
+  lsm6ds3_gy_data_rate_set(&dev_ctx, LSM6DS3_GY_ODR_208Hz);
+
 #endif
 
 #if defined(HAS_MPU6500)
@@ -708,6 +740,26 @@ void sensor_Thread()
       tgyr[0] *= -1.0;  // Flip X to match other sensors
       gyrValid = true;
     }
+#endif
+
+#if defined(HAS_LSM6DS3)
+    int16_t data_raw_acceleration[3];
+    int16_t data_raw_angular_rate[3];
+    int16_t data_raw_temperature;
+    uint8_t reg;
+
+    lsm6ds3_xl_flag_data_ready_get(&dev_ctx, &reg);
+
+    if (reg) {
+      memset(data_raw_acceleration, 0x00, 3 * sizeof(int16_t));
+      lsm6ds3_acceleration_raw_get(&dev_ctx, data_raw_acceleration);
+      tacc[0] = lsm6ds3_from_fs2g_to_mg(data_raw_acceleration[0]) / 1000.0f;
+      tacc[1] = lsm6ds3_from_fs2g_to_mg(data_raw_acceleration[1]) / 1000.0f;
+      tacc[2] = lsm6ds3_from_fs2g_to_mg(data_raw_acceleration[2]) / 1000.0f;
+      LOGD("Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n", tacc[0], tacc[1], tacc[2]);
+      accValid = true;
+    }
+
 #endif
 
 #if defined(HAS_QMC5883)
