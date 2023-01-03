@@ -13,7 +13,6 @@
 // ADC Sampling Settings
 // doc says that impedance of 800K == 40usec sample time
 
-//#define ADC_DEVICE_NAME DT_LABEL(DT_ALIAS(adcctrl))
 #define ADC_RESOLUTION 10
 #define ADC_GAIN ADC_GAIN_1_6
 #define ADC_REFERENCE ADC_REF_INTERNAL
