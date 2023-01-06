@@ -1,5 +1,5 @@
-#ifndef BOARDNANO33BLE_H
-#define BOARDNANO33BLE_H
+#ifndef BOARDJSON_H
+#define BOARDJSON_H
 
 #include <QObject>
 #include <QJsonDocument>
@@ -13,12 +13,12 @@
 #include "trackersettings.h"
 #include "calibrateble.h"
 
-class BoardNano33BLE : public BoardType
+class BoardJsonHT : public BoardType
 {
     Q_OBJECT
 public:
-    BoardNano33BLE(TrackerSettings *ts);
-    ~BoardNano33BLE();
+    BoardJsonHT(TrackerSettings *ts);
+    ~BoardJsonHT();
 
     // Incoming and outgoing data from the board
     void dataIn(QByteArray &recdat);
@@ -93,4 +93,4 @@ private slots:
 
 
 
-#endif // BOARDNANO33BLE_H
+#endif // BOARDJSON_H
