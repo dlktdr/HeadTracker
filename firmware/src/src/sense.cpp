@@ -82,10 +82,29 @@ Madgwick madgwick;
 int64_t usduration = 0;
 int64_t senseUsDuration = 0;
 
+const struct device *i2c_dev = nullptr;
+
 #if defined(HAS_APDS9960)
 static bool blesenseboard = false;
 static bool lastproximity = false;
 #endif
+
+// TODO.. Move me elsewhere. Also convert to the ST version of LSM9DS1?
+#if defined(HAS_LSM6DS3)
+#define BOOT_TIME 20
+stmdev_ctx_t dev_ctx;
+
+static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp, uint16_t len)
+{
+  return i2c_write_read(i2c_dev, LSM6DS3_I2C_ADD_L, &reg, 1, bufp, len);
+}
+
+static int32_t platform_write(void *handle, uint8_t reg, const uint8_t *bufp, uint16_t len)
+{
+  return i2c_write(i2c_dev, bufp, len, LSM6DS3_I2C_ADD_L);
+}
+#endif
+
 
 #if defined(PCB_NANO33BLE)
 LSM9DS1Class IMU;
@@ -119,7 +138,7 @@ struct k_poll_event calculateRunEvents[1] = {
 
 int sense_Init()
 {
-  const struct device *i2c_dev =
+  i2c_dev =
       device_get_binding("I2C_1");  // DEVICE_DT_GET(DT_NODELABEL(I2C_1));
   if (!i2c_dev) {
     LOGE("Could not get device binding for I2C");
@@ -141,7 +160,7 @@ int sense_Init()
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = 0;
   // Wait sensor boot time
-  rt_sleep_ms(BOOT_TIME);
+  rt_sleep_ms(20);
   // Check device ID
   lsm6ds3_device_id_get(&dev_ctx, &whoamI);
   if (whoamI != LSM6DS3_ID) {

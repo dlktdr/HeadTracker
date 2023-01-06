@@ -128,3 +128,13 @@
 &timer4 {
     status = "disabled";
 };
+
+/* USB CDC Device */
+zephyr_udc0: &usbd {
+  compatible = "nordic,nrf-usbd";
+	status = "okay";
+	cdc_acm_uart0 {
+		compatible = "zephyr,cdc-acm-uart";
+		label = "CDC_ACM_0";
+	};
+};
