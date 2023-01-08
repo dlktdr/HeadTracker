@@ -9,7 +9,6 @@
 #include <QTimer>
 
 #include "boardtype.h"
-#include "ucrc16lib.h"
 #include "trackersettings.h"
 #include "calibrateble.h"
 
@@ -76,7 +75,7 @@ private:
     public:
         static const T *getData(const QByteArray &ba, int &len) {
             T* array = (T*)ba.constData();
-            len = ba.size() / sizeof(T);
+            len = (int)(ba.size() / sizeof(T));
             return array;
         }
     };

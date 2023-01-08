@@ -6,7 +6,6 @@
 #include <QtOpenGL>
 #include "calibrate/imuread.h"
 #include "magcalwidget.h"
-#include "calibrate/visualize.h"
 
 static const GLfloat light_ambient[4]  = { 0.0f, 0.0f, 0.0f, 1.0f };
 //static const GLfloat light_ambient[4]  = { 0.4f, 0.4f, 0.4f, 1.0f };
@@ -182,9 +181,9 @@ void MagCalWidget::paintGL()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glColor3f(1, 0, 0);	// set current color to red
     glLoadIdentity();
-    xscale = 0.05;
-    yscale = 0.05;
-    zscale = 0.05;
+    xscale = 0.05f;
+    yscale = 0.05f;
+    zscale = 0.05f;
     xoff = 0.0;
     yoff = 0.0;
     zoff = -7.0;
