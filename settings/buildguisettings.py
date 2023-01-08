@@ -47,7 +47,10 @@ s.readSettings()
 
 # Write the constants to the file
 for row in s.const:
-  f.write("  static constexpr "  + s.typeToC(row[s.coltype]) + " " + row[s.colname] + " = " + row[s.coldefault] + ";\n")
+  if "float" in row[s.coltype]:
+    f.write("  static constexpr "  + s.typeToC(row[s.coltype]) + " " + row[s.colname] + " = {}".format(float(row[s.coldefault])) + "f;\n")
+  else:
+    f.write("  static constexpr "  + s.typeToC(row[s.coltype]) + " " + row[s.colname] + " = " + row[s.coldefault] + ";\n")
 
 # Write the Constructor
 f.write("\n  BaseTrackerSettings(QObject *parent=nullptr) : \n    QObject(parent)\n  {\n")
