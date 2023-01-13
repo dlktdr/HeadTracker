@@ -37,7 +37,6 @@
 #include "trackersettings.h"
 #include "uart_mode.h"
 
-
 #if defined(HAS_APDS9960)
 #include "APDS9960/APDS9960.h"
 #endif
@@ -50,6 +49,8 @@
 #if defined(HAS_QMC5883)
 #include "QMC5883/qmc5883.h"
 #endif
+
+void gyroCalibrate();
 
 static float auxdata[10];
 static float raccx = 0, raccy = 0, raccz = 0;
@@ -797,6 +798,9 @@ void sensor_Thread()
       madgsensbits |= MADGINIT_MAG;
     }
 
+    // Run Gyro Calibration
+    gyroCalibrate();
+
     // Only do this update after the first mag and accel data have been read.
     if (madgreads == 0) {
       if (madgsensbits == MADGINIT_READY) {
@@ -861,6 +865,72 @@ void sensor_Thread()
     }
 
   }  // END THREAD
+}
+
+void gyroCalibrate()
+{
+  static float last_gyro_mag = 0;
+  static float last_acc_mag = 0;
+  static float filt_gyrx = 0;
+  static float filt_gyry = 0;
+  static float filt_gyrz = 0;
+  static bool sent_gyro_cal_msg = false;
+  static uint32_t filter_samples = 0;
+  static uint64_t lasttime = 0;
+
+  uint64_t time = micros64();
+  if (lasttime == 0) {  // Skip first run
+    lasttime = time;
+    return;
+  }
+  float deltatime = (float)(time - lasttime) / 1000000.0f;
+  if (deltatime == 0.0f) return;
+  lasttime = time;
+
+  float gyro_magnitude = sqrt(rgyrx * rgyrx + rgyry * rgyry + rgyrz * rgyrz);
+  float acc_magnitude = sqrt(raccx * raccx + raccy * raccy + raccz * raccz);
+  float gyro_dif = (gyro_magnitude - last_gyro_mag) / deltatime;
+  last_gyro_mag = gyro_magnitude;
+  float acc_dif = (acc_magnitude - last_acc_mag) / deltatime;
+  last_acc_mag = acc_magnitude;
+
+  // Is Gyro anc Accelerometer stable?
+  if (fabs(gyro_dif) < GYRO_STABLE_DIFF && fabs(acc_dif) < ACC_STABLE_DIFF) {
+    // First run, preload filter
+    if (filter_samples == 0) {
+      filt_gyrx = rgyrx;
+      filt_gyry = rgyry;
+      filt_gyrz = rgyrz;
+      sent_gyro_cal_msg = false;
+      filter_samples++;
+    } else if (filter_samples < GYRO_STABLE_SAMPLES) {
+      filt_gyrx = ((1.0f - GYRO_SAMPLE_WEIGHT) * filt_gyrx) + (GYRO_SAMPLE_WEIGHT * rgyrx);
+      filt_gyry = ((1.0f - GYRO_SAMPLE_WEIGHT) * filt_gyry) + (GYRO_SAMPLE_WEIGHT * rgyry);
+      filt_gyrz = ((1.0f - GYRO_SAMPLE_WEIGHT) * filt_gyrz) + (GYRO_SAMPLE_WEIGHT * rgyrz);
+      filter_samples++;
+    } else if (filter_samples == GYRO_STABLE_SAMPLES) {
+      if(fabs(gyrxoff - filt_gyrx) > GYRO_FLASH_IF_OFFSET ||
+         fabs(gyryoff - filt_gyry) > GYRO_FLASH_IF_OFFSET ||
+         fabs(gyrzoff - filt_gyrz) > GYRO_FLASH_IF_OFFSET) {
+        if (!sent_gyro_cal_msg) {
+          k_mutex_lock(&data_mutex, K_FOREVER);
+          trkset.setGyrXOff(filt_gyrx);
+          trkset.setGyrYOff(filt_gyry);
+          trkset.setGyrZOff(filt_gyrz);
+          k_mutex_unlock(&data_mutex);
+          trkset.saveToEEPROM();
+          LOGW("Gyro calibration differs from saved value. Updating flash, x=%.3f,y=%.3f,z=%.3f", filt_gyrx, filt_gyry, filt_gyrz);
+          sent_gyro_cal_msg = true;
+        }
+      }
+      filter_samples++;
+    }
+  } else {
+    filter_samples = 0;
+  }
+
+  // Output in CSV format for determining limits
+  // printk("%.4f,%.2f,%.2f\n", (float)time / 1000000.0f, gyro_dif, acc_dif);
 }
 
 // FROM https://stackoverflow.com/questions/1628386/normalise-orientation-between-0-and-360
