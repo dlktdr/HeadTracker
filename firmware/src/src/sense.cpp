@@ -92,7 +92,7 @@ LSM9DS1Class IMU;
 #endif
 
 #if defined(HAS_BMI270)
-  const struct device *bmi270Dev;
+const struct device *bmi270Dev;
 #endif
 
 // Initial Orientation Data+Vars
@@ -142,11 +142,12 @@ int sense_Init()
 #endif
 
 #if defined(HAS_BMI270)
-  bmi270Dev = DEVICE_DT_GET_ONE(bosch_bmi270);;
-	if (!device_is_ready(bmi270Dev)) {
-		printf("Device %s is not ready\n", bmi270Dev->name);
-		return -1;
-	}
+  bmi270Dev = DEVICE_DT_GET_ONE(bosch_bmi270);
+  ;
+  if (!device_is_ready(bmi270Dev)) {
+    printf("Device %s is not ready\n", bmi270Dev->name);
+    return -1;
+  }
   printk("Found device %s", bmi270Dev->name);
 
   struct sensor_value full_scale, sampling_freq, oversampling;
@@ -165,25 +166,21 @@ int sense_Init()
    */
   sensor_attr_set(bmi270Dev, SENSOR_CHAN_ACCEL_XYZ, SENSOR_ATTR_SAMPLING_FREQUENCY, &sampling_freq);
 
-	/* Setting scale in degrees/s to match the sensor scale */
-	full_scale.val1 = 2000;          /* dps */
-	full_scale.val2 = 0;
-	sampling_freq.val1 = 200;       /* Hz. Performance mode */
-	sampling_freq.val2 = 0;
-	oversampling.val1 = 1;          /* Normal mode */
-	oversampling.val2 = 0;
+  /* Setting scale in degrees/s to match the sensor scale */
+  full_scale.val1 = 2000; /* dps */
+  full_scale.val2 = 0;
+  sampling_freq.val1 = 200; /* Hz. Performance mode */
+  sampling_freq.val2 = 0;
+  oversampling.val1 = 1; /* Normal mode */
+  oversampling.val2 = 0;
 
-	sensor_attr_set(bmi270Dev, SENSOR_CHAN_GYRO_XYZ, SENSOR_ATTR_FULL_SCALE,
-			&full_scale);
-	sensor_attr_set(bmi270Dev, SENSOR_CHAN_GYRO_XYZ, SENSOR_ATTR_OVERSAMPLING,
-			&oversampling);
-	/* Set sampling frequency last as this also sets the appropriate
-	 * power mode. If already sampling, change sampling frequency to
-	 * 0.0Hz before changing other attributes
-	 */
-	sensor_attr_set(bmi270Dev, SENSOR_CHAN_GYRO_XYZ,
-			SENSOR_ATTR_SAMPLING_FREQUENCY,
-			&sampling_freq);
+  sensor_attr_set(bmi270Dev, SENSOR_CHAN_GYRO_XYZ, SENSOR_ATTR_FULL_SCALE, &full_scale);
+  sensor_attr_set(bmi270Dev, SENSOR_CHAN_GYRO_XYZ, SENSOR_ATTR_OVERSAMPLING, &oversampling);
+  /* Set sampling frequency last as this also sets the appropriate
+   * power mode. If already sampling, change sampling frequency to
+   * 0.0Hz before changing other attributes
+   */
+  sensor_attr_set(bmi270Dev, SENSOR_CHAN_GYRO_XYZ, SENSOR_ATTR_SAMPLING_FREQUENCY, &sampling_freq);
 
 #endif
 
@@ -766,17 +763,17 @@ void sensor_Thread()
 #endif
 
 #if defined(HAS_BMI270)
-    if(device_is_ready(bmi270Dev)) {
-      if(sensor_sample_fetch(bmi270Dev) == 0) {
+    if (device_is_ready(bmi270Dev)) {
+      if (sensor_sample_fetch(bmi270Dev) == 0) {
         struct sensor_value acc[3], gyr[3];
         sensor_channel_get(bmi270Dev, SENSOR_CHAN_ACCEL_XYZ, acc);
         sensor_channel_get(bmi270Dev, SENSOR_CHAN_GYRO_XYZ, gyr);
-        tacc[0] = sensor_value_to_double(&acc[0]); // X
-        tacc[1] = sensor_value_to_double(&acc[1]); // Y
-        tacc[2] = sensor_value_to_double(&acc[2]); // Z
-        tgyr[0] = sensor_value_to_double(&gyr[0]); // X
-        tgyr[1] = sensor_value_to_double(&gyr[1]); // Y
-        tgyr[2] = sensor_value_to_double(&gyr[2]); // Z
+        tacc[0] = sensor_value_to_double(&acc[0]);  // X
+        tacc[1] = sensor_value_to_double(&acc[1]);  // Y
+        tacc[2] = sensor_value_to_double(&acc[2]);  // Z
+        tgyr[0] = sensor_value_to_double(&gyr[0]);  // X
+        tgyr[1] = sensor_value_to_double(&gyr[1]);  // Y
+        tgyr[2] = sensor_value_to_double(&gyr[2]);  // Z
         gyrValid = true;
         accValid = true;
       }
