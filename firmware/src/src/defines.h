@@ -17,6 +17,11 @@
 #define VERSION FW_MAJ.CONCAT(FW_MIN, FW_REV)
 #define FW_VERSION STRINGIFY(VERSION)
 
+// The majority of features are the same on Sense2
+#if defined(PCB_NANO33BLE_SENSE2)
+#define PCB_NANO33BLE
+#endif
+
 #if defined(PCB_NANO33BLE)
 #define FW_BOARD "NANO33BLE"
 #elif defined(PCB_DTQSYS)

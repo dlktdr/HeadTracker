@@ -8,12 +8,18 @@
 #define INPUT_PULLUP (GPIO_INPUT | GPIO_PULL_UP)
 
 // Board Features
+#if defined(PCB_NANO33BLE_SENSE2)
+  #define HAS_BMI270
+  #define HAS_BMM150
+#else
+  #define HAS_LSM9DS1
+#endif
+
 #define HAS_APDS9960
 #define HAS_3DIODE_RGB
 #define HAS_POWERLED
 #define HAS_NOTIFYLED
 #define HAS_PWMOUTPUTS
-#define HAS_LSM9DS1
 
 // Mapping Analog numbers to Analog pins
 #define AN0 7 // AN4 pin

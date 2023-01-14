@@ -1,0 +1,134 @@
+/*
+ * Copyright (c) 2020 Jefferson Lee
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+/dts-v1/;
+#include <nordic/nrf52840_qiaa.dtsi>
+
+/ {
+	model = "Arduino Nano 33 BLE Sense Rev2";
+	compatible = "arduino,arduino_nano_33_ble_sense_r2";
+
+	chosen {
+		zephyr,sram = &sram0;
+		zephyr,flash = &flash0;
+		zephyr,code-partition = &code_partition;
+	};
+
+	aliases {
+		adcctrl = &adc;
+	};
+};
+
+&flash0 {
+	partitions {
+		compatible = "fixed-partitions";
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		boot_partition: partition@0 {
+			label = "sam-ba";
+			reg = <0x00000000 0x00010000>;
+			read-only;
+		};
+
+		code_partition: partition@10000 {
+			label = "code";
+			reg = <0x10000 0xEC000>;
+			read-only;
+		};
+
+    datapt_partition: partition@FC000 {
+        label = "datapt";
+        reg = <0xFC000 0x4000>;
+    };
+	};
+};
+
+/*
+ * guide specifying pin numbers: https://docs.zephyrproject.org/latest/boards/arm/nrf52840dk_nrf52840/doc/index.html
+ * Given Pin PB.A:
+ * pin_no = B*32 + A
+ * ex. P1.0 => 32
+ */
+&adc {
+	status = "okay";
+};
+&uart0 {
+	compatible = "nordic,nrf-uart";
+	current-speed = <115200>;
+	status = "okay";
+	tx-pin = <35>; //P1.03
+	rx-pin = <42>; //P1.10
+};
+&i2c0 {
+	compatible = "nordic,nrf-twim";
+	status = "okay";
+	sda-pin = <31>; //P0.31
+	scl-pin = <2>; //P0.02
+};
+&i2c1 {
+	compatible = "nordic,nrf-twim";
+	status = "okay";
+	sda-pin = <14>; //P0.14
+	scl-pin = <15>; //P0.15
+  zephyr,concat-buf-size = <264>;
+  clock-frequency = <100000>;
+
+	bmi270@68 {
+		compatible = "bosch,bmi270";
+		reg = <0x68>;
+		label = "BMI270";
+	};
+
+  bmm150@10 {
+		compatible = "bosch,bmm150";
+		reg = <0x10>;
+		label = "BMM150";
+	};
+};
+// we use SPI2 because SPI1/0 shares conflicts with I2C1/0
+&spi2 {
+	compatible = "nordic,nrf-spim";
+	status = "okay";
+	sck-pin = <13>; //P0.13
+	mosi-pin = <33>; //P1.01
+	miso-pin = <40>; //P1.08
+};
+&gpio0 {
+	status = "okay";
+};
+&gpio1 {
+	status = "okay";
+};
+zephyr_udc0: &usbd {
+	compatible = "nordic,nrf-usbd";
+	status = "okay";
+  cdc_acm_uart0 {
+		compatible = "zephyr,cdc-acm-uart";
+		label = "CDC_ACM_0";
+	};
+};
+// All PWM's should be enaled
+&pwm0 {
+	status = "okay";
+};
+&pwm1 {
+	status = "okay";
+};
+&pwm2 {
+	status = "okay";
+};
+&pwm3 {
+	status = "okay";
+};
+&rtc1 {
+	status = "disabled";
+};
+&timer3 {
+    status = "disabled";
+};
+&timer4 {
+    status = "disabled";
+};
