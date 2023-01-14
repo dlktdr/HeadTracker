@@ -37,7 +37,6 @@
 #include "trackersettings.h"
 #include "uart_mode.h"
 
-
 #if defined(HAS_APDS9960)
 #include "APDS9960/APDS9960.h"
 #endif
@@ -105,7 +104,15 @@ static float amag[3] = {0, 0, 0};
 // Analog Filters
 SF1eFilter *anFilter[AN_CH_CNT];
 
-volatile bool senseTreadRun = false;
+static struct k_poll_signal senseThreadRunSignal = K_POLL_SIGNAL_INITIALIZER(senseThreadRunSignal);
+struct k_poll_event senseRunEvents[1] = {
+    K_POLL_EVENT_INITIALIZER(K_POLL_TYPE_SIGNAL, K_POLL_MODE_NOTIFY_ONLY, &senseThreadRunSignal),
+};
+
+static struct k_poll_signal calculateThreadRunSignal = K_POLL_SIGNAL_INITIALIZER(calculateThreadRunSignal);
+struct k_poll_event calculateRunEvents[1] = {
+    K_POLL_EVENT_INITIALIZER(K_POLL_TYPE_SIGNAL, K_POLL_MODE_NOTIFY_ONLY, &calculateThreadRunSignal),
+};
 
 int sense_Init()
 {
@@ -161,7 +168,11 @@ int sense_Init()
     SF1eFilterInit(anFilter[i]);
   }
 
-  senseTreadRun = true;
+  // Start reading the IMU sensors + fusion algorithm
+  k_poll_signal_raise(&senseThreadRunSignal, 1);
+
+  // Start doing the other calculations
+  k_poll_signal_raise(&calculateThreadRunSignal, 1);
 
   return 0;
 }
@@ -173,7 +184,10 @@ int sense_Init()
 void calculate_Thread()
 {
   while (1) {
-    if (!senseTreadRun || pauseForFlash) {
+    // Do not execute below until after initialization has happened
+    k_poll(calculateRunEvents, 1, K_FOREVER);
+
+    if (pauseForFlash) {
       rt_sleep_ms(10);
       continue;
     }
@@ -624,7 +638,10 @@ void calculate_Thread()
 void sensor_Thread()
 {
   while (1) {
-    if (!senseTreadRun || pauseForFlash) {
+    // Do not execute below until after initialization has happened
+    k_poll(senseRunEvents, 1, K_FOREVER);
+
+    if (pauseForFlash) {
       rt_sleep_ms(10);
       continue;
     }
@@ -920,6 +937,7 @@ void rotate(float pn[3], const float rotation[3])
 
 void reset_fusion()
 {
+  // TODO add a mutex here.
   madgreads = 0;
   madgsensbits = 0;
   firstrun = true;

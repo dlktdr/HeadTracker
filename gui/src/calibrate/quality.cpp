@@ -94,27 +94,27 @@ void quality_reset(void)
         sphereideal[0].z = 1.0f;
         for (i=1; i <= 15; i++) {
             longitude = ((float)(i - 1) + 0.5f) * (M_PI * 2.0 / 15.0);
-            sphereideal[i].x = cosf(longitude) * cosf(1.05911) * -1.0f;
-            sphereideal[i].y = sinf(longitude) * cosf(1.05911) * -1.0f;
-            sphereideal[i].z = sinf(1.05911);
+            sphereideal[i].x = cosf(longitude) * cosf(1.05911f) * -1.0f;
+            sphereideal[i].y = sinf(longitude) * cosf(1.05911f) * -1.0f;
+            sphereideal[i].z = sinf(1.05911f);
         }
         for (i=16; i <= 49; i++) {
             longitude = ((float)(i - 16) + 0.5f) * (M_PI * 2.0 / 34.0);
-            sphereideal[i].x = cosf(longitude) * cos(0.37388) * -1.0f;
-            sphereideal[i].y = sinf(longitude) * cos(0.37388) * -1.0f;
-            sphereideal[i].z = sinf(0.37388);
+            sphereideal[i].x = cosf(longitude) * cos(0.37388f) * -1.0f;
+            sphereideal[i].y = sinf(longitude) * cos(0.37388f) * -1.0f;
+            sphereideal[i].z = sinf(0.37388f);
         }
         for (i=50; i <= 83; i++) {
             longitude = ((float)(i - 50) + 0.5f) * (M_PI * 2.0 / 34.0);
-            sphereideal[i].x = cosf(longitude) * cos(0.37388) * -1.0f;
-            sphereideal[i].y = sinf(longitude) * cos(0.37388) * -1.0f;
-            sphereideal[i].z = sinf(-0.37388);
+            sphereideal[i].x = cosf(longitude) * cos(0.37388f) * -1.0f;
+            sphereideal[i].y = sinf(longitude) * cos(0.37388f) * -1.0f;
+            sphereideal[i].z = sinf(-0.37388f);
         }
         for (i=84; i <= 98; i++) {
             longitude = ((float)(i - 1) + 0.5f) * (M_PI * 2.0 / 15.0);
-            sphereideal[i].x = cosf(longitude) * cosf(1.05911) * -1.0f;
-            sphereideal[i].y = sinf(longitude) * cosf(1.05911) * -1.0f;
-            sphereideal[i].z = sinf(-1.05911);
+            sphereideal[i].x = cosf(longitude) * cosf(1.05911f) * -1.0f;
+            sphereideal[i].y = sinf(longitude) * cosf(1.05911f) * -1.0f;
+            sphereideal[i].z = sinf(-1.05911f);
         }
         sphereideal[99].x = 0.0f;
         sphereideal[99].y = 0.0f;

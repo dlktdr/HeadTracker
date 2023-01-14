@@ -36,11 +36,11 @@
 			read-only;
 		};
 
-        datapt_partition: partition@FC000 {
-            label = "datapt";
-            reg = <0xFC000 0x4000>;
-        };
-	};
+    datapt_partition: partition@FC000 {
+        label = "datapt";
+        reg = <0xFC000 0x4000>;
+    };
+  };
 };
 
 &adc {
@@ -67,3 +67,10 @@
     status = "disabled";
 };
 
+/* USB CDC Device */
+&zephyr_udc0 {
+	cdc_acm_uart0 {
+		compatible = "zephyr,cdc-acm-uart";
+		label = "CDC_ACM_0";
+	};
+};

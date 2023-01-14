@@ -1,4 +1,5 @@
 #include "boardnano33ble.h"
+#include "ucrc16lib.h"
 
 #ifndef WINDOWS
 #define Sleep(x) sleep(x)

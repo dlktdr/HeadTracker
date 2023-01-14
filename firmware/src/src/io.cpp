@@ -17,11 +17,12 @@
 K_SEM_DEFINE(button_sem, 0, 1);
 K_SEM_DEFINE(lngbutton_sem, 0, 1);
 
-volatile bool ioThreadRun = false;
+static struct k_poll_signal ioThreadRunSignal = K_POLL_SIGNAL_INITIALIZER(ioThreadRunSignal);
+struct k_poll_event ioRunEvents[1] = {
+    K_POLL_EVENT_INITIALIZER(K_POLL_TYPE_SIGNAL, K_POLL_MODE_NOTIFY_ONLY, &ioThreadRunSignal),
+};
 const device *gpios[2];
 
-volatile bool buttonpressed = false;
-volatile bool longpressedbutton = false;
 volatile int butpin;
 volatile uint32_t _ledmode = 0;
 
@@ -73,7 +74,9 @@ void io_Thread()
 
   while (1) {
     rt_sleep_ms(IO_PERIOD);
-    if (!ioThreadRun || pauseForFlash) continue;
+    k_poll(ioRunEvents, 1, K_FOREVER);
+
+    if (pauseForFlash) continue;
 
 #if defined(HAS_NOTIFYLED)
     // LEDS
@@ -224,8 +227,8 @@ bool readCenterButton()
 
 void io_init()
 {
-  gpios[0] = device_get_binding("GPIO_0");
-  gpios[1] = device_get_binding("GPIO_1");
+  gpios[0] = DEVICE_DT_GET(DT_NODELABEL(gpio0));  // device_get_binding("GPIO_0");
+  gpios[1] = DEVICE_DT_GET(DT_NODELABEL(gpio1));  // device_get_binding("GPIO_1");
 
 #if defined(PCB_NANO33BLE)
   pinMode(IO_VDDENA, GPIO_OUTPUT);
@@ -288,5 +291,5 @@ void io_init()
   pinMode(IO_AN3, GPIO_INPUT);
 #endif
 
-  ioThreadRun = true;
+  k_poll_signal_raise(&ioThreadRunSignal, 1);
 }

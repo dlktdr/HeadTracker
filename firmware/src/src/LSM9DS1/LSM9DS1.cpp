@@ -60,7 +60,7 @@ LSM9DS1Class::~LSM9DS1Class() {}
 
 int LSM9DS1Class::begin()
 {
-  i2c_dev = device_get_binding("I2C_1");
+  i2c_dev = DEVICE_DT_GET(DT_NODELABEL(i2c1));
   if (!i2c_dev) {
     LOGE("Could not get device binding for I2C");
     return 0;

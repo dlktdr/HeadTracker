@@ -32,15 +32,15 @@ class BaseTrackerSettings : public QObject
 {
   Q_OBJECT
 public:
-  static constexpr float FLOAT_MIN = -1000000;
-  static constexpr float FLOAT_MAX = 1000000;
+  static constexpr float FLOAT_MIN = -1000000.0f;
+  static constexpr float FLOAT_MAX = 1000000.0f;
   static constexpr uint16_t MIN_PWM = 988;
   static constexpr uint16_t MAX_PWM = 2012;
   static constexpr uint16_t DEF_MIN_PWM = 1050;
   static constexpr uint16_t DEF_MAX_PWM = 1950;
   static constexpr uint16_t PPM_CENTER = 1500;
-  static constexpr float MIN_GAIN = 0.01;
-  static constexpr float MAX_GAIN = 35;
+  static constexpr float MIN_GAIN = 0.01f;
+  static constexpr float MAX_GAIN = 35.0f;
   static constexpr uint16_t MINMAX_RNG = 242;
   static constexpr uint16_t MIN_CNT = (((MAX_PWM - MIN_PWM) / 2) + MIN_PWM - MINMAX_RNG);
   static constexpr uint16_t MAX_CNT = (((MAX_PWM - MIN_PWM) / 2) + MIN_PWM + MINMAX_RNG);
@@ -51,14 +51,14 @@ public:
   static constexpr uint8_t ROLL_REVERSE_BIT = 2;
   static constexpr uint8_t PAN_REVERSE_BIT = 4;
   static constexpr uint16_t SBUS_CENTER = 992;
-  static constexpr float SBUS_SCALE = 1.6;
-  static constexpr float RESET_ON_TILT_TIME = 1.5;
-  static constexpr float RESET_ON_TILT_AFTER = 1;
-  static constexpr float RECENTER_PULSE_DURATION = 0.5;
-  static constexpr float UART_ACTIVE_TIME = 0.1;
-  static constexpr float PPM_MIN_FRAMESYNC = 3000;
-  static constexpr float PPM_MIN_FRAME = 6666;
-  static constexpr float PPM_MAX_FRAME = 40000;
+  static constexpr float SBUS_SCALE = 1.6f;
+  static constexpr float RESET_ON_TILT_TIME = 1.5f;
+  static constexpr float RESET_ON_TILT_AFTER = 1.0f;
+  static constexpr float RECENTER_PULSE_DURATION = 0.5f;
+  static constexpr float UART_ACTIVE_TIME = 0.1f;
+  static constexpr float PPM_MIN_FRAMESYNC = 3000.0f;
+  static constexpr float PPM_MIN_FRAME = 6666.0f;
+  static constexpr float PPM_MAX_FRAME = 40000.0f;
   static constexpr uint8_t UART_MODE_OFF = 0;
   static constexpr uint8_t UART_MODE_SBUS = 1;
   static constexpr uint8_t UART_MODE_CRSFIN = 2;

@@ -77,13 +77,6 @@
 #define UARTRX_THREAD_PRIO PRIORITY_LOW - 2
 #define UARTTX_THREAD_PRIO PRIORITY_HIGH
 
-// Threads initialized flags
-extern volatile bool ioThreadRun;
-extern volatile bool serialThreadRun;
-extern volatile bool btThreadRun;
-extern volatile bool senseTreadRun;
-extern volatile bool sbusTreadRun;
-
 // Perepherial Channels Used, Make sure no dupilcates here
 // and can't be used by Zephyr
 // Cannot use GPIOTE interrupt as I override the interrupt handler in PPMIN
@@ -132,10 +125,10 @@ extern volatile bool sbusTreadRun;
 // RTOS Specifics
 #if defined(RTOS_ZEPHYR)
 #include "zephyr.h"
-#define micros() k_cyc_to_us_floor32(k_cycle_get_32())
-#define millis64() k_uptime_get()
-#define micros64() k_cyc_to_us_floor64(k_cycle_get_32())
 #define millis() k_cyc_to_ms_floor32(k_cycle_get_32())
+#define millis64() k_uptime_get()
+#define micros() k_cyc_to_us_floor32(k_cycle_get_32())
+#define micros64() k_cyc_to_us_floor64(k_cycle_get_32())
 #define rt_sleep_ms(x) k_msleep(x)
 #define rt_sleep_us(x) k_usleep(x)
 

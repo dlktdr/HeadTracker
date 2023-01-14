@@ -41,26 +41,34 @@ struct bt_uuid_16 htoverridech = BT_UUID_INIT_16(0xAFF1);
 struct bt_uuid_16 btbutton = BT_UUID_INIT_16(0xAFF2);
 struct bt_uuid_16 jsonuuid = BT_UUID_INIT_16(0xAFF3);
 
-// Switching modes, don't execute
-volatile bool btThreadRun = false;
+K_SEM_DEFINE(btPauseSem, 0, 1);
+static struct k_poll_signal btThreadRunSignal = K_POLL_SIGNAL_INITIALIZER(btThreadRunSignal);
+struct k_poll_event btRunEvents[1] = {
+    K_POLL_EVENT_INITIALIZER(K_POLL_TYPE_SIGNAL, K_POLL_MODE_NOTIFY_ONLY, &btThreadRunSignal),
+};
+
+void bt_ready(int error)
+{
+  k_poll_signal_raise(&btThreadRunSignal, 1);
+}
 
 void bt_init()
 {
-  int err = bt_enable(NULL);
+  int err = bt_enable(bt_ready);
   if (err) {
     LOGE("Bluetooth init failed (err %d)", err);
     return;
   }
-
   LOGI("Bluetooth initialized");
-  btThreadRun = true;
 }
 
 void bt_Thread()
 {
   int64_t usduration = 0;
   while (1) {
-    if (!btThreadRun || pauseForFlash) {
+    k_poll(btRunEvents, 1, K_FOREVER);
+
+    if (pauseForFlash || k_sem_count_get(&btPauseSem) == 1) {
       rt_sleep_ms(10);
       continue;
     }
@@ -100,7 +108,7 @@ void BTSetMode(btmodet mode)
   // Requested same mode, just return
   if (mode == curmode) return;
 
-  btThreadRun = false;
+  k_sem_give(&btPauseSem);
 
   // Shut Down
   switch (curmode) {
@@ -139,7 +147,7 @@ void BTSetMode(btmodet mode)
       break;
   }
 
-  btThreadRun = true;
+  k_sem_take(&btPauseSem, K_NO_WAIT);
 
   curmode = mode;
 }

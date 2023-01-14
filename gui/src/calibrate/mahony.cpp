@@ -63,7 +63,7 @@ void fusion_update(const AccelSensor_t *Accel, const MagSensor_t *Mag, const Gyr
     Q_UNUSED(MagCal);
     int i;
     float ax, ay, az, gx, gy, gz, mx, my, mz;
-    float factor = M_PI / 180.0;
+    float factor = (float)(M_PI / 180.0);
 
     ax = Accel->Gp[0];
     ay = Accel->Gp[1];

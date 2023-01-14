@@ -12,7 +12,6 @@
 
 #include "io.h"
 
-
 static const struct device *hdev;
 
 #define JOYSTICK_BUTTONS
