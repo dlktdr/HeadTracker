@@ -183,27 +183,17 @@ int sense_Init()
 
 #if defined(HAS_BMM150)
   /* Status of api are returned to this variable */
-  int8_t rslt;
+  int8_t rbslt;
 
-  rslt = bmm150_interface_selection(&bmm1_dev);
-  bmm150_error_codes_print_result("bmm150_interface_selection", rslt);
-  if (rslt == BMM150_OK) {
-    rslt = bmm150_init(&bmm1_dev);
-    bmm150_error_codes_print_result("bmm150_init", rslt);
+  rbslt = bmm150_interface_selection(&bmm1_dev);
+  bmm150_error_codes_print_result("bmm150_interface_selection", rbslt);
+  if (rbslt == BMM150_OK) {
+    rbslt = bmm150_init(&bmm1_dev);
+    bmm150_error_codes_print_result("bmm150_init", rbslt);
 
-    if (rslt == BMM150_OK) {
-      rslt = set_config(&bmm1_dev);
-      bmm150_error_codes_print_result("set_config", rslt);
-    }
-
-    while (1) {
-      /* Get the interrupt status */
-      rslt = bmm150_get_interrupt_status(&bmm1_dev);
-
-      if (dev.int_status & BMM150_INT_ASSERTED_HIGH_THRES) {
-        printf("High threshold interrupt occured");
-        break;
-      }
+    if (rbslt == BMM150_OK) {
+      rbslt = set_config(&bmm1_dev);
+      bmm150_error_codes_print_result("set_config", rbslt);
     }
   }
 
@@ -812,31 +802,20 @@ void sensor_Thread()
       // printk("GyrX=%4.2f,Y=%4.2f,Z=%4.2f\n", tgyr[0], tgyr[1], tgyr[2]);
       accValid = true;
       gyrValid = true;
-
-      magValid = true;  // REMOVE ME when MAG WORKS
-      tmag[0] = 0;
-      tmag[1] = 0;
-      tmag[2] = 0;
     }
 
 #endif
 
-    /*
-    #if defined(HAS_BMM150)
-        if (device_is_ready(bmm150Dev)) {
-          if (sensor_sample_fetch(bmm150Dev) == 0) {
-            struct sensor_value mag[3];
-            sensor_channel_get(bmm150Dev, SENSOR_CHAN_MAGN_X, &mag[0]);
-            sensor_channel_get(bmm150Dev, SENSOR_CHAN_MAGN_Y, &mag[1]);
-            sensor_channel_get(bmm150Dev, SENSOR_CHAN_MAGN_Z, &mag[2]);
-            tmag[0] = SENSOR_VALUE_TO_FLOAT(mag[0]);  // X
-            tmag[1] = SENSOR_VALUE_TO_FLOAT(mag[1]);  // Y
-            tmag[2] = SENSOR_VALUE_TO_FLOAT(mag[2]);  // Z
-           // printk("G%.3f,%.3f,%.3f\n", tmag[0], tmag[2], tmag[2]);
-            magValid = true;
-          }
-        }
-    #endif*/
+#if defined(HAS_BMM150)
+    int8_t rbslt;
+    struct bmm150_mag_data mag_data;
+    rbslt = bmm150_read_mag_data(&mag_data, &bmm1_dev);
+    bmm150_error_codes_print_result("bmm150_read_mag_data", rbslt);
+    tmag[0] = mag_data.y;
+    tmag[1] = mag_data.x;
+    tmag[2] = mag_data.z;
+    magValid = true;
+#endif
 
 #if defined(HAS_QMC5883)
     if (qmc5883Read(tmag)) {

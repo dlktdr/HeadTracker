@@ -4,17 +4,15 @@
  * SPDX-License-Identifier: BSD-3-Clause
  **/
 
-#ifndef _COMMON_H
-#define _COMMON_H
+#ifndef BMI2_COMMON_H
+#define BMI2_COMMON_H
 
 /*! CPP guard */
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include <drivers/i2c.h>
 #include <stdio.h>
-#include <zephyr.h>
 
 #include "bmi2.h"
 

@@ -11,7 +11,7 @@
 #include <stdlib.h>
 
 #include "bmi2_defs.h"
-#include "log.h"
+#include "drivers/i2c.h"
 
 /******************************************************************************/
 /*!                 Macro definitions                                         */
@@ -43,8 +43,7 @@ BMI2_INTF_RETURN_TYPE bmi2_i2c_read(uint8_t reg_addr, uint8_t *reg_data, uint32_
 {
   const struct device *i2c_dev = DEVICE_DT_GET(DT_NODELABEL(i2c1));
   if (!i2c_dev) {
-    LOGE("Could not get device binding for I2C");
-    return 0;
+    return -1;
   }
 
   uint8_t dev_addr = *(uint8_t *)intf_ptr;
@@ -59,8 +58,7 @@ BMI2_INTF_RETURN_TYPE bmi2_i2c_write(uint8_t reg_addr, const uint8_t *reg_data, 
 {
   const struct device *i2c_dev = DEVICE_DT_GET(DT_NODELABEL(i2c1));
   if (!i2c_dev) {
-    LOGE("Could not get device binding for I2C");
-    return 0;
+    return -1;
   }
 
   uint8_t dev_addr = *(uint8_t *)intf_ptr;
@@ -94,7 +92,7 @@ BMI2_INTF_RETURN_TYPE bmi2_spi_write(uint8_t reg_addr, const uint8_t *reg_data, 
 /*!
  * Delay function map to COINES platform
  */
-void bmi2_delay_us(uint32_t period, void *intf_ptr) { rt_sleep_us(period); }
+void bmi2_delay_us(uint32_t period, void *intf_ptr) { k_usleep(period); }
 
 /*!
  *  @brief Function to select the interface between SPI and I2C.

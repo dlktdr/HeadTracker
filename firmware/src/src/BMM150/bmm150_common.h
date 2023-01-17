@@ -12,9 +12,8 @@
 extern "C" {
 #endif
 
-#include <drivers/i2c.h>
+
 #include <stdio.h>
-#include <zephyr.h>
 
 #include "bmm150.h"
 
@@ -134,6 +133,8 @@ int8_t bmm150_interface_selection(struct bmm150_dev *dev);
  *  @return void.
  */
 void bmm150_error_codes_print_result(const char api_name[], int8_t rslt);
+
+int8_t set_config(struct bmm150_dev *dev);
 
 #ifdef __cplusplus
 }
