@@ -53,6 +53,10 @@
 #include "BMI270/bmi270.h"
 #include "BMI270/bmi2common.h"
 #endif
+#if defined(HAS_BMM150)
+#include "BMM150/bmm150.h"
+#include "BMM150/bmm150_common.h"
+#endif
 
 // Note: BMI270 + BMM150 On the Nano33BleSenseR2 are using the Zephyr Built in Drivers
 #define DEBUG_SENSOR_RATES
@@ -100,7 +104,7 @@ struct bmi2_dev bmi2_dev;
 #endif
 
 #if defined(HAS_BMM150)
-const struct device *bmm150Dev;
+struct bmm150_dev bmm1_dev;
 #endif
 
 #define SENSOR_VALUE_TO_FLOAT(x) ((float)x.val1 + (float)x.val2 / 1000000.0f)
@@ -177,16 +181,33 @@ int sense_Init()
 
 #endif
 
-    /*#if defined(HAS_BMM150)/
+#if defined(HAS_BMM150)
+  /* Status of api are returned to this variable */
+  int8_t rslt;
 
-      bmm150Dev = device_get_binding("BMM150");
+  rslt = bmm150_interface_selection(&bmm1_dev);
+  bmm150_error_codes_print_result("bmm150_interface_selection", rslt);
+  if (rslt == BMM150_OK) {
+    rslt = bmm150_init(&bmm1_dev);
+    bmm150_error_codes_print_result("bmm150_init", rslt);
 
-      if (!device_is_ready(bmm150Dev)) {
-        printf("Device %s is not ready\n", bmm150Dev->name);
-        return -1;
+    if (rslt == BMM150_OK) {
+      rslt = set_config(&bmm1_dev);
+      bmm150_error_codes_print_result("set_config", rslt);
+    }
+
+    while (1) {
+      /* Get the interrupt status */
+      rslt = bmm150_get_interrupt_status(&bmm1_dev);
+
+      if (dev.int_status & BMM150_INT_ASSERTED_HIGH_THRES) {
+        printf("High threshold interrupt occured");
+        break;
       }
-      printk("Found device %s", bmm150Dev->name);
-    #endif*/
+    }
+  }
+
+#endif
 
 #if defined(HAS_MPU6500)
   mpu_select_device(0);

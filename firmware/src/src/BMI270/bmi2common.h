@@ -12,12 +12,14 @@
 extern "C" {
 #endif
 
-#include <stdio.h>
-#include "bmi2.h"
 #include <drivers/i2c.h>
+#include <stdio.h>
 #include <zephyr.h>
 
-#define GRAVITY_EARTH  (9.80665f)
+#include "bmi2.h"
+
+
+#define GRAVITY_EARTH (9.80665f)
 
 /*!
  *  @brief Function for reading the sensor's registers through I2C bus.
@@ -32,7 +34,8 @@ extern "C" {
  *  @retval != BMI2_INTF_RET_SUCCESS  -> Failure Info
  *
  */
-BMI2_INTF_RETURN_TYPE bmi2_i2c_read(uint8_t reg_addr, uint8_t *reg_data, uint32_t len, void *intf_ptr);
+BMI2_INTF_RETURN_TYPE bmi2_i2c_read(uint8_t reg_addr, uint8_t *reg_data, uint32_t len,
+                                    void *intf_ptr);
 
 /*!
  *  @brief Function for writing the sensor's registers through I2C bus.
@@ -47,7 +50,8 @@ BMI2_INTF_RETURN_TYPE bmi2_i2c_read(uint8_t reg_addr, uint8_t *reg_data, uint32_
  *  @retval != BMI2_INTF_RET_SUCCESS  -> Failure Info
  *
  */
-BMI2_INTF_RETURN_TYPE bmi2_i2c_write(uint8_t reg_addr, const uint8_t *reg_data, uint32_t len, void *intf_ptr);
+BMI2_INTF_RETURN_TYPE bmi2_i2c_write(uint8_t reg_addr, const uint8_t *reg_data, uint32_t len,
+                                     void *intf_ptr);
 
 /*!
  *  @brief Function for reading the sensor's registers through SPI bus.
@@ -62,7 +66,8 @@ BMI2_INTF_RETURN_TYPE bmi2_i2c_write(uint8_t reg_addr, const uint8_t *reg_data, 
  *  @retval != BMI2_INTF_RET_SUCCESS  -> Failure Info
  *
  */
-BMI2_INTF_RETURN_TYPE bmi2_spi_read(uint8_t reg_addr, uint8_t *reg_data, uint32_t len, void *intf_ptr);
+BMI2_INTF_RETURN_TYPE bmi2_spi_read(uint8_t reg_addr, uint8_t *reg_data, uint32_t len,
+                                    void *intf_ptr);
 
 /*!
  *  @brief Function for writing the sensor's registers through SPI bus.
@@ -77,11 +82,12 @@ BMI2_INTF_RETURN_TYPE bmi2_spi_read(uint8_t reg_addr, uint8_t *reg_data, uint32_
  *  @retval != BMI2_INTF_RET_SUCCESS  -> Failure Info
  *
  */
-BMI2_INTF_RETURN_TYPE bmi2_spi_write(uint8_t reg_addr, const uint8_t *reg_data, uint32_t len, void *intf_ptr);
+BMI2_INTF_RETURN_TYPE bmi2_spi_write(uint8_t reg_addr, const uint8_t *reg_data, uint32_t len,
+                                     void *intf_ptr);
 
 /*!
- * @brief This function provides the delay for required time (Microsecond) as per the input provided in some of the
- * APIs.
+ * @brief This function provides the delay for required time (Microsecond) as per the input provided
+ * in some of the APIs.
  *
  *  @param[in] period       : The required wait time in microsecond.
  *  @param[in] intf_ptr     : Interface pointer
@@ -102,7 +108,6 @@ void bmi2_delay_us(uint32_t period, void *intf_ptr);
  *  @retval < 0 -> Failure Info
  */
 int8_t bmi2_interface_init(struct bmi2_dev *bma, uint8_t intf);
-
 
 // Others
 int8_t set_accel_gyro_config(struct bmi2_dev *bmi2_dev);

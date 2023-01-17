@@ -1,40 +1,40 @@
 /**
-* Copyright (c) 2021 Bosch Sensortec GmbH. All rights reserved.
-*
-* BSD-3-Clause
-*
-* Redistribution and use in source and binary forms, with or without
-* modification, are permitted provided that the following conditions are met:
-*
-* 1. Redistributions of source code must retain the above copyright
-*    notice, this list of conditions and the following disclaimer.
-*
-* 2. Redistributions in binary form must reproduce the above copyright
-*    notice, this list of conditions and the following disclaimer in the
-*    documentation and/or other materials provided with the distribution.
-*
-* 3. Neither the name of the copyright holder nor the names of its
-*    contributors may be used to endorse or promote products derived from
-*    this software without specific prior written permission.
-*
-* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-* "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-* LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-* FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-* COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-* INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-* (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-* SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-* HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
-* STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
-* IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-* POSSIBILITY OF SUCH DAMAGE.
-*
-* @file       bmi270.h
-* @date       2021-09-30
-* @version    v2.71.8
-*
-*/
+ * Copyright (c) 2021 Bosch Sensortec GmbH. All rights reserved.
+ *
+ * BSD-3-Clause
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+ * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ *
+ * @file       bmi270.h
+ * @date       2021-09-30
+ * @version    v2.71.8
+ *
+ */
 
 /**
  * \ingroup bmi2xy
@@ -62,63 +62,63 @@ extern "C" {
  ****************************************************************************/
 
 /*! @name BMI270 Chip identifier */
-#define BMI270_CHIP_ID                       UINT8_C(0x24)
+#define BMI270_CHIP_ID UINT8_C(0x24)
 
 /*! @name BMI270 feature input start addresses */
-#define BMI270_CONFIG_ID_STRT_ADDR           UINT8_C(0x00)
-#define BMI270_MAX_BURST_LEN_STRT_ADDR       UINT8_C(0x02)
-#define BMI270_CRT_GYRO_SELF_TEST_STRT_ADDR  UINT8_C(0x03)
-#define BMI270_ABORT_STRT_ADDR               UINT8_C(0x03)
-#define BMI270_AXIS_MAP_STRT_ADDR            UINT8_C(0x04)
-#define BMI270_GYRO_SELF_OFF_STRT_ADDR       UINT8_C(0x05)
-#define BMI270_NVM_PROG_PREP_STRT_ADDR       UINT8_C(0x05)
-#define BMI270_GYRO_GAIN_UPDATE_STRT_ADDR    UINT8_C(0x06)
-#define BMI270_ANY_MOT_STRT_ADDR             UINT8_C(0x0C)
-#define BMI270_NO_MOT_STRT_ADDR              UINT8_C(0x00)
-#define BMI270_SIG_MOT_STRT_ADDR             UINT8_C(0x04)
-#define BMI270_STEP_CNT_1_STRT_ADDR          UINT8_C(0x00)
-#define BMI270_STEP_CNT_4_STRT_ADDR          UINT8_C(0x02)
-#define BMI270_WRIST_GEST_STRT_ADDR          UINT8_C(0x06)
-#define BMI270_WRIST_WEAR_WAKE_UP_STRT_ADDR  UINT8_C(0x00)
+#define BMI270_CONFIG_ID_STRT_ADDR UINT8_C(0x00)
+#define BMI270_MAX_BURST_LEN_STRT_ADDR UINT8_C(0x02)
+#define BMI270_CRT_GYRO_SELF_TEST_STRT_ADDR UINT8_C(0x03)
+#define BMI270_ABORT_STRT_ADDR UINT8_C(0x03)
+#define BMI270_AXIS_MAP_STRT_ADDR UINT8_C(0x04)
+#define BMI270_GYRO_SELF_OFF_STRT_ADDR UINT8_C(0x05)
+#define BMI270_NVM_PROG_PREP_STRT_ADDR UINT8_C(0x05)
+#define BMI270_GYRO_GAIN_UPDATE_STRT_ADDR UINT8_C(0x06)
+#define BMI270_ANY_MOT_STRT_ADDR UINT8_C(0x0C)
+#define BMI270_NO_MOT_STRT_ADDR UINT8_C(0x00)
+#define BMI270_SIG_MOT_STRT_ADDR UINT8_C(0x04)
+#define BMI270_STEP_CNT_1_STRT_ADDR UINT8_C(0x00)
+#define BMI270_STEP_CNT_4_STRT_ADDR UINT8_C(0x02)
+#define BMI270_WRIST_GEST_STRT_ADDR UINT8_C(0x06)
+#define BMI270_WRIST_WEAR_WAKE_UP_STRT_ADDR UINT8_C(0x00)
 
 /*! @name BMI270 feature output start addresses */
-#define BMI270_STEP_CNT_OUT_STRT_ADDR        UINT8_C(0x00)
-#define BMI270_STEP_ACT_OUT_STRT_ADDR        UINT8_C(0x04)
-#define BMI270_WRIST_GEST_OUT_STRT_ADDR      UINT8_C(0x06)
-#define BMI270_GYR_USER_GAIN_OUT_STRT_ADDR   UINT8_C(0x08)
-#define BMI270_GYRO_CROSS_SENSE_STRT_ADDR    UINT8_C(0x0C)
-#define BMI270_NVM_VFRM_OUT_STRT_ADDR        UINT8_C(0x0E)
+#define BMI270_STEP_CNT_OUT_STRT_ADDR UINT8_C(0x00)
+#define BMI270_STEP_ACT_OUT_STRT_ADDR UINT8_C(0x04)
+#define BMI270_WRIST_GEST_OUT_STRT_ADDR UINT8_C(0x06)
+#define BMI270_GYR_USER_GAIN_OUT_STRT_ADDR UINT8_C(0x08)
+#define BMI270_GYRO_CROSS_SENSE_STRT_ADDR UINT8_C(0x0C)
+#define BMI270_NVM_VFRM_OUT_STRT_ADDR UINT8_C(0x0E)
 
 /*! @name Defines maximum number of pages */
-#define BMI270_MAX_PAGE_NUM                  UINT8_C(8)
+#define BMI270_MAX_PAGE_NUM UINT8_C(8)
 
 /*! @name Defines maximum number of feature input configurations */
-#define BMI270_MAX_FEAT_IN                   UINT8_C(17)
+#define BMI270_MAX_FEAT_IN UINT8_C(17)
 
 /*! @name Defines maximum number of feature outputs */
-#define BMI270_MAX_FEAT_OUT                  UINT8_C(7)
+#define BMI270_MAX_FEAT_OUT UINT8_C(7)
 
 /*! @name Mask definitions for feature interrupt status bits */
-#define BMI270_SIG_MOT_STATUS_MASK           UINT8_C(0x01)
-#define BMI270_STEP_CNT_STATUS_MASK          UINT8_C(0x02)
-#define BMI270_STEP_ACT_STATUS_MASK          UINT8_C(0x04)
-#define BMI270_WRIST_WAKE_UP_STATUS_MASK     UINT8_C(0x08)
-#define BMI270_WRIST_GEST_STATUS_MASK        UINT8_C(0x10)
-#define BMI270_NO_MOT_STATUS_MASK            UINT8_C(0x20)
-#define BMI270_ANY_MOT_STATUS_MASK           UINT8_C(0x40)
+#define BMI270_SIG_MOT_STATUS_MASK UINT8_C(0x01)
+#define BMI270_STEP_CNT_STATUS_MASK UINT8_C(0x02)
+#define BMI270_STEP_ACT_STATUS_MASK UINT8_C(0x04)
+#define BMI270_WRIST_WAKE_UP_STATUS_MASK UINT8_C(0x08)
+#define BMI270_WRIST_GEST_STATUS_MASK UINT8_C(0x10)
+#define BMI270_NO_MOT_STATUS_MASK UINT8_C(0x20)
+#define BMI270_ANY_MOT_STATUS_MASK UINT8_C(0x40)
 
 /*! @name Mask definitions for feature interrupt mapping bits */
-#define BMI270_INT_SIG_MOT_MASK              UINT8_C(0x01)
-#define BMI270_INT_STEP_COUNTER_MASK         UINT8_C(0x02)
-#define BMI270_INT_STEP_DETECTOR_MASK        UINT8_C(0x02)
-#define BMI270_INT_STEP_ACT_MASK             UINT8_C(0x04)
-#define BMI270_INT_WRIST_WEAR_WAKEUP_MASK    UINT8_C(0x08)
-#define BMI270_INT_WRIST_GEST_MASK           UINT8_C(0x10)
-#define BMI270_INT_NO_MOT_MASK               UINT8_C(0x20)
-#define BMI270_INT_ANY_MOT_MASK              UINT8_C(0x40)
+#define BMI270_INT_SIG_MOT_MASK UINT8_C(0x01)
+#define BMI270_INT_STEP_COUNTER_MASK UINT8_C(0x02)
+#define BMI270_INT_STEP_DETECTOR_MASK UINT8_C(0x02)
+#define BMI270_INT_STEP_ACT_MASK UINT8_C(0x04)
+#define BMI270_INT_WRIST_WEAR_WAKEUP_MASK UINT8_C(0x08)
+#define BMI270_INT_WRIST_GEST_MASK UINT8_C(0x10)
+#define BMI270_INT_NO_MOT_MASK UINT8_C(0x20)
+#define BMI270_INT_ANY_MOT_MASK UINT8_C(0x40)
 
 /*! @name Defines maximum number of feature interrupts */
-#define BMI270_MAX_INT_MAP                   UINT8_C(8)
+#define BMI270_MAX_INT_MAP UINT8_C(8)
 
 /***************************************************************************/
 
@@ -252,8 +252,8 @@ int8_t bmi270_sensor_disable(const uint8_t *sens_list, uint8_t n_sens, struct bm
  * \ingroup bmi270ApiSensorC
  * \page bmi270_api_bmi270_set_sensor_config bmi270_set_sensor_config
  * \code
- * int8_t bmi270_set_sensor_config(struct bmi2_sens_config *sens_cfg, uint8_t n_sens, struct bmi2_dev *dev);
- * \endcode
+ * int8_t bmi270_set_sensor_config(struct bmi2_sens_config *sens_cfg, uint8_t n_sens, struct
+ *bmi2_dev *dev); \endcode
  * @details This API sets the sensor/feature configuration.
  *
  * @param[in]       sens_cfg     : Structure instance of bmi2_sens_config.
@@ -280,14 +280,15 @@ int8_t bmi270_sensor_disable(const uint8_t *sens_list, uint8_t n_sens, struct bm
  * @retval 0 -> Success
  * @retval < 0 -> Fail
  */
-int8_t bmi270_set_sensor_config(struct bmi2_sens_config *sens_cfg, uint8_t n_sens, struct bmi2_dev *dev);
+int8_t bmi270_set_sensor_config(struct bmi2_sens_config *sens_cfg, uint8_t n_sens,
+                                struct bmi2_dev *dev);
 
 /*!
  * \ingroup bmi270ApiSensorC
  * \page bmi270_api_bmi270_get_sensor_config bmi270_get_sensor_config
  * \code
- * int8_t bmi270_get_sensor_config(struct bmi2_sens_config *sens_cfg, uint8_t n_sens, struct bmi2_dev *dev);
- * \endcode
+ * int8_t bmi270_get_sensor_config(struct bmi2_sens_config *sens_cfg, uint8_t n_sens, struct
+ *bmi2_dev *dev); \endcode
  * @details This API gets the sensor/feature configuration.
  *
  * @param[in]       sens_cfg     : Structure instance of bmi2_sens_config.
@@ -314,7 +315,8 @@ int8_t bmi270_set_sensor_config(struct bmi2_sens_config *sens_cfg, uint8_t n_sen
  * @retval 0 -> Success
  * @retval < 0 -> Fail
  */
-int8_t bmi270_get_sensor_config(struct bmi2_sens_config *sens_cfg, uint8_t n_sens, struct bmi2_dev *dev);
+int8_t bmi270_get_sensor_config(struct bmi2_sens_config *sens_cfg, uint8_t n_sens,
+                                struct bmi2_dev *dev);
 
 /**
  * \ingroup bmi270
@@ -326,8 +328,8 @@ int8_t bmi270_get_sensor_config(struct bmi2_sens_config *sens_cfg, uint8_t n_sen
  * \ingroup bmi270ApiSensorD
  * \page bmi270_api_bmi270_get_feature_data bmi270_get_feature_data
  * \code
- * int8_t bmi270_get_feature_data(struct bmi2_feat_sensor_data *feature_data, uint8_t n_sens, struct bmi2_dev *dev);
- * \endcode
+ * int8_t bmi270_get_feature_data(struct bmi2_feat_sensor_data *feature_data, uint8_t n_sens, struct
+ *bmi2_dev *dev); \endcode
  * @details This API gets the feature data.
  *
  * @param[out] feature_data   : Structure instance of bmi2_feat_sensor_data.
@@ -350,7 +352,8 @@ int8_t bmi270_get_sensor_config(struct bmi2_sens_config *sens_cfg, uint8_t n_sen
  * @retval 0 -> Success
  * @retval < 0 -> Fail
  */
-int8_t bmi270_get_feature_data(struct bmi2_feat_sensor_data *feature_data, uint8_t n_sens, struct bmi2_dev *dev);
+int8_t bmi270_get_feature_data(struct bmi2_feat_sensor_data *feature_data, uint8_t n_sens,
+                               struct bmi2_dev *dev);
 
 /**
  * \ingroup bmi270
@@ -362,8 +365,8 @@ int8_t bmi270_get_feature_data(struct bmi2_feat_sensor_data *feature_data, uint8
  * \ingroup bmi270ApiGyroUG
  * \page bmi270_api_bmi270_update_gyro_user_gain bmi270_update_gyro_user_gain
  * \code
- * int8_t bmi270_update_gyro_user_gain(const struct bmi2_gyro_user_gain_config *user_gain, struct bmi2_dev *dev);
- * \endcode
+ * int8_t bmi270_update_gyro_user_gain(const struct bmi2_gyro_user_gain_config *user_gain, struct
+ * bmi2_dev *dev); \endcode
  * @details This API updates the gyroscope user-gain.
  *
  * @param[in] user_gain      : Structure that stores user-gain configurations.
@@ -373,14 +376,15 @@ int8_t bmi270_get_feature_data(struct bmi2_feat_sensor_data *feature_data, uint8
  * @retval 0 -> Success
  * @retval < 0 -> Fail
  */
-int8_t bmi270_update_gyro_user_gain(const struct bmi2_gyro_user_gain_config *user_gain, struct bmi2_dev *dev);
+int8_t bmi270_update_gyro_user_gain(const struct bmi2_gyro_user_gain_config *user_gain,
+                                    struct bmi2_dev *dev);
 
 /*!
  * \ingroup bmi270ApiGyroUG
  * \page bmi270_api_bmi270_read_gyro_user_gain bmi270_read_gyro_user_gain
  * \code
- * int8_t bmi270_read_gyro_user_gain(struct bmi2_gyro_user_gain_data *gyr_usr_gain, const struct bmi2_dev *dev);
- * \endcode
+ * int8_t bmi270_read_gyro_user_gain(struct bmi2_gyro_user_gain_data *gyr_usr_gain, const struct
+ * bmi2_dev *dev); \endcode
  * @details This API reads the compensated gyroscope user-gain values.
  *
  * @param[out] gyr_usr_gain   : Structure that stores gain values.
@@ -390,14 +394,15 @@ int8_t bmi270_update_gyro_user_gain(const struct bmi2_gyro_user_gain_config *use
  * @retval 0 -> Success
  * @retval < 0 -> Fail
  */
-int8_t bmi270_read_gyro_user_gain(struct bmi2_gyro_user_gain_data *gyr_usr_gain, struct bmi2_dev *dev);
+int8_t bmi270_read_gyro_user_gain(struct bmi2_gyro_user_gain_data *gyr_usr_gain,
+                                  struct bmi2_dev *dev);
 
 /*!
  * \ingroup bmi270ApiInt
  * \page bmi270_api_bmi270_map_feat_int bmi270_map_feat_int
  * \code
- * int8_t bmi270_map_feat_int(const struct bmi2_sens_int_config *sens_int, uint8_t n_sens, struct bmi2_dev *dev)
- * \endcode
+ * int8_t bmi270_map_feat_int(const struct bmi2_sens_int_config *sens_int, uint8_t n_sens, struct
+ * bmi2_dev *dev) \endcode
  * @details This API maps/unmaps feature interrupts to that of interrupt pins.
  *
  * @param[in] sens_int     : Structure instance of bmi2_sens_int_config.
@@ -408,7 +413,8 @@ int8_t bmi270_read_gyro_user_gain(struct bmi2_gyro_user_gain_data *gyr_usr_gain,
  * @retval 0 -> Success
  * @retval < 0 -> Fail
  */
-int8_t bmi270_map_feat_int(const struct bmi2_sens_int_config *sens_int, uint8_t n_sens, struct bmi2_dev *dev);
+int8_t bmi270_map_feat_int(const struct bmi2_sens_int_config *sens_int, uint8_t n_sens,
+                           struct bmi2_dev *dev);
 
 /******************************************************************************/
 /*! @name       C++ Guard Macros                                      */

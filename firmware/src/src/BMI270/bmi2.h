@@ -1,40 +1,40 @@
 /**
-* Copyright (c) 2021 Bosch Sensortec GmbH. All rights reserved.
-*
-* BSD-3-Clause
-*
-* Redistribution and use in source and binary forms, with or without
-* modification, are permitted provided that the following conditions are met:
-*
-* 1. Redistributions of source code must retain the above copyright
-*    notice, this list of conditions and the following disclaimer.
-*
-* 2. Redistributions in binary form must reproduce the above copyright
-*    notice, this list of conditions and the following disclaimer in the
-*    documentation and/or other materials provided with the distribution.
-*
-* 3. Neither the name of the copyright holder nor the names of its
-*    contributors may be used to endorse or promote products derived from
-*    this software without specific prior written permission.
-*
-* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-* "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-* LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-* FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-* COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-* INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-* (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-* SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-* HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
-* STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
-* IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-* POSSIBILITY OF SUCH DAMAGE.
-*
-* @file       bmi2.h
-* @date       2021-09-30
-* @version    v2.71.8
-*
-*/
+ * Copyright (c) 2021 Bosch Sensortec GmbH. All rights reserved.
+ *
+ * BSD-3-Clause
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+ * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ *
+ * @file       bmi2.h
+ * @date       2021-09-30
+ * @version    v2.71.8
+ *
+ */
 
 /*!
  * @defgroup bmi2xy BMI2XY
@@ -175,8 +175,8 @@ int8_t bmi2_soft_reset(struct bmi2_dev *dev);
  * \ingroup bmi2ApiConfig
  * \page bmi2_api_bmi2_get_config_file_version bmi2_get_config_file_version
  * \code
- * int8_t bmi2_get_config_file_version(uint8_t *config_major, uint8_t *config_minor, struct bmi2_dev *dev);
- * \endcode
+ * int8_t bmi2_get_config_file_version(uint8_t *config_major, uint8_t *config_minor, struct bmi2_dev
+ * *dev); \endcode
  * @details This API is used to get the config file major and minor information.
  *
  * @param[in] dev   : Structure instance of bmi2_dev.
@@ -187,7 +187,8 @@ int8_t bmi2_soft_reset(struct bmi2_dev *dev);
  * @retval 0 -> Success
  * @retval < 0 -> Fail
  */
-int8_t bmi2_get_config_file_version(uint8_t *config_major, uint8_t *config_minor, struct bmi2_dev *dev);
+int8_t bmi2_get_config_file_version(uint8_t *config_major, uint8_t *config_minor,
+                                    struct bmi2_dev *dev);
 
 /**
  * \ingroup bmi2
@@ -349,8 +350,8 @@ int8_t bmi2_get_int_status(uint16_t *int_status, struct bmi2_dev *dev);
  * \ingroup bmi2ApiSensorC
  * \page bmi2_api_bmi2_set_sensor_config bmi2_set_sensor_config
  * \code
- * int8_t bmi2_set_sensor_config(struct bmi2_sens_config *sens_cfg, uint8_t n_sens, struct bmi2_dev *dev);
- * \endcode
+ * int8_t bmi2_set_sensor_config(struct bmi2_sens_config *sens_cfg, uint8_t n_sens, struct bmi2_dev
+ **dev); \endcode
  * @details This API sets the sensor/feature configuration.
  *
  * @param[in]       sens_cfg     : Structure instance of bmi2_sens_config.
@@ -372,14 +373,15 @@ int8_t bmi2_get_int_status(uint16_t *int_status, struct bmi2_dev *dev);
  * @retval 0 -> Success
  * @retval < 0 -> Fail
  */
-int8_t bmi2_set_sensor_config(struct bmi2_sens_config *sens_cfg, uint8_t n_sens, struct bmi2_dev *dev);
+int8_t bmi2_set_sensor_config(struct bmi2_sens_config *sens_cfg, uint8_t n_sens,
+                              struct bmi2_dev *dev);
 
 /*!
  * \ingroup bmi2ApiSensorC
  * \page bmi2_api_bmi2_get_sensor_config bmi2_get_sensor_config
  * \code
- * int8_t bmi2_get_sensor_config(struct bmi2_sens_config *sens_cfg, uint8_t n_sens, struct bmi2_dev *dev);
- * \endcode
+ * int8_t bmi2_get_sensor_config(struct bmi2_sens_config *sens_cfg, uint8_t n_sens, struct bmi2_dev
+ **dev); \endcode
  * @details This API gets the sensor/feature configuration.
  *
  * @param[in]       sens_cfg     : Structure instance of bmi2_sens_config.
@@ -401,7 +403,8 @@ int8_t bmi2_set_sensor_config(struct bmi2_sens_config *sens_cfg, uint8_t n_sens,
  * @retval 0 -> Success
  * @retval < 0 -> Fail
  */
-int8_t bmi2_get_sensor_config(struct bmi2_sens_config *sens_cfg, uint8_t n_sens, struct bmi2_dev *dev);
+int8_t bmi2_get_sensor_config(struct bmi2_sens_config *sens_cfg, uint8_t n_sens,
+                              struct bmi2_dev *dev);
 
 /**
  * \ingroup bmi2
@@ -485,9 +488,10 @@ int8_t bmi2_sensor_disable(const uint8_t *sens_list, uint8_t n_sens, struct bmi2
  * \ingroup bmi2ApiSensorD
  * \page bmi2_api_bmi2_get_feature_data bmi2_get_feature_data
  * \code
- * int8_t bmi2_get_feature_data(struct bmi2_feat_sensor_data *feat_sensor_data, uint8_t n_sens, struct bmi2_dev *dev);
- * \endcode
- * @details This API gets the feature data for gyroscope user-gain update and gyroscope cross sensitivity
+ * int8_t bmi2_get_feature_data(struct bmi2_feat_sensor_data *feat_sensor_data, uint8_t n_sens,
+ *struct bmi2_dev *dev); \endcode
+ * @details This API gets the feature data for gyroscope user-gain update and gyroscope cross
+ *sensitivity
  *
  * @param[out] feat_sensor_data   : Structure instance of bmi2_feat_sensor_data.
  * @param[in]  n_sens             : Number of sensors selected.
@@ -506,7 +510,8 @@ int8_t bmi2_sensor_disable(const uint8_t *sens_list, uint8_t n_sens, struct bmi2
  * @retval 0 -> Success
  * @retval < 0 -> Fail
  */
-int8_t bmi2_get_feature_data(struct bmi2_feat_sensor_data *feat_sensor_data, uint8_t n_sens, struct bmi2_dev *dev);
+int8_t bmi2_get_feature_data(struct bmi2_feat_sensor_data *feat_sensor_data, uint8_t n_sens,
+                             struct bmi2_dev *dev);
 
 /*!
  * \ingroup bmi2ApiSensorD
@@ -617,10 +622,8 @@ int8_t bmi2_read_fifo_data(struct bmi2_fifo_frame *fifo, struct bmi2_dev *dev);
  * @retval 0 -> Success
  * @retval < 0 -> Fail
  */
-int8_t bmi2_extract_accel(struct bmi2_sens_axes_data *accel_data,
-                          uint16_t *accel_length,
-                          struct bmi2_fifo_frame *fifo,
-                          const struct bmi2_dev *dev);
+int8_t bmi2_extract_accel(struct bmi2_sens_axes_data *accel_data, uint16_t *accel_length,
+                          struct bmi2_fifo_frame *fifo, const struct bmi2_dev *dev);
 
 /*!
  * \ingroup bmi2ApiFIFO
@@ -645,10 +648,8 @@ int8_t bmi2_extract_accel(struct bmi2_sens_axes_data *accel_data,
  * @retval 0 -> Success
  * @retval < 0 -> Fail
  */
-int8_t bmi2_extract_aux(struct bmi2_aux_fifo_data *aux,
-                        uint16_t *aux_length,
-                        struct bmi2_fifo_frame *fifo,
-                        const struct bmi2_dev *dev);
+int8_t bmi2_extract_aux(struct bmi2_aux_fifo_data *aux, uint16_t *aux_length,
+                        struct bmi2_fifo_frame *fifo, const struct bmi2_dev *dev);
 
 /*!
  * \ingroup bmi2ApiFIFO
@@ -673,10 +674,8 @@ int8_t bmi2_extract_aux(struct bmi2_aux_fifo_data *aux,
  * @retval 0 -> Success
  * @retval < 0 -> Fail
  */
-int8_t bmi2_extract_gyro(struct bmi2_sens_axes_data *gyro_data,
-                         uint16_t *gyro_length,
-                         struct bmi2_fifo_frame *fifo,
-                         const struct bmi2_dev *dev);
+int8_t bmi2_extract_gyro(struct bmi2_sens_axes_data *gyro_data, uint16_t *gyro_length,
+                         struct bmi2_fifo_frame *fifo, const struct bmi2_dev *dev);
 
 /**
  * \ingroup bmi2
@@ -796,8 +795,8 @@ int8_t bmi2_get_fifo_wm(uint16_t *fifo_wm, struct bmi2_dev *dev);
  * \ingroup bmi2ApiFIFO
  * \page bmi2_api_bmi2_set_fifo_filter_data bmi2_set_fifo_filter_data
  * \code
- * int8_t bmi2_set_fifo_filter_data(uint8_t sens_sel, uint8_t fifo_filter_data, struct bmi2_dev *dev);
- * \endcode
+ * int8_t bmi2_set_fifo_filter_data(uint8_t sens_sel, uint8_t fifo_filter_data, struct bmi2_dev
+ **dev); \endcode
  * @details This API sets either filtered or un-filtered FIFO accelerometer or
  * gyroscope data.
  *
@@ -830,8 +829,8 @@ int8_t bmi2_set_fifo_filter_data(uint8_t sens_sel, uint8_t fifo_filter_data, str
  * \ingroup bmi2ApiFIFO
  * \page bmi2_api_bmi2_get_fifo_filter_data bmi2_get_fifo_filter_data
  * \code
- * int8_t bmi2_get_fifo_filter_data(uint8_t sens_sel, uint8_t *fifo_filter_data, const struct bmi2_dev *dev);
- * \endcode
+ * int8_t bmi2_get_fifo_filter_data(uint8_t sens_sel, uint8_t *fifo_filter_data, const struct
+ *bmi2_dev *dev); \endcode
  * @details This API gets the FIFO accelerometer or gyroscope filter data.
  *
  * @param[in] sens_sel           : Selects either accelerometer or
@@ -890,8 +889,8 @@ int8_t bmi2_set_fifo_down_sample(uint8_t sens_sel, uint8_t fifo_down_samp, struc
  * \ingroup bmi2ApiFIFO
  * \page bmi2_api_bmi2_get_fifo_down_sample bmi2_get_fifo_down_sample
  * \code
- * int8_t bmi2_get_fifo_down_sample(uint8_t sens_sel, uint8_t *fifo_down_samp, const struct bmi2_dev *dev);
- * \endcode
+ * int8_t bmi2_get_fifo_down_sample(uint8_t sens_sel, uint8_t *fifo_down_samp, const struct bmi2_dev
+ **dev); \endcode
  * @details This API gets the down sampling rate, configured for FIFO
  * accelerometer or gyroscope data.
  *
@@ -975,8 +974,8 @@ int8_t bmi2_set_ois_interface(uint8_t enable, struct bmi2_dev *dev);
  * \ingroup bmi2ApiAux
  * \page bmi2_api_bmi2_read_aux_man_mode bmi2_read_aux_man_mode
  * \code
- * int8_t bmi2_read_aux_man_mode(uint8_t reg_addr, uint8_t *aux_data, uint16_t len, struct bmi2_dev *dev);
- * \endcode
+ * int8_t bmi2_read_aux_man_mode(uint8_t reg_addr, uint8_t *aux_data, uint16_t len, struct bmi2_dev
+ * *dev); \endcode
  * @details This API reads the user-defined bytes of data from the given register
  * address of auxiliary sensor in manual mode.
  *
@@ -991,14 +990,15 @@ int8_t bmi2_set_ois_interface(uint8_t enable, struct bmi2_dev *dev);
  * @retval 0 -> Success
  * @retval < 0 -> Fail
  */
-int8_t bmi2_read_aux_man_mode(uint8_t reg_addr, uint8_t *aux_data, uint16_t len, struct bmi2_dev *dev);
+int8_t bmi2_read_aux_man_mode(uint8_t reg_addr, uint8_t *aux_data, uint16_t len,
+                              struct bmi2_dev *dev);
 
 /*!
  * \ingroup bmi2ApiAux
  * \page bmi2_api_bmi2_write_aux_man_mode bmi2_write_aux_man_mode
  * \code
- * int8_t bmi2_write_aux_man_mode(uint8_t reg_addr, const uint8_t *aux_data, uint16_t len, struct bmi2_dev *dev);
- * \endcode
+ * int8_t bmi2_write_aux_man_mode(uint8_t reg_addr, const uint8_t *aux_data, uint16_t len, struct
+ * bmi2_dev *dev); \endcode
  * @details This API writes the user-defined bytes of data and the address of
  * auxiliary sensor where data is to be written in manual mode.
  *
@@ -1013,7 +1013,8 @@ int8_t bmi2_read_aux_man_mode(uint8_t reg_addr, uint8_t *aux_data, uint16_t len,
  * @retval 0 -> Success
  * @retval < 0 -> Fail
  */
-int8_t bmi2_write_aux_man_mode(uint8_t reg_addr, const uint8_t *aux_data, uint16_t len, struct bmi2_dev *dev);
+int8_t bmi2_write_aux_man_mode(uint8_t reg_addr, const uint8_t *aux_data, uint16_t len,
+                               struct bmi2_dev *dev);
 
 /**
  * \ingroup bmi2
@@ -1218,8 +1219,8 @@ int8_t bmi2_set_gyro_offset_comp(uint8_t enable, struct bmi2_dev *dev);
  * \ingroup bmi2ApiGyroOC
  * \page bmi2_api_bmi2_read_gyro_offset_comp_axes bmi2_read_gyro_offset_comp_axes
  * \code
- * int8_t bmi2_read_gyro_offset_comp_axes(struct bmi2_sens_axes_data *gyr_off_comp_axes, const struct bmi2_dev *dev);
- * \endcode
+ * int8_t bmi2_read_gyro_offset_comp_axes(struct bmi2_sens_axes_data *gyr_off_comp_axes, const
+ * struct bmi2_dev *dev); \endcode
  * @details This API reads the gyroscope bias values for each axis which is used
  * for gyroscope offset compensation.
  *
@@ -1231,14 +1232,15 @@ int8_t bmi2_set_gyro_offset_comp(uint8_t enable, struct bmi2_dev *dev);
  * @retval 0 -> Success
  * @retval < 0 -> Fail
  */
-int8_t bmi2_read_gyro_offset_comp_axes(struct bmi2_sens_axes_data *gyr_off_comp_axes, struct bmi2_dev *dev);
+int8_t bmi2_read_gyro_offset_comp_axes(struct bmi2_sens_axes_data *gyr_off_comp_axes,
+                                       struct bmi2_dev *dev);
 
 /*!
  * \ingroup bmi2ApiGyroOC
  * \page bmi2_api_bmi2_write_gyro_offset_comp_axes bmi2_write_gyro_offset_comp_axes
  * \code
- * int8_t bmi2_write_gyro_offset_comp_axes(const struct bmi2_sens_axes_data *gyr_off_comp_axes, struct bmi2_dev *dev);
- * \endcode
+ * int8_t bmi2_write_gyro_offset_comp_axes(const struct bmi2_sens_axes_data *gyr_off_comp_axes,
+ * struct bmi2_dev *dev); \endcode
  * @details This API writes the gyroscope bias values for each axis which is used
  * for gyroscope offset compensation.
  *
@@ -1250,7 +1252,8 @@ int8_t bmi2_read_gyro_offset_comp_axes(struct bmi2_sens_axes_data *gyr_off_comp_
  * @retval 0 -> Success
  * @retval < 0 -> Fail
  */
-int8_t bmi2_write_gyro_offset_comp_axes(const struct bmi2_sens_axes_data *gyr_off_comp_axes, struct bmi2_dev *dev);
+int8_t bmi2_write_gyro_offset_comp_axes(const struct bmi2_sens_axes_data *gyr_off_comp_axes,
+                                        struct bmi2_dev *dev);
 
 /**
  * \ingroup bmi2
@@ -1326,8 +1329,8 @@ int8_t bmi2_get_internal_status(uint8_t *int_stat, struct bmi2_dev *dev);
  * \ingroup bmi2ApiFOC
  * \page bmi2_api_bmi2_perform_accel_foc bmi2_perform_accel_foc
  * \code
- * int8_t bmi2_perform_accel_foc(const struct bmi2_accel_foc_g_value *accel_g_value, struct bmi2_dev *dev);
- * \endcode
+ * int8_t bmi2_perform_accel_foc(const struct bmi2_accel_foc_g_value *accel_g_value, struct bmi2_dev
+ * *dev); \endcode
  * @details This API performs Fast Offset Compensation for accelerometer.
  *
  * @param[in] accel_g_value : This parameter selects the accel foc
@@ -1345,7 +1348,8 @@ int8_t bmi2_get_internal_status(uint8_t *int_stat, struct bmi2_dev *dev);
  * @retval 0 -> Success
  * @retval < 0 -> Fail
  */
-int8_t bmi2_perform_accel_foc(const struct bmi2_accel_foc_g_value *accel_g_value, struct bmi2_dev *dev);
+int8_t bmi2_perform_accel_foc(const struct bmi2_accel_foc_g_value *accel_g_value,
+                              struct bmi2_dev *dev);
 
 /*!
  * \ingroup bmi2ApiFOC
