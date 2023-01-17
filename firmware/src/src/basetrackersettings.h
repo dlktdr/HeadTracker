@@ -667,6 +667,10 @@ public:
     return false;
   }
 
+  // Disable Magnetometer
+  inline const bool& getDisMag() {return dismag;}
+  void setDisMag(bool val=0) { dismag = val; }
+
   // Board Rotation X
   inline const float& getRotX() {return rotx;}
   bool setRotX(float val=0) {
@@ -1045,6 +1049,7 @@ public:
     json["so20"] = so20;
     json["so21"] = so21;
     json["so22"] = so22;
+    json["dismag"] = dismag;
     json["rotx"] = rotx;
     json["roty"] = roty;
     json["rotz"] = rotz;
@@ -1133,6 +1138,7 @@ public:
     v = json["so20"]; if(!v.isNull()) {setso20(v); chresetfusion = true;}
     v = json["so21"]; if(!v.isNull()) {setso21(v); chresetfusion = true;}
     v = json["so22"]; if(!v.isNull()) {setso22(v); chresetfusion = true;}
+    v = json["dismag"]; if(!v.isNull()) {setDisMag(v);}
     v = json["rotx"]; if(!v.isNull()) {setRotX(v); chresetfusion = true;}
     v = json["roty"]; if(!v.isNull()) {setRotY(v); chresetfusion = true;}
     v = json["rotz"]; if(!v.isNull()) {setRotZ(v); chresetfusion = true;}
@@ -1546,6 +1552,7 @@ protected:
   float so20 = 0; // Soft Iron Offset 20
   float so21 = 0; // Soft Iron Offset 21
   float so22 = 1; // Soft Iron Offset 22
+  bool dismag = 0; // Disable Magnetometer
   float rotx = 0; // Board Rotation X
   float roty = 0; // Board Rotation Y
   float rotz = 0; // Board Rotation Z

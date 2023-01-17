@@ -578,6 +578,7 @@ void MainWindow::updateToUI()
     ui->chkSbusOutInv->setChecked(trkset.getSbOutInv());
     ui->chkLngBttnPress->setChecked(trkset.getButLngPs());
     ui->chkRstOnTlt->setChecked(trkset.getRstOnTlt());
+    ui->chkNoMag->setChecked(trkset.getDisMag());
 
     // Button Press Mode - Enable/Disable on long press (Disable if no button pin selected)
     if(trkset.getButtonPin() > 0)
@@ -744,7 +745,8 @@ void MainWindow::updateFromUI()
     trkset.setRll_Cnt(ui->servoRoll->centerValue());
     trkset.setRll_Min(ui->servoRoll->minimumValue());
     trkset.setRll_Max(ui->servoRoll->maximumValue());
-    trkset.setRll_Gain(static_cast<float>(ui->rll_gain->value())/10.0f);
+    trkset.setRll_Gain(static_cast<float>(ui->rll_gain->value())/10.0f);    
+    trkset.setDisMag(ui->chkNoMag->isChecked());
 
     // Filters
     if(trkset.hardware() == "NANO33BLE" ||

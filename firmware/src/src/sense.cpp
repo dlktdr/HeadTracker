@@ -767,36 +767,43 @@ void sensor_Thread()
       gyrz = tmpgyr[2];
     }
 
-    if (magValid) {
-      // --- Magnetometer Calcs
-      rmagx = tmag[0];
-      rmagy = tmag[1];
-      rmagz = tmag[2];
-      float magsioff[9];
-      magxoff = trkset.getMagXOff();
-      magyoff = trkset.getMagYOff();
-      magzoff = trkset.getMagZOff();
-      trkset.getMagSiOff(magsioff);
+    if(!trkset.getDisMag()) {
+      if (magValid) {
+        // --- Magnetometer Calcs
+        rmagx = tmag[0];
+        rmagy = tmag[1];
+        rmagz = tmag[2];
+        float magsioff[9];
+        magxoff = trkset.getMagXOff();
+        magyoff = trkset.getMagYOff();
+        magzoff = trkset.getMagZOff();
+        trkset.getMagSiOff(magsioff);
 
-      // Calibrate Hard Iron Offsets
-      magx = rmagx - magxoff;
-      magy = rmagy - magyoff;
-      magz = rmagz - magzoff;
+        // Calibrate Hard Iron Offsets
+        magx = rmagx - magxoff;
+        magy = rmagy - magyoff;
+        magz = rmagz - magzoff;
 
-      magx = (magx * magsioff[0]) + (magy * magsioff[1]) + (magz * magsioff[2]);
-      magy = (magx * magsioff[3]) + (magy * magsioff[4]) + (magz * magsioff[5]);
-      magz = (magx * magsioff[6]) + (magy * magsioff[7]) + (magz * magsioff[8]);
+        magx = (magx * magsioff[0]) + (magy * magsioff[1]) + (magz * magsioff[2]);
+        magy = (magx * magsioff[3]) + (magy * magsioff[4]) + (magz * magsioff[5]);
+        magz = (magx * magsioff[6]) + (magy * magsioff[7]) + (magz * magsioff[8]);
 
-      // Apply Rotation
-      float tmpmag[3] = {magx, magy, magz};
-      rotate(tmpmag, rotation);
-      magx = tmpmag[0];
-      magy = tmpmag[1];
-      magz = tmpmag[2];
+        // Apply Rotation
+        float tmpmag[3] = {magx, magy, magz};
+        rotate(tmpmag, rotation);
+        magx = tmpmag[0];
+        magy = tmpmag[1];
+        magz = tmpmag[2];
 
-      // For inital orientation setup
-      madgsensbits |= MADGINIT_MAG;
-    }
+        // For inital orientation setup
+        madgsensbits |= MADGINIT_MAG;
+      }
+    } else {
+        magx = 0;
+        magy = 0;
+        magz = 0;
+        madgsensbits |= MADGINIT_MAG;
+      }
 
     // Run Gyro Calibration
     gyroCalibrate();
