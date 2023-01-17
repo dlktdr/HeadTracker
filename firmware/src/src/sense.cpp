@@ -909,15 +909,18 @@ void gyroCalibrate()
       filt_gyrz = ((1.0f - GYRO_SAMPLE_WEIGHT) * filt_gyrz) + (GYRO_SAMPLE_WEIGHT * rgyrz);
       filter_samples++;
     } else if (filter_samples == GYRO_STABLE_SAMPLES) {
+      // Set the new Gyro Offset Values
+      k_mutex_lock(&data_mutex, K_FOREVER);
+      trkset.setGyrXOff(filt_gyrx);
+      trkset.setGyrYOff(filt_gyry);
+      trkset.setGyrZOff(filt_gyrz);
+      k_mutex_unlock(&data_mutex);
+
+      // Check if they differ from the flash values and save if out of range
       if(fabs(gyrxoff - filt_gyrx) > GYRO_FLASH_IF_OFFSET ||
          fabs(gyryoff - filt_gyry) > GYRO_FLASH_IF_OFFSET ||
          fabs(gyrzoff - filt_gyrz) > GYRO_FLASH_IF_OFFSET) {
         if (!sent_gyro_cal_msg) {
-          k_mutex_lock(&data_mutex, K_FOREVER);
-          trkset.setGyrXOff(filt_gyrx);
-          trkset.setGyrYOff(filt_gyry);
-          trkset.setGyrZOff(filt_gyrz);
-          k_mutex_unlock(&data_mutex);
           trkset.saveToEEPROM();
           LOGW("Gyro calibration differs from saved value. Updating flash, x=%.3f,y=%.3f,z=%.3f", filt_gyrx, filt_gyry, filt_gyrz);
           sent_gyro_cal_msg = true;
