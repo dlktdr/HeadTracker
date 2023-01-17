@@ -774,7 +774,7 @@
               <item row="8" column="0">
                <widget class="QCheckBox" name="chkNoMag">
                 <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If your having issues calibrating the Magnetometer you can disable the magnetometer here. This may have some drift as it is only basing Pan on the Gyro. Be sure to place the board down on a stable surface and let it sit for 5 seconds before using it so the Gyro calibration can complete.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If your having issues calibrating the Magnetometer you can disable the magnetometer here. This may have some drift as it is only basing Pan on the Gyrometer. Be sure to place the board down on a stable surface and let it sit for 5 seconds before using it so the Gyrometer calibration can complete.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                 <property name="text">
                  <string>Don't use the magnetometer</string>
