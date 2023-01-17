@@ -147,8 +147,6 @@ public:
     _setting["ppmframe"] = 22500;
     _setting["ppmsync"] = 350;
     _setting["ppmchcnt"] = 8;
-    _setting["lppan"] = 100;
-    _setting["lptiltroll"] = 100;
     _setting["btpairedaddress"] = QString("");
     _dataItems["magx"] = false;
     _dataItems["magy"] = false;
@@ -1106,30 +1104,6 @@ public:
   bool setPpmChCnt(uint8_t val=8) {
     if(val >= 1 && val <= 16) {
       _setting["ppmchcnt"] = val;
-      return true;
-    }
-    return false;
-  }
-
-  // Low Pass filter For Pan
-  uint8_t getLpPan() {
-    return _setting["lppan"].toUInt();
-  }
-  bool setLpPan(uint8_t val=100) {
-    if(val >= 1 && val <= 100) {
-      _setting["lppan"] = val;
-      return true;
-    }
-    return false;
-  }
-
-  // Low Pass filter For Tilt + Roll
-  uint8_t getLpTiltRoll() {
-    return _setting["lptiltroll"].toUInt();
-  }
-  bool setLpTiltRoll(uint8_t val=100) {
-    if(val >= 1 && val <= 100) {
-      _setting["lptiltroll"] = val;
       return true;
     }
     return false;

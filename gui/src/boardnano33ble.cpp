@@ -315,13 +315,15 @@ void BoardNano33BLE::parseIncomingJSON(const QVariantMap &map)
         rxparamfaults = 0;
         trkset->setAllData(map);
         emit paramReceiveComplete();
-        // Remind user to calibrate
-        if(fabs(trkset->getMagXOff()) < 0.0001 &&
-           fabs(trkset->getMagYOff()) < 0.0001 &&
-           fabs(trkset->getMagZOff()) < 0.0001) {
-            if(calmsgshowed == false) {
-                emit needsCalibration();
-                calmsgshowed = true;
+        // Remind user to calibrate, if mag isn't disabled
+        if(!map["dismag"].toBool()) {
+            if(fabs(trkset->getMagXOff()) < 0.0001 &&
+               fabs(trkset->getMagYOff()) < 0.0001 &&
+               fabs(trkset->getMagZOff()) < 0.0001) {
+                if(calmsgshowed == false) {
+                    emit needsCalibration();
+                    calmsgshowed = true;
+                }
             }
         }
 

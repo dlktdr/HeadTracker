@@ -126,14 +126,11 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->chkLngBttnPress,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
     connect(ui->chkRstOnTlt,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
     connect(ui->chkCh5Arm,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
+    connect(ui->chkNoMag,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
 
     //connect(ui->chkRawData,SIGNAL(clicked(bool)),this,SLOT(setDataMode(bool)));
 
     // Spin Boxes
-    connect(ui->spnLPPan,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->spnLPTiltRoll,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->spnLPPan2,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->spnLPTiltRoll2,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->spnPPMSync,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
     connect(ui->spnPPMFrameLen,SIGNAL(valueChanged(double)),this,SLOT(updateFromUI()));
     connect(ui->spnA0Gain,SIGNAL(valueChanged(double)),this,SLOT(updateFromUI()));
@@ -578,7 +575,17 @@ void MainWindow::updateToUI()
     ui->chkSbusOutInv->setChecked(trkset.getSbOutInv());
     ui->chkLngBttnPress->setChecked(trkset.getButLngPs());
     ui->chkRstOnTlt->setChecked(trkset.getRstOnTlt());
+
+    // Disabled Magnetometer
     ui->chkNoMag->setChecked(trkset.getDisMag());
+    if(trkset.getDisMag()) {
+        ui->cmdCalibrate->setEnabled(false);
+        ui->cmdCalibrate->setToolTip("Calibration Disabled, Magnetometer is disabled");
+    } else {
+        ui->cmdCalibrate->setEnabled(true);
+        ui->cmdCalibrate->setToolTip("Click to Calibrate the Magnetometer");
+    }
+
 
     // Button Press Mode - Enable/Disable on long press (Disable if no button pin selected)
     if(trkset.getButtonPin() > 0)
@@ -589,10 +596,6 @@ void MainWindow::updateToUI()
     ui->spnPPMFrameLen->setMinimum((double)TrackerSettings::PPM_MIN_FRAME / 1000.0);
     ui->spnPPMFrameLen->setMaximum((double)TrackerSettings::PPM_MAX_FRAME / 1000.0);
 
-    ui->spnLPTiltRoll->setValue(trkset.getLpTiltRoll());
-    ui->spnLPPan->setValue(trkset.getLpPan());
-    ui->spnLPTiltRoll2->setValue(trkset.getLpTiltRoll());
-    ui->spnLPPan2->setValue(trkset.getLpPan());
     ui->spnA0Gain->setValue(trkset.getAn0Gain());
     ui->spnA0Off->setValue(trkset.getAn0Off());
     ui->spnA1Gain->setValue(trkset.getAn1Gain());
@@ -745,17 +748,15 @@ void MainWindow::updateFromUI()
     trkset.setRll_Cnt(ui->servoRoll->centerValue());
     trkset.setRll_Min(ui->servoRoll->minimumValue());
     trkset.setRll_Max(ui->servoRoll->maximumValue());
-    trkset.setRll_Gain(static_cast<float>(ui->rll_gain->value())/10.0f);    
-    trkset.setDisMag(ui->chkNoMag->isChecked());
+    trkset.setRll_Gain(static_cast<float>(ui->rll_gain->value())/10.0f);
 
-    // Filters
-    if(trkset.hardware() == "NANO33BLE" ||
-       trkset.hardware() == "DTQSYS") {
-        trkset.setLpTiltRoll(ui->spnLPTiltRoll->value());
-        trkset.setLpPan(ui->spnLPPan->value());
-    } else if (trkset.hardware() == "BNO055") {
-        trkset.setLpTiltRoll(ui->spnLPTiltRoll2->value());
-        trkset.setLpPan(ui->spnLPPan2->value());
+    trkset.setDisMag(ui->chkNoMag->isChecked());
+    if(trkset.getDisMag()) {
+        ui->cmdCalibrate->setEnabled(false);
+        ui->cmdCalibrate->setToolTip("Calibration Disabled, Magnetometer is disabled");
+    } else {
+        ui->cmdCalibrate->setEnabled(true);
+        ui->cmdCalibrate->setToolTip("Click to Calibrate the Magnetometer");
     }
 
     // Uart Mode

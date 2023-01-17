@@ -64,7 +64,6 @@ static float rolloffset = 0, panoffset = 0, tiltoffset = 0;
 static float magxoff = 0, magyoff = 0, magzoff = 0;
 static float accxoff = 0, accyoff = 0, acczoff = 0;
 static float gyrxoff = 0, gyryoff = 0, gyrzoff = 0;
-static float l_panout = 0, l_tiltout = 0, l_rollout = 0;
 static bool trpOutputEnabled = false;  // Default to disabled T/R/P output
 
 // Input Channel Data
@@ -228,22 +227,18 @@ void calculate_Thread()
     // Tilt output
     float tiltout =
         (tilt - tiltoffset) * trkset.getTlt_Gain() * (trkset.isTiltReversed() ? -1.0 : 1.0);
-    float beta = (float)trkset.getLpTiltRoll() / 100;  // LP Beta
-    filter_expAverage(&tiltout, beta, &l_tiltout);
     uint16_t tiltout_ui = tiltout + trkset.getTlt_Cnt();  // Apply Center Offset
     tiltout_ui = MAX(MIN(tiltout_ui, trkset.getTlt_Max()), trkset.getTlt_Min());  // Limit Output
 
     // Roll output
     float rollout =
         (roll - rolloffset) * trkset.getRll_Gain() * (trkset.isRollReversed() ? -1.0 : 1.0);
-    filter_expAverage(&rollout, beta, &l_rollout);
     uint16_t rollout_ui = rollout + trkset.getRll_Cnt();  // Apply Center Offset
     rollout_ui = MAX(MIN(rollout_ui, trkset.getRll_Max()), trkset.getRll_Min());  // Limit Output
 
     // Pan output, Normalize to +/- 180 Degrees
     float panout = normalize((pan - panoffset), -180, 180) * trkset.getPan_Gain() *
                    (trkset.isPanReversed() ? -1.0 : 1.0);
-    filter_expAverage(&panout, (float)trkset.getLpPan() / 100, &l_panout);
     uint16_t panout_ui = panout + trkset.getPan_Cnt();  // Apply Center Offset
     panout_ui = MAX(MIN(panout_ui, trkset.getPan_Max()), trkset.getPan_Min());  // Limit Output
 
