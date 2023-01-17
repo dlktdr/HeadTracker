@@ -8,12 +8,18 @@
 #define INPUT_PULLUP (GPIO_INPUT | GPIO_PULL_UP)
 
 // Board Features
+#if defined(PCB_NANO33BLE_SENSE2)
+  #define HAS_BMI270
+  #define HAS_BMM150
+#else
+  #define HAS_LSM9DS1
+#endif
+
 #define HAS_APDS9960
 #define HAS_3DIODE_RGB
 #define HAS_POWERLED
 #define HAS_NOTIFYLED
 #define HAS_PWMOUTPUTS
-#define HAS_LSM9DS1
 
 // Mapping Analog numbers to Analog pins
 #define AN0 7 // AN4 pin
@@ -29,38 +35,40 @@
 //     - The string descrition for D2 would be StrPins[IO_D2]
 
 #define PIN_X \
-  PIN(D2,      NRFPIN(1, 11), "Gen Purpose IO") \
-  PIN(D3,      NRFPIN(1, 12), "Gen Purpose IO" ) \
-  PIN(D4,      NRFPIN(1, 15), "Gen Purpose IO" ) \
-  PIN(D5,      NRFPIN(1, 13), "Gen Purpose IO" ) \
-  PIN(D6,      NRFPIN(1, 14), "Gen Purpose IO" ) \
-  PIN(D7,      NRFPIN(0, 23), "Gen Purpose IO" ) \
-  PIN(D8,      NRFPIN(0, 21), "Gen Purpose IO" ) \
-  PIN(D9,      NRFPIN(0, 27), "Gen Purpose IO" ) \
-  PIN(D10,     NRFPIN(1,  2), "Gen Purpose IO") \
-  PIN(D11,     NRFPIN(1,  1), "Gen Purpose IO") \
-  PIN(D12,     NRFPIN(1,  8), "Gen Purpose IO") \
-  PIN(LED,     NRFPIN(0, 13), "Notification LED") \
-  PIN(PWR,     NRFPIN(1,  9), "Power LED") \
-  PIN(LEDR,    NRFPIN(0, 24), "Reg LED") \
-  PIN(LEDG,    NRFPIN(0, 16), "Green LED") \
-  PIN(LEDB,    NRFPIN(0,  6), "Blue LED") \
-  PIN(PWM0,    NRFPIN(0,  4), "PWM 0 Output (A0)") \
-  PIN(PWM1,    NRFPIN(0,  5), "PWM 1 Output (A1)") \
-  PIN(PWM2,    NRFPIN(0, 30), "PWM 2 Output (A2)") \
-  PIN(PWM3,    NRFPIN(0, 29), "PWM 3 Output (A3)") \
-  PIN(AN0,     NRFPIN(0, 31), "Analog 0 (A4)") \
-  PIN(AN1,     NRFPIN(0,  2), "Analog 1 (A5)") \
-  PIN(AN2,     NRFPIN(0, 28), "Analog 2 (A6)") \
-  PIN(AN3,     NRFPIN(0,  3), "Analog 3 (A7)") \
-  PIN(TX,      NRFPIN(1,  3), "UART Transmit")  \
-  PIN(RX,      NRFPIN(1, 10), "UART Receive") \
-  PIN(TXINV,   NRFPIN(1,  4), "UART TX, Inv Pin") \
-  PIN(RXINVO,  NRFPIN(1, 13), "UART RX, Output Inv Pin") \
-  PIN(RXINVI,  NRFPIN(1, 14), "UART RX, Input Inv Pin") \
-  PIN(VDDENA,  NRFPIN(0, 22), "Internal Vdd Enable") \
-  PIN(I2C_PU,  NRFPIN(1,  0), "Internal I2C Pull Up") \
-  PIN(APDSINT, NRFPIN(0, 19), "APDS Interrupt Pin") \
+  PIN(D2,         NRFPIN(1, 11), "Gen Purpose IO") \
+  PIN(D3,         NRFPIN(1, 12), "Gen Purpose IO" ) \
+  PIN(D4,         NRFPIN(1, 15), "Gen Purpose IO" ) \
+  PIN(D5,         NRFPIN(1, 13), "Gen Purpose IO" ) \
+  PIN(D6,         NRFPIN(1, 14), "Gen Purpose IO" ) \
+  PIN(D7,         NRFPIN(0, 23), "Gen Purpose IO" ) \
+  PIN(D8,         NRFPIN(0, 21), "Gen Purpose IO" ) \
+  PIN(D9,         NRFPIN(0, 27), "Gen Purpose IO" ) \
+  PIN(D10,        NRFPIN(1,  2), "Gen Purpose IO") \
+  PIN(D11,        NRFPIN(1,  1), "Gen Purpose IO") \
+  PIN(D12,        NRFPIN(1,  8), "Gen Purpose IO") \
+  PIN(LED,        NRFPIN(0, 13), "Notification LED") \
+  PIN(PWR,        NRFPIN(1,  9), "Power LED") \
+  PIN(LEDR,       NRFPIN(0, 24), "Reg LED") \
+  PIN(LEDG,       NRFPIN(0, 16), "Green LED") \
+  PIN(LEDB,       NRFPIN(0,  6), "Blue LED") \
+  PIN(PWM0,       NRFPIN(0,  4), "PWM 0 Output (A0)") \
+  PIN(PWM1,       NRFPIN(0,  5), "PWM 1 Output (A1)") \
+  PIN(PWM2,       NRFPIN(0, 30), "PWM 2 Output (A2)") \
+  PIN(PWM3,       NRFPIN(0, 29), "PWM 3 Output (A3)") \
+  PIN(AN0,        NRFPIN(0, 31), "Analog 0 (A4)") \
+  PIN(AN1,        NRFPIN(0,  2), "Analog 1 (A5)") \
+  PIN(AN2,        NRFPIN(0, 28), "Analog 2 (A6)") \
+  PIN(AN3,        NRFPIN(0,  3), "Analog 3 (A7)") \
+  PIN(TX,         NRFPIN(1,  3), "UART Transmit")  \
+  PIN(RX,         NRFPIN(1, 10), "UART Receive") \
+  PIN(TXINV,      NRFPIN(1,  4), "UART TX, Inv Pin") \
+  PIN(RXINVO,     NRFPIN(1, 13), "UART RX, Output Inv Pin") \
+  PIN(RXINVI,     NRFPIN(1, 14), "UART RX, Input Inv Pin") \
+  PIN(VDDENA,     NRFPIN(0, 22), "Internal Vdd Enable") \
+  PIN(I2C_PU,     NRFPIN(1,  0), "Internal I2C Pull Up") \
+  PIN(APDSINT,    NRFPIN(0, 19), "APDS Interrupt Pin") \
+  PIN(BMI270INT1, NRFPIN(0, 11), "BMI270 Interrupt 1 Pin") \
+  PIN(BMI270INT2, NRFPIN(0, 20), "BMI270 Interrupt 2 Pin") \
   END_IO_PINS \
 
 typedef enum {

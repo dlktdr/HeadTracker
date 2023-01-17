@@ -49,6 +49,17 @@
 #if defined(HAS_QMC5883)
 #include "QMC5883/qmc5883.h"
 #endif
+#if defined(HAS_BMI270)
+#include "BMI270/bmi270.h"
+#include "BMI270/bmi2common.h"
+#endif
+#if defined(HAS_BMM150)
+#include "BMM150/bmm150.h"
+#include "BMM150/bmm150_common.h"
+#endif
+
+// Note: BMI270 + BMM150 On the Nano33BleSenseR2 are using the Zephyr Built in Drivers
+#define DEBUG_SENSOR_RATES
 
 void gyroCalibrate();
 
@@ -85,9 +96,19 @@ static bool blesenseboard = false;
 static bool lastproximity = false;
 #endif
 
-#if defined(PCB_NANO33BLE)
+#if defined(HAS_LSM9DS1)
 LSM9DS1Class IMU;
 #endif
+
+#if defined(HAS_BMI270)
+struct bmi2_dev bmi2_dev;
+#endif
+
+#if defined(HAS_BMM150)
+struct bmm150_dev bmm1_dev;
+#endif
+
+#define SENSOR_VALUE_TO_FLOAT(x) ((float)x.val1 + (float)x.val2 / 1000000.0f)
 
 // Initial Orientation Data+Vars
 #define MADGINIT_ACCEL 0x01
@@ -110,15 +131,16 @@ struct k_poll_event senseRunEvents[1] = {
     K_POLL_EVENT_INITIALIZER(K_POLL_TYPE_SIGNAL, K_POLL_MODE_NOTIFY_ONLY, &senseThreadRunSignal),
 };
 
-static struct k_poll_signal calculateThreadRunSignal = K_POLL_SIGNAL_INITIALIZER(calculateThreadRunSignal);
+static struct k_poll_signal calculateThreadRunSignal =
+    K_POLL_SIGNAL_INITIALIZER(calculateThreadRunSignal);
 struct k_poll_event calculateRunEvents[1] = {
-    K_POLL_EVENT_INITIALIZER(K_POLL_TYPE_SIGNAL, K_POLL_MODE_NOTIFY_ONLY, &calculateThreadRunSignal),
+    K_POLL_EVENT_INITIALIZER(K_POLL_TYPE_SIGNAL, K_POLL_MODE_NOTIFY_ONLY,
+                             &calculateThreadRunSignal),
 };
 
 int sense_Init()
 {
-  const struct device *i2c_dev =
-      device_get_binding("I2C_1");  // DEVICE_DT_GET(DT_NODELABEL(I2C_1));
+  const struct device *i2c_dev = device_get_binding("I2C_1");
   if (!i2c_dev) {
     LOGE("Could not get device binding for I2C");
     return false;
@@ -131,6 +153,51 @@ int sense_Init()
     LOGE("Failed to initalize sensors");
     return -1;
   }
+#endif
+
+#if defined(HAS_BMI270)
+  int8_t rslt;
+  uint8_t sensor_list[2] = {BMI2_ACCEL, BMI2_GYRO};
+  rslt = bmi2_interface_init(&bmi2_dev, BMI2_I2C_INTF);
+  bmi2_error_codes_print_result(rslt);
+
+  /* Initialize bmi270. */
+  rslt = bmi270_init(&bmi2_dev);
+  bmi2_error_codes_print_result(rslt);
+
+  if (rslt == BMI2_OK) {
+    /* Accel and gyro configuration settings. */
+    rslt = set_accel_gyro_config(&bmi2_dev);
+    bmi2_error_codes_print_result(rslt);
+
+    if (rslt == BMI2_OK) {
+      /* NOTE:
+       * Accel and Gyro enable must be done after setting configurations
+       */
+      rslt = bmi2_sensor_enable(sensor_list, 2, &bmi2_dev);
+      bmi2_error_codes_print_result(rslt);
+    }
+  } else
+    return -1;
+
+#endif
+
+#if defined(HAS_BMM150)
+  /* Status of api are returned to this variable */
+  int8_t rbslt;
+
+  rbslt = bmm150_interface_selection(&bmm1_dev);
+  bmm150_error_codes_print_result("bmm150_interface_selection", rbslt);
+  if (rbslt == BMM150_OK) {
+    rbslt = bmm150_init(&bmm1_dev);
+    bmm150_error_codes_print_result("bmm150_init", rbslt);
+
+    if (rbslt == BMM150_OK) {
+      rbslt = set_config(&bmm1_dev);
+      bmm150_error_codes_print_result("set_config", rbslt);
+    }
+  }
+
 #endif
 
 #if defined(HAS_MPU6500)
@@ -707,6 +774,46 @@ void sensor_Thread()
     }
 #endif
 
+#if defined(HAS_BMI270)
+    int8_t rslt;
+    uint16_t int_status = 0;
+    struct bmi2_sens_data sensor_data = {{0}};
+    rslt = bmi2_get_int_status(&int_status, &bmi2_dev);
+    bmi2_error_codes_print_result(rslt);
+    /* To check the data ready interrupt status and print the status for 10 samples. */
+    if ((int_status & BMI2_ACC_DRDY_INT_MASK) && (int_status & BMI2_GYR_DRDY_INT_MASK)) {
+      /* Get accel and gyro data for x, y and z axis. */
+      rslt = bmi2_get_sensor_data(&sensor_data, &bmi2_dev);
+      bmi2_error_codes_print_result(rslt);
+
+      /* Converting lsb to meter per second squared for 16 bit accelerometer at 2G range. */
+      tacc[0] = lsb_to_mps2(sensor_data.acc.y, 2, bmi2_dev.resolution) / GRAVITY_EARTH;
+      tacc[1] = -1.0f * lsb_to_mps2(sensor_data.acc.x, 2, bmi2_dev.resolution) / GRAVITY_EARTH;
+      tacc[2] = lsb_to_mps2(sensor_data.acc.z, 2, bmi2_dev.resolution) / GRAVITY_EARTH;
+      // printk("\nAccX=%4.2f,Y=%4.2f,Z=%4.2f\n", tacc[0], tacc[1], tacc[2]);
+      /* Converting lsb to degree per second for 16 bit gyro at 2000dps range. */
+
+      tgyr[0] = lsb_to_dps(sensor_data.gyr.y, 2000, bmi2_dev.resolution);
+      tgyr[1] = -1.0f * lsb_to_dps(sensor_data.gyr.x, 2000, bmi2_dev.resolution);
+      tgyr[2] = lsb_to_dps(sensor_data.gyr.z, 2000, bmi2_dev.resolution);
+      // printk("GyrX=%4.2f,Y=%4.2f,Z=%4.2f\n", tgyr[0], tgyr[1], tgyr[2]);
+      accValid = true;
+      gyrValid = true;
+    }
+
+#endif
+
+#if defined(HAS_BMM150)
+    int8_t rbslt;
+    struct bmm150_mag_data mag_data;
+    rbslt = bmm150_read_mag_data(&mag_data, &bmm1_dev);
+    bmm150_error_codes_print_result("bmm150_read_mag_data", rbslt);
+    tmag[0] = mag_data.y;
+    tmag[1] = mag_data.x;
+    tmag[2] = mag_data.z;
+    magValid = true;
+#endif
+
 #if defined(HAS_QMC5883)
     if (qmc5883Read(tmag)) {
       magValid = true;
@@ -884,6 +991,16 @@ void sensor_Thread()
       rt_sleep_us(SENSOR_PERIOD - senseUsDuration);
     }
 
+#if defined(DEBUG_SENSOR_RATES)
+    static int mcount = 0;
+    static int64_t mmic = millis64() + 1000;
+    if (mmic < millis64()) {  // Every Second
+      mmic = millis64() + 1000;
+      LOGI("Sense Rate = %d", mcount);
+      mcount = 0;
+    }
+    if (accValid) mcount++;
+#endif
   }  // END THREAD
 }
 
