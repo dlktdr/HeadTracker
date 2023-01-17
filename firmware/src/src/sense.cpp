@@ -49,6 +49,10 @@
 #if defined(HAS_QMC5883)
 #include "QMC5883/qmc5883.h"
 #endif
+#if defined(HAS_BMI270)
+#include "BMI270/bmi270.h"
+#include "BMI270/bmi2common.h"
+#endif
 
 // Note: BMI270 + BMM150 On the Nano33BleSenseR2 are using the Zephyr Built in Drivers
 #define DEBUG_SENSOR_RATES
@@ -92,8 +96,14 @@ LSM9DS1Class IMU;
 #endif
 
 #if defined(HAS_BMI270)
-const struct device *bmi270Dev;
+struct bmi2_dev bmi2_dev;
 #endif
+
+#if defined(HAS_BMM150)
+const struct device *bmm150Dev;
+#endif
+
+#define SENSOR_VALUE_TO_FLOAT(x) ((float)x.val1 + (float)x.val2 / 1000000.0f)
 
 // Initial Orientation Data+Vars
 #define MADGINIT_ACCEL 0x01
@@ -125,8 +135,7 @@ struct k_poll_event calculateRunEvents[1] = {
 
 int sense_Init()
 {
-  const struct device *i2c_dev =
-      device_get_binding("I2C_1");  // DEVICE_DT_GET(DT_NODELABEL(I2C_1));
+  const struct device *i2c_dev = device_get_binding("I2C_1");
   if (!i2c_dev) {
     LOGE("Could not get device binding for I2C");
     return false;
@@ -142,47 +151,42 @@ int sense_Init()
 #endif
 
 #if defined(HAS_BMI270)
-  bmi270Dev = DEVICE_DT_GET_ONE(bosch_bmi270);
-  ;
-  if (!device_is_ready(bmi270Dev)) {
-    printf("Device %s is not ready\n", bmi270Dev->name);
+  int8_t rslt;
+  uint8_t sensor_list[2] = {BMI2_ACCEL, BMI2_GYRO};
+  rslt = bmi2_interface_init(&bmi2_dev, BMI2_I2C_INTF);
+  bmi2_error_codes_print_result(rslt);
+
+  /* Initialize bmi270. */
+  rslt = bmi270_init(&bmi2_dev);
+  bmi2_error_codes_print_result(rslt);
+
+  if (rslt == BMI2_OK) {
+    /* Accel and gyro configuration settings. */
+    rslt = set_accel_gyro_config(&bmi2_dev);
+    bmi2_error_codes_print_result(rslt);
+
+    if (rslt == BMI2_OK) {
+      /* NOTE:
+       * Accel and Gyro enable must be done after setting configurations
+       */
+      rslt = bmi2_sensor_enable(sensor_list, 2, &bmi2_dev);
+      bmi2_error_codes_print_result(rslt);
+    }
+  } else
     return -1;
-  }
-  printk("Found device %s", bmi270Dev->name);
-
-  struct sensor_value full_scale, sampling_freq, oversampling;
-  full_scale.val1 = 2; /* G */
-  full_scale.val2 = 0;
-  sampling_freq.val1 = 200; /* Hz. Performance mode */
-  sampling_freq.val2 = 0;
-  oversampling.val1 = 1; /* Normal mode */
-  oversampling.val2 = 0;
-
-  sensor_attr_set(bmi270Dev, SENSOR_CHAN_ACCEL_XYZ, SENSOR_ATTR_FULL_SCALE, &full_scale);
-  sensor_attr_set(bmi270Dev, SENSOR_CHAN_ACCEL_XYZ, SENSOR_ATTR_OVERSAMPLING, &oversampling);
-  /* Set sampling frequency last as this also sets the appropriate
-   * power mode. If already sampling, change to 0.0Hz before changing
-   * other attributes
-   */
-  sensor_attr_set(bmi270Dev, SENSOR_CHAN_ACCEL_XYZ, SENSOR_ATTR_SAMPLING_FREQUENCY, &sampling_freq);
-
-  /* Setting scale in degrees/s to match the sensor scale */
-  full_scale.val1 = 2000; /* dps */
-  full_scale.val2 = 0;
-  sampling_freq.val1 = 200; /* Hz. Performance mode */
-  sampling_freq.val2 = 0;
-  oversampling.val1 = 1; /* Normal mode */
-  oversampling.val2 = 0;
-
-  sensor_attr_set(bmi270Dev, SENSOR_CHAN_GYRO_XYZ, SENSOR_ATTR_FULL_SCALE, &full_scale);
-  sensor_attr_set(bmi270Dev, SENSOR_CHAN_GYRO_XYZ, SENSOR_ATTR_OVERSAMPLING, &oversampling);
-  /* Set sampling frequency last as this also sets the appropriate
-   * power mode. If already sampling, change sampling frequency to
-   * 0.0Hz before changing other attributes
-   */
-  sensor_attr_set(bmi270Dev, SENSOR_CHAN_GYRO_XYZ, SENSOR_ATTR_SAMPLING_FREQUENCY, &sampling_freq);
 
 #endif
+
+    /*#if defined(HAS_BMM150)/
+
+      bmm150Dev = device_get_binding("BMM150");
+
+      if (!device_is_ready(bmm150Dev)) {
+        printf("Device %s is not ready\n", bmm150Dev->name);
+        return -1;
+      }
+      printk("Found device %s", bmm150Dev->name);
+    #endif*/
 
 #if defined(HAS_MPU6500)
   mpu_select_device(0);
@@ -763,22 +767,55 @@ void sensor_Thread()
 #endif
 
 #if defined(HAS_BMI270)
-    if (device_is_ready(bmi270Dev)) {
-      if (sensor_sample_fetch(bmi270Dev) == 0) {
-        struct sensor_value acc[3], gyr[3];
-        sensor_channel_get(bmi270Dev, SENSOR_CHAN_ACCEL_XYZ, acc);
-        sensor_channel_get(bmi270Dev, SENSOR_CHAN_GYRO_XYZ, gyr);
-        tacc[0] = sensor_value_to_double(&acc[0]);  // X
-        tacc[1] = sensor_value_to_double(&acc[1]);  // Y
-        tacc[2] = sensor_value_to_double(&acc[2]);  // Z
-        tgyr[0] = sensor_value_to_double(&gyr[0]);  // X
-        tgyr[1] = sensor_value_to_double(&gyr[1]);  // Y
-        tgyr[2] = sensor_value_to_double(&gyr[2]);  // Z
-        gyrValid = true;
-        accValid = true;
-      }
+    int8_t rslt;
+    uint16_t int_status = 0;
+    struct bmi2_sens_data sensor_data = {{0}};
+    rslt = bmi2_get_int_status(&int_status, &bmi2_dev);
+    bmi2_error_codes_print_result(rslt);
+    /* To check the data ready interrupt status and print the status for 10 samples. */
+    if ((int_status & BMI2_ACC_DRDY_INT_MASK) && (int_status & BMI2_GYR_DRDY_INT_MASK)) {
+      /* Get accel and gyro data for x, y and z axis. */
+      rslt = bmi2_get_sensor_data(&sensor_data, &bmi2_dev);
+      bmi2_error_codes_print_result(rslt);
+
+      /* Converting lsb to meter per second squared for 16 bit accelerometer at 2G range. */
+      tacc[0] = lsb_to_mps2(sensor_data.acc.y, 2, bmi2_dev.resolution) / GRAVITY_EARTH;
+      tacc[1] = -1.0f * lsb_to_mps2(sensor_data.acc.x, 2, bmi2_dev.resolution) / GRAVITY_EARTH;
+      tacc[2] = lsb_to_mps2(sensor_data.acc.z, 2, bmi2_dev.resolution) / GRAVITY_EARTH;
+      // printk("\nAccX=%4.2f,Y=%4.2f,Z=%4.2f\n", tacc[0], tacc[1], tacc[2]);
+      /* Converting lsb to degree per second for 16 bit gyro at 2000dps range. */
+
+      tgyr[0] = lsb_to_dps(sensor_data.gyr.y, 2000, bmi2_dev.resolution);
+      tgyr[1] = -1.0f * lsb_to_dps(sensor_data.gyr.x, 2000, bmi2_dev.resolution);
+      tgyr[2] = lsb_to_dps(sensor_data.gyr.z, 2000, bmi2_dev.resolution);
+      // printk("GyrX=%4.2f,Y=%4.2f,Z=%4.2f\n", tgyr[0], tgyr[1], tgyr[2]);
+      accValid = true;
+      gyrValid = true;
+
+      magValid = true;  // REMOVE ME when MAG WORKS
+      tmag[0] = 0;
+      tmag[1] = 0;
+      tmag[2] = 0;
     }
+
 #endif
+
+    /*
+    #if defined(HAS_BMM150)
+        if (device_is_ready(bmm150Dev)) {
+          if (sensor_sample_fetch(bmm150Dev) == 0) {
+            struct sensor_value mag[3];
+            sensor_channel_get(bmm150Dev, SENSOR_CHAN_MAGN_X, &mag[0]);
+            sensor_channel_get(bmm150Dev, SENSOR_CHAN_MAGN_Y, &mag[1]);
+            sensor_channel_get(bmm150Dev, SENSOR_CHAN_MAGN_Z, &mag[2]);
+            tmag[0] = SENSOR_VALUE_TO_FLOAT(mag[0]);  // X
+            tmag[1] = SENSOR_VALUE_TO_FLOAT(mag[1]);  // Y
+            tmag[2] = SENSOR_VALUE_TO_FLOAT(mag[2]);  // Z
+           // printk("G%.3f,%.3f,%.3f\n", tmag[0], tmag[2], tmag[2]);
+            magValid = true;
+          }
+        }
+    #endif*/
 
 #if defined(HAS_QMC5883)
     if (qmc5883Read(tmag)) {
@@ -955,7 +992,7 @@ void sensor_Thread()
       LOGI("Sense Rate = %d", mcount);
       mcount = 0;
     }
-    mcount++;
+    if (accValid) mcount++;
 #endif
   }  // END THREAD
 }

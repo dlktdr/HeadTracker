@@ -74,19 +74,7 @@
 	sda-pin = <14>; //P0.14
 	scl-pin = <15>; //P0.15
   zephyr,concat-buf-size = <264>;
-  clock-frequency = <100000>;
-
-	bmi270@68 {
-		compatible = "bosch,bmi270";
-		reg = <0x68>;
-		label = "BMI270";
-	};
-
-  bmm150@10 {
-		compatible = "bosch,bmm150";
-		reg = <0x10>;
-		label = "BMM150";
-	};
+//  clock-frequency = <100000>;
 };
 // we use SPI2 because SPI1/0 shares conflicts with I2C1/0
 &spi2 {
