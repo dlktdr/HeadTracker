@@ -315,7 +315,18 @@ void BoardNano33BLE::parseIncomingJSON(const QVariantMap &map)
         rxParamsTimer.stop(); // Stop error timer
         rxparamfaults = 0;
         trkset->setAllData(map);
-        emit paramReceiveComplete();        
+        emit paramReceiveComplete();
+        // Remind user to calibrate, if mag isn't disabled
+        if(!map["dismag"].toBool()) {
+            if(fabs(trkset->getMagXOff()) < 0.0001 &&
+               fabs(trkset->getMagYOff()) < 0.0001 &&
+               fabs(trkset->getMagZOff()) < 0.0001) {
+                if(calmsgshowed == false) {
+                    emit needsCalibration();
+                    calmsgshowed = true;
+                }
+            }
+        }
 
     // Data sent, Update the graph / servo sliders / calibration
     } else if (map["Cmd"].toString() == "Data") {
@@ -369,15 +380,6 @@ void BoardNano33BLE::parseIncomingJSON(const QVariantMap &map)
 
         // Add all the non array live data
         trkset->setLiveDataMap(cmap);
-
-        // Remind user to calibrate
-        if(cmap.contains("isCalibrated")) {
-            trkset->setDataItemSend("isCalibrated", false);
-            if(cmap["isCalibrated"].toBool() == false && calmsgshowed == false) {
-                emit needsCalibration();                
-                calmsgshowed = true;
-            }
-        }
 
     // Firmware Hardware and Version
     } else if (map["Cmd"].toString() == "FW") {

@@ -79,13 +79,13 @@ public:
     memset(btrmt,0,sizeof(char) * 18);
 
     // Call Virtual Events after initialization
-    pinsChanged();
     resetFusion();
+    pinsChanged();
   }
 
   // Virtual Events
-  virtual void pinsChanged() {};
   virtual void resetFusion() {};
+  virtual void pinsChanged() {};
 
   // Roll Minimum
   inline const uint16_t& getRll_Min() {return rll_min;}
@@ -667,6 +667,10 @@ public:
     return false;
   }
 
+  // Disable Magnetometer
+  inline const bool& getDisMag() {return dismag;}
+  void setDisMag(bool val=0) { dismag = val; }
+
   // Board Rotation X
   inline const float& getRotX() {return rotx;}
   bool setRotX(float val=0) {
@@ -824,26 +828,6 @@ public:
   bool setPpmChCnt(uint8_t val=8) {
     if(val >= 1 && val <= 16) {
       ppmchcnt = val;
-      return true;
-    }
-    return false;
-  }
-
-  // Low Pass filter For Pan
-  inline const uint8_t& getLpPan() {return lppan;}
-  bool setLpPan(uint8_t val=100) {
-    if(val >= 1 && val <= 100) {
-      lppan = val;
-      return true;
-    }
-    return false;
-  }
-
-  // Low Pass filter For Tilt + Roll
-  inline const uint8_t& getLpTiltRoll() {return lptiltroll;}
-  bool setLpTiltRoll(uint8_t val=100) {
-    if(val >= 1 && val <= 100) {
-      lptiltroll = val;
       return true;
     }
     return false;
@@ -1045,6 +1029,7 @@ public:
     json["so20"] = so20;
     json["so21"] = so21;
     json["so22"] = so22;
+    json["dismag"] = dismag;
     json["rotx"] = rotx;
     json["roty"] = roty;
     json["rotz"] = rotz;
@@ -1066,15 +1051,13 @@ public:
     json["ppmframe"] = ppmframe;
     json["ppmsync"] = ppmsync;
     json["ppmchcnt"] = ppmchcnt;
-    json["lppan"] = lppan;
-    json["lptiltroll"] = lptiltroll;
     json["btpairedaddress"] = btpairedaddress;
   }
 
   void loadJSONSettings(DynamicJsonDocument &json) {
     JsonVariant v;
-    bool chpinschanged = false;
     bool chresetfusion = false;
+    bool chpinschanged = false;
     v = json["rll_min"]; if(!v.isNull()) {setRll_Min(v);}
     v = json["rll_max"]; if(!v.isNull()) {setRll_Max(v);}
     v = json["rll_cnt"]; if(!v.isNull()) {setRll_Cnt(v);}
@@ -1133,6 +1116,7 @@ public:
     v = json["so20"]; if(!v.isNull()) {setso20(v); chresetfusion = true;}
     v = json["so21"]; if(!v.isNull()) {setso21(v); chresetfusion = true;}
     v = json["so22"]; if(!v.isNull()) {setso22(v); chresetfusion = true;}
+    v = json["dismag"]; if(!v.isNull()) {setDisMag(v);}
     v = json["rotx"]; if(!v.isNull()) {setRotX(v); chresetfusion = true;}
     v = json["roty"]; if(!v.isNull()) {setRotY(v); chresetfusion = true;}
     v = json["rotz"]; if(!v.isNull()) {setRotZ(v); chresetfusion = true;}
@@ -1154,13 +1138,11 @@ public:
     v = json["ppmframe"]; if(!v.isNull()) {setPpmFrame(v);}
     v = json["ppmsync"]; if(!v.isNull()) {setPpmSync(v);}
     v = json["ppmchcnt"]; if(!v.isNull()) {setPpmChCnt(v);}
-    v = json["lppan"]; if(!v.isNull()) {setLpPan(v);}
-    v = json["lptiltroll"]; if(!v.isNull()) {setLpTiltRoll(v);}
     v = json["btpairedaddress"]; if(!v.isNull()) {setBtPairedAddress(v);}
-    if(chpinschanged)
-      pinsChanged();
     if(chresetfusion)
       resetFusion();
+    if(chpinschanged)
+      pinsChanged();
   }
 
   void setJSONDataList(DynamicJsonDocument &json)
@@ -1546,6 +1528,7 @@ protected:
   float so20 = 0; // Soft Iron Offset 20
   float so21 = 0; // Soft Iron Offset 21
   float so22 = 1; // Soft Iron Offset 22
+  bool dismag = 0; // Disable Magnetometer
   float rotx = 0; // Board Rotation X
   float roty = 0; // Board Rotation Y
   float rotz = 0; // Board Rotation Z
@@ -1567,8 +1550,6 @@ protected:
   uint16_t ppmframe = 22500; // PPM Frame Length (us)
   uint16_t ppmsync = 350; // PPM Sync Pulse Length (us)
   uint8_t ppmchcnt = 8; // PPM channels to output
-  uint8_t lppan = 100; // Low Pass filter For Pan
-  uint8_t lptiltroll = 100; // Low Pass filter For Tilt + Roll
 
   // Setting Arrays
   char btpairedaddress[19]; // Bluetooth Remote address to Pair With

@@ -63,8 +63,6 @@ void BoardBNO055::requestHardware()
 void BoardBNO055::saveToRAM()
 {
     QStringList lst;
-    lst.append(QString::number(trkset->getLpTiltRoll()));
-    lst.append(QString::number(trkset->getLpPan()));
     lst.append(QString::number(trkset->gyroWeightTiltRoll()));
     lst.append(QString::number(trkset->gyroWeightPan()));
     lst.append(QString::number(trkset->getTlt_Gain()*10));
@@ -189,8 +187,6 @@ void BoardBNO055::parseIncomingHT(QString cmd)
     else if(cmd.left(5) == "$SET$") {
         QStringList setd = cmd.right(cmd.length()-5).split(',',Qt::KeepEmptyParts);
         if(setd.length() == 22) {
-            trkset->setLpTiltRoll(setd.at(0).toFloat());
-            trkset->setLpPan(setd.at(1).toFloat());
             trkset->setGyroWeightTiltRoll(setd.at(2).toFloat());
             trkset->setGyroWeightPan(setd.at(3).toFloat());
             trkset->setTlt_Gain(setd.at(4).toFloat() /10);

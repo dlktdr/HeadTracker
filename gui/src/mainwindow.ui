@@ -312,16 +312,10 @@
         </widget>
         <widget class="QWidget" name="BNO055">
          <layout class="QGridLayout" name="gridLayout_6">
-          <item row="4" column="0">
-           <widget class="QLabel" name="label_6">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_8">
             <property name="text">
-             <string>Axis Remapping</string>
+             <string>Axis Signs</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignBottom|Qt::AlignLeading|Qt::AlignLeft</set>
@@ -335,27 +329,10 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="label_8">
-            <property name="text">
-             <string>Axis Signs</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignBottom|Qt::AlignLeading|Qt::AlignLeft</set>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_7">
-            <property name="text">
-             <string>Manual Command</string>
-            </property>
-           </widget>
-          </item>
           <item row="0" column="1">
            <widget class="QLineEdit" name="txtCommand"/>
           </item>
-          <item row="5" column="0">
+          <item row="3" column="0">
            <spacer name="verticalSpacer_8">
             <property name="orientation">
              <enum>Qt::Vertical</enum>
@@ -368,95 +345,7 @@
             </property>
            </spacer>
           </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_24">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>Low Pass Filter on Tilt/Roll</string>
-            </property>
-           </widget>
-          </item>
           <item row="1" column="1" colspan="2">
-           <widget class="QSpinBox" name="spnLPTiltRoll2">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>50</width>
-              <height>25</height>
-             </size>
-            </property>
-            <property name="baseSize">
-             <size>
-              <width>8</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="suffix">
-             <string>%</string>
-            </property>
-            <property name="minimum">
-             <number>1</number>
-            </property>
-            <property name="maximum">
-             <number>100</number>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_31">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>Low Pass Filter on Pan</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1" colspan="2">
-           <widget class="QSpinBox" name="spnLPPan2">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>50</width>
-              <height>25</height>
-             </size>
-            </property>
-            <property name="baseSize">
-             <size>
-              <width>8</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="suffix">
-             <string>%</string>
-            </property>
-            <property name="minimum">
-             <number>1</number>
-            </property>
-            <property name="maximum">
-             <number>100</number>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="1" colspan="2">
            <widget class="QComboBox" name="cmbSigns">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
@@ -506,13 +395,36 @@
             </item>
            </widget>
           </item>
-          <item row="4" column="1" colspan="2">
+          <item row="2" column="1" colspan="2">
            <widget class="QComboBox" name="cmbRemap">
             <property name="sizePolicy">
              <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_7">
+            <property name="text">
+             <string>Manual Command</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_6">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Axis Remapping</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignBottom|Qt::AlignLeading|Qt::AlignLeft</set>
             </property>
            </widget>
           </item>
@@ -532,293 +444,13 @@
              <bool>false</bool>
             </property>
             <property name="currentIndex">
-             <number>5</number>
+             <number>0</number>
             </property>
             <widget class="QWidget" name="tabGeneral">
              <attribute name="title">
               <string>General</string>
              </attribute>
              <layout class="QGridLayout" name="gridLayout_12">
-              <item row="7" column="0">
-               <spacer name="verticalSpacer_6">
-                <property name="orientation">
-                 <enum>Qt::Vertical</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>20</width>
-                  <height>40</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-              <item row="4" column="1">
-               <widget class="QSpinBox" name="spnLPTiltRoll">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>50</width>
-                  <height>25</height>
-                 </size>
-                </property>
-                <property name="baseSize">
-                 <size>
-                  <width>8</width>
-                  <height>0</height>
-                 </size>
-                </property>
-                <property name="suffix">
-                 <string>%</string>
-                </property>
-                <property name="minimum">
-                 <number>1</number>
-                </property>
-                <property name="maximum">
-                 <number>100</number>
-                </property>
-               </widget>
-              </item>
-              <item row="3" column="1" colspan="2">
-               <layout class="QGridLayout" name="gridLayout_7">
-                <item row="1" column="0">
-                 <widget class="QLabel" name="label_45">
-                  <property name="toolTip">
-                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Please see the video online &lt;span style=&quot; font-weight:700;&quot;&gt;Help-&amp;gt;Online Help -&amp;gt; GUI Setup -&amp;gt; General&lt;/span&gt; for an explanation&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                  </property>
-                  <property name="text">
-                   <string>Tilt (X)</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="2" column="0">
-                 <widget class="QSpinBox" name="spnRotX">
-                  <property name="toolTip">
-                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Please see the video online &lt;span style=&quot; font-weight:700;&quot;&gt;Help-&amp;gt;Online Help -&amp;gt; GUI Setup -&amp;gt; General&lt;/span&gt; for an explanation&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                  </property>
-                  <property name="suffix">
-                   <string>°</string>
-                  </property>
-                  <property name="minimum">
-                   <number>-360</number>
-                  </property>
-                  <property name="maximum">
-                   <number>360</number>
-                  </property>
-                 </widget>
-                </item>
-                <item row="1" column="1">
-                 <widget class="QLabel" name="label_46">
-                  <property name="toolTip">
-                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Please see the video online &lt;span style=&quot; font-weight:700;&quot;&gt;Help-&amp;gt;Online Help -&amp;gt; GUI Setup -&amp;gt; General&lt;/span&gt; for an explanation&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                  </property>
-                  <property name="text">
-                   <string>Roll (Y)</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="2" column="1">
-                 <widget class="QSpinBox" name="spnRotY">
-                  <property name="toolTip">
-                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Please see the video online &lt;span style=&quot; font-weight:700;&quot;&gt;Help-&amp;gt;Online Help -&amp;gt; GUI Setup -&amp;gt; General&lt;/span&gt; for an explanation&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                  </property>
-                  <property name="suffix">
-                   <string>°</string>
-                  </property>
-                  <property name="minimum">
-                   <number>-360</number>
-                  </property>
-                  <property name="maximum">
-                   <number>360</number>
-                  </property>
-                 </widget>
-                </item>
-                <item row="2" column="2">
-                 <widget class="QSpinBox" name="spnRotZ">
-                  <property name="toolTip">
-                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Please see the video online &lt;span style=&quot; font-weight:700;&quot;&gt;Help-&amp;gt;Online Help -&amp;gt; GUI Setup -&amp;gt; General&lt;/span&gt; for an explanation&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                  </property>
-                  <property name="suffix">
-                   <string>°</string>
-                  </property>
-                  <property name="minimum">
-                   <number>-360</number>
-                  </property>
-                  <property name="maximum">
-                   <number>360</number>
-                  </property>
-                 </widget>
-                </item>
-                <item row="1" column="2">
-                 <widget class="QLabel" name="label_47">
-                  <property name="toolTip">
-                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Please see the video online &lt;span style=&quot; font-weight:700;&quot;&gt;Help-&amp;gt;Online Help -&amp;gt; GUI Setup -&amp;gt; General&lt;/span&gt; for an explanation&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                  </property>
-                  <property name="text">
-                   <string>Pan (Z)</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="0" column="0" colspan="3">
-                 <widget class="QCheckBox" name="chkRstOnTlt">
-                  <property name="text">
-                   <string>Reset Center on Tilt</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </item>
-              <item row="6" column="0" colspan="2">
-               <widget class="QCheckBox" name="chkResetCenterWave">
-                <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sets the output channel you want tilt on&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                </property>
-                <property name="text">
-                 <string>Center on Proximity Detect (BLE Sense Only)</string>
-                </property>
-               </widget>
-              </item>
-              <item row="4" column="0">
-               <widget class="QLabel" name="label_2">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="text">
-                 <string>Low Pass Filter on Tilt/Roll</string>
-                </property>
-               </widget>
-              </item>
-              <item row="5" column="0">
-               <widget class="QLabel" name="label_4">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="text">
-                 <string>Low Pass Filter on Pan</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="1" colspan="2">
-               <widget class="QComboBox" name="cmbButtonPin">
-                <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Choose the pin you want to wire your center button to here&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                </property>
-                <item>
-                 <property name="text">
-                  <string>Disabled</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>D2</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>D3</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>D4</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>D5</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>D6</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>D7</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>D8</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>D9</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>D10</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>D11</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>D12</string>
-                 </property>
-                </item>
-               </widget>
-              </item>
-              <item row="3" column="0">
-               <widget class="QLabel" name="label_15">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="text">
-                 <string>Board Rotation</string>
-                </property>
-               </widget>
-              </item>
-              <item row="5" column="1">
-               <widget class="QSpinBox" name="spnLPPan">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>50</width>
-                  <height>25</height>
-                 </size>
-                </property>
-                <property name="baseSize">
-                 <size>
-                  <width>8</width>
-                  <height>0</height>
-                 </size>
-                </property>
-                <property name="suffix">
-                 <string>%</string>
-                </property>
-                <property name="minimum">
-                 <number>1</number>
-                </property>
-                <property name="maximum">
-                 <number>100</number>
-                </property>
-               </widget>
-              </item>
               <item row="0" column="0">
                <widget class="QLabel" name="lblButtonPin">
                 <property name="sizePolicy">
@@ -832,18 +464,38 @@
                 </property>
                </widget>
               </item>
-              <item row="1" column="0">
-               <widget class="QLabel" name="alertSignal">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
+              <item row="5" column="0" colspan="3">
+               <widget class="QCheckBox" name="chkResetCenterWave">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sets the output channel you want tilt on&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                 <property name="text">
-                 <string>Send Recenter on Chan</string>
+                 <string>Center on Proximity Detect (BLE Sense Only)</string>
                 </property>
                </widget>
+              </item>
+              <item row="2" column="1">
+               <widget class="QCheckBox" name="chkLngBttnPress">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This function allows you to enable the tilt/roll/pan outputs after a long press of the reset button. Another long press will disable the output&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>Enable Tilt/Roll/Pan after a long button press</string>
+                </property>
+               </widget>
+              </item>
+              <item row="7" column="0">
+               <spacer name="verticalSpacer_6">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>40</height>
+                 </size>
+                </property>
+               </spacer>
               </item>
               <item row="1" column="1" colspan="2">
                <widget class="QComboBox" name="cmbalertchn">
@@ -937,13 +589,195 @@
                 </item>
                </widget>
               </item>
-              <item row="2" column="1">
-               <widget class="QCheckBox" name="chkLngBttnPress">
-                <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This function allows you to enable the tilt/roll/pan outputs after a long press of the reset button. Another long press will disable the output&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              <item row="3" column="1" colspan="2">
+               <layout class="QGridLayout" name="gridLayout_7">
+                <item row="1" column="0">
+                 <widget class="QLabel" name="label_45">
+                  <property name="toolTip">
+                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Please see the video online &lt;span style=&quot; font-weight:700;&quot;&gt;Help-&amp;gt;Online Help -&amp;gt; GUI Setup -&amp;gt; General&lt;/span&gt; for an explanation&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  </property>
+                  <property name="text">
+                   <string>Tilt (X)</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="0">
+                 <widget class="QSpinBox" name="spnRotX">
+                  <property name="toolTip">
+                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Please see the video online &lt;span style=&quot; font-weight:700;&quot;&gt;Help-&amp;gt;Online Help -&amp;gt; GUI Setup -&amp;gt; General&lt;/span&gt; for an explanation&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  </property>
+                  <property name="suffix">
+                   <string>°</string>
+                  </property>
+                  <property name="minimum">
+                   <number>-360</number>
+                  </property>
+                  <property name="maximum">
+                   <number>360</number>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="1">
+                 <widget class="QLabel" name="label_46">
+                  <property name="toolTip">
+                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Please see the video online &lt;span style=&quot; font-weight:700;&quot;&gt;Help-&amp;gt;Online Help -&amp;gt; GUI Setup -&amp;gt; General&lt;/span&gt; for an explanation&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  </property>
+                  <property name="text">
+                   <string>Roll (Y)</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="1">
+                 <widget class="QSpinBox" name="spnRotY">
+                  <property name="toolTip">
+                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Please see the video online &lt;span style=&quot; font-weight:700;&quot;&gt;Help-&amp;gt;Online Help -&amp;gt; GUI Setup -&amp;gt; General&lt;/span&gt; for an explanation&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  </property>
+                  <property name="suffix">
+                   <string>°</string>
+                  </property>
+                  <property name="minimum">
+                   <number>-360</number>
+                  </property>
+                  <property name="maximum">
+                   <number>360</number>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="2">
+                 <widget class="QSpinBox" name="spnRotZ">
+                  <property name="toolTip">
+                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Please see the video online &lt;span style=&quot; font-weight:700;&quot;&gt;Help-&amp;gt;Online Help -&amp;gt; GUI Setup -&amp;gt; General&lt;/span&gt; for an explanation&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  </property>
+                  <property name="suffix">
+                   <string>°</string>
+                  </property>
+                  <property name="minimum">
+                   <number>-360</number>
+                  </property>
+                  <property name="maximum">
+                   <number>360</number>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="2">
+                 <widget class="QLabel" name="label_47">
+                  <property name="toolTip">
+                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Please see the video online &lt;span style=&quot; font-weight:700;&quot;&gt;Help-&amp;gt;Online Help -&amp;gt; GUI Setup -&amp;gt; General&lt;/span&gt; for an explanation&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  </property>
+                  <property name="text">
+                   <string>Pan (Z)</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="0" colspan="3">
+                 <widget class="QCheckBox" name="chkRstOnTlt">
+                  <property name="text">
+                   <string>Reset Center on Tilt</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item row="3" column="0">
+               <widget class="QLabel" name="label_15">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
                 </property>
                 <property name="text">
-                 <string>Enable Tilt/Roll/Pan after a long button press</string>
+                 <string>Board Rotation</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QLabel" name="alertSignal">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="text">
+                 <string>Send Recenter on Chan</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1" colspan="2">
+               <widget class="QComboBox" name="cmbButtonPin">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Choose the pin you want to wire your center button to here&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <item>
+                 <property name="text">
+                  <string>Disabled</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>D2</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>D3</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>D4</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>D5</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>D6</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>D7</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>D8</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>D9</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>D10</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>D11</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>D12</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+              <item row="8" column="0">
+               <widget class="QCheckBox" name="chkNoMag">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If your having issues calibrating the Magnetometer you can disable the magnetometer here. This may have some drift as it is only basing Pan on the Gyrometer. Be sure to place the board down on a stable surface and let it sit for 5 seconds before using it so the Gyrometer calibration can complete.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>Don't use the magnetometer</string>
                 </property>
                </widget>
               </item>
@@ -4427,8 +4261,6 @@
   <tabstop>cmdConnect</tabstop>
   <tabstop>cmdReboot</tabstop>
   <tabstop>txtCommand</tabstop>
-  <tabstop>spnLPTiltRoll2</tabstop>
-  <tabstop>spnLPPan2</tabstop>
   <tabstop>cmbSigns</tabstop>
   <tabstop>cmbRemap</tabstop>
   <tabstop>cmbButtonPin</tabstop>
@@ -4436,8 +4268,6 @@
   <tabstop>spnRotY</tabstop>
   <tabstop>spnRotZ</tabstop>
   <tabstop>chkResetCenterWave</tabstop>
-  <tabstop>spnLPTiltRoll</tabstop>
-  <tabstop>spnLPPan</tabstop>
   <tabstop>spnPPMFrameLen</tabstop>
   <tabstop>cmbPpmOutPin</tabstop>
   <tabstop>cmbBtMode</tabstop>

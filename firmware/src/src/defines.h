@@ -121,6 +121,9 @@
 
 // Magnetometer, Initial Orientation, Samples to average
 #define MADGSTART_SAMPLES 15
+#define GYRO_STABLE_SAMPLES 400
+#define GYRO_SAMPLE_WEIGHT 0.05
+#define GYRO_FLASH_IF_OFFSET 0.5 // Save to flash if gyro is off more than 0.5 degrees/sec from flash value
 
 // RTOS Specifics
 #if defined(RTOS_ZEPHYR)

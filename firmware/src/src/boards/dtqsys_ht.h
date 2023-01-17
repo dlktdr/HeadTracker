@@ -62,3 +62,7 @@ const int8_t PinNumber[] = {
 #define pinMode(pin, mode) gpio_pin_configure(gpios[PIN_TO_NRFPORT(PIN_NAME_TO_NUM(pin))], PIN_TO_NRFPIN(PIN_NAME_TO_NUM(pin)), mode)
 #define digitalWrite(pin, value) gpio_pin_set(gpios[PIN_TO_NRFPORT(PIN_NAME_TO_NUM(pin))], PIN_TO_NRFPIN(PIN_NAME_TO_NUM(pin)), value)
 #define digitalRead(pin) gpio_pin_get(gpios[PIN_TO_NRFPORT(PIN_NAME_TO_NUM(pin))], PIN_TO_NRFPIN(PIN_NAME_TO_NUM(pin)))
+
+// Values below were determined by plotting Gyro Output (See sense.cpp, gyroCalibration())
+#define GYRO_STABLE_DIFF 200.0f
+#define ACC_STABLE_DIFF 3.5
