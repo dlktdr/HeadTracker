@@ -7,7 +7,6 @@
 #include <device.h>
 #include <drivers/led_strip.h>
 #include <drivers/spi.h>
-
 #endif
 
 #include "soc_flash.h"

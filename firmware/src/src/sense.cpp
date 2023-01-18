@@ -43,6 +43,9 @@
 #if defined(HAS_LSM9DS1)
 #include "LSM9DS1/LSM9DS1.h"
 #endif
+#if defined(HAS_LSM6DS3)
+#include "LSMCommon/lsm_common.h"
+#endif
 #if defined(HAS_MPU6500)
 #include "MPU6xxx/inv_mpu.h"
 #endif
@@ -91,9 +94,15 @@ Madgwick madgwick;
 int64_t usduration = 0;
 int64_t senseUsDuration = 0;
 
+const struct device *i2c_dev = nullptr;
+
 #if defined(HAS_APDS9960)
 static bool blesenseboard = false;
 static bool lastproximity = false;
+#endif
+
+#if defined(HAS_LSM6DS3)
+stmdev_ctx_t dev_ctx;
 #endif
 
 #if defined(HAS_LSM9DS1)
@@ -197,7 +206,11 @@ int sense_Init()
       bmm150_error_codes_print_result("set_config", rbslt);
     }
   }
+#endif
 
+#if defined(HAS_LSM6DS3)
+  if(initailizeLSM6DS3(&dev_ctx))
+    return -1;
 #endif
 
 #if defined(HAS_MPU6500)
@@ -812,6 +825,13 @@ void sensor_Thread()
     tmag[1] = mag_data.x;
     tmag[2] = mag_data.z;
     magValid = true;
+#endif
+
+#if defined(HAS_LSM6DS3)
+    int16_t data_raw_acceleration[3];
+    int16_t data_raw_angular_rate[3];
+    int16_t data_raw_temperature;
+    uint8_t reg;
 #endif
 
 #if defined(HAS_QMC5883)
