@@ -19,7 +19,7 @@ DEFINES += GIT_VERSION_TAG="\\\"$(shell git -C \""$$_PRO_FILE_PWD_"\" describe -
 
 SOURCES += \
     boardbno055.cpp \
-    boardnano33ble.cpp \
+    boardjson.cpp \
     boardtype.cpp \
     calibrate/fusion.cpp \
     calibrate/imuread.cpp \
@@ -49,7 +49,7 @@ SOURCES += \
 
 HEADERS += \
     boardbno055.h \
-    boardnano33ble.h \
+    boardjson.h \
     boardtype.h \
     calibrate/imuread.h \
     calibrateble.h \

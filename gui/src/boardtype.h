@@ -18,7 +18,6 @@ public:
     void setTracker(TrackerSettings *t);
 
     // Returns the board name
-    void setBoardName(QString name) {_boardName = name;}
     QString boardName() {return _boardName;}
 
     // Enables or disables the base classes methods based on alwacces

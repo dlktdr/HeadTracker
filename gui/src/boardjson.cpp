@@ -1,11 +1,11 @@
-#include "boardnano33ble.h"
+#include "boardjson.h"
 #include "ucrc16lib.h"
 
 #ifndef WINDOWS
 #define Sleep(x) sleep(x)
 #endif
 
-BoardNano33BLE::BoardNano33BLE(TrackerSettings *ts)
+BoardJson::BoardJson(TrackerSettings *ts)
 {
     trkset = ts;
     bleCalibratorDialog = new CalibrateBLE(trkset);
@@ -13,20 +13,20 @@ BoardNano33BLE::BoardNano33BLE(TrackerSettings *ts)
     connect(&imheretimout,SIGNAL(timeout()),this,SLOT(ihTimeout()));
     connect(&rxParamsTimer,SIGNAL(timeout()),this,SLOT(rxParamsTimeout()));
     rxParamsTimer.setSingleShot(true);
-    connect(bleCalibratorDialog,&CalibrateBLE::calibrationSave,this,&BoardNano33BLE::calibrationComplete);
-    connect(bleCalibratorDialog,&CalibrateBLE::calibrationCancel,this, &BoardNano33BLE::calibrationCancel);
+    connect(bleCalibratorDialog,&CalibrateBLE::calibrationSave,this,&BoardJson::calibrationComplete);
+    connect(bleCalibratorDialog,&CalibrateBLE::calibrationCancel,this, &BoardJson::calibrationCancel);
 
     reqDataItemsChanged.setSingleShot(true);
     reqDataItemsChanged.setInterval(200);
     connect(&reqDataItemsChanged,SIGNAL(timeout()),this,SLOT(changeDataItems()));
 }
 
-BoardNano33BLE::~BoardNano33BLE()
+BoardJson::~BoardJson()
 {
     delete bleCalibratorDialog;
 }
 
-void BoardNano33BLE::dataIn(QByteArray &data)
+void BoardJson::dataIn(QByteArray &data)
 {
     // Found a SOT & EOT Character. JSON Data was sent
     if(data.left(1)[0] == (char)0x02 && data.right(1)[0] == (char)0x03) { // JSON Data
@@ -65,7 +65,7 @@ void BoardNano33BLE::dataIn(QByteArray &data)
 
 }
 
-QByteArray BoardNano33BLE::dataout()
+QByteArray BoardJson::dataout()
 {
     // Don't allow serial access if not allowed
     // prevents two boards talking at the same time
@@ -76,12 +76,12 @@ QByteArray BoardNano33BLE::dataout()
     return sdo;
 }
 
-void BoardNano33BLE::requestHardware()
+void BoardJson::requestHardware()
 {
     sendSerialJSON("FW"); // Get the firmware
 }
 
-void BoardNano33BLE::saveToRAM()
+void BoardJson::saveToRAM()
 {
     QVariantMap d2s = trkset->changedData();
     // Remove useless items
@@ -107,18 +107,18 @@ void BoardNano33BLE::saveToRAM()
     paramRXErrorSent = false;
 }
 
-void BoardNano33BLE::saveToNVM()
+void BoardJson::saveToNVM()
 {
     sendSerialJSON("Flash");
     savedToNVM = true;
 }
 
-void BoardNano33BLE::reboot()
+void BoardJson::reboot()
 {
   sendSerialJSON("Reboot");
 }
 
-void BoardNano33BLE::erase()
+void BoardJson::erase()
 {
   sendSerialJSON("Erase");
 }
@@ -126,7 +126,7 @@ void BoardNano33BLE::erase()
 
 // Parameters requested from the board
 
-void BoardNano33BLE::requestParameters()
+void BoardJson::requestParameters()
 {
 //    qDebug() << "JSON Data" << jsonqueue.length();
     if(rxparamfaults == 0) {
@@ -146,7 +146,7 @@ void BoardNano33BLE::requestParameters()
 }
 
 // Timer if parameters are not received in time
-void BoardNano33BLE::rxParamsTimeout()
+void BoardJson::rxParamsTimeout()
 {
     // Don't increment counter if data hasn't been sent yet
     if(serialDataOut.size() != 0) {
@@ -161,7 +161,7 @@ void BoardNano33BLE::rxParamsTimeout()
 
 // Function calls a timer, so if multiple emits in short order it only
 // causes a single write.
-void BoardNano33BLE::reqDataItemChanged()
+void BoardJson::reqDataItemChanged()
 {
     reqDataItemsChanged.stop();
     reqDataItemsChanged.start();
@@ -169,7 +169,7 @@ void BoardNano33BLE::reqDataItemChanged()
 
 // Calibration Wizard not completed, remove calibration items
 
-void BoardNano33BLE::calibrationCancel()
+void BoardJson::calibrationCancel()
 {
     // Remove all items
     trkset->clearDataItems();
@@ -182,7 +182,7 @@ void BoardNano33BLE::calibrationCancel()
     emit calibrationFailure();
 }
 
-void BoardNano33BLE::calibrationComplete()
+void BoardJson::calibrationComplete()
 {
     // Remove all items
     trkset->clearDataItems();
@@ -194,7 +194,7 @@ void BoardNano33BLE::calibrationComplete()
 }
 
 // Add/Remove data items to be received from the board
-void BoardNano33BLE::changeDataItems()
+void BoardJson::changeDataItems()
 {
     QMap<QString,bool> toChange = trkset->getDataItemsDiff();
 
@@ -210,7 +210,7 @@ void BoardNano33BLE::changeDataItems()
     trkset->setDataItemsMatched();
 }
 
-void BoardNano33BLE::startCalibration()
+void BoardJson::startCalibration()
 {
     // Save a list if the currently sending data items
     //  to be restored on calibration completed/canceled
@@ -232,19 +232,19 @@ void BoardNano33BLE::startCalibration()
     bleCalibratorDialog->show();
 }
 
-void BoardNano33BLE::startData()
+void BoardJson::startData()
 {
     jsonqueue.clear();
     jsonwaitingack = 0;
 }
 
-void BoardNano33BLE::stopData()
+void BoardJson::stopData()
 {
     // Used on boot to reset data
     sendSerialJSON("D--"); // Stop all Data
 }
 
-void BoardNano33BLE::allowAccessChanged(bool acc)
+void BoardJson::allowAccessChanged(bool acc)
 {
     // Access was just allowed/disallowed to this class
     // reset everything
@@ -267,17 +267,17 @@ void BoardNano33BLE::allowAccessChanged(bool acc)
         disconnect(trkset, SIGNAL(requestedDataItemChanged()), 0, 0);
 }
 
-void BoardNano33BLE::disconnected()
+void BoardJson::disconnected()
 {
     bleCalibratorDialog->hide();
 }
 
-void BoardNano33BLE::resetCenter()
+void BoardJson::resetCenter()
 {
     sendSerialJSON("RstCnt");
 }
 
-void BoardNano33BLE::sendSerialJSON(QString command, QVariantMap map)
+void BoardJson::sendSerialJSON(QString command, QVariantMap map)
 {
     // Don't send any new data until last has been received successfully
     map.remove("Hard");
@@ -311,7 +311,7 @@ void BoardNano33BLE::sendSerialJSON(QString command, QVariantMap map)
     imheretimout.start(IMHERETIME);
 }
 
-void BoardNano33BLE::parseIncomingJSON(const QVariantMap &map)
+void BoardJson::parseIncomingJSON(const QVariantMap &map)
 {
     // Settings from the Tracker Sent, save them and update the UI
     if(map["Cmd"].toString() == "Set") {
@@ -395,7 +395,7 @@ void BoardNano33BLE::parseIncomingJSON(const QVariantMap &map)
     }
 }
 
-uint16_t BoardNano33BLE::escapeCRC(uint16_t crc)
+uint16_t BoardJson::escapeCRC(uint16_t crc)
 {
     // Characters to escape out
     uint8_t crclow = crc & 0xFF;
@@ -415,7 +415,7 @@ uint16_t BoardNano33BLE::escapeCRC(uint16_t crc)
     return (uint16_t)crclow | ((uint16_t)crchigh << 8);
 }
 
-void BoardNano33BLE::nakError()
+void BoardJson::nakError()
 {
     // If too many faults, disconnect.
     if(jsonwaitingack > MAX_TX_FAULTS) {
@@ -438,7 +438,7 @@ void BoardNano33BLE::nakError()
     }
 }
 
-void BoardNano33BLE::ihTimeout()
+void BoardJson::ihTimeout()
 {
     sendSerialJSON("IH");
 }

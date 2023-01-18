@@ -17,7 +17,7 @@
 #include "firmwarewizard.h"
 #include "channelviewer.h"
 #include "diagnosticdisplay.h"
-#include "boardnano33ble.h"
+#include "boardjson.h"
 #include "boardbno055.h"
 #include "imageviewer/imageviewer.h"
 
@@ -87,8 +87,7 @@ private:
     QQueue<QByteArray> serialDataOut;
     volatile bool sending;
 
-    BoardNano33BLE *nano33ble;
-    BoardNano33BLE *dtqsys;
+    BoardJson *jsonht;
     BoardBNO055 *bno055;
     BoardType *currentboard;
     bool channelViewerOpen=false;

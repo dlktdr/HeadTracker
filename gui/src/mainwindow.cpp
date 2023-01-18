@@ -28,16 +28,11 @@ MainWindow::MainWindow(QWidget *parent)
     imageViewer->resize(800,600);
 
     // Start the board interface
-    nano33ble = new BoardNano33BLE(&trkset);
-    nano33ble->setBoardName("NANO33BLE");
-    dtqsys = new BoardNano33BLE(&trkset);
-    dtqsys->setBoardName("DTQSYS");
+    jsonht = new BoardJson(&trkset);
     bno055 = new BoardBNO055(&trkset);
-    bno055->setBoardName("BNO055");
 
     // Add it to the list of available boards
-    boards.append(nano33ble);
-    boards.append(dtqsys);
+    boards.append(jsonht);
     boards.append(bno055);
 
     // Once correct board is discovered this will be set to one of the above boards
@@ -254,9 +249,8 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow()
 {
     delete serialcon;
-    delete nano33ble;
+    delete jsonht;
     delete bno055;
-    delete dtqsys;
     if(firmwareWizard != nullptr)
         delete firmwareWizard;
     delete serialDebug;
@@ -1434,9 +1428,10 @@ void MainWindow::boardDiscovered(BoardType *brd)
     // Board discovered, save it
     currentboard = brd;
 
-    // Stack widget changes to hide some info depending on board
+    // GUI changes info depending on board type
     if(brd->boardName() == "NANO33BLE" ||
-       brd->boardName() == "DTQSYS") {
+       brd->boardName() == "DTQSYS" ||
+       brd->boardName() == "XIAOSENSE" ) {
         addToLog(tr("Connected to a ") + brd->boardName() + "\n");
         ui->cmdStartGraph->setVisible(false);
         ui->cmdStopGraph->setVisible(false);
@@ -1454,7 +1449,8 @@ void MainWindow::boardDiscovered(BoardType *brd)
         ui->stackedWidget->setCurrentIndex(3);
         ui->cmdChannelViewer->setEnabled(true);
 
-        if(brd->boardName() == "DTQSYS") { // Pins are all fixed
+        if(brd->boardName() == "DTQSYS" ||
+           brd->boardName() == "XIAOSENSE") { // Pins are all fixed
             ui->cmbPpmInPin->setVisible(false);
             ui->lblPPMInPin->setVisible(false);
             ui->cmbPpmOutPin->setVisible(false);
