@@ -58,8 +58,7 @@
 #include "BMM150/bmm150_common.h"
 #endif
 
-// Note: BMI270 + BMM150 On the Nano33BleSenseR2 are using the Zephyr Built in Drivers
-#define DEBUG_SENSOR_RATES
+//#define DEBUG_SENSOR_RATES
 
 void gyroCalibrate();
 
