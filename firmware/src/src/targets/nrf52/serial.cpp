@@ -371,7 +371,7 @@ void parseData(DynamicJsonDocument &json)
   } else if (strcmp(command, "FW") == 0) {
     DynamicJsonDocument fwjson(100);
     fwjson["Cmd"] = "FW";
-    fwjson["Vers"] = FW_VERSION;
+    fwjson["Vers"] = STRINGIFY(FW_VER_TAG);
     fwjson["Hard"] = FW_BOARD;
     fwjson["Git"] = STRINGIFY(FW_GIT_REV);
     serialWriteJSON(fwjson);

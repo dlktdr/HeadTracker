@@ -1,21 +1,12 @@
 #pragma once
 
 // Defines specified at compile time. If not, use 0.0.0
-#ifndef FW_MAJ
-#define FW_MAJ 0
-#endif
-#ifndef FW_MIN
-#define FW_MIN 0
-#endif
-#ifndef FW_REV
-#define FW_REV 0
+#ifndef FW_VER_TAG
+#define FW_VER_TAG 0.0
 #endif
 #ifndef FW_GIT_REV
 #define FW_GIT_REV "-------"
 #endif
-
-#define VERSION FW_MAJ.CONCAT(FW_MIN, FW_REV)
-#define FW_VERSION STRINGIFY(VERSION)
 
 // The majority of features are the same on Sense2
 #if defined(PCB_NANO33BLE_SENSE2)
