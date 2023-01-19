@@ -1479,6 +1479,7 @@ void MainWindow::boardDiscovered(BoardType *brd)
 
         // GUI Version
         QString lfver = version;
+        lfver.remove(0,1);
         lfver.remove(1,1);
         int lmajver = lfver.left(2).toInt();   // Major Version 1.1x == 11
 
