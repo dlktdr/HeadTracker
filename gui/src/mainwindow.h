@@ -21,9 +21,16 @@
 #include "boardbno055.h"
 #include "imageviewer/imageviewer.h"
 
+#ifndef GIT_CURRENT_SHA
+#define GIT_CURRENT_SHA "SHA Unknown"
+#endif
+
+#ifndef GIT_VERSION_TAG
+#define GIT_VERSION_TAG "?.??"
+#endif
+
 constexpr int MAX_LOG_LENGTH=6000; // How many bytes to keep of log data in the gui
-const QString version="2.20"; // Current Version Number
-const QString versionsuffix=""; // Version Suffix
+const QString version=GIT_VERSION_TAG; // Current Version Number
 const QStringList firmwares={"BNO055","NANO33BLE"}; // Allowable hardware types
 const QUrl helpurl("https://headtracker.gitbook.io/head-tracker/settings/gui-settings");
 const QUrl discordurl("https://discord.gg/ux5hEaNSPQ");

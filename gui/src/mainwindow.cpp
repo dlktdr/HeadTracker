@@ -44,7 +44,7 @@ MainWindow::MainWindow(QWidget *parent)
     currentboard = nullptr;
     ui->tabBLE->setCurrentIndex(0);
 
-    setWindowTitle(windowTitle() + " " + version + " " + versionsuffix);
+    setWindowTitle(windowTitle() + " " + version);
 
     // Serial Connection
     serialcon = new QSerialPort;
@@ -243,6 +243,9 @@ MainWindow::MainWindow(QWidget *parent)
     saveToRAMTimer.setSingleShot(true);
     connect(&requestParamsTimer,SIGNAL(timeout()),this,SLOT(requestParamsTimeout()));
     requestParamsTimer.setSingleShot(true);
+
+    // Set GIT SHA in bottom right of StatusBar
+    ui->statusbar->addPermanentWidget(new QLabel(GIT_CURRENT_SHA));
 
     // Called to initalize GUI state to disconnected
     serialDisconnect();
