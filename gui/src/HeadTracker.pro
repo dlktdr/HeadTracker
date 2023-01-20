@@ -9,8 +9,8 @@ CONFIG += c++11 file_copies
 # depend on your compiler). Please consult the documentation of the
 # deprecated API in order to know how to port your code away from it.
 DEFINES += QT_NO_DEPRECATED_WARNING
-DEFINES += GIT_CURRENT_SHA="\\\"$(shell git -C \""$$_PRO_FILE_PWD_"\" rev-parse --short HEAD)\\\""
-DEFINES += GIT_VERSION_TAG="\\\"$(shell git -C \""$$_PRO_FILE_PWD_"\" describe --tags --abbrev=0)\\\""
+DEFINES += GIT_CURRENT_SHA=$$system($$quote(git rev-parse --short HEAD))
+DEFINES += GIT_VERSION_TAG=$$system($$quote(git describe --tags --abbrev=0))
 
 # You can also make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
