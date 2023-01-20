@@ -41,7 +41,8 @@ public:
   static constexpr uint16_t PPM_CENTER = 1500;
   static constexpr float MIN_GAIN = 0.01f;
   static constexpr float MAX_GAIN = 35.0f;
-  static constexpr uint16_t MINMAX_RNG = 242;
+  static constexpr uint16_t MINMAX_RNG = 487;
+  static constexpr uint16_t MIN_TO_CENTER = 25;
   static constexpr uint16_t MIN_CNT = (((MAX_PWM - MIN_PWM) / 2) + MIN_PWM - MINMAX_RNG);
   static constexpr uint16_t MAX_CNT = (((MAX_PWM - MIN_PWM) / 2) + MIN_PWM + MINMAX_RNG);
   static constexpr uint8_t BT_CHANNELS = 8;

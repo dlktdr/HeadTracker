@@ -59,8 +59,6 @@ private:
     bool showPos;
     int min_travel;
     int max_travel;
-    int c_min;
-    int c_max;
     int c_value;
     int min_max;
     int min_val;
@@ -97,6 +95,8 @@ private:
     int max_start;
     int cnt_start;
     QTimer hidepopup;
+
+    void minMaxPositionCheck();
 };
 
 #endif // SERVOMINMAX_H

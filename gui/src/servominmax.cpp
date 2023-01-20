@@ -8,14 +8,13 @@ ServoMinMax::ServoMinMax(QWidget *parent) : QWidget(parent)
     min_travel = TrackerSettings::MIN_PWM; // In trackersettings.h
     max_travel = TrackerSettings::MAX_PWM;
 
-    c_max = TrackerSettings::MAX_CNT;
-    c_min = TrackerSettings::MIN_CNT;
-
     // Minimum value the maximum slider is allowed
     min_max = min_travel + TrackerSettings::MINMAX_RNG;
 
     // Maximum value the minimum slider is allowed
     max_min = max_travel - TrackerSettings::MINMAX_RNG;
+
+    c_value = 1500;
 
     padding = 10;
     hpad = padding/2;
@@ -30,7 +29,6 @@ ServoMinMax::ServoMinMax(QWidget *parent) : QWidget(parent)
 
     // Spin Boxes for direct entry
     cntspinbox = new PopupSlider(this);
-    cntspinbox->setLimits(c_min,c_max);
     connect(cntspinbox,SIGNAL(valueChanged(double)),this,SLOT(cntSpinChanged(double)));
     minspinbox = new PopupSlider(this);
     minspinbox->setLimits(min_travel,min_max);
@@ -38,7 +36,8 @@ ServoMinMax::ServoMinMax(QWidget *parent) : QWidget(parent)
     maxspinbox = new PopupSlider(this);
     maxspinbox->setLimits(max_min,max_travel);
     connect(maxspinbox,SIGNAL(valueChanged(double)),this,SLOT(maxSpinChanged(double)));
-
+    cntspinbox->setLimits(min_travel + TrackerSettings::MIN_TO_CENTER,
+                          max_travel - TrackerSettings::MIN_TO_CENTER);
     setDefaults();
     setContextMenuPolicy(Qt::CustomContextMenu);
     setMouseTracking(true);
@@ -100,8 +99,9 @@ void ServoMinMax::actSetMax()
 
 void ServoMinMax::cntSpinChanged(double v)
 {
-    c_value = v;   
+    c_value = v;
     cntspinbox->move(this->mapToGlobal(QPoint(centerSlider.x()-((max_val - min_travel) / travel)-cntspinbox->width()/2+centerSlider.width()/2,-cntspinbox->height()+padding/2)));
+    minMaxPositionCheck();
     update();
     emit centerChanged(c_value);
 }
@@ -110,6 +110,7 @@ void ServoMinMax::minSpinChanged(double v)
 {
     min_val = v;    
     minspinbox->move(this->mapToGlobal(QPoint(minSlider.x()-((max_val - min_travel) / travel)-minspinbox->width()/2+minSlider.width()/2,-minspinbox->height()+padding/2)));
+    minMaxPositionCheck();
     update();
     emit minimumChanged(min_val);
 }
@@ -118,10 +119,10 @@ void ServoMinMax::maxSpinChanged(double v)
 {
     max_val = v;
     maxspinbox->move(this->mapToGlobal(QPoint(maxSlider.x()-((max_val - min_travel) / travel)-maxspinbox->width()/2+maxSlider.width()/2,-maxspinbox->height()+padding/2)));
+    minMaxPositionCheck();
     update();
     emit maximumChanged(max_val);
 }
-
 
 void ServoMinMax::paintEvent(QPaintEvent *event)
 {
@@ -130,7 +131,6 @@ void ServoMinMax::paintEvent(QPaintEvent *event)
     painter.setRenderHint(QPainter::Antialiasing);
     QBrush brush;
     QPen pen;
-
 
     travel = max_travel - min_travel; // Overall range
     minSliderPos = (min_val - min_travel) / travel;
@@ -253,7 +253,7 @@ void ServoMinMax::mousePressEvent(QMouseEvent *event)
 
     if(event->buttons() == Qt::LeftButton) {
         if(minSlider.contains(event->pos())) {
-            mouseDownPoint = event->globalPos();
+            mouseDownPoint = event->globalPosition();
             minSliderSelected = true;
             min_start = min_val;
             minspinbox->show();
@@ -261,7 +261,7 @@ void ServoMinMax::mousePressEvent(QMouseEvent *event)
             minspinbox->setValue(min_val);
 
         } else if(maxSlider.contains(event->pos())) {
-            mouseDownPoint = event->globalPos();
+            mouseDownPoint = event->globalPosition();
             maxSliderSelected = true;
             max_start = max_val;
             maxspinbox->show();
@@ -269,7 +269,7 @@ void ServoMinMax::mousePressEvent(QMouseEvent *event)
             maxspinbox->setValue(max_val);
 
         } else if(centerSlider.contains(event->pos())) {
-            mouseDownPoint = event->globalPos();
+            mouseDownPoint = event->globalPosition();
             centerSliderSelected = true;
             cnt_start = c_value;
             cntspinbox->show();
@@ -283,40 +283,29 @@ void ServoMinMax::mousePressEvent(QMouseEvent *event)
 void ServoMinMax::mouseMoveEvent(QMouseEvent *event)
 {
     // Movement from mouse down point in X axis
-    int xtrans = mouseDownPoint.x() - event->globalPos().x();
+    int xtrans = mouseDownPoint.x() - event->globalPosition().x();
     double xtravelperpixel = travel/(width()-padding);
     double xtr = xtrans*xtravelperpixel;
 
     if(minSliderSelected) {
         min_val = min_start - xtr;
-        if(min_val < min_travel)
-            min_val = min_travel;
-        if(min_val > min_max)
-            min_val = min_max;
+        minMaxPositionCheck();
         minspinbox->move(this->mapToGlobal(QPoint(minSlider.x()-((min_val - min_travel) / travel)-minspinbox->width()/2+minSlider.width()/2,-minspinbox->height()+padding/2)));
         minspinbox->setValue(min_val);
         update();
     } else if (maxSliderSelected) {
         max_val = max_start - xtr;
-        if(max_val > max_travel)
-            max_val = max_travel;
-        if(max_val < max_min)
-            max_val = max_min;
+        minMaxPositionCheck();
         maxspinbox->move(this->mapToGlobal(QPoint(maxSlider.x()-((max_val - min_travel) / travel)-maxspinbox->width()/2+maxSlider.width()/2,-maxspinbox->height()+padding/2)));
         maxspinbox->setValue(max_val);
         update();
     } else if (centerSliderSelected) {
         c_value = cnt_start - xtr;
-        if(c_value < c_min)
-            c_value = c_min;
-        if(c_value > c_max)
-            c_value = c_max;
+        minMaxPositionCheck();
         cntspinbox->move(this->mapToGlobal(QPoint(centerSlider.x()-((c_value - min_travel) / travel)-cntspinbox->width()/2+centerSlider.width()/2,-cntspinbox->height()+padding/2)));
         cntspinbox->setValue(c_value);
         update();
     }
-
-
 }
 
 void ServoMinMax::mouseDoubleClickEvent(QMouseEvent *event)
@@ -325,6 +314,22 @@ void ServoMinMax::mouseDoubleClickEvent(QMouseEvent *event)
         if(centerSlider.contains(event->pos())) {
         }
     }
+}
+
+void ServoMinMax::minMaxPositionCheck()
+{
+    if(min_val < min_travel)
+        min_val = min_travel;
+    if(min_val > min_max)
+        min_val = min_max;
+    if(max_val > max_travel)
+        max_val = max_travel;
+    if(max_val < max_min)
+        max_val = max_min;
+    if(c_value > max_val - TrackerSettings::MIN_TO_CENTER)
+        c_value = max_val - TrackerSettings::MIN_TO_CENTER;
+    if(c_value < min_val + TrackerSettings::MIN_TO_CENTER)
+        c_value = min_val + TrackerSettings::MIN_TO_CENTER;
 }
 
 bool ServoMinMax::event(QEvent *event)
