@@ -523,6 +523,8 @@ uint16_t BTRmtGetChannel(int channel)
 
 const char *BTRmtGetAddress() { return _address; }
 
+bool BTRmtGetConnected() {return bleconnected;}
+
 int8_t BTRmtGetRSSI()
 {
   // *** Implement

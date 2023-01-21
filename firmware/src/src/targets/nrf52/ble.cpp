@@ -88,6 +88,9 @@ void bt_Thread()
         break;
       case BTSCANONLY:
         break;
+      case BTJOYSTICK:
+        BTJoystickExecute();
+        break;
       default:
         break;
     }
@@ -123,6 +126,9 @@ void BTSetMode(btmodet mode)
       BTRmtStop();
       btscanonly = false;
       break;
+    case BTJOYSTICK:
+      BTJoystickStop();
+      break;
     default:
       break;
   }
@@ -143,6 +149,9 @@ void BTSetMode(btmodet mode)
     case BTSCANONLY:
       btscanonly = true;
       BTRmtStart();
+    case BTJOYSTICK:
+      BTJoystickStart();
+      break;
     default:
       break;
   }
@@ -184,6 +193,9 @@ void BTSetChannel(int channel, const uint16_t value)
       break;
     case BTPARARMT:
       BTRmtSetChannel(channel, value);
+      break;
+    case BTJOYSTICK:
+      BTJoystickSetChannel(channel, value);
       break;
     default:
       break;

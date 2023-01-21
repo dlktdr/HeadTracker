@@ -1524,6 +1524,11 @@
                   <string>FrSky - Wireless Receiver - Scanner Mode</string>
                  </property>
                 </item>
+                <item>
+                 <property name="text">
+                  <string>Bluetooth HID Joystick</string>
+                 </property>
+                </item>
                </widget>
               </item>
               <item row="2" column="0">

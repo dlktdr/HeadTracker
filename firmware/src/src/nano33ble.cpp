@@ -10,6 +10,7 @@
 #include "ble.h"
 #include "io.h"
 #include "joystick.h"
+#include "btjoystick.h"
 #include "log.h"
 #include "pmw.h"
 #include "sense.h"
