@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>621</width>
+    <width>606</width>
     <height>706</height>
    </rect>
   </property>
@@ -451,8 +451,8 @@
               <string>General</string>
              </attribute>
              <layout class="QGridLayout" name="gridLayout_12">
-              <item row="0" column="0">
-               <widget class="QLabel" name="lblButtonPin">
+              <item row="3" column="0">
+               <widget class="QLabel" name="label_15">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
                   <horstretch>0</horstretch>
@@ -460,7 +460,7 @@
                  </sizepolicy>
                 </property>
                 <property name="text">
-                 <string>Center Button</string>
+                 <string>Board Rotation</string>
                 </property>
                </widget>
               </item>
@@ -483,19 +483,6 @@
                  <string>Enable Tilt/Roll/Pan after a long button press</string>
                 </property>
                </widget>
-              </item>
-              <item row="7" column="0">
-               <spacer name="verticalSpacer_6">
-                <property name="orientation">
-                 <enum>Qt::Vertical</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>20</width>
-                  <height>40</height>
-                 </size>
-                </property>
-               </spacer>
               </item>
               <item row="1" column="1" colspan="2">
                <widget class="QComboBox" name="cmbalertchn">
@@ -589,6 +576,86 @@
                 </item>
                </widget>
               </item>
+              <item row="0" column="0">
+               <widget class="QLabel" name="lblButtonPin">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="text">
+                 <string>Center Button</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1" colspan="2">
+               <widget class="QComboBox" name="cmbButtonPin">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Choose the pin you want to wire your center button to here&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <item>
+                 <property name="text">
+                  <string>Disabled</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>D2</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>D3</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>D4</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>D5</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>D6</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>D7</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>D8</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>D9</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>D10</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>D11</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>D12</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
               <item row="3" column="1" colspan="2">
                <layout class="QGridLayout" name="gridLayout_7">
                 <item row="1" column="0">
@@ -678,19 +745,6 @@
                 </item>
                </layout>
               </item>
-              <item row="3" column="0">
-               <widget class="QLabel" name="label_15">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="text">
-                 <string>Board Rotation</string>
-                </property>
-               </widget>
-              </item>
               <item row="1" column="0">
                <widget class="QLabel" name="alertSignal">
                 <property name="sizePolicy">
@@ -704,74 +758,7 @@
                 </property>
                </widget>
               </item>
-              <item row="0" column="1" colspan="2">
-               <widget class="QComboBox" name="cmbButtonPin">
-                <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Choose the pin you want to wire your center button to here&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                </property>
-                <item>
-                 <property name="text">
-                  <string>Disabled</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>D2</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>D3</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>D4</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>D5</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>D6</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>D7</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>D8</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>D9</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>D10</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>D11</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>D12</string>
-                 </property>
-                </item>
-               </widget>
-              </item>
-              <item row="8" column="0">
+              <item row="9" column="0" colspan="2">
                <widget class="QCheckBox" name="chkNoMag">
                 <property name="toolTip">
                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If your having issues calibrating the Magnetometer you can disable the magnetometer here. This may have some drift as it is only basing Pan on the Gyrometer. Be sure to place the board down on a stable surface and let it sit for 5 seconds before using it so the Gyrometer calibration can complete.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -780,6 +767,56 @@
                  <string>Don't use the magnetometer</string>
                 </property>
                </widget>
+              </item>
+              <item row="10" column="0" colspan="3">
+               <layout class="QHBoxLayout" name="horizontalLayout_12">
+                <item>
+                 <widget class="Led" name="gyroLed" native="true">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>20</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>20</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                  <layout class="QHBoxLayout" name="horizontalLayout_4"/>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="lblGyroCal">
+                  <property name="toolTip">
+                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt; font-weight:700;&quot;&gt;To Calibrate the Gyro,&lt;/span&gt;&lt;br/&gt;Place the board on a stable surface and do not touch it for 2 seconds. Do this after every power up.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  </property>
+                  <property name="text">
+                   <string>Gyrometer Calibrated</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item row="7" column="0" colspan="3">
+               <spacer name="verticalSpacer_6">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>40</height>
+                 </size>
+                </property>
+               </spacer>
               </item>
              </layout>
             </widget>
@@ -3234,105 +3271,6 @@
          </property>
         </widget>
        </item>
-       <item row="2" column="2">
-        <widget class="GainSlider" name="til_gain">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-           <horstretch>2</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>152</width>
-           <height>0</height>
-          </size>
-         </property>
-         <property name="toolTip">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Adjusts the sensitivity of the servo output&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-         </property>
-         <property name="minimum">
-          <number>0</number>
-         </property>
-         <property name="maximum">
-          <number>1000</number>
-         </property>
-         <property name="value">
-          <number>250</number>
-         </property>
-         <property name="tracking">
-          <bool>true</bool>
-         </property>
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="invertedAppearance">
-          <bool>false</bool>
-         </property>
-         <property name="tickPosition">
-          <enum>QSlider::NoTicks</enum>
-         </property>
-         <property name="tickInterval">
-          <number>0</number>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="6">
-        <widget class="QCheckBox" name="chktltrev">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>40</width>
-           <height>16777215</height>
-          </size>
-         </property>
-         <property name="toolTip">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;These will reverse your servo output&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-         </property>
-         <property name="layoutDirection">
-          <enum>Qt::LeftToRight</enum>
-         </property>
-         <property name="autoFillBackground">
-          <bool>false</bool>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">margin-left:15%;</string>
-         </property>
-         <property name="text">
-          <string/>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="6">
-        <widget class="QLabel" name="label_12">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>40</width>
-           <height>16777215</height>
-          </size>
-         </property>
-         <property name="styleSheet">
-          <string notr="true"/>
-         </property>
-         <property name="text">
-          <string>Reverse</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
        <item row="3" column="3" colspan="2">
         <widget class="ServoMinMax" name="servoRoll" native="true">
          <property name="sizePolicy">
@@ -3349,42 +3287,6 @@
          </property>
          <property name="toolTip">
           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Adjusts your servos center and min/max range here&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="1">
-        <widget class="QLabel" name="lblPanValue">
-         <property name="minimumSize">
-          <size>
-           <width>50</width>
-           <height>0</height>
-          </size>
-         </property>
-         <property name="font">
-          <font>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="toolTip">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:400;&quot;&gt;Actual values from the board&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-         </property>
-         <property name="autoFillBackground">
-          <bool>false</bool>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">background-color: #d9d9d9</string>
-         </property>
-         <property name="frameShape">
-          <enum>QFrame::Box</enum>
-         </property>
-         <property name="frameShadow">
-          <enum>QFrame::Raised</enum>
-         </property>
-         <property name="text">
-          <string/>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
          </property>
         </widget>
        </item>
@@ -3486,137 +3388,6 @@
          </item>
         </widget>
        </item>
-       <item row="3" column="2">
-        <widget class="GainSlider" name="rll_gain">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-           <horstretch>2</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>152</width>
-           <height>0</height>
-          </size>
-         </property>
-         <property name="toolTip">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Adjusts the sensitivity of the servo output&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-         </property>
-         <property name="minimum">
-          <number>0</number>
-         </property>
-         <property name="maximum">
-          <number>1000</number>
-         </property>
-         <property name="value">
-          <number>250</number>
-         </property>
-         <property name="tracking">
-          <bool>true</bool>
-         </property>
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="invertedAppearance">
-          <bool>false</bool>
-         </property>
-         <property name="tickPosition">
-          <enum>QSlider::NoTicks</enum>
-         </property>
-         <property name="tickInterval">
-          <number>0</number>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="1">
-        <widget class="QLabel" name="lblTilt_2">
-         <property name="minimumSize">
-          <size>
-           <width>50</width>
-           <height>0</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>Value</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="6">
-        <widget class="QCheckBox" name="chkpanrev">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>40</width>
-           <height>16777215</height>
-          </size>
-         </property>
-         <property name="toolTip">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;These will reverse your servo output&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-         </property>
-         <property name="layoutDirection">
-          <enum>Qt::LeftToRight</enum>
-         </property>
-         <property name="autoFillBackground">
-          <bool>false</bool>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">margin-left:15%;</string>
-         </property>
-         <property name="text">
-          <string/>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="2">
-        <widget class="QLabel" name="label_20">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
-           <horstretch>2</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>150</width>
-           <height>0</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>Gain</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="3" colspan="2">
-        <widget class="ServoMinMax" name="servoPan" native="true">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
-           <horstretch>2</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>152</width>
-           <height>30</height>
-          </size>
-         </property>
-         <property name="toolTip">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Adjusts your servos center and min/max range here&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-         </property>
-        </widget>
-       </item>
        <item row="0" column="5">
         <widget class="QLabel" name="label_11">
          <property name="text">
@@ -3624,8 +3395,8 @@
          </property>
         </widget>
        </item>
-       <item row="4" column="5">
-        <widget class="QComboBox" name="cmbpanchn">
+       <item row="3" column="5">
+        <widget class="QComboBox" name="cmbrllchn">
          <property name="minimumSize">
           <size>
            <width>50</width>
@@ -3633,7 +3404,7 @@
           </size>
          </property>
          <property name="toolTip">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sets the output channel you want pan on&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sets the output channel you want roll on&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <item>
           <property name="text">
@@ -3722,6 +3493,54 @@
          </item>
         </widget>
        </item>
+       <item row="4" column="3" colspan="2">
+        <widget class="ServoMinMax" name="servoPan" native="true">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+           <horstretch>2</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>152</width>
+           <height>30</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Adjusts your servos center and min/max range here&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="3" colspan="2">
+        <widget class="QLabel" name="lblRange">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+           <horstretch>2</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>Range</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="label_17">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>Tilt</string>
+         </property>
+        </widget>
+       </item>
        <item row="3" column="0">
         <widget class="QLabel" name="label_18">
          <property name="sizePolicy">
@@ -3735,8 +3554,82 @@
          </property>
         </widget>
        </item>
-       <item row="4" column="2">
-        <widget class="GainSlider" name="pan_gain">
+       <item row="3" column="1">
+        <widget class="QLabel" name="lblRollValue">
+         <property name="minimumSize">
+          <size>
+           <width>50</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:400;&quot;&gt;Actual values from the board&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="autoFillBackground">
+          <bool>false</bool>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background-color: #d9d9d9</string>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::Box</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="label_19">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>Pan</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="6">
+        <widget class="QLabel" name="label_12">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>40</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="styleSheet">
+          <string notr="true"/>
+         </property>
+         <property name="text">
+          <string>Reverse</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="2">
+        <widget class="GainSlider" name="rll_gain">
          <property name="sizePolicy">
           <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
            <horstretch>2</horstretch>
@@ -3778,37 +3671,8 @@
          </property>
         </widget>
        </item>
-       <item row="0" column="3" colspan="2">
-        <widget class="QLabel" name="lblRange">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
-           <horstretch>2</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="text">
-          <string>Range</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="0">
-        <widget class="QLabel" name="label_19">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="text">
-          <string>Pan</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="5">
-        <widget class="QComboBox" name="cmbrllchn">
+       <item row="4" column="5">
+        <widget class="QComboBox" name="cmbpanchn">
          <property name="minimumSize">
           <size>
            <width>50</width>
@@ -3816,7 +3680,7 @@
           </size>
          </property>
          <property name="toolTip">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sets the output channel you want roll on&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sets the output channel you want pan on&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <item>
           <property name="text">
@@ -3955,21 +3819,51 @@
          </property>
         </widget>
        </item>
-       <item row="2" column="0">
-        <widget class="QLabel" name="label_17">
+       <item row="4" column="2">
+        <widget class="GainSlider" name="pan_gain">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-           <horstretch>0</horstretch>
+          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+           <horstretch>2</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
-         <property name="text">
-          <string>Tilt</string>
+         <property name="minimumSize">
+          <size>
+           <width>152</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Adjusts the sensitivity of the servo output&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="minimum">
+          <number>0</number>
+         </property>
+         <property name="maximum">
+          <number>1000</number>
+         </property>
+         <property name="value">
+          <number>250</number>
+         </property>
+         <property name="tracking">
+          <bool>true</bool>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="invertedAppearance">
+          <bool>false</bool>
+         </property>
+         <property name="tickPosition">
+          <enum>QSlider::NoTicks</enum>
+         </property>
+         <property name="tickInterval">
+          <number>0</number>
          </property>
         </widget>
        </item>
-       <item row="3" column="1">
-        <widget class="QLabel" name="lblRollValue">
+       <item row="4" column="1">
+        <widget class="QLabel" name="lblPanValue">
          <property name="minimumSize">
           <size>
            <width>50</width>
@@ -3998,6 +3892,149 @@
          </property>
          <property name="text">
           <string/>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLabel" name="lblTilt_2">
+         <property name="minimumSize">
+          <size>
+           <width>50</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Value</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="6">
+        <widget class="QCheckBox" name="chkpanrev">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>40</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;These will reverse your servo output&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="layoutDirection">
+          <enum>Qt::LeftToRight</enum>
+         </property>
+         <property name="autoFillBackground">
+          <bool>false</bool>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">margin-left:15%;</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="2">
+        <widget class="GainSlider" name="til_gain">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+           <horstretch>2</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>152</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Adjusts the sensitivity of the servo output&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="minimum">
+          <number>0</number>
+         </property>
+         <property name="maximum">
+          <number>1000</number>
+         </property>
+         <property name="value">
+          <number>250</number>
+         </property>
+         <property name="tracking">
+          <bool>true</bool>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="invertedAppearance">
+          <bool>false</bool>
+         </property>
+         <property name="tickPosition">
+          <enum>QSlider::NoTicks</enum>
+         </property>
+         <property name="tickInterval">
+          <number>0</number>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="6">
+        <widget class="QCheckBox" name="chktltrev">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>40</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;These will reverse your servo output&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="layoutDirection">
+          <enum>Qt::LeftToRight</enum>
+         </property>
+         <property name="autoFillBackground">
+          <bool>false</bool>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">margin-left:15%;</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="2">
+        <widget class="QLabel" name="label_20">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+           <horstretch>2</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>150</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Gain</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
@@ -4098,7 +4135,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>621</width>
+     <width>606</width>
      <height>22</height>
     </rect>
    </property>

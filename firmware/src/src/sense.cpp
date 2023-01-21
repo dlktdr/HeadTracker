@@ -75,6 +75,7 @@ static float magxoff = 0, magyoff = 0, magzoff = 0;
 static float accxoff = 0, accyoff = 0, acczoff = 0;
 static float gyrxoff = 0, gyryoff = 0, gyrzoff = 0;
 static bool trpOutputEnabled = false;  // Default to disabled T/R/P output
+static bool gyroCalibrated = false;
 
 // Input Channel Data
 static uint16_t ppm_in_chans[16];
@@ -214,10 +215,8 @@ int sense_Init()
   // Initalize Gesture Sensor
   if (!APDS.begin()) {
     blesenseboard = false;
-    trkset.setDataisSense(false);
   } else {
     blesenseboard = true;
-    trkset.setDataisSense(true);
   }
 #endif
 
@@ -660,7 +659,9 @@ void calculate_Thread()
       trkset.setDataBtCh(bt_chans);
       trkset.setDataUartCh(uart_in_chans);
       trkset.setDataChOut(channel_data);
+
       trkset.setDataTrpEnabled(trpOutputEnabled);
+      trkset.setDataGyroCal(gyroCalibrated);
 
       // Qauterion Data
       float *qd = madgwick.getQuat();
@@ -1045,6 +1046,7 @@ void gyroCalibrate()
       filt_gyrz = ((1.0f - GYRO_SAMPLE_WEIGHT) * filt_gyrz) + (GYRO_SAMPLE_WEIGHT * rgyrz);
       filter_samples++;
     } else if (filter_samples == GYRO_STABLE_SAMPLES) {
+      gyroCalibrated = true;
       // Set the new Gyro Offset Values
       k_mutex_lock(&data_mutex, K_FOREVER);
       trkset.setGyrXOff(filt_gyrx);

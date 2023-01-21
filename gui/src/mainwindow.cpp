@@ -1027,8 +1027,11 @@ void MainWindow::liveDataChanged()
       ui->servoTilt->setShowActualPosition(false);
       ui->servoRoll->setShowActualPosition(false);
       ui->lblRange->setText(tr("<b>Range - Output Disabled</b>"));
-      ui->lblRange->setToolTip("1) Gryo calibration not complete\n2) Enable on long press option selected and button hasn't been long pressed");
     }
+    if(trkset.getDataGyroCal())
+      ui->gyroLed->setState(true);
+    else
+      ui->gyroLed->setState(false);
 }
 
 
@@ -1258,11 +1261,13 @@ void MainWindow::BLE33tabChanged()
     dataitms["rollout"] = true;
     dataitms["panout"] = true;
     dataitms["btcon"] = false;
+    dataitms["gyrocal"] = false;
     dataitms["btaddr"] = false;
     dataitms["btrmt"] = false;
 
     switch(ui->tabBLE->currentIndex()) {
     case 0: { // General
+        dataitms["gyrocal"] = true;
         break;
     }
     case 1: { // Output

@@ -931,8 +931,8 @@ public:
   // Offset Pan in Degrees
   void setDataPanOff(float val) { panoff = val; }
 
-  // Is Board a Nano33 Sense Variant
-  void setDataisSense(bool val) { issense = val; }
+  // Gyro Has Been Calibrated
+  void setDataGyroCal(bool val) { gyrocal = val; }
 
   // Channel Outputs
   void setDataChOut(const uint16_t val[16]) {
@@ -1179,7 +1179,7 @@ public:
     array.add("tiltoff");
     array.add("rolloff");
     array.add("panoff");
-    array.add("issense");
+    array.add("gyrocal");
     array.add("chout");
     array.add("btch");
     array.add("ppmch");
@@ -1312,7 +1312,7 @@ public:
       enabled == true ? senddatavars |= 1 << 30 : senddatavars &= ~(1 << 30);
       return;
     }
-    else if (strcmp(var, "issense") == 0) {
+    else if (strcmp(var, "gyrocal") == 0) {
       enabled == true ? senddatavars |= 1 << 31 : senddatavars &= ~(1 << 31);
       return;
     }
@@ -1445,7 +1445,7 @@ public:
     if (senddatavars & (1 << 30) && (counter % 1) == 0)
       json["panoff"] = roundf(((float)panoff * 1000)) / 1000;
     if (senddatavars & (1 << 31) && (counter % 10) == 0)
-      json["issense"] = issense;
+      json["gyrocal"] = gyrocal;
 
     sendArray(json,1,counter,1,"6choutu16",(void*)chout,(void*)lastchout, sizeof(uint16_t) * 16);
     sendArray(json,2,counter,1,"6btchu16",(void*)btch,(void*)lastbtch, sizeof(uint16_t) * 8);
@@ -1586,7 +1586,7 @@ protected:
   float tiltoff = 0; // Offset Tilt in Degrees
   float rolloff = 0; // Offset Roll in Degrees
   float panoff = 0; // Offset Pan in Degrees
-  bool issense = 0; // Is Board a Nano33 Sense Variant
+  bool gyrocal = 0; // Gyro Has Been Calibrated
 
   // Real Time Data Arrays
   uint16_t chout[16]; // Channel Outputs

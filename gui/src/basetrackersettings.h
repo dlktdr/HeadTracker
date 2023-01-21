@@ -65,6 +65,8 @@ public:
   static constexpr uint8_t UART_MODE_CRSFIN = 2;
   static constexpr uint8_t UART_MODE_CRSFOUT = 3;
 
+  QMap<QString, QString> descriptions;
+
   BaseTrackerSettings(QObject *parent=nullptr) : 
     QObject(parent)
   {
@@ -179,7 +181,126 @@ public:
     _dataItems["tiltoff"] = false;
     _dataItems["rolloff"] = false;
     _dataItems["panoff"] = false;
-    _dataItems["issense"] = false;
+    _dataItems["gyrocal"] = false;
+    descriptions["rll_min"] = "Roll Minimum";
+    descriptions["rll_max"] = "Roll Maximum";
+    descriptions["rll_cnt"] = "Roll Center";
+    descriptions["rll_gain"] = "Roll Gain";
+    descriptions["tlt_min"] = "Tilt Minimum";
+    descriptions["tlt_max"] = "Tilt Maximum";
+    descriptions["tlt_cnt"] = "Tilt Center";
+    descriptions["tlt_gain"] = "Tilt Gain";
+    descriptions["pan_min"] = "Pan Minimum";
+    descriptions["pan_max"] = "Pan Maximum";
+    descriptions["pan_cnt"] = "Pan Center";
+    descriptions["pan_gain"] = "Pan Gain";
+    descriptions["tltch"] = "Tilt Output Channel";
+    descriptions["rllch"] = "Roll Output Channel";
+    descriptions["panch"] = "Pan Output Channel";
+    descriptions["alertch"] = "Alert Output Channel";
+    descriptions["pwm0"] = "PWM 0 Channel";
+    descriptions["pwm1"] = "PWM 1 Channel";
+    descriptions["pwm2"] = "PWM 2 Channel";
+    descriptions["pwm3"] = "PWM 3 Channel";
+    descriptions["an0ch"] = "Analog 0 Channel";
+    descriptions["an1ch"] = "Analog 1 Channel";
+    descriptions["an2ch"] = "Analog 2 Channel";
+    descriptions["an3ch"] = "Analog 3 Channel";
+    descriptions["aux0ch"] = "Auxilary Function 0 Channel";
+    descriptions["aux1ch"] = "Auxilary Function 1 Channel";
+    descriptions["aux2ch"] = "Auxilary Function 2 Channel";
+    descriptions["rstppm"] = "Reset Center on PPM Input Channel";
+    descriptions["aux0func"] = "Auxilary Function 0";
+    descriptions["aux1func"] = "Auxilary Function 1";
+    descriptions["aux2func"] = "Auxilary Function 2";
+    descriptions["an0gain"] = "Analog 0 Gain";
+    descriptions["an1gain"] = "Analog 1 Gain";
+    descriptions["an2gain"] = "Analog 2 Gain";
+    descriptions["an3gain"] = "Analog 3 Gain";
+    descriptions["an0off"] = "Analog 0 Offset";
+    descriptions["an1off"] = "Analog 1 Offset";
+    descriptions["an2off"] = "Analog 2 Offset";
+    descriptions["an3off"] = "Analog 3 Offset";
+    descriptions["servoreverse"] = "Servo Reverse (BitMask)";
+    descriptions["magxoff"] = "Magnetometer X Calibration Offset";
+    descriptions["magyoff"] = "Magnetometer Y Calibration Offset";
+    descriptions["magzoff"] = "Magnetometer Z Calibration Offset";
+    descriptions["accxoff"] = "Accelerometer X Calibration Offset";
+    descriptions["accyoff"] = "Accelerometer Y Calibration Offset";
+    descriptions["acczoff"] = "Accelerometer Z Calibration Offset";
+    descriptions["gyrxoff"] = "Gyrometer X Calibration Offset";
+    descriptions["gyryoff"] = "Gyrometer Y Calibration Offset";
+    descriptions["gyrzoff"] = "Gyrometer Z Calibration Offset";
+    descriptions["so00"] = "Soft Iron Offset 00";
+    descriptions["so01"] = "Soft Iron Offset 01";
+    descriptions["so02"] = "Soft Iron Offset 02";
+    descriptions["so10"] = "Soft Iron Offset 10";
+    descriptions["so11"] = "Soft Iron Offset 11";
+    descriptions["so12"] = "Soft Iron Offset 12";
+    descriptions["so20"] = "Soft Iron Offset 20";
+    descriptions["so21"] = "Soft Iron Offset 21";
+    descriptions["so22"] = "Soft Iron Offset 22";
+    descriptions["dismag"] = "Disable Magnetometer";
+    descriptions["rotx"] = "Board Rotation X";
+    descriptions["roty"] = "Board Rotation Y";
+    descriptions["rotz"] = "Board Rotation Z";
+    descriptions["buttonpin"] = "Button Pin";
+    descriptions["ppmoutpin"] = "PPM Output Pin";
+    descriptions["ppminpin"] = "PPM Input Pin";
+    descriptions["uartmode"] = "Uart Mode (0- Off, 1-SBUS, 2-CRSFIN, 3-CRSFOUT)";
+    descriptions["crsftxrate"] = "CRSF Transmit Frequncy";
+    descriptions["sbustxrate"] = "SBUS Transmit Freqency";
+    descriptions["sbininv"] = "SBUS Receieve Inverted";
+    descriptions["sboutinv"] = "SBUS Transmit Inverted";
+    descriptions["ch5arm"] = "Channel 5 ";
+    descriptions["btmode"] = "Bluetooth Mode (0-Off, 1- Head, 2-Receive, 3-Scanner)";
+    descriptions["rstonwave"] = "Reset on Proximity Sense";
+    descriptions["butlngps"] = "Long Press on the Button to Enable/Disable Tilt Roll and Pan";
+    descriptions["rstontlt"] = "Reset Center on a Head Tilt";
+    descriptions["ppmoutinvert"] = "Invert PPM Output";
+    descriptions["ppmininvert"] = "Invert PPM Output";
+    descriptions["ppmframe"] = "PPM Frame Length (us)";
+    descriptions["ppmsync"] = "PPM Sync Pulse Length (us)";
+    descriptions["ppmchcnt"] = "PPM channels to output";
+    descriptions["magx"] = "Raw Sensor Mag X";
+    descriptions["magy"] = "Raw Sensor Mag Y";
+    descriptions["magz"] = "Raw Sensor Mag Z";
+    descriptions["gyrox"] = "Raw Sensor Gyro X";
+    descriptions["gyroy"] = "Raw Sensor Gyro Y";
+    descriptions["gyroz"] = "Raw Sensor Gyro Z";
+    descriptions["accx"] = "Raw Sensor Accel X";
+    descriptions["accy"] = "Raw Sensor Accel Y";
+    descriptions["accz"] = "Raw Sensor Accel Z";
+    descriptions["off_magx"] = "Calibrated Mag X";
+    descriptions["off_magy"] = "Calibrated Mag Y";
+    descriptions["off_magz"] = "Calibrated Mag Z";
+    descriptions["off_gyrox"] = "Calibrated Gyro X";
+    descriptions["off_gyroy"] = "Calibrated Gyro Y";
+    descriptions["off_gyroz"] = "Calibrated Gyro Z";
+    descriptions["off_accx"] = "Calibrated Accel X";
+    descriptions["off_accy"] = "Calibrated Accel Y";
+    descriptions["off_accz"] = "Calibrated Accel Z";
+    descriptions["tiltout"] = "Board Tilt Output (us)";
+    descriptions["rollout"] = "Board Roll Output (us)";
+    descriptions["panout"] = "Board Pan Output (us)";
+    descriptions["iscal"] = "Has the board been Calibrated";
+    descriptions["btcon"] = "Bluetooth is connected";
+    descriptions["trpenabled"] = "Tilt/Roll/Pan Output Enabled";
+    descriptions["tilt"] = "Raw Tilt in Degrees";
+    descriptions["roll"] = "Raw Roll in Degrees";
+    descriptions["pan"] = "Raw Pan in Degrees";
+    descriptions["tiltoff"] = "Offset Tilt in Degrees";
+    descriptions["rolloff"] = "Offset Roll in Degrees";
+    descriptions["panoff"] = "Offset Pan in Degrees";
+    descriptions["gyrocal"] = "Gyro Has Been Calibrated";
+    descriptions["btpairedaddress"] = "Bluetooth Remote address to Pair With";
+    descriptions["chout"] = "Channel Outputs";
+    descriptions["btch"] = "Bluetooth Inputs";
+    descriptions["ppmch"] = "PPM Inputs";
+    descriptions["uartch"] = "Uart Channels (Sbus/Crsf)";
+    descriptions["quat"] = "Quaternion Output (Tilt / Roll / Pan)";
+    descriptions["btaddr"] = "Local Bluetooth Address";
+    descriptions["btrmt"] = "Remote Bluetooth Address";
     _dataItems["chout"] = false;
     _dataItems["btch"] = false;
     _dataItems["ppmch"] = false;
@@ -1208,8 +1329,8 @@ public:
   // Offset Pan in Degrees
   float getDataPanOff() { return _data["panoff"].toFloat(); }
 
-  // Is Board a Nano33 Sense Variant
-  bool getDataisSense() { return _data["issense"].toBool(); }
+  // Gyro Has Been Calibrated
+  bool getDataGyroCal() { return _data["gyrocal"].toBool(); }
 
   // Local Bluetooth Address
   QString getDataBtAddr() { return _data["btaddr"].toString(); }
@@ -1249,7 +1370,7 @@ public:
     rv.append("tiltoff");
     rv.append("rolloff");
     rv.append("panoff");
-    rv.append("issense");
+    rv.append("gyrocal");
     rv.append("chout[0]");
     rv.append("chout[1]");
     rv.append("chout[2]");

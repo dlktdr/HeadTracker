@@ -52,6 +52,8 @@ for row in s.const:
   else:
     f.write("  static constexpr "  + s.typeToC(row[s.coltype]) + " " + row[s.colname] + " = " + row[s.coldefault] + ";\n")
 
+f.write("\n  QMap<QString, QString> descriptions;\n");
+
 # Write the Constructor
 f.write("\n  BaseTrackerSettings(QObject *parent=nullptr) : \n    QObject(parent)\n  {\n")
 for row in s.settings:
@@ -74,6 +76,24 @@ for row in s.settingsarrays:
 
 for row in s.data:
   f.write("    _dataItems[\"" + row[s.colname].lower() + "\"] = false;\n")
+
+# Add the descriptions
+for row in s.settings:
+  f.write("    descriptions[\"" + row[s.colname].lower() + "\"] = \"" + row[s.coldesc] + "\";\n")
+for row in s.data:
+  f.write("    descriptions[\"" + row[s.colname].lower() + "\"] = \"" + row[s.coldesc] + "\";\n")
+for row in s.settingsarrays:
+  start = row[s.colname].find("[")
+  end = row[s.colname].find("]")
+  arraylength = row[s.colname][start+1:end]
+  name = row[s.colname][:start].lower()
+  f.write("    descriptions[\"" + name.lower() + "\"] = \"" + row[s.coldesc] + "\";\n")
+for row in s.dataarrays:
+  start = row[s.colname].find("[")
+  end = row[s.colname].find("]")
+  arraylength = row[s.colname][start+1:end]
+  name = row[s.colname][:start].lower()
+  f.write("    descriptions[\"" + name.lower() + "\"] = \"" + row[s.coldesc] + "\";\n")
 
 for row in s.dataarrays:
   start = row[s.colname].find("[")

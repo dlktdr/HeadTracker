@@ -6,33 +6,47 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>364</width>
-    <height>653</height>
+    <width>504</width>
+    <height>526</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Diagnostic Display</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
+  <layout class="QVBoxLayout" name="verticalLayout_3">
    <item>
-    <widget class="QLabel" name="label">
-     <property name="text">
-      <string>Settings</string>
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="currentIndex">
+      <number>0</number>
      </property>
+     <widget class="QWidget" name="tab">
+      <attribute name="title">
+       <string>Settings</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <widget class="QTableWidget" name="tblParams"/>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_2">
+      <attribute name="title">
+       <string>Live Data</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <widget class="QTableView" name="tblLiveData"/>
+       </item>
+       <item>
+        <widget class="QLabel" name="label">
+         <property name="text">
+          <string>Selecting too many items will slow down the GUI</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
     </widget>
-   </item>
-   <item>
-    <widget class="QTableWidget" name="tblParams"/>
-   </item>
-   <item>
-    <widget class="QLabel" name="label_2">
-     <property name="text">
-      <string>Live Data</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QTableView" name="tblLiveData"/>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">

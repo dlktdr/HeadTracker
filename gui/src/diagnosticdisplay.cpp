@@ -20,7 +20,9 @@ DiagnosticDisplay::DiagnosticDisplay(TrackerSettings *ts, QWidget *parent) :
     ui->tblLiveData->setModel(model);
     //ui->tblLiveData->setStyleSheet("QTreeView::item {padding-left: 0px; border: 0px}");
     ui->tblLiveData->resizeColumnToContents(0);
-    ui->tblLiveData->horizontalHeader()->setSectionResizeMode(1,QHeaderView::Stretch);
+    ui->tblLiveData->horizontalHeader()->setSectionResizeMode(2,QHeaderView::Stretch);
+
+    ui->tabWidget->setCurrentIndex(0);
 }
 
 DiagnosticDisplay::~DiagnosticDisplay()
@@ -33,7 +35,7 @@ void DiagnosticDisplay::updated()
     QVariantMap settings=trkset->allData();
 
     ui->tblParams->clear();
-    ui->tblParams->setColumnCount(2);
+    ui->tblParams->setColumnCount(3);
     ui->tblParams->setRowCount(settings.count());
 
     int row=0;
@@ -42,13 +44,17 @@ void DiagnosticDisplay::updated()
         x.next();
         QTableWidgetItem *key = new QTableWidgetItem(x.key());
         QTableWidgetItem *value = new QTableWidgetItem(x.value().toString());
+        QTableWidgetItem *description = new QTableWidgetItem(trkset->descriptions[x.key()]);
         if(x.key() == "Cmd") {
             key->setBackground(QBrush(Qt::lightGray));
             value->setBackground(QBrush(Qt::lightGray));
+            description->setBackground(QBrush(Qt::lightGray));
+            description->setText("Description");
         }
 
         ui->tblParams->setItem(row,0,key);
-        ui->tblParams->setItem(row++,1,value);
+        ui->tblParams->setItem(row,1,value);
+        ui->tblParams->setItem(row++,2,description);
     }
 }
 
@@ -122,6 +128,14 @@ QVariant DataModel::data(const QModelIndex &index, int role) const
     if(index.column() == 1) {
         return datalist.at(index.row())->value;
     }
+    if(index.column() == 2) { // Description
+        QString name = datalist.at(index.row())->name;
+        int pos = name.indexOf(QChar('['));
+        if(pos >= 0) {
+            name = name.left(pos);
+        }
+        return trkset->descriptions[name];
+    }
   } else if (role == Qt::CheckStateRole) {
       if(index.column() == 0)
         return datalist.at(index.row())->checked?Qt::Checked:Qt::Unchecked;
@@ -135,10 +149,8 @@ QModelIndex DataModel::index(int row, int column, const QModelIndex &parent) con
   if(!(row < datalist.count()))
     return QModelIndex();
 
-  if(column == 0)
-    return datalist.at(row)->index0;
-  else if (column == 1)
-    return datalist.at(row)->index1;
+  if(column >=0 && column < 4)
+    return createIndex(row,column);
 
   return QModelIndex();
 }
@@ -158,6 +170,8 @@ QVariant DataModel::headerData(int section, Qt::Orientation orientation, int rol
     return tr("Item");
   if(section == 1)
     return tr("Value");
+  if(section == 2)
+    return tr("Description");
   return QVariant();
 }
 

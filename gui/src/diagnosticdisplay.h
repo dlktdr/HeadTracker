@@ -51,7 +51,7 @@ public:
   QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
   QModelIndex parent(const QModelIndex &index) const override;
   int rowCount(const QModelIndex &parent = QModelIndex()) const override {Q_UNUSED(parent); return datalist.count()-1;}
-  int columnCount(const QModelIndex &parent = QModelIndex()) const override {Q_UNUSED(parent); return 2;}
+  int columnCount(const QModelIndex &parent = QModelIndex()) const override {Q_UNUSED(parent); return 3;}
   QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 private:
   void checkArray(QString array, bool checked);
