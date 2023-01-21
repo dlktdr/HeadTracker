@@ -1,16 +1,20 @@
 Import("env")
 
-# access to global build environment
-print(env)
+# Dump build environment (for debug)
+# print(env.Dump())
 
-# access to project build environment (is used source files in "src" folder)
+build_flags = env.ParseFlags(env['BUILD_FLAGS'])
+defines = {k: v for (k, v) in build_flags.get("CPPDEFINES")}
 
-my_flags = env.ParseFlags(env['BUILD_FLAGS'])
-defines = {k: v for (k, v) in my_flags.get("CPPDEFINES")}
-print(defines)
-env.Replace(PROGNAME="%s%s_v%s_%s%s_%s" % (defines.get("FNAME"),
-                                           defines.get("FW_EXTRA"),
-                                           defines.get("FW_MAJ"),
-                                           defines.get("FW_MIN"),
-                                           defines.get("FW_REV"),
-                                           defines.get("FW_GIT_REV")))
+fileprefix = defines.get("FNAME")
+versiontag = defines.get("FW_VER_TAG")
+versiontag = versiontag.replace(".", "_")
+gitrev = defines.get("FW_GIT_REV")
+
+# The changing filename causes issues when debugging with a J-Link and
+# uploading. If built in debug mode, always keep the filename the same
+
+if env['BUILD_TYPE'] == "debug":
+  env.Replace(PROGNAME="DEBUG")
+else:
+  env.Replace(PROGNAME="%s_v%s_%s" % (fileprefix, versiontag, gitrev))
