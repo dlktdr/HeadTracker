@@ -973,9 +973,7 @@ void sensor_Thread()
       madgwick.update(gyrx * DEG_TO_RAD, gyry * DEG_TO_RAD, gyrz * DEG_TO_RAD, accx, accy, accz,
                       magx, magy, magz, madgwick.deltatUpdate());
       if (firstrun && pan != 0) {
-        k_mutex_lock(&sensor_mutex, K_FOREVER);
         panoffset = pan;
-        k_mutex_unlock(&sensor_mutex);
         firstrun = false;
       }
     }
