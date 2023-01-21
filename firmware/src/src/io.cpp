@@ -100,8 +100,17 @@ void io_Thread()
       digitalWrite(IO_LED, led_is_on);
     }
 #endif
+
+    // Gyro Calibration Mode - Long Red, Flashing
+    if (_ledmode & LED_GYROCAL) {
+      led_sequence[0].RGB = RGB_RED;
+      led_sequence[0].time = 400;
+      led_sequence[1].RGB = 0;
+      led_sequence[1].time = 200;
+      led_sequence[2].time = 0;  // End Sequence
+
     // Bluetooth Connected - Blue light on solid
-    if (_ledmode & LED_BTCONNECTED) {
+    } else if (_ledmode & LED_BTCONNECTED) {
       led_sequence[0].RGB = RGB_BLUE;
       led_sequence[0].time = 100;
       led_sequence[1].time = 0;  // End Sequence
@@ -133,13 +142,6 @@ void io_Thread()
       led_sequence[2].time = 200;
       led_sequence[3].time = 0;  // End Sequence
 
-      // Gyro Calibration Mode - Long Red, Flashing
-    } else if (_ledmode & LED_GYROCAL) {
-      led_sequence[0].RGB = RGB_RED;
-      led_sequence[0].time = 400;
-      led_sequence[1].RGB = 0;
-      led_sequence[1].time = 200;
-      led_sequence[2].time = 0;  // End Sequence
     } else {
       rgb_sequence_no = 0;
       led_sequence[0].time = 0;
@@ -290,6 +292,8 @@ void io_init()
 #if defined(AN3)
   pinMode(IO_AN3, GPIO_INPUT);
 #endif
+
+  setLEDFlag(LED_GYROCAL);
 
   k_poll_signal_raise(&ioThreadRunSignal, 1);
 }

@@ -1047,6 +1047,7 @@ void gyroCalibrate()
       filter_samples++;
     } else if (filter_samples == GYRO_STABLE_SAMPLES) {
       gyroCalibrated = true;
+      clearLEDFlag(LED_GYROCAL);
       // Set the new Gyro Offset Values
       k_mutex_lock(&data_mutex, K_FOREVER);
       trkset.setGyrXOff(filt_gyrx);
