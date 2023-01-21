@@ -964,7 +964,6 @@ void sensor_Thread()
     } else if (madgreads == MADGSTART_SAMPLES - 1) {
       // Pass it averaged values
       madgwick.begin(aacc[0], aacc[1], aacc[2], amag[0], amag[1], amag[2]);
-      panoffset = pan;
       madgreads = MADGSTART_SAMPLES;
     }
 
@@ -973,8 +972,10 @@ void sensor_Thread()
       // Period Between Samples
       madgwick.update(gyrx * DEG_TO_RAD, gyry * DEG_TO_RAD, gyrz * DEG_TO_RAD, accx, accy, accz,
                       magx, magy, magz, madgwick.deltatUpdate());
-      if (firstrun) {
+      if (firstrun && pan != 0) {
+        k_mutex_lock(&sensor_mutex, K_FOREVER);
         panoffset = pan;
+        k_mutex_unlock(&sensor_mutex);
         firstrun = false;
       }
     }
