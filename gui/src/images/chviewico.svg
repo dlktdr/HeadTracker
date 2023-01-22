@@ -1,38 +1,82 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!-- Creator: CorelDRAW Home & Student X8 -->
-<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="600px" height="412px" version="1.1" style="shape-rendering:geometricPrecision; text-rendering:geometricPrecision; image-rendering:optimizeQuality; fill-rule:evenodd; clip-rule:evenodd"
-viewBox="0 0 600 412"
- xmlns:xlink="http://www.w3.org/1999/xlink"
- xmlns:dc="http://purl.org/dc/elements/1.1/"
- xmlns:cc="http://creativecommons.org/ns#"
- xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
- xmlns:svg="http://www.w3.org/2000/svg"
- xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
- xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
- inkscape:version="0.92.2 (5c3e80d, 2017-08-06)"
- sodipodi:docname="chviewico.svg">
- <defs>
-  <style type="text/css">
+
+<svg
+   xml:space="preserve"
+   width="1500"
+   height="1500"
+   version="1.1"
+   style="clip-rule:evenodd;fill-rule:evenodd;image-rendering:optimizeQuality;shape-rendering:geometricPrecision;text-rendering:geometricPrecision"
+   viewBox="0 0 1500 1500"
+   enable-background="new 0 0 100 100"
+   id="svg35"
+   sodipodi:docname="chviewico.svg"
+   inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"><sodipodi:namedview
+   id="namedview37"
+   pagecolor="#ffffff"
+   bordercolor="#666666"
+   borderopacity="1.0"
+   inkscape:pageshadow="2"
+   inkscape:pageopacity="0.0"
+   inkscape:pagecheckerboard="0"
+   showgrid="false"
+   inkscape:zoom="0.41436457"
+   inkscape:cx="918.27348"
+   inkscape:cy="698.66011"
+   inkscape:window-width="1920"
+   inkscape:window-height="1129"
+   inkscape:window-x="-8"
+   inkscape:window-y="-8"
+   inkscape:window-maximized="1"
+   inkscape:current-layer="Layer_x0020_1"
+   units="px" />
+ <defs
+   id="defs26">
+  <style
+   type="text/css"
+   id="style24">
    <![CDATA[
-    .str0 {stroke:black;stroke-width:3.1252}
-    .fil3 {fill:blue}
-    .fil1 {fill:lime}
-    .fil0 {fill:#CCCCCC}
-    .fil2 {fill:red}
+    .fil0 {fill:black}
    ]]>
   </style>
- </defs>
- <g id="Layer_x0020_1">
-  <metadata id="CorelCorpID_0Corel-Layer"/>
-  <sodipodi:namedview id="base" pagecolor="#ffffff" bordercolor="#666666" borderopacity="1.0" inkscape:pageopacity="0.0" inkscape:pageshadow="2" inkscape:zoom="1.4" inkscape:cx="168.20465" inkscape:cy="919.81787" inkscape:document-units="mm" inkscape:current-layer="layer1" showgrid="false" inkscape:window-width="1920" inkscape:window-height="1137" inkscape:window-x="-8" inkscape:window-y="29" inkscape:window-maximized="1"/>
-  <g id="layer1" inkscape:label="Layer 1" inkscape:groupmode="layer">
-   <path id="path13" class="fil0 str0" d="M30 0l540 0c17,0 30,13 30,30l0 60c0,16 -13,30 -30,30l-540 0c-17,0 -30,-14 -30,-30l0 -60c0,-17 13,-30 30,-30z" inkscape:connector-curvature="0"/>
-   <path id="path15" class="fil0 str0" d="M30 146l540 0c17,0 30,14 30,30l0 60c0,17 -13,30 -30,30l-540 0c-17,0 -30,-13 -30,-30l0 -60c0,-16 13,-30 30,-30z" inkscape:connector-curvature="0"/>
-   <path id="path17" class="fil0 str0" d="M30 292l540 0c17,0 30,14 30,30l0 60c0,17 -13,30 -30,30l-540 0c-17,0 -30,-13 -30,-30l0 -60c0,-16 13,-30 30,-30z" inkscape:connector-curvature="0"/>
-   <path id="path19" class="fil1 str0" d="M30 0l270 0c17,0 30,13 30,30l0 60c0,16 -13,30 -30,30l-270 0c-17,0 -30,-14 -30,-30l0 -60c0,-17 13,-30 30,-30z" inkscape:connector-curvature="0"/>
-   <path id="path21" class="fil2 str0" d="M30 146l510 0c17,0 30,14 30,30l0 60c0,17 -13,30 -30,30l-510 0c-17,0 -30,-13 -30,-30l0 -60c0,-16 13,-30 30,-30z" inkscape:connector-curvature="0"/>
-   <path id="path23" class="fil3 str0" d="M30 292l90 0c16,0 30,14 30,30l0 60c0,17 -14,30 -30,30l-90 0c-17,0 -30,-13 -30,-30l0 -60c0,-16 13,-30 30,-30z" inkscape:connector-curvature="0"/>
-  </g>
- </g>
+ <pattern
+   id="EMFhbasepattern"
+   patternUnits="userSpaceOnUse"
+   width="6"
+   height="6"
+   x="0"
+   y="0" /></defs>
+ <g
+   id="Layer_x0020_1"
+   inkscape:label="Layer 1"
+   inkscape:groupmode="layer">
+  <metadata
+   id="CorelCorpID_0Corel-Layer" />
+  
+ <rect
+   style="fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:0.778421;stroke-linecap:round;stroke-linejoin:round"
+   id="rect444"
+   width="1260.3781"
+   height="399.22159"
+   x="0.38921016"
+   y="50.38921"
+   ry="39.957352" /><rect
+   style="clip-rule:evenodd;fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:0.848883;stroke-linecap:round;stroke-linejoin:round;image-rendering:optimizeQuality;shape-rendering:geometricPrecision;text-rendering:geometricPrecision"
+   id="rect444-5"
+   width="1499.1511"
+   height="399.15112"
+   x="0.42447445"
+   y="550.42444"
+   ry="39.950294" /><rect
+   style="clip-rule:evenodd;fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:0.693381;stroke-linecap:round;stroke-linejoin:round;image-rendering:optimizeQuality;shape-rendering:geometricPrecision;text-rendering:geometricPrecision"
+   id="rect444-3"
+   width="999.82306"
+   height="399.30661"
+   x="0.34672281"
+   y="1050.3467"
+   ry="39.965866" /></g>
 </svg>
