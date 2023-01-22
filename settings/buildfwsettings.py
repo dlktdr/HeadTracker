@@ -81,6 +81,8 @@ f.write("\n    // Call Virtual Events after initialization\n")
 events = set()
 for row in s.settings:
   events.add(row[s.colfwonevnt])
+events = sorted(events)
+
 for row in events:
   if row != "":
     f.write("    " + row + "();\n");

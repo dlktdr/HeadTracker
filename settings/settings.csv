@@ -146,7 +146,7 @@ float,Setting,so20,0,FLOAT_MIN,FLOAT_MAX,Soft Iron Offset 20,resetFusion,,4,
 float,Setting,so21,0,FLOAT_MIN,FLOAT_MAX,Soft Iron Offset 21,resetFusion,,4,
 float,Setting,so22,1,FLOAT_MIN,FLOAT_MAX,Soft Iron Offset 22,resetFusion,,4,
 ,,,,,,,,,,
-bool,Setting,DisMag,0,,,Disable Magnetometer,,,,
+bool,Setting,DisMag,0,,,Disable Magnetometer,,,,F117
 ,,,,,,,,,,
 Board Rotation Settings,,,,,,,,,,
 float,Setting,RotX,0,-360,360,Board Rotation X,resetFusion,,4,
