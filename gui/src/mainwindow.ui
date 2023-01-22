@@ -778,7 +778,7 @@
               <item row="11" column="0" colspan="2">
                <widget class="QCheckBox" name="chkNoMag">
                 <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If your having issues calibrating the Magnetometer you can disable it here. This may have some drift as it is only the Gyrometer is used to calculate Pan. Be sure to place the board down on a stable surface and let it sit for 5 seconds before using it so the Gyrometer calibration can complete.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If your having issues calibrating the Magnetometer you can disable it. When disabled there will be drift caused by to gyrometer offset. To reduce this always place the board down on a stable surface after power up for 5 seconds to complete the calibration.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                 <property name="text">
                  <string>Don't use the magnetometer</string>
