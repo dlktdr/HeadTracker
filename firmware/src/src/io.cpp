@@ -93,7 +93,6 @@ void io_Thread()
       led_on_time = 25;
       led_off_time = 200;
     }
-
     if ((!led_is_on && (_counter % led_off_time == 0)) ||
         (led_is_on && (_counter % led_on_time == 0))) {
       led_is_on = !led_is_on;
@@ -101,21 +100,8 @@ void io_Thread()
     }
 #endif
 
-    // Gyro Calibration Mode - Long Red, Flashing
-    if (_ledmode & LED_GYROCAL) {
-      led_sequence[0].RGB = RGB_RED;
-      led_sequence[0].time = 400;
-      led_sequence[1].RGB = 0;
-      led_sequence[1].time = 200;
-      led_sequence[2].time = 0;  // End Sequence
-
-    // Bluetooth Connected - Blue light on solid
-    } else if (_ledmode & LED_BTCONNECTED) {
-      led_sequence[0].RGB = RGB_BLUE;
-      led_sequence[0].time = 100;
-      led_sequence[1].time = 0;  // End Sequence
-
-    } else if (_ledmode & LED_BTCONFIGURATOR) {
+    // Force BT head configuration mode !Must be priority 1
+    if (_ledmode & LED_BTCONFIGURATOR) {
       led_sequence[0].RGB = RGB_RED;
       led_sequence[0].time = 300;
       led_sequence[1].RGB = RGB_GREEN;
@@ -124,21 +110,43 @@ void io_Thread()
       led_sequence[2].time = 300;
       led_sequence[3].time = 0;  // End Sequence
 
-      // Bluetooth Scanning, Blue light slow blinking
+    // Gyro not calibrated but bluetooth is connected. Mostly Blue, Pulse of Red
+    } else if (_ledmode & LED_GYROCAL && _ledmode & LED_BTCONNECTED) {
+      led_sequence[0].RGB = RGB_BLUE;
+      led_sequence[0].time = 500;
+      led_sequence[1].RGB = RGB_RED;
+      led_sequence[1].time = 20;
+      led_sequence[2].time = 0;  // End Sequence
+
+    // Gyro Calibration Mode - Red slow, equal flashing
+    } else if (_ledmode & LED_GYROCAL) { // Priority 2
+      led_sequence[0].RGB = RGB_RED;
+      led_sequence[0].time = 400;
+      led_sequence[1].RGB = RGB_OFF;
+      led_sequence[1].time = 400;
+      led_sequence[2].time = 0;  // End Sequence
+
+    // Bluetooth Connected - Blue light on solid
+    } else if (_ledmode & LED_BTCONNECTED) {
+      led_sequence[0].RGB = RGB_BLUE;
+      led_sequence[0].time = 100;
+      led_sequence[1].time = 0;  // End Sequence
+
+    // Bluetooth Scanning, Blue light slow blinking
     } else if (_ledmode & LED_BTSCANNING) {
       led_sequence[0].RGB = RGB_BLUE;
       led_sequence[0].time = 300;
-      led_sequence[1].RGB = 0;
+      led_sequence[1].RGB = RGB_OFF;
       led_sequence[1].time = 300;
       led_sequence[2].time = 0;  // End Sequence
 
-      // Magnetometer Calibration Mode - Red, Blue, Pause
+      // Magnetometer Calibration Mode - Red, Blue, Off
     } else if (_ledmode & LED_MAGCAL) {
       led_sequence[0].RGB = RGB_RED;
       led_sequence[0].time = 200;
       led_sequence[1].RGB = RGB_BLUE;
       led_sequence[1].time = 200;
-      led_sequence[2].RGB = 0;  // Pause
+      led_sequence[2].RGB = RGB_OFF;
       led_sequence[2].time = 200;
       led_sequence[3].time = 0;  // End Sequence
 
