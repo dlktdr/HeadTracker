@@ -248,8 +248,19 @@ void BTJoystickStart()
 
 void BTJoystickExecute()
 {
-  buildJoystickHIDReport(report, bthidchans);
-  if (simulate_input) bt_gatt_notify(NULL, &bthid_svc.attrs[6], (void *)&report, sizeof(report));
+  if (bleconnected) {
+    clearLEDFlag(LED_BTSCANNING);
+    setLEDFlag(LED_BTCONNECTED);
+
+    buildJoystickHIDReport(report, bthidchans);
+    if (simulate_input)
+      bt_gatt_notify(NULL, &bthid_svc.attrs[6], (void *)&report, sizeof(report));
+
+  } else {
+    // Scanning
+    setLEDFlag(LED_BTSCANNING);
+    clearLEDFlag(LED_BTCONNECTED);
+  }
 }
 
 void BTJoystickSetChannel(int channel, const uint16_t value) { bthidchans[channel] = value; }

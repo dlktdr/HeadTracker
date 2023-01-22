@@ -210,6 +210,8 @@ const char *BTGetAddress()
     case BTPARARMT:
     case BTSCANONLY:
       return BTRmtGetAddress();
+    case BTJOYSTICK:
+      return BTJoystickGetAddress();
     default:
       break;
   }

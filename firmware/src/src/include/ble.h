@@ -20,7 +20,7 @@ extern struct bt_uuid_16 htoverridech;
 extern struct bt_uuid_16 btbutton;
 extern struct bt_uuid_16 jsonuuid;
 
-/* TODO: Work me in, instead of using the switch statements
+/* TODO: Work me in?, instead of using the switch statements
 typedef struct {
   void (*start)();
   void (*stop)();

@@ -260,7 +260,7 @@ public:
     descriptions["sboutinv"] = "SBUS Transmit Inverted";
     descriptions["crsftxinv"] = "Invert CRSF output";
     descriptions["ch5arm"] = "Channel 5 ";
-    descriptions["btmode"] = "Bluetooth Mode (0-Off, 1- Head, 2-Receive, 3-Scanner)";
+    descriptions["btmode"] = "Bluetooth Mode (0-Off, 1- Head, 2-Receive, 3-Scanner, 4- BT HID Joystick)";
     descriptions["rstonwave"] = "Reset on Proximity Sense";
     descriptions["butlngps"] = "Long Press on the Button to Enable/Disable Tilt Roll and Pan";
     descriptions["rstontlt"] = "Reset Center on a Head Tilt";
@@ -1174,7 +1174,7 @@ public:
   bool getCh5Arm() {return _setting["ch5arm"].toBool();}
   void setCh5Arm(bool val=false) { _setting["ch5arm"] = val; }
 
-  // Bluetooth Mode (0-Off, 1- Head, 2-Receive, 3-Scanner, BT_HID_Joystick)
+  // Bluetooth Mode (0-Off, 1- Head, 2-Receive, 3-Scanner, 4- BT HID Joystick)
   uint8_t getBtMode() {
     return _setting["btmode"].toUInt();
   }

@@ -783,7 +783,7 @@ public:
   inline const bool& getCh5Arm() {return ch5arm;}
   void setCh5Arm(bool val=false) { ch5arm = val; }
 
-  // Bluetooth Mode (0-Off, 1- Head, 2-Receive, 3-Scanner, BT_HID_Joystick)
+  // Bluetooth Mode (0-Off, 1- Head, 2-Receive, 3-Scanner, 4- BT HID Joystick)
   inline const uint8_t& getBtMode() {return btmode;}
   bool setBtMode(uint8_t val=0) {
     if(val >= 0 && val <= 4) {
