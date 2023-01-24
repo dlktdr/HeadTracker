@@ -225,6 +225,9 @@ void BoardNano33BLE::startCalibration()
     dat["magx"] = true;
     dat["magy"] = true;
     dat["magz"] = true;
+    dat["accx"] = true;
+    dat["accy"] = true;
+    dat["accz"] = true;
     trkset->setDataItemSend(dat);
     bleCalibratorDialog->show();
 }

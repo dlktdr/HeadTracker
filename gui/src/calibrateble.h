@@ -36,8 +36,16 @@ private:
 
     float _soo[3][3]; // Soft Iron
     float _hoo[3]; // Hard Iron
+    float _accOff[3];
+    float _accZ[2]; // Accelerometer Z Min & Max
+    float _accY[2]; // Accelerometer Z Min & Max
+    float _accX[2]; // Accelerometer Z Min & Max
+    float _currentAccel[3];
+    bool _accInverted[3];
     bool firstmag=true;    
     enum STEP {MAGCAL=0,ACCELCAL};
+    enum ACCSTEP {ZP,ZM,YP,YM,XP,XM};
+    int accStep;
 
 private slots:
     void nextClicked();
@@ -48,6 +56,10 @@ private slots:
                     float fiterror,
                     float hoop[3],
                     float soo[3][3]);
+    void rawAccelChanged(float x, float y, float z);
+    void setNextAccStep();
+    void setPrevAccStep();
+
 signals:
     void calibrationSave();
     void calibrationCancel();

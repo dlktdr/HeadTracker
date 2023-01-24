@@ -9,16 +9,24 @@ CalibrateBLE::CalibrateBLE(TrackerSettings *ts, QWidget *parent) :
     ui->setupUi(this);
     step = 0;
 
-//    connect(trkset,&TrackerSettings::rawGyroChanged,this,&CalibrateBLE::rawGyroChanged);
-
     connect(ui->cmdNext,SIGNAL(clicked()),this,SLOT(nextClicked()));
     connect(ui->cmdPrevious,SIGNAL(clicked()),this,SLOT(prevClicked()));
 
     ui->stackedWidget->setCurrentIndex(0);
 
     ui->magcalwid->setTracker(trkset);
-
     connect(ui->magcalwid,&MagCalWidget::dataUpdate,this,&CalibrateBLE::dataUpdate);
+
+    // ACCEL
+    accStep = 0;
+    for(int i=0; i < 3; i++) {
+        _accInverted[i] = false;
+        _accOff[i] = 0;
+    }
+
+    connect(trkset,&TrackerSettings::rawAccelChanged,this, &CalibrateBLE::rawAccelChanged);
+    connect(ui->cmdAccNext, &QPushButton::clicked, this, &CalibrateBLE::setNextAccStep);
+    connect(ui->cmdAccPrevious, &QPushButton::clicked, this, &CalibrateBLE::setPrevAccStep);
 }
 
 CalibrateBLE::~CalibrateBLE()
@@ -26,45 +34,91 @@ CalibrateBLE::~CalibrateBLE()
     delete ui;
 }
 
+void CalibrateBLE::setNextAccStep()
+{
+    switch(accStep) {
+    case ZP:
+        ui->ledZMax->setBlink(false);
+        ui->ledZMax->setState(true);
+        ui->ledZMin->setBlink(true);
 
+        if(_currentAccel[2] < 0)
+            _accInverted[2] = true;
+
+        accStep++;
+        break;
+    case ZM:
+        ui->ledZMin->setBlink(false);
+        ui->ledZMin->setState(true);
+        ui->ledYMax->setBlink(true);
+        accStep++;
+        break;
+    case YP:
+        ui->ledYMax->setBlink(false);
+        ui->ledYMax->setState(true);
+        ui->ledYMin->setBlink(true);
+
+        if(_currentAccel[1] < 0)
+            _accInverted[1] = true;
+
+        accStep++;
+        break;
+    case YM:
+        ui->ledYMin->setBlink(false);
+        ui->ledYMin->setState(true);
+        ui->ledXMax->setBlink(true);
+        accStep++;
+        break;
+    case XP:
+        ui->ledXMax->setBlink(false);
+        ui->ledXMax->setState(true);
+        ui->ledXMin->setBlink(true);
+
+        if(_currentAccel[0] < 0)
+            _accInverted[0] = true;
+
+        accStep++;
+        break;
+    case XM:
+        ui->ledXMin->setBlink(false);
+        ui->ledXMin->setState(true);
+        ui->cmdNext->setDisabled(false);
+        accStep=0;
+        // COMPLETE
+        break;
+    }
+}
+
+void CalibrateBLE::setPrevAccStep()
+{
+    // CHANGE ME TO START OVER
+}
 
 void CalibrateBLE::nextClicked()
 {
     switch (step) {
-    // Gyrometer
-    /*case GYROCAL: {
-        ui->stackedWidget->setCurrentIndex(1);
-        ui->cmdPrevious->setText("Previous");
-
-        // REMOVE ONCE ACCEL CAL READY
-           ui->cmdNext->setText("Save");
-        // ------------
-
-        firstmag = true;
-        for(int i=0;i<3;i++)
-            gyrsaveoff[i] = gyroff[i]; // Values to save
-        step = MAGCAL;
-        ui->cmdNext->setDisabled(true);
-        ui->magcalwid->resetDataPoints();
-        break;
-    }*/
     // Magnetometer
     case MAGCAL: {
         ui->stackedWidget->setCurrentIndex(1);
         ui->cmdNext->setText("Save");
-         step = ACCELCAL;
+        ui->cmdNext->setDisabled(true);
+        step = ACCELCAL;
+        trkset->setMagOffset(_hoo[0], _hoo[1], _hoo[2]);
+        trkset->setSoftIronOffsets(_soo);
 
-        // REMOVE ONCE ACCEL CAL READY
-            hide();
-            ui->stackedWidget->setCurrentIndex(0);
-            ui->cmdNext->setText("Next");
-            trkset->setMagOffset(_hoo[0], _hoo[1], _hoo[2]);
-            trkset->setSoftIronOffsets(_soo);
-//            trkset->setGyroOffset(gyrsaveoff[0],gyrsaveoff[1],gyrsaveoff[2]);
-            emit calibrationSave();
-            step = MAGCAL;
-        //----------------------------------------
+        ui->ledXMax->setState(false);
+        ui->ledXMin->setState(false);
+        ui->ledYMax->setState(false);
+        ui->ledYMin->setState(false);
+        ui->ledZMax->setState(false);
+        ui->ledZMin->setState(false);
 
+        ui->ledXMax->setBlink(false);
+        ui->ledXMin->setBlink(false);
+        ui->ledYMax->setBlink(false);
+        ui->ledYMin->setBlink(false);
+        ui->ledZMax->setBlink(true);
+        ui->ledZMin->setBlink(false);
         break;
     }
     // Accelerometer - If clicked here save + close
@@ -73,9 +127,7 @@ void CalibrateBLE::nextClicked()
         hide();
         ui->stackedWidget->setCurrentIndex(0);
         ui->cmdNext->setText("Next");
-        trkset->setMagOffset(_hoo[0], _hoo[1], _hoo[2]);
-        trkset->setSoftIronOffsets(_soo);
-        //trkset->setGyroOffset(gyrsaveoff[0],gyrsaveoff[1],gyrsaveoff[2]);
+        trkset->setAccOffset(_accOff[0], _accOff[1], _accOff[2]);
         emit calibrationSave();
         step = 0;
         break;
@@ -86,12 +138,6 @@ void CalibrateBLE::nextClicked()
 void CalibrateBLE::prevClicked()
 {
     switch (step) {
-    // Gyrometer - If clicked here close
-/*    case GYROCAL: {
-        emit calibrationCancel();
-        hide();
-        break;
-    }*/
     // Magnetometer
     case MAGCAL: {
         ui->cmdPrevious->setText("Cancel");
@@ -129,11 +175,12 @@ void CalibrateBLE::dataUpdate(float variance,
     ui->lblWobble->setText(QString::number(wobble,'g',3) + "%");
     ui->lblGaps->setText(QString::number(gaps,'g',3) + "%");
 
-     // On the magcal step and values all good?
-    if(step == MAGCAL && gaps < 15.0f && variance < 4.5f && wobble < 4.0f && fiterror < 5.0f)
-            ui->cmdNext->setDisabled(false);    
+    // On the magcal step and values all good?
+    if((step == MAGCAL && gaps < 15.0f && variance < 4.5f && wobble < 4.0f && fiterror < 5.0f) ||
+        step == ACCELCAL)
+        ui->cmdNext->setDisabled(false);
     else
-        ui->cmdNext->setDisabled(true);
+        ui->cmdNext->setDisabled(false); // FASDf
 
     // Save the current offsets locally
     for(int i=0;i<3;i++) {
@@ -142,4 +189,36 @@ void CalibrateBLE::dataUpdate(float variance,
         }
         _hoo[i] = hoo[i];
     }
+}
+
+void CalibrateBLE::rawAccelChanged(float x, float y, float z)
+{
+    float beta=0.3f;
+    _currentAccel[0] = ((1.0f - beta) * _currentAccel[0]) + (beta * x);
+    _currentAccel[1] = ((1.0f - beta) * _currentAccel[1]) + (beta * y);
+    _currentAccel[2] = ((1.0f - beta) * _currentAccel[2]) + (beta * z);
+    qDebug() << "ACCEL " << _currentAccel[0] << _currentAccel[1] << _currentAccel[2];
+
+    switch(accStep) {
+    case ZP:
+        ui->lblCurVal->setText(QString::number(_currentAccel[2],'g',3));
+        break;
+    case ZM:
+        ui->lblCurVal->setText(QString::number(_currentAccel[2],'g',3));
+        break;
+    case YP:
+        ui->lblCurVal->setText(QString::number(_currentAccel[1],'g',3));
+        break;
+    case YM:
+        ui->lblCurVal->setText(QString::number(_currentAccel[1],'g',3));
+        break;
+    case XP:
+        ui->lblCurVal->setText(QString::number(_currentAccel[0],'g',3));
+        break;
+    case XM:
+        ui->lblCurVal->setText(QString::number(_currentAccel[0],'g',3));
+        break;
+
+    }
+
 }
