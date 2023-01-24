@@ -40,6 +40,7 @@ private:
     float _accZ[2]; // Accelerometer Z Min & Max
     float _accY[2]; // Accelerometer Z Min & Max
     float _accX[2]; // Accelerometer Z Min & Max
+    float _accFirst;
     float _currentAccel[3];
     bool _accInverted[3];
     bool firstmag=true;    

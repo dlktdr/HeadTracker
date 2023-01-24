@@ -22,6 +22,7 @@ CalibrateBLE::CalibrateBLE(TrackerSettings *ts, QWidget *parent) :
     for(int i=0; i < 3; i++) {
         _accInverted[i] = false;
         _accOff[i] = 0;
+        _currentAccel[i] = 0;
     }
 
     connect(trkset,&TrackerSettings::rawAccelChanged,this, &CalibrateBLE::rawAccelChanged);
@@ -45,12 +46,18 @@ void CalibrateBLE::setNextAccStep()
         if(_currentAccel[2] < 0)
             _accInverted[2] = true;
 
+        _accFirst = _currentAccel[2];
+
         accStep++;
         break;
     case ZM:
         ui->ledZMin->setBlink(false);
         ui->ledZMin->setState(true);
         ui->ledYMax->setBlink(true);
+        _accOff[2] = fabs(_accFirst + _currentAccel[2]) / 2.0f;
+        if(_accInverted[2])
+            _accOff[2] *= -1.0f;
+        qDebug() << "OFFSET " << _accOff[2];
         accStep++;
         break;
     case YP:
@@ -60,6 +67,7 @@ void CalibrateBLE::setNextAccStep()
 
         if(_currentAccel[1] < 0)
             _accInverted[1] = true;
+        _accFirst = _currentAccel[1];
 
         accStep++;
         break;
@@ -67,6 +75,10 @@ void CalibrateBLE::setNextAccStep()
         ui->ledYMin->setBlink(false);
         ui->ledYMin->setState(true);
         ui->ledXMax->setBlink(true);
+        _accOff[1] = fabs(_accFirst + _currentAccel[1]) / 2.0f;
+        if(_accInverted[1])
+            _accOff[1] *= -1.0f;
+        qDebug() << "OFFSET " << _accOff[1];
         accStep++;
         break;
     case XP:
@@ -76,6 +88,7 @@ void CalibrateBLE::setNextAccStep()
 
         if(_currentAccel[0] < 0)
             _accInverted[0] = true;
+        _accFirst = _currentAccel[0];
 
         accStep++;
         break;
@@ -83,6 +96,10 @@ void CalibrateBLE::setNextAccStep()
         ui->ledXMin->setBlink(false);
         ui->ledXMin->setState(true);
         ui->cmdNext->setDisabled(false);
+        _accOff[0] = fabs(_accFirst + _currentAccel[0]) / 2.0f;
+        if(_accInverted[0])
+            _accOff[0] *= -1.0f;
+        qDebug() << "OFFSET " << _accOff[0];
         accStep=0;
         // COMPLETE
         break;
@@ -201,22 +218,22 @@ void CalibrateBLE::rawAccelChanged(float x, float y, float z)
 
     switch(accStep) {
     case ZP:
-        ui->lblCurVal->setText(QString::number(_currentAccel[2],'g',3));
+        ui->lblCurVal->setText(QString::number(_currentAccel[2],'f',2));
         break;
     case ZM:
-        ui->lblCurVal->setText(QString::number(_currentAccel[2],'g',3));
+        ui->lblCurVal->setText(QString::number(_currentAccel[2],'f',2));
         break;
     case YP:
-        ui->lblCurVal->setText(QString::number(_currentAccel[1],'g',3));
+        ui->lblCurVal->setText(QString::number(_currentAccel[1],'f',2));
         break;
     case YM:
-        ui->lblCurVal->setText(QString::number(_currentAccel[1],'g',3));
+        ui->lblCurVal->setText(QString::number(_currentAccel[1],'f',2));
         break;
     case XP:
-        ui->lblCurVal->setText(QString::number(_currentAccel[0],'g',3));
+        ui->lblCurVal->setText(QString::number(_currentAccel[0],'f',2));
         break;
     case XM:
-        ui->lblCurVal->setText(QString::number(_currentAccel[0],'g',3));
+        ui->lblCurVal->setText(QString::number(_currentAccel[0],'f',2));
         break;
 
     }
