@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - master
-      - v2.2x
     paths:
       - '.github/workflows/build-gui.yml'
       - 'gui/src/**'
@@ -22,19 +21,19 @@ jobs:
   build:
     runs-on: windows-latest
 
-    steps:  
+    steps:
       - name: Check out repository code
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-        
+
       - name: Cache Qt
         id: cache-qt
         uses: actions/cache@v1
         with:
           path: qt/
           key: ${{ runner.os }}-QtCache
-    
+
       - name: Install Qt
         uses: jurplel/install-qt-action@v3
         with:
@@ -46,14 +45,14 @@ jobs:
           dir: '${{ github.workspace }}/qt'
           install-deps: 'true'
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
-          
+
       - name: Set up MinGW
         uses: gcmcnutt/setup-mingw@v3
         with:
             platform: x64
-               
+
       - name: Build
-        working-directory: ${{github.workspace}}       
+        working-directory: ${{github.workspace}}
         run: |
           cd gui/src
           dir
@@ -66,7 +65,7 @@ jobs:
           limit-access-to-actor: true
         if: ${{ failure() }}
         timeout-minutes: 15
-    
+
       - name: WinDeployQT
         working-directory: ${{github.workspace}}
         run: |
@@ -76,7 +75,7 @@ jobs:
           # cp gui/src/css/Background.svg output/
           cd output
           curl -L -o bossac.exe https://github.com/dlktdr/HeadTracker/raw/master/gui/bin/bossac.exe
-          windeployqt HeadTracker.exe            
+          windeployqt HeadTracker.exe
 
       - name: Archive production artifacts
         uses: actions/upload-artifact@v2

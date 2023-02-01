@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - master
-      - v2.2x
     paths:
       - '.github/workflows/build-firmware.yml'
       - 'firmware/src/**'
@@ -65,11 +64,11 @@ jobs:
         run: |
           cd /src/firmware/src
           pio run -e Head_Tracker-DTQSys
-          
+
       - name: Build Firmware Arduino Nano 33 BLE Sense Rev 2
         run: |
           cd /src/firmware/src
-          pio run -e Head_Tracker-Nano33_BLE_Sense2          
+          pio run -e Head_Tracker-Nano33_BLE_Sense2
 
       # Runs a set of commands using the runners shell
       - name: Package Firmware

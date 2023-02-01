@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - master
-      - v2.2x
     paths:
       - '.github/workflows/build-gui_linux.yml'
       - 'gui/src/**'
