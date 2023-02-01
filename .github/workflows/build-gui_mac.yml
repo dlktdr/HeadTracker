@@ -97,17 +97,17 @@ jobs:
           # mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
           # cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
 
-# https://localazy.com/blog/how-to-automatically-sign-macos-apps-using-github-actions  
-# https://successfulsoftware.net/2018/11/16/how-to-notarize-your-software-on-macos/        
+# https://localazy.com/blog/how-to-automatically-sign-macos-apps-using-github-actions
+# https://successfulsoftware.net/2018/11/16/how-to-notarize-your-software-on-macos/
 
       - name: Notarize executable
         working-directory: ${{github.workspace}}/output
-        env: 
-          APPLE_DEV_IDENTITY: ${{ secrets.APPLE_DEV_IDENTITY }} 
+        env:
+          APPLE_DEV_IDENTITY: ${{ secrets.APPLE_DEV_IDENTITY }}
           APPLE_DEV_USER: ${{ secrets.APPLE_DEV_USER }}
           APPLE_DEV_PASS: ${{ secrets.APPLE_DEV_PASS }}
           ENV_APP_NAME: HeadTracker
-          ENV_BUNDLE_ID: org.accelero.headtracker 
+          ENV_BUNDLE_ID: net.headtracker.gui
 
         run: |
           macdeployqt ${ENV_APP_NAME}.app -dmg -sign-for-notarization="${APPLE_DEV_IDENTITY}"
