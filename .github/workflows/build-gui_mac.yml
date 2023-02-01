@@ -2,6 +2,8 @@ name: MacOS GUI
 
 on:
   push:
+    tags:
+      - '*'
     branches:
       - master
       - v2.2x
@@ -29,9 +31,10 @@ jobs:
           xcode-version: '12.5.1'
 
       - name: Check out the repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           submodules: recursive
+          fetch-depth: 0
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v3
@@ -41,6 +44,12 @@ jobs:
           modules: 'qtserialport'
           setup-python: false
 
+      - name: Generate Icons
+        working-directory: ${{github.workspace}}
+        run: |
+          cd gui/src/images
+          bash -x svg2icns.bash IconFile.png
+
       - name: Build
         working-directory: ${{github.workspace}}
         run: |
@@ -49,66 +58,94 @@ jobs:
           qmake HeadTracker.pro
           make
 
-#      - name: List Files
-#        working-directory: ${{github.workspace}}
-#        run: |
-#          ls -la gui/src/HeadTracker.app/
-#          ls -la gui/src/HeadTracker.app/Contents
-#          ls -la gui/src/HeadTracker.app/Contents/MacOs
-#          lipo -detailed_info gui/src/HeadTracker.app/Contents/MacOS/HeadTracker
-
-      - name: MacDeployQT
+      - name: prepare output
         working-directory: ${{github.workspace}}
         run: |
           mkdir output
           cp -R gui/src/HeadTracker.app output/HeadTracker.app
-          cp gui/src/css/stylesheet.css output/HeadTracker.app/Contents/MacOs
-          cp gui/src/css/Background.svg output/HeadTracker.app/Contents/MacOs
-          cd output
-          macdeployqt HeadTracker.app -verbose=2
+          # cp gui/src/css/stylesheet.css output/HeadTracker.app/Contents/MacOs
+          # cp gui/src/css/Background.svg output/HeadTracker.app/Contents/MacOs
+
+# https://docs.github.com/en/enterprise-server@3.4/actions/deployment/deploying-xcode-applications/installing-an-apple-certificate-on-macos-runners-for-xcode-development
+
+      - name: Install the Apple certificate and provisioning profile
+        env:
+          BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
+          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+          BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.BUILD_PROVISION_PROFILE_BASE64 }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: |
+          # create variables
+          CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+          # PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+
+          # import certificate and provisioning profile from secrets
+          echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode --output $CERTIFICATE_PATH
+          # echo -n "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode --output $PP_PATH
+
+          # create temporary keychain
+          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+
+          # import certificate to keychain
+          security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+          security list-keychain -d user -s $KEYCHAIN_PATH
+
+          # apply provisioning profile
+          # mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          # cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
 
 # https://localazy.com/blog/how-to-automatically-sign-macos-apps-using-github-actions  
 # https://successfulsoftware.net/2018/11/16/how-to-notarize-your-software-on-macos/        
 
-      - name: Codesign executable
+      - name: Notarize executable
         working-directory: ${{github.workspace}}/output
         env: 
-          APPLE_DEV_IDENTITY: ${{ secrets.APPLE_DEV_IDENTITY}} 
-          APPLE_DEV_USER: ${{ secrets.DEV_USER }}
-          APPLE_DEV_PASS: ${{ secrets.DEV_PASS }}
+          APPLE_DEV_IDENTITY: ${{ secrets.APPLE_DEV_IDENTITY }} 
+          APPLE_DEV_USER: ${{ secrets.APPLE_DEV_USER }}
+          APPLE_DEV_PASS: ${{ secrets.APPLE_DEV_PASS }}
+          ENV_APP_NAME: HeadTracker
+          ENV_BUNDLE_ID: org.accelero.headtracker 
+
         run: |
-          macdeployqt HeadTracker.app -dmg -sign-for-notarization="${APPLE_DEV_IDENTITY}"
-          mv HeadTracker.dmg HeadTracker-${VERSION}.dmg
+          macdeployqt ${ENV_APP_NAME}.app -dmg -sign-for-notarization="${APPLE_DEV_IDENTITY}"
+          mkdir dmg
 
-          # echo "--> Start Notarization process"
-          # response=$(xcrun altool -t osx -f HeadTracker-${VERSION}.dmg --primary-bundle-id org.accelero.headtracker --notarize-app -u ${APPLE_DEV_USER} -p ${APPLE_DEV_PASS})
-          # requestUUID=$(echo "${response}" | tr ' ' '\n' | tail -1)
+          # take the latest tag as version
+          VERSION=$(git describe --tags --abbrev=0)
+          mv ${ENV_APP_NAME}.dmg dmg/${ENV_APP_NAME}-${VERSION}.dmg
 
-          # while true; do
-          #   echo "--> Checking notarization status"
+          echo "--> Start Notarization process"
+          response=$(xcrun altool -t osx -f dmg/${ENV_APP_NAME}-${VERSION}.dmg --primary-bundle-id ${ENV_BUNDLE_ID} --notarize-app -u ${APPLE_DEV_USER} -p @env:APPLE_DEV_PASS)
+          requestUUID=$(echo "${response}" | tr ' ' '\n' | tail -1)
 
-          #   statusCheckResponse=$(xcrun altool --notarization-info ${requestUUID} -u ${APPLE_DEV_USER} -p ${APPLE_DEV_PASS})
+          while true; do
+            echo "--> Checking notarization status req[${requestUUID}]"
 
-          #   isSuccess=$(echo "${statusCheckResponse}" | grep "success")
-          #   isFailure=$(echo "${statusCheckResponse}" | grep "invalid")
+            statusCheckResponse=$(xcrun altool --notarization-info ${requestUUID} -u ${APPLE_DEV_USER} -p @env:APPLE_DEV_PASS)
 
-          #   if [[ "${isSuccess}" != "" ]]; then
-          #       echo "Notarization done!"
-          #       xcrun stapler staple -v HeadTracker-${VERSION}.dmg
-          #       echo "Stapler done!"
-          #       break
-          #   fi
-          #   if [[ "${isFailure}" != "" ]]; then
-          #       echo "Notarization failed"
-          #       return 1
-          #   fi
-          #   echo "Notarization not finished yet, sleep 2m then check again..."
-          #   sleep 120
-          # done
+            isSuccess=$(echo "${statusCheckResponse}" | grep "success" | cat)
+            isFailure=$(echo "${statusCheckResponse}" | grep "invalid" | cat)
+
+            if [[ "${isSuccess}" != "" ]]; then
+                echo "Notarization done!"
+                xcrun stapler staple -v dmg/${ENV_APP_NAME}-${VERSION}.dmg
+                echo "Stapler done!"
+                break
+            fi
+            if [[ "${isFailure}" != "" ]]; then
+                echo "Notarization failed"
+                exit 1
+            fi
+            echo "Notarization not finished yet, sleep 2m then check again..."
+            sleep 120
+          done
 
       - name: Archive production artifacts
         uses: actions/upload-artifact@v2
         with:
           name: HeadTracker_MacOs
-          path: ${{github.workspace}}/output
+          path: ${{github.workspace}}/output/dmg
           retention-days: 60

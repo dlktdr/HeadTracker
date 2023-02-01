@@ -8,7 +8,7 @@ int main(int argc, char *argv[])
     QApplication::setAttribute(Qt::AA_UseDesktopOpenGL);
     QApplication a(argc, argv);
 
-    QString cssFileName = "stylesheet.css";
+    QString cssFileName = ":/css/stylesheet.css";
 
     // Force Current Working Dir to Same location as the Executable
     //  So we can find stylesheet and images easily on all platforms

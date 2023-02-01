@@ -245,7 +245,7 @@ MainWindow::MainWindow(QWidget *parent)
     requestParamsTimer.setSingleShot(true);
 
     // Set GIT SHA in bottom right of StatusBar
-    ui->statusbar->addPermanentWidget(new QLabel(GIT_CURRENT_SHA));
+    ui->statusbar->addPermanentWidget(new QLabel(GIT_CURRENT_SHA_STRING));
 
     // Called to initalize GUI state to disconnected
     serialDisconnect();

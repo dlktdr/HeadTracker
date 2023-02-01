@@ -15,6 +15,9 @@
         <file>images/send.svg</file>
         <file>images/Pinout.png</file>
         <file>images/center.svg</file>
+        <file>images/Background.svg</file>
     </qresource>
-    <qresource prefix="/"/>
+    <qresource prefix="/">
+        <file>css/stylesheet.css</file>
+    </qresource>
 </RCC>
