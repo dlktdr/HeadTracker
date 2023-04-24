@@ -30,6 +30,8 @@ const QByteArray BLE33HEADER_BIN_ZEPHER("\x00\x20",2);
 const QByteArray BLE33HEADER_HEX(":020000021000EC",15);
 const QByteArray NANOHEADER_HEX(":100000000C94",13);
 
+constexpr int REFRESH_DELAY = 10; // 10 * 200ms = 2sec
+
 namespace Ui {
 class firmwarewizard;
 }
@@ -87,6 +89,8 @@ private:
     QTimer lastPortTmr;
     QString lastFoundPort;
 
+    int refreshDelay=0;
+
     void startPortDiscovery(const QString &filename);
     void startProgramming();
     void parseFirmwareFile(QString ff);
@@ -122,6 +126,7 @@ private slots:
 
 signals:
     void comPortConnected(QString);
+    void programmingComplete();
 
 protected:
     void showEvent(QShowEvent *event);

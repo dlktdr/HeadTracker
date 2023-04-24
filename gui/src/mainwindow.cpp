@@ -1102,6 +1102,7 @@ void MainWindow::uploadFirmwareWizard()
 {
     if(firmwareWizard == nullptr) {
         firmwareWizard = new FirmwareWizard(this);
+        connect(firmwareWizard, FirmwareWizard::programmingComplete, this, &MainWindow::findSerialPorts);
         firmwareWizard->setWindowFlags(Qt::Window);
     }
     firmwareWizard->show();
