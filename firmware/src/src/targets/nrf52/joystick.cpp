@@ -13,82 +13,59 @@
 #include "io.h"
 
 static const struct device *hdev;
-
-#define JOYSTICK_BUTTONS
-#define JOYSTICK_BUTTON_HIGH 1750
-#define JOYSTICK_BUTTON_LOW 1250
-
-struct {
-#ifdef JOYSTICK_BUTTONS
-  uint8_t but[2];
-#endif
-  uint16_t channels[8];
-} report;
+#define MOUSE_BTN_REPORT_POS	0
+#define MOUSE_X_REPORT_POS	1
+#define MOUSE_Y_REPORT_POS	2
+uint8_t report[4] = { 0x00 };
 
 void set_JoystickChannels(uint16_t chans[16])
 {
-  memcpy(report.channels, chans, sizeof(report.channels));
+  int32_t xvalue = chans[0] - 1500; // Fixed to Channel 1, shift value to center
+  int32_t yvalue = chans[1] - 1500; // Fixed to Channel 2
 
-#ifdef JOYSTICK_BUTTONS
-  report.but[0] = 0;
-  report.but[1] = 0;
-#endif
-
-  for (int i = 0; i < 8; i++) {
-    if (report.channels[i] == 0)  // If disabled, center it
-      report.channels[i] = 1500;
-
-#ifdef JOYSTICK_BUTTONS
-    if (report.channels[i] >= JOYSTICK_BUTTON_HIGH) {
-      report.but[0] |= 1 << (i * 2);
-      report.but[1] |= 1 << ((i - 4) * 2);
-    }
-
-    if (report.channels[i] <= JOYSTICK_BUTTON_LOW) {
-      report.but[0] |= 1 << ((i * 2) + 1);
-      report.but[1] |= 1 << (((i - 4) * 2) + 1);
-    }
-#endif
-
-    report.channels[i] -= 988;  // Shift from center so it's 0-1024
-  }
+  report[MOUSE_BTN_REPORT_POS] = 0;
+  report[MOUSE_X_REPORT_POS] = xvalue / 4; // Mouse is +/-127, HT range is 1024. so divide by 4.
+  report[MOUSE_Y_REPORT_POS] = yvalue / 4;
 
 #if defined(CONFIG_USB_DEVICE_HID)
-  hid_int_ep_write(hdev, (uint8_t *)&report, sizeof(report), NULL);
+  hid_int_ep_write(hdev, report, sizeof(report), NULL);
 #endif
 }
 
-static const uint8_t hid_report_desc[] = {
-    0x05, 0x01,  //     USAGE_PAGE (Generic Desktop)
-    0x09, 0x05,  //     USAGE (Game Pad)
-    0xa1, 0x01,  //     COLLECTION (Application)
-    0xa1, 0x00,  //       COLLECTION (Physical)
-#ifdef JOYSTICK_BUTTONS
-    0x05, 0x09,  //         USAGE_PAGE (Button)
-    0x19, 0x01,  //         USAGE_MINIMUM (Button 1)
-    0x29, 0x10,  //         USAGE_MAXIMUM (Button 8)
-    0x15, 0x00,  //         LOGICAL_MINIMUM (0)
-    0x25, 0x01,  //         LOGICAL_MAXIMUM (1)
-    0x95, 0x10,  //         REPORT_COUNT (8)
-    0x75, 0x01,  //         REPORT_SIZE (1)
-    0x81, 0x02,  //         INPUT (Data,Var,Abs)
-#endif
-    0x05, 0x01,        //         USAGE_PAGE (Generic Desktop)
-    0x09, 0x30,        //         USAGE (X)
-    0x09, 0x31,        //         USAGE (Y)
-    0x09, 0x32,        //         USAGE (Z)
-    0x09, 0x33,        //         USAGE (Rx)
-    0x09, 0x34,        //         USAGE (Ry)
-    0x09, 0x35,        //         USAGE (Rz)
-    0x09, 0x36,        //         USAGE (Slider)
-    0x09, 0x36,        //         USAGE (Slider)
-    0x16, 0x00, 0x00,  //         LOGICAL_MINIMUM (0)
-    0x26, 0xFF, 0x03,  //         LOGICAL_MAXIMUM (1024)
-    0x75, 0x10,        //         REPORT_SIZE (16)
-    0x95, 0x08,        //         REPORT_COUNT (8)
-    0x81, 0x02,        //         INPUT (Data,Var,Abs)
-    0xc0,              //       END_COLLECTION
-    0xc0               //     END_COLLECTION
+static const uint8_t hid_report_desc[] = {				\
+	HID_USAGE_PAGE(HID_USAGE_GEN_DESKTOP),			\
+	HID_USAGE(HID_USAGE_GEN_DESKTOP_MOUSE),			\
+	HID_COLLECTION(HID_COLLECTION_APPLICATION),		\
+		HID_USAGE(HID_USAGE_GEN_DESKTOP_POINTER),	\
+		HID_COLLECTION(HID_COLLECTION_PHYSICAL),	\
+			/* Bits used for button signalling */	\
+			HID_USAGE_PAGE(HID_USAGE_GEN_BUTTON),	\
+			HID_USAGE_MIN8(1),			\
+			HID_USAGE_MAX8(2),			\
+			HID_LOGICAL_MIN8(0),			\
+			HID_LOGICAL_MAX8(1),			\
+			HID_REPORT_SIZE(1),			\
+			HID_REPORT_COUNT(2),			\
+			/* HID_INPUT (Data,Var,Abs) */		\
+			HID_INPUT(0x02),			\
+			/* Unused bits */			\
+			HID_REPORT_SIZE(8 - 2),		\
+			HID_REPORT_COUNT(1),			\
+			/* HID_INPUT (Cnst,Ary,Abs) */		\
+			HID_INPUT(1),				\
+			/* X and Y axis, scroll */		\
+			HID_USAGE_PAGE(HID_USAGE_GEN_DESKTOP),	\
+			HID_USAGE(HID_USAGE_GEN_DESKTOP_X),	\
+			HID_USAGE(HID_USAGE_GEN_DESKTOP_Y),	\
+			HID_USAGE(HID_USAGE_GEN_DESKTOP_WHEEL),	\
+			HID_LOGICAL_MIN8((uint8_t)-127),			\
+			HID_LOGICAL_MAX8(127),			\
+			HID_REPORT_SIZE(8),			\
+			HID_REPORT_COUNT(3),			\
+			/* HID_INPUT (Data,Var,Rel) */		\
+			HID_INPUT(0x06),			\
+		HID_END_COLLECTION,				\
+	HID_END_COLLECTION,					\
 };
 
 void joystick_init(void)
