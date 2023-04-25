@@ -13,8 +13,8 @@
 
 constexpr char accel_cal_images[6][35] = {":/Icons/images/components_up.png",
                                         ":/Icons/images/components_down.png",
-                                        ":/Icons/images/edge_left.png",
                                         ":/Icons/images/edge_right.png",
+                                        ":/Icons/images/edge_left.png",
                                         ":/Icons/images/USB_up.png",
                                         ":/Icons/images/USB_down.png"};
 
@@ -52,7 +52,7 @@ private:
     bool _accInverted[3];
     bool firstmag=true;    
     enum STEP {MAGCAL=0,ACCELCAL};
-    enum ACCSTEP {ZP,ZM,YP,YM,XP,XM};
+    enum ACCSTEP {ZP,ZM,YP,YM,XP,XM,ACCCOMPLETE};
     int accStep;
 
 private slots:
@@ -66,7 +66,7 @@ private slots:
                     float soo[3][3]);
     void rawAccelChanged(float x, float y, float z);
     void setNextAccStep();
-    void setPrevAccStep();
+    void restartCal();
 
 signals:
     void calibrationSave();

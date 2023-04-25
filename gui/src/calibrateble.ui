@@ -275,7 +275,7 @@
        <item>
         <widget class="QLabel" name="label">
          <property name="text">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This step will calibrate the accelerometer. Follow the steps and click record at each step. Hold the board in the requested position for 3 seconds before clicking next. Try to keep the board as straigt as possible during these steps, use a box or square if needed.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This step will calibrate the accelerometer. Hold the board in the requested position for 3 seconds then click record. Try to keep the board as straigt as possible during these steps, use a box or square if needed.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
@@ -298,6 +298,9 @@
            <width>350</width>
            <height>200</height>
           </size>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">font: 16pt &quot;Segoe UI&quot;;</string>
          </property>
          <property name="text">
           <string/>
@@ -327,6 +330,14 @@
          </item>
          <item>
           <widget class="QLabel" name="lblCurVal">
+           <property name="font">
+            <font>
+             <bold>true</bold>
+            </font>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">background-color: #d9d9d9</string>
+           </property>
            <property name="frameShape">
             <enum>QFrame::Box</enum>
            </property>
@@ -335,6 +346,9 @@
            </property>
            <property name="text">
             <string>TextLabel</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -402,7 +416,7 @@
            <item>
             <widget class="QLabel" name="label_4">
              <property name="text">
-              <string>Front</string>
+              <string>Right Edge</string>
              </property>
             </widget>
            </item>
@@ -501,7 +515,7 @@
            <item>
             <widget class="QLabel" name="label_5">
              <property name="text">
-              <string>Back</string>
+              <string>Left Edge</string>
              </property>
             </widget>
            </item>
@@ -545,9 +559,9 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_8">
          <item>
-          <widget class="QPushButton" name="cmdAccPrevious">
+          <widget class="QPushButton" name="cmdRestart">
            <property name="text">
-            <string>Previous</string>
+            <string>Restart</string>
            </property>
           </widget>
          </item>
@@ -567,7 +581,7 @@
          <item>
           <widget class="QPushButton" name="cmdAccNext">
            <property name="text">
-            <string>Next</string>
+            <string>Record</string>
            </property>
           </widget>
          </item>
@@ -636,7 +650,7 @@
         </font>
        </property>
        <property name="text">
-        <string>&amp;Save</string>
+        <string>Next</string>
        </property>
       </widget>
      </item>

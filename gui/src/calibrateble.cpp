@@ -27,7 +27,7 @@ CalibrateBLE::CalibrateBLE(TrackerSettings *ts, QWidget *parent) :
 
     connect(trkset,&TrackerSettings::rawAccelChanged,this, &CalibrateBLE::rawAccelChanged);
     connect(ui->cmdAccNext, &QPushButton::clicked, this, &CalibrateBLE::setNextAccStep);
-    connect(ui->cmdAccPrevious, &QPushButton::clicked, this, &CalibrateBLE::setPrevAccStep);
+    connect(ui->cmdRestart, &QPushButton::clicked, this, &CalibrateBLE::restartCal);
 }
 
 CalibrateBLE::~CalibrateBLE()
@@ -99,16 +99,35 @@ void CalibrateBLE::setNextAccStep()
         if(_accInverted[0])
             _accOff[0] *= -1.0f;
         qDebug() << "OFFSET " << _accOff[0];
-        accStep=0;
+        accStep++;
         // COMPLETE
         break;
     }
     ui->accelImage->setPixmap(QPixmap(accel_cal_images[accStep]));
+    if(accStep == ACCCOMPLETE) {
+        ui->accelImage->setPixmap(QPixmap());
+        ui->accelImage->setText(tr("Accelerometer Calibration Complete"));
+    }
 }
 
-void CalibrateBLE::setPrevAccStep()
+void CalibrateBLE::restartCal()
 {
-    // CHANGE ME TO START OVER
+    ui->ledXMax->setState(false);
+    ui->ledXMin->setState(false);
+    ui->ledYMax->setState(false);
+    ui->ledYMin->setState(false);
+    ui->ledZMax->setState(false);
+    ui->ledZMin->setState(false);
+
+    ui->ledXMax->setBlink(false);
+    ui->ledXMin->setBlink(false);
+    ui->ledYMax->setBlink(false);
+    ui->ledYMin->setBlink(false);
+    ui->ledZMax->setBlink(true);
+    ui->ledZMin->setBlink(false);
+    accStep = 0;
+    ui->accelImage->setPixmap(QPixmap(accel_cal_images[accStep]));
+    ui->accelImage->setText("");
 }
 
 void CalibrateBLE::nextClicked()
@@ -119,23 +138,11 @@ void CalibrateBLE::nextClicked()
         ui->stackedWidget->setCurrentIndex(1);
         ui->cmdNext->setText("Save");
         ui->cmdNext->setDisabled(true);
+        ui->cmdPrevious->setText("Back");
         step = ACCELCAL;
         trkset->setMagOffset(_hoo[0], _hoo[1], _hoo[2]);
         trkset->setSoftIronOffsets(_soo);
-
-        ui->ledXMax->setState(false);
-        ui->ledXMin->setState(false);
-        ui->ledYMax->setState(false);
-        ui->ledYMin->setState(false);
-        ui->ledZMax->setState(false);
-        ui->ledZMin->setState(false);
-
-        ui->ledXMax->setBlink(false);
-        ui->ledXMin->setBlink(false);
-        ui->ledYMax->setBlink(false);
-        ui->ledYMin->setBlink(false);
-        ui->ledZMax->setBlink(true);
-        ui->ledZMin->setBlink(false);
+        restartCal();
         break;
     }
     // Accelerometer - If clicked here save + close
@@ -144,6 +151,7 @@ void CalibrateBLE::nextClicked()
         hide();
         ui->stackedWidget->setCurrentIndex(0);
         ui->cmdNext->setText("Next");
+        ui->cmdPrevious->setText("Cancel");
         trkset->setAccOffset(_accOff[0], _accOff[1], _accOff[2]);
         emit calibrationSave();
         step = 0;
@@ -157,8 +165,7 @@ void CalibrateBLE::prevClicked()
     switch (step) {
     // Magnetometer
     case MAGCAL: {
-        ui->cmdPrevious->setText("Cancel");
-        ui->cmdNext->setText("Complete");
+
         ui->cmdNext->setDisabled(false);
         ui->stackedWidget->setCurrentIndex(0);
         // Cancel Clicked, start over
@@ -170,14 +177,14 @@ void CalibrateBLE::prevClicked()
     }
     // Accelerometer
     case ACCELCAL: {
-        ui->stackedWidget->setCurrentIndex(1);
-        ui->cmdNext->setText("Next");
+        ui->stackedWidget->setCurrentIndex(0);
         step = MAGCAL;
         firstmag = true;
         break;
     }
     }
-
+    ui->cmdPrevious->setText("Cancel");
+    ui->cmdNext->setText("Next");
 }
 
 void CalibrateBLE::dataUpdate(float variance,
@@ -197,7 +204,7 @@ void CalibrateBLE::dataUpdate(float variance,
         step == ACCELCAL)
         ui->cmdNext->setDisabled(false);
     else
-        ui->cmdNext->setDisabled(false); // FASDf
+        ui->cmdNext->setDisabled(true);
 
     // Save the current offsets locally
     for(int i=0;i<3;i++) {
