@@ -46,8 +46,7 @@ void CalibrateBLE::setNextAccStep()
         if(_currentAccel[2] < 0)
             _accInverted[2] = true;
 
-        _accFirst = _currentAccel[2];
-
+        _accFirst = _currentAccel[2];        
         accStep++;
         break;
     case ZM:
@@ -104,6 +103,7 @@ void CalibrateBLE::setNextAccStep()
         // COMPLETE
         break;
     }
+    ui->accelImage->setPixmap(QPixmap(accel_cal_images[accStep]));
 }
 
 void CalibrateBLE::setPrevAccStep()

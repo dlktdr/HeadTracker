@@ -11,6 +11,13 @@
 #define MIN(x,y) x < y ? x : y
 #define MAX(x,y) x > y ? x : y
 
+constexpr char accel_cal_images[6][35] = {":/Icons/images/components_up.png",
+                                        ":/Icons/images/components_down.png",
+                                        ":/Icons/images/edge_left.png",
+                                        ":/Icons/images/edge_right.png",
+                                        ":/Icons/images/USB_up.png",
+                                        ":/Icons/images/USB_down.png"};
+
 namespace Ui {
 class CalibrateBLE;
 }

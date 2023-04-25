@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>423</width>
-    <height>513</height>
+    <width>416</width>
+    <height>543</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -275,7 +275,7 @@
        <item>
         <widget class="QLabel" name="label">
          <property name="text">
-          <string>This step will calibrate the accelerometer. Follow the steps and click record at each step. If you need to start over click restart. Hold the board in the requested position for 3 seconds before clicking next.</string>
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This step will calibrate the accelerometer. Follow the steps and click record at each step. Hold the board in the requested position for 3 seconds before clicking next. Try to keep the board as straigt as possible during these steps, use a box or square if needed.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
@@ -286,25 +286,28 @@
         </widget>
        </item>
        <item>
-        <widget class="QStackedWidget" name="stkPhoto">
-         <property name="currentIndex">
-          <number>0</number>
+        <widget class="QLabel" name="accelImage">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
          </property>
-         <widget class="QWidget" name="page">
-          <layout class="QVBoxLayout" name="verticalLayout_3">
-           <item>
-            <widget class="QLabel" name="label_9">
-             <property name="text">
-              <string>Generic board photos here</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </widget>
-         <widget class="QWidget" name="page_4"/>
+         <property name="minimumSize">
+          <size>
+           <width>350</width>
+           <height>200</height>
+          </size>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="pixmap">
+          <pixmap resource="Resources.qrc">:/Icons/images/components_up.png</pixmap>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
         </widget>
        </item>
        <item>
@@ -654,6 +657,8 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="Resources.qrc"/>
+ </resources>
  <connections/>
 </ui>
