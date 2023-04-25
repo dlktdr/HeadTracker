@@ -561,9 +561,10 @@ void FirmwareWizard::programmerFinished(int exitCode, QProcess::ExitStatus exitS
 
 void FirmwareWizard::discoverTimeout()
 {
-    if(programmerState == PRG_WAIT4PORT)
+    if(programmerState == PRG_WAIT4PORT) {
         discoverPorts();
-    else if (programmerState == PRG_WAIT4NEWPORT) {
+        refreshDelay = 0;
+    } else if (programmerState == PRG_WAIT4NEWPORT) {
         waitingprogram++;
         if(waitingprogram > 50) {
             // Waited too long, try the orig port, maybe it's already in bootloader mode?
@@ -574,6 +575,14 @@ void FirmwareWizard::discoverTimeout()
         }
         else
             discoverPorts();
+    } else if (programmerState == PRG_COMPLETE) {
+        if(refreshDelay == REFRESH_DELAY) {
+            emit programmingComplete();
+            refreshDelay++;
+        } else if (refreshDelay < REFRESH_DELAY) {
+            refreshDelay++;
+        }
+
     }
 }
 

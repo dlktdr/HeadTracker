@@ -21,6 +21,9 @@
         <file>images/edge_right.png</file>
         <file>images/USB_down.png</file>
         <file>images/USB_up.png</file>
+        <file>images/Background.svg</file>
     </qresource>
-    <qresource prefix="/"/>
+    <qresource prefix="/">
+        <file>css/stylesheet.css</file>
+    </qresource>
 </RCC>

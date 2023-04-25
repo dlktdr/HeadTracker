@@ -240,7 +240,7 @@ MainWindow::MainWindow(QWidget *parent)
     requestParamsTimer.setSingleShot(true);
 
     // Set GIT SHA in bottom right of StatusBar
-    ui->statusbar->addPermanentWidget(new QLabel(GIT_CURRENT_SHA));
+    ui->statusbar->addPermanentWidget(new QLabel(GIT_CURRENT_SHA_STRING));
 
     // Called to initalize GUI state to disconnected
     serialDisconnect();
@@ -1096,6 +1096,7 @@ void MainWindow::uploadFirmwareWizard()
 {
     if(firmwareWizard == nullptr) {
         firmwareWizard = new FirmwareWizard(this);
+        connect(firmwareWizard, &FirmwareWizard::programmingComplete, this, &MainWindow::findSerialPorts);
         firmwareWizard->setWindowFlags(Qt::Window);
     }
     firmwareWizard->show();
