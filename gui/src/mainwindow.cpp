@@ -83,88 +83,88 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Board Connections, connects all boards signals to same end points
     foreach(BoardType *brd, boards) {
-        connect(brd,SIGNAL(paramSendStart()), this, SLOT(paramSendStart()));
-        connect(brd,SIGNAL(paramSendComplete()), this, SLOT(paramSendComplete()));
-        connect(brd,SIGNAL(paramSendFailure(int)), this, SLOT(paramSendFailure(int)));
-        connect(brd,SIGNAL(paramReceiveStart()), this, SLOT(paramReceiveStart()));
-        connect(brd,SIGNAL(paramReceiveComplete()), this, SLOT(paramReceiveComplete()));
-        connect(brd,SIGNAL(paramReceiveFailure(int)), this, SLOT(paramReceiveFailure(int)));
-        connect(brd,SIGNAL(calibrationSuccess()), this, SLOT(calibrationSuccess()));
-        connect(brd,SIGNAL(calibrationFailure()), this, SLOT(calibrationFailure()));
-        connect(brd,SIGNAL(serialTxReady()), this, SLOT(serialTxReady()));
-        connect(brd,SIGNAL(addToLog(QString,int)),this,SLOT(addToLog(QString,int)));
-        connect(brd,SIGNAL(needsCalibration()),this,SLOT(needsCalibration()));
-        connect(brd,SIGNAL(boardDiscovered(BoardType*)),this,SLOT(boardDiscovered(BoardType*)));
-        connect(brd,SIGNAL(statusMessage(QString,int)),this,SLOT(statusMessage(QString,int)));
+        connect(brd, &BoardType::paramSendStart, this,  &MainWindow::paramSendStart);
+        connect(brd, &BoardType::paramSendComplete, this,  &MainWindow::paramSendComplete);
+        connect(brd, &BoardType::paramSendFailure, this,  &MainWindow::paramSendFailure);
+        connect(brd, &BoardType::paramReceiveStart, this,  &MainWindow::paramReceiveStart);
+        connect(brd, &BoardType::paramReceiveComplete, this,  &MainWindow::paramReceiveComplete);
+        connect(brd, &BoardType::paramReceiveFailure, this,  &MainWindow::paramReceiveFailure);
+        connect(brd, &BoardType::calibrationSuccess, this,  &MainWindow::calibrationSuccess);
+        connect(brd, &BoardType::calibrationFailure, this,  &MainWindow::calibrationFailure);
+        connect(brd, &BoardType::serialTxReady, this,  &MainWindow::serialTxReady);
+        connect(brd, &BoardType::addToLog,this, &MainWindow::addToLog);
+        connect(brd, &BoardType::needsCalibration,this, &MainWindow::needsCalibration);
+        connect(brd, &BoardType::boardDiscovered,this, &MainWindow::boardDiscovered);
+        connect(brd, &BoardType::statusMessage,this, &MainWindow::statusMessage);
     }
 
     // Serial data ready
-    connect(serialcon,SIGNAL(readyRead()),this,SLOT(serialReadReady()));
-    connect(serialcon, SIGNAL(errorOccurred(QSerialPort::SerialPortError)),this,SLOT(serialError(QSerialPort::SerialPortError)));
+    connect(serialcon, &QSerialPort::readyRead,this, &MainWindow::serialReadReady);
+    connect(serialcon, &QSerialPort::errorOccurred,this, &MainWindow::serialError);
 
     // Buttons
     connect(ui->cmdConnect,&QPushButton::clicked,this,&MainWindow::connectDisconnectClicked);
-    connect(ui->cmdSend,SIGNAL(clicked()),this,SLOT(manualSend()));
-    //connect(ui->cmdStartGraph,SIGNAL(clicked()),this,SLOT(startGraph()));
-    //connect(ui->cmdStopGraph,SIGNAL(clicked()),this,SLOT(stopGraph()));
-    connect(ui->cmdResetCenter,SIGNAL(clicked()),this, SLOT(resetCenter()));
-    connect(ui->cmdCalibrate,SIGNAL(clicked()),this, SLOT(startCalibration()));
-    connect(ui->cmdSaveNVM,SIGNAL(clicked()),this,SLOT(storeToNVM()));
-    connect(ui->cmdReboot,SIGNAL(clicked()),this,SLOT(reboot()));
-    connect(ui->cmdChannelViewer,SIGNAL(clicked()),ui->actionChannel_Viewer, SLOT(trigger()));
+    connect(ui->cmdSend, &QPushButton::clicked,this, &MainWindow::manualSend);
+    //connect(ui->cmdStartGraph, &QPushButton::clicked,this, &MainWindow::startGraph);
+    //connect(ui->cmdStopGraph, &QPushButton::clicked,this, &MainWindow::stopGraph);
+    connect(ui->cmdResetCenter, &QPushButton::clicked,this,  &MainWindow::resetCenter);
+    connect(ui->cmdCalibrate, &QPushButton::clicked,this,  &MainWindow::startCalibration);
+    connect(ui->cmdSaveNVM, &QPushButton::clicked,this, &MainWindow::storeToNVM);
+    connect(ui->cmdReboot, &QPushButton::clicked,this, &MainWindow::reboot);
+    connect(ui->cmdChannelViewer, &QPushButton::clicked, ui->actionChannel_Viewer, &QAction::trigger);
     connect(ui->cmdRefresh,&QPushButton::clicked,this,&MainWindow::findSerialPorts);
 
     // Check Boxes
-    connect(ui->chkpanrev,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
-    connect(ui->chkrllrev,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
-    connect(ui->chktltrev,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
-    connect(ui->chkInvertedPPM,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
-    connect(ui->chkInvertedPPMIn,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
-    connect(ui->chkResetCenterWave,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
-    connect(ui->chkSbusInInv,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
-    connect(ui->chkSbusOutInv,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
-    connect(ui->chkLngBttnPress,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
-    connect(ui->chkRstOnTlt,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
-    connect(ui->chkCh5Arm,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
-    connect(ui->chkNoMag,SIGNAL(clicked(bool)),this,SLOT(updateFromUI()));
+    connect(ui->chkpanrev, &QPushButton::clicked, this, &MainWindow::updateFromUI);
+    connect(ui->chkrllrev, &QPushButton::clicked, this,&MainWindow::updateFromUI);
+    connect(ui->chktltrev, &QPushButton::clicked, this, &MainWindow::updateFromUI);
+    connect(ui->chkInvertedPPM, &QPushButton::clicked, this, &MainWindow::updateFromUI);
+    connect(ui->chkInvertedPPMIn, &QPushButton::clicked, this, &MainWindow::updateFromUI);
+    connect(ui->chkResetCenterWave, &QPushButton::clicked, this, &MainWindow::updateFromUI);
+    connect(ui->chkSbusInInv, &QPushButton::clicked, this, &MainWindow::updateFromUI);
+    connect(ui->chkSbusOutInv, &QPushButton::clicked, this, &MainWindow::updateFromUI);
+    connect(ui->chkLngBttnPress, &QPushButton::clicked, this, &MainWindow::updateFromUI);
+    connect(ui->chkRstOnTlt, &QPushButton::clicked, this, &MainWindow::updateFromUI);
+    connect(ui->chkCh5Arm, &QPushButton::clicked, this ,&MainWindow::updateFromUI);
+    connect(ui->chkNoMag, &QPushButton::clicked, this, &MainWindow::updateFromUI);
 
-    //connect(ui->chkRawData,SIGNAL(clicked(bool)),this,SLOT(setDataMode(bool)));
+    //connect(ui->chkRawData,&QPushButton::clicked,this, &MainWindow::setDataMode(bool)));
 
     // Spin Boxes
-    connect(ui->spnPPMSync,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->spnPPMFrameLen,SIGNAL(valueChanged(double)),this,SLOT(updateFromUI()));
-    connect(ui->spnA0Gain,SIGNAL(valueChanged(double)),this,SLOT(updateFromUI()));
-    connect(ui->spnA0Off,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->spnA1Gain,SIGNAL(valueChanged(double)),this,SLOT(updateFromUI()));
-    connect(ui->spnA1Off,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->spnA2Gain,SIGNAL(valueChanged(double)),this,SLOT(updateFromUI()));
-    connect(ui->spnA2Off,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->spnA3Gain,SIGNAL(valueChanged(double)),this,SLOT(updateFromUI()));
-    connect(ui->spnA3Off,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->spnRotX,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->spnRotY,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->spnRotZ,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->spnSBUSRate,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->spnCRSFRate,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->spnPPMSync, &QSpinBox::valueChanged, this, &MainWindow::updateFromUI);
+    connect(ui->spnPPMFrameLen, &QDoubleSpinBox::valueChanged, this, &MainWindow::updateFromUI);
+    connect(ui->spnA0Gain, &QDoubleSpinBox::valueChanged, this, &MainWindow::updateFromUI);
+    connect(ui->spnA0Off, &QSpinBox::valueChanged, this, &MainWindow::updateFromUI);
+    connect(ui->spnA1Gain, &QDoubleSpinBox::valueChanged, this, &MainWindow::updateFromUI);
+    connect(ui->spnA1Off, &QSpinBox::valueChanged, this, &MainWindow::updateFromUI);
+    connect(ui->spnA2Gain, &QDoubleSpinBox::valueChanged, this, &MainWindow::updateFromUI);
+    connect(ui->spnA2Off, &QSpinBox::valueChanged, this, &MainWindow::updateFromUI);
+    connect(ui->spnA3Gain, &QDoubleSpinBox::valueChanged, this, &MainWindow::updateFromUI);
+    connect(ui->spnA3Off, &QSpinBox::valueChanged, this, &MainWindow::updateFromUI);
+    connect(ui->spnRotX, &QSpinBox::valueChanged, this, &MainWindow::updateFromUI);
+    connect(ui->spnRotY, &QSpinBox::valueChanged, this, &MainWindow::updateFromUI);
+    connect(ui->spnRotZ, &QSpinBox::valueChanged, this, &MainWindow::updateFromUI);
+    connect(ui->spnSBUSRate, &QSpinBox::valueChanged, this, &MainWindow::updateFromUI);
+    connect(ui->spnCRSFRate, &QSpinBox::valueChanged, this, &MainWindow::updateFromUI);
 
     // Gain Sliders
-    connect(ui->til_gain,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->rll_gain,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->pan_gain,SIGNAL(valueChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->til_gain, &GainSlider::valueChanged, this, &MainWindow::updateFromUI);
+    connect(ui->rll_gain, &GainSlider::valueChanged, this, &MainWindow::updateFromUI);
+    connect(ui->pan_gain, &GainSlider::valueChanged, this, &MainWindow::updateFromUI);
     ui->til_gain->setMaximum(TrackerSettings::MAX_GAIN*10);
     ui->rll_gain->setMaximum(TrackerSettings::MAX_GAIN*10);
     ui->pan_gain->setMaximum(TrackerSettings::MAX_GAIN*10);
 
     // Servo Scaling Widgets
-    connect(ui->servoPan,&ServoMinMax::minimumChanged,this,&MainWindow::updateFromUI);
-    connect(ui->servoPan,&ServoMinMax::maximumChanged,this,&MainWindow::updateFromUI);
-    connect(ui->servoPan,&ServoMinMax::centerChanged,this,&MainWindow::updateFromUI);
-    connect(ui->servoTilt,&ServoMinMax::minimumChanged,this,&MainWindow::updateFromUI);
-    connect(ui->servoTilt,&ServoMinMax::maximumChanged,this,&MainWindow::updateFromUI);
-    connect(ui->servoTilt,&ServoMinMax::centerChanged,this,&MainWindow::updateFromUI);
-    connect(ui->servoRoll,&ServoMinMax::minimumChanged,this,&MainWindow::updateFromUI);
-    connect(ui->servoRoll,&ServoMinMax::maximumChanged,this,&MainWindow::updateFromUI);
-    connect(ui->servoRoll,&ServoMinMax::centerChanged,this,&MainWindow::updateFromUI);
+    connect(ui->servoPan, &ServoMinMax::minimumChanged, this, &MainWindow::updateFromUI);
+    connect(ui->servoPan, &ServoMinMax::maximumChanged, this, &MainWindow::updateFromUI);
+    connect(ui->servoPan, &ServoMinMax::centerChanged, this, &MainWindow::updateFromUI);
+    connect(ui->servoTilt, &ServoMinMax::minimumChanged, this, &MainWindow::updateFromUI);
+    connect(ui->servoTilt, &ServoMinMax::maximumChanged, this, &MainWindow::updateFromUI);
+    connect(ui->servoTilt, &ServoMinMax::centerChanged, this, &MainWindow::updateFromUI);
+    connect(ui->servoRoll, &ServoMinMax::minimumChanged, this, &MainWindow::updateFromUI);
+    connect(ui->servoRoll, &ServoMinMax::maximumChanged, this, &MainWindow::updateFromUI);
+    connect(ui->servoRoll, &ServoMinMax::centerChanged, this, &MainWindow::updateFromUI);
 
     // On Live Data Change
     connect(&trkset,&TrackerSettings::rawOrientChanged,this,&MainWindow::offOrientChanged);
@@ -183,65 +183,65 @@ MainWindow::MainWindow(QWidget *parent)
     ui->cmbRemap->addItem("Z,Y,Z",AXES_MAP(AXIS_Z,AXIS_Y,AXIS_X));
     ui->cmbRemap->setCurrentIndex(0);
 
-    connect(ui->cmbpanchn,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->cmbtiltchn,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->cmbrllchn,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->cmbalertchn,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->cmbRemap,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->cmbSigns,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->cmbButtonPin,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->cmbPpmInPin,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->cmbPpmOutPin,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->cmbBtMode,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
-    //connect(ui->cmbResetOnPPM,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->cmbPPMChCount,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->cmbA0Ch,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->cmbA1Ch,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->cmbA2Ch,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->cmbA3Ch,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->cmbAuxFn0,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->cmbAuxFn1,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->cmbAuxFn2,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->cmbAuxFn0Ch,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->cmbAuxFn1Ch,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->cmbAuxFn2Ch,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->cmbPWM0,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->cmbPWM1,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->cmbPWM2,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->cmbPWM3,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->cmbBTRmtMode,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
-    connect(ui->cmbUartMode,SIGNAL(currentIndexChanged(int)),this,SLOT(updateFromUI()));
+    connect(ui->cmbpanchn,  &QComboBox::currentIndexChanged, this, &MainWindow::updateFromUI);
+    connect(ui->cmbtiltchn, &QComboBox::currentIndexChanged, this, &MainWindow::updateFromUI);
+    connect(ui->cmbrllchn, &QComboBox::currentIndexChanged, this, &MainWindow::updateFromUI);
+    connect(ui->cmbalertchn, &QComboBox::currentIndexChanged, this, &MainWindow::updateFromUI);
+    connect(ui->cmbRemap, &QComboBox::currentIndexChanged, this, &MainWindow::updateFromUI);
+    connect(ui->cmbSigns, &QComboBox::currentIndexChanged, this, &MainWindow::updateFromUI);
+    connect(ui->cmbButtonPin, &QComboBox::currentIndexChanged, this, &MainWindow::updateFromUI);
+    connect(ui->cmbPpmInPin, &QComboBox::currentIndexChanged, this, &MainWindow::updateFromUI);
+    connect(ui->cmbPpmOutPin, &QComboBox::currentIndexChanged, this, &MainWindow::updateFromUI);
+    connect(ui->cmbBtMode, &QComboBox::currentIndexChanged, this, &MainWindow::updateFromUI);
+    //connect(ui->cmbResetOnPPM, &QComboBox::currentIndexChanged,this,&MainWindow::updateFromUI));
+    connect(ui->cmbPPMChCount, &QComboBox::currentIndexChanged, this, &MainWindow::updateFromUI);
+    connect(ui->cmbA0Ch, &QComboBox::currentIndexChanged, this, &MainWindow::updateFromUI);
+    connect(ui->cmbA1Ch, &QComboBox::currentIndexChanged, this, &MainWindow::updateFromUI);
+    connect(ui->cmbA2Ch, &QComboBox::currentIndexChanged, this, &MainWindow::updateFromUI);
+    connect(ui->cmbA3Ch, &QComboBox::currentIndexChanged, this, &MainWindow::updateFromUI);
+    connect(ui->cmbAuxFn0, &QComboBox::currentIndexChanged, this, &MainWindow::updateFromUI);
+    connect(ui->cmbAuxFn1, &QComboBox::currentIndexChanged, this, &MainWindow::updateFromUI);
+    connect(ui->cmbAuxFn2, &QComboBox::currentIndexChanged, this, &MainWindow::updateFromUI);
+    connect(ui->cmbAuxFn0Ch, &QComboBox::currentIndexChanged, this, &MainWindow::updateFromUI);
+    connect(ui->cmbAuxFn1Ch, &QComboBox::currentIndexChanged, this, &MainWindow::updateFromUI);
+    connect(ui->cmbAuxFn2Ch, &QComboBox::currentIndexChanged, this, &MainWindow::updateFromUI);
+    connect(ui->cmbPWM0, &QComboBox::currentIndexChanged, this, &MainWindow::updateFromUI);
+    connect(ui->cmbPWM1, &QComboBox::currentIndexChanged, this, &MainWindow::updateFromUI);
+    connect(ui->cmbPWM2, &QComboBox::currentIndexChanged, this, &MainWindow::updateFromUI);
+    connect(ui->cmbPWM3, &QComboBox::currentIndexChanged, this, &MainWindow::updateFromUI);
+    connect(ui->cmbBTRmtMode, &QComboBox::currentIndexChanged, this, &MainWindow::updateFromUI);
+    connect(ui->cmbUartMode, &QComboBox::currentIndexChanged, this, &MainWindow::updateFromUI);
 
     // Menu Actions
-    connect(ui->action_Save_to_File,SIGNAL(triggered()),this,SLOT(saveSettings()));
-    connect(ui->action_Load,SIGNAL(triggered()),this,SLOT(loadSettings()));
-    connect(ui->actionE_xit,SIGNAL(triggered()),this,SLOT(close()));
-    connect(ui->actionFirmware_Wizard,SIGNAL(triggered()),this,SLOT(uploadFirmwareWizard()));
-    connect(ui->actionShow_Data,SIGNAL(triggered()),this,SLOT(showDiagsClicked()));
-    connect(ui->actionShow_Serial_Transmissions,SIGNAL(triggered()),this,SLOT(showSerialDiagClicked()));
-    connect(ui->actionChannel_Viewer,SIGNAL(triggered()),this,SLOT(showChannelViewerClicked()));    
-    connect(ui->actionPinout, SIGNAL(triggered()),this, SLOT(showPinView()));
-    connect(ui->actionEraseFlash, SIGNAL(triggered()),this, SLOT(eraseFlash()));
-    connect(ui->actionOnline_Help, SIGNAL(triggered()),this, SLOT(openHelp()));
-    connect(ui->actionDonate, SIGNAL(triggered()),this, SLOT(openDonate()));
-    connect(ui->action_GitHub, SIGNAL(triggered()),this, SLOT(openGitHub()));
-    connect(ui->action_Discord_Chat, SIGNAL(triggered()),this, SLOT(openDiscord()));
+    connect(ui->action_Save_to_File, &QAction::triggered,this, &MainWindow::saveSettings);
+    connect(ui->action_Load, &QAction::triggered,this, &MainWindow::loadSettings);
+    connect(ui->actionE_xit, &QAction::triggered,this, &MainWindow::close);
+    connect(ui->actionFirmware_Wizard, &QAction::triggered,this, &MainWindow::uploadFirmwareWizard);
+    connect(ui->actionShow_Data, &QAction::triggered,this, &MainWindow::showDiagsClicked);
+    connect(ui->actionShow_Serial_Transmissions, &QAction::triggered,this, &MainWindow::showSerialDiagClicked);
+    connect(ui->actionChannel_Viewer, &QAction::triggered,this, &MainWindow::showChannelViewerClicked);
+    connect(ui->actionPinout,  &QAction::triggered,this,  &MainWindow::showPinView);
+    connect(ui->actionEraseFlash,  &QAction::triggered,this,  &MainWindow::eraseFlash);
+    connect(ui->actionOnline_Help,  &QAction::triggered,this,  &MainWindow::openHelp);
+    connect(ui->actionDonate,  &QAction::triggered,this,  &MainWindow::openDonate);
+    connect(ui->action_GitHub,  &QAction::triggered,this,  &MainWindow::openGitHub);
+    connect(ui->action_Discord_Chat,  &QAction::triggered,this,  &MainWindow::openDiscord);
 
     // Tab Widget
     connect(ui->tabBLE,&QTabWidget::currentChanged,this,&MainWindow::BLE33tabChanged);
 
     // Timers
-    connect(&rxledtimer,SIGNAL(timeout()),this,SLOT(rxledtimeout()));
+    connect(&rxledtimer, &QTimer::timeout,this, &MainWindow::rxledtimeout);
     rxledtimer.setInterval(100);
-    connect(&txledtimer,SIGNAL(timeout()),this,SLOT(txledtimeout()));
+    connect(&txledtimer, &QTimer::timeout,this, &MainWindow::txledtimeout);
     txledtimer.setInterval(100);
-    connect(&connectTimer,SIGNAL(timeout()),this,SLOT(connectTimeout()));
+    connect(&connectTimer, &QTimer::timeout,this, &MainWindow::connectTimeout);
     connectTimer.setSingleShot(true);
-    connect(&requestTimer,SIGNAL(timeout()),this,SLOT(requestTimeout()));
+    connect(&requestTimer, &QTimer::timeout,this, &MainWindow::requestTimeout);
     requestTimer.setSingleShot(true);
-    connect(&saveToRAMTimer,SIGNAL(timeout()),this,SLOT(saveToRAMTimeout()));
+    connect(&saveToRAMTimer, &QTimer::timeout,this, &MainWindow::saveToRAMTimeout);
     saveToRAMTimer.setSingleShot(true);
-    connect(&requestParamsTimer,SIGNAL(timeout()),this,SLOT(requestParamsTimeout()));
+    connect(&requestParamsTimer, &QTimer::timeout,this, &MainWindow::requestParamsTimeout);
     requestParamsTimer.setSingleShot(true);
 
     // Set GIT SHA in bottom right of StatusBar
