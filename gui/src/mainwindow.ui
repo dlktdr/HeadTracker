@@ -444,7 +444,7 @@
              <bool>false</bool>
             </property>
             <property name="currentIndex">
-             <number>0</number>
+             <number>2</number>
             </property>
             <widget class="QWidget" name="tabGeneral">
              <attribute name="title">
@@ -1306,7 +1306,7 @@
               <item>
                <widget class="QStackedWidget" name="stkUart">
                 <property name="currentIndex">
-                 <number>1</number>
+                 <number>3</number>
                 </property>
                 <widget class="QWidget" name="page_2"/>
                 <widget class="QWidget" name="sbus">
@@ -1407,10 +1407,10 @@
                 </widget>
                 <widget class="QWidget" name="page_3">
                  <layout class="QGridLayout" name="gridLayout_8">
-                  <item row="2" column="0">
-                   <widget class="QLabel" name="label_3">
+                  <item row="1" column="0">
+                   <widget class="QLabel" name="label_41">
                     <property name="text">
-                     <string>Use channel 5 as AUX1 / ARM</string>
+                     <string>Update Rate</string>
                     </property>
                    </widget>
                   </item>
@@ -1430,17 +1430,14 @@
                     </property>
                    </widget>
                   </item>
-                  <item row="0" column="0">
-                   <widget class="QLabel" name="label_56">
+                  <item row="2" column="1">
+                   <widget class="QCheckBox" name="chkCh5Arm">
                     <property name="text">
-                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;CRSF Output Settings&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                    </property>
-                    <property name="alignment">
-                     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+                     <string>Set Channel 5 to 2000uS</string>
                     </property>
                    </widget>
                   </item>
-                  <item row="3" column="0">
+                  <item row="4" column="0">
                    <spacer name="verticalSpacer_3">
                     <property name="orientation">
                      <enum>Qt::Vertical</enum>
@@ -1453,17 +1450,37 @@
                     </property>
                    </spacer>
                   </item>
-                  <item row="1" column="0">
-                   <widget class="QLabel" name="label_41">
+                  <item row="0" column="0">
+                   <widget class="QLabel" name="label_56">
                     <property name="text">
-                     <string>Update Rate</string>
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;CRSF Output Settings&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                    <property name="alignment">
+                     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
                     </property>
                    </widget>
                   </item>
-                  <item row="2" column="1">
-                   <widget class="QCheckBox" name="chkCh5Arm">
+                  <item row="2" column="0">
+                   <widget class="QLabel" name="label_3">
                     <property name="text">
-                     <string>Set Channel 5 to 2000uS</string>
+                     <string>Use channel 5 as AUX1 / ARM</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="3" column="0">
+                   <widget class="QLabel" name="label_2">
+                    <property name="text">
+                     <string>CRSF Output Level</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="3" column="1">
+                   <widget class="QCheckBox" name="chkCRSFInv">
+                    <property name="toolTip">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Invert the CRSF output if you are directly connecting to a radio module S.PORT&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                    <property name="text">
+                     <string>Invert TX</string>
                     </property>
                    </widget>
                   </item>

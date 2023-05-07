@@ -127,6 +127,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->chkRstOnTlt, &QPushButton::clicked, this, &MainWindow::updateFromUI);
     connect(ui->chkCh5Arm, &QPushButton::clicked, this ,&MainWindow::updateFromUI);
     connect(ui->chkNoMag, &QPushButton::clicked, this, &MainWindow::updateFromUI);
+    connect(ui->chkCRSFInv, &QPushButton::clicked, this, &MainWindow::updateFromUI);
 
     //connect(ui->chkRawData,&QPushButton::clicked,this, &MainWindow::setDataMode(bool)));
 
@@ -578,6 +579,7 @@ void MainWindow::updateToUI()
     ui->chkSbusOutInv->setChecked(trkset.getSbOutInv());
     ui->chkLngBttnPress->setChecked(trkset.getButLngPs());
     ui->chkRstOnTlt->setChecked(trkset.getRstOnTlt());
+    ui->chkCRSFInv->setChecked(trkset.getCrsfTxInv());
 
     // Disabled Magnetometer
     ui->chkNoMag->setChecked(trkset.getDisMag());
@@ -876,6 +878,7 @@ void MainWindow::updateFromUI()
     trkset.setSbOutInv(ui->chkSbusOutInv->isChecked());
     trkset.setSbusTxRate(ui->spnSBUSRate->value());
     trkset.setCrsfTxRate(ui->spnCRSFRate->value());
+    trkset.setCrsfTxInv(ui->chkCRSFInv->isChecked());
 
     uint16_t setframelen = ui->spnPPMFrameLen->value() * 1000;
     trkset.setPpmFrame(setframelen);
