@@ -1,6 +1,7 @@
 #include "crsfout.h"
 #include "auxserial.h"
 #include "crc8.h"
+#include "trackersettings.h"
 
 CRSF crsfout;
 
@@ -65,6 +66,19 @@ void CRSF::sendLinkStatisticsToFC()
 
 void CRSF::sendRCFrameToFC()
 {
+  // Fix me properly, also merge CRSF better one day.
+
+  // Check the inversion status of the TX pin
+  static bool crsfoutinv = false;
+  if (crsfoutinv != trkset.getCrsfTxInv()) {
+    crsfoutinv = trkset.getCrsfTxInv();
+    // Close and re-open port with new settings
+    AuxSerial_Close();
+    uint8_t inversion = 0;
+    if (crsfoutinv) inversion |= CONFINV_TX;
+    AuxSerial_Open(BAUD400000, CONF8N1, inversion);
+  }
+
   uint8_t outBuffer[RCframeLength + 4] = {0};
 
   outBuffer[0] = CRSF_ADDRESS_FLIGHT_CONTROLLER;

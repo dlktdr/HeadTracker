@@ -770,9 +770,13 @@ public:
   inline const bool& getSbOutInv() {return sboutinv;}
   void setSbOutInv(bool val=true) { sboutinv = val; }
 
+  // Invert CRSF output
+  inline const bool& getCrsfTxInv() {return crsftxinv;}
+  void setCrsfTxInv(bool val=false) { crsftxinv = val; }
+
   // Channel 5 
   inline const bool& getCh5Arm() {return ch5arm;}
-  void setCh5Arm(bool val=true) { ch5arm = val; }
+  void setCh5Arm(bool val=false) { ch5arm = val; }
 
   // Bluetooth Mode (0-Off, 1- Head, 2-Receive, 3-Scanner)
   inline const uint8_t& getBtMode() {return btmode;}
@@ -1042,6 +1046,7 @@ public:
     json["sbustxrate"] = sbustxrate;
     json["sbininv"] = sbininv;
     json["sboutinv"] = sboutinv;
+    json["crsftxinv"] = crsftxinv;
     json["ch5arm"] = ch5arm;
     json["btmode"] = btmode;
     json["rstonwave"] = rstonwave;
@@ -1129,6 +1134,7 @@ public:
     v = json["sbustxrate"]; if(!v.isNull()) {setSbusTxRate(v);}
     v = json["sbininv"]; if(!v.isNull()) {setSbInInv(v); chpinschanged = true;}
     v = json["sboutinv"]; if(!v.isNull()) {setSbOutInv(v);}
+    v = json["crsftxinv"]; if(!v.isNull()) {setCrsfTxInv(v);}
     v = json["ch5arm"]; if(!v.isNull()) {setCh5Arm(v);}
     v = json["btmode"]; if(!v.isNull()) {setBtMode(v);}
     v = json["rstonwave"]; if(!v.isNull()) {setRstOnWave(v);}
@@ -1541,7 +1547,8 @@ protected:
   uint8_t sbustxrate = 80; // SBUS Transmit Freqency
   bool sbininv = true; // SBUS Receieve Inverted
   bool sboutinv = true; // SBUS Transmit Inverted
-  bool ch5arm = true; // Channel 5 
+  bool crsftxinv = false; // Invert CRSF output
+  bool ch5arm = false; // Channel 5 
   uint8_t btmode = 0; // Bluetooth Mode (0-Off, 1- Head, 2-Receive, 3-Scanner)
   bool rstonwave = false; // Reset on Proximity Sense
   bool butlngps = false; // Long Press on the Button to Enable/Disable Tilt Roll and Pan

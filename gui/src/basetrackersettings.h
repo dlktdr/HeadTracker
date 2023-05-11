@@ -140,7 +140,8 @@ public:
     _setting["sbustxrate"] = 80;
     _setting["sbininv"] = true;
     _setting["sboutinv"] = true;
-    _setting["ch5arm"] = true;
+    _setting["crsftxinv"] = false;
+    _setting["ch5arm"] = false;
     _setting["btmode"] = 0;
     _setting["rstonwave"] = false;
     _setting["butlngps"] = false;
@@ -252,6 +253,7 @@ public:
     descriptions["sbustxrate"] = "SBUS Transmit Freqency";
     descriptions["sbininv"] = "SBUS Receieve Inverted";
     descriptions["sboutinv"] = "SBUS Transmit Inverted";
+    descriptions["crsftxinv"] = "Invert CRSF output";
     descriptions["ch5arm"] = "Channel 5 ";
     descriptions["btmode"] = "Bluetooth Mode (0-Off, 1- Head, 2-Receive, 3-Scanner)";
     descriptions["rstonwave"] = "Reset on Proximity Sense";
@@ -1159,9 +1161,13 @@ public:
   bool getSbOutInv() {return _setting["sboutinv"].toBool();}
   void setSbOutInv(bool val=true) { _setting["sboutinv"] = val; }
 
+  // Invert CRSF output
+  bool getCrsfTxInv() {return _setting["crsftxinv"].toBool();}
+  void setCrsfTxInv(bool val=false) { _setting["crsftxinv"] = val; }
+
   // Channel 5 
   bool getCh5Arm() {return _setting["ch5arm"].toBool();}
-  void setCh5Arm(bool val=true) { _setting["ch5arm"] = val; }
+  void setCh5Arm(bool val=false) { _setting["ch5arm"] = val; }
 
   // Bluetooth Mode (0-Off, 1- Head, 2-Receive, 3-Scanner)
   uint8_t getBtMode() {
