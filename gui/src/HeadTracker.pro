@@ -19,7 +19,7 @@ DEFINES += GIT_VERSION_TAG=$$system($$quote(git describe --tags --abbrev=0))
 
 SOURCES += \
     boardbno055.cpp \
-    boardnano33ble.cpp \
+    boardjson.cpp \
     boardtype.cpp \
     calibrate/fusion.cpp \
     calibrate/imuread.cpp \
@@ -30,6 +30,8 @@ SOURCES += \
     calibrate/rawdata.cpp \
     calibrateble.cpp \
     calibratebno.cpp \
+    calibratewizard/calaccelerometer.cpp \
+    calibration.cpp \
     channelviewer.cpp \
     diagnosticdisplay.cpp \
     firmwarewizard.cpp \
@@ -49,11 +51,13 @@ SOURCES += \
 
 HEADERS += \
     boardbno055.h \
-    boardnano33ble.h \
+    boardjson.h \
     boardtype.h \
     calibrate/imuread.h \
     calibrateble.h \
     calibratebno.h \
+    calibratewizard/calaccelerometer.h \
+    calibration.h \
     channelviewer.h \
     diagnosticdisplay.h \
     firmwarewizard.h \
@@ -73,6 +77,7 @@ HEADERS += \
 FORMS += \
     calibrateble.ui \
     calibratebno.ui \
+    calibratewizard/calaccelerometer.ui \
     channelviewer.ui \
     diagnosticdisplay.ui \
     firmwarewizard.ui \

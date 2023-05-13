@@ -28,16 +28,11 @@ MainWindow::MainWindow(QWidget *parent)
     imageViewer->resize(800,600);
 
     // Start the board interface
-    nano33ble = new BoardNano33BLE(&trkset);
-    nano33ble->setBoardName("NANO33BLE");
-    dtqsys = new BoardNano33BLE(&trkset);
-    dtqsys->setBoardName("DTQSYS");
+    jsonht = new BoardJson(&trkset);
     bno055 = new BoardBNO055(&trkset);
-    bno055->setBoardName("BNO055");
 
     // Add it to the list of available boards
-    boards.append(nano33ble);
-    boards.append(dtqsys);
+    boards.append(jsonht);
     boards.append(bno055);
 
     // Once correct board is discovered this will be set to one of the above boards
@@ -126,7 +121,6 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->chkLngBttnPress, &QPushButton::clicked, this, &MainWindow::updateFromUI);
     connect(ui->chkRstOnTlt, &QPushButton::clicked, this, &MainWindow::updateFromUI);
     connect(ui->chkCh5Arm, &QPushButton::clicked, this ,&MainWindow::updateFromUI);
-    connect(ui->chkNoMag, &QPushButton::clicked, this, &MainWindow::updateFromUI);
     connect(ui->chkCRSFInv, &QPushButton::clicked, this, &MainWindow::updateFromUI);
 
     //connect(ui->chkRawData,&QPushButton::clicked,this, &MainWindow::setDataMode(bool)));
@@ -255,9 +249,8 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow()
 {
     delete serialcon;
-    delete nano33ble;
+    delete jsonht;
     delete bno055;
-    delete dtqsys;
     if(firmwareWizard != nullptr)
         delete firmwareWizard;
     delete serialDebug;
@@ -581,17 +574,6 @@ void MainWindow::updateToUI()
     ui->chkRstOnTlt->setChecked(trkset.getRstOnTlt());
     ui->chkCRSFInv->setChecked(trkset.getCrsfTxInv());
 
-    // Disabled Magnetometer
-    ui->chkNoMag->setChecked(trkset.getDisMag());
-    if(trkset.getDisMag()) {
-        ui->cmdCalibrate->setEnabled(false);
-        ui->cmdCalibrate->setToolTip("Calibration Disabled, Magnetometer is disabled");
-    } else {
-        ui->cmdCalibrate->setEnabled(true);
-        ui->cmdCalibrate->setToolTip("Click to Calibrate the Magnetometer");
-    }
-
-
     // Button Press Mode - Enable/Disable on long press (Disable if no button pin selected)
     if(trkset.getButtonPin() > 0)
         ui->chkLngBttnPress->setEnabled(true);
@@ -754,15 +736,6 @@ void MainWindow::updateFromUI()
     trkset.setRll_Min(ui->servoRoll->minimumValue());
     trkset.setRll_Max(ui->servoRoll->maximumValue());
     trkset.setRll_Gain(static_cast<float>(ui->rll_gain->value())/10.0f);
-
-    trkset.setDisMag(ui->chkNoMag->isChecked());
-    if(trkset.getDisMag()) {
-        ui->cmdCalibrate->setEnabled(false);
-        ui->cmdCalibrate->setToolTip("Calibration Disabled, Magnetometer is disabled");
-    } else {
-        ui->cmdCalibrate->setEnabled(true);
-        ui->cmdCalibrate->setToolTip("Click to Calibrate the Magnetometer");
-    }
 
     // Uart Mode
     trkset.setUartMode(ui->cmbUartMode->currentIndex());
@@ -1438,9 +1411,10 @@ void MainWindow::boardDiscovered(BoardType *brd)
     // Board discovered, save it
     currentboard = brd;
 
-    // Stack widget changes to hide some info depending on board
+    // GUI changes info depending on board type
     if(brd->boardName() == "NANO33BLE" ||
-       brd->boardName() == "DTQSYS") {
+       brd->boardName() == "DTQSYS" ||
+       brd->boardName() == "XIAOSENSE" ) {
         addToLog(tr("Connected to a ") + brd->boardName() + "\n");
         ui->cmdStartGraph->setVisible(false);
         ui->cmdStopGraph->setVisible(false);
@@ -1458,7 +1432,8 @@ void MainWindow::boardDiscovered(BoardType *brd)
         ui->stackedWidget->setCurrentIndex(3);
         ui->cmdChannelViewer->setEnabled(true);
 
-        if(brd->boardName() == "DTQSYS") { // Pins are all fixed
+        if(brd->boardName() == "DTQSYS" ||
+           brd->boardName() == "XIAOSENSE") { // Pins are all fixed
             ui->cmbPpmInPin->setVisible(false);
             ui->lblPPMInPin->setVisible(false);
             ui->cmbPpmOutPin->setVisible(false);

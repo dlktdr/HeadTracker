@@ -670,7 +670,7 @@ public:
 
   // Disable Magnetometer
   inline const bool& getDisMag() {return dismag;}
-  void setDisMag(bool val=0) { dismag = val; }
+  void setDisMag(bool val=1) { dismag = val; }
 
   // Board Rotation X
   inline const float& getRotX() {return rotx;}
@@ -1535,7 +1535,7 @@ protected:
   float so20 = 0; // Soft Iron Offset 20
   float so21 = 0; // Soft Iron Offset 21
   float so22 = 1; // Soft Iron Offset 22
-  bool dismag = 0; // Disable Magnetometer
+  bool dismag = 1; // Disable Magnetometer
   float rotx = 0; // Board Rotation X
   float roty = 0; // Board Rotation Y
   float rotz = 0; // Board Rotation Z

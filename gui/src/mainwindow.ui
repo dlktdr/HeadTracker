@@ -281,7 +281,7 @@
              <enum>QFrame::Box</enum>
             </property>
             <property name="text">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; font-weight:600;&quot;&gt;Welcome&lt;/span&gt;&lt;span style=&quot; font-size:10pt; font-weight:600; text-decoration: underline;&quot;&gt;&lt;br/&gt;&lt;br/&gt;&lt;/span&gt;&lt;span style=&quot; font-size:10pt; font-weight:600;&quot;&gt;How to get started&lt;/span&gt;&lt;span style=&quot; font-size:10pt; font-weight:600; text-decoration: underline;&quot;&gt;&lt;br/&gt;&lt;/span&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;1) Connect your board to your computer with a USB cable&lt;br/&gt;2) Upload firmware to the board under Firmware on the menu bar&lt;br/&gt;3) Select your port from the drop down list. Use the refresh icon to update the list&lt;br/&gt;4) Choose Connect to begin configuring&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Please look under &lt;/span&gt;&lt;span style=&quot; font-size:10pt; font-weight:700;&quot;&gt;Help&lt;/span&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt; above for additional support,&lt;br/&gt;&lt;/span&gt;&lt;span style=&quot; font-size:10pt; font-weight:700;&quot;&gt;Online Help&lt;/span&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt; - Explains the pages in this GUI&lt;br/&gt;&lt;/span&gt;&lt;span style=&quot; font-size:10pt; font-weight:700;&quot;&gt;GitHub&lt;/span&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt; - Open source code. Search and Report issues here.&lt;br/&gt;&lt;/span&gt;&lt;span style=&quot; font-size:10pt; font-weight:700;&quot;&gt;Discord Chat - &lt;/span&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Live chat support, or just to show off you builds!&lt;br/&gt;&lt;/span&gt;&lt;span style=&quot; font-size:10pt; font-weight:700;&quot;&gt;Donate - &lt;/span&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;If you would like to contribute to the project&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; font-weight:600;&quot;&gt;Welcome&lt;/span&gt;&lt;span style=&quot; font-size:10pt; font-weight:600; text-decoration: underline;&quot;&gt;&lt;br/&gt;&lt;br/&gt;&lt;/span&gt;&lt;span style=&quot; font-size:10pt; font-weight:600;&quot;&gt;How to get started&lt;/span&gt;&lt;span style=&quot; font-size:10pt; font-weight:600; text-decoration: underline;&quot;&gt;&lt;br/&gt;&lt;/span&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;1) Upload firmware to your board under Firmware on the menu bar&lt;br/&gt;2) Connect your board via USB cable&lt;br/&gt;3) Select your port from the drop down list. Use the refresh icon to reload the list&lt;br/&gt;4) Choose Connect to begin configuring&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Please look under &lt;/span&gt;&lt;span style=&quot; font-size:10pt; font-weight:700;&quot;&gt;Help&lt;/span&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt; above for additional support,&lt;br/&gt;&lt;/span&gt;&lt;span style=&quot; font-size:10pt; font-weight:700;&quot;&gt;Online Help&lt;/span&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt; - Explains the pages in this GUI&lt;br/&gt;&lt;/span&gt;&lt;span style=&quot; font-size:10pt; font-weight:700;&quot;&gt;GitHub&lt;/span&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt; - Open source code. Search and Report issues here.&lt;br/&gt;&lt;/span&gt;&lt;span style=&quot; font-size:10pt; font-weight:700;&quot;&gt;Discord Chat - &lt;/span&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Live chat support, or just to show off you builds!&lt;br/&gt;&lt;/span&gt;&lt;span style=&quot; font-size:10pt; font-weight:700;&quot;&gt;Donate - &lt;/span&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;If you would like to contribute to the project&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
@@ -444,13 +444,189 @@
              <bool>false</bool>
             </property>
             <property name="currentIndex">
-             <number>2</number>
+             <number>0</number>
             </property>
             <widget class="QWidget" name="tabGeneral">
              <attribute name="title">
               <string>General</string>
              </attribute>
              <layout class="QGridLayout" name="gridLayout_12">
+              <item row="11" column="0" colspan="3">
+               <layout class="QHBoxLayout" name="horizontalLayout_12">
+                <item>
+                 <widget class="Led" name="gyroLed" native="true">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>20</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>20</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                  <layout class="QHBoxLayout" name="horizontalLayout_4"/>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="lblGyroCal">
+                  <property name="toolTip">
+                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt; font-weight:700;&quot;&gt;To Calibrate the Gyro,&lt;/span&gt;&lt;br/&gt;Place the board on a stable surface and do not touch it for 2 seconds. Do this after every power up.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  </property>
+                  <property name="text">
+                   <string>Gyrometer Calibrated</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item row="1" column="0">
+               <widget class="QLabel" name="alertSignal">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="text">
+                 <string>Send Recenter on Chan</string>
+                </property>
+               </widget>
+              </item>
+              <item row="5" column="0">
+               <widget class="QLabel" name="label_15">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="text">
+                 <string>Board Rotation</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="1">
+               <widget class="QCheckBox" name="chkRstOnTlt">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Allows you to recenter using roll output. Set your gain on roll below so that you can hit the minimum and maximum easily. When you roll back and forth from min to maxium will cause a Reset Center after a delay&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>Center on Roll from Min to Max</string>
+                </property>
+               </widget>
+              </item>
+              <item row="9" column="0" colspan="3">
+               <spacer name="verticalSpacer_6">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>40</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item row="0" column="1" colspan="2">
+               <widget class="QComboBox" name="cmbButtonPin">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Choose the pin you want to wire your center button to here&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <item>
+                 <property name="text">
+                  <string>Disabled</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>D2</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>D3</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>D4</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>D5</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>D6</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>D7</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>D8</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>D9</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>D10</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>D11</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>D12</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <widget class="QCheckBox" name="chkLngBttnPress">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This function allows you to enable the tilt/roll/pan outputs after a long press of the reset button. Another long press will disable the output&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>Enable Tilt/Roll/Pan after a long button press</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="0">
+               <widget class="QLabel" name="lblButtonPin">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="text">
+                 <string>Center Button</string>
+                </property>
+               </widget>
+              </item>
               <item row="1" column="1" colspan="2">
                <widget class="QComboBox" name="cmbalertchn">
                 <property name="toolTip">
@@ -543,116 +719,13 @@
                 </item>
                </widget>
               </item>
-              <item row="5" column="0">
-               <widget class="QLabel" name="label_15">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="text">
-                 <string>Board Rotation</string>
-                </property>
-               </widget>
-              </item>
-              <item row="3" column="1">
-               <widget class="QCheckBox" name="chkRstOnTlt">
+              <item row="4" column="1">
+               <widget class="QCheckBox" name="chkResetCenterWave">
                 <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Allows you to recenter using roll output. Set your gain on roll below so that you can hit the minimum and maximum easily. When you roll back and forth from min to maxium will cause a Reset Center after a delay&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sets the output channel you want tilt on&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                 <property name="text">
-                 <string>Center on Roll from Min to Max</string>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="1">
-               <widget class="QCheckBox" name="chkLngBttnPress">
-                <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This function allows you to enable the tilt/roll/pan outputs after a long press of the reset button. Another long press will disable the output&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                </property>
-                <property name="text">
-                 <string>Enable Tilt/Roll/Pan after a long button press</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="1" colspan="2">
-               <widget class="QComboBox" name="cmbButtonPin">
-                <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Choose the pin you want to wire your center button to here&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                </property>
-                <item>
-                 <property name="text">
-                  <string>Disabled</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>D2</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>D3</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>D4</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>D5</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>D6</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>D7</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>D8</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>D9</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>D10</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>D11</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>D12</string>
-                 </property>
-                </item>
-               </widget>
-              </item>
-              <item row="0" column="0">
-               <widget class="QLabel" name="lblButtonPin">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="text">
-                 <string>Center Button</string>
+                 <string>Center on Proximity Detect (BLE Sense Only)</string>
                 </property>
                </widget>
               </item>
@@ -737,89 +810,6 @@
                  </widget>
                 </item>
                </layout>
-              </item>
-              <item row="12" column="0" colspan="3">
-               <layout class="QHBoxLayout" name="horizontalLayout_12">
-                <item>
-                 <widget class="Led" name="gyroLed" native="true">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="minimumSize">
-                   <size>
-                    <width>20</width>
-                    <height>20</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>20</width>
-                    <height>20</height>
-                   </size>
-                  </property>
-                  <layout class="QHBoxLayout" name="horizontalLayout_4"/>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLabel" name="lblGyroCal">
-                  <property name="toolTip">
-                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt; font-weight:700;&quot;&gt;To Calibrate the Gyro,&lt;/span&gt;&lt;br/&gt;Place the board on a stable surface and do not touch it for 2 seconds. Do this after every power up.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                  </property>
-                  <property name="text">
-                   <string>Gyrometer Calibrated</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </item>
-              <item row="11" column="0" colspan="2">
-               <widget class="QCheckBox" name="chkNoMag">
-                <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If your having issues calibrating the Magnetometer you can disable it. When disabled there will be drift caused by to gyrometer offset. To reduce this always place the board down on a stable surface after power up for 5 seconds to complete the calibration.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                </property>
-                <property name="text">
-                 <string>Don't use the magnetometer</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="0">
-               <widget class="QLabel" name="alertSignal">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="text">
-                 <string>Send Recenter on Chan</string>
-                </property>
-               </widget>
-              </item>
-              <item row="9" column="0" colspan="3">
-               <spacer name="verticalSpacer_6">
-                <property name="orientation">
-                 <enum>Qt::Vertical</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>20</width>
-                  <height>40</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-              <item row="4" column="1">
-               <widget class="QCheckBox" name="chkResetCenterWave">
-                <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sets the output channel you want tilt on&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                </property>
-                <property name="text">
-                 <string>Center on Proximity Detect (BLE Sense Only)</string>
-                </property>
-               </widget>
               </item>
              </layout>
             </widget>

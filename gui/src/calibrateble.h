@@ -11,6 +11,13 @@
 #define MIN(x,y) x < y ? x : y
 #define MAX(x,y) x > y ? x : y
 
+constexpr char accel_cal_images[6][35] = {":/Icons/images/components_up.png",
+                                        ":/Icons/images/components_down.png",
+                                        ":/Icons/images/edge_right.png",
+                                        ":/Icons/images/edge_left.png",
+                                        ":/Icons/images/USB_up.png",
+                                        ":/Icons/images/USB_down.png"};
+
 namespace Ui {
 class CalibrateBLE;
 }
@@ -36,8 +43,20 @@ private:
 
     float _soo[3][3]; // Soft Iron
     float _hoo[3]; // Hard Iron
-    bool firstmag=true;    
-    enum STEP {MAGCAL=0,ACCELCAL};
+    float _accOff[3];
+    float _accZ[2]; // Accelerometer Z Min & Max
+    float _accY[2]; // Accelerometer Z Min & Max
+    float _accX[2]; // Accelerometer Z Min & Max
+    float _accFirst;
+    float _currentAccel[3];
+    bool _accInverted[3];
+    bool firstmag=true;
+    enum STEP {STEP_MAGINTRO,STEP_MAGCAL,STEP_ACCELCAL,STEP_END};
+    enum ACCSTEP {ZP,ZM,YP,YM,XP,XM,ACCCOMPLETE};
+    int accStep;
+
+    void setButtonText();
+    void showEvent(QShowEvent *event) override;
 
 private slots:
     void nextClicked();
@@ -48,9 +67,15 @@ private slots:
                     float fiterror,
                     float hoop[3],
                     float soo[3][3]);
+    void rawAccelChanged(float x, float y, float z);
+    void setNextAccStep();
+    void restartCal();
+    void useMagToggle();
+
 signals:
     void calibrationSave();
     void calibrationCancel();
+    void saveToRam();
 };
 
 #endif // CALIBRATEBLE_H

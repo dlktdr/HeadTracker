@@ -128,7 +128,7 @@ public:
     _setting["so20"] = 0;
     _setting["so21"] = 0;
     _setting["so22"] = 1;
-    _setting["dismag"] = 0;
+    _setting["dismag"] = 1;
     _setting["rotx"] = 0;
     _setting["roty"] = 0;
     _setting["rotz"] = 0;
@@ -1040,7 +1040,7 @@ public:
 
   // Disable Magnetometer
   bool getDisMag() {return _setting["dismag"].toBool();}
-  void setDisMag(bool val=0) { _setting["dismag"] = val; }
+  void setDisMag(bool val=1) { _setting["dismag"] = val; }
 
   // Board Rotation X
   float getRotX() {

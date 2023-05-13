@@ -12,12 +12,12 @@
 #include "trackersettings.h"
 #include "calibrateble.h"
 
-class BoardNano33BLE : public BoardType
+class BoardJson : public BoardType
 {
     Q_OBJECT
 public:
-    BoardNano33BLE(TrackerSettings *ts);
-    ~BoardNano33BLE();
+    BoardJson(TrackerSettings *ts);
+    ~BoardJson();
 
     // Incoming and outgoing data from the board
     void dataIn(QByteArray &recdat);

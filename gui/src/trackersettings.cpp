@@ -227,9 +227,9 @@ void TrackerSettings::setLiveDataMap(const QVariantMap &datalist, bool reset)
             ge = true;
         }
         if((key == "accx" || key == "accy" || key == "accz") && !ae) {
-            emit(rawAccelChanged(_data["gyrox"].toFloat(),
-                                _data["gyroy"].toFloat(),
-                                _data["gyroz"].toFloat()));
+            emit(rawAccelChanged(_data["accx"].toFloat(),
+                                 _data["accy"].toFloat(),
+                                 _data["accz"].toFloat()));
             ae = true;
         }
         if((key == "magx" || key == "magy" || key == "magz") && !me) {
