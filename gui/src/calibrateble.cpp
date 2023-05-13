@@ -28,6 +28,7 @@ CalibrateBLE::CalibrateBLE(TrackerSettings *ts, QWidget *parent) :
     connect(trkset,&TrackerSettings::rawAccelChanged,this, &CalibrateBLE::rawAccelChanged);
     connect(ui->cmdAccNext, &QPushButton::clicked, this, &CalibrateBLE::setNextAccStep);
     connect(ui->cmdRestart, &QPushButton::clicked, this, &CalibrateBLE::restartCal);
+    connect(ui->chkUseMagnetometer, &QCheckBox::toggled, this, &CalibrateBLE::useMagToggle);
 }
 
 CalibrateBLE::~CalibrateBLE()
@@ -105,6 +106,8 @@ void CalibrateBLE::setNextAccStep()
     }
     ui->accelImage->setPixmap(QPixmap(accel_cal_images[accStep]));
     if(accStep == ACCCOMPLETE) {
+        step=STEP_END;
+        setButtonText();
         ui->accelImage->setPixmap(QPixmap());
         ui->accelImage->setText(tr("Accelerometer Calibration Complete"));
     }
@@ -130,61 +133,96 @@ void CalibrateBLE::restartCal()
     ui->accelImage->setText("");
 }
 
+void CalibrateBLE::useMagToggle()
+{
+    trkset->setDisMag(!ui->chkUseMagnetometer->isChecked());
+    emit saveToRam();
+}
+
+void CalibrateBLE::setButtonText()
+{
+    if(step == 0) {
+        ui->cmdPrevious->setText("Cancel");
+    } else {
+        ui->cmdPrevious->setText("Back");
+    }
+    if(step < STEP_END) {
+        ui->cmdNext->setText("Next");
+    } else {
+        ui->cmdNext->setText("Save");
+    }
+    ui->cmdPrevious->setDisabled(false);
+    ui->cmdNext->setDisabled(false);
+}
+
+void CalibrateBLE::showEvent(QShowEvent *event)
+{
+    Q_UNUSED(event);
+    ui->chkUseMagnetometer->setChecked(!trkset->getDisMag());
+}
+
 void CalibrateBLE::nextClicked()
 {
-    switch (step) {
-    // Magnetometer
-    case MAGCAL: {
-        ui->stackedWidget->setCurrentIndex(1);
-        ui->cmdNext->setText("Save");
-        ui->cmdNext->setDisabled(true);
-        ui->cmdPrevious->setText("Back");
-        step = ACCELCAL;
+    if(step == STEP_MAGINTRO) {
+        trkset->setDisMag(!ui->chkUseMagnetometer->isChecked());
+    }
+    step++;
+    if(step < STEP_END) {
+        ui->stackedWidget->setCurrentIndex(step);
+    } else {
         trkset->setMagOffset(_hoo[0], _hoo[1], _hoo[2]);
         trkset->setSoftIronOffsets(_soo);
-        restartCal();
-        break;
-    }
-    // Accelerometer - If clicked here save + close
-    case ACCELCAL: {
-        // SAVE HERE + CLOSE
-        hide();
-        ui->stackedWidget->setCurrentIndex(0);
-        ui->cmdNext->setText("Next");
-        ui->cmdPrevious->setText("Cancel");
         trkset->setAccOffset(_accOff[0], _accOff[1], _accOff[2]);
         emit calibrationSave();
         step = 0;
-        break;
+        ui->stackedWidget->setCurrentIndex(step);
+        hide();
     }
+    setButtonText();
+    if(step == STEP_MAGCAL) {
+        _hoo[0] = 0;
+        _hoo[1] = 0;
+        _hoo[2] = 0;
+        for(int i=0; i<3; i++)
+            for(int j=0; j<3; j++)
+                _soo[i][j] = 0;
+        ui->cmdNext->setDisabled(true);
+        ui->magcalwid->resetDataPoints();
+        if(trkset->getDisMag()) // Skip this step if mag disabled
+            nextClicked();
+    } else if (step == STEP_ACCELCAL) {
+        restartCal();
+        ui->cmdNext->setDisabled(true);
+    } else if( step == STEP_END) {
+
     }
 }
 
 void CalibrateBLE::prevClicked()
 {
-    switch (step) {
-    // Magnetometer
-    case MAGCAL: {
-
-        ui->cmdNext->setDisabled(false);
-        ui->stackedWidget->setCurrentIndex(0);
-        // Cancel Clicked, start over
-        ui->magcalwid->resetDataPoints();
+    if(step == 0) {
         emit calibrationCancel();
         hide();
-        step = MAGCAL;
-        break;
     }
-    // Accelerometer
-    case ACCELCAL: {
-        ui->stackedWidget->setCurrentIndex(0);
-        step = MAGCAL;
-        firstmag = true;
-        break;
+    if(step == STEP_END)
+        step--; // Jump back two, for buttons
+    if(step > 0)
+        step--;
+    setButtonText();
+    ui->stackedWidget->setCurrentIndex(step);
+
+    if(step == STEP_MAGCAL) {
+        ui->cmdNext->setDisabled(true);
+        trkset->setMagOffset(_hoo[0], _hoo[1], _hoo[2]);
+        trkset->setSoftIronOffsets(_soo);
+        ui->magcalwid->resetDataPoints();
+        if(trkset->getDisMag()) // Skip this step if mag disabled
+            prevClicked();
+    } else if (step == STEP_ACCELCAL) {
+        restartCal();
+        ui->cmdNext->setDisabled(true);
+        trkset->setAccOffset(_accOff[0], _accOff[1], _accOff[2]);
     }
-    }
-    ui->cmdPrevious->setText("Cancel");
-    ui->cmdNext->setText("Next");
 }
 
 void CalibrateBLE::dataUpdate(float variance,
@@ -200,8 +238,8 @@ void CalibrateBLE::dataUpdate(float variance,
     ui->lblGaps->setText(QString::number(gaps,'g',3) + "%");
 
     // On the magcal step and values all good?
-    if((step == MAGCAL && gaps < 15.0f && variance < 4.5f && wobble < 4.0f && fiterror < 5.0f) ||
-        step == ACCELCAL)
+    if((step == STEP_MAGCAL && gaps < 15.0f && variance < 4.5f && wobble < 4.0f && fiterror < 5.0f) ||
+        step == STEP_ACCELCAL)
         ui->cmdNext->setDisabled(false);
     else
         ui->cmdNext->setDisabled(true);
@@ -244,5 +282,4 @@ void CalibrateBLE::rawAccelChanged(float x, float y, float z)
         break;
 
     }
-
 }

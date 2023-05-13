@@ -121,7 +121,6 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->chkLngBttnPress, &QPushButton::clicked, this, &MainWindow::updateFromUI);
     connect(ui->chkRstOnTlt, &QPushButton::clicked, this, &MainWindow::updateFromUI);
     connect(ui->chkCh5Arm, &QPushButton::clicked, this ,&MainWindow::updateFromUI);
-    connect(ui->chkNoMag, &QPushButton::clicked, this, &MainWindow::updateFromUI);
     connect(ui->chkCRSFInv, &QPushButton::clicked, this, &MainWindow::updateFromUI);
 
     //connect(ui->chkRawData,&QPushButton::clicked,this, &MainWindow::setDataMode(bool)));
@@ -575,17 +574,6 @@ void MainWindow::updateToUI()
     ui->chkRstOnTlt->setChecked(trkset.getRstOnTlt());
     ui->chkCRSFInv->setChecked(trkset.getCrsfTxInv());
 
-    // Disabled Magnetometer
-    ui->chkNoMag->setChecked(trkset.getDisMag());
-    if(trkset.getDisMag()) {
-        ui->cmdCalibrate->setEnabled(false);
-        ui->cmdCalibrate->setToolTip("Calibration Disabled, Magnetometer is disabled");
-    } else {
-        ui->cmdCalibrate->setEnabled(true);
-        ui->cmdCalibrate->setToolTip("Click to Calibrate the Magnetometer");
-    }
-
-
     // Button Press Mode - Enable/Disable on long press (Disable if no button pin selected)
     if(trkset.getButtonPin() > 0)
         ui->chkLngBttnPress->setEnabled(true);
@@ -748,15 +736,6 @@ void MainWindow::updateFromUI()
     trkset.setRll_Min(ui->servoRoll->minimumValue());
     trkset.setRll_Max(ui->servoRoll->maximumValue());
     trkset.setRll_Gain(static_cast<float>(ui->rll_gain->value())/10.0f);
-
-    trkset.setDisMag(ui->chkNoMag->isChecked());
-    if(trkset.getDisMag()) {
-        ui->cmdCalibrate->setEnabled(false);
-        ui->cmdCalibrate->setToolTip("Calibration Disabled, Magnetometer is disabled");
-    } else {
-        ui->cmdCalibrate->setEnabled(true);
-        ui->cmdCalibrate->setToolTip("Click to Calibrate the Magnetometer");
-    }
 
     // Uart Mode
     trkset.setUartMode(ui->cmbUartMode->currentIndex());

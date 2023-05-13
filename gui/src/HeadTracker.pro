@@ -30,6 +30,8 @@ SOURCES += \
     calibrate/rawdata.cpp \
     calibrateble.cpp \
     calibratebno.cpp \
+    calibratewizard/calaccelerometer.cpp \
+    calibration.cpp \
     channelviewer.cpp \
     diagnosticdisplay.cpp \
     firmwarewizard.cpp \
@@ -54,6 +56,8 @@ HEADERS += \
     calibrate/imuread.h \
     calibrateble.h \
     calibratebno.h \
+    calibratewizard/calaccelerometer.h \
+    calibration.h \
     channelviewer.h \
     diagnosticdisplay.h \
     firmwarewizard.h \
@@ -73,6 +77,7 @@ HEADERS += \
 FORMS += \
     calibrateble.ui \
     calibratebno.ui \
+    calibratewizard/calaccelerometer.ui \
     channelviewer.ui \
     diagnosticdisplay.ui \
     firmwarewizard.ui \

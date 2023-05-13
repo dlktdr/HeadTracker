@@ -19,6 +19,9 @@ BoardJson::BoardJson(TrackerSettings *ts)
     reqDataItemsChanged.setSingleShot(true);
     reqDataItemsChanged.setInterval(200);
     connect(&reqDataItemsChanged,SIGNAL(timeout()),this,SLOT(changeDataItems()));
+
+    // BLE calibrator needs to be able to save the magnetometer selection
+    connect(bleCalibratorDialog, &CalibrateBLE::saveToRam, this, &BoardJson::saveToRAM);
 }
 
 BoardJson::~BoardJson()

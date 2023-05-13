@@ -50,10 +50,13 @@ private:
     float _accFirst;
     float _currentAccel[3];
     bool _accInverted[3];
-    bool firstmag=true;    
-    enum STEP {MAGCAL=0,ACCELCAL};
+    bool firstmag=true;
+    enum STEP {STEP_MAGINTRO,STEP_MAGCAL,STEP_ACCELCAL,STEP_END};
     enum ACCSTEP {ZP,ZM,YP,YM,XP,XM,ACCCOMPLETE};
     int accStep;
+
+    void setButtonText();
+    void showEvent(QShowEvent *event) override;
 
 private slots:
     void nextClicked();
@@ -67,10 +70,12 @@ private slots:
     void rawAccelChanged(float x, float y, float z);
     void setNextAccStep();
     void restartCal();
+    void useMagToggle();
 
 signals:
     void calibrationSave();
     void calibrationCancel();
+    void saveToRam();
 };
 
 #endif // CALIBRATEBLE_H
