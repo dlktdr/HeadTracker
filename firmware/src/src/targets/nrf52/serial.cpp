@@ -30,13 +30,13 @@
 #include <usb/class/usb_cdc.h>
 #include <zephyr.h>
 
+#include "boards/features.h"
 #include "io.h"
 #include "log.h"
 #include "nano33ble.h"
 #include "soc_flash.h"
 #include "trackersettings.h"
 #include "ucrc16lib.h"
-
 
 // Wait for serial connection before starting..
 // #define WAITFOR_DTR
@@ -103,8 +103,8 @@ void serial_init()
 
   dev = DEVICE_DT_GET(DT_N_INST_0_zephyr_cdc_acm_uart);
   if (!device_is_ready(dev)) {
-		//LOG_ERR("CDC ACM device not ready");
-		return;
+    // LOG_ERR("CDC ACM device not ready");
+    return;
   }
 
   ret = usb_enable(NULL);
@@ -305,7 +305,6 @@ void parseData(DynamicJsonDocument &json)
 
   // Reset Center
   if (strcmp(command, "RstCnt") == 0) {
-    // TODO we should also log when the button on the device issues a Reset Center
     LOGI("Resetting Center");
     pressButton();
 
@@ -341,6 +340,14 @@ void parseData(DynamicJsonDocument &json)
     json["Cmd"] = "Set";
     serialWriteJSON(json);
 
+    // Send Firmware Features
+  } else if (strcmp(command, "Feat") == 0) {
+    LOGI("Sending Features");
+    json.clear();
+    json["Cmd"] = "Feat";
+    json["Feat"] = getFeatures();
+    serialWriteJSON(json);
+
     // Im Here Received, Means the GUI is running
   } else if (strcmp(command, "IH") == 0) {
     __NOP();
@@ -374,6 +381,7 @@ void parseData(DynamicJsonDocument &json)
     fwjson["Vers"] = STRINGIFY(FW_VER_TAG);
     fwjson["Hard"] = FW_BOARD;
     fwjson["Git"] = STRINGIFY(FW_GIT_REV);
+    fwjson["Feat"] = getFeatures();
     serialWriteJSON(fwjson);
 
     // Unknown Command

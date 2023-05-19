@@ -71,7 +71,7 @@ public:
 
     QString hardware() {return _setting["Hard"].toString();}
     QString fwVersion() {return _setting["Vers"].toString();}
-    void setHardware(QString vers,QString hard, QString git="");
+    void setHardware(QString vers,QString hard, QString git="", qulonglong features=0);
 
     void setSoftIronOffsets(float soo[3][3]);
 
@@ -85,7 +85,8 @@ public:
     QMap<QString, bool> getDataItemsDiff();
     void setDataItemsMatched() {_deviceDataItems = _dataItems;}
     // Gets all currently sending data items
-    QMap<QString, bool> getDataItems();    
+    QMap<QString, bool> getDataItems();
+
 
 signals:
     void rawGyroChanged(float x, float y, float z);

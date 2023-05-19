@@ -20,6 +20,9 @@
 #define HAS_POWERLED
 #define HAS_NOTIFYLED
 #define HAS_PWMOUTPUTS
+#define HAS_BT5
+#define HAS_UART
+#define HAS_UART_INV_REQ_SHORT // User must connect two pins for Rx Inversion
 
 // Mapping Analog numbers to Analog pins
 #define AN0 7 // AN4 pin

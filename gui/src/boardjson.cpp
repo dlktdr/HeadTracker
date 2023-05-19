@@ -54,7 +54,7 @@ void BoardJson::dataIn(QByteArray &data)
         if(!jsonqueue.isEmpty()) {
             serialDataOut += jsonqueue.dequeue();
             jsonwaitingack = 1;
-            emit serialTxReady();            
+            emit serialTxReady();
         }
 
         // Found a not-acknowldege character, resend data
@@ -263,7 +263,7 @@ void BoardJson::allowAccessChanged(bool acc)
     lastjson.clear();
     imheretimout.stop();
     updatesettingstmr.stop();
-    rxParamsTimer.stop();    
+    rxParamsTimer.stop();
     if(acc)
         connect(trkset,SIGNAL(requestedDataItemChanged()),this,SLOT(reqDataItemChanged()));
     else
@@ -304,7 +304,7 @@ void BoardJson::sendSerialJSON(QString command, QVariantMap map)
     }
 
     // Add serial data to the TX buffer, emit a signal it's ready
-    serialDataOut += lastjson;    
+    serialDataOut += lastjson;
     jsonwaitingack = 1; // Set as faulted until ACK returned
 
     emit serialTxReady();
@@ -343,7 +343,7 @@ void BoardJson::parseIncomingJSON(const QVariantMap &map)
         int arrlength=0;
         for (QVariantMap::const_iterator it = cmap.cbegin(), end = cmap.cend(); it != end; ++it) {
             if(it.key().startsWith('6')) {
-                QByteArray arr = QByteArray::fromBase64(it.value().toByteArray());                
+                QByteArray arr = QByteArray::fromBase64(it.value().toByteArray());
                 if(it.key().endsWith("u16")) {
                     const uint16_t *darray = ArrayType<uint16_t>::getData(arr,arrlength);
                     for(int i=0;i< arrlength;i++) {
@@ -377,7 +377,7 @@ void BoardJson::parseIncomingJSON(const QVariantMap &map)
                     for(int i=0;i< arrlength;i++) {
                         trkset->setLiveData(it.key().mid(1,it.key().length()-4) + QString("[%1]").arg(i),darray[i]);
                     }
-                }                
+                }
 
                 // Don't add it as encoded
                 cmap.remove(it.key());
@@ -389,11 +389,13 @@ void BoardJson::parseIncomingJSON(const QVariantMap &map)
 
     // Firmware Hardware and Version
     } else if (map["Cmd"].toString() == "FW") {
-        _boardName = map["Hard"].toString();
-        trkset->setHardware(map["Vers"].toString(),
-                            map["Hard"].toString(),
-                            map["Git"].toString());
-        emit boardDiscovered(this);
+        if(map["Hard"].toString() == boardName()) {
+            trkset->setHardware(map["Vers"].toString(),
+                                map["Hard"].toString(),
+                                map["Git"].toString(),
+                                map["Feat"].toULongLong());
+            emit boardDiscovered(this);
+        }
     }
 }
 

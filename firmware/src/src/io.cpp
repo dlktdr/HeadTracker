@@ -1,6 +1,7 @@
+#include "io.h"
+
 #include <zephyr.h>
 
-#include "io.h"
 #include "defines.h"
 
 #if defined(HAS_WS2812)
@@ -10,9 +11,9 @@
 
 #endif
 
+#include "log.h"
 #include "soc_flash.h"
 #include "trackersettings.h"
-#include "log.h"
 
 K_SEM_DEFINE(button_sem, 0, 1);
 K_SEM_DEFINE(lngbutton_sem, 0, 1);
@@ -110,7 +111,7 @@ void io_Thread()
       led_sequence[2].time = 300;
       led_sequence[3].time = 0;  // End Sequence
 
-    // Gyro not calibrated but bluetooth is connected. Mostly Blue, Pulse of Red
+      // Gyro not calibrated but bluetooth is connected. Mostly Blue, Pulse of Red
     } else if (_ledmode & LED_GYROCAL && _ledmode & LED_BTCONNECTED) {
       led_sequence[0].RGB = RGB_BLUE;
       led_sequence[0].time = 500;
@@ -118,21 +119,21 @@ void io_Thread()
       led_sequence[1].time = 20;
       led_sequence[2].time = 0;  // End Sequence
 
-    // Gyro Calibration Mode - Red slow, equal flashing
-    } else if (_ledmode & LED_GYROCAL) { // Priority 2
+      // Gyro Calibration Mode - Red slow, equal flashing
+    } else if (_ledmode & LED_GYROCAL) {  // Priority 2
       led_sequence[0].RGB = RGB_RED;
       led_sequence[0].time = 400;
       led_sequence[1].RGB = RGB_OFF;
       led_sequence[1].time = 400;
       led_sequence[2].time = 0;  // End Sequence
 
-    // Bluetooth Connected - Blue light on solid
+      // Bluetooth Connected - Blue light on solid
     } else if (_ledmode & LED_BTCONNECTED) {
       led_sequence[0].RGB = RGB_BLUE;
       led_sequence[0].time = 100;
       led_sequence[1].time = 0;  // End Sequence
 
-    // Bluetooth Scanning, Blue light slow blinking
+      // Bluetooth Scanning, Blue light slow blinking
     } else if (_ledmode & LED_BTSCANNING) {
       led_sequence[0].RGB = RGB_BLUE;
       led_sequence[0].time = 300;
@@ -177,8 +178,8 @@ void io_Thread()
 
 #if defined(HAS_WS2812)
     const struct device *strip = DEVICE_DT_GET(DT_NODELABEL(led_strip));
-    //strip = device_get_binding(DT_NODELABEL(led_strip));
-	  if (strip) {
+    // strip = device_get_binding(DT_NODELABEL(led_strip));
+    if (strip) {
       struct led_rgb pixel;
       pixel.b = curcolor & 0xFF;
       pixel.g = (curcolor >> 8) & 0xFF;
@@ -224,14 +225,13 @@ void io_Thread()
 bool readCenterButton()
 {
 #if defined(PCB_NANO33BLE)
-    int butpin = trkset.getButtonPin();
-    if (butpin < 1 || butpin > 13)
-      return false;
-    pinMode(D_TO_ENUM(butpin), INPUT_PULLUP);
-    return digitalRead(D_TO_ENUM(butpin)) == 0;
+  int butpin = trkset.getButtonPin();
+  if (butpin < 1 || butpin > 13) return false;
+  pinMode(D_TO_ENUM(butpin), INPUT_PULLUP);
+  return digitalRead(D_TO_ENUM(butpin)) == 0;
 #else
-    pinMode(IO_CENTER_BTN, INPUT_PULLUP);
-    return digitalRead(IO_CENTER_BTN) == 0;
+  pinMode(IO_CENTER_BTN, INPUT_PULLUP);
+  return digitalRead(IO_CENTER_BTN) == 0;
 #endif
 }
 

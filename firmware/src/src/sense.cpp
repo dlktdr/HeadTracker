@@ -58,7 +58,7 @@
 #include "BMM150/bmm150_common.h"
 #endif
 
-//#define DEBUG_SENSOR_RATES
+// #define DEBUG_SENSOR_RATES
 
 void gyroCalibrate();
 
@@ -270,6 +270,7 @@ void calculate_Thread()
     // Toggles output on and off if long pressed
     bool butlngdwn = false;
     if (wasButtonLongPressed()) {
+      LOGI("Button Long Pressed");
       trpOutputEnabled = !trpOutputEnabled;
       butlngdwn = true;
     }
@@ -287,6 +288,7 @@ void calculate_Thread()
     // Zero button was pressed, adjust all values to zero
     bool butdnw = false;
     if (wasButtonPressed()) {
+      LOGI("Button Pressed");
       rolloffset = roll;
       panoffset = pan;
       tiltoffset = tilt;
@@ -887,7 +889,7 @@ void sensor_Thread()
       gyrz = tmpgyr[2];
     }
 
-    if(!trkset.getDisMag()) {
+    if (!trkset.getDisMag()) {
       if (magValid) {
         // --- Magnetometer Calcs
         rmagx = tmag[0];
@@ -919,11 +921,11 @@ void sensor_Thread()
         madgsensbits |= MADGINIT_MAG;
       }
     } else {
-        magx = 0;
-        magy = 0;
-        magz = 0;
-        madgsensbits |= MADGINIT_MAG;
-      }
+      magx = 0;
+      magy = 0;
+      magz = 0;
+      madgsensbits |= MADGINIT_MAG;
+    }
 
     // Run Gyro Calibration
     gyroCalibrate();
@@ -1055,12 +1057,13 @@ void gyroCalibrate()
       k_mutex_unlock(&data_mutex);
 
       // Check if they differ from the flash values and save if out of range
-      if(fabs(gyrxoff - filt_gyrx) > GYRO_FLASH_IF_OFFSET ||
-         fabs(gyryoff - filt_gyry) > GYRO_FLASH_IF_OFFSET ||
-         fabs(gyrzoff - filt_gyrz) > GYRO_FLASH_IF_OFFSET) {
+      if (fabs(gyrxoff - filt_gyrx) > GYRO_FLASH_IF_OFFSET ||
+          fabs(gyryoff - filt_gyry) > GYRO_FLASH_IF_OFFSET ||
+          fabs(gyrzoff - filt_gyrz) > GYRO_FLASH_IF_OFFSET) {
         if (!sent_gyro_cal_msg) {
           k_sem_give(&saveToFlash_sem);
-          LOGW("Gyro calibration differs from saved value. Updating flash, x=%.3f,y=%.3f,z=%.3f", filt_gyrx, filt_gyry, filt_gyrz);
+          LOGW("Gyro calibration differs from saved value. Updating flash, x=%.3f,y=%.3f,z=%.3f",
+               filt_gyrx, filt_gyry, filt_gyrz);
           sent_gyro_cal_msg = true;
         }
       }
