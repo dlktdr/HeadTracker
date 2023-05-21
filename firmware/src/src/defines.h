@@ -8,17 +8,16 @@
 #define FW_GIT_REV "-------"
 #endif
 
-// The majority of features are the same on Sense2
-#if defined(PCB_NANO33BLE_SENSE2)
-#define PCB_NANO33BLE
-#endif
-
+// Include the correct board header file
 #if defined(PCB_NANO33BLE)
-#define FW_BOARD "NANO33BLE"
+#include "boards/nano33board.h"
+#elif defined(PCB_NANO33BLE_SENSE2) // Most features are the same on sense rev2
+#define PCB_NANO33BLE
+#include "boards/nano33board.h"
 #elif defined(PCB_DTQSYS)
-#define FW_BOARD "DTQSYS"
+#include "boards/dtqsys_ht.h"
 #else
-#error NO PCB DEFINED
+#error "NO PCB DEFINED"
 #endif
 
 #if defined(DEBUG)
@@ -73,39 +72,6 @@
 #define UARTRX_THREAD_PRIO PRIORITY_LOW - 2
 #define UARTTX_THREAD_PRIO PRIORITY_HIGH
 
-// Perepherial Channels Used, Make sure no dupilcates here
-// and can't be used by Zephyr
-// Cannot use GPIOTE interrupt as I override the interrupt handler in PPMIN
-
-#define PPMOUT_PPICH 0
-#define SERIALIN1_PPICH 1
-#define SERIALIN2_PPICH 2
-#define SERIALOUT_PPICH 3
-#define PPMIN_PPICH1 4
-#define PPMIN_PPICH2 5
-// 6 Used
-// 7 Enable always gets flipped off
-// 8+ ??
-
-#define SERIAL_UARTE_CH 1
-
-// GPIOTE
-// Known good GPIOTE 0,1,2,3,4,5,6,7
-#define SERIALOUT0_GPIOTE 4
-#define SERIALOUT1_GPIOTE 5
-#define SERIALIN0_GPIOTE 0
-#define SERIALIN1_GPIOTE 1
-#define SERIALIN2_GPIOTE 2
-#define PPMIN_GPIOTE 6
-#define PPMOUT_GPIOTE 7
-
-#define SBUSIN_TIMER_CH 2
-#define PPMOUT_TIMER_CH 3
-#define PPMIN_TIMER_CH 4
-
-#define PPMIN_TMRCOMP_CH 0
-#define PPMOUT_TMRCOMP_CH 0
-
 // Buffer Sizes for Serial/JSON
 #define JSON_BUF_SIZE 3000
 #define TX_RNGBUF_SIZE 1500
@@ -143,8 +109,3 @@
 #error("NO RTOS DECLARED")
 #endif
 
-#if defined(PCB_NANO33BLE)
-#include "boards/nano33board.h"
-#elif defined(PCB_DTQSYS)
-#include "boards/dtqsys_ht.h"
-#endif

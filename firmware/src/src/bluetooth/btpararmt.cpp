@@ -15,7 +15,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "btpararmt.h"
+#include "bluetooth/btpararmt.h"
 
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/conn.h>
@@ -384,11 +384,19 @@ static void start_scan(void)
   LOGI("Scanning successfully started");
 }
 
+#ifdef HAS_BT5
 static struct bt_conn_le_phy_param phy_params = {
     .options = BT_CONN_LE_PHY_OPT_CODED_S8,
     .pref_tx_phy = BT_GAP_LE_PHY_CODED,
     .pref_rx_phy = BT_GAP_LE_PHY_CODED,
 };
+#else
+static struct bt_conn_le_phy_param phy_params = {
+    .options = BT_CONN_LE_PHY_OPT_NONE,
+    .pref_tx_phy = BT_GAP_LE_PHY_1M,
+    .pref_rx_phy = BT_GAP_LE_PHY_1M,
+};
+#endif
 
 static void rmtconnected(struct bt_conn *conn, uint8_t err)
 {

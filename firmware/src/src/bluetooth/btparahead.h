@@ -16,12 +16,12 @@
  */
 
 #pragma once
+#include "ble.h"
 
-#define INPUT_PULLUP (GPIO_INPUT | GPIO_PULL_UP)
-#define NRFPIN(port, pin) ((32 * port) + pin)
-#define PIN_TO_NRFPORT(pin) (pin / 32)
-#define PIN_TO_NRFPIN(pin) (pin % 32)
-#define END_IO_PINS PIN(COUNT, -1, "\0")
-#define PIN_NAME_TO_NUM(pin) PinNumber[pin]
-
-extern const char* StrPins[];
+void BTHeadStop();
+void BTHeadStart();
+void BTHeadExecute();
+void BTHeadSetChannel(int channel, const uint16_t value);
+uint16_t BTHeadGetChannel(int channel);
+const char* BTHeadGetAddress();
+int8_t BTHeadGetRSSI();

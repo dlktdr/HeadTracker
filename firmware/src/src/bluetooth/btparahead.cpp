@@ -15,7 +15,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "btparahead.h"
+#include "bluetooth/btparahead.h"
 
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/conn.h>
@@ -142,11 +142,19 @@ static struct bt_conn_cb conn_callbacks = {
     //.security_changed = securitychanged
 };
 
+#ifdef HAS_BT5
 static struct bt_conn_le_phy_param phy_params = {
     .options = BT_CONN_LE_PHY_OPT_CODED_S8,
     .pref_tx_phy = BT_GAP_LE_PHY_CODED,
     .pref_rx_phy = BT_GAP_LE_PHY_CODED,
 };
+#else
+static struct bt_conn_le_phy_param phy_params = {
+    .options = BT_CONN_LE_PHY_OPT_NONE,
+    .pref_tx_phy = BT_GAP_LE_PHY_1M,
+    .pref_rx_phy = BT_GAP_LE_PHY_1M,
+};
+#endif
 
 bt_addr_le_t addrarry[CONFIG_BT_ID_MAX];
 size_t addrcnt = 1;

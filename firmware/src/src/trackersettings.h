@@ -5,8 +5,8 @@
 #include "PPMIn.h"
 #include "PPMOut.h"
 #include "arduinojsonwrp.h"
-#include "btparahead.h"
-#include "btpararmt.h"
+#include "bluetooth/btparahead.h"
+#include "bluetooth/btpararmt.h"
 #include "serial.h"
 #include "basetrackersettings.h"
 

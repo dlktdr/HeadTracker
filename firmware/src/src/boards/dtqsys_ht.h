@@ -1,11 +1,28 @@
+/*
+ * This file is part of the Head Tracker distribution (https://github.com/dlktdr/headtracker)
+ * Copyright (c) 2023 Cliff Blackburn
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #pragma once
 
 #include <stdint.h>
 
 #include "boardsdefs.h"
+#include "nrfcommon.h"
 
-// Pull up pin mode
-#define INPUT_PULLUP (GPIO_INPUT | GPIO_PULL_UP)
+#define FW_BOARD "DTQSYS"
 
 // Board features
 #define HAS_WS2812
@@ -16,6 +33,8 @@
 #define HAS_CENTERBTN
 #define HAS_BT5
 #define HAS_UART
+#define HAS_PPM
+#define HAS_USBHID
 #define AN0 1  // Battery V on analog 0
 #define AN1 5  // Pin 0.29
 #define AN2 0  // Pin 0.02

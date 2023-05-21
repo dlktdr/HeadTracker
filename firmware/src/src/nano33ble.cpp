@@ -6,15 +6,20 @@
 #include <drivers/counter.h>
 #include <nrfx_clock.h>
 
+#include "defines.h"
 #include "PPMIn.h"
 #include "PPMOut.h"
 #include "uart_mode.h"
 #include "analog.h"
-#include "ble.h"
+#include "bluetooth/ble.h"
 #include "io.h"
-#include "joystick.h"
+#ifdef HAS_USBHID
+#include "usbhid/joystick.h"
+#endif
 #include "log.h"
-#include "pmw.h"
+#ifdef HAS_PWM
+  #include "pmw.h"
+#endif
 #include "sense.h"
 #include "serial.h"
 #include "soc_flash.h"
@@ -31,6 +36,7 @@ K_SEM_DEFINE(saveToFlash_sem, 0, 1);
 
 void start(void)
 {
+#ifdef CPU_NRF_52840
   // Force High Accuracy Clock
   const char *clock_label = DT_LABEL(CLOCK_NODE);
   clock0 = DEVICE_DT_GET(DT_NODELABEL(clock));
@@ -38,9 +44,12 @@ void start(void)
     printk("Failed to fetch clock %s\n", clock_label);
   }
   clock_control_on(clock0, CLOCK_CONTROL_NRF_SUBSYS_HF);
+#endif
 
   // USB Joystick
+#if defined(HAS_USBHID)
   joystick_init();
+#endif
 
   // Setup Serial
   logger_init();
@@ -50,10 +59,12 @@ void start(void)
   sense_Init();
 
   // Start Externam UART
+#if defined(HAS_UART)
   uart_init();
+#endif
 
   // PWM Outputs - Fixed to A0-A3
-#if defined(HAS_PWMOUTPUTS)
+#if defined(HAS_PWM)
   PWM_Init(PWM_FREQUENCY);
 #endif
 
@@ -66,8 +77,10 @@ void start(void)
     setLEDFlag(LED_BTCONFIGURATOR);
   }
 
+#if defined(HAS_BT4) || defined(HAS_BT5)
   // Start the BT Thread
   bt_init();
+#endif
 
   // Monitor if saving to EEPROM is required
   while(1) {
@@ -92,6 +105,4 @@ K_THREAD_DEFINE(uartRx_Thread_ID, 512, uartRx_Thread, NULL, NULL, NULL, UARTRX_T
 
 #elif defined(RTOS_FREERTOS)
 #error "TODO... Add tasks for FreeRTOS"
-#else
-#error "RTOS NOT SPECIFIED"
 #endif

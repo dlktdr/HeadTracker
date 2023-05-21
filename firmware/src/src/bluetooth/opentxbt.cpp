@@ -2,7 +2,6 @@
 
 #include <zephyr.h>
 
-
 constexpr uint8_t START_STOP = 0x7E;
 constexpr uint8_t BYTE_STUFF = 0x7D;
 constexpr uint8_t STUFF_MASK = 0x20;

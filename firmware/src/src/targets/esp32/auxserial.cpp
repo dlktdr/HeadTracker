@@ -17,9 +17,6 @@
 
 #include "auxserial.h"
 
-#include <nrfx.h>
-#include <nrfx_ppi.h>
-#include <nrfx_uarte.h>
 #include <zephyr.h>
 
 #include "defines.h"

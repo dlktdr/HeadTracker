@@ -33,10 +33,10 @@
 #include "boards/features.h"
 #include "io.h"
 #include "log.h"
-#include "nano33ble.h"
 #include "soc_flash.h"
 #include "trackersettings.h"
 #include "ucrc16lib.h"
+#include "nano33ble.h"
 
 // Wait for serial connection before starting..
 // #define WAITFOR_DTR
@@ -340,14 +340,6 @@ void parseData(DynamicJsonDocument &json)
     json["Cmd"] = "Set";
     serialWriteJSON(json);
 
-    // Send Firmware Features
-  } else if (strcmp(command, "Feat") == 0) {
-    LOGI("Sending Features");
-    json.clear();
-    json["Cmd"] = "Feat";
-    json["Feat"] = getFeatures();
-    serialWriteJSON(json);
-
     // Im Here Received, Means the GUI is running
   } else if (strcmp(command, "IH") == 0) {
     __NOP();
@@ -381,7 +373,8 @@ void parseData(DynamicJsonDocument &json)
     fwjson["Vers"] = STRINGIFY(FW_VER_TAG);
     fwjson["Hard"] = FW_BOARD;
     fwjson["Git"] = STRINGIFY(FW_GIT_REV);
-    fwjson["Feat"] = getFeatures();
+    fwjson["Feat0"] = getFeatures0();
+    fwjson["Feat1"] = getFeatures1();
     serialWriteJSON(fwjson);
 
     // Unknown Command

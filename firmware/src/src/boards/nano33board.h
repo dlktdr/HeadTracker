@@ -1,17 +1,34 @@
+/*
+ * This file is part of the Head Tracker distribution (https://github.com/dlktdr/headtracker)
+ * Copyright (c) 2023 Cliff Blackburn
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #pragma once
 
 #include <stdint.h>
 
 #include "boardsdefs.h"
-
-// Pull up pin mode
-#define INPUT_PULLUP (GPIO_INPUT | GPIO_PULL_UP)
+#include "nrfcommon.h"
 
 // Board Features
 #if defined(PCB_NANO33BLE_SENSE2)
+  #define FW_BOARD "NANO33BLE_SR2"
   #define HAS_BMI270
   #define HAS_BMM150
 #else
+  #define FW_BOARD "NANO33BLE"
   #define HAS_LSM9DS1
 #endif
 
@@ -19,10 +36,12 @@
 #define HAS_3DIODE_RGB
 #define HAS_POWERLED
 #define HAS_NOTIFYLED
-#define HAS_PWMOUTPUTS
 #define HAS_BT5
 #define HAS_UART
 #define HAS_UART_INV_REQ_SHORT // User must connect two pins for Rx Inversion
+#define HAS_PPM
+#define HAS_PWM
+#define HAS_USBHID
 
 // Mapping Analog numbers to Analog pins
 #define AN0 7 // AN4 pin

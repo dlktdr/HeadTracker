@@ -17,11 +17,15 @@
 
 #pragma once
 
-#define INPUT_PULLUP (GPIO_INPUT | GPIO_PULL_UP)
-#define NRFPIN(port, pin) ((32 * port) + pin)
-#define PIN_TO_NRFPORT(pin) (pin / 32)
-#define PIN_TO_NRFPIN(pin) (pin % 32)
-#define END_IO_PINS PIN(COUNT, -1, "\0")
-#define PIN_NAME_TO_NUM(pin) PinNumber[pin]
+#include "ble.h"
 
-extern const char* StrPins[];
+extern uint16_t chanoverrides;
+
+void BTRmtStop();
+void BTRmtStart();
+void BTRmtExecute();
+void BTRmtSetChannel(int channel, const uint16_t value);
+uint16_t BTRmtGetChannel(int channel);
+const char* BTRmtGetAddress();
+void BTRmtSendButtonPress(bool longpress = false);
+int8_t BTRmtGetRSSI();

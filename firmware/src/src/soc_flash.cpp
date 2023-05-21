@@ -46,7 +46,7 @@ void socClearFlash()
   flash_dev = device_get_binding(DT_CHOSEN_ZEPHYR_FLASH_CONTROLLER_LABEL);
 
   if (!flash_dev) {
-    LOGE("Nordic nRF5 flash driver was not found!");
+    LOGE("Flash driver was not found!");
     return;
   }
 
@@ -70,7 +70,7 @@ int socWriteFlash(const char *datain, int len)
   flash_dev = device_get_binding(DT_CHOSEN_ZEPHYR_FLASH_CONTROLLER_LABEL);
 
   if (!flash_dev) {
-    LOGE("Nordic nRF5 flash driver was not found!");
+    LOGE("Flash driver was not found!");
     return -1;
   }
 

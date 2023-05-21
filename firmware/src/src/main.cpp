@@ -12,6 +12,7 @@
 #include <usb/usb_device.h>
 #include <zephyr.h>
 
+#include "defines.h"
 #include "io.h"
 #include "nano33ble.h"
 
@@ -46,12 +47,14 @@ static int board_internal_sensors_init(const struct device *dev)
 
   io_init();
 
+#ifdef CPU_NRF
   NRF_PWM_Type *PWM[] = {NRF_PWM0, NRF_PWM1, NRF_PWM2, NRF_PWM3};
 
   for (unsigned int i = 0; i < (ARRAY_SIZE(PWM)); i++) {
     PWM[i]->ENABLE = 0;
     PWM[i]->PSEL.OUT[0] = 0xFFFFFFFFUL;
   }
+#endif
 
   return 0;
 }

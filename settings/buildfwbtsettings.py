@@ -5,7 +5,7 @@ import csv
 
 import set_common as s
 
-f = open("../firmware/src/src/targets/nrf52/blechars.cpp","w")
+f = open("../firmware/src/src/Bluetooth/blechars.cpp","w")
 f.write("""\
 /*
 * This file is part of the Head Tracker distribution (https://github.com/dlktdr/headtracker)

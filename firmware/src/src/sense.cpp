@@ -24,12 +24,11 @@
 
 #include "MadgwickAHRS/MadgwickAHRS.h"
 #include "analog.h"
-#include "ble.h"
+#include "bluetooth/ble.h"
 #include "defines.h"
-#include "filters.h"
-#include "filters/SF1eFilter.h"
+#include "filters/filters.h"
 #include "io.h"
-#include "joystick.h"
+#include "usbhid/joystick.h"
 #include "log.h"
 #include "nano33ble.h"
 #include "pmw.h"
@@ -38,24 +37,24 @@
 #include "uart_mode.h"
 
 #if defined(HAS_APDS9960)
-#include "APDS9960/APDS9960.h"
+#include "sensors/APDS9960/APDS9960.h"
 #endif
 #if defined(HAS_LSM9DS1)
-#include "LSM9DS1/LSM9DS1.h"
+#include "sensors/LSM9DS1/LSM9DS1.h"
 #endif
 #if defined(HAS_MPU6500)
-#include "MPU6xxx/inv_mpu.h"
+#include "sensors/MPU6xxx/inv_mpu.h"
 #endif
 #if defined(HAS_QMC5883)
-#include "QMC5883/qmc5883.h"
+#include "sensors/QMC5883/qmc5883.h"
 #endif
 #if defined(HAS_BMI270)
-#include "BMI270/bmi270.h"
-#include "BMI270/bmi2common.h"
+#include "sensors/BMI270/bmi270.h"
+#include "sensors/BMI270/bmi2common.h"
 #endif
 #if defined(HAS_BMM150)
-#include "BMM150/bmm150.h"
-#include "BMM150/bmm150_common.h"
+#include "sensors/BMM150/bmm150.h"
+#include "sensors/BMM150/bmm150_common.h"
 #endif
 
 // #define DEBUG_SENSOR_RATES

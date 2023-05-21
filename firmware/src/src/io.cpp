@@ -281,7 +281,7 @@ void io_init()
   pinMode(IO_LED, GPIO_OUTPUT);
 #endif
 
-#if defined(HAS_PWMOUTPUTS)
+#if defined(HAS_PWM)
   pinMode(IO_PWM0, GPIO_OUTPUT);  // PWM 0
   pinMode(IO_PWM1, GPIO_OUTPUT);  // PWM 1
   pinMode(IO_PWM2, GPIO_OUTPUT);  // PWM 2

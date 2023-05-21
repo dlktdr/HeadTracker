@@ -1,5 +1,7 @@
 #pragma once
 
+#include "SF1eFilter.h"
+
 void filter_lowPass(float input, float *output, float beta) { *output += beta * (input - *output); }
 
 void filter_expAverage(float *variable, float beta, float *buffer)
