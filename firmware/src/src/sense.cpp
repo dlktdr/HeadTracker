@@ -22,7 +22,7 @@
 #include <drivers/sensor.h>
 #include <zephyr.h>
 
-#include "MadgwickAHRS/MadgwickAHRS.h"
+#include "ahrs/MadgwickAHRS/MadgwickAHRS.h"
 #include "analog.h"
 #include "bluetooth/ble.h"
 #include "defines.h"
