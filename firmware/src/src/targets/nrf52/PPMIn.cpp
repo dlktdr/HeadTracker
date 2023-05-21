@@ -60,8 +60,8 @@ ISR_DIRECT_DECLARE(PPMInGPIOTE_ISR)
     // Read Timer Captured Value
     uint32_t time = PPMIN_TIMER->CC[PPMIN_TMRCOMP_CH];
 
-    // Long pulse = Start.. Minimum frame sync is 3ms.. Giving a 10us leway
-    if (time > 2990) {
+    // Long pulse = Start.. Minimum frame sync is 2ms.. Giving a 10us leway
+    if (time > 1990) {
       // Copy all data to another buffer so it can be read complete
       for (int i = 0; i < 16; i++) {
         ch_count = isrch_count;
@@ -232,7 +232,7 @@ void PpmIn_execute()
     if (cyclescount < cyclesbeforeppm)
       cyclescount++;
     else {
-      if (sentconn == true && ch_count >= 4 && ch_count <= 16) {
+      if (sentconn == true && ch_count >= 2 && ch_count <= 16) {
         LOGI("PPM Input Data Received");
         sentconn = false;
       }
