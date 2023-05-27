@@ -122,7 +122,6 @@
 #define GYRO_FLASH_IF_OFFSET 0.5 // Save to flash if gyro is off more than 0.5 degrees/sec from flash value
 
 // RTOS Specifics
-#if defined(RTOS_ZEPHYR)
 #include "zephyr.h"
 #define millis() k_cyc_to_ms_floor32(k_cycle_get_32())
 #define millis64() k_uptime_get()
@@ -130,18 +129,6 @@
 #define micros64() k_cyc_to_us_floor64(k_cycle_get_32())
 #define rt_sleep_ms(x) k_msleep(x)
 #define rt_sleep_us(x) k_usleep(x)
-
-#elif defined(RTOS_FREERTOS)
-#error("FREE RTOS NOT IMPLEMENTED")
-#define micros()
-#define micros64()
-#define millis()
-#define rt_sleep_s(x)
-#define rt_sleep_ms(x)
-#define rt_sleep_us(x)
-#else
-#error("NO RTOS DECLARED")
-#endif
 
 #if defined(PCB_NANO33BLE)
 #include "boards/nano33board.h"

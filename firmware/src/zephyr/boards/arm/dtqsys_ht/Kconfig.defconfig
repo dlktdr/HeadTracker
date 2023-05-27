@@ -8,6 +8,9 @@ config BOARD
 config BT_CTLR
 	default BT
 
+config BOARD_DTQSYS_INIT
+	default y
+
 if I2C
 config I2C_NRFX
 	default y

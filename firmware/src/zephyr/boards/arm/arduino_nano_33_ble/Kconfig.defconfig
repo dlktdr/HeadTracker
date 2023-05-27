@@ -8,6 +8,9 @@ config BOARD
 config BT_CTLR
 	default BT
 
+config BOARD_ARDUINO_NANO_33_BLE_INIT
+	default y
+
 if I2C
 config I2C_NRFX
 	default y
@@ -16,8 +19,6 @@ config NRFX_TWIM
 config I2C_0
 	default y
 config I2C_1
-	default y
-config BOARD_ARDUINO_NANO_33_BLE_INIT_SENSORS
 	default y
 endif #I2C
 

@@ -18,3 +18,6 @@ CONFIG_BOOTLOADER_BOSSA_LEGACY=y
 
 # additional board options
 CONFIG_GPIO_AS_PINRESET=y
+
+# Custom Initialization for arduino nano 33 ble
+CONFIG_BOARD_ARDUINO_NANO_33_BLE_INIT=y
