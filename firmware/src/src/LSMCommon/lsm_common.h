@@ -3,7 +3,7 @@
 #include <drivers/i2c.h>
 #include <zephyr.h>
 
-#include "LSM6DS3/lsm6ds3_reg.h"
+#include "LSM6DS3/lsm6ds3tr-c_reg.h"
 
 #define BOOT_TIME 20
 

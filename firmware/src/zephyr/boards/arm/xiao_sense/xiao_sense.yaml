@@ -1,5 +1,5 @@
 identifier: xiao_sense
-name: XIAO BLE
+name: XIAO Sense
 type: mcu
 arch: arm
 ram: 256
