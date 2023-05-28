@@ -70,6 +70,11 @@ jobs:
           cd /src/firmware/src
           pio run -e Head_Tracker-Nano33_BLE_Sense2
 
+      - name: Build XIAO
+        run: |
+          cd /src/firmware/src
+          pio run -e Head_Tracker-Nano33_BLE_Sense2          
+
       # Runs a set of commands using the runners shell
       - name: Package Firmware
         uses: 'actions/upload-artifact@v2'
@@ -77,5 +82,6 @@ jobs:
           name: Firmware_Binaries
           path: |
             /src/firmware/src/.pio/build/*/*.bin
+            /src/firmware/src/.pio/build/*/*.uf2
           retention-days: 60
           if-no-files-found: error
