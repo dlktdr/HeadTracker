@@ -80,7 +80,7 @@ jobs:
         run: |
           gitrevshort=$(git rev-parse --short HEAD)
           gitlasttag=$(git describe --tags --abbrev=0)
-          gitlasttag=${gitlasttag//./_}
+          gitlasttag=`echo $gitlasttag | tr '.' '_'`
           cd /src/firmware/src
           pio run -e Head_Tracker-Nano33_BLE_Sense2
           cd /src/firmware/src/.pio/build/Head_Tracker-XIAOSense
