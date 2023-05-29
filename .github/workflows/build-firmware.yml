@@ -59,7 +59,7 @@ jobs:
 
       - name: Workaround bug in github actions issue 6775
         run: |
-          git config --global --add safe.directory /src
+          git config --global --add safe.directory '*'
           
       - name: Build Firmware Nano 33 BLE
         run: |
@@ -78,7 +78,6 @@ jobs:
 
       - name: Build XIAO
         run: |
-          git config --global --add safe.directory /__w/HeadTracker/HeadTracker
           gitrevshort=$(git rev-parse --short HEAD)
           gitlasttag=$(git describe --tags --abbrev=0)
           gitlasttag=${gitlasttag//./_}
