@@ -78,6 +78,7 @@ jobs:
 
       - name: Build XIAO
         run: |
+          git config --global --add safe.directory /__w/HeadTracker/HeadTracker
           gitrevshort=$(git rev-parse --short HEAD)
           gitlasttag=$(git describe --tags --abbrev=0)
           gitlasttag=${gitlasttag//./_}
