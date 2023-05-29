@@ -59,7 +59,7 @@ jobs:
 
       - name: Workaround bug in github actions issue 6775
         run: |
-          git config --global --add safe.directory /github/workspace
+          git config --global --add safe.directory /src
           
       - name: Build Firmware Nano 33 BLE
         run: |
