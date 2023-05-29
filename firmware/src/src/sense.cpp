@@ -156,6 +156,11 @@ int sense_Init()
   }
 
   i2c_configure(i2c_dev, I2C_SPEED_SET(I2C_SPEED_FAST) | I2C_MODE_MASTER);
+  while(!device_is_ready(device_get_binding("I2C_1"))) {
+    k_msleep(10);
+  }
+  k_msleep(10);
+
 
 #if defined(HAS_LSM9DS1)
   if (!IMU.begin()) {
