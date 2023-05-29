@@ -76,13 +76,13 @@ jobs:
           cd /src/firmware/src
           pio run -e Head_Tracker-Nano33_BLE_Sense2
 
-      - name: Build XIAO
+      - name: Build XIAO Sense Firmware
         run: |
           gitrevshort=$(git rev-parse --short HEAD)
           gitlasttag=$(git describe --tags --abbrev=0)
           gitlasttag=`echo $gitlasttag | tr '.' '_'`
           cd /src/firmware/src
-          pio run -e Head_Tracker-Nano33_BLE_Sense2
+          pio run -e Head_Tracker-XIAOSense
           cd /src/firmware/src/.pio/build/Head_Tracker-XIAOSense
           python ../../../tools/uf2conv.py XIA_${gitlasttag}_${gitrevshort}.bin -o ./XIAO_${gitlasttag}_${gitrevshort}.uf2 -f 0xADA52840 -c -b 0x27000
 
