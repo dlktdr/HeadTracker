@@ -74,7 +74,12 @@ jobs:
       - name: Build XIAO
         run: |
           cd /src/firmware/src
-          pio run -e Head_Tracker-Nano33_BLE_Sense2          
+          pio run -e Head_Tracker-Nano33_BLE_Sense2
+          cd /src/firmware/src/tools
+          gitrevshort=$(git rev-parse --short HEAD)
+          gitlasttag=$(git describe --tags --abbrev=0)
+          gitlasttag=${gitlasttag//./_}
+          python ./uf2conv.py ../.pio/build/Head_Tracker-XIAOSense/XIA_$gitlasttag_$gitrevshort.bin -o ./XIAO_$gitlasttag_$gitrevshort.uf2 -f 0xADA52840 -c -b 0x27000
 
       # Runs a set of commands using the runners shell
       - name: Package Firmware
@@ -83,6 +88,6 @@ jobs:
           name: Firmware_Binaries
           path: |
             /src/firmware/src/.pio/build/*/*.bin
-            /src/firmware/src/.pio/build/*/*.uf2
-          retention-days: 60
+            /src/firmware/src/tools/*.uf2
+          retention-days: 90
           if-no-files-found: error
