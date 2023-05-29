@@ -98,9 +98,14 @@ void io_Thread()
       digitalWrite(IO_LED, led_is_on);
     }
 #endif
+    // Unrecoverable error
+    if(_ledmode & LED_HARDFAULT) {
+      led_sequence[0].RGB = RGB_RED;
+      led_sequence[0].time = 10;
+      led_sequence[1].time = 0;
 
-    // Force BT head configuration mode !Must be priority 1
-    if (_ledmode & LED_BTCONFIGURATOR) {
+    // Force BT head configuration mode
+    } else if (_ledmode & LED_BTCONFIGURATOR) {
       led_sequence[0].RGB = RGB_RED;
       led_sequence[0].time = 300;
       led_sequence[1].RGB = RGB_GREEN;

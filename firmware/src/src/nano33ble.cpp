@@ -35,7 +35,8 @@ void start(void)
   serial_init();
 
   // Actual Calculations - sense.cpp
-  sense_Init();
+  if(sense_Init())
+    setLEDFlag(LED_HARDFAULT);
 
   // Start Externam UART
   uart_init();
