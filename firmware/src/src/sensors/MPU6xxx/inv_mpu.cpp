@@ -37,7 +37,6 @@
  * min(int a, int b)
  */
 
-#define I2C_DEV "I2C_1"
 
 #define _i2c_write   i2c_writeBytes
 #define i2c_read    i2c_readBytes
@@ -51,7 +50,7 @@
 
 bool i2c_writeBytes(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint8_t *data)
 {
-  const struct device* i2c_dev = device_get_binding(I2C_DEV);
+  const struct device* i2c_dev = DT_I2C_SENSORS;
   if (!i2c_dev) {
     LOGE("Could not get device binding for I2C");
   }
@@ -68,7 +67,7 @@ bool i2c_writeBytes(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint8_t *d
 
 bool i2c_readBytes(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint8_t *data)
 {
-  const struct device* i2c_dev = device_get_binding(I2C_DEV);
+  const struct device* i2c_dev = DT_I2C_SENSORS;
   if (!i2c_dev) {
     LOGE("Could not get device binding for I2C");
     return -1;

@@ -63,11 +63,9 @@
 #define QMC5883L_REG_ID 0x0D
 #define QMC5883_ID_VAL 0xFF
 
-#define I2C_DEV "I2C_1"
-
 static bool i2c_writeBytes(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint8_t *data)
 {
-  const struct device* i2c_dev = device_get_binding(I2C_DEV);
+  const struct device* i2c_dev = DT_I2C_SENSORS;
   if (!i2c_dev) {
     LOGE("Could not get device binding for I2C");
   }
@@ -84,7 +82,7 @@ static bool i2c_writeBytes(uint8_t devAddr, uint8_t regAddr, uint8_t length, uin
 
 static bool i2c_readBytes(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint8_t *data)
 {
-  const struct device* i2c_dev = device_get_binding(I2C_DEV);
+  const struct device* i2c_dev = DT_I2C_SENSORS;
   if (!i2c_dev) {
     LOGE("Could not get device binding for I2C");
     return -1;

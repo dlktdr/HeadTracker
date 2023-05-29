@@ -101,7 +101,7 @@ void serial_init()
 {
   int ret;
 
-  dev = DEVICE_DT_GET(DT_N_INST_0_zephyr_cdc_acm_uart);
+  dev = DT_GUI_UART;
   if (!device_is_ready(dev)) {
     // LOG_ERR("CDC ACM device not ready");
     return;

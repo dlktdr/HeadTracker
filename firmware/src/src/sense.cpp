@@ -139,7 +139,7 @@ struct k_poll_event calculateRunEvents[1] = {
 
 int sense_Init()
 {
-  const struct device *i2c_dev = device_get_binding("I2C_1");
+  const struct device *i2c_dev = DT_I2C_SENSORS;
   if (!i2c_dev) {
     LOGE("Could not get device binding for I2C");
     return false;

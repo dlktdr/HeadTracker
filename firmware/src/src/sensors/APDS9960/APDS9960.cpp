@@ -47,7 +47,7 @@ APDS9960::~APDS9960() {}
 
 bool APDS9960::begin()
 {
-  i2c_dev = device_get_binding("I2C_1");
+  i2c_dev = DT_I2C_SENSORS;
   if (!i2c_dev) {
     LOGE("Could not get device binding for I2C");
     return false;

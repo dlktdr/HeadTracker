@@ -52,3 +52,7 @@
 
 #define PPMIN_TMRCOMP_CH 0
 #define PPMOUT_TMRCOMP_CH 0
+
+// Device tree bindings
+#define DT_I2C_SENSORS device_get_binding("I2C_1")
+#define DT_GUI_UART DEVICE_DT_GET(DT_N_INST_0_zephyr_cdc_acm_uart)

@@ -47,24 +47,24 @@
 //       using functions PIN_TO_NRFPORT & PIN_TO_NRFPIN
 //     - The string descrition for AN0 would be StrPins[IO_AN0]
 
-#define PIN_X                                      \
-  PIN(AN0, NRFPIN(0, 3), "Analog Battery Voltage") \
-  PIN(AN1, NRFPIN(0, 29), "Analog 1 (AIN_5)")      \
-  PIN(AN2, NRFPIN(0, 2), "Analog 2 (AIN_0)")       \
-  PIN(AN3, NRFPIN(0, 28), "Analog 3 (AIN_4)")      \
-  PIN(CENTER_BTN, NRFPIN(1, 13), "Center Button")  \
-  PIN(LEDWS, NRFPIN(1, 10), "WS2812 LED")          \
-  PIN(LED, NRFPIN(0, 13), "Notification LED")      \
-  PIN(PPMOUT, NRFPIN(0, 31), "PPM Output Pin")     \
-  PIN(PPMIN, NRFPIN(0, 30), "PPM In Pin")          \
-  PIN(BUZZ, NRFPIN(1, 11), "Buzzer")               \
-  PIN(TX, NRFPIN(0, 9), "UART Transmit")           \
-  PIN(RX, NRFPIN(0, 10), "UART Receive")           \
-  PIN(TXINV, NRFPIN(0, 4), "UART TX, Inv Pin")     \
-  PIN(RXINVO, NRFPIN(0, 0), "UART RX, Out Inv")    \
-  PIN(RXINVI, NRFPIN(0, 1), "UART RX, Inp Inv")    \
-  PIN(I2CSDA, NRFPIN(0, 5), "I2C - SDA")           \
-  PIN(I2CSCL, NRFPIN(1, 9), "I2C - SCL")           \
+#define PIN_X\
+  PIN(AN0,        NRFPIN(0, 3), "Analog Battery Voltage")\
+  PIN(AN1,        NRFPIN(0, 29), "Analog 1 (AIN_5)")\
+  PIN(AN2,        NRFPIN(0, 2), "Analog 2 (AIN_0)")\
+  PIN(AN3,        NRFPIN(0, 28), "Analog 3 (AIN_4)")\
+  PIN(CENTER_BTN, NRFPIN(1, 13), "Center Button")\
+  PIN(LEDWS,      NRFPIN(1, 10), "WS2812 LED")\
+  PIN(LED,        NRFPIN(0, 13), "Notification LED")\
+  PIN(PPMOUT,     NRFPIN(0, 31), "PPM Output Pin")\
+  PIN(PPMIN,      NRFPIN(0, 30), "PPM In Pin")\
+  PIN(BUZZ,       NRFPIN(1, 11), "Buzzer")\
+  PIN(TX,         NRFPIN(0, 9), "UART Transmit")\
+  PIN(RX,         NRFPIN(0, 10), "UART Receive")\
+  PIN(TXINV,      NRFPIN(0, 4), "UART TX, Inv Pin")\
+  PIN(RXINVO,     NRFPIN(0, 0), "UART RX, Out Inv")\
+  PIN(RXINVI,     NRFPIN(0, 1), "UART RX, Inp Inv")\
+  PIN(I2CSDA,     NRFPIN(0, 5), "I2C - SDA")\
+  PIN(I2CSCL,     NRFPIN(1, 9), "I2C - SCL")\
   END_IO_PINS
 
 typedef enum {
