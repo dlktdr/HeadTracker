@@ -18,11 +18,6 @@ int32_t platform_write_lsm6(void *handle, uint8_t reg, const uint8_t *bufp, uint
 
 int initailizeLSM6DS3(stmdev_ctx_t *dev_ctx)
 {
-  // Power up the LSM6DS3 on the XIAO Sense
-  #if defined(PCB_XIAOSENSE)
-  pinMode(IO_LSM6DS3PWR, GPIO_OUTPUT);
-  digitalWrite(IO_LSM6DS3PWR, 1);
-  #endif
   uint8_t whoamI=0, rst;
   /* Initialize mems driver interface */
   dev_ctx->write_reg = platform_write_lsm6;

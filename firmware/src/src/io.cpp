@@ -251,6 +251,12 @@ void io_init()
   digitalWrite(IO_I2C_PU, 1);
 #endif
 
+#if defined(PCB_XIAOSENSE)
+  // 10K I2C Pull up Resistors on internal LSM6DS3
+  pinMode(IO_LSM6DS3PWR, GPIO_OUTPUT);
+  digitalWrite(IO_LSM6DS3PWR, 1);
+#endif
+
 #if defined(HAS_CENTERBTN)
   pinMode(IO_CENTER_BTN, INPUT_PULLUP);
 #endif

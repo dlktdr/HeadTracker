@@ -48,7 +48,7 @@
   PIN(MISO,         NRFPIN(0, 24), "SPI Data In - Flash") \
   PIN(FLSH_WP,      NRFPIN(0, 22), "Flash Write Protect") \
   PIN(FLSH_HLD,     NRFPIN(0, 23), "Flash Hold") \
-  PIN(LSM6DS3PWR,   NRFPIN(1,  8), "LSM6DS3 Power") \
+  PIN(LSM6DS3PWR,   NRFPIN(1,  8), "LSM6DS3 I2C Pullup 6DPWR") \
   PIN(LSM6DS3INT,   NRFPIN(0, 11), "LSM6DS3 Interrupt") \
   PIN(I2CSCL,       NRFPIN(0, 27), "I2C - SCL") \
   PIN(I2CSDA,       NRFPIN(0,  7), "I2C - SDA") \

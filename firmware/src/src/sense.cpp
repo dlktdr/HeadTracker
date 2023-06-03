@@ -159,7 +159,7 @@ int sense_Init()
   while(!device_is_ready(device_get_binding("I2C_1"))) {
     k_msleep(10);
   }
-  k_msleep(10);
+  k_msleep(20);
 
 
 #if defined(HAS_LSM9DS1)
