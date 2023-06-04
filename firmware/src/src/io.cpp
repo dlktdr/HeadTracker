@@ -98,7 +98,7 @@ void io_Thread()
       digitalWrite(IO_LED, led_is_on);
     }
 #endif
-    // Unrecoverable error
+    // Unrecoverable error, Solid Red
     if(_ledmode & LED_HARDFAULT) {
       led_sequence[0].RGB = RGB_RED;
       led_sequence[0].time = 10;
@@ -161,7 +161,7 @@ void io_Thread()
 
     // Run the Sequence
     uint32_t curcolor = led_sequence[rgb_sequence_no].RGB;
-    if (led_sequence[rgb_sequence_no].time == 0) curcolor = 0;
+    if (led_sequence[rgb_sequence_no].time == 0) curcolor = led_sequence[rgb_sequence_no-1].RGB;
 
 #if defined(HAS_3DIODE_RGB)
     // TODO - Replace me with PWM control
