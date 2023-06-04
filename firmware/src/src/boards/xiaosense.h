@@ -14,10 +14,10 @@
 #define HAS_CENTERBTN
 
 // Mapping Analog numbers to Analog pins
-#define AN0 0 // A0 pin
-#define AN1 1 // A1 pin
-#define AN2 4 // A2 pin
-#define AN3 5 // A3 pin
+#define AN0 7 // Battery Voltage
+#define AN1 1 //
+#define AN2 4 //
+#define AN3 5 //
 
 // Pins (name, number, description)
 // NOTE: These pins are an enum entry. e.g. IO_D2 = 0
@@ -27,7 +27,8 @@
 //     - The string descrition for D2 would be StrPins[IO_D2]
 
 #define PIN_X \
-  PIN(AN0,          NRFPIN(0,  2), "Analog 0 (AIN_0)") \
+  PIN(AN0,          NRFPIN(0, 31), "Analog Battery Voltage") \
+  PIN(ANBATT_ENA,   NRFPIN(0, 14), "Battery Monitor Enable") \
   PIN(AN1,          NRFPIN(0,  3), "Analog 1 (AIN_1)") \
   PIN(AN2,          NRFPIN(0, 28), "Analog 2 (AIN_4)") \
   PIN(AN3,          NRFPIN(0, 29), "Analog 3 (AIN_5)") \

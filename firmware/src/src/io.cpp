@@ -255,6 +255,10 @@ void io_init()
   // 10K I2C Pull up Resistors on internal LSM6DS3
   pinMode(IO_LSM6DS3PWR, GPIO_OUTPUT);
   digitalWrite(IO_LSM6DS3PWR, 1);
+
+  // Enable Battery Voltage Monitor
+  pinMode(IO_ANBATT_ENA, GPIO_OUTPUT);
+  digitalWrite(IO_ANBATT_ENA, 0);
 #endif
 
 #if defined(HAS_CENTERBTN)
