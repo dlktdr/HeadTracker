@@ -252,8 +252,12 @@ void io_init()
 #endif
 
 #if defined(PCB_XIAOSENSE)
-  // 10K I2C Pull up Resistors on internal LSM6DS3
-  pinMode(IO_LSM6DS3PWR, GPIO_OUTPUT);
+  // 10K I2C Pull up Resistors on internal LSM6DS3, High Drive Strength
+  pinMode(IO_LSM6DS3PWR, GPIO_OUTPUT | GPIO_DS_ALT_LOW | GPIO_DS_ALT_HIGH);
+  // Shut Sensor off
+  digitalWrite(IO_LSM6DS3PWR, 0);
+  k_msleep(100);
+  // Enable Sensor
   digitalWrite(IO_LSM6DS3PWR, 1);
 
   // Enable Battery Voltage Monitor

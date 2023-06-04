@@ -7,13 +7,13 @@
 int32_t platform_read_lsm6(void *handle, uint8_t reg, uint8_t *bufp, uint16_t len)
 {
   const struct device *i2c_dev = device_get_binding("I2C_1");
-  return i2c_burst_read(i2c_dev, 0x6A, reg, bufp, len);
+  return i2c_burst_read(i2c_dev, LSM6DS3TR_C_ID, reg, bufp, len);
 }
 
 int32_t platform_write_lsm6(void *handle, uint8_t reg, const uint8_t *bufp, uint16_t len)
 {
   const struct device *i2c_dev = device_get_binding("I2C_1");
-  return i2c_burst_write(i2c_dev, 0x6A, reg, bufp, len);
+  return i2c_burst_write(i2c_dev, LSM6DS3TR_C_ID, reg, bufp, len);
 }
 
 int initailizeLSM6DS3(stmdev_ctx_t *dev_ctx)

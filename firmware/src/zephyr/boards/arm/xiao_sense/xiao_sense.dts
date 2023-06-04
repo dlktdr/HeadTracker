@@ -69,7 +69,7 @@
 	status = "okay";
 	sda-pin =  <7>;
 	scl-pin = <27>;
-  clock-frequency = <100000>;
+  clock-frequency = <400000>;
 };
 
 &spi3 {
