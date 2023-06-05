@@ -19,7 +19,7 @@
 #define HAS_3DIODE_RGB
 #define HAS_POWERLED
 #define HAS_NOTIFYLED
-#define HAS_PWMOUTPUTS
+// #define HAS_PWMOUTPUTS   //disable PWM pins for SPI CS
 
 // Mapping Analog numbers to Analog pins
 #define AN0 7 // AN4 pin
@@ -51,10 +51,6 @@
   PIN(LEDR,       NRFPIN(0, 24), "Reg LED") \
   PIN(LEDG,       NRFPIN(0, 16), "Green LED") \
   PIN(LEDB,       NRFPIN(0,  6), "Blue LED") \
-  PIN(PWM0,       NRFPIN(0,  4), "PWM 0 Output (A0)") \
-  PIN(PWM1,       NRFPIN(0,  5), "PWM 1 Output (A1)") \
-  PIN(PWM2,       NRFPIN(0, 30), "PWM 2 Output (A2)") \
-  PIN(PWM3,       NRFPIN(0, 29), "PWM 3 Output (A3)") \
   PIN(AN0,        NRFPIN(0, 31), "Analog 0 (A4)") \
   PIN(AN1,        NRFPIN(0,  2), "Analog 1 (A5)") \
   PIN(AN2,        NRFPIN(0, 28), "Analog 2 (A6)") \

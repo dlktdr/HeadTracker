@@ -247,6 +247,8 @@ int sense_Init()
 // Calculations and Main Channel Thread
 //----------------------------------------------------------------------
 
+#include "oled.h"
+
 void calculate_Thread()
 {
   while (1) {
@@ -266,6 +268,10 @@ void calculate_Thread()
     tilt = madgwick.getRoll();
     pan = madgwick.getYaw();
     k_mutex_unlock(&sensor_mutex);
+
+    oled_set_tilt(tilt);
+    oled_set_roll(roll);
+    oled_set_pan(pan);
 
     // Toggles output on and off if long pressed
     bool butlngdwn = false;
