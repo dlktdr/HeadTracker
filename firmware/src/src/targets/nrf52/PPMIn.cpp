@@ -93,18 +93,24 @@ ISR_DIRECT_DECLARE(PPMInGPIOTE_ISR)
 void PpmIn_setPin(int pinNum)
 {
   // Same pin, just quit
-  if (pinNum == setPin) return;
 
 #if defined(PCB_NANO33BLE) // Nano33, can pick D2-D12
+  if (pinNum == setPin) return;
   int pin = D_TO_PIN(pinNum);
   int port = D_TO_PORT(pinNum);
   int setPin_pin = D_TO_PIN(setPin);
   int setPin_port = D_TO_PORT(setPin);
 #else
+#if defined(HAS_PPMIN)
+  // If pin is fixed don't allow turning it off
+  static bool initalized = false;
+  if(initalized) return;
+  initalized = true;
   int pin = PIN_TO_NRFPIN(PIN_NAME_TO_NUM(IO_PPMIN));
   int port = PIN_TO_NRFPORT(PIN_NAME_TO_NUM(IO_PPMIN));
   int setPin_pin = pin;
   int setPin_port = port;
+#endif
 #endif
 
   // Stop Interrupts

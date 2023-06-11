@@ -14,6 +14,8 @@
 #define HAS_MPU6500
 #define HAS_QMC5883
 #define HAS_CENTERBTN
+#define HAS_PPMOUT
+#define HAS_PPMIN
 #define AN0 1 // Battery V on analog 0
 #define AN1 5 // Pin 0.29
 #define AN2 0 // Pin 0.02
