@@ -37,7 +37,7 @@
 constexpr int MAX_LOG_LENGTH=6000; // How many bytes to keep of log data in the gui
 const QString version=GIT_VERSION_TAG_STRING; // Current Version Number
 const QStringList firmwares={"BNO055","NANO33BLE"}; // Allowable hardware types
-const QUrl helpurl("https://headtracker.gitbook.io/head-tracker/settings/gui-settings");
+const QUrl helpurl("https://headtracker.gitbook.io/head-tracker-v2.2/settings/gui-settings");
 const QUrl discordurl("https://discord.gg/ux5hEaNSPQ");
 const QUrl githuburl("https://github.com/dlktdr/HeadTracker");
 const QUrl donateurl("https://www.paypal.com/donate?hosted_button_id=NMU3B9Z82JB3A");
