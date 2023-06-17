@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - v2.2x
     paths:
       - '.github/workflows/build-firmware.yml'
       - 'firmware/src/**'
@@ -60,7 +61,7 @@ jobs:
       - name: Workaround bug in github actions issue 6775
         run: |
           git config --global --add safe.directory '*'
-          
+
       - name: Build Firmware Nano 33 BLE
         run: |
           cd /src/firmware/src
@@ -74,7 +75,7 @@ jobs:
       - name: Build Firmware Arduino Nano 33 BLE Sense Rev 2
         run: |
           cd /src/firmware/src
-          pio run -e Head_Tracker-Nano33_BLE_Sense2
+          pio run -e Head_Tracker-Nano33_BLE_Sense_Rev_2
 
       - name: Build XIAO Sense Firmware
         run: |
