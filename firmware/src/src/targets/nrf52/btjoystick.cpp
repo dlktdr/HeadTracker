@@ -76,7 +76,7 @@ enum {
 };
 
 static struct hids_report input = {
-    .id = 0x01,
+    .id = 0x00,
     .type = HIDS_INPUT,
 };
 
