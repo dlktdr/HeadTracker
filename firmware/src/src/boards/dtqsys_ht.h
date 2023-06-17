@@ -33,7 +33,8 @@
 #define HAS_CENTERBTN
 #define HAS_BT5
 #define HAS_UART
-#define HAS_PPM
+#define HAS_PPMIN
+#define HAS_PPMOUT
 #define HAS_USBHID
 #define AN0 1  // Battery V on analog 0
 #define AN1 5  // Pin 0.29

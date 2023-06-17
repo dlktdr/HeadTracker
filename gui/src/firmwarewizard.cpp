@@ -175,8 +175,7 @@ void FirmwareWizard::startProgramming()
     if(boardType == BRD_NANO33BLE) {
         arguments.prepend(QString("--port=%1").arg(lastFoundPort));
         addToLog("Starting: " + programmercommand + " " + arguments.join(" "));
-
-        programmer->start(programmercommand, arguments);
+        programmer->start(QCoreApplication::applicationDirPath() + "/" + programmercommand, arguments);
     } else if (boardType == BRD_ARDUINONANO) {
         arguments.prepend(QString ("-P" + lastFoundPort));
         addToLog("Starting: " + programmercommand + " " + arguments.join(" "));
@@ -271,9 +270,10 @@ void FirmwareWizard::parseFirmwareFile(QString ff)
         // Extract all the variant keys, make a new map and add them to mapData
         QMap<QString,QVariant> mapData;
         foreach(QString childkey, ini.childKeys()) {
+            QString orgiKey = childkey;
             if(childkey.toLower() == "filename")
                 childkey = "filename";
-            mapData[childkey] = ini.value(childkey);
+            mapData[childkey] = ini.value(orgiKey);
         }
         itm->setData(Qt::UserRole,mapData);
         ui->lstFirmwares->addItem(itm);

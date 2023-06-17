@@ -39,9 +39,11 @@
 #define HAS_BT5
 #define HAS_UART
 #define HAS_UART_INV_REQ_SHORT // User must connect two pins for Rx Inversion
-#define HAS_PPM
+#define HAS_PPMOUT
+#define HAS_PPMIN
 #define HAS_PWM
 #define HAS_USBHID
+#define HAS_PWMOUTPUTS
 
 // Mapping Analog numbers to Analog pins
 #define AN0 7 // AN4 pin

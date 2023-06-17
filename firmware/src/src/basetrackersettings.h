@@ -68,6 +68,11 @@ public:
   static constexpr uint8_t UART_MODE_SBUS = 1;
   static constexpr uint8_t UART_MODE_CRSFIN = 2;
   static constexpr uint8_t UART_MODE_CRSFOUT = 3;
+  static constexpr uint8_t BT_MODE_OFF = 0;
+  static constexpr uint8_t BT_MODE_HEAD = 1;
+  static constexpr uint8_t BT_MODE_REMOTE = 2;
+  static constexpr uint8_t BT_MODE_SCANNER = 3;
+  static constexpr uint8_t BT_MODE_HIDJOYSTICK = 4;
 
   BaseTrackerSettings() {
     strcpy(btpairedaddress,"");
@@ -778,10 +783,10 @@ public:
   inline const bool& getCh5Arm() {return ch5arm;}
   void setCh5Arm(bool val=false) { ch5arm = val; }
 
-  // Bluetooth Mode (0-Off, 1- Head, 2-Receive, 3-Scanner)
+  // Bluetooth Mode (0-Off, 1- Head, 2-Receive, 3-Scanner, BT_HID_Joystick)
   inline const uint8_t& getBtMode() {return btmode;}
   bool setBtMode(uint8_t val=0) {
-    if(val >= 0 && val <= 3) {
+    if(val >= 0 && val <= 4) {
       btmode = val;
       return true;
     }
@@ -1386,7 +1391,7 @@ public:
       }
     }
   }
-  
+
   void setJSONData(DynamicJsonDocument &json)
   {
     // Sends only requested data items
@@ -1555,7 +1560,7 @@ protected:
   bool sboutinv = true; // SBUS Transmit Inverted
   bool crsftxinv = false; // Invert CRSF output
   bool ch5arm = false; // Set channel 5 to 2000us
-  uint8_t btmode = 0; // Bluetooth Mode (0-Off, 1- Head, 2-Receive, 3-Scanner)
+  uint8_t btmode = 0; // Bluetooth Mode (0-Off, 1- Head, 2-Receive, 3-Scanner, BT_HID_Joystick)
   bool rstonwave = false; // Reset on Proximity Sense
   bool butlngps = false; // Long Press on the Button to Enable/Disable Tilt Roll and Pan
   bool rstontlt = false; // Reset Center on a Head Tilt

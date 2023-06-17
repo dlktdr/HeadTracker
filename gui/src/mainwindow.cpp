@@ -39,7 +39,9 @@ MainWindow::MainWindow(QWidget *parent)
     currentboard = nullptr;
     ui->tabBLE->setCurrentIndex(0);
 
-    setWindowTitle(windowTitle() + " " + version);
+    QString guiDisplayVersion = version;
+    guiDisplayVersion.remove(4,1);
+    setWindowTitle(windowTitle() + " " + guiDisplayVersion);
 
     // Serial Connection
     serialcon = new QSerialPort;
@@ -869,7 +871,8 @@ void MainWindow::updateFromUI()
   //  trkset.setResetCntPPM(rstppm_index==0?-1:rstppm_index);
 
     trkset.setBtMode(ui->cmbBtMode->currentIndex());
-    if(ui->cmbBtMode->currentIndex() > 1) // Remote or Scanner Mode
+    if(ui->cmbBtMode->currentIndex() == TrackerSettings::BT_MODE_REMOTE ||
+        ui->cmbBtMode->currentIndex() == TrackerSettings::BT_MODE_SCANNER)
     {
         ui->lblPairWith->setVisible(true);
         ui->cmbBTRmtMode->setVisible(true);
@@ -1472,15 +1475,17 @@ void MainWindow::boardDiscovered(BoardType *brd)
 
         // Firmware is too old
         if(lmajver > rmajver) {
-            msgbox->setText(tr("Firmware is outdated. Upload a firmware of ") + QString::number((float)lmajver/10,'f',1) + "x for this GUI");
+            msgbox->setText(tr("The firmware on the board is too old. Upload a ") + QString::number((float)lmajver/10,'f',1) + "x version of firmware for this GUI");
             msgbox->setWindowTitle(tr("Firmware Version Mismatch"));
             msgbox->show();
+            serialDisconnect();
 
         // Firmware is too new
         } else if (lmajver < rmajver) {
-            msgbox->setText(tr("Firmware is newer than supported by this GUI. Download ") + QString::number((float)rmajver/10,'f',1) +"x \n\nfrom www.github.com/dlktdr/headtracker");
+            msgbox->setText(tr("Firmware is newer than supported by this application\nDownload the GUI v") + QString::number((float)rmajver/10,'f',1) +" from www.github.com/dlktdr/headtracker");
             msgbox->setWindowTitle(tr("Firmware Version Mismatch"));
             msgbox->show();
+            serialDisconnect();
         }
         channelviewer->setBoard(currentboard);
         if(channelViewerOpen) {

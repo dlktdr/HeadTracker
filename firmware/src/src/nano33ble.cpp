@@ -1,34 +1,28 @@
 
 #include "nano33ble.h"
 
-#include <drivers/clock_control.h>
-#include <drivers/clock_control/nrf_clock_control.h>
 #include <drivers/counter.h>
 #include <nrfx_clock.h>
 
 #include "defines.h"
+#include "log.h"
 #include "PPMIn.h"
 #include "PPMOut.h"
-#include "uart_mode.h"
 #include "analog.h"
 #include "bluetooth/ble.h"
+#include "bluetooth/btjoystick.h"
 #include "io.h"
-#ifdef HAS_USBHID
-#include "usbhid/joystick.h"
-#endif
-#include "log.h"
-#ifdef HAS_PWM
-  #include "pmw.h"
-#endif
 #include "sense.h"
 #include "serial.h"
 #include "soc_flash.h"
 #include "trackersettings.h"
-
-#define CLOCK_NODE DT_INST(0, nordic_nrf_clock)
-static const struct device *clock0;
-
-bool led_is_on = false;
+#include "uart_mode.h"
+#ifdef HAS_USBHID
+#include "usbhid/joystick.h"
+#endif
+#ifdef HAS_PWM
+  #include "pmw.h"
+#endif
 
 TrackerSettings trkset;
 
@@ -36,15 +30,8 @@ K_SEM_DEFINE(saveToFlash_sem, 0, 1);
 
 void start(void)
 {
-#ifdef CPU_NRF_52840
-  // Force High Accuracy Clock
-  const char *clock_label = DT_LABEL(CLOCK_NODE);
-  clock0 = DEVICE_DT_GET(DT_NODELABEL(clock));
-  if (clock0 == NULL) {
-    printk("Failed to fetch clock %s\n", clock_label);
-  }
-  clock_control_on(clock0, CLOCK_CONTROL_NRF_SUBSYS_HF);
-#endif
+  // Initalize IO
+  io_init();
 
   // USB Joystick
 #if defined(HAS_USBHID)
@@ -56,7 +43,8 @@ void start(void)
   serial_init();
 
   // Actual Calculations - sense.cpp
-  sense_Init();
+  if(sense_Init())
+    setLEDFlag(LED_HARDFAULT);
 
   // Start Externam UART
 #if defined(HAS_UART)
@@ -72,7 +60,7 @@ void start(void)
   trkset.loadFromEEPROM();
 
   // Check if center button is held down, force BT Configuration mode
-  if(readCenterButton()) {
+  if (readCenterButton()) {
     trkset.setBtMode(BTPARAHEAD);
     setLEDFlag(LED_BTCONFIGURATOR);
   }
@@ -83,14 +71,13 @@ void start(void)
 #endif
 
   // Monitor if saving to EEPROM is required
-  while(1) {
+  while (1) {
     if (!k_sem_take(&saveToFlash_sem, K_FOREVER)) {
       trkset.saveToEEPROM();
     }
   }
 }
 
-#if defined(RTOS_ZEPHYR)
 // Threads
 K_THREAD_DEFINE(io_Thread_id, 512, io_Thread, NULL, NULL, NULL, IO_THREAD_PRIO, 0, 0);
 K_THREAD_DEFINE(serial_Thread_id, 4096, serial_Thread, NULL, NULL, NULL, SERIAL_THREAD_PRIO,
@@ -100,9 +87,7 @@ K_THREAD_DEFINE(sensor_Thread_id, 1024, sensor_Thread, NULL, NULL, NULL, SENSOR_
                 K_FP_REGS, 500);
 K_THREAD_DEFINE(calculate_Thread_id, 1024, calculate_Thread, NULL, NULL, NULL,
                 CALCULATE_THREAD_PRIO, K_FP_REGS, 1000);
-K_THREAD_DEFINE(uartTx_Thread_ID, 1024, uartTx_Thread, NULL, NULL, NULL, UARTTX_THREAD_PRIO, 0, 1000);
-K_THREAD_DEFINE(uartRx_Thread_ID, 512, uartRx_Thread, NULL, NULL, NULL, UARTRX_THREAD_PRIO, 0, 1000);
-
-#elif defined(RTOS_FREERTOS)
-#error "TODO... Add tasks for FreeRTOS"
-#endif
+K_THREAD_DEFINE(uartTx_Thread_ID, 1024, uartTx_Thread, NULL, NULL, NULL, UARTTX_THREAD_PRIO, 0,
+                1000);
+K_THREAD_DEFINE(uartRx_Thread_ID, 512, uartRx_Thread, NULL, NULL, NULL, UARTRX_THREAD_PRIO, 0,
+                1000);

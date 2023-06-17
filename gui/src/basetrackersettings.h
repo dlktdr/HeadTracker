@@ -64,10 +64,15 @@ public:
   static constexpr uint8_t UART_MODE_SBUS = 1;
   static constexpr uint8_t UART_MODE_CRSFIN = 2;
   static constexpr uint8_t UART_MODE_CRSFOUT = 3;
+  static constexpr uint8_t BT_MODE_OFF = 0;
+  static constexpr uint8_t BT_MODE_HEAD = 1;
+  static constexpr uint8_t BT_MODE_REMOTE = 2;
+  static constexpr uint8_t BT_MODE_SCANNER = 3;
+  static constexpr uint8_t BT_MODE_HIDJOYSTICK = 4;
 
   QMap<QString, QString> descriptions;
 
-  BaseTrackerSettings(QObject *parent=nullptr) : 
+  BaseTrackerSettings(QObject *parent=nullptr) :
     QObject(parent)
   {
     _setting["rll_min"] = DEF_MIN_PWM;
@@ -256,7 +261,7 @@ public:
     descriptions["sboutinv"] = "SBUS Transmit Inverted";
     descriptions["crsftxinv"] = "Invert CRSF output";
     descriptions["ch5arm"] = "Set channel 5 to 2000us";
-    descriptions["btmode"] = "Bluetooth Mode (0-Off, 1- Head, 2-Receive, 3-Scanner)";
+    descriptions["btmode"] = "Bluetooth Mode (0-Off, 1- Head, 2-Receive, 3-Scanner, BT_HID_Joystick)";
     descriptions["rstonwave"] = "Reset on Proximity Sense";
     descriptions["butlngps"] = "Long Press on the Button to Enable/Disable Tilt Roll and Pan";
     descriptions["rstontlt"] = "Reset Center on a Head Tilt";
@@ -1171,12 +1176,12 @@ public:
   bool getCh5Arm() {return _setting["ch5arm"].toBool();}
   void setCh5Arm(bool val=false) { _setting["ch5arm"] = val; }
 
-  // Bluetooth Mode (0-Off, 1- Head, 2-Receive, 3-Scanner)
+  // Bluetooth Mode (0-Off, 1- Head, 2-Receive, 3-Scanner, BT_HID_Joystick)
   uint8_t getBtMode() {
     return _setting["btmode"].toUInt();
   }
   bool setBtMode(uint8_t val=0) {
-    if(val <= 3) {
+    if(val <= 4) {
       _setting["btmode"] = val;
       return true;
     }
@@ -1454,5 +1459,5 @@ protected:
   QMap<QString, bool> _dataItems; // Data items that requested to be sent
   QMap<QString, bool> _deviceDataItems; // What items the device is currently sending
 
-  
+
 };

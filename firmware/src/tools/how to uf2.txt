@@ -1,0 +1,3 @@
+Example of properly converting a Bin to UF2 for the XIAO Sense
+
+python.exe .\uf2conv.py ..\.pio\build\Head_Tracker-XIAOSense\XIA_v2_21pre_fca1fcf.bin -o ./XIAO.uf2 -f 0xADA52840 -c -b 0x27000

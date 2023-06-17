@@ -42,6 +42,9 @@
 #if defined(HAS_LSM9DS1)
 #include "sensors/LSM9DS1/LSM9DS1.h"
 #endif
+#if defined(HAS_LSM6DS3)
+#include "LSMCommon/lsm_common.h"
+#endif
 #if defined(HAS_MPU6500)
 #include "sensors/MPU6xxx/inv_mpu.h"
 #endif
@@ -90,9 +93,15 @@ Madgwick madgwick;
 int64_t usduration = 0;
 int64_t senseUsDuration = 0;
 
+const struct device *i2c_dev = nullptr;
+
 #if defined(HAS_APDS9960)
 static bool blesenseboard = false;
 static bool lastproximity = false;
+#endif
+
+#if defined(HAS_LSM6DS3)
+stmdev_ctx_t dev_ctx;
 #endif
 
 #if defined(HAS_LSM9DS1)
@@ -145,7 +154,11 @@ int sense_Init()
     return false;
   }
 
-  i2c_configure(i2c_dev, I2C_SPEED_SET(I2C_SPEED_FAST) | I2C_MODE_MASTER);
+  while(!device_is_ready(device_get_binding("I2C_1"))) {
+    k_msleep(10);
+  }
+  k_msleep(20);
+
 
 #if defined(HAS_LSM9DS1)
   if (!IMU.begin()) {
@@ -196,7 +209,10 @@ int sense_Init()
       bmm150_error_codes_print_result("set_config", rbslt);
     }
   }
+#endif
 
+#if defined(HAS_LSM6DS3)
+  if (initailizeLSM6DS3(&dev_ctx)) return -1;
 #endif
 
 #if defined(HAS_MPU6500)
@@ -608,11 +624,7 @@ void calculate_Thread()
     }
 
     // 14 Set USB Joystick Channels, Only 8 channels
-    static int joycnt = 0;
-    if (joycnt++ == 1) {
-      set_JoystickChannels(channel_data);
-      joycnt = 0;
-    }
+    set_JoystickChannels(channel_data);
 
     // Update the settings for the GUI
     // Serial also uses this data, make sure writes are complete.
@@ -815,6 +827,31 @@ void sensor_Thread()
     magValid = true;
 #endif
 
+#if defined(HAS_LSM6DS3)
+    int16_t data_raw_acceleration[3];
+    int16_t data_raw_angular_rate[3];
+    lsm6ds3tr_c_reg_t reg;
+    lsm6ds3tr_c_status_reg_get(&dev_ctx, &reg.status_reg);
+    if (reg.status_reg.xlda) {
+      /* Read magnetic field data */
+      memset(data_raw_acceleration, 0x00, 3 * sizeof(int16_t));
+      lsm6ds3tr_c_acceleration_raw_get(&dev_ctx, data_raw_acceleration);
+      tacc[0] = (float)lsm6ds3tr_c_from_fs2g_to_mg(data_raw_acceleration[0]) / 1000.0f;
+      tacc[1] = (float)lsm6ds3tr_c_from_fs2g_to_mg(data_raw_acceleration[1]) / 1000.0f;
+      tacc[2] = (float)lsm6ds3tr_c_from_fs2g_to_mg(data_raw_acceleration[2]) / 1000.0f;
+      accValid = true;
+    }
+    if (reg.status_reg.gda) {
+      memset(data_raw_angular_rate, 0x00, 3 * sizeof(int16_t));
+      lsm6ds3tr_c_angular_rate_raw_get(&dev_ctx, data_raw_angular_rate);
+      tgyr[0] = (float)lsm6ds3tr_c_from_fs2000dps_to_mdps(data_raw_angular_rate[0]) / 1000.0f;
+      tgyr[1] = (float)lsm6ds3tr_c_from_fs2000dps_to_mdps(data_raw_angular_rate[1]) / 1000.0f;
+      tgyr[2] = (float)lsm6ds3tr_c_from_fs2000dps_to_mdps(data_raw_angular_rate[2]) / 1000.0f;
+      gyrValid = true;
+    }
+
+#endif
+
 #if defined(HAS_QMC5883)
     if (qmc5883Read(tmag)) {
       magValid = true;
@@ -926,8 +963,8 @@ void sensor_Thread()
       madgsensbits |= MADGINIT_MAG;
     }
 
-    // Run Gyro Calibration
-    gyroCalibrate();
+    // Run Gyro Calibration, only on good gyro data
+    if (gyrValid) gyroCalibrate();
 
     // Only do this update after the first mag and accel data have been read.
     if (madgreads == 0) {

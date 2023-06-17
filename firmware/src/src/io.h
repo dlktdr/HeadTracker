@@ -25,6 +25,7 @@ extern volatile uint32_t _ledmode;
 #define LED_BTSCANNING (1 << 3)
 #define LED_MAGCAL (1 << 4)
 #define LED_BTCONFIGURATOR (1 << 5)
+#define LED_HARDFAULT (1 << 6)
 
 #define RGB_OFF 0
 #define RGB_RED (0xFF << 16)
