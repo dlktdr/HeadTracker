@@ -271,9 +271,10 @@ void FirmwareWizard::parseFirmwareFile(QString ff)
         // Extract all the variant keys, make a new map and add them to mapData
         QMap<QString,QVariant> mapData;
         foreach(QString childkey, ini.childKeys()) {
+            QString orgiKey = childkey;
             if(childkey.toLower() == "filename")
                 childkey = "filename";
-            mapData[childkey] = ini.value(childkey);
+            mapData[childkey] = ini.value(orgiKey);
         }
         itm->setData(Qt::UserRole,mapData);
         ui->lstFirmwares->addItem(itm);
