@@ -1,16 +1,16 @@
 /*
- * Copyright (c) 2020 Jefferson Lee
- *    Modified for DTQSYS board by Cliff Blackburn
+ * Copyright (c) 2022 Marcin Niestroj
+ * Copyright (c) 2022 Peter Johanson
  *
  * SPDX-License-Identifier: Apache-2.0
  */
+
 /dts-v1/;
-#include <dt-bindings/led/led.h>
 #include <nordic/nrf52840_qiaa.dtsi>
 
 / {
-	model = "DTQSYS Head Tracker";
-	compatible = "dtqsys_ht";
+	model = "Seeed XIAO Sense";
+	compatible = "seeed,xiao-sense";
 
 	chosen {
 		zephyr,sram = &sram0;
@@ -18,7 +18,7 @@
 		zephyr,code-partition = &code_partition;
 	};
 
-	aliases {
+  aliases {
 		adcctrl = &adc;
 	};
 };
@@ -29,61 +29,75 @@
 		#address-cells = <1>;
 		#size-cells = <1>;
 
-		code_partition: partition@10000 {
-			label = "code";
-			reg = <0x10000 0xEC000>;
-			read-only;
+		sd_partition: partition@0 {
+			label = "softdevice";
+			reg = <0x00000000 0x00027000>;
 		};
 
-		datapt_partition: partition@FC000 {
+		code_partition: partition@27000 {
+			label = "code_partition";
+			reg = <0x00027000 0x000c5000>;
+		};
+
+    datapt_partition: partition@EC000 {
 			label = "datapt";
-			reg = <0xFC000 0x4000>;
+			reg = <0xEC000 0x8000>;
+		};
+
+		boot_partition: partition@f4000 {
+			label = "adafruit_boot";
+			reg = <0x000f4000 0x0000c000>;
 		};
 	};
 };
-
-/*
- * guide specifying pin numbers: https://docs.zephyrproject.org/latest/boards/arm/nrf52840dk_nrf52840/doc/index.html
- * Given Pin PB.A:
- * pin_no = B*32 + A
- * ex. P1.0 => 32
- */
 
 &adc {
 	status = "okay";
 };
+
 &uart0 {
 	status = "disabled";
 };
+
 &i2c0 {
 	compatible = "nordic,nrf-twim";
 	status = "disabled";
 };
+
 &i2c1 {
 	compatible = "nordic,nrf-twim";
 	status = "okay";
-	sda-pin = <5>;
-	scl-pin = <41>;
+	sda-pin =  <7>;
+	scl-pin = <27>;
   clock-frequency = <400000>;
 };
 
-&spi2 {
-	compatible = "nordic,nrf-spim";
+&spi3 {
 	status = "okay";
-	sck-pin = <13>; //P0.13 - Unused
-	mosi-pin = <42>; //P1.10
-	miso-pin = <40>; //P1.08 - Unused
-    led_strip: ws2812@0 {
-	    compatible = "worldsemi,ws2812-spi";
-		label = "ledstrip";
+	sck-pin = <13>; //P0.21
+	mosi-pin = <42>; //P0.20
+	miso-pin = <40>; //P0.24
+	cs-gpios = <&gpio0 25 GPIO_ACTIVE_LOW>;
+	p25q16h_spi: p25q16h@0 {
+    label = "p25q16h";
+		compatible = "jedec,spi-nor";
 		reg = <0>;
-    spi-max-frequency = <4000000>;
-    color-mapping = <LED_COLOR_ID_GREEN LED_COLOR_ID_RED LED_COLOR_ID_BLUE>;
-		chain-length = <1>;
-		spi-one-frame = <0x70>;
-		spi-zero-frame = <0x40>;
+		wp-gpios = <&gpio0 22 GPIO_ACTIVE_LOW>;
+		hold-gpios = <&gpio0 23 GPIO_ACTIVE_LOW>;
+		spi-max-frequency = <104000000>;
+		jedec-id = [85 60 15];
+		sfdp-bfp = [
+			e5 20 f1 ff  ff ff ff 00  44 eb 08 6b  08 3b 80 bb
+			ee ff ff ff  ff ff 00 ff  ff ff 00 ff  0c 20 0f 52
+			10 d8 08 81
+		];
+		size = <16777216>;
+		has-dpd;
+		t-enter-dpd = <3000>;
+		t-exit-dpd = <8000>;
 	};
 };
+
 &gpio0 {
 	status = "okay";
 };
@@ -94,7 +108,6 @@
 	compatible = "nordic,nrf-usbd";
 	status = "okay";
 };
-
 &pwm0 {
 	status = "disabled";
 };

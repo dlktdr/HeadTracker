@@ -55,6 +55,8 @@ private:
     enum ACCSTEP {ZP,ZM,YP,YM,XP,XM,ACCCOMPLETE};
     int accStep;
 
+    bool hasMagnetometer=true;
+
     void setButtonText();
     void showEvent(QShowEvent *event) override;
 

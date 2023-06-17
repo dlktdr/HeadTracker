@@ -7,7 +7,6 @@
 #include <device.h>
 #include <drivers/led_strip.h>
 #include <drivers/spi.h>
-
 #endif
 
 #include "soc_flash.h"
@@ -99,9 +98,14 @@ void io_Thread()
       digitalWrite(IO_LED, led_is_on);
     }
 #endif
+    // Unrecoverable error, Solid Red
+    if(_ledmode & LED_HARDFAULT) {
+      led_sequence[0].RGB = RGB_RED;
+      led_sequence[0].time = 10;
+      led_sequence[1].time = 0;
 
-    // Force BT head configuration mode !Must be priority 1
-    if (_ledmode & LED_BTCONFIGURATOR) {
+    // Force BT head configuration mode
+    } else if (_ledmode & LED_BTCONFIGURATOR) {
       led_sequence[0].RGB = RGB_RED;
       led_sequence[0].time = 300;
       led_sequence[1].RGB = RGB_GREEN;
@@ -157,7 +161,7 @@ void io_Thread()
 
     // Run the Sequence
     uint32_t curcolor = led_sequence[rgb_sequence_no].RGB;
-    if (led_sequence[rgb_sequence_no].time == 0) curcolor = 0;
+    if (led_sequence[rgb_sequence_no].time == 0) curcolor = led_sequence[rgb_sequence_no-1].RGB;
 
 #if defined(HAS_3DIODE_RGB)
     // TODO - Replace me with PWM control
@@ -245,6 +249,20 @@ void io_init()
   pinMode(IO_I2C_PU, GPIO_OUTPUT);
   digitalWrite(IO_VDDENA, 1);
   digitalWrite(IO_I2C_PU, 1);
+#endif
+
+#if defined(PCB_XIAOSENSE)
+  // 10K I2C Pull up Resistors on internal LSM6DS3, High Drive Strength
+  pinMode(IO_LSM6DS3PWR, GPIO_OUTPUT | GPIO_DS_ALT_LOW | GPIO_DS_ALT_HIGH);
+  // Shut Sensor off
+  digitalWrite(IO_LSM6DS3PWR, 0);
+  k_msleep(100);
+  // Enable Sensor
+  digitalWrite(IO_LSM6DS3PWR, 1);
+
+  // Enable Battery Voltage Monitor
+  pinMode(IO_ANBATT_ENA, GPIO_OUTPUT);
+  digitalWrite(IO_ANBATT_ENA, 0);
 #endif
 
 #if defined(HAS_CENTERBTN)

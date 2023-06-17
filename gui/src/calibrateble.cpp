@@ -151,6 +151,9 @@ void CalibrateBLE::setButtonText()
     } else {
         ui->cmdNext->setText("Save");
     }
+    if(hasMagnetometer == false && step == STEP_ACCELCAL) {
+        ui->cmdPrevious->setText("Cancel");
+    }
     ui->cmdPrevious->setDisabled(false);
     ui->cmdNext->setDisabled(false);
 }
@@ -159,6 +162,16 @@ void CalibrateBLE::showEvent(QShowEvent *event)
 {
     Q_UNUSED(event);
     ui->chkUseMagnetometer->setChecked(!trkset->getDisMag());
+    if(trkset->hardware().contains("XIAO")) {
+        hasMagnetometer = false;
+        if(step == STEP_MAGINTRO || step == STEP_MAGCAL) {
+            step = STEP_ACCELCAL;
+            ui->stackedWidget->setCurrentIndex(step);
+            setButtonText();
+        }
+    }
+     else
+        hasMagnetometer = true;
 }
 
 void CalibrateBLE::nextClicked()
@@ -200,7 +213,7 @@ void CalibrateBLE::nextClicked()
 
 void CalibrateBLE::prevClicked()
 {
-    if(step == 0) {
+    if(step == 0 || (step == STEP_ACCELCAL && hasMagnetometer==false)) {
         emit calibrationCancel();
         hide();
     }

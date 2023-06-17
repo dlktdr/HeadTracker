@@ -60,7 +60,6 @@
 	status = "okay";
 	sda-pin = <14>; //P0.14
 	scl-pin = <15>; //P0.15
-  zephyr,concat-buf-size = <264>;
   clock-frequency = <400000>;
 };
 // we use SPI2 because SPI1/0 shares conflicts with I2C1/0
@@ -97,7 +96,6 @@
 &timer4 {
     status = "disabled";
 };
-
 zephyr_udc0: &usbd {
 	compatible = "nordic,nrf-usbd";
 	status = "okay";
