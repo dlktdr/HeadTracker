@@ -871,7 +871,8 @@ void MainWindow::updateFromUI()
   //  trkset.setResetCntPPM(rstppm_index==0?-1:rstppm_index);
 
     trkset.setBtMode(ui->cmbBtMode->currentIndex());
-    if(ui->cmbBtMode->currentIndex() > 1) // Remote or Scanner Mode
+    if(ui->cmbBtMode->currentIndex() == TrackerSettings::BT_MODE_REMOTE ||
+        ui->cmbBtMode->currentIndex() == TrackerSettings::BT_MODE_SCANNER)
     {
         ui->lblPairWith->setVisible(true);
         ui->cmbBTRmtMode->setVisible(true);

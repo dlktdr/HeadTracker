@@ -4,6 +4,7 @@
 
 #include "btparahead.h"
 #include "btpararmt.h"
+#include "btjoystick.h"
 #include "defines.h"
 
 #define LEN_BLUETOOTH_ADDR 16
@@ -19,7 +20,58 @@ extern struct bt_uuid_16 htoverridech;
 extern struct bt_uuid_16 btbutton;
 extern struct bt_uuid_16 jsonuuid;
 
-typedef enum { BTDISABLE = 0, BTPARAHEAD, BTPARARMT, BTSCANONLY } btmodet;
+/* TODO: Work me in?, instead of using the switch statements
+typedef struct {
+  void (*start)();
+  void (*stop)();
+  void (*exec)();
+  void (*setChannel)(int channel, uint16_t value);
+  uint16_t (*getChannel)(int channel);
+  const char* (*getAddress)();
+  bool (*getConnected)();
+} bluetoothMode;
+
+bluetoothMode bluetoothModes[] = {
+  // Disabled Mode
+  {
+   .start = nullptr,
+   .stop = nullptr,
+   .exec = nullptr,
+   .setChannel = nullptr,
+   .getChannel = nullptr,
+   .getAddress = nullptr,
+   .getConnected = nullptr
+  },
+  // Para Head
+  {
+   .start = BTHeadStart,
+   .stop = BTHeadStop,
+   .exec = BTHeadExecute,
+   .setChannel = BTHeadSetChannel,
+   .getChannel = nullptr,
+   .getAddress = BTHeadGetAddress,
+   .getConnected = BTHeadGetConnected
+  },
+
+  // Para Remote
+  {
+   .start = BTRmtStart,
+   .stop = BTRmtStop,
+   .exec = BTRmtExecute,
+   .setChannel = nullptr,
+   .getChannel = BTRmtGetChannel,
+   .getAddress = BTRmtGetAddress,
+   .getConnected = BTRmtGetConnected
+  },
+  // Scan Only
+
+  // Bt Joystick
+
+  // TODO Finish me
+};
+*/
+
+typedef enum { BTDISABLE = 0, BTPARAHEAD, BTPARARMT, BTSCANONLY, BTJOYSTICK } btmodet;
 
 void bt_Thread();
 void bt_init();
