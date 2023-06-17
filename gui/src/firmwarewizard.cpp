@@ -175,8 +175,7 @@ void FirmwareWizard::startProgramming()
     if(boardType == BRD_NANO33BLE) {
         arguments.prepend(QString("--port=%1").arg(lastFoundPort));
         addToLog("Starting: " + programmercommand + " " + arguments.join(" "));
-
-        programmer->start(programmercommand, arguments);
+        programmer->start(QCoreApplication::applicationDirPath() + "/" + programmercommand, arguments);
     } else if (boardType == BRD_ARDUINONANO) {
         arguments.prepend(QString ("-P" + lastFoundPort));
         addToLog("Starting: " + programmercommand + " " + arguments.join(" "));
