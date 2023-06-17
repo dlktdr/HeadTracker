@@ -607,11 +607,7 @@ void calculate_Thread()
     }
 
     // 14 Set USB Joystick Channels, Only 8 channels
-    static int joycnt = 0;
-    if (joycnt++ == 1) {
-      set_JoystickChannels(channel_data);
-      joycnt = 0;
-    }
+    set_JoystickChannels(channel_data);
 
     // Update the settings for the GUI
     // Serial also uses this data, make sure writes are complete.
