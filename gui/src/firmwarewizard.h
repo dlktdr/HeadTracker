@@ -15,15 +15,18 @@
 #include <QSettings>
 
 #if defined(LINUX)
-    constexpr char bossac_programmer[] = "bossac_lin";
+constexpr char bossac_programmer[] = "bossac_lin";
+const QString localfirmlist = "/tmp/firmware.ini";
+const QString localfirmware = "/tmp/online.fmw";
 #elif defined(WINDOWS)
-    constexpr char bossac_programmer[] = "bossac.exe";
-#elif defined(MACOS)
-    constexpr char bossac_programmer[] = "bossac_mac";
-#endif
-
+constexpr char bossac_programmer[] = "bossac.exe";
 const QString localfirmlist = "firmware.ini";
 const QString localfirmware = "online.fmw";
+#elif defined(MACOS)
+constexpr char bossac_programmer[] = "bossac_mac";
+const QString localfirmlist = "firmware.ini";
+const QString localfirmware = "online.fmw";
+#endif
 
 const QByteArray BLE33HEADER_BIN_MBED("\x00\x00\x04\x20",4);
 const QByteArray BLE33HEADER_BIN_ZEPHER("\x00\x20",2);
