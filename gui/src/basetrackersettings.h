@@ -72,7 +72,7 @@ public:
 
   QMap<QString, QString> descriptions;
 
-  BaseTrackerSettings(QObject *parent=nullptr) :
+  BaseTrackerSettings(QObject *parent=nullptr) : 
     QObject(parent)
   {
     _setting["rll_min"] = DEF_MIN_PWM;
@@ -1459,5 +1459,5 @@ protected:
   QMap<QString, bool> _dataItems; // Data items that requested to be sent
   QMap<QString, bool> _deviceDataItems; // What items the device is currently sending
 
-
+  
 };

@@ -1391,7 +1391,7 @@ public:
       }
     }
   }
-
+  
   void setJSONData(DynamicJsonDocument &json)
   {
     // Sends only requested data items

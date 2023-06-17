@@ -23,10 +23,9 @@
 #include <bluetooth/hci.h>
 #include <bluetooth/uuid.h>
 #include <zephyr.h>
-
 #include "defines.h"
 #include "io.h"
-#include "joystick.h"
+#include "usbhid/joystick.h"
 #include "log.h"
 #include "nano33ble.h"
 #include "trackersettings.h"

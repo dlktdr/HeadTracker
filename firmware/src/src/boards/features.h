@@ -37,7 +37,8 @@ FEAT_BMM150,
 FEAT_LSM9DS1,
 FEAT_LSM6DS3,
 FEAT_CENTERBTN,
-FEAT_PPM,
+FEAT_PPMIN,
+FEAT_PPMOUT,
 FEAT_PWM,
 FEAT_USBHID,
 FEAT_UART,
@@ -52,7 +53,7 @@ FEAT_LZ4_COMPRESS
 uint32_t getFeatures0() { //0-31
   uint32_t features=0;
   #ifdef HAS_WS2812
-    features|=1<<FEAT_WS2182;
+    features|=1<<FEAT_WS2812;
   #endif
   #ifdef HAS_3DIODE_RGB
     features|=1<<FEAT_3DIODE_RGB;
@@ -97,7 +98,10 @@ uint32_t getFeatures0() { //0-31
     features|=1<<FEAT_CENTERBTN;
   #endif
   #ifdef HAS_PPM
-    features|=1<<FEAT_PPM;
+    features|=1<<FEAT_PPMIN;
+  #endif
+  #ifdef HAS_PPM
+    features|=1<<FEAT_PPMOUT;
   #endif
   #ifdef HAS_PWM
     features|=1<<FEAT_PWM;

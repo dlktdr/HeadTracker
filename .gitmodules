@@ -2,5 +2,5 @@
 	path = web_configurator
 	url = https://github.com/dlktdr/HeadTracker_WebBLE.git
 [submodule "firmware/src/src/LSM6DS3"]
-	path = firmware/src/src/LSM6DS3
+	path = firmware/src/src/sensors/LSM6DS3
 	url = https://github.com/STMicroelectronics/LSM6DS3TR-C-PID

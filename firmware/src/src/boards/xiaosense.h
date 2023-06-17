@@ -14,6 +14,8 @@
 #define HAS_CENTERBTN
 #define HAS_PPMIN
 #define HAS_PPMOUT
+#define HAS_UART
+#define HAS_UART_INV_REQ_SHORT // User must connect two pins for Rx Inversion
 
 // Mapping Analog numbers to Analog pins
 #define AN0 7 // Battery Voltage
