@@ -156,12 +156,15 @@ void io_Thread()
 
     } else {
       rgb_sequence_no = 0;
+      led_sequence[0].RGB = 0;
       led_sequence[0].time = 0;
     }
 
     // Run the Sequence
     uint32_t curcolor = led_sequence[rgb_sequence_no].RGB;
-    if (led_sequence[rgb_sequence_no].time == 0) curcolor = led_sequence[rgb_sequence_no-1].RGB;
+    if (led_sequence[rgb_sequence_no].time == 0 && rgb_sequence_no > 0) {
+      curcolor = led_sequence[rgb_sequence_no-1].RGB;
+    }
 
 #if defined(HAS_3DIODE_RGB)
     // TODO - Replace me with PWM control
