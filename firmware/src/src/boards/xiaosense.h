@@ -12,6 +12,8 @@
 #define HAS_NOTIFYLED
 #define HAS_LSM6DS3
 #define HAS_CENTERBTN
+#define HAS_PPMIN
+#define HAS_PPMOUT
 
 // Mapping Analog numbers to Analog pins
 #define AN0 7 // Battery Voltage
