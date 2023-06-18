@@ -201,6 +201,7 @@ void FirmwareWizard::loadOnlineFirmware()
         QNetworkRequest request(url);
         request.setAttribute(QNetworkRequest::CacheSaveControlAttribute,false);
         request.setAttribute(QNetworkRequest::CacheLoadControlAttribute,false);
+        request.setRawHeader("User-Agent", "Mozilla Firefox");
         firmreply = manager.get(request);
         connect(firmreply,SIGNAL(finished()),this,SLOT(firmwareVersionsReady()));
         connect(firmreply,SIGNAL(sslErrors(const QList<QSslError> &)),this, SLOT(ssLerrors(const QList<QSslError> &)));
