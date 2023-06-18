@@ -483,6 +483,8 @@ void FirmwareWizard::programClicked()
         QNetworkRequest request(url);
         request.setAttribute(QNetworkRequest::CacheSaveControlAttribute,false);
         request.setAttribute(QNetworkRequest::CacheLoadControlAttribute,false);
+        request.setRawHeader("User-Agent", "Mozilla Firefox");
+
         hexreply = manager.get(request);
         connect(hexreply,SIGNAL(finished()),this,SLOT(firmwareReady()));
         connect(hexreply,SIGNAL(sslErrors(const QList<QSslError> &)),this, SLOT(ssLerrors(const QList<QSslError> &)));
