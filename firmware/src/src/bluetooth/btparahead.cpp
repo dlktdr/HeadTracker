@@ -28,7 +28,7 @@
 #include "io.h"
 #include "log.h"
 #include "nano33ble.h"
-#include "targets/nrf52/blechars.h"
+#include "bluetooth/blechars.h"
 #include "trackersettings.h"
 
 void sendTrainer();
