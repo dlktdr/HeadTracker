@@ -158,17 +158,30 @@ void drawPosition(int16_t x, int y)
   writeLine(x      , y - D_S, x - D_S, y      , 1);
 }
 
+#define CALIBRATION_MULTIPLY 7
+
 void oled_set_tilt(float tilt_new)
 {
-  tilt = (int16_t)(tilt_new * 7);
+  tilt = (int16_t)(tilt_new * CALIBRATION_MULTIPLY);
 }
 void oled_set_roll(float roll_new)
 {
-  roll = (int16_t)(-roll_new * 7);
+  roll = (int16_t)(-roll_new * CALIBRATION_MULTIPLY);
 }
 void oled_set_pan(float pan_new)
 {
-  pan = (int16_t)(-pan_new * 7);
+  pan = (int16_t)(-pan_new * CALIBRATION_MULTIPLY);
+}
+
+int16_t temp_pan = -10000;
+int16_t temp_roll = -10000;
+
+void set_oled_pan_roll(uint32_t pan_new, uint32_t roll_new)
+{
+  temp_pan = (int16_t)(-((int16_t)pan_new) * CALIBRATION_MULTIPLY);
+  temp_roll = (int16_t)(-((int16_t)roll_new) * CALIBRATION_MULTIPLY);
+  LOGI("temp_pan = %d, temp_roll, %d", temp_pan, temp_roll);
+  // LOGI("pan = %d, roll, %d", temp_pan, temp_roll);
 }
 
 void oled_Thread()
@@ -230,6 +243,7 @@ void oled_Thread()
     drawPosition(ADJUST_PAN-pan, roll+30);
     drawPosition(ADJUST_PAN-pan+50, roll+40);
     drawPosition(ADJUST_PAN-pan-50, roll+60);
+    drawPosition(ADJUST_PAN-pan-temp_pan, roll+temp_roll);
     display_write(display, 0, 0, &buf_desc, buf_clear);
     rt_sleep_ms(25);
   }
