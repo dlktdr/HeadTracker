@@ -92,6 +92,8 @@ void BoardJson::saveToRAM()
     d2s.remove("axissign");
     d2s.remove("Hard");
     d2s.remove("Vers");
+    d2s.remove("Git");
+    d2s.remove("Feat");
     // If no changes, return
     if(d2s.count() == 0)
         return;
@@ -389,13 +391,19 @@ void BoardJson::parseIncomingJSON(const QVariantMap &map)
 
     // Firmware Hardware and Version
     } else if (map["Cmd"].toString() == "FW") {
-        if(map["Hard"].toString() == boardName()) {
-            trkset->setHardware(map["Vers"].toString(),
-                                map["Hard"].toString(),
-                                map["Git"].toString(),
-                                map["Feat"].toULongLong());
-            emit boardDiscovered(this);
+        _boardName = map["Hard"].toString();
+        _boardType = "JSON";
+        QStringList features;
+        foreach(const QString var, map["Feat"].toStringList()) {
+            features.append(var);
         }
+        QString featcsv = features.join(',');
+        trkset->setHardware(map["Vers"].toString(),
+                            map["Hard"].toString(),
+                            map["Git"].toString(),
+                            featcsv);
+        _boardFeat = featcsv;
+        emit boardDiscovered(this);
     }
 }
 

@@ -1,4 +1,4 @@
-#ifndef CALIBRATEBLE_H
+ #ifndef CALIBRATEBLE_H
 #define CALIBRATEBLE_H
 
 #include <QDialog>

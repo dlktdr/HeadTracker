@@ -16,6 +16,8 @@
 #define HAS_PPMOUT
 #define HAS_UART
 #define HAS_UART_INV_REQ_SHORT // User must connect two pins for Rx Inversion
+#define HAS_ANALOG3
+#define HAS_ANALOG3
 
 // Mapping Analog numbers to Analog pins
 #define AN0 7 // Battery Voltage
@@ -36,7 +38,7 @@
   PIN(AN1,          NRFPIN(0,  3), "Analog 1 (AIN_1)") \
   PIN(AN2,          NRFPIN(0, 28), "Analog 2 (AIN_4)") \
   PIN(AN3,          NRFPIN(0, 29), "Analog 3 (AIN_5)") \
-  PIN(CENTER_BTN,   NRFPIN(1, 13), "Center Button, D8") \
+  PIN(CENTER_BTN,   NRFPIN(1, 13), "Center Button [D8]") \
   PIN(LEDR,         NRFPIN(0, 26), "Red LED") \
   PIN(LEDG,         NRFPIN(0, 30), "Green LED") \
   PIN(LEDB,         NRFPIN(0,  6), "Blue LED") \

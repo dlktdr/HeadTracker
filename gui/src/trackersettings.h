@@ -71,7 +71,8 @@ public:
 
     QString hardware() {return _setting["Hard"].toString();}
     QString fwVersion() {return _setting["Vers"].toString();}
-    void setHardware(QString vers,QString hard, QString git="", qulonglong features=0);
+    QString features() {return _setting["Feat"].toString();}
+    void setHardware(QString vers,QString hard, QString git="", QString features="");
 
     void setSoftIronOffsets(float soo[3][3]);
 

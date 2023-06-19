@@ -36,6 +36,8 @@
 #define HAS_PPMIN
 #define HAS_PPMOUT
 #define HAS_USBHID
+#define HAS_ANALOG4
+
 #define AN0 1  // Battery V on analog 0
 #define AN1 5  // Pin 0.29
 #define AN2 0  // Pin 0.02

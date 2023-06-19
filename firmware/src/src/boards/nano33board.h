@@ -41,8 +41,9 @@
 #define HAS_UART_INV_REQ_SHORT // User must connect two pins for Rx Inversion
 #define HAS_PPMOUT
 #define HAS_PPMIN
-#define HAS_PWM
+#define HAS_PWM4
 #define HAS_USBHID
+#define HAS_ANALOG4
 
 // Mapping Analog numbers to Analog pins
 #define AN0 7 // AN4 pin
@@ -124,3 +125,6 @@ const int dpintoenum[] = {0,  0, IO_D2, IO_D3, IO_D4, IO_D5, IO_D6, IO_D7, IO_D8
 // Values below were determined by plotting Gyro Output (See sense.cpp, gyroCalibration())
 #define GYRO_STABLE_DIFF 200.0f
 #define ACC_STABLE_DIFF 2.5f
+
+// Sensor
+#define APDS_HYSTERISIS 10

@@ -22,6 +22,8 @@ DiagnosticDisplay::DiagnosticDisplay(TrackerSettings *ts, QWidget *parent) :
     ui->tblLiveData->resizeColumnToContents(0);
     ui->tblLiveData->horizontalHeader()->setSectionResizeMode(2,QHeaderView::Stretch);
 
+    ui->tblParams->horizontalHeader()->setSectionResizeMode(2,QHeaderView::Stretch);
+
     ui->tabWidget->setCurrentIndex(0);
 }
 

@@ -1149,8 +1149,7 @@ void MainWindow::requestParamsTimeout()
  */
 void MainWindow::eraseFlash()
 {
-  if(currentboard && (currentboard->boardName() == "NANO33BLE" ||
-                      currentboard->boardName() == "DTQSYS")) {
+  if(currentboard) {
     if(QMessageBox::question(this, tr("Set Defaults?"), tr("This will erase all settings to defaults\r\nAre you sure?")) == QMessageBox::Yes) {
       currentboard->_erase();
       currentboard->_reboot();
@@ -1415,9 +1414,7 @@ void MainWindow::boardDiscovered(BoardType *brd)
     currentboard = brd;
 
     // GUI changes info depending on board type
-    if(brd->boardName() == "NANO33BLE" ||
-       brd->boardName() == "DTQSYS" ||
-       brd->boardName() == "XIAOSENSE" ) {
+    if(brd->boardType() == "JSON") {
         addToLog(tr("Connected to a ") + brd->boardName() + "\n");
         ui->cmdStartGraph->setVisible(false);
         ui->cmdStopGraph->setVisible(false);
@@ -1435,31 +1432,52 @@ void MainWindow::boardDiscovered(BoardType *brd)
         ui->stackedWidget->setCurrentIndex(3);
         ui->cmdChannelViewer->setEnabled(true);
 
-        if(brd->boardName() == "DTQSYS" ||
-           brd->boardName() == "XIAOSENSE") { // Pins are all fixed
-            ui->cmbPpmInPin->setVisible(false);
-            ui->lblPPMInPin->setVisible(false);
-            ui->cmbPpmOutPin->setVisible(false);
-            ui->lblPPMOutPin->setVisible(false);
+        // Fixed Pin Center Button
+        if(trkset.features().contains("CB")) {
             ui->cmbButtonPin->setVisible(false);
             ui->lblButtonPin->setVisible(false);
-            ui->tabBLE->setTabVisible(4,false);
+        } else {
+            ui->cmbButtonPin->setVisible(true);
+            ui->lblButtonPin->setVisible(true);
+        }
+
+        // Board needs to send the pin description / possible pin assignments
+
+        // TODO ***** , board needs to send the pin number
+        // Board contains a battery monitor
+        if(trkset.features().contains("BM")) {
             ui->lblAn4->setText(tr("Battery Voltage"));
-            ui->lblAn5->setText(tr("Analog 1 (0.29)"));
+        } else {
+            ui->lblAn4->setText(tr("Analog A4"));
+        }
+
+        /*  ui->lblAn5->setText(tr("Analog 1 (0.29)"));
             ui->lblAn6->setText(tr("Analog 2 (0.02)"));
             ui->lblAn7->setText(tr("Analog 3 (0.28)"));
         } else {
-            ui->cmbPpmInPin->setVisible(true);
-            ui->lblPPMInPin->setVisible(true);
-            ui->cmbPpmOutPin->setVisible(true);
-            ui->lblPPMOutPin->setVisible(true);
-            ui->cmbButtonPin->setVisible(true);
-            ui->lblButtonPin->setVisible(true);
             ui->tabBLE->setTabVisible(4,true);
             ui->lblAn4->setText(tr("Analog A4"));
             ui->lblAn5->setText(tr("Analog A5"));
             ui->lblAn6->setText(tr("Analog A6"));
             ui->lblAn7->setText(tr("Analog A7"));
+        } */
+
+        // Fixed pin PPM Input
+        if(trkset.features().contains("PI")) {
+            ui->cmbPpmInPin->setVisible(false);
+            ui->lblPPMInPin->setVisible(false);
+        } else {
+            ui->cmbPpmInPin->setVisible(true);
+            ui->lblPPMInPin->setVisible(true);
+        }
+
+        // Fixed pin PPM Output
+        if(trkset.features().contains("PO")) {
+            ui->cmbPpmOutPin->setVisible(false);
+            ui->lblPPMOutPin->setVisible(false);
+        } else {
+            ui->cmbPpmOutPin->setVisible(true);
+            ui->lblPPMOutPin->setVisible(true);
         }
 
         // Check Firmware Version is Compatible

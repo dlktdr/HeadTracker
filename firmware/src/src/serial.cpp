@@ -368,13 +368,12 @@ void parseData(DynamicJsonDocument &json)
 
     // Firmware Reqest
   } else if (strcmp(command, "FW") == 0) {
-    DynamicJsonDocument fwjson(100);
+    DynamicJsonDocument fwjson(300);
     fwjson["Cmd"] = "FW";
     fwjson["Vers"] = STRINGIFY(FW_VER_TAG);
     fwjson["Hard"] = FW_BOARD;
     fwjson["Git"] = STRINGIFY(FW_GIT_REV);
-    fwjson["Feat0"] = getFeatures0();
-    fwjson["Feat1"] = getFeatures1();
+    getFeatures(fwjson);
     serialWriteJSON(fwjson);
 
     // Unknown Command

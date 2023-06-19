@@ -19,6 +19,8 @@ public:
 
     // Returns the board name
     QString boardName() {return _boardName;}
+    QString boardType() {return _boardType;}
+    QString boardFeatures() {return _boardFeat;}
 
     // Enables or disables the base classes methods based on alwacces
     virtual void allowAccessChanged(bool access)=0;
@@ -48,6 +50,8 @@ public:
 protected:
     TrackerSettings *trkset;
     QString _boardName;
+    QString _boardType;
+    QString _boardFeat;
 
 private:
     bool alwaccess;

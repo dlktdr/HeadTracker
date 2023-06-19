@@ -96,7 +96,7 @@ int64_t senseUsDuration = 0;
 const struct device *i2c_dev = nullptr;
 
 #if defined(HAS_APDS9960)
-static bool blesenseboard = false;
+bool blesenseboard = false;
 static bool lastproximity = false;
 #endif
 

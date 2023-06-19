@@ -6,6 +6,10 @@ TrackerSettings::TrackerSettings(QObject *parent) :
 {
   _setting["axisremap"] = (uint)AXES_MAP(AXIS_X,AXIS_Y,AXIS_Z);
   _setting["axissign"] = (uint)0;
+  descriptions["Git"] = "Git Revision Tag (Short)";
+  descriptions["Feat"] = "Firmware Features";
+  descriptions["Hard"] = "PCB Hardware Type";
+  descriptions["Vers"] = "Firmware Version";
 }
 
 void TrackerSettings::setRollReversed(bool value)
@@ -266,7 +270,7 @@ void TrackerSettings::setLiveDataMap(const QVariantMap &datalist, bool reset)
     emit liveDataChanged();
 }
 
-void TrackerSettings::setHardware(QString vers, QString hard, QString git, qulonglong features)
+void TrackerSettings::setHardware(QString vers, QString hard, QString git, QString features)
 {
     _setting["Vers"] = vers;
     _setting["Hard"] = hard;
