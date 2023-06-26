@@ -7,9 +7,9 @@
 [submodule "firmware/src/src/third-party/ArduinoJson"]
 	path = firmware/src/src/third-party/ArduinoJson
 	url = https://github.com/bblanchon/ArduinoJson.git
-[submodule "firmware/src/third-party/ArduinoJson"]
-	path = firmware/src/third-party/ArduinoJson
-	url = https://github.com/bblanchon/ArduinoJson.git
 [submodule "firmware/src/third-party/BMI270_SensorAPI"]
 	path = firmware/src/third-party/BMI270_SensorAPI
 	url = https://github.com/boschsensortec/BMI270_SensorAPI
+[submodule "firmware/src/src/LSM9DS1"]
+	path = firmware/src/src/LSM9DS1
+	url = https://github.com/STMicroelectronics/lsm9ds1-pid.git
