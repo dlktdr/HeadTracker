@@ -1417,7 +1417,8 @@ void MainWindow::boardDiscovered(BoardType *brd)
     // GUI changes info depending on board type
     if(brd->boardName() == "NANO33BLE" ||
        brd->boardName() == "DTQSYS" ||
-       brd->boardName() == "XIAOSENSE" ) {
+       brd->boardName() == "XIAOSENSE" ||
+       brd->boardName() == "XIAO52840" ) {
         addToLog(tr("Connected to a ") + brd->boardName() + "\n");
         ui->cmdStartGraph->setVisible(false);
         ui->cmdStopGraph->setVisible(false);
@@ -1434,9 +1435,14 @@ void MainWindow::boardDiscovered(BoardType *brd)
         ui->cmdReboot->setEnabled(true);
         ui->stackedWidget->setCurrentIndex(3);
         ui->cmdChannelViewer->setEnabled(true);
+        ui->grpLocalGraph->setVisible(true);
+        ui->grpRangeSel->setVisible(true);
+        ui->lblGyroCal->setVisible(true);
+        ui->gyroLed->setVisible(true);
 
         if(brd->boardName() == "DTQSYS" ||
-           brd->boardName() == "XIAOSENSE") { // Pins are all fixed
+           brd->boardName() == "XIAOSENSE" ||
+           brd->boardName() == "XIAO52840" ) { // Pins are all fixed
             ui->cmbPpmInPin->setVisible(false);
             ui->lblPPMInPin->setVisible(false);
             ui->cmbPpmOutPin->setVisible(false);
@@ -1448,6 +1454,14 @@ void MainWindow::boardDiscovered(BoardType *brd)
             ui->lblAn5->setText(tr("Analog 1 (0.29)"));
             ui->lblAn6->setText(tr("Analog 2 (0.02)"));
             ui->lblAn7->setText(tr("Analog 3 (0.28)"));
+            if(brd->boardName() == "XIAO52840") {
+                ui->grpLocalGraph->setVisible(false);
+                ui->grpRangeSel->setVisible(false);
+                ui->cmdResetCenter->setVisible(false);
+                ui->cmdCalibrate->setVisible(false);
+                ui->lblGyroCal->setVisible(false);
+                ui->gyroLed->setVisible(false);
+            }
         } else {
             ui->cmbPpmInPin->setVisible(true);
             ui->lblPPMInPin->setVisible(true);

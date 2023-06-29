@@ -8,19 +8,21 @@
 #define FW_GIT_REV "-------"
 #endif
 
-// The majority of features are the same on Sense2
-#if defined(PCB_NANO33BLE_SENSE2)
-#define PCB_NANO33BLE
-#endif
-
 #if defined(PCB_NANO33BLE)
 #define FW_BOARD "NANO33BLE"
+#include "boards/nano33board.h"
+#elif defined(PCB_NANO33BLE_SENSE2)
+#define PCB_NANO33BLE // Most items
+#define FW_BOARD "NANO33BLESR2"
 #include "boards/nano33board.h"
 #elif defined(PCB_DTQSYS)
 #define FW_BOARD "DTQSYS"
 #include "boards/dtqsys_ht.h"
 #elif defined(PCB_XIAOSENSE)
 #define FW_BOARD "XIAOSENSE"
+#include "boards/xiaosense.h"
+#elif defined(PCB_XIAO52840)
+#define FW_BOARD "XIAO52840"
 #include "boards/xiaosense.h"
 #else
 #error NO PCB DEFINED

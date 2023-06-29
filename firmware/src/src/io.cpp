@@ -98,7 +98,7 @@ void io_Thread()
       digitalWrite(IO_LED, led_is_on);
     }
 #endif
-    // Unrecoverable error, Solid Red
+    // Unrecoverable sensor error, Solid Red
     if(_ledmode & LED_HARDFAULT) {
       led_sequence[0].RGB = RGB_RED;
       led_sequence[0].time = 10;
@@ -322,7 +322,9 @@ void io_init()
   pinMode(IO_AN3, GPIO_INPUT);
 #endif
 
+#if !defined(HAS_NOIMU)
   setLEDFlag(LED_GYROCAL);
+#endif
 
   k_poll_signal_raise(&ioThreadRunSignal, 1);
 }
