@@ -82,6 +82,11 @@ jobs:
           cd /src/firmware/src
           pio run -e Head_Tracker-XIAOSense
 
+      - name: Build XIAO 52840 Firmware
+        run: |
+          cd /src/firmware/src
+          pio run -e Head_Tracker-XIAO52840
+
       # Runs a set of commands using the runners shell
       - name: Package Firmware
         uses: 'actions/upload-artifact@v2'
