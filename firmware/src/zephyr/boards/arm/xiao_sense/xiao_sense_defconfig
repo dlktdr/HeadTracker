@@ -18,8 +18,11 @@ CONFIG_SERIAL=y
 CONFIG_USB_DEVICE_STACK=y
 
 # Build UF2 by default, supported by the Adafruit nRF52 Bootloader
+#  This does not seem to work in platformio. Using a python script
+#  and uf2conv to do it after the .bin file is created
+#CONFIG_BUILD_OUTPUT_UF2=y
 
-CONFIG_BUILD_OUTPUT_UF2=y
+
 CONFIG_USE_DT_CODE_PARTITION=y
 
 # additional board options
