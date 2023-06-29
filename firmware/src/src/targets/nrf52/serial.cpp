@@ -330,7 +330,15 @@ void parseData(DynamicJsonDocument &json)
 
     // Force Bootloader
   } else if (strcmp(command, "Boot") == 0) {
+#if defined(ARDUINO_BOOTLOADER)
     (*((volatile uint32_t *)0x20007FFCul)) = 0x07738135;
+#elif defined(SEEED_BOOTLOADER)
+    __disable_irq();
+#define DFU_MAGIC_UF2_RESET           0x57
+    NRF_POWER->GPREGRET = DFU_MAGIC_UF2_RESET;
+#else
+#warning "Bootloader Magic Code Not Defined"
+#endif
     NVIC_SystemReset();
 
     // Get settings
