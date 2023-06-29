@@ -42,8 +42,8 @@
   ],
   "name": "XIAO Sense",
   "upload": {
-    "maximum_ram_size": 262144,
-    "maximum_size": 983040,
+    "maximum_ram_size": 237568,
+    "maximum_size": 811008,
     "protocol": "sam-ba",
     "protocols": [
       "jlink",
