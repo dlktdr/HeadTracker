@@ -158,7 +158,7 @@ void drawPosition(int16_t x, int y)
   writeLine(x      , y - D_S, x - D_S, y      , 1);
 }
 
-#define CALIBRATION_MULTIPLY 7
+#define CALIBRATION_MULTIPLY 5
 
 void oled_set_tilt(float tilt_new)
 {
@@ -170,7 +170,7 @@ void oled_set_roll(float roll_new)
 }
 void oled_set_pan(float pan_new)
 {
-  pan = (int16_t)(-pan_new * CALIBRATION_MULTIPLY);
+  pan = (int16_t)(-pan_new * CALIBRATION_MULTIPLY - 250);
 }
 
 int16_t temp_pan = -10000;
@@ -187,7 +187,7 @@ void set_oled_pan_roll(uint32_t pan_new, uint32_t roll_new)
 void oled_Thread()
 {
 /* waiting until log functions initialize */
-  rt_sleep_ms(3000);
+  // rt_sleep_ms(3000);
 
   LOGI("Oled thread started");
 
@@ -231,7 +231,7 @@ void oled_Thread()
   writeLine(0,63,127,63,1);
   display_write(display, 0, 0, &buf_desc, buf_clear);
 
-  rt_sleep_ms(1500);
+  rt_sleep_ms(10000);
 
   display_write(display, 0, 0, &buf_desc, buf_clear);
 
