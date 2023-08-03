@@ -127,7 +127,7 @@
 #define GYRO_FLASH_IF_OFFSET 0.5 // Save to flash if gyro is off more than 0.5 degrees/sec from flash value
 
 // RTOS Specifics
-#include "zephyr.h"
+#include "zephyr/kernel.h"
 #define millis() k_cyc_to_ms_floor32(k_cycle_get_32())
 #define millis64() k_uptime_get()
 #define micros() k_cyc_to_us_floor32(k_cycle_get_32())

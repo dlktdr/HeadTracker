@@ -3,19 +3,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <drivers/uart.h>
+#include <zephyr/drivers/uart.h>
 #include <nrfx_rtc.h>
-#include <pm/pm.h>
+#include <zephyr/pm/pm.h>
 #include <string.h>
-#include <sys/printk.h>
-#include <sys/util.h>
-#include <usb/usb_device.h>
-#include <zephyr.h>
+#include <zephyr/sys/printk.h>
+#include <zephyr/sys/util.h>
+#include <zephyr/usb/usb_device.h>
+#include <zephyr/kernel.h>
 
 #include "io.h"
 #include "nano33ble.h"
 
-extern "C" void main(void)
+extern "C" int main(void)
 {
   start();  // Call Our C++ Main
 }

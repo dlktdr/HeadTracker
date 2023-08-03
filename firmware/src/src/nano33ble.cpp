@@ -1,7 +1,7 @@
 
 #include "nano33ble.h"
 
-#include <drivers/counter.h>
+#include <zephyr/drivers/counter.h>
 #include <nrfx_clock.h>
 
 #include "PPMIn.h"

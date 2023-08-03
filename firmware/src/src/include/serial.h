@@ -2,9 +2,9 @@
 
 #include <string>
 #define ARDUINOJSON_USE_DOUBLE 0
-#include <include/arduinojsonwrp.h>
+#include "arduinojsonwrp.h"
 
-#include "defines.h"
+#include "../defines.h"
 
 void serial_init();
 void serial_Thread();

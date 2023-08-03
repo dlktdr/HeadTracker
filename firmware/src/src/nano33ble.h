@@ -7,7 +7,7 @@ extern "C" {
 
 void start(void);
 
-#include "zephyr.h"
+#include "zephyr/kernel.h"
 
 extern struct k_sem saveToFlash_sem;
 

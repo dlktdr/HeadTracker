@@ -20,7 +20,7 @@
 #include <nrfx_gpiote.h>
 #include <nrfx_ppi.h>
 
-#include "defines.h"
+#include "../defines.h"
 
 
 int PWM_Init(int updateRate);

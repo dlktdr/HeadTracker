@@ -2,10 +2,10 @@
 #define LOGGIT_H
 
 // TODO transition this to local logger -- common to both modules
-#include <logging/log.h>
-#include <usb/usb_device.h>
+#include <zephyr/logging/log.h>
+#include <zephyr/usb/usb_device.h>
 
-#include "defines.h"
+#include "../defines.h"
 
 LOG_MODULE_DECLARE(cdc_acm_composite, LOG_LEVEL_ERR);
 

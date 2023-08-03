@@ -1,7 +1,7 @@
 #pragma once
 
-#include <drivers/gpio.h>
-#include <zephyr.h>
+#include <zephyr/drivers/gpio.h>
+#include <zephyr/kernel.h>
 
 
 extern bool wasButtonPressed();
