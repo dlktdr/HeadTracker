@@ -22,8 +22,27 @@ endfunction()
 message(STATUS "Git Revision ${GIT_REV}")
 message(STATUS "Git Tag ${GIT_TAG}")
 
-#set (BOARD_ROOT "${CMAKE_SOURCE_DIR}/zephyr") # Use the local board files first
-set (CONF_FILE zephyr/prj.conf) # Set the project configuration file
+# NRF52 Boards
+if((${BOARD} STREQUAL "arduino_nano_33_ble") OR
+   (${BOARD} STREQUAL "xiao_ble") OR
+   (${BOARD} EQUAL "dtqsys_ht"))
+set (CONF_FILE zephyr/nrf_prj.conf)
+message(STATUS "Board is a NRF52 based board")
+
+#DTQ Board, use local board file from /zephyr/boards
+if((${BOARD} STREQUAL "dtqsys_ht"))
+set (BOARD_ROOT "${CMAKE_SOURCE_DIR}/zephyr")
+endif()
+
+#ESP32C3 Boards
+elseif(${BOARD} MATCHES "esp32c3")
+set (CONF_FILE zephyr/esp32c3_prj.conf)
+message(STATUS "Board is a ESP32C3 based board")
+
+else()
+message(FATAL_ERROR "ERROR: Board is not supported")
+endif()
+
 find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 project(HeadTracker DESCRIPTION "HeadTracker")
 
