@@ -8,8 +8,6 @@
 #define INPUT_PULLUP (GPIO_INPUT | GPIO_PULL_UP)
 
 // Board Features
-//#define HAS_3DIODE_RGB
-//#define HAS_NOTIFYLED
 #define HAS_LSM6DS3
 #define HAS_CENTERBTN
 #define HAS_PPMIN
@@ -18,17 +16,17 @@
 // Pins (name, number, description)
 // NOTE: These pins are an enum entry. e.g. IO_D2 = 0
 //     - Use PIN_NAME_TO_NUM(IO_D2) to get actual the pin number
-//     - The pin number can be converted back into the NRF port/pin
-//       using functions PIN_TO_NRFPORT & PIN_TO_NRFPIN
 //     - The string descrition for D2 would be StrPins[IO_D2]
 
+// TODO: ** Replace these with devicetree overlay files
+
 #define PIN_X \
-  PIN(CENTER_BTN,   ESPPIN(1), "Center Button") \
+  PIN(CENTER_BTN,   ESPPIN(9), "Center Button") \
   PIN(LED,          ESPPIN(2), "Notification LED") \
-  PIN(PPMOUT,       ESPPIN(3), "PPM Output Pin [D10]") \
-  PIN(PPMIN,        ESPPIN(4), "PPM In Pin [D9]") \
-  PIN(TX,           ESPPIN(5), "UART Transmit [TX]")  \
-  PIN(RX,           ESPPIN(6), "UART Receive [RX]") \
+  PIN(PPMOUT,       ESPPIN(10),"PPM Output Pin") \
+  PIN(PPMIN,        ESPPIN(9), "PPM In Pin") \
+  PIN(TX,           ESPPIN(3), "UART Transmit")  \
+  PIN(RX,           ESPPIN(8), "UART Receive") \
   END_IO_PINS \
 
 typedef enum {
