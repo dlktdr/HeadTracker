@@ -36,7 +36,7 @@ static struct adc_channel_cfg m_1st_channel_cfg = {
 };
 
 // initialize the adc channel
-/*static const struct device *init_adc(int channel)
+static const struct device *init_adc(int channel)
 {
   int ret;
   const struct device *adc_dev = DEVICE_DT_GET(DT_ALIAS(adcctrl));
@@ -68,14 +68,14 @@ static struct adc_channel_cfg m_1st_channel_cfg = {
   memset(m_sample_buffer, 0, sizeof(m_sample_buffer));
   return adc_dev;
 }
-*/
+
 
 // ------------------------------------------------
 // read one channel of adc
 // ------------------------------------------------
 static int16_t readOneChannel(int channel)
 {
-  /*const struct adc_sequence sequence = {
+  const struct adc_sequence sequence = {
       .options = NULL,            // extra samples and callback
       .channels = BIT(channel),   // bit mask of channels to read
       .buffer = m_sample_buffer,  // where to put samples read
@@ -95,7 +95,7 @@ static int16_t readOneChannel(int channel)
     }
   }
 
-  return sample_value;*/
+  return sample_value;
   return 0;
 }
 

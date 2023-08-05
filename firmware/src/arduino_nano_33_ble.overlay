@@ -15,7 +15,6 @@
   aliases {
     adcctrl = &adc;
     i2csensor = &i2c1;
-    guiconsole = &zephyr_udc0,cdc_acm_uart0;
   };
 
 };
