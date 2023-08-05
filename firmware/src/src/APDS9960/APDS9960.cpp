@@ -456,6 +456,6 @@ int APDS9960::readProximity()
   return (255 - r);
 }
 
-#ifdef PCB_NANO33BLE
+#ifdef CONFIG_BOARD_ARDUINO_NANO_33_BLE
 APDS9960 APDS(-1);
 #endif

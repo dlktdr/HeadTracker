@@ -136,7 +136,7 @@ void PpmOut_setPin(int pinNum)
   // Same pin, just quit
   if (pinNum == setPin) return;
 
-#if defined(PCB_NANO33BLE) // Nano33, can pick D2-D12
+#if defined(CONFIG_BOARD_ARDUINO_NANO_33_BLE) // Nano33, can pick D2-D12
   int pin = D_TO_PIN(pinNum);
   int port = D_TO_PORT(pinNum);
   int setPin_pin = D_TO_PIN(setPin);

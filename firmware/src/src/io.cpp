@@ -230,7 +230,7 @@ void io_Thread()
 
 bool readCenterButton()
 {
-#if defined(PCB_NANO33BLE)
+#if defined(CONFIG_BOARD_ARDUINO_NANO_33_BLE)
     int butpin = trkset.getButtonPin();
     if (butpin < 1 || butpin > 13)
       return false;
@@ -247,7 +247,7 @@ void io_init()
   gpios[0] = DEVICE_DT_GET(DT_NODELABEL(gpio0));  // device_get_binding("GPIO_0");
   gpios[1] = DEVICE_DT_GET(DT_NODELABEL(gpio1));  // device_get_binding("GPIO_1");
 
-#if defined(PCB_NANO33BLE)
+#if defined(CONFIG_BOARD_ARDUINO_NANO_33_BLE)
   pinMode(IO_VDDENA, GPIO_OUTPUT);
   pinMode(IO_I2C_PU, GPIO_OUTPUT);
   digitalWrite(IO_VDDENA, 1);

@@ -9,21 +9,24 @@
 #endif
 
 // The majority of features are the same on Sense2
-#if defined(PCB_NANO33BLE_SENSE2)
-#define PCB_NANO33BLE
+#if defined(CONFIG_BOARD_ARDUINO_NANO_33_BLE_SENSE2)
+#define CONFIG_BOARD_ARDUINO_NANO_33_BLE
 #endif
 
-#if defined(PCB_NANO33BLE)
+#if defined(CONFIG_BOARD_ARDUINO_NANO_33_BLE)
 #define FW_BOARD "NANO33BLE"
 #include "boards/nano33board.h"
-#elif defined(PCB_DTQSYS)
+#define ARDUINO_BOOTLOADER
+#elif defined(CONFIG_BOARD_DTQSYS_HT)
 #define FW_BOARD "DTQSYS"
 #include "boards/dtqsys_ht.h"
-#elif defined(PCB_XIAOSENSE)
+#define ARDUINO_BOOTLOADER
+#elif defined(CONFIG_XIAO_BLE_SENSE)
 #define FW_BOARD "XIAOSENSE"
 #include "boards/xiaosense.h"
+#define SEEED_BOOTLOADER
 #else
-#error NO PCB DEFINED
+#error NO COMPATIBLE BOARD DEFINED
 #endif
 
 #if defined(DEBUG)
@@ -135,7 +138,7 @@
 #define rt_sleep_ms(x) k_msleep(x)
 #define rt_sleep_us(x) k_usleep(x)
 
-#if defined(PCB_NANO33BLE)
+#if defined(CONFIG_BOARD_ARDUINO_NANO_33_BLE)
 #include "boards/nano33board.h"
 #elif defined(PCB_DTQSYS)
 #include "boards/dtqsys_ht.h"
