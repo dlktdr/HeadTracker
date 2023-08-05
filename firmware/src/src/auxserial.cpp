@@ -395,7 +395,7 @@ bool AuxSerial_Available() { return serialRxBuf.getOccupied() > 0; }
 
 #elif defined(CONFIG_SOC_ESP32C3)
 
-int AuxSerial_Open(uint32_t baudrate, uint16_t settings, uint8_t inversions) {}
+int AuxSerial_Open(uint32_t baudrate, uint16_t settings, uint8_t inversions) {return 0;}
 bool AuxSerial_Available() {return 0;}
 void AuxSerial_Close() {}
 uint32_t AuxSerial_Write(const uint8_t* buffer, uint32_t len) {return 0;}

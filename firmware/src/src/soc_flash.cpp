@@ -26,7 +26,7 @@
 #include "defines.h"
 #include "log.h"
 
-#define FLASH_OFFSET FLASH_AREA_OFFSET(datapt)
+#define FLASH_OFFSET DT_REG_ADDR(DT_NODE_BY_FIXED_PARTITION_LABEL(datapt))
 #define FLASH_PAGE_SIZE 4096  // Can grow up to 0x4000
 
 volatile bool pauseForFlash = false;
@@ -70,7 +70,7 @@ int socWriteFlash(const char *datain, int len)
   flash_dev = DEVICE_DT_GET_OR_NULL(DT_CHOSEN(zephyr_flash_controller));
 
   if (!flash_dev) {
-    LOGE("Nordic nRF5 flash driver was not found!");
+    LOGE("Flash driver was not found!");
     return -1;
   }
 
