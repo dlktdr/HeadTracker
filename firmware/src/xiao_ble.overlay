@@ -1,0 +1,94 @@
+/ {
+	model = "Xiao BLE";
+	compatible = "seeed,xiao-ble";
+
+	chosen {
+		/delete-property/ zephyr,console;
+		/delete-property/ zephyr,shell-uart;
+		/delete-property/ zephyr,uart-mcumgr;
+		/delete-property/ zephyr,bt-mon-uart;
+		/delete-property/ zephyr,bt-c2h-uart;
+		zephyr,sram = &sram0;
+		zephyr,flash = &flash0;
+		zephyr,code-partition = &code_partition;
+	};
+};
+
+/* Flash Layout
+ *    Bootloader    0x00000 - 0x10000 (Size 0x10000 65536 Bytes)
+ *    Code          0x10000 - 0xFC000 (Size 0xEC000 966656 Bytes)
+ *    NVM Data      0xFC000 - 0x100000 (Size 0x4000 16384 Bytes)
+ */
+
+&flash0 {
+	partitions {
+		compatible = "fixed-partitions";
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		sd_partition: partition@0 {
+			label = "softdevice";
+			reg = <0x00000000 0x00027000>;
+		};
+
+		code_partition: partition@27000 {
+			label = "code_partition";
+			reg = <0x00027000 0x000c5000>;
+		};
+
+		/*
+		 * The flash starting at 0x000ec000 and ending at
+		 * 0x000f3fff is reserved for use by the application.
+		 *
+		 * Storage partition will be used by FCB/LittleFS/NVS
+		 * if enabled.
+		 */
+		storage_partition: partition@ec000 {
+			label = "storage";
+			reg = <0x000ec000 0x00008000>;
+		};
+
+		boot_partition: partition@f4000 {
+			label = "adafruit_boot";
+			reg = <0x000f4000 0x0000c000>;
+		};
+
+    datapt_partition: partition@FC000 {
+        label = "datapt";
+        reg = <0xFC000 0x4000>;
+    };
+	};
+};
+
+&adc {
+	status = "okay";
+};
+
+&uart0 {
+	status = "disabled";
+};
+
+&i2c0 {
+	status = "disabled";
+};
+
+/* Disable Timer3, used by PPM output
+ */
+&timer3 {
+    status = "disabled";
+};
+
+/* Disable Timer4, used by PPM input
+ */
+&timer4 {
+    status = "disabled";
+};
+
+zephyr_udc0: &usbd {
+	compatible = "nordic,nrf-usbd";
+	status = "okay";
+  cdc_acm_uart0 {
+		compatible = "zephyr,cdc-acm-uart";
+	};
+};
+

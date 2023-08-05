@@ -22,7 +22,7 @@ endfunction()
 message(STATUS "Git Revision ${GIT_REV}")
 message(STATUS "Git Tag ${GIT_TAG}")
 
-set (BOARD_ROOT "${CMAKE_SOURCE_DIR}/zephyr") # Use the local board files first
+#set (BOARD_ROOT "${CMAKE_SOURCE_DIR}/zephyr") # Use the local board files first
 set (CONF_FILE zephyr/prj.conf) # Set the project configuration file
 find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 project(HeadTracker DESCRIPTION "HeadTracker")

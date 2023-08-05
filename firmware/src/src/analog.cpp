@@ -39,7 +39,7 @@ static struct adc_channel_cfg m_1st_channel_cfg = {
 static const struct device *init_adc(int channel)
 {
   int ret;
-  const struct device *adc_dev = DEVICE_DT_GET(DT_ALIAS(adctrl));
+  const struct device *adc_dev = DEVICE_DT_GET(DT_NODELABEL(adc));
   if (!adc_dev) {
     LOGE("Could not get device binding for ADC");
     return 0;
