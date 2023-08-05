@@ -245,7 +245,9 @@ bool readCenterButton()
 void io_init()
 {
   gpios[0] = DEVICE_DT_GET(DT_NODELABEL(gpio0));  // device_get_binding("GPIO_0");
+#if defined(CONFIG_SOC_SERIES_NRF52X)
   gpios[1] = DEVICE_DT_GET(DT_NODELABEL(gpio1));  // device_get_binding("GPIO_1");
+#endif
 
 #if defined(CONFIG_BOARD_ARDUINO_NANO_33_BLE)
   pinMode(IO_VDDENA, GPIO_OUTPUT);

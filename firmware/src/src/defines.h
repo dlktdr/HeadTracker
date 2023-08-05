@@ -25,6 +25,9 @@
 #define FW_BOARD "XIAOSENSE"
 #include "boards/xiaosense.h"
 #define SEEED_BOOTLOADER
+#elif defined(CONFIG_SOC_ESP32C3)
+#define FW_BOARD "ESP32C3"
+#include "boards/esp32c3.h"
 #else
 #error NO COMPATIBLE BOARD DEFINED
 #endif
@@ -137,9 +140,3 @@
 #define micros64() k_cyc_to_us_floor64(k_cycle_get_32())
 #define rt_sleep_ms(x) k_msleep(x)
 #define rt_sleep_us(x) k_usleep(x)
-
-#if defined(CONFIG_BOARD_ARDUINO_NANO_33_BLE)
-#include "boards/nano33board.h"
-#elif defined(PCB_DTQSYS)
-#include "boards/dtqsys_ht.h"
-#endif

@@ -4,7 +4,6 @@
  */
 
 #include <zephyr/drivers/uart.h>
-#include <nrfx_rtc.h>
 #include <zephyr/pm/pm.h>
 #include <string.h>
 #include <zephyr/sys/printk.h>
@@ -16,6 +15,7 @@
 #include "nano33ble.h"
 
 #if defined(CONFIG_SOC_SERIES_NRF52X)
+#include <nrfx_rtc.h>
 #include <zephyr/drivers/clock_control.h>
 #include <zephyr/drivers/clock_control/nrf_clock_control.h>
 static const struct device *clock0;
@@ -34,7 +34,7 @@ extern "C" int main(void)
   }
   clock_control_on(clock0, CLOCK_CONTROL_NRF_SUBSYS_HF);
 #else
-#error TEST
+
 #endif
   start();  // Call Our C++ Main
   return 0;

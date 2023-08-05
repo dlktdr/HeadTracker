@@ -1,8 +1,6 @@
 
 #include "nano33ble.h"
-
 #include <zephyr/drivers/counter.h>
-#include <nrfx_clock.h>
 
 #include "PPMIn.h"
 #include "PPMOut.h"
@@ -66,6 +64,10 @@ void start(void)
     }
   }
 }
+
+#if !defined(CONFIG_SOC_SERIES_NRF52X)
+#define K_FP_REGS 0
+#endif
 
 // Threads
 K_THREAD_DEFINE(io_Thread_id, 512, io_Thread, NULL, NULL, NULL, IO_THREAD_PRIO, 0, 0);

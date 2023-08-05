@@ -17,16 +17,18 @@
 
 #include "PPMIn.h"
 
-#include <nrfx_gpiote.h>
-#include <nrfx_ppi.h>
 #include <zephyr/kernel.h>
-
-#include <chrono>
 
 #include "defines.h"
 #include "io.h"
 #include "log.h"
 #include "trackersettings.h"
+
+#if defined(CONFIG_SOC_SERIES_NRF52X)
+
+#include <nrfx_gpiote.h>
+#include <nrfx_ppi.h>
+#include <chrono>
 
 #define PPMIN_PPICH1_MSK CONCAT(CONCAT(PPI_CHENSET_CH, PPMIN_PPICH1), _Msk)
 #define PPMIN_PPICH2_MSK CONCAT(CONCAT(PPI_CHENSET_CH, PPMIN_PPICH2), _Msk)
@@ -266,3 +268,19 @@ int PpmIn_getChannels(uint16_t *ch)
 
   return rval;
 }
+
+#elif defined(CONFIG_SOC_ESP32C3)
+
+int PpmIn_getChannels(uint16_t *ch)
+{
+  return 0;
+}
+
+void PpmIn_setPin(int pinNum) {}
+void PpmIn_execute() {}
+
+#else
+
+#error "No PPMInput Support"
+
+#endif

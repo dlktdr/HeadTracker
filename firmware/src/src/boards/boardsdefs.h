@@ -1,5 +1,6 @@
 #pragma once
 
+#define ESPPIN(pin) pin
 #define NRFPIN(port, pin) ((32 * port) + pin)
 #define PIN_TO_NRFPORT(pin) (pin / 32)
 #define PIN_TO_NRFPIN(pin) (pin % 32)

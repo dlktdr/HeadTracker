@@ -100,13 +100,19 @@ void serial_init()
 {
   int ret;
 
+#if defined(DT_N_INST_0_zephyr_cdc_acm_uart)
   dev = DEVICE_DT_GET(DT_N_INST_0_zephyr_cdc_acm_uart);
+#else
+  dev = DEVICE_DT_GET(DT_ALIAS(guiuart));
+#endif
   if (!device_is_ready(dev)) {
 		//LOG_ERR("CDC ACM device not ready");
 		return;
   }
 
+#if defined(DT_N_INST_0_zephyr_cdc_acm_uart)
   ret = usb_enable(NULL);
+#endif
   if (ret != 0) {
     return;
   }
@@ -335,10 +341,12 @@ void parseData(DynamicJsonDocument &json)
     __disable_irq();
 #define DFU_MAGIC_UF2_RESET           0x57
     NRF_POWER->GPREGRET = DFU_MAGIC_UF2_RESET;
+#elif defined(CONFIG_SOC_ESP32C3)
+// TODO - Find a way for the GUI to flash this board, this shouldn't be needed
 #else
 #warning "Bootloader Magic Code Not Defined"
 #endif
-    NVIC_SystemReset();
+    sys_reboot(SYS_REBOOT_COLD);
 
     // Get settings
   } else if (strcmp(command, "Get") == 0) {
@@ -350,7 +358,7 @@ void parseData(DynamicJsonDocument &json)
 
     // Im Here Received, Means the GUI is running
   } else if (strcmp(command, "IH") == 0) {
-    __NOP();
+
 
     // Get a List of All Data Items
   } else if (strcmp(command, "DatLst") == 0) {
@@ -416,7 +424,7 @@ void serialWrite(const char *data, int len)
   k_mutex_unlock(&ring_tx_mutex);
   if (rb_len != len) {
     // TODO: deal with this case
-    __NOP();
+
   }
 }
 

@@ -42,7 +42,7 @@ static uint8_t dev_addr;
 BMI2_INTF_RETURN_TYPE bmi2_i2c_read(uint8_t reg_addr, uint8_t *reg_data, uint32_t len,
                                     void *intf_ptr)
 {
-  const struct device *i2c_dev = DEVICE_DT_GET(DT_NODELABEL(i2c1));
+  const struct device *i2c_dev = DEVICE_DT_GET(DT_ALIAS(i2csensor));
   if (!i2c_dev) {
     return -1;
   }
@@ -57,7 +57,7 @@ BMI2_INTF_RETURN_TYPE bmi2_i2c_read(uint8_t reg_addr, uint8_t *reg_data, uint32_
 BMI2_INTF_RETURN_TYPE bmi2_i2c_write(uint8_t reg_addr, const uint8_t *reg_data, uint32_t len,
                                      void *intf_ptr)
 {
-  const struct device *i2c_dev = DEVICE_DT_GET(DT_NODELABEL(i2c1));
+  const struct device *i2c_dev = DEVICE_DT_GET(DT_ALIAS(i2csensor));
   if (!i2c_dev) {
     return -1;
   }

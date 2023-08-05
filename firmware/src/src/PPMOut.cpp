@@ -15,16 +15,18 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <nrfx_gpiote.h>
-#include <nrfx_ppi.h>
 #include <zephyr/sys/util.h>
 #include <zephyr/kernel.h>
+#include <stdint.h>
 
 #include "defines.h"
 #include "io.h"
 #include "serial.h"
 #include "trackersettings.h"
 
+#if defined(CONFIG_SOC_SERIES_NRF52X)
+#include <nrfx_gpiote.h>
+#include <nrfx_ppi.h>
 
 #define PPMOUT_PPICH_MSK CONCAT(CONCAT(PPI_CHENSET_CH, PPMOUT_PPICH), _Msk)
 #define PPMOUT_TIMER CONCAT(NRF_TIMER, PPMOUT_TIMER_CH)
@@ -254,3 +256,16 @@ void PpmOut_setChannel(int chan, uint16_t val)
 }
 
 int PpmOut_getChnCount() { return ch_count; }
+
+#elif defined(CONFIG_SOC_ESP32C3)
+
+void PpmOut_setPin(int pinNum) {}
+void PpmOut_setChannel(int chan, uint16_t val) {}
+void PpmOut_execute() {}
+int PpmOut_getChnCount() {return 0;}
+
+#else
+
+#error "No PPMInput Support"
+
+#endif

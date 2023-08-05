@@ -17,14 +17,15 @@
 
 #include "auxserial.h"
 
+#include <zephyr/kernel.h>
+
+#if defined(CONFIG_SOC_SERIES_NRF52X)
 #include <nrfx.h>
 #include <nrfx_ppi.h>
 #include <nrfx_uarte.h>
-#include <zephyr/kernel.h>
 
 #include "defines.h"
 #include "ringbuffer.h"
-
 
 static bool serialopened = false;
 
@@ -391,3 +392,17 @@ uint32_t AuxSerial_Read(uint8_t *buffer, uint32_t bufsize)
 }
 
 bool AuxSerial_Available() { return serialRxBuf.getOccupied() > 0; }
+
+#elif defined(CONFIG_SOC_ESP32C3)
+
+int AuxSerial_Open(uint32_t baudrate, uint16_t settings, uint8_t inversions) {}
+bool AuxSerial_Available() {return 0;}
+void AuxSerial_Close() {}
+uint32_t AuxSerial_Write(const uint8_t* buffer, uint32_t len) {return 0;}
+uint32_t AuxSerial_Read(uint8_t* buffer, uint32_t bufsize) {return 0;}
+
+#else
+
+#error "No Aux Serial Support"
+
+#endif

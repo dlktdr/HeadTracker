@@ -19,8 +19,6 @@
 
 #include <zephyr/sys/ring_buffer.h>
 #include <zephyr/kernel.h>
-#include <nrfx.h>
-#include <nrfx_uarte.h>
 #include <string.h>
 
 #include "auxserial.h"

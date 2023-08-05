@@ -47,7 +47,7 @@ APDS9960::~APDS9960() {}
 
 bool APDS9960::begin()
 {
-  i2c_dev = DEVICE_DT_GET(DT_NODELABEL(i2c1));
+  i2c_dev = DEVICE_DT_GET(DT_ALIAS(i2csensor));
   if (!i2c_dev) {
     LOGE("Could not get device binding for I2C");
     return false;

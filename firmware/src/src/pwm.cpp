@@ -24,6 +24,8 @@
 #include "trackersettings.h"
 
 
+#if defined(CONFIG_SOC_SERIES_NRF52X)
+
 static uint16_t pwmvals[4];
 static constexpr uint16_t countertop = 5000;  // 5000uS per period, before end delay
 static uint16_t usperiod = 5000;
@@ -73,3 +75,15 @@ void setPWMValue(int ch, uint16_t value)
 
   NRF_PWM0->TASKS_SEQSTART[0] = 1;
 }
+
+
+#elif defined(CONFIG_SOC_ESP32C3)
+
+int PWM_Init(int updateRate) {return 0;}
+void setPWMValue(int ch, uint16_t value) {}
+
+#else
+
+#error "No PWM Support"
+
+#endif
