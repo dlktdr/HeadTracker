@@ -6,12 +6,13 @@
 
 #include "bmi2common.h"
 
+#include <zephyr/drivers/i2c.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 #include "bmi2_defs.h"
-#include "drivers/i2c.h"
+
 
 /******************************************************************************/
 /*!                 Macro definitions                                         */

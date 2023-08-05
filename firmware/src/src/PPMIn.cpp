@@ -19,7 +19,7 @@
 
 #include <nrfx_gpiote.h>
 #include <nrfx_ppi.h>
-#include <zephyr.h>
+#include <zephyr/kernel.h>
 
 #include <chrono>
 

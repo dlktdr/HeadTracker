@@ -19,9 +19,9 @@
 
 #include "soc_flash.h"
 
-#include <drivers/flash.h>
-#include <storage/flash_map.h>
-#include <zephyr.h>
+#include <zephyr/kernel.h>
+#include <zephyr/drivers/flash.h>
+#include <zephyr/storage/flash_map.h>
 
 #include "defines.h"
 #include "log.h"
@@ -43,7 +43,7 @@ void socClearFlash()
 {
   const struct device *flash_dev;
 
-  flash_dev = device_get_binding(DT_CHOSEN_ZEPHYR_FLASH_CONTROLLER_LABEL);
+  flash_dev = DEVICE_DT_GET_OR_NULL(DT_CHOSEN(zephyr_flash_controller));
 
   if (!flash_dev) {
     LOGE("Nordic nRF5 flash driver was not found!");
@@ -67,7 +67,7 @@ int socWriteFlash(const char *datain, int len)
 {
   const struct device *flash_dev;
 
-  flash_dev = device_get_binding(DT_CHOSEN_ZEPHYR_FLASH_CONTROLLER_LABEL);
+  flash_dev = DEVICE_DT_GET_OR_NULL(DT_CHOSEN(zephyr_flash_controller));
 
   if (!flash_dev) {
     LOGE("Nordic nRF5 flash driver was not found!");

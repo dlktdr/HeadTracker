@@ -5,10 +5,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <device.h>
-#include <usb/class/usb_hid.h>
-#include <usb/usb_device.h>
-#include <zephyr.h>
+#include <zephyr/device.h>
+#include <zephyr/usb/class/usb_hid.h>
+#include <zephyr/usb/usb_device.h>
+#include <zephyr/kernel.h>
 
 #include "io.h"
 #include "joystick.h"

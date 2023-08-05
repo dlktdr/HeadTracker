@@ -17,10 +17,10 @@
 
 #include "sense.h"
 
-#include <device.h>
-#include <drivers/i2c.h>
-#include <drivers/sensor.h>
-#include <zephyr.h>
+#include <zephyr/device.h>
+#include <zephyr/drivers/i2c.h>
+#include <zephyr/drivers/sensor.h>
+#include <zephyr/kernel.h>
 
 #include "MadgwickAHRS/MadgwickAHRS.h"
 #include "analog.h"

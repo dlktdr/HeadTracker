@@ -17,7 +17,7 @@
 
 #include "uart_mode.h"
 
-#include <zephyr.h>
+#include <zephyr/kernel.h>
 
 #include "CRSF/crsfin.h"
 #include "CRSF/crsfout.h"

@@ -17,19 +17,18 @@
 
 #include "serial.h"
 
-#include <device.h>
-#include <drivers/uart.h>
-#include <drivers/uart/cdc_acm.h>
-#include <drivers/usb/usb_dc.h>
+#include <zephyr/kernel.h>
+#include <zephyr/device.h>
+#include <zephyr/drivers/uart.h>
+#include <zephyr/drivers/uart/cdc_acm.h>
+#include <zephyr/drivers/usb/usb_dc.h>
+#include <zephyr/sys/ring_buffer.h>
+#include <zephyr/usb/class/usb_cdc.h>
+#include <zephyr/sys/reboot.h>
 #include <math.h>
-#include <power/reboot.h>
 #include <soc.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/ring_buffer.h>
-#include <usb/class/usb_cdc.h>
-#include <zephyr.h>
-
 #include "io.h"
 #include "log.h"
 #include "nano33ble.h"

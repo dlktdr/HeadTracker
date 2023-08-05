@@ -2,4 +2,4 @@
 #undef _current
 #define ARDUINOJSON_USE_DOUBLE 0
 
-#include "../ArduinoJson/ArduinoJson.h"
+#include <ArduinoJson.h>

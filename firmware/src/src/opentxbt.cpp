@@ -1,6 +1,6 @@
 #include "opentxbt.h"
 
-#include <zephyr.h>
+#include <zephyr/kernel.h>
 
 
 constexpr uint8_t START_STOP = 0x7E;

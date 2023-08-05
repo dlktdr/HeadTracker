@@ -17,11 +17,11 @@
 
 #include "sbus.h"
 
+#include <zephyr/sys/ring_buffer.h>
+#include <zephyr/kernel.h>
 #include <nrfx.h>
 #include <nrfx_uarte.h>
 #include <string.h>
-#include <sys/ring_buffer.h>
-#include <zephyr.h>
 
 #include "auxserial.h"
 #include "io.h"

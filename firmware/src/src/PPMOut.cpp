@@ -17,8 +17,8 @@
 
 #include <nrfx_gpiote.h>
 #include <nrfx_ppi.h>
-#include <sys/util.h>
-#include <zephyr.h>
+#include <zephyr/sys/util.h>
+#include <zephyr/kernel.h>
 
 #include "defines.h"
 #include "io.h"

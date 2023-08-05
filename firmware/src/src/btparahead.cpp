@@ -17,18 +17,18 @@
 
 #include "btparahead.h"
 
-#include <bluetooth/bluetooth.h>
-#include <bluetooth/conn.h>
-#include <bluetooth/gatt.h>
-#include <bluetooth/hci.h>
-#include <bluetooth/uuid.h>
-#include <zephyr.h>
+#include <zephyr/bluetooth/bluetooth.h>
+#include <zephyr/bluetooth/conn.h>
+#include <zephyr/bluetooth/gatt.h>
+#include <zephyr/bluetooth/hci.h>
+#include <zephyr/bluetooth/uuid.h>
+#include <zephyr/kernel.h>
 
 #include "defines.h"
 #include "io.h"
 #include "log.h"
 #include "nano33ble.h"
-#include "targets/nrf52/blechars.h"
+#include "blechars.h"
 #include "trackersettings.h"
 
 void sendTrainer();

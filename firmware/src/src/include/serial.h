@@ -1,7 +1,6 @@
 #pragma once
 
 #include <string>
-#define ARDUINOJSON_USE_DOUBLE 0
 #include "arduinojsonwrp.h"
 
 #include "../defines.h"

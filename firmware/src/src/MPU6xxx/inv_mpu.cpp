@@ -43,9 +43,9 @@
 #define i2c_read    i2c_readBytes
 #define delay_ms    rt_sleep_ms
 
-#include <device.h>
-#include <drivers/i2c.h>
-#include <zephyr.h>
+#include <zephyr/kernel.h>
+#include <zephyr/device.h>
+#include <zephyr/drivers/i2c.h>
 
 #include "log.h"
 

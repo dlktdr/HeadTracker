@@ -28,9 +28,9 @@
 #ifndef LSM9DS1_V2
 #define LSM9DS1_V2
 
-#include <device.h>
-#include <drivers/i2c.h>
-#include <zephyr.h>
+#include <zephyr/device.h>
+#include <zephyr/drivers/i2c.h>
+#include <zephyr/kernel.h>
 
 
 #define accelerationSampleRate getAccelODR

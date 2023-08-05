@@ -21,7 +21,7 @@
 
 #include "APDS9960.h"
 
-#include <drivers/i2c.h>
+#include <zephyr/drivers/i2c.h>
 
 #include "defines.h"
 #include "io.h"

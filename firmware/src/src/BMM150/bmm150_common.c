@@ -8,8 +8,8 @@
 #include "bmm150_common.h"
 
 
+#include <zephyr/drivers/i2c.h>
 #include <stdio.h>
-#include "drivers/i2c.h"
 #include "bmm150.h"
 #include "log.h"
 

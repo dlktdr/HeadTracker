@@ -1,10 +1,10 @@
 #pragma once
 
-#include <zephyr.h>
+#include <zephyr/kernel.h>
+#include "arduinojsonwrp.h"
 
 #include "PPMIn.h"
 #include "PPMOut.h"
-#include "arduinojsonwrp.h"
 #include "btparahead.h"
 #include "btpararmt.h"
 #include "serial.h"

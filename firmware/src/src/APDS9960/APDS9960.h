@@ -22,7 +22,7 @@
 #ifndef ARDUINO_APDS9960
 #define ARDUINO_APDS9960
 
-#include <zephyr.h>
+#include <zephyr/kernel.h>
 
 enum { GESTURE_NONE = -1, GESTURE_UP = 0, GESTURE_DOWN = 1, GESTURE_LEFT = 2, GESTURE_RIGHT = 3 };
 

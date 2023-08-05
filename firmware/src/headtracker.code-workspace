@@ -12,7 +12,6 @@
   ],
   "extensions": {
     "recommendations": [
-      "platformio.platformio-ide",
       "ms-vscode.cpptools",
       "xaver.clang-format",
     ]
@@ -25,22 +24,8 @@
       "titleBar.activeForeground": "#ffffff"
     },
     "terminal.integrated.env.windows": {
-      "path": "${env:PATH}$HOME/zephyrproject/zephyr/scripts;",
-      "ZEPHYR_BASE": "$Env:HOME/zephyrproject/zephyr"
-    },
-    "files.associations": {
-      "map": "cpp",
-      "format": "cpp",
-      "istream": "cpp",
-      "memory": "cpp",
-      "type_traits": "cpp",
-      "xlocmes": "cpp",
-      "xlocmon": "cpp",
-      "xlocnum": "cpp",
-      "xloctime": "cpp",
-      "functional": "cpp",
-      "log.h": "c",
-      "xstring": "cpp"
+      //"path": "${env:USERPROFILE}/zephyrproject/zephyr/scripts;",
+      "ZEPHYR_BASE": "${env:USERPROFILE}\\zephyrproject\\zephyr"
     },
     "west": "${env:HOME}/.python_default_venv/bin/west",
 		"twister":  {
@@ -86,5 +71,32 @@
         "url": "http://localhost:8080"
       }
     ]
+  },
+  "tasks": {
+    "version": "2.0.0",
+    "options": {
+      "env": {
+        "ZEPHYR_BASE": "${env:USERPROFILE}/zephyrproject/zephyr" // *Windows Only, following default install guide. TODO fixme
+      }
+    },
+    "tasks": [
+      {
+        "label": "Build (Arduino Nano 33 BLE)",
+        "command": "west",
+        "type": "shell",
+        "args": [
+          "build",
+          "-p", "always",
+          "-b", "arduino_nano_33_ble"
+        ],
+        "problemMatcher": [
+          "$tsc"
+        ],
+        "presentation": {
+          "reveal": "always"
+        },
+        "group": "build"
+      }
+  ]
   }
 }

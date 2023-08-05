@@ -1,4 +1,4 @@
-#include <zephyr.h>
+#include <zephyr/kernel.h>
 
 #include "io.h"
 #include "defines.h"
