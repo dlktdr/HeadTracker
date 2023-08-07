@@ -1417,7 +1417,8 @@ void MainWindow::boardDiscovered(BoardType *brd)
     // GUI changes info depending on board type
     if(brd->boardName() == "NANO33BLE" ||
        brd->boardName() == "DTQSYS" ||
-       brd->boardName() == "XIAOSENSE" ) {
+       brd->boardName() == "XIAOSENSE" ||
+       brd->boardName() == "ESP32C3") {
         addToLog(tr("Connected to a ") + brd->boardName() + "\n");
         ui->cmdStartGraph->setVisible(false);
         ui->cmdStopGraph->setVisible(false);
