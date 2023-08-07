@@ -171,6 +171,7 @@ void serial_Thread()
 
     k_mutex_lock(&ring_tx_mutex, K_FOREVER);
 
+#if !defined(CONFIG_SOC_ESP32C3)
     // lost connection
     if (dtr && !new_dtr) {
       ring_buf_reset(&ringbuf_tx);
@@ -194,6 +195,7 @@ void serial_Thread()
 
     // Port is open, send data
     if (new_dtr) {
+#endif
       int rb_len = ring_buf_get(&ringbuf_tx, buffer, sizeof(buffer));
       if (rb_len) {
         int send_len = uart_fifo_fill(dev, buffer, rb_len);
@@ -201,12 +203,13 @@ void serial_Thread()
           // LOG_ERR("USB CDC Ring Buffer Full, Dropped data");
         }
       }
+#if !defined(CONFIG_SOC_ESP32C3)
     } else {
       ring_buf_reset(&ringbuf_tx);  // Clear buffer
     }
     k_mutex_unlock(&ring_tx_mutex);
     dtr = new_dtr;
-
+#endif
     serialrx_Process();
 
     // Data output
