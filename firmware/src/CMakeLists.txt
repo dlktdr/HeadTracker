@@ -23,6 +23,7 @@ message(STATUS "Git Revision ${GIT_REV}")
 message(STATUS "Git Tag ${GIT_TAG}")
 
 # NRF52 Boards
+if(DEFINED ${BOARD})
 if((${BOARD} STREQUAL "arduino_nano_33_ble") OR
    (${BOARD} STREQUAL "xiao_ble") OR
    (${BOARD} EQUAL "dtqsys_ht"))
@@ -42,9 +43,20 @@ message(STATUS "Board is a ESP32C3 based board")
 else()
 message(FATAL_ERROR "ERROR: Board is not supported")
 endif()
+else()
+  # TODO --sysbuild causing an issue here, looks like board isn't defined, but only
+  # using it for esp mcuboot, so probably okay for now
+  set (CONF_FILE zephyr/esp32c3_prj.conf)
+endif()
 
 find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 project(HeadTracker DESCRIPTION "HeadTracker")
+
+# -DOPENOCD=/openocd-esp32/bin -DOPENOCD_DEFAULT_PATH=/openocd-esp32/share/openocd/scripts
+if(${BOARD} MATCHES "esp32c3")
+target_compile_definitions(app PUBLIC "OPENOCD=\"c:\\openocd-esp32\\bin\"")
+target_compile_definitions(app PUBLIC "OPENOCD_DEFAULT_PATH=\"c:\\openocd-esp32\\share\\openocd\\scripts\"")
+endif()
 
 target_compile_definitions(app PUBLIC FW_GIT_REV=${GIT_REV})
 target_compile_definitions(app PUBLIC FW_VER_TAG=${GIT_TAG})
