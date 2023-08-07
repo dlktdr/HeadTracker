@@ -1,0 +1,11 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
+// https://github.com/microsoft/vscode-dev-containers/tree/v0.187.0/containers/cpp
+{
+	"name": "zephyr-dev",
+	"image": "ghcr.io/zephyrproject-rtos/zephyr-build:latest",
+  "extensions": [
+		"ms-vscode.cpptools",
+    "trond-snekvik.devicetree"
+	],
+  "terminal.integrated.defaultProfile.linux": "bash"
+}
