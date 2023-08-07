@@ -30,25 +30,11 @@
     "west": "${env:HOME}/.python_default_venv/bin/west",
 		"twister":  {
 			"host_test_arch": "arm",
-		},
-		// Board support package settings:
-		"bsp": {
-			"cpu": "",  // must be used if multi core system (put _m4 or _m7 here for example)
-			"soc": "nRF52840",
-			"board": "arduino_nano_33_ble",
-			"board_root": "${workspaceFolder:zephyrproject}/zephyr",
-			"board_path": "${config:bsp.board_root}/boards/arm/${config:bsp.board}",
-			"svd": "${workspaceFolder}/nrf52840.svd",
-			//"debug_config": "${config:bsp.board_path}/support/openocd.cfg"
-		},
-    // App settings:
-		"app": {
-			"name": "${workspaceFolder:AppUnderDev}",
-			"build_dir": "${workspaceFolder:AppUnderDev}/build",
-			"zephyr_config": "",  // -DOVERLAY_CONFIG=<path_relative_to_sample> use ; for multiple files
-			"zephyr_dtc_overlay": "",  // "-DDTC_OVERLAY_FILE=boards/nucleo_f303re.overlay"  // -DDTC_OVERLAY_FILE=<path_relative_to_sample> use ; for multiple files
-			"compile_args": ""
-		},
+    },
+    "files.associations": {
+      "random": "cpp"
+    },
+
   },
   "launch": {
     "configurations": [
@@ -88,6 +74,55 @@
           "build",
           "-p", "always",
           "-b", "arduino_nano_33_ble"
+        ],
+        "problemMatcher": [
+          "$tsc"
+        ],
+        "presentation": {
+          "reveal": "always"
+        },
+        "group": "build"
+      },
+      {
+        "label": "Build (ESP32C3_DEVKITM)",
+        "command": "west",
+        "type": "shell",
+        "args": [
+          "build",
+          "-p", "always",
+          "-b", "esp32c3_devkitm"
+        ],
+        "problemMatcher": [
+          "$tsc"
+        ],
+        "presentation": {
+          "reveal": "always"
+        },
+        "group": "build"
+      },
+      {
+        "label": "Build (XIAO_ESP32C3)",
+        "command": "west",
+        "type": "shell",
+        "args": [
+          "build",
+          "-p", "always",
+          "-b", "xiao_esp32c3"
+        ],
+        "problemMatcher": [
+          "$tsc"
+        ],
+        "presentation": {
+          "reveal": "always"
+        },
+        "group": "build"
+      },
+      {
+        "label": "West Flash",
+        "command": "west",
+        "type": "shell",
+        "args": [
+          "flash"
         ],
         "problemMatcher": [
           "$tsc"
