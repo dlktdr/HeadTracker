@@ -207,9 +207,9 @@ void serial_Thread()
     } else {
       ring_buf_reset(&ringbuf_tx);  // Clear buffer
     }
-    k_mutex_unlock(&ring_tx_mutex);
     dtr = new_dtr;
 #endif
+    k_mutex_unlock(&ring_tx_mutex);
     serialrx_Process();
 
     // Data output
