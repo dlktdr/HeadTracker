@@ -1,0 +1,13 @@
+Debugging with OpenOCD and internal USB CDC+JTAG
+
+Must use openocd program supplied by espressif for support
+
+Driver for using the internal GPIO 18+19 USB CDC + JTAG, Driver install without getting whole IDF SDK is this command.
+Invoke-WebRequest 'https://dl.espressif.com/dl/idf-env/idf-env.exe' -OutFile .\idf-env.exe; .\idf-env.exe driver install --espressif
+
+In the esp_prj file enable the debugging Options for better stepping
+
+Start OpenOCD
+C:\openocd\bin\openocd.exe -f C:\Users\cblac.DESKTOP-ARFAJKF\zephyrproject\zephyr\boards\riscv\xiao_esp32c3\support\openocd.cfg
+
+Then Execute The Launch command ESP32 Debug to connection
