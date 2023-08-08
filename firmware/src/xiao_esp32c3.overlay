@@ -1,9 +1,8 @@
 / {
-  /delete-property/ zephyr,console;
-  /delete-property/ zephyr,shell-uart;
-  /delete-property/ zephyr,uart-mcumgr;
-  /delete-property/ zephyr,bt-mon-uart;
-  /delete-property/ zephyr,bt-c2h-uart;
+  chosen {
+    zephyr,console = &usb_serial;
+    /delete-property/ zephyr,shell-uart;
+  };
 
   gpio_keys {
       compatible = "gpio-keys";
@@ -20,7 +19,7 @@
     adcctrl = &adc0;
     i2csensor = &i2c0;
     spisensor = &spi2;
-    guiuart = &uart0;
+    guiuart = &usb_serial;
   };
 };
 
@@ -97,9 +96,9 @@
   status = "okay";
 };
 
-&uart0 {
-  current-speed = <921600>;
-};
+//&uart0 {
+//  current-speed = <921600>;
+//};
 
 &uart1 {
   status = "okay";
@@ -145,14 +144,9 @@
 			   reg = <0x00210000 0x00040000>;
 		};
 
-		storage_partition: partition@250000 {
-			label = "storage";
-			reg = <0x00250000 0x00006000>;
-		};
-
-    datapt_partition: partition@256000 {
+    datapt_partition: partition@250000 {
       label = "datapt";
-      reg = <0x00256000 0x4000>;
+      reg = <0x00250000 0x4000>;
   };
 	};
 };
