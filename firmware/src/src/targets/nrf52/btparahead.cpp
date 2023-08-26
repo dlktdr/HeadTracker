@@ -30,7 +30,6 @@
 #include "nano33ble.h"
 #include "targets/nrf52/blechars.h"
 #include "trackersettings.h"
-#include "oled.h"
 
 void sendTrainer();
 int setTrainer(uint8_t *addr);
@@ -216,7 +215,7 @@ static ssize_t write_ct(struct bt_conn *conn, const struct bt_gatt_attr *attr, c
     memcpy(&incoming_friendly, buf, len);
     // As first step it should be enough ;]
     LOGI("Something was received, distance = %d, tilt = %d, pan = %d", incoming_friendly.distance, incoming_friendly.tilt, incoming_friendly.pan);
-    set_oled_pan_roll(incoming_friendly.pan, incoming_friendly.tilt);
+    // set_oled_pan_roll(incoming_friendly.pan, incoming_friendly.tilt);
   }
 
   return len;

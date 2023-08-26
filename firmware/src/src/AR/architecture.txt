@@ -1,0 +1,9 @@
+Agumented Reality
+
+Agumented Reality module is build up from 3 files:
+1. Navigation - basically array of all points in GPS cordinates (thread
+   is called each 1000 ms, converting all positions to angles)
+2. Position - basically array of all points in angles angles (thread is
+   called each 25ms, converting angles X and Y position to be diaplyed
+   on OLED)
+3. Display - functions to handle display only (no thread)

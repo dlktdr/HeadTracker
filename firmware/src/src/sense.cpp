@@ -36,6 +36,7 @@
 #include "soc_flash.h"
 #include "trackersettings.h"
 #include "uart_mode.h"
+#include "AR/position.h"
 
 #if defined(HAS_APDS9960)
 #include "APDS9960/APDS9960.h"
@@ -247,7 +248,6 @@ int sense_Init()
 // Calculations and Main Channel Thread
 //----------------------------------------------------------------------
 
-#include "oled.h"
 
 void calculate_Thread()
 {
@@ -269,9 +269,9 @@ void calculate_Thread()
     pan = madgwick.getYaw();
     k_mutex_unlock(&sensor_mutex);
 
-    oled_set_tilt(tilt);
-    oled_set_roll(roll);
-    oled_set_pan(pan);
+    position_set_roll(tilt);
+    position_set_pitch(roll);
+    position_set_azimuth(pan);
 
     // Toggles output on and off if long pressed
     bool butlngdwn = false;

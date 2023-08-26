@@ -19,7 +19,7 @@
 #include "serial.h"
 #include "soc_flash.h"
 #include "trackersettings.h"
-#include "oled.h"
+#include "AR/position.h"
 
 #define CLOCK_NODE DT_INST(0, nordic_nrf_clock)
 static const struct device *clock0;
@@ -80,6 +80,7 @@ void start(void)
 
 #if defined(RTOS_ZEPHYR)
 #define OLED_THREAD_PRIO PRIORITY_LOW
+#define POSITION_THREAD_PRIO PRIORITY_LOW
 
 // Threads
 // Just to make sure inputs/outputs are not going to make any mess
@@ -93,7 +94,8 @@ K_THREAD_DEFINE(calculate_Thread_id, 1024, calculate_Thread, NULL, NULL, NULL,
                 CALCULATE_THREAD_PRIO, K_FP_REGS, 1000);
 K_THREAD_DEFINE(uartTx_Thread_ID, 1024, uartTx_Thread, NULL, NULL, NULL, UARTTX_THREAD_PRIO, 0, 1000);
 K_THREAD_DEFINE(uartRx_Thread_ID, 512, uartRx_Thread, NULL, NULL, NULL, UARTRX_THREAD_PRIO, 0, 1000);
-K_THREAD_DEFINE(oled_ID, 4096, oled_Thread, NULL, NULL, NULL, OLED_THREAD_PRIO, 0, 1000);
+// K_THREAD_DEFINE(oled_ID, 4096, oled_Thread, NULL, NULL, NULL, OLED_THREAD_PRIO, 0, 1000);
+K_THREAD_DEFINE(position_ID, 4096, position_Thread, NULL, NULL, NULL, POSITION_THREAD_PRIO, 0, 1000);
 
 #elif defined(RTOS_FREERTOS)
 #error "TODO... Add tasks for FreeRTOS"
