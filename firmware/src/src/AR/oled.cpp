@@ -42,7 +42,8 @@
   }
 #endif
 
-#define D_S 6 // DIAMOND_SIZE
+#define POINT_SIZE 6
+#define POINT_HALF_SIZE ((int16_t) POINT_SIZE / 2)
 
 uint8_t oled_buf[1024] = {0};
 
@@ -167,12 +168,45 @@ void display_write_line(int16_t x0, int16_t y0, int16_t x1, int16_t y1)
   }
 }
 
-void oled_draw_diamond(int16_t x, int y)
+void oled_draw_diamond(int16_t x, int16_t y)
 {
-  display_write_line(x - D_S, y      , x      , y + D_S);
-  display_write_line(x      , y + D_S, x + D_S, y      );
-  display_write_line(x + D_S, y      , x      , y - D_S);
-  display_write_line(x      , y - D_S, x - D_S, y      );
+  display_write_line(x - POINT_HALF_SIZE, y                  , x                  , y + POINT_HALF_SIZE);
+  display_write_line(x                  , y + POINT_HALF_SIZE, x + POINT_HALF_SIZE, y                  );
+  display_write_line(x + POINT_HALF_SIZE, y                  , x                  , y - POINT_HALF_SIZE);
+  display_write_line(x                  , y - POINT_HALF_SIZE, x - POINT_HALF_SIZE, y                  );
+}
+
+void oled_draw_square(int16_t x, int16_t y)
+{
+  display_write_line(x - POINT_HALF_SIZE, y - POINT_HALF_SIZE, x - POINT_HALF_SIZE, y + POINT_HALF_SIZE);
+  display_write_line(x - POINT_HALF_SIZE, y + POINT_HALF_SIZE, x + POINT_HALF_SIZE, y + POINT_HALF_SIZE);
+  display_write_line(x + POINT_HALF_SIZE, y + POINT_HALF_SIZE, x + POINT_HALF_SIZE, y - POINT_HALF_SIZE);
+  display_write_line(x + POINT_HALF_SIZE, y - POINT_HALF_SIZE, x - POINT_HALF_SIZE, y - POINT_HALF_SIZE);
+}
+
+void oled_draw_triangle(int16_t x, int16_t y)
+{
+  display_write_line(x + POINT_HALF_SIZE, y + POINT_HALF_SIZE, x                  , y - POINT_HALF_SIZE);
+  display_write_line(x                  , y - POINT_HALF_SIZE, x - POINT_HALF_SIZE, y + POINT_HALF_SIZE);
+  display_write_line(x + POINT_HALF_SIZE, y + POINT_HALF_SIZE, x - POINT_HALF_SIZE, y + POINT_HALF_SIZE);
+}
+
+void oled_draw_x_shape(int16_t x, int16_t y)
+{
+  display_write_line(x - POINT_HALF_SIZE, y + POINT_HALF_SIZE, x + POINT_HALF_SIZE, y - POINT_HALF_SIZE);
+  display_write_line(x - POINT_HALF_SIZE, y - POINT_HALF_SIZE, x + POINT_HALF_SIZE, y + POINT_HALF_SIZE);
+}
+
+void oled_update()
+{
+  display_write(oled, 0, 0, &buf_desc, oled_buf);
+}
+
+void oled_clean()
+{
+  for(uint16_t i = 0; i < 1024; i++) {
+    oled_buf[i] = 0;
+  }
 }
 
 void oled_init()
