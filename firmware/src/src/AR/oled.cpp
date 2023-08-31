@@ -197,6 +197,41 @@ void oled_draw_x_shape(int16_t x, int16_t y)
   display_write_line(x - POINT_HALF_SIZE, y - POINT_HALF_SIZE, x + POINT_HALF_SIZE, y + POINT_HALF_SIZE);
 }
 
+void oled_draw_circle(int16_t x0, int16_t y0)
+ {
+  int16_t r = POINT_HALF_SIZE;
+  int16_t f = 1 - r;
+  int16_t ddF_x = 1;
+  int16_t ddF_y = -2 * r;
+  int16_t x = 0;
+  int16_t y = r;
+
+  oled_write_pixel(x0, y0 + r);
+  oled_write_pixel(x0, y0 - r);
+  oled_write_pixel(x0 + r, y0);
+  oled_write_pixel(x0 - r, y0);
+
+  while (x < y) {
+    if (f >= 0) {
+      y--;
+      ddF_y += 2;
+      f += ddF_y;
+    }
+    x++;
+    ddF_x += 2;
+    f += ddF_x;
+
+    oled_write_pixel(x0 + x, y0 + y);
+    oled_write_pixel(x0 - x, y0 + y);
+    oled_write_pixel(x0 + x, y0 - y);
+    oled_write_pixel(x0 - x, y0 - y);
+    oled_write_pixel(x0 + y, y0 + x);
+    oled_write_pixel(x0 - y, y0 + x);
+    oled_write_pixel(x0 + y, y0 - x);
+    oled_write_pixel(x0 - y, y0 - x);
+  }
+}
+
 void oled_update()
 {
   display_write(oled, 0, 0, &buf_desc, oled_buf);

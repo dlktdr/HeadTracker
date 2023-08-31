@@ -10,6 +10,7 @@ void oled_draw_diamond(int16_t x, int16_t y);
 void oled_draw_square(int16_t x, int16_t y);
 void oled_draw_triangle(int16_t x, int16_t y);
 void oled_draw_x_shape(int16_t x, int16_t y);
+void oled_draw_circle(int16_t x0, int16_t y0);
 void oled_update();
 void oled_clean();
 
