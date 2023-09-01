@@ -232,6 +232,39 @@ void oled_draw_circle(int16_t x0, int16_t y0)
   }
 }
 
+void oled_write_N(int16_t x, int16_t y, uint8_t size)
+{
+  display_write_line(x - size, y - size, x - size, y + size);
+  display_write_line(x - size, y + size, x + size, y - size);
+  display_write_line(x + size, y - size, x + size, y + size);
+
+}
+
+void oled_write_E(int16_t x, int16_t y, uint8_t size)
+{
+  display_write_line(x - size, y - size, x - size, y + size);
+  display_write_line(x - size, y + size, x + size, y + size);
+  display_write_line(x - size, y       , x + size, y       );
+  display_write_line(x - size, y - size, x + size, y - size);
+}
+
+void oled_write_S(int16_t x, int16_t y, uint8_t size)
+{
+  display_write_line(x - size, y - size, x + size, y - size);
+  display_write_line(x + size, y - size, x + size, y       );
+  display_write_line(x + size, y       , x - size, y       );
+  display_write_line(x - size, y       , x - size, y + size);
+  display_write_line(x - size, y + size, x + size, y + size);
+}
+
+void oled_write_W(int16_t x, int16_t y, uint8_t size)
+{
+  display_write_line(x - size, y - size, x - size, y + size);
+  display_write_line(x - size, y - size, x       , y       );
+  display_write_line(x       , y       , x + size, y - size);
+  display_write_line(x + size, y - size, x + size, y + size);
+}
+
 void oled_update()
 {
   display_write(oled, 0, 0, &buf_desc, oled_buf);

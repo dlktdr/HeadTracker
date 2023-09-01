@@ -78,13 +78,16 @@ void position_Thread()
   LOGI("Position thread started");
 
   oled_init();
-
   oled_clean();
   oled_draw_diamond(20, 20);
   oled_draw_square(30, 20);
   oled_draw_triangle(40, 20);
   oled_draw_x_shape(50, 20);
   oled_draw_circle(60, 20);
+  oled_write_N(20, 30, 3);
+  oled_write_E(30, 30, 3);
+  oled_write_S(40, 30, 3);
+  oled_write_W(50, 30, 3);
   oled_update();
 
   while (1) {
