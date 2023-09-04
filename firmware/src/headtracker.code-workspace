@@ -36,7 +36,8 @@
       "xloctime": "cpp",
       "functional": "cpp",
       "log.h": "c",
-      "xstring": "cpp"
+      "xstring": "cpp",
+      "cmath": "cpp"
     },
   },
   "launch": {

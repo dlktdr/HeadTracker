@@ -42,7 +42,7 @@
   }
 #endif
 
-#define POINT_SIZE 6
+#define POINT_SIZE 8
 #define POINT_HALF_SIZE ((int16_t) POINT_SIZE / 2)
 
 uint8_t oled_buf[1024] = {0};
@@ -86,6 +86,7 @@ void oled_write_pixel(int16_t x, int16_t y)
       return;
 
     uint8_t rotation = 0;
+    y = (HEIGHT - 1) - y;
 
     int16_t t;
     switch (rotation) {
@@ -125,7 +126,7 @@ void oled_write_pixel(int16_t x, int16_t y)
   }
 }
 
-void display_write_line(int16_t x0, int16_t y0, int16_t x1, int16_t y1)
+void oled_write_line(int16_t x0, int16_t y0, int16_t x1, int16_t y1)
 {
 #if defined(ESP8266)
   yield();
@@ -170,31 +171,31 @@ void display_write_line(int16_t x0, int16_t y0, int16_t x1, int16_t y1)
 
 void oled_draw_diamond(int16_t x, int16_t y)
 {
-  display_write_line(x - POINT_HALF_SIZE, y                  , x                  , y + POINT_HALF_SIZE);
-  display_write_line(x                  , y + POINT_HALF_SIZE, x + POINT_HALF_SIZE, y                  );
-  display_write_line(x + POINT_HALF_SIZE, y                  , x                  , y - POINT_HALF_SIZE);
-  display_write_line(x                  , y - POINT_HALF_SIZE, x - POINT_HALF_SIZE, y                  );
+  oled_write_line(x - POINT_HALF_SIZE, y                  , x                  , y + POINT_HALF_SIZE);
+  oled_write_line(x                  , y + POINT_HALF_SIZE, x + POINT_HALF_SIZE, y                  );
+  oled_write_line(x + POINT_HALF_SIZE, y                  , x                  , y - POINT_HALF_SIZE);
+  oled_write_line(x                  , y - POINT_HALF_SIZE, x - POINT_HALF_SIZE, y                  );
 }
 
 void oled_draw_square(int16_t x, int16_t y)
 {
-  display_write_line(x - POINT_HALF_SIZE, y - POINT_HALF_SIZE, x - POINT_HALF_SIZE, y + POINT_HALF_SIZE);
-  display_write_line(x - POINT_HALF_SIZE, y + POINT_HALF_SIZE, x + POINT_HALF_SIZE, y + POINT_HALF_SIZE);
-  display_write_line(x + POINT_HALF_SIZE, y + POINT_HALF_SIZE, x + POINT_HALF_SIZE, y - POINT_HALF_SIZE);
-  display_write_line(x + POINT_HALF_SIZE, y - POINT_HALF_SIZE, x - POINT_HALF_SIZE, y - POINT_HALF_SIZE);
+  oled_write_line(x - POINT_HALF_SIZE, y - POINT_HALF_SIZE, x - POINT_HALF_SIZE, y + POINT_HALF_SIZE);
+  oled_write_line(x - POINT_HALF_SIZE, y + POINT_HALF_SIZE, x + POINT_HALF_SIZE, y + POINT_HALF_SIZE);
+  oled_write_line(x + POINT_HALF_SIZE, y + POINT_HALF_SIZE, x + POINT_HALF_SIZE, y - POINT_HALF_SIZE);
+  oled_write_line(x + POINT_HALF_SIZE, y - POINT_HALF_SIZE, x - POINT_HALF_SIZE, y - POINT_HALF_SIZE);
 }
 
 void oled_draw_triangle(int16_t x, int16_t y)
 {
-  display_write_line(x + POINT_HALF_SIZE, y + POINT_HALF_SIZE, x                  , y - POINT_HALF_SIZE);
-  display_write_line(x                  , y - POINT_HALF_SIZE, x - POINT_HALF_SIZE, y + POINT_HALF_SIZE);
-  display_write_line(x + POINT_HALF_SIZE, y + POINT_HALF_SIZE, x - POINT_HALF_SIZE, y + POINT_HALF_SIZE);
+  oled_write_line(x + POINT_HALF_SIZE, y + POINT_HALF_SIZE, x                  , y - POINT_HALF_SIZE);
+  oled_write_line(x                  , y - POINT_HALF_SIZE, x - POINT_HALF_SIZE, y + POINT_HALF_SIZE);
+  oled_write_line(x + POINT_HALF_SIZE, y + POINT_HALF_SIZE, x - POINT_HALF_SIZE, y + POINT_HALF_SIZE);
 }
 
 void oled_draw_x_shape(int16_t x, int16_t y)
 {
-  display_write_line(x - POINT_HALF_SIZE, y + POINT_HALF_SIZE, x + POINT_HALF_SIZE, y - POINT_HALF_SIZE);
-  display_write_line(x - POINT_HALF_SIZE, y - POINT_HALF_SIZE, x + POINT_HALF_SIZE, y + POINT_HALF_SIZE);
+  oled_write_line(x - POINT_HALF_SIZE, y + POINT_HALF_SIZE, x + POINT_HALF_SIZE, y - POINT_HALF_SIZE);
+  oled_write_line(x - POINT_HALF_SIZE, y - POINT_HALF_SIZE, x + POINT_HALF_SIZE, y + POINT_HALF_SIZE);
 }
 
 void oled_draw_circle(int16_t x0, int16_t y0)
@@ -234,35 +235,35 @@ void oled_draw_circle(int16_t x0, int16_t y0)
 
 void oled_write_N(int16_t x, int16_t y, uint8_t size)
 {
-  display_write_line(x - size, y - size, x - size, y + size);
-  display_write_line(x - size, y + size, x + size, y - size);
-  display_write_line(x + size, y - size, x + size, y + size);
+  oled_write_line(x - size, y - size, x - size, y + size);
+  oled_write_line(x - size, y + size, x + size, y - size);
+  oled_write_line(x + size, y - size, x + size, y + size);
 
 }
 
 void oled_write_E(int16_t x, int16_t y, uint8_t size)
 {
-  display_write_line(x - size, y - size, x - size, y + size);
-  display_write_line(x - size, y + size, x + size, y + size);
-  display_write_line(x - size, y       , x + size, y       );
-  display_write_line(x - size, y - size, x + size, y - size);
+  oled_write_line(x - size, y - size, x - size, y + size);
+  oled_write_line(x - size, y + size, x + size, y + size);
+  oled_write_line(x - size, y       , x + size, y       );
+  oled_write_line(x - size, y - size, x + size, y - size);
 }
 
 void oled_write_S(int16_t x, int16_t y, uint8_t size)
 {
-  display_write_line(x - size, y - size, x + size, y - size);
-  display_write_line(x + size, y - size, x + size, y       );
-  display_write_line(x + size, y       , x - size, y       );
-  display_write_line(x - size, y       , x - size, y + size);
-  display_write_line(x - size, y + size, x + size, y + size);
+  oled_write_line(x - size, y - size, x + size, y - size);
+  oled_write_line(x + size, y - size, x + size, y       );
+  oled_write_line(x + size, y       , x - size, y       );
+  oled_write_line(x - size, y       , x - size, y + size);
+  oled_write_line(x - size, y + size, x + size, y + size);
 }
 
 void oled_write_W(int16_t x, int16_t y, uint8_t size)
 {
-  display_write_line(x - size, y - size, x - size, y + size);
-  display_write_line(x - size, y - size, x       , y       );
-  display_write_line(x       , y       , x + size, y - size);
-  display_write_line(x + size, y - size, x + size, y + size);
+  oled_write_line(x - size, y - size, x - size, y + size);
+  oled_write_line(x - size, y - size, x       , y       );
+  oled_write_line(x       , y       , x + size, y - size);
+  oled_write_line(x + size, y - size, x + size, y + size);
 }
 
 void oled_update()
@@ -304,13 +305,12 @@ void oled_init()
     LOGI("Contrast set");
   }
 
-  display_write_line(0,0,127,63);
-  display_write_line(0,63,127,0);
-  display_write_line(0,0,127,0);
-  display_write_line(0,0,0,63);
-  display_write_line(127,0,127,63);
-  display_write_line(0,63,127,63);
+  oled_write_line(0,0,127,63);
+  oled_write_line(0,63,127,0);
+  oled_write_line(0,0,127,0);
+  oled_write_line(0,0,0,63);
+  oled_write_line(127,0,127,63);
+  oled_write_line(0,63,127,63);
   display_write(oled, 0, 0, &buf_desc, oled_buf);
-
-  rt_sleep_ms(10000);
+  rt_sleep_ms(5000);
 }
