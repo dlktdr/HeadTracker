@@ -62,22 +62,16 @@ const struct display_buffer_descriptor buf_desc = {
 
 uint8_t buf[1024] = {0};
 
-// static void display_update();
+union Column_Mask {
+  uint32_t value;
+  uint8_t values[4];
+};
 
-// static int display_update()
-// {
-//   struct display_driver_api *api = (struct display_driver_api *)display->api;
 
-// 	return api->write(display, 0, 0, buf_desc, buf);
-// }
-
-// static inline int display_set_contrast(const struct device *dev, uint8_t contrast)
-// {
-// 	struct display_driver_api *api =
-// 		(struct display_driver_api *)dev->api;
-
-// 	return api->set_contrast(dev, contrast);
-// }
+extern const uint16_t *const* pix5;
+extern const uint16_t *const* pix7;
+extern const uint16_t *const* pix11;
+extern const uint16_t *const* pix14;
 
 void oled_write_pixel(int16_t x, int16_t y)
 {
@@ -166,6 +160,111 @@ void oled_write_line(int16_t x0, int16_t y0, int16_t x1, int16_t y1)
       y0 += ystep;
       err += dx;
     }
+  }
+}
+
+static const uint16_t *const*get_font_param(uint8_t height, uint8_t *width)
+{
+  const uint16_t *const*test_font;
+  uint8_t font_width = 0;
+
+  switch (height) {
+  case 5:
+    font_width = 4;
+    test_font = pix5;
+    break;
+  case 7:
+    font_width = 4;
+    test_font = pix7;
+    break;
+  case 11:
+    font_width = 7;
+    test_font = pix11;
+    break;
+  case 14:
+    font_width = 8;
+    test_font = pix14;
+    break;
+  default:
+    font_width = 4;
+    test_font = pix5;
+    break;
+  }
+
+  if (width != nullptr) {
+    *width = font_width;
+  }
+
+  return test_font;
+}
+
+void oled_write_char(int16_t x, int16_t y, char letter, uint8_t font_size)
+{
+  union Column_Mask column_mask;
+  uint8_t oled_font_width = 0;
+  const uint16_t *const*font;
+  const uint16_t *x_char;
+  int16_t y_buf_mask;
+  int16_t buf_index;
+  int16_t y_cur_pos;
+  uint8_t j = 0;
+  uint8_t i = 0;
+
+  font = get_font_param(font_size, &oled_font_width);
+
+  uint8_t test_y_height = ((font_size + (8 - (y % 8))) + 7) / 8;
+  LOGI("test_y_height = %d, y = %d", test_y_height, y);
+
+  x_char = font[letter - 0x20];
+
+/* process all Y columns of pixels to display char*/
+  for (i = 0; i < oled_font_width; i++) {
+    /* process single Y column of pixels */
+    if (x < 0) {
+      x++;
+      continue;
+    }
+    if (x >= WIDTH) {
+      break;
+    }
+
+    column_mask.value = (x_char[i] << (8 - (y % 8)));
+    y_cur_pos = 7 - (y / 8);
+    for (j = 0; j < test_y_height; j++) {
+
+      y_buf_mask = column_mask.values[j];
+
+      buf_index = x + y_cur_pos * WIDTH;
+      if (buf_index < 0 || buf_index >= 1024) {
+        LOGI("y_cur_pos = %d, x = %d, y = %d, buf_index = %d", y_cur_pos, x, y, buf_index);
+      } else {
+        oled_buf[buf_index] |= y_buf_mask;
+      }
+
+      y_cur_pos++;
+    }
+
+    x++;
+  }
+}
+
+
+void oled_write_text(int16_t x, int16_t y, char* text, uint8_t text_size, bool center)
+{
+  uint8_t text_length = strlen(text);
+  const uint16_t *const*font;
+  uint8_t width;
+
+  font = get_font_param(text_size, &width);
+
+  if (center) {
+    x -= (text_length * width + text_length - 1) / 2;
+  }
+
+  while (*text != '\0') {
+    oled_write_char(x, y, *text, text_size);
+    x += 1 + width;
+    text++;
   }
 }
 
@@ -278,7 +377,7 @@ void oled_clean()
   }
 }
 
-void oled_init()
+void oled_init(uint32_t delay)
 {
   if (oled == NULL) {
     LOGI("oled pointer is NULL");
@@ -311,6 +410,7 @@ void oled_init()
   oled_write_line(0,0,0,63);
   oled_write_line(127,0,127,63);
   oled_write_line(0,63,127,63);
+
   display_write(oled, 0, 0, &buf_desc, oled_buf);
-  rt_sleep_ms(5000);
+  rt_sleep_ms(delay);
 }

@@ -232,7 +232,7 @@ void hasSecurityChangedTimer(struct k_timer *tmr)
   // If a CC2540 device, is should have changed the security level to 2 by now
   // If you force the notify subscription on a CC2540 right away it won't send data
   if (sl == BT_SECURITY_L1) {
-    uint8_t ccv = BT_GATT_CCC_NOTIFY;
+    // uint8_t ccv = BT_GATT_CCC_NOTIFY;
     // bt_gatt_attr_write_ccc(curconn, &bt_srv.attrs[3], &ccv, 1, 0, 0);
     LOGI("Detected a CC2650 Chip (PARA Wireless)");
   } else

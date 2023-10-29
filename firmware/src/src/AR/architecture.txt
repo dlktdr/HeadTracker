@@ -7,3 +7,5 @@ Agumented Reality module is build up from 3 files:
    called each 25ms, converting angles X and Y position to be diaplyed
    on OLED)
 3. Display - functions to handle display only (no thread)
+
+Fonts are implemented on display level only

@@ -6,7 +6,10 @@
 #define X_CENTER    63
 #define Y_CENTER    31
 
-void oled_init();
+void oled_write_char(int16_t x, int16_t y, char letter, uint8_t font_size);
+void oled_write_text(int16_t x, int16_t y, char* text, uint8_t text_size, bool center);
+
+void oled_init(uint32_t delay);
 void oled_write_pixel(int16_t x, int16_t y);
 void oled_write_line(int16_t x0, int16_t y0, int16_t x1, int16_t y1);
 void oled_draw_diamond(int16_t x, int16_t y);
