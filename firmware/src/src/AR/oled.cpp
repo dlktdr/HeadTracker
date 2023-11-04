@@ -119,7 +119,7 @@ void oled_write_pixel(int16_t x, int16_t y)
   }
 }
 
-void oled_write_line(int16_t x0, int16_t y0, int16_t x1, int16_t y1)
+void oled_write_line(int16_t x0, int16_t y0, int16_t x1, int16_t y1, enum Line_T line_type)
 {
 #if defined(ESP8266)
   yield();
@@ -148,11 +148,44 @@ void oled_write_line(int16_t x0, int16_t y0, int16_t x1, int16_t y1)
     ystep = -1;
   }
 
+  uint8_t counter = 0;
+  if (line_type == Cropped_1) {
+    counter = 1;
+  } else if (line_type == Dashed_1) {
+    counter = 2;
+  }
+
   for (; x0 <= x1; x0++) {
-    if (steep) {
-      oled_write_pixel(y0, x0);
-    } else {
-      oled_write_pixel(x0, y0);
+    if (line_type == Solid) {
+      if (steep) {
+        oled_write_pixel(y0, x0);
+      } else {
+        oled_write_pixel(x0, y0);
+      }
+    }
+    if (line_type == Cropped_0 || line_type == Cropped_1) {
+      if (counter == 0) {
+        counter = 1;
+        if (steep) {
+          oled_write_pixel(y0, x0);
+        } else {
+          oled_write_pixel(x0, y0);
+        }
+      } else {
+        counter = 0;
+      }
+    }
+    if (line_type == Dashed_0 || line_type == Dashed_0) {
+      counter++;
+      if (counter == 0 || counter == 1) {
+        if (steep) {
+          oled_write_pixel(y0, x0);
+        } else {
+          oled_write_pixel(x0, y0);
+        }
+      } else if (counter > 4) {
+        counter = 0;
+      }
     }
     err -= dy;
     if (err < 0) {
@@ -268,33 +301,37 @@ void oled_write_text(int16_t x, int16_t y, char* text, uint8_t text_size, bool c
   }
 }
 
-void oled_draw_diamond(int16_t x, int16_t y)
+void oled_draw_diamond(int16_t x, int16_t y, bool cropped)
 {
-  oled_write_line(x - POINT_HALF_SIZE, y                  , x                  , y + POINT_HALF_SIZE);
-  oled_write_line(x                  , y + POINT_HALF_SIZE, x + POINT_HALF_SIZE, y                  );
-  oled_write_line(x + POINT_HALF_SIZE, y                  , x                  , y - POINT_HALF_SIZE);
-  oled_write_line(x                  , y - POINT_HALF_SIZE, x - POINT_HALF_SIZE, y                  );
+  enum Line_T line_type = Solid;
+  if (cropped) {
+    line_type = Cropped_0;
+  }
+  oled_write_line(x - POINT_HALF_SIZE, y                  , x                  , y + POINT_HALF_SIZE, line_type);
+  oled_write_line(x                  , y + POINT_HALF_SIZE, x + POINT_HALF_SIZE, y                  , line_type);
+  oled_write_line(x + POINT_HALF_SIZE, y                  , x                  , y - POINT_HALF_SIZE, line_type);
+  oled_write_line(x                  , y - POINT_HALF_SIZE, x - POINT_HALF_SIZE, y                  , line_type);
 }
 
 void oled_draw_square(int16_t x, int16_t y)
 {
-  oled_write_line(x - POINT_HALF_SIZE, y - POINT_HALF_SIZE, x - POINT_HALF_SIZE, y + POINT_HALF_SIZE);
-  oled_write_line(x - POINT_HALF_SIZE, y + POINT_HALF_SIZE, x + POINT_HALF_SIZE, y + POINT_HALF_SIZE);
-  oled_write_line(x + POINT_HALF_SIZE, y + POINT_HALF_SIZE, x + POINT_HALF_SIZE, y - POINT_HALF_SIZE);
-  oled_write_line(x + POINT_HALF_SIZE, y - POINT_HALF_SIZE, x - POINT_HALF_SIZE, y - POINT_HALF_SIZE);
+  oled_write_line(x - POINT_HALF_SIZE, y - POINT_HALF_SIZE, x - POINT_HALF_SIZE, y + POINT_HALF_SIZE, Solid);
+  oled_write_line(x - POINT_HALF_SIZE, y + POINT_HALF_SIZE, x + POINT_HALF_SIZE, y + POINT_HALF_SIZE, Solid);
+  oled_write_line(x + POINT_HALF_SIZE, y + POINT_HALF_SIZE, x + POINT_HALF_SIZE, y - POINT_HALF_SIZE, Solid);
+  oled_write_line(x + POINT_HALF_SIZE, y - POINT_HALF_SIZE, x - POINT_HALF_SIZE, y - POINT_HALF_SIZE, Solid);
 }
 
 void oled_draw_triangle(int16_t x, int16_t y)
 {
-  oled_write_line(x + POINT_HALF_SIZE, y + POINT_HALF_SIZE, x                  , y - POINT_HALF_SIZE);
-  oled_write_line(x                  , y - POINT_HALF_SIZE, x - POINT_HALF_SIZE, y + POINT_HALF_SIZE);
-  oled_write_line(x + POINT_HALF_SIZE, y + POINT_HALF_SIZE, x - POINT_HALF_SIZE, y + POINT_HALF_SIZE);
+  oled_write_line(x + POINT_HALF_SIZE, y + POINT_HALF_SIZE, x                  , y - POINT_HALF_SIZE, Solid);
+  oled_write_line(x                  , y - POINT_HALF_SIZE, x - POINT_HALF_SIZE, y + POINT_HALF_SIZE, Solid);
+  oled_write_line(x + POINT_HALF_SIZE, y + POINT_HALF_SIZE, x - POINT_HALF_SIZE, y + POINT_HALF_SIZE, Solid);
 }
 
 void oled_draw_x_shape(int16_t x, int16_t y)
 {
-  oled_write_line(x - POINT_HALF_SIZE, y + POINT_HALF_SIZE, x + POINT_HALF_SIZE, y - POINT_HALF_SIZE);
-  oled_write_line(x - POINT_HALF_SIZE, y - POINT_HALF_SIZE, x + POINT_HALF_SIZE, y + POINT_HALF_SIZE);
+  oled_write_line(x - POINT_HALF_SIZE, y + POINT_HALF_SIZE, x + POINT_HALF_SIZE, y - POINT_HALF_SIZE, Solid);
+  oled_write_line(x - POINT_HALF_SIZE, y - POINT_HALF_SIZE, x + POINT_HALF_SIZE, y + POINT_HALF_SIZE, Solid);
 }
 
 void oled_draw_circle(int16_t x0, int16_t y0)
@@ -330,39 +367,6 @@ void oled_draw_circle(int16_t x0, int16_t y0)
     oled_write_pixel(x0 + y, y0 - x);
     oled_write_pixel(x0 - y, y0 - x);
   }
-}
-
-void oled_write_N(int16_t x, int16_t y, uint8_t size)
-{
-  oled_write_line(x - size, y - size, x - size, y + size);
-  oled_write_line(x - size, y + size, x + size, y - size);
-  oled_write_line(x + size, y - size, x + size, y + size);
-
-}
-
-void oled_write_E(int16_t x, int16_t y, uint8_t size)
-{
-  oled_write_line(x - size, y - size, x - size, y + size);
-  oled_write_line(x - size, y + size, x + size, y + size);
-  oled_write_line(x - size, y       , x + size, y       );
-  oled_write_line(x - size, y - size, x + size, y - size);
-}
-
-void oled_write_S(int16_t x, int16_t y, uint8_t size)
-{
-  oled_write_line(x - size, y - size, x + size, y - size);
-  oled_write_line(x + size, y - size, x + size, y       );
-  oled_write_line(x + size, y       , x - size, y       );
-  oled_write_line(x - size, y       , x - size, y + size);
-  oled_write_line(x - size, y + size, x + size, y + size);
-}
-
-void oled_write_W(int16_t x, int16_t y, uint8_t size)
-{
-  oled_write_line(x - size, y - size, x - size, y + size);
-  oled_write_line(x - size, y - size, x       , y       );
-  oled_write_line(x       , y       , x + size, y - size);
-  oled_write_line(x + size, y - size, x + size, y + size);
 }
 
 void oled_update()
@@ -404,12 +408,12 @@ void oled_init(uint32_t delay)
     LOGI("Contrast set");
   }
 
-  oled_write_line(0,0,127,63);
-  oled_write_line(0,63,127,0);
-  oled_write_line(0,0,127,0);
-  oled_write_line(0,0,0,63);
-  oled_write_line(127,0,127,63);
-  oled_write_line(0,63,127,63);
+  oled_write_line(0,0,127,63, Solid);
+  oled_write_line(0,63,127,0, Solid);
+  oled_write_line(0,0,127,0, Solid);
+  oled_write_line(0,0,0,63, Solid);
+  oled_write_line(127,0,127,63, Solid);
+  oled_write_line(0,63,127,63, Solid);
 
   display_write(oled, 0, 0, &buf_desc, oled_buf);
   rt_sleep_ms(delay);

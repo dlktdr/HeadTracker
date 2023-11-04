@@ -47,6 +47,8 @@
 #define COMPASS_LETTER_LARGE  5
 #define COMPASS_LETTER_SMALL  3
 
+#define DIAMOND_AGING 15000
+
 #define PI 3.14159265359
 
 struct Compass_Data_T {
@@ -230,11 +232,20 @@ static void distance_to_text(uint32_t distance, char *buf, uint8_t size)
 
 static void process_point(struct Head_Track_T head, struct Position_Data_T position, bool adjust_roll)
 {
+  uint32_t time_alive = k_uptime_get_32() - position.time_stamp;
+  // DEBUG TEMPORARY ONLY, to be replaced with function on navigation level
+  // DEBUG removing old
+  if (time_alive > 30000) {
+    position_del_point(position.name, strlen(position.name));
+  }
+
+
   struct Point_T point = calculate_cordinates(head, position.azimuth, position.pitch, adjust_roll);
+
 
   switch(position.point_type) {
   case DIAMOND:
-    oled_draw_diamond(point.x, point.y);
+    oled_draw_diamond(point.x, point.y, (time_alive > DIAMOND_AGING));
     break;
   case SQUARE:
     oled_draw_square(point.x, point.y);
@@ -264,7 +275,7 @@ static void process_all_points(struct Head_Track_T head, struct Position_Data_T 
   uint32_t i = 0;
 
   for (i = 0; i < size; i++) {
-    if(cordinates_within_frame(head, positions[i].azimuth, positions[i].pitch)) {
+    if(positions[i].name[0] != '\0' && cordinates_within_frame(head, positions[i].azimuth, positions[i].pitch)) {
       process_point(head, positions[i], adjust_roll);
     }
   }
@@ -289,7 +300,7 @@ static void process_compass(struct Head_Track_T head, struct Compass_Data_T comp
       } else {
         point_end = calculate_cordinates(head, compass_array[i].azimuth, COMPASS_PITCH_SHORT, adjust_roll);
       }
-      oled_write_line(point_start.x, point_start.y, point_end.x, point_end.y);
+      oled_write_line(point_start.x, point_start.y, point_end.x, point_end.y, Solid);
 
       oled_write_text(point_start.x, point_start.y - 1,compass_array[i].text, compass_array[i].font_size, true);
     }
@@ -316,11 +327,52 @@ void position_set_azimuth(float pan_new)
 void position_add_point(struct Position_Data_T point_data)
 {
   uint32_t i = 0;
+
+  if (point_data.name[0] == '\0') {
+    LOGI("Adding point with empyt name - discarding");
+    return;
+  }
+
+  if (point_data.azimuth == 0xffffffff || point_data.azimuth == 0 ||
+      point_data.pitch == 0xffffffff || point_data.pitch == 0 ||
+      point_data.distance == 0xffffffff || point_data.distance == 0) {
+    LOGI("Deleting point %s", point_data.name);
+    position_del_point(point_data.name, strlen(point_data.name));
+    return;
+  }
+
+  point_data.time_stamp = k_uptime_get_32();
+
+/* search for already added point */
+  for(i = 0; i < POINTS_MAX; i++) {
+    if (0 == strncmp(point_data.name, positions_memory[i].name, strlen(point_data.name))) {
+      positions_memory[i] = point_data;
+      return;
+    }
+  }
+
+/* search for empty space */
   for (i = 0; i < POINTS_MAX; i++) {
-    if (positions_memory[i].name[0] == 0)
+    if (positions_memory[i].name[0] == '\0')
     {
       positions_memory[i] = point_data;
-      break;
+      return;
+    }
+  }
+
+  LOGI("Out of memory");
+}
+
+void position_del_point(char *name, uint8_t size)
+{
+  uint8_t i = 0;
+  if (size > MAX_NAME_LENGTH) {
+    return;
+  }
+
+  for (i = 0; i < POINTS_MAX; i++) {
+    if (0 == strncmp(name, positions_memory[i].name, size)) {
+      memset(&positions_memory[i], 0, sizeof(positions_memory[i]));
     }
   }
 }
@@ -384,6 +436,14 @@ void position_Thread()
   position_add_point(point_data);
 
   position_add_point(point_data);
+  point_data.azimuth = 310.0;
+  point_data.pitch = 5.0;
+  point_data.distance = 2460;
+  set_point_name(&point_data, "HQ");
+  point_data.point_type = TRIANGLE;
+  position_add_point(point_data);
+
+  position_add_point(point_data);
   point_data.azimuth = 345.0;
   point_data.pitch = 5.0;
   point_data.distance = 60;
@@ -391,13 +451,12 @@ void position_Thread()
   point_data.point_type = SQUARE;
   position_add_point(point_data);
 
-  position_add_point(point_data);
-  point_data.azimuth = 310.0;
-  point_data.pitch = 5.0;
-  point_data.distance = 2460;
-  set_point_name(&point_data, "HQ");
-  point_data.point_type = TRIANGLE;
-  position_add_point(point_data);
+// DEBUG START Demo to be removed
+  uint32_t counter1 = 0;
+  uint32_t counter2 = 0;
+  float azimuth = -1.0;
+  int32_t dist = 13;
+// DEBUG END Demo to be removed
 
   while (1) {
     oled_clean();
@@ -408,6 +467,38 @@ void position_Thread()
     oled_write_pixel(63, 31); // middle point dot - helpfull for development
 
     oled_update();
+
+// DEBUG START Demo to be removed
+    if (counter1 == 40) {
+      LOGI("Updating counter");
+      counter1 = 0;
+      counter2++;
+      point_data.azimuth += azimuth;
+      point_data.distance += dist;
+      position_add_point(point_data);
+    }
+
+    if (counter2 == 15) {
+      counter2++;
+      LOGI("counter2 == 15");
+      azimuth = 1.0;
+      dist = -13;
+      position_add_point(point_data);
+    }
+
+    if (counter2 == 30) {
+      LOGI("counter2 == 30");
+      counter2 = 0;
+      point_data.azimuth = 345.0;
+      point_data.distance = 60;
+      dist = 13;
+      azimuth = -1.0;
+      position_add_point(point_data);
+    }
+
+    counter1++;
+// DEBUG END Demo to be removed
+
     rt_sleep_ms(25);
   }
 }
