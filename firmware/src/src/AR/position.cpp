@@ -302,7 +302,7 @@ void position_set_pitch(float tilt_new)
 }
 void position_set_roll(float roll_new)
 {
-  head_track.roll = roll_new;
+  head_track.roll = roll_new * -1.0;
 }
 void position_set_azimuth(float pan_new)
 {
@@ -403,7 +403,7 @@ void position_Thread()
     oled_clean();
 
     process_all_points(head_track, positions_memory, 12, ROLL_ADJUST);
-    process_compass(head_track, compass_array, COMPASS_ELEMENTS, ROLL_IGNORE);
+    process_compass(head_track, compass_array, COMPASS_ELEMENTS, ROLL_ADJUST);
 
     oled_write_pixel(63, 31); // middle point dot - helpfull for development
 

@@ -67,7 +67,6 @@ union Column_Mask {
   uint8_t values[4];
 };
 
-
 extern const uint16_t *const* pix5;
 extern const uint16_t *const* pix7;
 extern const uint16_t *const* pix11;
@@ -200,21 +199,19 @@ static const uint16_t *const*get_font_param(uint8_t height, uint8_t *width)
 
 void oled_write_char(int16_t x, int16_t y, char letter, uint8_t font_size)
 {
+  int16_t y_start_pos = 7 - (y / 8);
   union Column_Mask column_mask;
   uint8_t oled_font_width = 0;
   const uint16_t *const*font;
   const uint16_t *x_char;
+  uint8_t test_y_height;
   int16_t y_buf_mask;
   int16_t buf_index;
-  int16_t y_cur_pos;
   uint8_t j = 0;
   uint8_t i = 0;
 
   font = get_font_param(font_size, &oled_font_width);
-
-  uint8_t test_y_height = ((font_size + (8 - (y % 8))) + 7) / 8;
-  LOGI("test_y_height = %d, y = %d", test_y_height, y);
-
+  test_y_height = ((font_size + (8 - (y % 8))) + 7) / 8;
   x_char = font[letter - 0x20];
 
 /* process all Y columns of pixels to display char*/
@@ -229,25 +226,28 @@ void oled_write_char(int16_t x, int16_t y, char letter, uint8_t font_size)
     }
 
     column_mask.value = (x_char[i] << (8 - (y % 8)));
-    y_cur_pos = 7 - (y / 8);
     for (j = 0; j < test_y_height; j++) {
+
+      if ((y_start_pos + j) < 0) {
+        continue;
+      }
+      if ((y_start_pos + j) >= 8) {
+        break;
+      }
 
       y_buf_mask = column_mask.values[j];
 
-      buf_index = x + y_cur_pos * WIDTH;
+      buf_index = x + (y_start_pos + j) * WIDTH;
       if (buf_index < 0 || buf_index >= 1024) {
-        LOGI("y_cur_pos = %d, x = %d, y = %d, buf_index = %d", y_cur_pos, x, y, buf_index);
+        LOGI("y_start_pos = %d, x = %d, y = %d, buf_index = %d", y_start_pos, x, y, buf_index);
       } else {
         oled_buf[buf_index] |= y_buf_mask;
       }
-
-      y_cur_pos++;
     }
 
     x++;
   }
 }
-
 
 void oled_write_text(int16_t x, int16_t y, char* text, uint8_t text_size, bool center)
 {
