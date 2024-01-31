@@ -3,9 +3,15 @@
 {
 	"name": "zephyr-dev",
 	"image": "ghcr.io/zephyrproject-rtos/zephyr-build:latest",
-  "extensions": [
-		"ms-vscode.cpptools",
-    "trond-snekvik.devicetree"
-	],
-  "terminal.integrated.defaultProfile.linux": "bash"
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash",
+      },
+      "extensions": [
+        "ms-vscode.cpptools",
+        "trond-snekvik.devicetree"
+      ]
+    }
+  }
 }

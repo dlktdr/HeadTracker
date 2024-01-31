@@ -79,3 +79,5 @@ Release/
 !/gui/bin/bossac*
 /gui/build*
 
+# Ignore Zephyr workspace
+/firmware/zephyr*
