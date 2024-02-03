@@ -88,7 +88,7 @@ ssize_t btrd_{lowername}(struct bt_conn *conn, const struct bt_gatt_attr *attr, 
 
 f.close()
 
-f = open("../firmware/src/src/targets/nrf52/blechars.h","w")
+f = open("../firmware/src/src/blechars.h","w")
 f.write("""\
 /*
 * This file is part of the Head Tracker distribution (https://github.com/dlktdr/headtracker)
@@ -120,13 +120,12 @@ f.write("""\
 
 #pragma once
 
-#include <zephyr.h>
-
-#include <bluetooth/bluetooth.h>
-#include <bluetooth/conn.h>
-#include <bluetooth/gatt.h>
-#include <bluetooth/hci.h>
-#include <bluetooth/uuid.h>
+#include <zephyr/kernel.h>
+#include <zephyr/bluetooth/bluetooth.h>
+#include <zephyr/bluetooth/conn.h>
+#include <zephyr/bluetooth/gatt.h>
+#include <zephyr/bluetooth/hci.h>
+#include <zephyr/bluetooth/uuid.h>
 
 """)
 
