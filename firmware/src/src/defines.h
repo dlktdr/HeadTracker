@@ -123,14 +123,14 @@
 #define RX_RNGBUF_SIZE 1500
 
 // Math Defines
-#define DEG_TO_RAD 0.017453295199
-#define RAD_TO_DEG 57.29577951308
+#define DEG_TO_RAD 0.017453295199f
+#define RAD_TO_DEG 57.29577951308f
 
 // Magnetometer, Initial Orientation, Samples to average
 #define MADGSTART_SAMPLES 15
 #define GYRO_STABLE_SAMPLES 400
-#define GYRO_SAMPLE_WEIGHT 0.05
-#define GYRO_FLASH_IF_OFFSET 0.5 // Save to flash if gyro is off more than 0.5 degrees/sec from flash value
+#define GYRO_SAMPLE_WEIGHT 0.05f
+#define GYRO_FLASH_IF_OFFSET 0.5f // Save to flash if gyro is off more than 0.5 degrees/sec from flash value
 
 // RTOS Specifics
 #include "zephyr/kernel.h"

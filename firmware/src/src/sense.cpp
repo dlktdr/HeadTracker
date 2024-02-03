@@ -322,19 +322,19 @@ void calculate_Thread()
 
     // Tilt output
     float tiltout =
-        (tilt - tiltoffset) * trkset.getTlt_Gain() * (trkset.isTiltReversed() ? -1.0 : 1.0);
+        (tilt - tiltoffset) * trkset.getTlt_Gain() * (trkset.isTiltReversed() ? -1.0f : 1.0f);
     uint16_t tiltout_ui = tiltout + trkset.getTlt_Cnt();  // Apply Center Offset
     tiltout_ui = MAX(MIN(tiltout_ui, trkset.getTlt_Max()), trkset.getTlt_Min());  // Limit Output
 
     // Roll output
     float rollout =
-        (roll - rolloffset) * trkset.getRll_Gain() * (trkset.isRollReversed() ? -1.0 : 1.0);
+        (roll - rolloffset) * trkset.getRll_Gain() * (trkset.isRollReversed() ? -1.0f : 1.0f);
     uint16_t rollout_ui = rollout + trkset.getRll_Cnt();  // Apply Center Offset
     rollout_ui = MAX(MIN(rollout_ui, trkset.getRll_Max()), trkset.getRll_Min());  // Limit Output
 
     // Pan output, Normalize to +/- 180 Degrees
     float panout = normalize((pan - panoffset), -180, 180) * trkset.getPan_Gain() *
-                   (trkset.isPanReversed() ? -1.0 : 1.0);
+                   (trkset.isPanReversed() ? -1.0f : 1.0f);
     uint16_t panout_ui = panout + trkset.getPan_Cnt();  // Apply Center Offset
     panout_ui = MAX(MIN(panout_ui, trkset.getPan_Max()), trkset.getPan_Min());  // Limit Output
 
@@ -372,7 +372,7 @@ void calculate_Thread()
 
       // If hit a max/min wait an amount of time and reset it
       if (tiltpeak == true) {
-        resettime += (float)CALCULATE_PERIOD / 1000000.0;
+        resettime += (float)CALCULATE_PERIOD / 1000000.0f;
         if (resettime > TrackerSettings::RESET_ON_TILT_TIME) {
           tiltpeak = false;
           minmax = HITNONE;
@@ -389,7 +389,7 @@ void calculate_Thread()
         timetoreset = 0;
         pressButton();
       }
-      timetoreset += (float)CALCULATE_PERIOD / 1000000.0;
+      timetoreset += (float)CALCULATE_PERIOD / 1000000.0f;
     }
 
     /* ************************************************************
@@ -549,7 +549,7 @@ void calculate_Thread()
       }
       if (sendingresetpulse) {
         channel_data[alertch - 1] = TrackerSettings::MAX_PWM;
-        pulsetimer += (float)CALCULATE_PERIOD / 1000000.0;
+        pulsetimer += (float)CALCULATE_PERIOD / 1000000.0f;
         if (pulsetimer > TrackerSettings::RECENTER_PULSE_DURATION) {
           sendingresetpulse = false;
         }
@@ -772,7 +772,7 @@ void sensor_Thread()
 #if defined(HAS_LSM9DS1)
     if (IMU.accelerationAvailable()) {
       IMU.readRawAccel(tacc[0], tacc[1], tacc[2]);
-      tacc[0] *= -1.0;  // Flip X
+      tacc[0] *= -1.0f;  // Flip X
       accValid = true;
     }
     if (IMU.magneticFieldAvailable()) {
@@ -781,7 +781,7 @@ void sensor_Thread()
     }
     if (IMU.gyroscopeAvailable()) {
       IMU.readRawGyro(tgyr[0], tgyr[1], tgyr[2]);
-      tgyr[0] *= -1.0;  // Flip X to match other sensors
+      tgyr[0] *= -1.0f;  // Flip X to match other sensors
       gyrValid = true;
     }
 #endif
@@ -1098,7 +1098,7 @@ void gyroCalibrate()
         if (!sent_gyro_cal_msg) {
           k_sem_give(&saveToFlash_sem);
           LOGW("Gyro calibration differs from saved value. Updating flash, x=%.3f,y=%.3f,z=%.3f",
-               filt_gyrx, filt_gyry, filt_gyrz);
+               (double)filt_gyrx, (double)filt_gyry, (double)filt_gyrz);
           sent_gyro_cal_msg = true;
         }
       }
@@ -1197,5 +1197,5 @@ void buildAuxData()
   auxdata[TrackerSettings::AUX_ACCELZO] =
       ((accz - 1.0f) / 2.0f) * pwmrange + TrackerSettings::PPM_CENTER;
   auxdata[TrackerSettings::BT_RSSI] =
-      static_cast<float>(BTGetRSSI()) / 127.0 * pwmrange + TrackerSettings::MIN_PWM;
+      static_cast<float>(BTGetRSSI()) / 127.0f * pwmrange + TrackerSettings::MIN_PWM;
 }

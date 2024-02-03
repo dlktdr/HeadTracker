@@ -113,7 +113,7 @@ float SF1eFilterDo(SF1eFilter *filter, float x)
   return SFLowPassFilterDo(&(filter->xfilt), x, SF1eFilterAlpha(filter, cutoff));
 }
 
-float SF1eFilterDoAtTime(SF1eFilter *filter, float x, double timestamp)
+float SF1eFilterDoAtTime(SF1eFilter *filter, float x, float timestamp)
 {
   if (filter->lastTime != 0) {
     filter->frequency = 1.0f / (timestamp - filter->lastTime);
@@ -125,7 +125,7 @@ float SF1eFilterDoAtTime(SF1eFilter *filter, float x, double timestamp)
 
 float SF1eFilterAlpha(SF1eFilter *filter, float cutoff)
 {
-  float tau = 1.0f / (2.f * 3.14159265359 * cutoff);
+  float tau = 1.0f / (2.0f * 3.14159265359f * cutoff);
   float te = 1.0f / filter->frequency;
   return 1.0f / (1.0f + tau / te);
 }

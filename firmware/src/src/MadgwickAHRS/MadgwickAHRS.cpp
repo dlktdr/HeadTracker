@@ -54,12 +54,12 @@ Madgwick::Madgwick()
 // See https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles#Source_code
 void Madgwick::begin(float pitch, float roll, float yaw)
 {
-  float cy = cos(yaw * 0.5);
-  float sy = sin(yaw * 0.5);
-  float cp = cos(pitch * 0.5);
-  float sp = sin(pitch * 0.5);
-  float cr = cos(roll * 0.5);
-  float sr = sin(roll * 0.5);
+  float cy = cosf(yaw * 0.5f);
+  float sy = sinf(yaw * 0.5f);
+  float cp = cosf(pitch * 0.5f);
+  float sp = sinf(pitch * 0.5f);
+  float cr = cosf(roll * 0.5f);
+  float sr = sinf(roll * 0.5f);
 
   q0 = cr * cp * cy + sr * sp * sy;
   q1 = sr * cp * cy - cr * sp * sy;

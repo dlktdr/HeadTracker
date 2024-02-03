@@ -108,5 +108,5 @@ float analogRead(int channel)
   if (sv == BAD_ANALOG_READ) {
     return sv;
   }
-  return (float)sv / 287.0;
+  return (float)sv / 287.0f;
 }

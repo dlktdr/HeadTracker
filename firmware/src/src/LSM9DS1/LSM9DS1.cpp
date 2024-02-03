@@ -150,7 +150,7 @@ int LSM9DS1Class::readRawAccel(float& x, float& y, float& z)  // return raw unca
     return 0;
   }
   // See releasenotes   	read =	Unit * Slope * (PFS / 32786 * Data - Offset )
-  float scale = getAccelFS() / 32768.0;
+  float scale = getAccelFS() / 32768.0f;
   x = scale * data[0];
   y = scale * data[1];
   z = scale * data[2];
@@ -293,7 +293,7 @@ int LSM9DS1Class::readRawGyro(float& x, float& y,
     z = NAN;
     return 0;
   }
-  float scale = getGyroFS() / 32768.0;
+  float scale = getGyroFS() / 32768.0f;
   x = scale * data[0];
   y = scale * data[1];
   z = scale * data[2];
@@ -440,7 +440,7 @@ int LSM9DS1Class::readRawMagnet(float& x, float& y, float& z)
     z = NAN;
     return 0;
   }
-  float scale = getMagnetFS() / 32768.0;
+  float scale = getMagnetFS() / 32768.0f;
   x = scale * data[0];
   y = scale * data[1];
   z = scale * data[2];
@@ -541,9 +541,9 @@ void LSM9DS1Class::measureODRcombined()  // Combined measurement for faster star
     }
   }
 
-  accelODR = (1000000.0 * float(countA) / float(lastEventTimeA - startA));
+  accelODR = (1000000.0f * float(countA) / float(lastEventTimeA - startA));
   gyroODR = accelODR;
-  magnetODR = (1000000.0 * float(countM) / float(lastEventTimeM - startM));
+  magnetODR = (1000000.0f * float(countM) / float(lastEventTimeM - startM));
 }
 
 float LSM9DS1Class::measureAccelGyroODR()
@@ -565,7 +565,7 @@ float LSM9DS1Class::measureAccelGyroODR()
   }
 
   if (fifoEna) setContinuousMode();
-  return (1000000.0 * float(count) / float(lastEventTime - start));
+  return (1000000.0f * float(count) / float(lastEventTime - start));
 }
 
 float LSM9DS1Class::measureMagnetODR(unsigned long duration)
@@ -584,7 +584,7 @@ float LSM9DS1Class::measureMagnetODR(unsigned long duration)
     }
   }
 
-  return (1000000.0 * float(count) / float(lastEventTime - start));
+  return (1000000.0f * float(count) / float(lastEventTime - start));
 }
 
 int LSM9DS1Class::readRegister(uint8_t slaveAddress, uint8_t address)

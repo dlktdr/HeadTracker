@@ -85,7 +85,7 @@ typedef struct {
   SF1eFilterConfiguration config;
   SFLowPassFilter xfilt;
   SFLowPassFilter dxfilt;
-  double lastTime;
+  float lastTime;
   float frequency;
 } SF1eFilter;
 
@@ -115,7 +115,7 @@ float SF1eFilterDo(SF1eFilter *filter, float x);
  Filter a float using the given One Euro Filter and the given timestamp. Frequency will be
  automatically recomputed.
  */
-float SF1eFilterDoAtTime(SF1eFilter *filter, float x, double timestamp);
+float SF1eFilterDoAtTime(SF1eFilter *filter, float x, float timestamp);
 /**
  Compute Alpha for a given One Euro Filter and a given cutoff frequency.
  */

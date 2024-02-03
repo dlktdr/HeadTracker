@@ -123,10 +123,10 @@ void uartTx_Thread()
     switch (curmode) {
       case UARTSBUSIO:
         SbusTx();
-        rt_sleep_us((1.0 / (float)trkset.getSbusTxRate()) * 1.0e6);
+        rt_sleep_us((1.0f / (float)trkset.getSbusTxRate()) * 1.0e6f);
         break;
       case UARTCRSFOUT:
-        rt_sleep_us((1.0 / (float)trkset.getCrsfTxRate()) * 1.0e6);
+        rt_sleep_us((1.0f / (float)trkset.getCrsfTxRate()) * 1.0e6f);
         crsfout.sendRCFrameToFC();
         /*crsfout.AttitudeDataOut.pitch = 10;
         crsfout.AttitudeDataOut.roll = 30;
