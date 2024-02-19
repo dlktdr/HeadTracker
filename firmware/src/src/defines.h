@@ -8,10 +8,13 @@
 #define FW_GIT_REV "-------"
 #endif
 
-// The majority of features are the same on Sense2
-#if defined(CONFIG_BOARD_ARDUINO_NANO_33_BLE_SENSE2)
-#define CONFIG_BOARD_ARDUINO_NANO_33_BLE
+#ifndef BOARD_REV
+#define BOARD_REV 0
 #endif
+
+//#pragma message ("Board is " CONFIG_BOARD)
+
+// The majority of features are the same on Sense2
 
 #if defined(CONFIG_BOARD_ARDUINO_NANO_33_BLE)
 #define FW_BOARD "NANO33BLE"

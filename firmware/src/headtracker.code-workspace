@@ -14,6 +14,7 @@
     "recommendations": [
       "ms-vscode.cpptools",
       "xaver.clang-format",
+      "cortex-debug.cortex-debug",
     ]
   },
   "settings": {
@@ -24,27 +25,58 @@
       "titleBar.activeForeground": "#ffffff"
     },
     "terminal.integrated.env.windows": {
-      //"path": "${env:USERPROFILE}/zephyrproject/zephyr/scripts;",
-      "ZEPHYR_BASE": "${env:USERPROFILE}\\zephyrproject\\zephyr"
+      "ZEPHYR_BASE": "${workspaceRoot:src}\\..\\zephyr_latest\\zephyr"
     },
     "west": "${env:HOME}/.python_default_venv/bin/west",
 		"twister":  {
 			"host_test_arch": "arm",
     },
     "files.associations": {
-      "random": "cpp"
+      "random": "cpp",
+      "system_error": "cpp"
     },
 
   },
   "launch": {
     "configurations": [
       {
-        "name": "ESP32 Debug",
+        "name": "Jlink - Arduino Nano 33 BLE",
+        "device": "nRF52840_XXAA",
+        "cwd": "${workspaceRoot:src}",
+        "executable": "build/zephyr/zephyr.elf",
+        "request": "launch",
+        "type": "cortex-debug",
+        "runToEntryPoint": "main",
+        "servertype": "jlink",
+        //"showDevDebugOutput":"raw",
+        "serverpath": "C:/Program Files/SEGGER/JLink/JLinkGDBServerCL.exe", // Check path to Jlink installation
+        "armToolchainPath": "${workspaceRoot:src}/../zephyr-sdk-0.16.5/arm-zephyr-eabi/bin", // NOTE Check version & path of SDK here
+        "toolchainPrefix": "arm-zephyr-eabi",
+        "preLaunchTask": "Build (Arduino Nano 33 BLE)",
+        "svdFile": "${workspaceRoot:src}/nrf52840.svd",
+      },      {
+        "name": "Jlink - Arduino Nano 33 BLE SR2",
+        "device": "nRF52840_XXAA",
+        "cwd": "${workspaceRoot:src}",
+        "executable": "build/zephyr/zephyr.elf",
+        "request": "launch",
+        "type": "cortex-debug",
+        "runToEntryPoint": "main",
+        "servertype": "jlink",
+        //"showDevDebugOutput":"raw",
+        "serverpath": "C:/Program Files/SEGGER/JLink/JLinkGDBServerCL.exe", // Check path to Jlink installation
+        "armToolchainPath": "${workspaceRoot:src}/../zephyr-sdk-0.16.5/arm-zephyr-eabi/bin", // NOTE Check version & path of SDK here
+        "toolchainPrefix": "arm-zephyr-eabi",
+        "preLaunchTask": "Build (Arduino Nano 33 BLE Rev 2)",
+        "svdFile": "${workspaceRoot:src}/nrf52840.svd",
+      },
+      {
+        "name": "OpenOCD - ESP32C3_DevKitM (RISC-V)",
         "type": "cppdbg",
         "request": "launch",
         "cwd": "${workspaceRoot:src}/build",
         "program": "${workspaceRoot:src}/build/zephyr/zephyr.elf",
-        "miDebuggerPath": "${userHome}/zephyr-sdk-0.16.1/riscv64-zephyr-elf/bin/riscv64-zephyr-elf-gdb.exe",
+        "miDebuggerPath": "${workspaceRoot:src}/../zephyr-sdk-0.16.5/riscv64-zephyr-elf/bin/riscv64-zephyr-elf-gdb.exe",
         "setupCommands": [
           { "text": "target extended-remote 127.0.0.1:3333" },
           { "text": "set remote hardware-watchpoint-limit 2" },
@@ -55,46 +87,21 @@
         "MIMode": "gdb",
         "stopAtEntry": true,
         "debugServerPath": "openocd.exe",
-        "debugServerArgs": "-c \"set ESP_RTOS \\\"hwthread\\\"\" -d2 -f ${userHome}\\zephyrproject\\zephyr\\boards\\riscv\\esp32c3_devkitm\\support\\openocd.cfg",
+        "debugServerArgs": "-c \"set ESP_RTOS \\\"hwthread\\\"\" -d2 -f ${workspaceRoot:src}\\..\\zephyr-lateset\\zephyr\\boards\\riscv\\esp32c3_devkitm\\support\\openocd.cfg",
         "logging": {
           "moduleLoad": true
         }
-      },
-      {
-        "type": "chrome",
-        "name": "http://127.0.0.1:8080",
-        "request": "launch",
-        "url": "http://127.0.0.1:8080"
-      },
-      {
-        "type": "chrome",
-        "name": "http://127.0.0.1",
-        "request": "launch",
-        "url": "http://127.0.0.1"
-      },
-      {
-        "type": "chrome",
-        "name": "http://localhost:8080",
-        "request": "launch",
-        "url": "http://localhost:8080"
-      },
-    ]
-  },
+      },]},
   "tasks": {
     "version": "2.0.0",
-    "options": {
-      "env": {
-        "ZEPHYR_BASE": "${env:USERPROFILE}/zephyrproject/zephyr" // *Windows Only, following default install guide. TODO fixme
-      }
-    },
     "tasks": [
       {
         "label": "Build (Arduino Nano 33 BLE)",
-        "command": "west",
         "type": "shell",
+        "command": "west",
         "args": [
           "build",
-          "-p", "always",
+          "-p", "auto",
           "-b", "arduino_nano_33_ble"
         ],
         "problemMatcher": [
@@ -106,13 +113,14 @@
         "group": "build"
       },
       {
-        "label": "Build (ESP32C3_DEVKITM)",
-        "command": "west",
+        "label": "Build (Arduino Nano 33 BLE Rev 2)",
         "type": "shell",
+        "command": "west",
         "args": [
           "build",
-          "-p", "always",
-          "-b", "esp32c3_devkitm"
+          "-p", "auto",
+          "-b", "arduino_nano_33_ble",
+          "--", "-DBOARD_REV_SR2=y"
         ],
         "problemMatcher": [
           "$tsc"
@@ -123,28 +131,14 @@
         "group": "build"
       },
       {
-        "label": "Build (XIAO_ESP32C3)",
-        "command": "west",
+        "label": "Build (XIAO NRF52840 Sense)",
         "type": "shell",
+        "command": "west",
         "args": [
           "build",
-          "-p", "always",
-          "-b", "xiao_esp32c3"
-        ],
-        "problemMatcher": [
-          "$tsc"
-        ],
-        "presentation": {
-          "reveal": "always"
-        },
-        "group": "build"
-      },
-      {
-        "label": "West Flash",
-        "command": "west",
-        "type": "shell",
-        "args": [
-          "flash"
+          "-p", "auto",
+          "-b", "",
+          "--", "-DBOARD_SR2=y"
         ],
         "problemMatcher": [
           "$tsc"
@@ -154,6 +148,19 @@
         },
         "group": "build"
       }
-  ]
-  }
+    ]
+  },
+  "c_cpp_properties": {
+    "configurations": [
+      {
+        "name": "ARM Cortex-ZephyrOS",
+        "includePath": [
+            "${workspaceFolder}/../zephyr_latest/zephyr/include/**"
+        ],
+        "defines": [],
+        "intelliSenseMode": "gcc-arm"
+    }
+    ],
+    "version": 4
+  },
 }

@@ -27,21 +27,39 @@ message(STATUS "Board=${BOARD}")
 
 # NRF52 Boards
 if((${BOARD} STREQUAL "arduino_nano_33_ble") OR
-    (${BOARD} STREQUAL "xiao_ble") OR
-    (${BOARD} STREQUAL "dtqsys_ht"))
+   (${BOARD} STREQUAL "arduino_nano_33_ble_sr2") OR
+   (${BOARD} STREQUAL "xiao_ble") OR
+   (${BOARD} STREQUAL "dtqsys_ht"))
   message(STATUS "Board is a NRF52 based board")
+  # Pick the correct project file for this architecture
   set (CONF_FILE zephyr/nrf_prj.conf)
+
+  # The sense revision 2 uses the same board file as the original
+  # but a few different defines in the code.
+  if(DEFINED BOARD_REV_SR2)
+    message(STATUS "Board is a Revision 2 Nano 33 BLE Sense")
+    set (BOARD "arduino_nano_33_ble")
+    # SEE BELOW for defined passed to compiler
+  endif()
 
   #DTQ Board, use local board file from /zephyr/boards
   if((${BOARD} STREQUAL "dtqsys_ht"))
     set (BOARD_ROOT "${CMAKE_SOURCE_DIR}/zephyr")
   endif()
+
 #ESP32C3 Boards
-elseif(${BOARD} MATCHES "esp32c3")
+elseif(${BOARD} STREQUAL "esp32c3")
   message(STATUS "ESP Board Defined")
   set (CONF_FILE zephyr/esp32c3_prj.conf)
   message(STATUS "Board is a ESP32C3 based board")
+
+  # M5Stick CPLUS1
+  elseif(${BOARD} STREQUAL "esp32c3")
+  message(STATUS "M5 Stick Plus")
+  set(CONF_FILE zephyr/esppico_prj.conf)
+
 else()
+
   message(FATAL_ERROR "ERROR: Board is not supported")
 endif()
 
@@ -50,8 +68,13 @@ project(HeadTracker DESCRIPTION "HeadTracker")
 
 # -DOPENOCD=/openocd-esp32/bin -DOPENOCD_DEFAULT_PATH=/openocd-esp32/share/openocd/scripts
 if(${BOARD} MATCHES "esp32c3")
-target_compile_definitions(app PUBLIC "OPENOCD=\"c:\\openocd-esp32\\bin\"")
-target_compile_definitions(app PUBLIC "OPENOCD_DEFAULT_PATH=\"c:\\openocd-esp32\\share\\openocd\\scripts\"")
+  target_compile_definitions(app PUBLIC "OPENOCD=\"c:\\openocd-esp32\\bin\"")
+  target_compile_definitions(app PUBLIC "OPENOCD_DEFAULT_PATH=\"c:\\openocd-esp32\\share\\openocd\\scripts\"")
+endif()
+
+# Arduino Nano Sense Rev 2
+if(DEFINED BOARD_REV_SR2)
+  target_compile_definitions(app PUBLIC BOARD_REV_SR2=1)
 endif()
 
 target_compile_definitions(app PUBLIC FW_GIT_REV=${GIT_REV})

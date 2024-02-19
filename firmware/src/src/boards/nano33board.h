@@ -8,7 +8,7 @@
 #define INPUT_PULLUP (GPIO_INPUT | GPIO_PULL_UP)
 
 // Board Features
-#if defined(CONFIG_BOARD_ARDUINO_NANO_33_BLE_SENSE2)
+#if defined(BOARD_REV_SR2)
   #define HAS_BMI270
   #define HAS_BMM150
 #else

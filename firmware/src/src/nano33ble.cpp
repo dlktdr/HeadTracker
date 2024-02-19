@@ -48,7 +48,7 @@ void start(void)
 #endif
 
   // Load settings from flash - trackersettings.cpp
-  //trkset.loadFromEEPROM();
+  trkset.loadFromEEPROM();
 
   // Check if center button is held down, force BT Configuration mode
   if (readCenterButton()) {
