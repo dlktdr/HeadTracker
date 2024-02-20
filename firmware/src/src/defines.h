@@ -24,7 +24,7 @@
 #define FW_BOARD "DTQSYS"
 #include "boards/dtqsys_ht.h"
 #define ARDUINO_BOOTLOADER
-#elif defined(CONFIG_BOARD_XIAO_BLE)
+#elif defined(CONFIG_BOARD_XIAO_BLE_SENSE) || defined(CONFIG_BOARD_XIAO_BLE)
 #define FW_BOARD "XIAOSENSE"
 #include "boards/xiaosense.h"
 #define SEEED_BOOTLOADER

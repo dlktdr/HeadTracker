@@ -83,6 +83,7 @@ static void interrupt_handler(const struct device *dev, void *user_data)
       int recv_len, rb_len;
       uint8_t buffer[64];
 
+      // TODO: This is a blocking call. should it be in an interrupt, why?
       k_mutex_lock(&ring_rx_mutex, K_FOREVER);
       size_t len = MIN(ring_buf_space_get(&ringbuf_rx), sizeof(buffer));
       recv_len = uart_fifo_read(dev, buffer, len);
@@ -96,7 +97,7 @@ static void interrupt_handler(const struct device *dev, void *user_data)
   }
 }
 
-void serial_init()
+int serial_init()
 {
   int ret;
 
@@ -106,15 +107,16 @@ void serial_init()
   dev = DEVICE_DT_GET(DT_ALIAS(guiuart));
 #endif
   if (!device_is_ready(dev)) {
-		//LOG_ERR("CDC ACM device not ready");
-		return;
+		printk("CDC ACM device not ready");
+		return -1;
   }
 
 #if defined(DT_N_INST_0_zephyr_cdc_acm_uart)
   ret = usb_enable(NULL);
 #endif
   if (ret != 0) {
-    return;
+    printk("Unable to enable USB\n");
+    return -1;
   }
 
   ring_buf_init(&ringbuf_tx, sizeof(ring_buffer_tx), ring_buffer_tx);
@@ -150,6 +152,8 @@ void serial_init()
 
   // Start Serial Thread
   k_poll_signal_raise(&serialThreadRunSignal, 1);
+
+  return 0;
 }
 
 void serial_Thread()

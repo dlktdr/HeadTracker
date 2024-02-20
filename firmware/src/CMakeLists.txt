@@ -28,9 +28,10 @@ message(STATUS "Board=${BOARD}")
 # NRF52 Boards
 if((${BOARD} STREQUAL "arduino_nano_33_ble") OR
    (${BOARD} STREQUAL "arduino_nano_33_ble_sr2") OR
-   (${BOARD} STREQUAL "xiao_ble") OR
+   (${BOARD} STREQUAL "xiao_ble_sense") OR
    (${BOARD} STREQUAL "dtqsys_ht"))
   message(STATUS "Board is a NRF52 based board")
+
   # Pick the correct project file for this architecture
   set (CONF_FILE zephyr/nrf_prj.conf)
 

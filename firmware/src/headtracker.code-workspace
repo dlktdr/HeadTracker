@@ -25,7 +25,7 @@
       "titleBar.activeForeground": "#ffffff"
     },
     "terminal.integrated.env.windows": {
-      "ZEPHYR_BASE": "${workspaceRoot:src}\\..\\zephyr_latest\\zephyr"
+      "ZEPHYR_BASE": "${workspaceRoot:src}\\..\\zephyr\\zephyr"
     },
     "west": "${env:HOME}/.python_default_venv/bin/west",
 		"twister":  {
@@ -50,11 +50,12 @@
         "servertype": "jlink",
         //"showDevDebugOutput":"raw",
         "serverpath": "C:/Program Files/SEGGER/JLink/JLinkGDBServerCL.exe", // Check path to Jlink installation
-        "armToolchainPath": "${workspaceRoot:src}/../zephyr-sdk-0.16.5/arm-zephyr-eabi/bin", // NOTE Check version & path of SDK here
+        "armToolchainPath": "${workspaceRoot:src}/../zephyr-sdk/arm-zephyr-eabi/bin", // NOTE Check version & path of SDK here
         "toolchainPrefix": "arm-zephyr-eabi",
         "preLaunchTask": "Build (Arduino Nano 33 BLE)",
         "svdFile": "${workspaceRoot:src}/nrf52840.svd",
-      },      {
+      },
+      {
         "name": "Jlink - Arduino Nano 33 BLE SR2",
         "device": "nRF52840_XXAA",
         "cwd": "${workspaceRoot:src}",
@@ -65,9 +66,41 @@
         "servertype": "jlink",
         //"showDevDebugOutput":"raw",
         "serverpath": "C:/Program Files/SEGGER/JLink/JLinkGDBServerCL.exe", // Check path to Jlink installation
-        "armToolchainPath": "${workspaceRoot:src}/../zephyr-sdk-0.16.5/arm-zephyr-eabi/bin", // NOTE Check version & path of SDK here
+        "armToolchainPath": "${workspaceRoot:src}/../zephyr-sdk/arm-zephyr-eabi/bin", // NOTE Check version & path of SDK here
         "toolchainPrefix": "arm-zephyr-eabi",
         "preLaunchTask": "Build (Arduino Nano 33 BLE Rev 2)",
+        "svdFile": "${workspaceRoot:src}/nrf52840.svd",
+      },
+      {
+        "name": "Jlink - XIAO NRF52840 Sense",
+        "device": "nRF52840_XXAA",
+        "cwd": "${workspaceRoot:src}",
+        "executable": "build/zephyr/zephyr.elf",
+        "request": "launch",
+        "type": "cortex-debug",
+        "runToEntryPoint": "main",
+        "servertype": "jlink",
+        "showDevDebugOutput":"raw",
+        "serverpath": "C:/Program Files/SEGGER/JLink/JLinkGDBServerCL.exe", // Check path to Jlink installation
+        "armToolchainPath": "${workspaceRoot:src}/../zephyr-sdk/arm-zephyr-eabi/bin", // NOTE Check version & path of SDK here
+        "toolchainPrefix": "arm-zephyr-eabi",
+        "preLaunchTask": "Build (XIAO NRF52840 Sense)",
+        "svdFile": "${workspaceRoot:src}/nrf52840.svd",
+      },
+      {
+        "name": "Jlink - DTQSYS HT",
+        "device": "nRF52840_XXAA",
+        "cwd": "${workspaceRoot:src}",
+        "executable": "build/zephyr/zephyr.elf",
+        "request": "launch",
+        "type": "cortex-debug",
+        "runToEntryPoint": "main",
+        "servertype": "jlink",
+        //"showDevDebugOutput":"raw",
+        "serverpath": "C:/Program Files/SEGGER/JLink/JLinkGDBServerCL.exe", // Check path to Jlink installation
+        "armToolchainPath": "${workspaceRoot:src}/../zephyr-sdk/arm-zephyr-eabi/bin", // NOTE Check version & path of SDK here
+        "toolchainPrefix": "arm-zephyr-eabi",
+        "preLaunchTask": "Build (DTQSYS HT)",
         "svdFile": "${workspaceRoot:src}/nrf52840.svd",
       },
       {
@@ -76,7 +109,7 @@
         "request": "launch",
         "cwd": "${workspaceRoot:src}/build",
         "program": "${workspaceRoot:src}/build/zephyr/zephyr.elf",
-        "miDebuggerPath": "${workspaceRoot:src}/../zephyr-sdk-0.16.5/riscv64-zephyr-elf/bin/riscv64-zephyr-elf-gdb.exe",
+        "miDebuggerPath": "${workspaceRoot:src}/../zephyr-sdk/riscv64-zephyr-elf/bin/riscv64-zephyr-elf-gdb.exe",
         "setupCommands": [
           { "text": "target extended-remote 127.0.0.1:3333" },
           { "text": "set remote hardware-watchpoint-limit 2" },
@@ -137,8 +170,24 @@
         "args": [
           "build",
           "-p", "auto",
-          "-b", "",
-          "--", "-DBOARD_SR2=y"
+          "-b", "xiao_ble_sense",
+        ],
+        "problemMatcher": [
+          "$tsc"
+        ],
+        "presentation": {
+          "reveal": "always"
+        },
+        "group": "build"
+      },
+      {
+        "label": "Build (DTQSYS HT)",
+        "type": "shell",
+        "command": "west",
+        "args": [
+          "build",
+          "-p", "auto",
+          "-b", "dtqsys_ht",
         ],
         "problemMatcher": [
           "$tsc"
@@ -155,7 +204,7 @@
       {
         "name": "ARM Cortex-ZephyrOS",
         "includePath": [
-            "${workspaceFolder}/../zephyr_latest/zephyr/include/**"
+            "${workspaceFolder}/../zephyr/zephyr/include/**"
         ],
         "defines": [],
         "intelliSenseMode": "gcc-arm"

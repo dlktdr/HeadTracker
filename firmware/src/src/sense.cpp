@@ -213,7 +213,10 @@ int sense_Init()
 #endif
 
 #if defined(HAS_LSM6DS3)
-  if (initailizeLSM6DS3(&dev_ctx)) return -1;
+  if (initailizeLSM6DS3(&dev_ctx)) {
+    printk("Unable to init LSM6DS3\n");
+    return -1;
+  }
 #endif
 
 #if defined(HAS_MPU6500)

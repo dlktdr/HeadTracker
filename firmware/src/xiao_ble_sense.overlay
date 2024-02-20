@@ -8,6 +8,7 @@
 		/delete-property/ zephyr,uart-mcumgr;
 		/delete-property/ zephyr,bt-mon-uart;
 		/delete-property/ zephyr,bt-c2h-uart;
+    /delete-property/ zephyr,ieee802154;
 		zephyr,sram = &sram0;
 		zephyr,flash = &flash0;
 		zephyr,code-partition = &code_partition;
@@ -15,7 +16,7 @@
 
   aliases {
     adcctrl = &adc;
-    i2csensor = &i2c1;
+    i2csensor = &i2c0;
   };
 
 };
@@ -25,6 +26,8 @@
  *    Code          0x10000 - 0xFC000 (Size 0xEC000 966656 Bytes)
  *    NVM Data      0xFC000 - 0x100000 (Size 0x4000 16384 Bytes)
  */
+
+/delete-node/ &storage_partition;
 
 &flash0 {
 	partitions {
@@ -42,15 +45,8 @@
 			reg = <0x00027000 0x000c5000>;
 		};
 
-		/*
-		 * The flash starting at 0x000ec000 and ending at
-		 * 0x000f3fff is reserved for use by the application.
-		 *
-		 * Storage partition will be used by FCB/LittleFS/NVS
-		 * if enabled.
-		 */
-		storage_partition: partition@ec000 {
-			label = "storage";
+		datapt_partition: partition@ec000 {
+			label = "datapt";
 			reg = <0x000ec000 0x00008000>;
 		};
 
@@ -58,11 +54,6 @@
 			label = "adafruit_boot";
 			reg = <0x000f4000 0x0000c000>;
 		};
-
-    datapt_partition: partition@FC000 {
-        label = "datapt";
-        reg = <0xFC000 0x4000>;
-    };
 	};
 };
 
@@ -70,11 +61,17 @@
 	status = "okay";
 };
 
-&uart0 {
-	status = "disabled";
+&i2c0 {
+	compatible = "nordic,nrf-twim";
+	/* Cannot be used together with spi0. */
+	status = "okay";
+	pinctrl-0 = <&i2c0_default>;
+	pinctrl-1 = <&i2c0_sleep>;
+	pinctrl-names = "default", "sleep";
+	clock-frequency = <I2C_BITRATE_FAST>;
 };
 
-&i2c0 {
+&uart0 {
 	status = "disabled";
 };
 
@@ -90,9 +87,12 @@
     status = "disabled";
 };
 
+/delete-node/ &usb_cdc_acm_uart; /* We use cdc_acm_uart0 */
+
 zephyr_udc0: &usbd {
-	compatible = "nordic,nrf-usbd";
+  compatible = "nordic,nrf-usbd";
 	status = "okay";
+
   cdc_acm_uart0 {
 		compatible = "zephyr,cdc-acm-uart";
 	};

@@ -33,7 +33,8 @@ void start(void)
 
   // Setup Serial
   logger_init();
-  serial_init();
+  if(serial_init())
+    setLEDFlag(LED_HARDFAULT);
 
   // Actual Calculations - sense.cpp
   if(sense_Init())
@@ -67,9 +68,9 @@ void start(void)
   }
 }
 
-/*#if !defined(CONFIG_SOC_SERIES_NRF52X)
+#if !defined(CONFIG_SOC_SERIES_NRF52X)
 #define K_FP_REGS 0
-#endif*/
+#endif
 
 // Threads
 K_THREAD_DEFINE(io_Thread_id, 512, io_Thread, NULL, NULL, NULL, IO_THREAD_PRIO, 0, 0);

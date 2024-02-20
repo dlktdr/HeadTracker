@@ -5,7 +5,7 @@
 
 #include "../defines.h"
 
-void serial_init();
+int serial_init();
 void serial_Thread();
 
 // ONLY use these serial write methods, they are buffered & thread safe
