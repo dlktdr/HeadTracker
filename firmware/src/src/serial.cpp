@@ -19,6 +19,7 @@
 
 #include <zephyr/kernel.h>
 #include <zephyr/device.h>
+#include <zephyr/usb/usb_device.h>
 #include <zephyr/drivers/uart.h>
 #include <zephyr/drivers/uart/cdc_acm.h>
 #include <zephyr/drivers/usb/usb_dc.h>
@@ -26,7 +27,6 @@
 #include <zephyr/usb/class/usb_cdc.h>
 #include <zephyr/sys/reboot.h>
 #include <math.h>
-#include <soc.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "io.h"

@@ -1,4 +1,9 @@
-Debugging with OpenOCD and internal USB CDC+JTAG
+
+# To compile an ESP board, you must include hal_espressif with,
+west blobs fetch hal_espressif
+
+
+# Debugging with OpenOCD and the internal USB CDC+JTAG e.g. ESP32C3
 
 Must use openocd program supplied by espressif for support
 

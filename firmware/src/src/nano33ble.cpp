@@ -1,6 +1,8 @@
 
 #include "nano33ble.h"
 
+#include <zephyr/logging/log.h>
+
 #include "PPMIn.h"
 #include "PPMOut.h"
 #include "analog.h"
@@ -15,6 +17,8 @@
 #include "soc_flash.h"
 #include "trackersettings.h"
 #include "uart_mode.h"
+
+LOG_MODULE_REGISTER(nano33ble);
 
 TrackerSettings trkset;
 
