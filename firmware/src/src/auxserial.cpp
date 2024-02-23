@@ -403,6 +403,11 @@ uint32_t AuxSerial_Read(uint8_t* buffer, uint32_t bufsize) {return 0;}
 
 #else
 
-#error "No Aux Serial Support"
+int AuxSerial_Open(uint32_t baudrate, uint16_t settings, uint8_t inversions) {return 0;}
+bool AuxSerial_Available() {return 0;}
+void AuxSerial_Close() {}
+uint32_t AuxSerial_Write(const uint8_t* buffer, uint32_t len) {return 0;}
+uint32_t AuxSerial_Read(uint8_t* buffer, uint32_t bufsize) {return 0;}
+#warning "No Aux Serial Support"
 
 #endif

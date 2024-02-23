@@ -84,6 +84,9 @@ void setPWMValue(int ch, uint16_t value) {}
 
 #else
 
-#error "No PWM Support"
+int PWM_Init(int updateRate) {return 0;}
+void setPWMValue(int ch, uint16_t value) {}
+
+#warning "No PWM Support"
 
 #endif

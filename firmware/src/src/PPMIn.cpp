@@ -281,6 +281,14 @@ void PpmIn_execute() {}
 
 #else
 
-#error "No PPMInput Support"
+#warning "No PPMInput Support"
+int PpmIn_getChannels(uint16_t *ch)
+{
+  return 0;
+}
+
+void PpmIn_setPin(int pinNum) {}
+void PpmIn_execute() {}
+
 
 #endif

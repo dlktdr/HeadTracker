@@ -54,10 +54,11 @@ elseif(${BOARD} STREQUAL "esp32c3")
   set (CONF_FILE zephyr/esp32c3_prj.conf)
   message(STATUS "Board is a ESP32C3 based board")
 
-  # M5Stick CPLUS1
-  elseif(${BOARD} STREQUAL "esp32c3")
-  message(STATUS "M5 Stick Plus")
-  set(CONF_FILE zephyr/esppico_prj.conf)
+# M5Stick CPLUS1
+elseif(${BOARD} STREQUAL "m5stickc_plus")
+  message(STATUS "M5 Stick C Plus")
+  set(CONF_FILE zephyr/m5stickc_plus_prj.conf)
+  message(STATUS "Board is a ESP32 PICO based board")
 
 else()
 

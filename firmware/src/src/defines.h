@@ -31,6 +31,9 @@
 #elif defined(CONFIG_SOC_ESP32C3)
 #define FW_BOARD "ESP32C3"
 #include "boards/esp32c3.h"
+#elif defined(CONFIG_BOARD_M5STICKC_PLUS)
+#define FW_BOARD "M5CSTICK_PLUS"
+#include "boards/m5stickc_plus.h"
 #else
 #error NO COMPATIBLE BOARD DEFINED
 #endif

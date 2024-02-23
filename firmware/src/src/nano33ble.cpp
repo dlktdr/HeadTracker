@@ -68,10 +68,6 @@ void start(void)
   }
 }
 
-#if !defined(CONFIG_SOC_SERIES_NRF52X)
-#define K_FP_REGS 0
-#endif
-
 // Threads
 K_THREAD_DEFINE(io_Thread_id, 512, io_Thread, NULL, NULL, NULL, IO_THREAD_PRIO, 0, 0);
 K_THREAD_DEFINE(serial_Thread_id, 4096, serial_Thread, NULL, NULL, NULL, SERIAL_THREAD_PRIO, K_FP_REGS, 1000);

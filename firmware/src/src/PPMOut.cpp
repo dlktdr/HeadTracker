@@ -266,6 +266,11 @@ int PpmOut_getChnCount() {return 0;}
 
 #else
 
-#error "No PPMInput Support"
+void PpmOut_setPin(int pinNum) {}
+void PpmOut_setChannel(int chan, uint16_t val) {}
+void PpmOut_execute() {}
+int PpmOut_getChnCount() {return 0;}
+
+#warning "No PPMInput Support"
 
 #endif
