@@ -67,4 +67,4 @@ const int8_t PinNumber[] = {
 
 // Values below were determined by plotting Gyro Output (See sense.cpp, gyroCalibration())
 #define GYRO_STABLE_DIFF 200.0f
-#define ACC_STABLE_DIFF 3.5
+#define ACC_STABLE_DIFF 3.5f

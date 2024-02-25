@@ -4,9 +4,9 @@
 #include "defines.h"
 
 #if defined(HAS_WS2812)
-#include <device.h>
-#include <drivers/led_strip.h>
-#include <drivers/spi.h>
+#include <zephyr/device.h>
+#include <zephyr/drivers/led_strip.h>
+#include <zephyr/drivers/spi.h>
 #endif
 
 #include "soc_flash.h"
@@ -184,7 +184,6 @@ void io_Thread()
 
 #if defined(HAS_WS2812)
     const struct device *strip = DEVICE_DT_GET(DT_NODELABEL(led_strip));
-    //strip = device_get_binding(DT_NODELABEL(led_strip));
 	  if (strip) {
       struct led_rgb pixel;
       pixel.b = curcolor & 0xFF;
