@@ -146,6 +146,8 @@ RUN sudo -E -- bash -c ' \
 	chown -R user:user /home/user/.cmake \
 	'
 
+RUN useradd -l -u 33333 -G sudo -md /home/gitpod -s /bin/bash -p gitpod gitpod
+
 USER root
 
 # Set the locale
