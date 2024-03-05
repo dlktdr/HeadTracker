@@ -31,6 +31,8 @@ ARG FVP_CORSTONE310_VERSION=11.24_13
 ENV FVP_CORSTONE310_VERSION=$FVP_CORSTONE310_VERSION
 ARG WGET_ARGS="-q --show-progress --progress=bar:force:noscroll"
 
+USER root
+
 # Install Kitware ninja
 # NOTE: Pre-built Kitware ninja binaries are only available for x86_64 host.
 RUN if [ "${HOSTTYPE}" = "x86_64" ]; then \
