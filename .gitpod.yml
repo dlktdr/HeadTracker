@@ -1,2 +1,2 @@
 image:
-    file: firmware/src/.devcontainer/Dockerfile.zsrc
+    file: Dockerfile.gitpod
