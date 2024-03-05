@@ -1,7 +1,7 @@
 # CI Image (ci)
 
 ARG BASE_IMAGE
-FROM ${BASE_IMAGE:-zephyrprojectrtos/ci-base:latest}
+FROM gitpod/workspace-full:latest
 
 ARG ZSDK_VERSION=0.16.5-1
 ENV ZSDK_VERSION=$ZSDK_VERSION
@@ -102,7 +102,9 @@ RUN mkdir -p /opt/toolchains && \
 	zephyr-sdk-${ZSDK_VERSION}/setup.sh -t all -h -c && \
 	rm zephyr-sdk-${ZSDK_VERSION}_linux-${HOSTTYPE}.tar.xz
 	
-# Install Zephyr 3.5.99
+USER gitpod
+	
+# Install Zephyr
 RUN pip3 install west && \
 	west init ~/zephyr && \
 	cd ~/zephyr && \
@@ -139,15 +141,12 @@ RUN apt-get clean -y && \
 # Run the Zephyr SDK setup script as 'user' in order to ensure that the
 # `Zephyr-sdk` CMake package is located in the package registry under the
 # user's home directory.
-USER user
+USER gitpod
 
 RUN sudo -E -- bash -c ' \
 	/opt/toolchains/zephyr-sdk-${ZSDK_VERSION}/setup.sh -c && \
-	chown -R user:user /home/user/.cmake \
+	chown -R gitpod:gitpod /home/user/.cmake \
 	'
-
-RUN useradd -l -u 33333 -G sudo -md /home/gitpod -s /bin/bash -p gitpod gitpod
-
 USER root
 
 # Set the locale
@@ -155,4 +154,7 @@ ENV ZEPHYR_TOOLCHAIN_VARIANT=zephyr
 ENV PKG_CONFIG_PATH=/usr/lib/i386-linux-gnu/pkgconfig
 ENV OVMF_FD_PATH=/usr/share/ovmf/OVMF.fd
 ENV ARMFVP_BIN_PATH=/usr/local/bin
+
+USER gitpod
+
 ENV ZEPHYR_BASE=~/zephyr/zephyr
