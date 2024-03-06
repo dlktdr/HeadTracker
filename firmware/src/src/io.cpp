@@ -241,7 +241,7 @@ void io_init()
   gpios[1] = DEVICE_DT_GET(DT_NODELABEL(gpio1));  // device_get_binding("GPIO_1");
 
 #if defined(PCB_NANO33BLE)
-  pinMode(IO_VDDENA, GPIO_OUTPUT);
+  pinMode(IO_VDDENA, GPIO_OUTPUT | GPIO_DS_ALT_HIGH  );
   pinMode(IO_I2C_PU, GPIO_OUTPUT);
   digitalWrite(IO_VDDENA, 1);
   digitalWrite(IO_I2C_PU, 1);
