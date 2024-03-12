@@ -1,162 +1,24 @@
-# CI Image (ci)
+FROM gitpod/workspace-base:2024-03-06-11-21-33
 
-ARG BASE_IMAGE
-FROM gitpod/workspace-full:latest
+RUN sudo install-packages git cmake ninja-build gperf \
+  ccache dfu-util device-tree-compiler wget \
+  python3-dev python3-pip python3-setuptools python3-tk python3-wheel xz-utils file \
+  make gcc gcc-multilib g++-multilib libsdl2-dev libmagic1
 
-ARG ZSDK_VERSION=0.16.5-1
-ENV ZSDK_VERSION=$ZSDK_VERSION
-ARG KITWARE_NINJA_VERSION=1.11.1.g95dee.kitware.jobserver-1
-ENV KITWARE_NINJA_VERSION=$KITWARE_NINJA_VERSION
-ARG CCACHE_VERSION=4.9.1
-ENV CCACHE_VERSION=$CCACHE_VERSION
-ARG DOXYGEN_VERSION=1.9.4
-ENV DOXYGEN_VERSION=$DOXYGEN_VERSION
-ARG RENODE_VERSION=1.14.0
-ENV RENODE_VERSION=$RENODE_VERSION
-ARG LLVM_VERSION=16
-ENV LLVM_VERSION=$LLVM_VERSION
-ARG BSIM_VERSION=v2.1
-ENV BSIM_VERSION=$BSIM_VERSION
-ARG SPARSE_VERSION=9212270048c3bd23f56c20a83d4f89b870b2b26e
-ENV SPARSE_VERSION=$SPARSE_VERSION
-ARG PROTOC_VERSION=21.7
-ENV PROTOC_VERSION=$PROTOC_VERSION
-ARG FVP_BASE_REVC_VERSION=11.24_11
-ENV FVP_BASE_REVC_VERSION=$FVP_BASE_REVC_VERSION
-ARG FVP_BASE_AEMV8R_VERSION=11.24_11
-ENV FVP_BASE_AEMV8R_VERSION=$FVP_BASE_AEMV8R_VERSION
-ARG FVP_CORSTONE300_VERSION=11.24_13
-ENV FVP_CORSTONE300_VERSION=$FVP_CORSTONE300_VERSION
-ARG FVP_CORSTONE310_VERSION=11.24_13
-ENV FVP_CORSTONE310_VERSION=$FVP_CORSTONE310_VERSION
-ARG WGET_ARGS="-q --show-progress --progress=bar:force:noscroll"
+RUN cd ~ && \
+    wget --progress=bar:force:noscroll https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v0.16.5-1/zephyr-sdk-0.16.5-1_linux-x86_64_minimal.tar.xz && \
+    tar xvf zephyr-sdk-0.16.5-1_linux-x86_64_minimal.tar.xz && \
+    rm zephyr-sdk-0.16.5-1_linux-x86_64_minimal.tar.xz && \
+    cd zephyr-sdk-0.16.5-1 && \
+    ./setup.sh -t arm-zephyr-eabi -t xtensa-espressif_esp32_zephyr-elf -t riscv64-zephyr-elf -h && \
+    ln -s ~/zephyr-sdk-0.16.5-1/ ~/zephyr-sdk
 
-USER root
+RUN pip3 install west
 
-# Install Kitware ninja
-# NOTE: Pre-built Kitware ninja binaries are only available for x86_64 host.
-RUN if [ "${HOSTTYPE}" = "x86_64" ]; then \
-	wget ${WGET_ARGS} https://github.com/Kitware/ninja/releases/download/v${KITWARE_NINJA_VERSION}/ninja-${KITWARE_NINJA_VERSION}_x86_64-linux-gnu.tar.gz && \
-	tar xf ninja-${KITWARE_NINJA_VERSION}_x86_64-linux-gnu.tar.gz -C /opt && \
-	ln -s /opt/ninja-${KITWARE_NINJA_VERSION}_x86_64-linux-gnu/ninja /usr/local/bin && \
-	rm ninja-${KITWARE_NINJA_VERSION}_x86_64-linux-gnu.tar.gz \
-	; fi
+RUN west init ~/zephyr && \
+    cd zephyr && \
+    west update && \
+    west -z ~/zephyr zephyr-export && \
+    pip3 install -r ~/zephyr/zephyr/scripts/requirements.txt
 
-# Install ccache
-# NOTE: Pre-built ccache binaries are only available for x86_64 host.
-RUN if [ "${HOSTTYPE}" = "x86_64" ]; then \
-	wget ${WGET_ARGS} https://github.com/ccache/ccache/releases/download/v${CCACHE_VERSION}/ccache-${CCACHE_VERSION}-linux-x86_64.tar.xz && \
-	tar xf ccache-${CCACHE_VERSION}-linux-x86_64.tar.xz -C /opt && \
-	ln -s /opt/ccache-${CCACHE_VERSION}-linux-x86_64/ccache /usr/local/bin && \
-	rm ccache-${CCACHE_VERSION}-linux-x86_64.tar.xz \
-	; fi
-
-# Install renode (x86 only)
-# NOTE: Renode is currently only available for x86_64 host.
-RUN if [ "${HOSTTYPE}" = "x86_64" ]; then \
-	apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF && \
-	echo "deb https://download.mono-project.com/repo/ubuntu stable-focal main" | tee /etc/apt/sources.list.d/mono-official-stable.list && \
-	apt-get -y update && \
-	wget ${WGET_ARGS} https://github.com/renode/renode/releases/download/v${RENODE_VERSION}/renode_${RENODE_VERSION}_amd64.deb && \
-	apt-get install -y ./renode_${RENODE_VERSION}_amd64.deb && \
-	rm renode_${RENODE_VERSION}_amd64.deb && \
-	pip3 install -r /opt/renode/tests/requirements.txt --no-cache-dir \
-	; fi
-
-# Install BSIM
-# Note: west needs an extra folder level, so we create a link to the old location to be backwards compatible
-RUN mkdir -p /opt/bsim_west && \
-	cd /opt/ && \
-	west init -m https://github.com/zephyrproject-rtos/babblesim-manifest.git --mr ${BSIM_VERSION} bsim_west && \
-	cd bsim_west/bsim && \
-	west update && \
-	make everything -j 8 && \
-	echo ${BSIM_VERSION} > ./version && \
-	chmod ag+w . -R && \
-	ln -s /opt/bsim_west/bsim /opt/bsim
-
-# Install cargo environment
-RUN wget -q -O-  "https://sh.rustup.rs" | sh -s -- -y
-
-# Install uefi-run utility
-RUN ~/.cargo/bin/cargo install uefi-run --root /usr
-
-# Install LLVM and Clang
-RUN wget ${WGET_ARGS} https://apt.llvm.org/llvm.sh && \
-	chmod +x llvm.sh && \
-	./llvm.sh ${LLVM_VERSION} all && \
-	rm -f llvm.sh
-
-# Install sparse package for static analysis
-RUN mkdir -p /opt/sparse && \
-	cd /opt/sparse && \
-	git clone https://git.kernel.org/pub/scm/devel/sparse/sparse.git && \
-	cd sparse && git checkout ${SPARSE_VERSION} && \
-	make -j8 && \
-	PREFIX=/opt/sparse make install && \
-	rm -rf /opt/sparse/sparse
-
-# Install Zephyr SDK
-RUN mkdir -p /opt/toolchains && \
-	cd /opt/toolchains && \
-	wget ${WGET_ARGS} https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v${ZSDK_VERSION}/zephyr-sdk-${ZSDK_VERSION}_linux-${HOSTTYPE}.tar.xz && \
-	tar xf zephyr-sdk-${ZSDK_VERSION}_linux-${HOSTTYPE}.tar.xz && \
-	zephyr-sdk-${ZSDK_VERSION}/setup.sh -t all -h -c && \
-	rm zephyr-sdk-${ZSDK_VERSION}_linux-${HOSTTYPE}.tar.xz
-	
-USER gitpod
-	
-# Install Zephyr
-RUN pip3 install west && \
-	west init ~/zephyr && \
-	cd ~/zephyr && \
-	west update && \
-	west zephyr-export && \
-	pip3 install --user -r ~/zephyr/zephyr/scripts/requirements.txt
-	
-# Install FVP
-#
-# Ecosystem FVP License permits redistribution (refer to the relevant license available in the container).
-RUN if [ "${HOSTTYPE}" = "x86_64" ]; then \
-	mkdir -p /opt/fvps && \
-	cd /opt/fvps && \
-	wget ${WGET_ARGS} -O- https://developer.arm.com/-/media/Files/downloads/ecosystem-models/FVP_Base_RevC-2xAEMvA_${FVP_BASE_REVC_VERSION}_Linux64.tgz | tar xz && \
-	wget ${WGET_ARGS} -O- https://developer.arm.com/-/media/Files/downloads/ecosystem-models/FVP_Base_AEMv8R_${FVP_BASE_AEMV8R_VERSION}_Linux64.tgz | tar xz && \
-	wget ${WGET_ARGS} -O- https://developer.arm.com/-/media/Arm%20Developer%20Community/Downloads/OSS/FVP/Corstone-300/FVP_Corstone_SSE-300_${FVP_CORSTONE300_VERSION}_Linux64.tgz | tar xz && \
-	wget ${WGET_ARGS} -O- https://developer.arm.com/-/media/Arm%20Developer%20Community/Downloads/OSS/FVP/Corstone-310/FVP_Corstone_SSE-310_${FVP_CORSTONE310_VERSION}_Linux64.tgz | tar xz && \
-	./FVP_Corstone_SSE-300.sh --no-interactive --i-agree-to-the-contained-eula && \
-	./FVP_Corstone_SSE-310.sh --no-interactive --i-agree-to-the-contained-eula && \
-	ln -s /opt/fvps/Base_RevC_AEMvA_pkg/models/Linux64_GCC-9.3/FVP_Base_RevC-2xAEMvA /usr/local/bin && \
-	ln -s /opt/fvps/AEMv8R_base_pkg/models/Linux64_GCC-9.3/FVP_BaseR_AEMv8R /usr/local/bin && \
-	ln -s /usr/local/FVP_Corstone_SSE-300/models/Linux64_GCC-9.3/FVP_Corstone_SSE-300_Ethos-U55 /usr/local/bin && \
-	ln -s /usr/local/FVP_Corstone_SSE-300/models/Linux64_GCC-9.3/FVP_Corstone_SSE-300_Ethos-U65 /usr/local/bin && \
-	ln -s /usr/local/FVP_Corstone_SSE-310/models/Linux64_GCC-9.3/FVP_Corstone_SSE-310 /usr/local/bin && \
-	ln -s /usr/local/FVP_Corstone_SSE-310/models/Linux64_GCC-9.3/FVP_Corstone_SSE-310_Ethos-U65 /usr/local/bin && \
-	rm FVP_Corstone_SSE-300.sh FVP_Corstone_SSE-310.sh \
-	; fi
-
-# Clean up stale packages
-RUN apt-get clean -y && \
-	apt-get autoremove --purge -y && \
-	rm -rf /var/lib/apt/lists/*
-
-# Run the Zephyr SDK setup script as 'user' in order to ensure that the
-# `Zephyr-sdk` CMake package is located in the package registry under the
-# user's home directory.
-USER gitpod
-
-RUN sudo -E -- bash -c ' \
-	/opt/toolchains/zephyr-sdk-${ZSDK_VERSION}/setup.sh -c && \
-	chown -R gitpod:gitpod /home/user/.cmake \
-	'
-USER root
-
-# Set the locale
-ENV ZEPHYR_TOOLCHAIN_VARIANT=zephyr
-ENV PKG_CONFIG_PATH=/usr/lib/i386-linux-gnu/pkgconfig
-ENV OVMF_FD_PATH=/usr/share/ovmf/OVMF.fd
-ENV ARMFVP_BIN_PATH=/usr/local/bin
-
-USER gitpod
-
-ENV ZEPHYR_BASE=~/zephyr/zephyr
+RUN echo source /home/gitpod/zephyr/zephyr/zephyr-env.sh >> ~/.bashrc
