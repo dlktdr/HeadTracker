@@ -74,9 +74,11 @@ static float magx = 0, magy = 0, magz = 0;
 static float gyrx = 0, gyry = 0, gyrz = 0;
 static float tilt = 0, roll = 0, pan = 0;
 static float rolloffset = 0, panoffset = 0, tiltoffset = 0;
+#if !defined(HAS_NOIMU)
 static float magxoff = 0, magyoff = 0, magzoff = 0;
 static float accxoff = 0, accyoff = 0, acczoff = 0;
 static float gyrxoff = 0, gyryoff = 0, gyrzoff = 0;
+#endif
 static bool trpOutputEnabled = false;  // Default to disabled T/R/P output
 static bool gyroCalibrated = false;
 
@@ -760,6 +762,8 @@ void sensor_Thread()
     }
 #endif
 
+// Below is all IMU Related, if no IMU don't compile it in
+#if !defined(HAS_NOIMU)
     // Setup Rotations
     float rotation[3] = {trkset.getRotX(), trkset.getRotY(), trkset.getRotZ()};
 
@@ -1017,6 +1021,8 @@ void sensor_Thread()
 
     k_mutex_unlock(&sensor_mutex);
 
+#endif // If no sensor
+
     // Adjust sleep for a more accurate period
     senseUsDuration = micros64() - senseUsDuration;
     if (SENSOR_PERIOD - senseUsDuration <
@@ -1042,6 +1048,7 @@ void sensor_Thread()
 
 void gyroCalibrate()
 {
+#if !defined(HAS_NOIMU)
   static float last_gyro_mag = 0;
   static float last_acc_mag = 0;
   static float filt_gyrx = 0;
@@ -1110,6 +1117,7 @@ void gyroCalibrate()
 
   // Output in CSV format for determining limits
   // printk("%.4f,%.2f,%.2f\n", (float)time / 1000000.0f, gyro_dif, acc_dif);
+#endif
 }
 
 // FROM https://stackoverflow.com/questions/1628386/normalise-orientation-between-0-and-360

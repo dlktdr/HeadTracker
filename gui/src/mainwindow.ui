@@ -452,7 +452,7 @@
              </attribute>
              <layout class="QGridLayout" name="gridLayout_12">
               <item row="11" column="0" colspan="3">
-               <layout class="QHBoxLayout" name="horizontalLayout_12">
+               <layout class="QHBoxLayout" name="hlayGyroCal">
                 <item>
                  <widget class="Led" name="gyroLed" native="true">
                   <property name="sizePolicy">
@@ -3239,7 +3239,7 @@
      </layout>
     </item>
     <item>
-     <widget class="QGroupBox" name="groupBox">
+     <widget class="QGroupBox" name="grpRangeSel">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
         <horstretch>0</horstretch>
@@ -4060,7 +4060,7 @@
      </widget>
     </item>
     <item>
-     <widget class="QGroupBox" name="groupBox_4">
+     <widget class="QGroupBox" name="grpLocalGraph">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
         <horstretch>0</horstretch>
