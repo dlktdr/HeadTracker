@@ -52,7 +52,7 @@
         "serverpath": "C:/Program Files/SEGGER/JLink/JLinkGDBServerCL.exe", // Check path to Jlink installation
         "armToolchainPath": "${workspaceRoot:src}/../zephyr-sdk/arm-zephyr-eabi/bin", // NOTE Check version & path of SDK here
         "toolchainPrefix": "arm-zephyr-eabi",
-        "preLaunchTask": "Build (Arduino Nano 33 BLE)",
+        "preLaunchTask": "Build (Arduino Nano 33 BLE) - Debug",
         "svdFile": "${workspaceRoot:src}/nrf52840.svd",
       },
       {
@@ -68,7 +68,7 @@
         "serverpath": "C:/Program Files/SEGGER/JLink/JLinkGDBServerCL.exe", // Check path to Jlink installation
         "armToolchainPath": "${workspaceRoot:src}/../zephyr-sdk/arm-zephyr-eabi/bin", // NOTE Check version & path of SDK here
         "toolchainPrefix": "arm-zephyr-eabi",
-        "preLaunchTask": "Build (Arduino Nano 33 BLE Rev 2)",
+        "preLaunchTask": "Build (Arduino Nano 33 BLE Rev 2) - Debug",
         "svdFile": "${workspaceRoot:src}/nrf52840.svd",
       },
       {
@@ -84,7 +84,7 @@
         "serverpath": "C:/Program Files/SEGGER/JLink/JLinkGDBServerCL.exe", // Check path to Jlink installation
         "armToolchainPath": "${workspaceRoot:src}/../zephyr-sdk/arm-zephyr-eabi/bin", // NOTE Check version & path of SDK here
         "toolchainPrefix": "arm-zephyr-eabi",
-        "preLaunchTask": "Build (XIAO NRF52840 Sense)",
+        "preLaunchTask": "Build (XIAO NRF52840 Sense) - Debug",
         "svdFile": "${workspaceRoot:src}/nrf52840.svd",
       },
       {
@@ -100,7 +100,7 @@
         "serverpath": "C:/Program Files/SEGGER/JLink/JLinkGDBServerCL.exe", // Check path to Jlink installation
         "armToolchainPath": "${workspaceRoot:src}/../zephyr-sdk/arm-zephyr-eabi/bin", // NOTE Check version & path of SDK here
         "toolchainPrefix": "arm-zephyr-eabi",
-        "preLaunchTask": "Build (DTQSYS HT)",
+        "preLaunchTask": "Build (DTQSYS HT) - Debug",
         "svdFile": "${workspaceRoot:src}/nrf52840.svd",
       },
       {
