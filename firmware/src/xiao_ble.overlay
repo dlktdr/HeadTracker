@@ -12,11 +12,16 @@
 		zephyr,sram = &sram0;
 		zephyr,flash = &flash0;
 		zephyr,code-partition = &code_partition;
+
+		// Uncomment the below line for kernel logging to a second USB CDC port
+		// Also uncomment the extra cdc at the bottom of the file
+		//   zephyr,console = &cdc_acm_uart1;
 	};
 
   aliases {
     adcctrl = &adc;
     i2csensor = &i2c0;
+		guiuart = &cdc_acm_uart0;
   };
 
 };
@@ -90,11 +95,19 @@
 /delete-node/ &usb_cdc_acm_uart; /* We use cdc_acm_uart0 */
 
 zephyr_udc0: &usbd {
-  compatible = "nordic,nrf-usbd";
+	compatible = "nordic,nrf-usbd";
 	status = "okay";
-
-  cdc_acm_uart0 {
+  cdc_acm_uart0: cdc_acm_uart0 {
 		compatible = "zephyr,cdc-acm-uart";
 	};
+
+  // Uncomment the below lines for kernel logging to a second USB CDC port
+	/*
+	cdc_acm_uart1: cdc_acm_uart1 {
+		compatible = "zephyr,cdc-acm-uart";
+	};
+	*/
 };
+
+
 

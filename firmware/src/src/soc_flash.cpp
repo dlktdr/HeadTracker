@@ -51,7 +51,7 @@ void socClearFlash()
   }
 
   pauseForFlash = true;
-  rt_sleep_ms(PAUSE_BEFORE_FLASH);
+  k_msleep(PAUSE_BEFORE_FLASH);
 
   if (flash_erase(flash_dev, FLASH_OFFSET, FLASH_PAGE_SIZE) != 0) {
     LOGE("Flash erase Failure");
@@ -75,7 +75,7 @@ int socWriteFlash(const char *datain, int len)
   }
 
   pauseForFlash = true;
-  rt_sleep_ms(PAUSE_BEFORE_FLASH);
+  k_msleep(PAUSE_BEFORE_FLASH);
 
   if (flash_erase(flash_dev, FLASH_OFFSET, FLASH_PAGE_SIZE) != 0) {
     LOGE("Flash erase Failure");

@@ -21,8 +21,6 @@
 #include <zephyr/device.h>
 #include <zephyr/usb/usb_device.h>
 #include <zephyr/drivers/uart.h>
-#include <zephyr/drivers/uart/cdc_acm.h>
-#include <zephyr/drivers/usb/usb_dc.h>
 #include <zephyr/sys/ring_buffer.h>
 #include <zephyr/usb/class/usb_cdc.h>
 #include <zephyr/sys/reboot.h>
@@ -35,10 +33,6 @@
 #include "soc_flash.h"
 #include "trackersettings.h"
 #include "ucrc16lib.h"
-
-
-// Wait for serial connection before starting..
-// #define WAITFOR_DTR
 
 void serialrx_Process();
 char *getJSONBuffer();
@@ -101,22 +95,11 @@ int serial_init()
 {
   int ret;
 
-#if defined(DT_N_INST_0_zephyr_cdc_acm_uart)
-  dev = DEVICE_DT_GET(DT_N_INST_0_zephyr_cdc_acm_uart);
-#else
+  // Use the device tree alias to specify the UART device to use
   dev = DEVICE_DT_GET(DT_ALIAS(guiuart));
-#endif
   if (!device_is_ready(dev)) {
-		printk("CDC ACM device not ready");
+		printk("GUI UART device is not ready");
 		return -1;
-  }
-
-#if defined(DT_N_INST_0_zephyr_cdc_acm_uart)
-  ret = usb_enable(NULL);
-#endif
-  if (ret != 0) {
-    printk("Unable to enable USB\n");
-    return -1;
   }
 
   ring_buf_init(&ringbuf_tx, sizeof(ring_buffer_tx), ring_buffer_tx);
@@ -124,19 +107,6 @@ int serial_init()
 
   ring_buf_init(&ringbuf_rx, sizeof(ring_buffer_rx), ring_buffer_rx);
   k_mutex_init(&ring_rx_mutex);
-
-#ifdef WAITFOR_DTR
-  uint32_t dtr = 0U;
-  while (true) {
-    uart_line_ctrl_get(dev, UART_LINE_CTRL_DTR, &dtr);
-    if (dtr) {
-      break;
-    } else {
-      /* Give CPU resources to low priority threads. */
-      rt_sleep_ms(100);
-    }
-  }
-#endif
 
   /* They are optional, we use them to test the interrupt endpoint */
   ret = uart_line_ctrl_set(dev, UART_LINE_CTRL_DCD, 1);
@@ -163,7 +133,7 @@ void serial_Thread()
 
   while (1) {
     k_poll(serialRunEvents, 1, K_FOREVER);
-    rt_sleep_ms(SERIAL_PERIOD);
+    k_msleep(SERIAL_PERIOD);
 
     if (pauseForFlash) {
       continue;

@@ -4,19 +4,24 @@
 
 	chosen {
 		/delete-property/ zephyr,console;
-		/delete-property/ zephyr,shell-uart;
+    /delete-property/ zephyr,shell-uart;
 		/delete-property/ zephyr,uart-mcumgr;
 		/delete-property/ zephyr,bt-mon-uart;
 		/delete-property/ zephyr,bt-c2h-uart;
 		zephyr,sram = &sram0;
 		zephyr,flash = &flash0;
 		zephyr,code-partition = &code_partition;
+
+		// Uncomment the below line for kernel logging to a second USB CDC port
+		// Also uncomment the extra cdc at the bottom of the file
+		//   zephyr,console = &cdc_acm_uart1;
 	};
+
   aliases {
     adcctrl = &adc;
     i2csensor = &i2c1;
+		guiuart = &cdc_acm_uart0;
   };
-
 };
 
 /* Flash Layout
@@ -56,6 +61,17 @@
 	status = "disabled";
 };
 
+&i2c1 {
+	status = "okay";
+	clock-frequency = <I2C_BITRATE_FAST>;
+
+	bmi270@68 {
+		compatible = "bosch,bmi270";
+		reg = <0x68>;
+		vin-supply = <&vdd_env>;
+	};
+};
+
 /* Disable Timer3, used by PPM output
  */
 &timer3 {
@@ -71,8 +87,14 @@
 zephyr_udc0: &usbd {
 	compatible = "nordic,nrf-usbd";
 	status = "okay";
-  cdc_acm_uart0 {
+  cdc_acm_uart0: cdc_acm_uart0 {
 		compatible = "zephyr,cdc-acm-uart";
 	};
+
+  // Uncomment the below lines for kernel logging to a second USB CDC port
+	/*
+	cdc_acm_uart1: cdc_acm_uart1 {
+		compatible = "zephyr,cdc-acm-uart";
+	}; */
 };
 

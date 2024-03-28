@@ -74,7 +74,7 @@ int LSM9DS1Class::begin()
   writeRegister(LSM9DS1_ADDRESS, LSM9DS1_CTRL_REG8, 0x05);
   writeRegister(LSM9DS1_ADDRESS_M, LSM9DS1_CTRL_REG2_M, 0x0c);
 
-  rt_sleep_ms(10);
+  k_msleep(10);
 
   if (readRegister(LSM9DS1_ADDRESS, LSM9DS1_WHO_AM_I) != 0x68) {
     end();

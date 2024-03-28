@@ -69,7 +69,7 @@ void bt_Thread()
     k_poll(btRunEvents, 1, K_FOREVER);
 
     if (pauseForFlash || k_sem_count_get(&btPauseSem) == 1) {
-      rt_sleep_ms(10);
+      k_msleep(10);
       continue;
     }
 
@@ -99,9 +99,9 @@ void bt_Thread()
     usduration = micros64() - usduration;
     if (BT_PERIOD - usduration <
         BT_PERIOD * 0.7) {  // Took a long time. Will crash if sleep is too short
-      rt_sleep_us(BT_PERIOD);
+      k_usleep(BT_PERIOD);
     } else {
-      rt_sleep_us(BT_PERIOD - usduration);
+      k_usleep(BT_PERIOD - usduration);
     }
   }
 }

@@ -21,6 +21,7 @@
 #include <zephyr/drivers/i2c.h>
 #include <zephyr/drivers/sensor.h>
 #include <zephyr/kernel.h>
+#include <zephyr/logging/log.h>
 
 #include "MadgwickAHRS/MadgwickAHRS.h"
 #include "analog.h"
@@ -53,8 +54,8 @@
 #include "QMC5883/qmc5883.h"
 #endif
 #if defined(HAS_BMI270)
-#include "BMI270/bmi270.h"
-#include "BMI270/bmi2common.h"
+// #include "BMI270/bmi270.h"
+// #include "BMI270/bmi2common.h"
 #endif
 #if defined(HAS_BMM150)
 #include "BMM150/bmm150.h"
@@ -110,7 +111,8 @@ LSM9DS1Class IMU;
 #endif
 
 #if defined(HAS_BMI270)
-struct bmi2_dev bmi2_dev;
+const struct device *const bmi2_dev = DEVICE_DT_GET_ONE(bosch_bmi270);
+//struct bmi2_dev bmi2_dev;
 #endif
 
 #if defined(HAS_BMM150)
@@ -125,6 +127,8 @@ struct bmm150_dev bmm1_dev;
 #define MADGINIT_READY (MADGINIT_ACCEL | MADGINIT_MAG)
 
 K_MUTEX_DEFINE(sensor_mutex);
+
+LOG_MODULE_REGISTER(sensors);
 
 static int madgreads = 0;
 static uint8_t madgsensbits = 0;
@@ -169,30 +173,81 @@ int sense_Init()
 #endif
 
 #if defined(HAS_BMI270)
-  int8_t rslt;
+  struct sensor_value full_scale, sampling_freq, oversampling;
+
+  static int fcount=0;
+  while(!device_is_ready(bmi2_dev)) {
+    k_msleep(10);
+    fcount++;
+    if(fcount > 100) {
+      LOG_ERR("Device %s is not ready", bmi2_dev->name);
+      return -1;
+    }
+  }
+
+  printk("Device %p name is %s\n", bmi2_dev, bmi2_dev->name);
+
+  /* Setting scale in G, due to loss of precision if the SI unit m/s^2
+	 * is used
+	 */
+	full_scale.val1 = 2;            /* G */
+	full_scale.val2 = 0;
+	sampling_freq.val1 = 200;       /* Hz. Performance mode */
+	sampling_freq.val2 = 0;
+	oversampling.val1 = 1;          /* Normal mode */
+	oversampling.val2 = 0;
+
+	sensor_attr_set(bmi2_dev, SENSOR_CHAN_ACCEL_XYZ, SENSOR_ATTR_FULL_SCALE,
+			&full_scale);
+	sensor_attr_set(bmi2_dev, SENSOR_CHAN_ACCEL_XYZ, SENSOR_ATTR_OVERSAMPLING,
+			&oversampling);
+	/* Set sampling frequency last as this also sets the appropriate
+	 * power mode. If already sampling, change to 0.0Hz before changing
+	 * other attributes
+	 */
+	sensor_attr_set(bmi2_dev, SENSOR_CHAN_ACCEL_XYZ,
+			SENSOR_ATTR_SAMPLING_FREQUENCY,
+			&sampling_freq);
+
+	/* Setting scale in degrees/s to match the sensor scale */
+	full_scale.val1 = 500;          /* dps */
+	full_scale.val2 = 0;
+	sampling_freq.val1 = 200;       /* Hz. Performance mode */
+	sampling_freq.val2 = 0;
+	oversampling.val1 = 1;          /* Normal mode */
+	oversampling.val2 = 0;
+
+	sensor_attr_set(bmi2_dev, SENSOR_CHAN_GYRO_XYZ, SENSOR_ATTR_FULL_SCALE,
+			&full_scale);
+	sensor_attr_set(bmi2_dev, SENSOR_CHAN_GYRO_XYZ, SENSOR_ATTR_OVERSAMPLING,
+			&oversampling);
+	/* Set sampling frequency last as this also sets the appropriate
+	 * power mode. If already sampling, change sampling frequency to
+	 * 0.0Hz before changing other attributes
+	 */
+	sensor_attr_set(bmi2_dev, SENSOR_CHAN_GYRO_XYZ,
+			SENSOR_ATTR_SAMPLING_FREQUENCY,
+			&sampling_freq);
+
+/*  int8_t rslt;
   uint8_t sensor_list[2] = {BMI2_ACCEL, BMI2_GYRO};
   rslt = bmi2_interface_init(&bmi2_dev, BMI2_I2C_INTF);
   bmi2_error_codes_print_result(rslt);
 
-  /* Initialize bmi270. */
   rslt = bmi270_init(&bmi2_dev);
   bmi2_error_codes_print_result(rslt);
 
   if (rslt == BMI2_OK) {
-    /* Accel and gyro configuration settings. */
     rslt = set_accel_gyro_config(&bmi2_dev);
     bmi2_error_codes_print_result(rslt);
 
     if (rslt == BMI2_OK) {
-      /* NOTE:
-       * Accel and Gyro enable must be done after setting configurations
-       */
       rslt = bmi2_sensor_enable(sensor_list, 2, &bmi2_dev);
       bmi2_error_codes_print_result(rslt);
     }
   } else
     return -1;
-
+*/
 #endif
 
 #if defined(HAS_BMM150)
@@ -273,7 +328,7 @@ void calculate_Thread()
     k_poll(calculateRunEvents, 1, K_FOREVER);
 
     if (pauseForFlash) {
-      rt_sleep_ms(10);
+      k_msleep(10);
       continue;
     }
 
@@ -692,9 +747,9 @@ void calculate_Thread()
     if (CALCULATE_PERIOD - usduration <
         CALCULATE_PERIOD * 0.7) {  // Took a long time. Will crash if sleep is too short
 
-      rt_sleep_us(CALCULATE_PERIOD);
+      k_usleep(CALCULATE_PERIOD);
     } else {
-      rt_sleep_us(CALCULATE_PERIOD - usduration);
+      k_usleep(CALCULATE_PERIOD - usduration);
     }
 
 #if defined(DEBUG_SENSOR_RATES)
@@ -721,7 +776,7 @@ void sensor_Thread()
     k_poll(senseRunEvents, 1, K_FOREVER);
 
     if (pauseForFlash) {
-      rt_sleep_ms(10);
+      k_msleep(10);
       continue;
     }
 
@@ -790,31 +845,46 @@ void sensor_Thread()
 #endif
 
 #if defined(HAS_BMI270)
-    int8_t rslt;
-    uint16_t int_status = 0;
-    struct bmi2_sens_data sensor_data = {{0}};
-    rslt = bmi2_get_int_status(&int_status, &bmi2_dev);
-    bmi2_error_codes_print_result(rslt);
-    /* To check the data ready interrupt status and print the status for 10 samples. */
-    if ((int_status & BMI2_ACC_DRDY_INT_MASK) && (int_status & BMI2_GYR_DRDY_INT_MASK)) {
-      /* Get accel and gyro data for x, y and z axis. */
-      rslt = bmi2_get_sensor_data(&sensor_data, &bmi2_dev);
-      bmi2_error_codes_print_result(rslt);
-
-      /* Converting lsb to meter per second squared for 16 bit accelerometer at 2G range. */
-      tacc[0] = lsb_to_mps2(sensor_data.acc.y, 2, bmi2_dev.resolution) / GRAVITY_EARTH;
-      tacc[1] = -1.0f * lsb_to_mps2(sensor_data.acc.x, 2, bmi2_dev.resolution) / GRAVITY_EARTH;
-      tacc[2] = lsb_to_mps2(sensor_data.acc.z, 2, bmi2_dev.resolution) / GRAVITY_EARTH;
-      // printk("\nAccX=%4.2f,Y=%4.2f,Z=%4.2f\n", tacc[0], tacc[1], tacc[2]);
-      /* Converting lsb to degree per second for 16 bit gyro at 2000dps range. */
-
-      tgyr[0] = lsb_to_dps(sensor_data.gyr.y, 2000, bmi2_dev.resolution);
-      tgyr[1] = -1.0f * lsb_to_dps(sensor_data.gyr.x, 2000, bmi2_dev.resolution);
-      tgyr[2] = lsb_to_dps(sensor_data.gyr.z, 2000, bmi2_dev.resolution);
-      // printk("GyrX=%4.2f,Y=%4.2f,Z=%4.2f\n", tgyr[0], tgyr[1], tgyr[2]);
-      accValid = true;
-      gyrValid = true;
+    sensor_sample_fetch(bmi2_dev);
+    struct sensor_value acc[3], gyr[3];
+		if(sensor_channel_get(bmi2_dev, SENSOR_CHAN_ACCEL_XYZ, acc)) {
+      accValid=true;
+      tacc[0] = acc[0].val1 + (float)acc[0].val2 / 1000000;
+      tacc[1] = acc[1].val1 + (float)acc[1].val2 / 1000000;
+      tacc[2] = acc[2].val1 + (float)acc[2].val2 / 1000000;
     }
+		if(sensor_channel_get(bmi2_dev, SENSOR_CHAN_GYRO_XYZ, gyr)) {
+      gyrValid=true;
+      tgyr[0] = gyr[0].val1 + (float)gyr[0].val2 / 1000000;
+      tgyr[1] = gyr[1].val1 + (float)gyr[1].val2 / 1000000;
+      tgyr[2] = gyr[2].val1 + (float)gyr[2].val2 / 1000000;
+    }
+
+    // int8_t rslt;
+    // uint16_t int_status = 0;
+    // struct bmi2_sens_data sensor_data = {{0}};
+    // rslt = bmi2_get_int_status(&int_status, &bmi2_dev);
+    // bmi2_error_codes_print_result(rslt);
+    // /* To check the data ready interrupt status and print the status for 10 samples. */
+    // if ((int_status & BMI2_ACC_DRDY_INT_MASK) && (int_status & BMI2_GYR_DRDY_INT_MASK)) {
+    //   /* Get accel and gyro data for x, y and z axis. */
+    //   rslt = bmi2_get_sensor_data(&sensor_data, &bmi2_dev);
+    //   bmi2_error_codes_print_result(rslt);
+
+    //   /* Converting lsb to meter per second squared for 16 bit accelerometer at 2G range. */
+    //   tacc[0] = lsb_to_mps2(sensor_data.acc.y, 2, bmi2_dev.resolution) / GRAVITY_EARTH;
+    //   tacc[1] = -1.0f * lsb_to_mps2(sensor_data.acc.x, 2, bmi2_dev.resolution) / GRAVITY_EARTH;
+    //   tacc[2] = lsb_to_mps2(sensor_data.acc.z, 2, bmi2_dev.resolution) / GRAVITY_EARTH;
+    //   // printk("\nAccX=%4.2f,Y=%4.2f,Z=%4.2f\n", tacc[0], tacc[1], tacc[2]);
+    //   /* Converting lsb to degree per second for 16 bit gyro at 2000dps range. */
+
+    //   tgyr[0] = lsb_to_dps(sensor_data.gyr.y, 2000, bmi2_dev.resolution);
+    //   tgyr[1] = -1.0f * lsb_to_dps(sensor_data.gyr.x, 2000, bmi2_dev.resolution);
+    //   tgyr[2] = lsb_to_dps(sensor_data.gyr.z, 2000, bmi2_dev.resolution);
+    //   // printk("GyrX=%4.2f,Y=%4.2f,Z=%4.2f\n", tgyr[0], tgyr[1], tgyr[2]);
+    //   accValid = true;
+    //   gyrValid = true;
+    // }*/
 
 #endif
 
@@ -1025,9 +1095,9 @@ void sensor_Thread()
     if (SENSOR_PERIOD - senseUsDuration <
         SENSOR_PERIOD * 0.7) {  // Took a long time. Will crash if sleep is too short
 
-      rt_sleep_us(SENSOR_PERIOD);
+      k_usleep(SENSOR_PERIOD);
     } else {
-      rt_sleep_us(SENSOR_PERIOD - senseUsDuration);
+      k_usleep(SENSOR_PERIOD - senseUsDuration);
     }
 
 #if defined(DEBUG_SENSOR_RATES)
