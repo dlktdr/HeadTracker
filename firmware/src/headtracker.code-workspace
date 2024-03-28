@@ -129,31 +129,14 @@
     "version": "2.0.0",
     "tasks": [
       {
-        "label": "Build (Arduino Nano 33 BLE)",
-        "type": "shell",
-        "command": "west",
-        "args": [
-          "build",
-          "-p", "auto",
-          "-b", "arduino_nano_33_ble"
-        ],
-        "problemMatcher": [
-          "$tsc"
-        ],
-        "presentation": {
-          "reveal": "always"
-        },
-        "group": "build"
-      },
-      {
-        "label": "Build (Arduino Nano 33 BLE Rev 2)",
+        "label": "Build (Arduino Nano 33 BLE) - Debug",
         "type": "shell",
         "command": "west",
         "args": [
           "build",
           "-p", "auto",
           "-b", "arduino_nano_33_ble",
-          "--", "-DBOARD_REV_SR2=y"
+          "--", "-DCMAKE_BUILD_TYPE=Debug"
         ],
         "problemMatcher": [
           "$tsc"
@@ -164,13 +147,15 @@
         "group": "build"
       },
       {
-        "label": "Build (XIAO NRF52840 Sense)",
+        "label": "Build (Arduino Nano 33 BLE Rev 2) - Debug",
         "type": "shell",
         "command": "west",
         "args": [
           "build",
           "-p", "auto",
-          "-b", "xiao_ble_sense",
+          "-b", "arduino_nano_33_ble",
+          "--", "-DBOARD_REV_SR2=y",
+          "-DCMAKE_BUILD_TYPE=Debug"
         ],
         "problemMatcher": [
           "$tsc"
@@ -181,13 +166,32 @@
         "group": "build"
       },
       {
-        "label": "Build (DTQSYS HT)",
+        "label": "Build (XIAO NRF52840 Sense) - Debug",
+        "type": "shell",
+        "command": "west",
+        "args": [
+          "build",
+          "-p", "auto",
+          "-b", "xiao_ble/nrf52840/sense",
+          "--", "-DCMAKE_BUILD_TYPE=Debug"
+        ],
+        "problemMatcher": [
+          "$tsc"
+        ],
+        "presentation": {
+          "reveal": "always"
+        },
+        "group": "build"
+      },
+      {
+        "label": "Build (DTQSYS HT) - Debug",
         "type": "shell",
         "command": "west",
         "args": [
           "build",
           "-p", "auto",
           "-b", "dtqsys_ht",
+          "--", "-DCMAKE_BUILD_TYPE=Debug"
         ],
         "problemMatcher": [
           "$tsc"
