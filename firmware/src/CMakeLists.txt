@@ -22,6 +22,17 @@ endfunction()
 message(STATUS "Git Revision ${GIT_REV}")
 message(STATUS "Git Tag ${GIT_TAG}")
 
+# Set the output filename in release mode
+string(TOLOWER "${CMAKE_BUILD_TYPE}" build_type)
+if(NOT build_type STREQUAL "debug")
+  string(REPLACE "." "_" output_name "${BOARD}_${GIT_TAG}_${GIT_REV}")
+  string(REPLACE "/" "_" output_name "${output_name}")
+  set(CONFIG_KERNEL_BIN_NAME "\"${output_name}\"" CACHE INTERNAL "")
+  message(STATUS "Output File Name=${output_name}")
+else()
+  message(STATUS "Building in Debug mode")
+endif()
+
 set (CONF_FILE zephyr/nrf_prj.conf)
 message(STATUS "Board=${BOARD}")
 
@@ -30,7 +41,7 @@ if((${BOARD} STREQUAL "arduino_nano_33_ble") OR
    (${BOARD} STREQUAL "arduino_nano_33_ble_sr2") OR
    (${BOARD} STREQUAL "xiao_ble/nrf52840/sense") OR
    (${BOARD} STREQUAL "dtqsys_ht"))
-  message(STATUS "Board is a NRF52 based board")
+  message(STATUS "  Board is a NRF52 based board")
 
   # Pick the correct project file for this architecture
   set (CONF_FILE zephyr/nrf_prj.conf)
@@ -38,7 +49,7 @@ if((${BOARD} STREQUAL "arduino_nano_33_ble") OR
   # The sense revision 2 uses the same board file as the original
   # but a few different defines in the code.
   if(DEFINED BOARD_REV_SR2)
-    message(STATUS "Board is a Revision 2 Nano 33 BLE Sense")
+    message(STATUS "  Board is a Revision 2 Nano 33 BLE Sense")
     set (BOARD "arduino_nano_33_ble")
     # SEE BELOW for defined passed to compiler
   endif()
@@ -50,16 +61,13 @@ if((${BOARD} STREQUAL "arduino_nano_33_ble") OR
 
 #ESP32C3 Boards
 elseif(${BOARD} STREQUAL "esp32c3")
-  message(STATUS "ESP Board Defined")
+  message(STATUS "  Board is a ESP32C3 based board")
   set (CONF_FILE zephyr/esp32c3_prj.conf)
-  message(STATUS "Board is a ESP32C3 based board")
 
 # M5Stick CPLUS1
 elseif(${BOARD} STREQUAL "m5stickc_plus")
-  message(STATUS "M5 Stick C Plus")
+  message(STATUS "  Board is a ESP32 PICO based board")
   set(CONF_FILE zephyr/m5stickc_plus_prj.conf)
-  message(STATUS "Board is a ESP32 PICO based board")
-
 else()
 
   message(FATAL_ERROR "ERROR: Board is not supported")
