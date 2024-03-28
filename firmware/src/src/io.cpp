@@ -72,7 +72,7 @@ void io_Thread()
   uint32_t _counter = 0;
 
   while (1) {
-    rt_sleep_ms(IO_PERIOD);
+    k_msleep(IO_PERIOD);
     k_poll(ioRunEvents, 1, K_FOREVER);
 
     if (pauseForFlash) continue;

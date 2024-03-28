@@ -2,6 +2,8 @@
 #include "nano33ble.h"
 
 #include <zephyr/logging/log.h>
+#include <zephyr/usb/usb_device.h>
+#include <zephyr/drivers/uart.h>
 
 #include "PPMIn.h"
 #include "PPMOut.h"
@@ -24,18 +26,41 @@ TrackerSettings trkset;
 
 K_SEM_DEFINE(saveToFlash_sem, 0, 1);
 
+// Wait for serial connection on the GUI port before starting.
+//#define WAITFOR_DTR
+
 void start(void)
 {
-
-  printk("Booting\n");
-
   // Initalize IO
   io_init();
+
+  // Serial Setup, we have a CDC Device, enable USB
+#if defined(DT_N_INST_0_zephyr_cdc_acm_uart)
+  int ret = usb_enable(NULL);
+  if (ret != 0) {
+    LOG_ERR("Unable to enable USB\n");
+    setLEDFlag(LED_HARDFAULT);
+  }
+#endif
 
   // USB Joystick
   joystick_init();
 
-  // Setup Serial
+// Pause code here until connected via serial
+#ifdef WAITFOR_DTR
+  const struct device *dev = DEVICE_DT_GET(DT_ALIAS(guiuart));
+  uint32_t dtr = 0U;
+  while (true) {
+    uart_line_ctrl_get(dev, UART_LINE_CTRL_DTR, &dtr);
+    if (dtr) {
+      break;
+    } else {
+      k_msleep(50);
+    }
+  }
+#endif
+
+  // Ininitialize GUI logging and GUI Serial
   logger_init();
   if(serial_init())
     setLEDFlag(LED_HARDFAULT);
@@ -44,7 +69,7 @@ void start(void)
   if(sense_Init())
     setLEDFlag(LED_HARDFAULT);
 
-  // Start Externam UART
+  // Start External UART
   uart_init();
 
   // PWM Outputs - Fixed to A0-A3

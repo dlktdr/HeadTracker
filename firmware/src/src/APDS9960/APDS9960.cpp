@@ -71,7 +71,7 @@ bool APDS9960::begin()
   if (!setATIME(256 - (10 / 2.78))) return false;
   // set ADC gain 4x (0x00 => 1x, 0x01 => 4x, 0x02 => 16x, 0x03 => 64x)
   if (!setCONTROL(0x02)) return false;
-  rt_sleep_ms(10);
+  k_msleep(10);
   // enable power
   if (!enablePower()) return false;
 

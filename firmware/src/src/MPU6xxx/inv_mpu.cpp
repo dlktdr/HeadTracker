@@ -41,7 +41,7 @@
 
 #define _i2c_write   i2c_writeBytes
 #define i2c_read    i2c_readBytes
-#define delay_ms    rt_sleep_ms
+#define delay_ms    k_msleep
 
 #include <zephyr/kernel.h>
 #include <zephyr/device.h>
