@@ -25,20 +25,23 @@ message(STATUS "Git Tag ${GIT_TAG}")
 # Set the output filename in release mode
 string(TOLOWER "${CMAKE_BUILD_TYPE}" build_type)
 if(NOT build_type STREQUAL "debug")
+  message(STATUS "Building in Release mode")
   string(REPLACE "." "_" output_name "${BOARD}_${GIT_TAG}_${GIT_REV}")
   string(REPLACE "/" "_" output_name "${output_name}")
   set(CONFIG_KERNEL_BIN_NAME "\"${output_name}\"" CACHE INTERNAL "")
   message(STATUS "Output File Name=${output_name}")
+# Set KConfig Option to disable some optimizations in debug mode
+# do this here so it's easy in VScode with a task to set the build type
 else()
   message(STATUS "Building in Debug mode")
+  set(CONFIG_DEBUG_OPTIMIZATIONS "y" CACHE INTERNAL "")
+  set(NO_BUILD_TYPE_WARNING "y")
 endif()
 
-set (CONF_FILE zephyr/nrf_prj.conf)
 message(STATUS "Board=${BOARD}")
 
 # NRF52 Boards
 if((${BOARD} STREQUAL "arduino_nano_33_ble") OR
-   (${BOARD} STREQUAL "arduino_nano_33_ble_sr2") OR
    (${BOARD} STREQUAL "xiao_ble/nrf52840/sense") OR
    (${BOARD} STREQUAL "dtqsys_ht"))
   message(STATUS "  Board is a NRF52 based board")
@@ -75,6 +78,10 @@ endif()
 
 find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 project(HeadTracker DESCRIPTION "HeadTracker")
+
+# Set optimization level to -O1 for debug builds
+set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O1")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O1")
 
 # -DOPENOCD=/openocd-esp32/bin -DOPENOCD_DEFAULT_PATH=/openocd-esp32/share/openocd/scripts
 if(${BOARD} MATCHES "esp32c3")
