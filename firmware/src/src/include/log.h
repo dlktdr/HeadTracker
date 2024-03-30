@@ -3,7 +3,7 @@
 
 // TODO transition this to local logger -- common to both modules
 
-#include "../defines.h"
+#include "defines.h"
 
 //LOG_MODULE_DECLARE(cdc_acm_composite, LOG_LEVEL_ERR);
 

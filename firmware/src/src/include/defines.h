@@ -48,6 +48,7 @@
 #define BUTTON_LONG_PRESS_TIME 1000  // How long to hold button Enable/Disables Tilt/Roll/Pan (ms)
 
 // Thread Periods
+#if defined(CONFIG_SOC_SERIES_NRF52X)
 #define IO_PERIOD 25           // (ms) IO Period (button reading)
 #define BT_PERIOD 12500        // (us) Bluetooth update rate
 #define SERIAL_PERIOD 30       // (ms) Serial processing
@@ -57,6 +58,36 @@
 #define UART_PERIOD 4000       // (us) Update rate of UART
 #define PWM_FREQUENCY 50       // (ms) PWM Period
 #define PAUSE_BEFORE_FLASH 60  // (ms) Time to pause all threads before Flash writing
+#else
+#define IO_PERIOD 25           // (ms) IO Period (button reading)
+#define BT_PERIOD 12500        // (us) Bluetooth update rate
+#define SERIAL_PERIOD 30       // (ms) Serial processing
+#define DATA_PERIOD 2          // Multiplier of Serial Period (Live Data Transmission Speed)
+#define SENSOR_PERIOD 12000     // (us) Sensor Reads
+#define CALCULATE_PERIOD 12000  // (us) Channel Calculations
+#define UART_PERIOD 4000       // (us) Update rate of UART
+#define PWM_FREQUENCY 50       // (ms) PWM Period
+#define PAUSE_BEFORE_FLASH 60  // (ms) Time to pause all threads before Flash writing
+#endif
+
+// Thread Stack Sizes
+#if defined(CONFIG_SOC_SERIES_NRF52X)
+#define IO_STACK_SIZE 512
+#define SERIAL_STACK_SIZE 4096
+#define BT_STACK_SIZE 1024
+#define SENSOR_STACK_SIZE 1024
+#define CALCULATE_STACK_SIZE 1024
+#define UARTTX_STACK_SIZE 1024
+#define UARTRX_STACK_SIZE 512
+#else
+#define IO_STACK_SIZE 512
+#define SERIAL_STACK_SIZE 4096
+#define BT_STACK_SIZE 1024
+#define SENSOR_STACK_SIZE 2048
+#define CALCULATE_STACK_SIZE 2048
+#define UARTTX_STACK_SIZE 1024
+#define UARTRX_STACK_SIZE 512
+#endif
 
 // Analog Filters 1 Euro Filter
 #define AN_CH_CNT 4

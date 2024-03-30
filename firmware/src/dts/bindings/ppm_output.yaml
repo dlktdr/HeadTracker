@@ -1,0 +1,10 @@
+description: GPIO pin to output the PPM signal
+
+compatible: "ppm-output-gpio"
+
+properties:
+  gpios:
+    type: phandle-array
+    required: true
+    description: |
+      The GPIO to output a PPM signal.

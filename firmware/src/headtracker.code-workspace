@@ -27,10 +27,6 @@
     "terminal.integrated.env.windows": {
       "ZEPHYR_BASE": "${workspaceRoot:src}\\..\\zephyr\\zephyr"
     },
-    "west": "${env:HOME}/.python_default_venv/bin/west",
-		"twister":  {
-			"host_test_arch": "arm",
-    },
     "files.associations": {
       "random": "cpp",
       "system_error": "cpp",
@@ -203,18 +199,5 @@
         "group": "build"
       }
     ]
-  },
-  "c_cpp_properties": {
-    "configurations": [
-      {
-        "name": "ARM Cortex-ZephyrOS",
-        "includePath": [
-            "${workspaceFolder}/../zephyr/zephyr/include/**"
-        ],
-        "defines": [],
-        "intelliSenseMode": "gcc-arm"
-    }
-    ],
-    "version": 4
-  },
+  }
 }

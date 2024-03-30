@@ -11,6 +11,9 @@
 //#define HAS_LSM6DS3
 #define HAS_CENTERBTN
 #define HAS_NOTIFYLED
+#define HAS_MPU6886
+#define HAS_BUZZER
+#define HAS_POWERHOLD
 //#define HAS_PPMIN
 //#define HAS_PPMOUT
 
@@ -23,9 +26,11 @@
 
 #define PIN_X \
   PIN(CENTER_BTN,   ESPPIN(37), "Center Button") \
-  PIN(LED,          ESPPIN(10), "Notification LED") \
+  PIN(LED,          ESPPIN(19), "Notification LED") \
   PIN(TX,           ESPPIN(32), "UART Transmit")  \
   PIN(RX,           ESPPIN(33), "UART Receive") \
+  PIN(PWRHOLD,      ESPPIN( 4), "Hold High=Powered") \
+  PIN(BUZZ,         ESPPIN( 2), "Buzzer") \
   END_IO_PINS \
 
 /*

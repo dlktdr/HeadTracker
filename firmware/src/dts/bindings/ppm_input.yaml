@@ -1,0 +1,10 @@
+description: GPIO pin to input the PPM signal
+
+compatible: "ppm-input-gpio"
+
+properties:
+  gpios:
+    type: phandle-array
+    required: true
+    description: |
+      The GPIO to input a PPM signal.

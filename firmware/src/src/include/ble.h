@@ -5,7 +5,7 @@
 #include "btparahead.h"
 #include "btpararmt.h"
 #include "btjoystick.h"
-#include "../defines.h"
+#include "defines.h"
 
 #define LEN_BLUETOOTH_ADDR 16
 #define MAX_BLUETOOTH_DISTANT_ADDR 6

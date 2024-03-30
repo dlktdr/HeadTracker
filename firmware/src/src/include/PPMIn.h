@@ -7,6 +7,7 @@
 
 #include <stdint.h>
 
+int PpmIn_init();
 void PpmIn_setPin(int pinNum);
 int PpmIn_getChannels(uint16_t *ch);
 void PpmIn_execute();
