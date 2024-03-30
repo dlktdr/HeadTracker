@@ -50,6 +50,9 @@
 #if defined(HAS_MPU6500)
 #include "MPU6xxx/inv_mpu.h"
 #endif
+#if defined(HAS_MPU6886)
+#include "MPU6886/MPU6886.h"
+#endif
 #if defined(HAS_QMC5883)
 #include "QMC5883/qmc5883.h"
 #endif
@@ -119,6 +122,11 @@ const struct device *const bmi2_dev = DEVICE_DT_GET_ONE(bosch_bmi270);
 struct bmm150_dev bmm1_dev;
 #endif
 
+#if defined(HAS_MPU6886)
+MPU6886 mpu6886;
+#endif
+
+
 #define SENSOR_VALUE_TO_FLOAT(x) ((float)x.val1 + (float)x.val2 / 1000000.0f)
 
 // Initial Orientation Data+Vars
@@ -155,15 +163,23 @@ int sense_Init()
 {
   const struct device *i2c_dev = DEVICE_DT_GET(DT_ALIAS(i2csensor));
   if (!i2c_dev) {
-    LOGE("Could not get device binding for I2C");
+    LOG_ERR("Could not get device binding for I2C");
     return false;
   }
+  uint32_t i2c_cfg = 0;
+  if(!i2c_get_config(i2c_dev, &i2c_cfg)){
+    LOG_INF("I2C Config: 0x%x", i2c_cfg);
+  }
 
+
+
+LOG_INF("Waiting for I2C Sensor Bus To Be Ready");
   while(!device_is_ready(DEVICE_DT_GET(DT_ALIAS(i2csensor)))) {
     k_msleep(10);
   }
   k_msleep(20);
-
+  i2c_recover_bus(i2c_dev);
+  LOG_INF("I2C Sensor Bus Ready");
 
 #if defined(HAS_LSM9DS1)
   if (!IMU.begin()) {
@@ -285,6 +301,11 @@ int sense_Init()
   mpu_configure_fifo(INV_XYZ_GYRO | INV_XYZ_ACCEL);
 #endif
 
+#if defined(HAS_MPU6886)
+  LOG_INF("MPU6886 Initializing");
+  mpu6886.Init();
+#endif
+
 #if defined(HAS_APDS9960)
   // Initalize Gesture Sensor
   if (!APDS.begin()) {
@@ -310,9 +331,11 @@ int sense_Init()
 
   // Start reading the IMU sensors + fusion algorithm
   k_poll_signal_raise(&senseThreadRunSignal, 1);
+  LOG_INF("Sense Thread Signal Raised");
 
   // Start doing the other calculations
   k_poll_signal_raise(&calculateThreadRunSignal, 1);
+  LOG_INF("Calculate Thread Signal Raised");
 
   return 0;
 }
@@ -323,6 +346,7 @@ int sense_Init()
 
 void calculate_Thread()
 {
+  LOG_INF("Calculate Thread Loaded");
   while (1) {
     // Do not execute below until after initialization has happened
     k_poll(calculateRunEvents, 1, K_FOREVER);
@@ -361,6 +385,7 @@ void calculate_Thread()
     // Zero button was pressed, adjust all values to zero
     bool butdnw = false;
     if (wasButtonPressed()) {
+      LOG_INF("Reset Center Activated");
       rolloffset = roll;
       panoffset = pan;
       tiltoffset = tilt;
@@ -746,7 +771,7 @@ void calculate_Thread()
     usduration = micros64() - usduration;
     if (CALCULATE_PERIOD - usduration <
         CALCULATE_PERIOD * 0.7) {  // Took a long time. Will crash if sleep is too short
-
+      LOG_INF("Calculate Thread Overrun %lld", usduration);
       k_usleep(CALCULATE_PERIOD);
     } else {
       k_usleep(CALCULATE_PERIOD - usduration);
@@ -757,7 +782,7 @@ void calculate_Thread()
     static int64_t mmic = millis64() + 1000;
     if (mmic < millis64()) {  // Every Second
       mmic = millis64() + 1000;
-      LOGI("Calc Rate = %d", mcount);
+      LOG_INF("Calc Rate = %d", mcount);
       mcount = 0;
     }
     mcount++;
@@ -771,6 +796,7 @@ void calculate_Thread()
 
 void sensor_Thread()
 {
+  LOG_INF("Sensor Thread Loaded");
   while (1) {
     // Do not execute below until after initialization has happened
     k_poll(senseRunEvents, 1, K_FOREVER);
@@ -950,6 +976,13 @@ void sensor_Thread()
     tgyr[2] = _gyro[2] / gscale;
 #endif
 
+#if defined(HAS_MPU6886)
+    if(!mpu6886.getAccelData(&tacc[0], &tacc[1], &tacc[2]))
+      accValid = true;
+    if(!mpu6886.getGyroData(&tgyr[0], &tgyr[1], &tgyr[2]))
+      gyrValid = true;
+#endif
+
     k_mutex_lock(&sensor_mutex, K_FOREVER);
 
     // -- Accelerometer
@@ -967,7 +1000,7 @@ void sensor_Thread()
 
       // Apply Rotation
       float tmpacc[3] = {accx, accy, accz};
-      rotate(tmpacc, rotation);
+      //rotate(tmpacc, rotation);
       accx = tmpacc[0];
       accy = tmpacc[1];
       accz = tmpacc[2];
@@ -1036,7 +1069,7 @@ void sensor_Thread()
     }
 
     // Run Gyro Calibration, only on good gyro data
-    if (gyrValid) gyroCalibrate();
+    //if (gyrValid) gyroCalibrate();
 
     // Only do this update after the first mag and accel data have been read.
     if (madgreads == 0) {
@@ -1072,6 +1105,7 @@ void sensor_Thread()
 
       // Got the averaged values, apply the initial orientation.
     } else if (madgreads == MADGSTART_SAMPLES - 1) {
+      LOG_INF("Initial Orientation Set");
       // Pass it averaged values
       madgwick.begin(aacc[0], aacc[1], aacc[2], amag[0], amag[1], amag[2]);
       madgreads = MADGSTART_SAMPLES;
@@ -1080,8 +1114,21 @@ void sensor_Thread()
     // Do the AHRS calculations
     if (madgreads == MADGSTART_SAMPLES) {
       // Period Between Samples
+      float delttime = madgwick.deltatUpdate();
+      if(delttime > 0.1f) {
+        LOG_ERR("Deltatime too large: %f", (double)delttime);
+      }
+      gyrx = 0.0f;
+      gyry = 0.0f;
+      gyrz = 0.0f;
+      accx = 0.0f;
+      accy = 0.0f;
+      accz = 1.0f;
       madgwick.update(gyrx * DEG_TO_RAD, gyry * DEG_TO_RAD, gyrz * DEG_TO_RAD, accx, accy, accz,
-                      magx, magy, magz, madgwick.deltatUpdate());
+                      magx, magy, magz, delttime);
+//      LOG_INF("Values for AHRS: %f,%f,%f,%f,%f,%f,%f,%f,%f", gyrx, gyry, gyrz, accx, accy, accz,
+  //            magx, magy, magz);
+
       if (firstrun && pan != 0) {
         panoffset = pan;
         firstrun = false;
@@ -1094,7 +1141,7 @@ void sensor_Thread()
     senseUsDuration = micros64() - senseUsDuration;
     if (SENSOR_PERIOD - senseUsDuration <
         SENSOR_PERIOD * 0.7) {  // Took a long time. Will crash if sleep is too short
-
+      LOG_INF("Sensor Thread Overrun");
       k_usleep(SENSOR_PERIOD);
     } else {
       k_usleep(SENSOR_PERIOD - senseUsDuration);
@@ -1105,7 +1152,7 @@ void sensor_Thread()
     static int64_t mmic = millis64() + 1000;
     if (mmic < millis64()) {  // Every Second
       mmic = millis64() + 1000;
-      LOGI("Sense Rate = %d", mcount);
+      LOG_INF("Sense Rate = %d", mcount);
       mcount = 0;
     }
     if (accValid) mcount++;
@@ -1133,15 +1180,15 @@ void gyroCalibrate()
   if (deltatime == 0.0f) return;
   lasttime = time;
 
-  float gyro_magnitude = sqrt(rgyrx * rgyrx + rgyry * rgyry + rgyrz * rgyrz);
-  float acc_magnitude = sqrt(raccx * raccx + raccy * raccy + raccz * raccz);
+  float gyro_magnitude = sqrtf(rgyrx * rgyrx + rgyry * rgyry + rgyrz * rgyrz);
+  float acc_magnitude = sqrtf(raccx * raccx + raccy * raccy + raccz * raccz);
   float gyro_dif = (gyro_magnitude - last_gyro_mag) / deltatime;
   last_gyro_mag = gyro_magnitude;
   float acc_dif = (acc_magnitude - last_acc_mag) / deltatime;
   last_acc_mag = acc_magnitude;
 
   // Is Gyro anc Accelerometer stable?
-  if (fabs(gyro_dif) < GYRO_STABLE_DIFF && fabs(acc_dif) < ACC_STABLE_DIFF) {
+  if (fabsf(gyro_dif) < GYRO_STABLE_DIFF && fabsf(acc_dif) < ACC_STABLE_DIFF) {
     // First run, preload filter
     if (filter_samples == 0) {
       filt_gyrx = rgyrx;
@@ -1155,6 +1202,8 @@ void gyroCalibrate()
       filt_gyrz = ((1.0f - GYRO_SAMPLE_WEIGHT) * filt_gyrz) + (GYRO_SAMPLE_WEIGHT * rgyrz);
       filter_samples++;
     } else if (filter_samples == GYRO_STABLE_SAMPLES) {
+      LOG_INF("Gyro Calibrated, x=%.3f,y=%.3f,z=%.3f", (double)filt_gyrx, (double)filt_gyry,
+              (double)filt_gyrz);
       gyroCalibrated = true;
       clearLEDFlag(LED_GYROCAL);
       // Set the new Gyro Offset Values
@@ -1165,11 +1214,11 @@ void gyroCalibrate()
       k_mutex_unlock(&data_mutex);
 
       // Check if they differ from the flash values and save if out of range
-      if (fabs(gyrxoff - filt_gyrx) > GYRO_FLASH_IF_OFFSET ||
-          fabs(gyryoff - filt_gyry) > GYRO_FLASH_IF_OFFSET ||
-          fabs(gyrzoff - filt_gyrz) > GYRO_FLASH_IF_OFFSET) {
+      if (fabsf(gyrxoff - filt_gyrx) > GYRO_FLASH_IF_OFFSET ||
+          fabsf(gyryoff - filt_gyry) > GYRO_FLASH_IF_OFFSET ||
+          fabsf(gyrzoff - filt_gyrz) > GYRO_FLASH_IF_OFFSET) {
         if (!sent_gyro_cal_msg) {
-          k_sem_give(&saveToFlash_sem);
+          //k_sem_give(&saveToFlash_sem);
           LOGW("Gyro calibration differs from saved value. Updating flash, x=%.3f,y=%.3f,z=%.3f",
                (double)filt_gyrx, (double)filt_gyry, (double)filt_gyrz);
           sent_gyro_cal_msg = true;
@@ -1193,7 +1242,7 @@ float normalize(const float value, const float start, const float end)
   const float width = end - start;          //
   const float offsetValue = value - start;  // value relative to 0
 
-  return (offsetValue - (floor(offsetValue / width) * width)) + start;
+  return (offsetValue - (floorf(offsetValue / width) * width)) + start;
   // + start to reset back to start of original range
 }
 
@@ -1214,24 +1263,24 @@ void rotate(float pn[3], const float rotation[3])
   // X Rotation
   if (rotation[0] != 0) {
     out[0] = pn[0] * 1 + pn[1] * 0 + pn[2] * 0;
-    out[1] = pn[0] * 0 + pn[1] * cos(rot[0]) - pn[2] * sin(rot[0]);
-    out[2] = pn[0] * 0 + pn[1] * sin(rot[0]) + pn[2] * cos(rot[0]);
+    out[1] = pn[0] * 0 + pn[1] * cosf(rot[0]) - pn[2] * sinf(rot[0]);
+    out[2] = pn[0] * 0 + pn[1] * sinf(rot[0]) + pn[2] * cosf(rot[0]);
     memcpy(pn, out, sizeof(out[0]) * 3);
   }
 
   // Y Rotation
   if (rotation[1] != 0) {
-    out[0] = pn[0] * cos(rot[1]) - pn[1] * 0 + pn[2] * sin(rot[1]);
+    out[0] = pn[0] * cosf(rot[1]) - pn[1] * 0 + pn[2] * sinf(rot[1]);
     out[1] = pn[0] * 0 + pn[1] * 1 + pn[2] * 0;
-    out[2] = -pn[0] * sin(rot[1]) + pn[1] * 0 + pn[2] * cos(rot[1]);
+    out[2] = -pn[0] * sinf(rot[1]) + pn[1] * 0 + pn[2] * cosf(rot[1]);
     memcpy(pn, out, sizeof(out[0]) * 3);
   }
 
   // Z Rotation
   if (rotation[2] != 0) {
-    out[0] = pn[0] * cos(rot[2]) - pn[1] * sin(rot[2]) + pn[2] * 0;
-    out[1] = pn[0] * sin(rot[2]) + pn[1] * cos(rot[2]) + pn[2] * 0;
-    out[2] = pn[0] * 0 + pn[1] * 0 + pn[2] * 1;
+    out[0] = pn[0] * cosf(rot[2]) - pn[1] * sinf(rot[2]) + pn[2] * 0.0f;
+    out[1] = pn[0] * sinf(rot[2]) + pn[1] * cosf(rot[2]) + pn[2] * 0.0f;
+    out[2] = pn[0] * 0.0f + pn[1] * 0.0f + pn[2] * 1.0f;
     memcpy(pn, out, sizeof(out[0]) * 3);
   }
 }

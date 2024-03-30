@@ -1415,10 +1415,12 @@ void MainWindow::boardDiscovered(BoardType *brd)
     currentboard = brd;
 
     // GUI changes info depending on board type
+    // TODO *** MUST CHANGE
     if(brd->boardName() == "NANO33BLE" ||
        brd->boardName() == "DTQSYS" ||
        brd->boardName() == "XIAOSENSE" ||
-       brd->boardName() == "ESP32C3") {
+       brd->boardName() == "ESP32C3" ||
+       brd->boardName() == "M5CSTICK_PLUS") {
         addToLog(tr("Connected to a ") + brd->boardName() + "\n");
         ui->cmdStartGraph->setVisible(false);
         ui->cmdStopGraph->setVisible(false);
@@ -1437,7 +1439,8 @@ void MainWindow::boardDiscovered(BoardType *brd)
         ui->cmdChannelViewer->setEnabled(true);
 
         if(brd->boardName() == "DTQSYS" ||
-           brd->boardName() == "XIAOSENSE") { // Pins are all fixed
+           brd->boardName() == "XIAOSENSE" ||
+           brd->boardName() == "M5CSTICK_PLUS") { // Pins are all fixed
             ui->cmbPpmInPin->setVisible(false);
             ui->lblPPMInPin->setVisible(false);
             ui->cmbPpmOutPin->setVisible(false);

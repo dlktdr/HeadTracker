@@ -269,26 +269,26 @@ int PpmIn_getChannels(uint16_t *ch)
   return rval;
 }
 
-#elif defined(CONFIG_SOC_ESP32C3)
+int PpmIn_init() {return 0;}
 
+#elif DT_NODE_EXISTS(DT_NODELABEL(ppm_input))
+#warning "PPMIn using DT_NODELABEL(ppm_input) pin"
+
+int PpmIn_init() {return 0;}
 int PpmIn_getChannels(uint16_t *ch)
 {
   return 0;
 }
-
 void PpmIn_setPin(int pinNum) {}
 void PpmIn_execute() {}
 
 #else
 
 #warning "No PPMInput Support"
-int PpmIn_getChannels(uint16_t *ch)
-{
-  return 0;
-}
 
+int PpmIn_init() {return -1;}
+int PpmIn_getChannels(uint16_t *ch) {return 0;}
 void PpmIn_setPin(int pinNum) {}
 void PpmIn_execute() {}
-
 
 #endif

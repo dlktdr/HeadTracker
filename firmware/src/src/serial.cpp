@@ -34,6 +34,8 @@
 #include "trackersettings.h"
 #include "ucrc16lib.h"
 
+LOG_MODULE_REGISTER(serial);
+
 void serialrx_Process();
 char *getJSONBuffer();
 void parseData(DynamicJsonDocument &json);
@@ -98,7 +100,7 @@ int serial_init()
   // Use the device tree alias to specify the UART device to use
   dev = DEVICE_DT_GET(DT_ALIAS(guiuart));
   if (!device_is_ready(dev)) {
-		printk("GUI UART device is not ready");
+		LOG_ERR("GUI UART device is not ready");
 		return -1;
   }
 
@@ -109,8 +111,10 @@ int serial_init()
   k_mutex_init(&ring_rx_mutex);
 
   /* They are optional, we use them to test the interrupt endpoint */
+#if defined(CONFIG_SOC_NRF52840_QIAA)
   ret = uart_line_ctrl_set(dev, UART_LINE_CTRL_DCD, 1);
   ret = uart_line_ctrl_set(dev, UART_LINE_CTRL_DSR, 1);
+#endif
 
   /* Wait 1 sec for the host to do all settings */
   k_busy_wait(1000000);
@@ -122,6 +126,7 @@ int serial_init()
 
   // Start Serial Thread
   k_poll_signal_raise(&serialThreadRunSignal, 1);
+  LOG_INF("Serial Thread Signal Raised");
 
   return 0;
 }
@@ -130,6 +135,7 @@ void serial_Thread()
 {
   uint8_t buffer[64];
   static uint32_t datacounter = 0;
+  LOG_INF("Serial Thread Loaded");
 
   while (1) {
     k_poll(serialRunEvents, 1, K_FOREVER);
@@ -145,7 +151,7 @@ void serial_Thread()
 
     k_mutex_lock(&ring_tx_mutex, K_FOREVER);
 
-#if !defined(CONFIG_SOC_ESP32C3)
+#if defined(CONFIG_SOC_SERIES_NRF52X)
     // lost connection
     if (dtr && !new_dtr) {
       ring_buf_reset(&ringbuf_tx);
@@ -177,7 +183,7 @@ void serial_Thread()
           // LOG_ERR("USB CDC Ring Buffer Full, Dropped data");
         }
       }
-#if !defined(CONFIG_SOC_ESP32C3)
+#if defined(CONFIG_SOC_SERIES_NRF52X)
     } else {
       ring_buf_reset(&ringbuf_tx);  // Clear buffer
     }
@@ -318,10 +324,6 @@ void parseData(DynamicJsonDocument &json)
     __disable_irq();
 #define DFU_MAGIC_UF2_RESET           0x57
     NRF_POWER->GPREGRET = DFU_MAGIC_UF2_RESET;
-#elif defined(CONFIG_SOC_ESP32C3)
-// TODO - Find a way for the GUI to flash this board, this shouldn't be needed
-#else
-#warning "Bootloader Magic Code Not Defined"
 #endif
     sys_reboot(SYS_REBOOT_COLD);
 

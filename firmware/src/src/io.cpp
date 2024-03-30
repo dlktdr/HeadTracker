@@ -269,6 +269,11 @@ void io_init()
   digitalWrite(IO_ANBATT_ENA, 0);
 #endif
 
+#if defined(HAS_POWERHOLD)
+  pinMode(IO_PWRHOLD, GPIO_OUTPUT);
+  digitalWrite(IO_PWRHOLD, 1);
+#endif
+
 #if defined(HAS_CENTERBTN)
   pinMode(IO_CENTER_BTN, INPUT_PULLUP);
 #endif

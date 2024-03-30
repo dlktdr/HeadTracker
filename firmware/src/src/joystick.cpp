@@ -9,9 +9,12 @@
 #include <zephyr/usb/class/usb_hid.h>
 #include <zephyr/usb/usb_device.h>
 #include <zephyr/kernel.h>
+#include <zephyr/logging/log.h>
 
 #include "io.h"
 #include "joystick.h"
+
+LOG_MODULE_REGISTER(joystick);
 
 static const struct device *hdev;
 static hidreport_s report;
@@ -83,11 +86,13 @@ void set_JoystickChannels(uint16_t chans[16])
 void joystick_init(void)
 {
 #ifndef CONFIG_USB_DEVICE_HID
+  LOG_INF("USB HID not enabled");
   return;
 #endif
 
   hdev = device_get_binding("HID_0");
   if (hdev == NULL) {
+    LOG_ERR("Cannot bind to USB HID device");
     return;
   }
 

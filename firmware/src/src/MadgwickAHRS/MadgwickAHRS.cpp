@@ -26,6 +26,9 @@
 
 #include "MadgwickAHRS.h"
 
+#include <zephyr/logging/log.h>
+LOG_MODULE_REGISTER(madgwick);
+
 #include <math.h>
 #include <string.h>
 
@@ -73,6 +76,7 @@ void Madgwick::begin(float pitch, float roll, float yaw)
 // Finds North, then aligns North with (1, 0, 0) and Gravity with (0, 0, 1)
 void Madgwick::begin(float ax, float ay, float az, float mx, float my, float mz)
 {
+  LOG_INF("begin: ax=%f, ay=%f, az=%f, mx=%f, my=%f, mz=%f",(double)ax, (double)ay, (double)az, (double)mx, (double)my, (double)mz);
   // Reset quaternion, we are searching from scratch
   q0 = 1;
   q1 = 0;
@@ -317,10 +321,10 @@ void Madgwick::align(float ax, float ay, float az, float bx, float by, float bz)
   norm(bx, by, bz);
   norm(vx, vy, vz);
   va = acos(dot(ax, ay, az, bx, by, bz));
-  float a2 = cos(va / 2);
-  float b2 = vx * sin(va / 2);
-  float c2 = vy * sin(va / 2);
-  float d2 = vz * sin(va / 2);
+  float a2 = cos(va / 2.0f);
+  float b2 = vx * sin(va / 2.0f);
+  float c2 = vy * sin(va / 2.0f);
+  float d2 = vz * sin(va / 2.0f);
   combine(a2, b2, c2, d2);
 }
 

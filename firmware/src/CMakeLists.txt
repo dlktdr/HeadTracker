@@ -68,7 +68,7 @@ elseif(${BOARD} STREQUAL "esp32c3")
   set (CONF_FILE zephyr/esp32c3_prj.conf)
 
 # M5Stick CPLUS1
-elseif(${BOARD} STREQUAL "m5stickc_plus")
+elseif(${BOARD} STREQUAL "m5stickc_plus/esp32/procpu")
   message(STATUS "  Board is a ESP32 PICO based board")
   set(CONF_FILE zephyr/m5stickc_plus_prj.conf)
 else()
@@ -79,7 +79,7 @@ endif()
 find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 project(HeadTracker DESCRIPTION "HeadTracker")
 
-# Set optimization level to -O1 for debug builds
+# Set optimization level to -O1 for debug builds -o0 casuses stack issues
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O1")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O1")
 
@@ -99,6 +99,7 @@ target_compile_definitions(app PUBLIC FW_VER_TAG=${GIT_TAG})
 target_include_directories(app PRIVATE src/include)
 target_include_directories(app PRIVATE src)
 target_include_directories(app PRIVATE third-party/ArduinoJson/src)
+target_include_directories(app PRIVATE third-party/BMI270_SensorAPI)
 
 FILE(GLOB_RECURSE app_sources src/*.c*)
 target_sources(app PRIVATE ${app_sources})

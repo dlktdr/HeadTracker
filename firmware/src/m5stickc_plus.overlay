@@ -2,7 +2,7 @@
   chosen {
     /delete-property/ zephyr,shell-uart;
     /delete-property/ zephyr,console;
-    zephyr,display = &st7789v;
+    //zephyr,display = &st7789v;
     zephyr,console = &uart1;
     zephyr,shell-uart = &uart1;
   };
@@ -11,8 +11,15 @@
     adcctrl = &adc0;
     i2csensor = &i2c0;
     spisensor = &spi2;
-    guiuart = &uart1;
+    guiuart = &uart0;
+		centerbtn = &user_button_0;
   };
+
+	// Define the PPM output pin
+	/*ppm_output: ppm_output {
+		compatible = "ppm-output-gpio";
+		gpios = <&gpio0 26 GPIO_ACTIVE_HIGH>;
+	};*/
 };
 
 &pinctrl {
@@ -39,7 +46,16 @@
   status = "okay";
 };
 
-&spi3 {
+&i2c0 {
+	status = "okay";
+	clock-frequency = <I2C_BITRATE_FAST>;
+	sda-gpios = <&gpio0 21 GPIO_OPEN_DRAIN>;
+	scl-gpios = <&gpio0 22 GPIO_OPEN_DRAIN>;
+	pinctrl-0 = <&i2c0_sda_gpio21 &i2c0_scl_gpio22>;
+	pinctrl-names = "default";
+};
+
+/*&spi3 {
 	status = "okay";
   cs-gpios = < &gpio0 5 GPIO_ACTIVE_LOW >;
 
@@ -47,8 +63,8 @@
     compatible = "sitronix,st7789v";
     reg = <0>;
     spi-max-frequency = <20000000>;
-    reset-gpios = <&gpio0 18 GPIO_ACTIVE_LOW>;
-    cmd-data-gpios = < &gpio0 23 GPIO_ACTIVE_LOW >;
+    reset-gpios = <&gpio0 12 GPIO_ACTIVE_LOW>;
+    cmd-data-gpios = < &gpio0 14 GPIO_ACTIVE_LOW >;
     width = < 240 >;
     height = < 135 >;
     x-offset = < 0 >;
@@ -70,7 +86,7 @@
 		rgb-param = [CD 08 14];
   };
 
-};
+};*/
 
 &flash0 {
 	status = "okay";

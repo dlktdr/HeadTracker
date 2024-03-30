@@ -256,16 +256,25 @@ void PpmOut_setChannel(int chan, uint16_t val)
 }
 
 int PpmOut_getChnCount() { return ch_count; }
+int PpmOut_init() {return 0;}
 
-#elif defined(CONFIG_SOC_ESP32C3)
+#elif DT_NODE_EXISTS(DT_NODELABEL(ppm_output))
 
+#warning "PPMOut using DT_NODELABEL(ppm_output) pin"
+int PpmOut_init()
+{
+
+  return 0;
+}
 void PpmOut_setPin(int pinNum) {}
 void PpmOut_setChannel(int chan, uint16_t val) {}
 void PpmOut_execute() {}
 int PpmOut_getChnCount() {return 0;}
 
+
 #else
 
+int PpmOut_init() {return -1;}
 void PpmOut_setPin(int pinNum) {}
 void PpmOut_setChannel(int chan, uint16_t val) {}
 void PpmOut_execute() {}
