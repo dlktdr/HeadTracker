@@ -51,7 +51,8 @@ jobs:
         uses: egor-tensin/setup-mingw@v2
         with:
             platform: x64
-
+            static: 0
+            
       - name: Build
         working-directory: ${{github.workspace}}
         run: |
