@@ -20,6 +20,6 @@ RUN west init ~/zephyr && \
     west update && \
     west -z ~/zephyr zephyr-export && \
     pip3 install -r ~/zephyr/zephyr/scripts/requirements.txt && \
-	west blobs fetch hal_espressif
+    west blobs fetch hal_espressif
 
 RUN echo source /home/gitpod/zephyr/zephyr/zephyr-env.sh >> ~/.bashrc
