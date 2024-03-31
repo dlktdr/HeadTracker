@@ -79,3 +79,4 @@ Release/
 !/gui/bin/bossac*
 /gui/build*
 
+firmware/zephyr*
