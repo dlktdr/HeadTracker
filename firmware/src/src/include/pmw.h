@@ -22,7 +22,7 @@
 #include <nrfx_ppi.h>
 #endif
 
-#include "../defines.h"
+#include "defines.h"
 
 #include <stdint.h>
 

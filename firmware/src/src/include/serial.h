@@ -3,7 +3,7 @@
 #include <string>
 #include "arduinojsonwrp.h"
 
-#include "../defines.h"
+#include "defines.h"
 
 int serial_init();
 void serial_Thread();

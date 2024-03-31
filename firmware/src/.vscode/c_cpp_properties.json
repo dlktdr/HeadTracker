@@ -5,6 +5,7 @@
             "includePath": [
                 "src/**",
                 "src/include/**",
+                "third-party/BMI270_SensorAPI/**",
                 "../zephyr/**"
             ],
             "browse": {
@@ -12,6 +13,7 @@
                 "path": [
                     "src/**",
                     "src/include/**",
+                    "third-party/BMI270_SensorAPI/**",
                     "../zephyr/**"
                 ]
             },

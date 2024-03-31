@@ -102,4 +102,6 @@ target_include_directories(app PRIVATE third-party/ArduinoJson/src)
 target_include_directories(app PRIVATE third-party/BMI270_SensorAPI)
 
 FILE(GLOB_RECURSE app_sources src/*.c*)
+set(app_sources ${app_sources} third-party/BMI270_SensorAPI/bmi2.c)
+set(app_sources ${app_sources} third-party/BMI270_SensorAPI/bmi270.c)
 target_sources(app PRIVATE ${app_sources})

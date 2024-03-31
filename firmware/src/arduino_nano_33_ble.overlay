@@ -64,12 +64,8 @@
 &i2c1 {
 	status = "okay";
 	clock-frequency = <I2C_BITRATE_FAST>;
-
-	bmi270@68 {
-		compatible = "bosch,bmi270";
-		reg = <0x68>;
-		vin-supply = <&vdd_env>;
-	};
+	zephyr,flash-buf-max-size = <128>;
+	zephyr,concat-buf-size = <128>;
 };
 
 /* Disable Timer3, used by PPM output

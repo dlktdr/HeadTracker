@@ -57,8 +57,9 @@
 #include "QMC5883/qmc5883.h"
 #endif
 #if defined(HAS_BMI270)
-// #include "BMI270/bmi270.h"
-// #include "BMI270/bmi2common.h"
+#include "bmi270.h"
+#include "BMI270/bmi270_common.h"
+
 #endif
 #if defined(HAS_BMM150)
 #include "BMM150/bmm150.h"
@@ -100,6 +101,8 @@ int64_t senseUsDuration = 0;
 
 const struct device *i2c_dev = nullptr;
 
+static bool hasMag = false;
+
 #if defined(HAS_APDS9960)
 static bool blesenseboard = false;
 static bool lastproximity = false;
@@ -114,8 +117,7 @@ LSM9DS1Class IMU;
 #endif
 
 #if defined(HAS_BMI270)
-const struct device *const bmi2_dev = DEVICE_DT_GET_ONE(bosch_bmi270);
-//struct bmi2_dev bmi2_dev;
+struct bmi2_dev bmi2_dev;
 #endif
 
 #if defined(HAS_BMM150)
@@ -125,7 +127,6 @@ struct bmm150_dev bmm1_dev;
 #if defined(HAS_MPU6886)
 MPU6886 mpu6886;
 #endif
-
 
 #define SENSOR_VALUE_TO_FLOAT(x) ((float)x.val1 + (float)x.val2 / 1000000.0f)
 
@@ -171,8 +172,6 @@ int sense_Init()
     LOG_INF("I2C Config: 0x%x", i2c_cfg);
   }
 
-
-
 LOG_INF("Waiting for I2C Sensor Bus To Be Ready");
   while(!device_is_ready(DEVICE_DT_GET(DT_ALIAS(i2csensor)))) {
     k_msleep(10);
@@ -189,63 +188,7 @@ LOG_INF("Waiting for I2C Sensor Bus To Be Ready");
 #endif
 
 #if defined(HAS_BMI270)
-  struct sensor_value full_scale, sampling_freq, oversampling;
-
-  static int fcount=0;
-  while(!device_is_ready(bmi2_dev)) {
-    k_msleep(10);
-    fcount++;
-    if(fcount > 100) {
-      LOG_ERR("Device %s is not ready", bmi2_dev->name);
-      return -1;
-    }
-  }
-
-  printk("Device %p name is %s\n", bmi2_dev, bmi2_dev->name);
-
-  /* Setting scale in G, due to loss of precision if the SI unit m/s^2
-	 * is used
-	 */
-	full_scale.val1 = 2;            /* G */
-	full_scale.val2 = 0;
-	sampling_freq.val1 = 200;       /* Hz. Performance mode */
-	sampling_freq.val2 = 0;
-	oversampling.val1 = 1;          /* Normal mode */
-	oversampling.val2 = 0;
-
-	sensor_attr_set(bmi2_dev, SENSOR_CHAN_ACCEL_XYZ, SENSOR_ATTR_FULL_SCALE,
-			&full_scale);
-	sensor_attr_set(bmi2_dev, SENSOR_CHAN_ACCEL_XYZ, SENSOR_ATTR_OVERSAMPLING,
-			&oversampling);
-	/* Set sampling frequency last as this also sets the appropriate
-	 * power mode. If already sampling, change to 0.0Hz before changing
-	 * other attributes
-	 */
-	sensor_attr_set(bmi2_dev, SENSOR_CHAN_ACCEL_XYZ,
-			SENSOR_ATTR_SAMPLING_FREQUENCY,
-			&sampling_freq);
-
-	/* Setting scale in degrees/s to match the sensor scale */
-	full_scale.val1 = 500;          /* dps */
-	full_scale.val2 = 0;
-	sampling_freq.val1 = 200;       /* Hz. Performance mode */
-	sampling_freq.val2 = 0;
-	oversampling.val1 = 1;          /* Normal mode */
-	oversampling.val2 = 0;
-
-	sensor_attr_set(bmi2_dev, SENSOR_CHAN_GYRO_XYZ, SENSOR_ATTR_FULL_SCALE,
-			&full_scale);
-	sensor_attr_set(bmi2_dev, SENSOR_CHAN_GYRO_XYZ, SENSOR_ATTR_OVERSAMPLING,
-			&oversampling);
-	/* Set sampling frequency last as this also sets the appropriate
-	 * power mode. If already sampling, change sampling frequency to
-	 * 0.0Hz before changing other attributes
-	 */
-	sensor_attr_set(bmi2_dev, SENSOR_CHAN_GYRO_XYZ,
-			SENSOR_ATTR_SAMPLING_FREQUENCY,
-			&sampling_freq);
-
-/*  int8_t rslt;
+  int8_t rslt;
   uint8_t sensor_list[2] = {BMI2_ACCEL, BMI2_GYRO};
   rslt = bmi2_interface_init(&bmi2_dev, BMI2_I2C_INTF);
   bmi2_error_codes_print_result(rslt);
@@ -263,7 +206,6 @@ LOG_INF("Waiting for I2C Sensor Bus To Be Ready");
     }
   } else
     return -1;
-*/
 #endif
 
 #if defined(HAS_BMM150)
@@ -280,6 +222,7 @@ LOG_INF("Waiting for I2C Sensor Bus To Be Ready");
       rbslt = set_config(&bmm1_dev);
       bmm150_error_codes_print_result("set_config", rbslt);
     }
+    hasMag = true;
   }
 #endif
 
@@ -287,6 +230,8 @@ LOG_INF("Waiting for I2C Sensor Bus To Be Ready");
   if (initailizeLSM6DS3(&dev_ctx)) {
     printk("Unable to init LSM6DS3\n");
     return -1;
+  } else {
+    hasMag = true;
   }
 #endif
 
@@ -317,6 +262,7 @@ LOG_INF("Waiting for I2C Sensor Bus To Be Ready");
 
 #if defined(HAS_QMC5883)
   qmc5883Init();
+  hasMag = true;
 #endif
 
   for (int i = 0; i < TrackerSettings::BT_CHANNELS; i++) {
@@ -871,58 +817,44 @@ void sensor_Thread()
 #endif
 
 #if defined(HAS_BMI270)
-    sensor_sample_fetch(bmi2_dev);
-    struct sensor_value acc[3], gyr[3];
-		if(sensor_channel_get(bmi2_dev, SENSOR_CHAN_ACCEL_XYZ, acc)) {
-      accValid=true;
-      tacc[0] = acc[0].val1 + (float)acc[0].val2 / 1000000;
-      tacc[1] = acc[1].val1 + (float)acc[1].val2 / 1000000;
-      tacc[2] = acc[2].val1 + (float)acc[2].val2 / 1000000;
+    int8_t rslt;
+    uint16_t int_status = 0;
+    struct bmi2_sens_data sensor_data = {{0}};
+    rslt = bmi2_get_int_status(&int_status, &bmi2_dev);
+    bmi2_error_codes_print_result(rslt);
+    /* To check the data ready interrupt status and print the status for 10 samples. */
+    if ((int_status & BMI2_ACC_DRDY_INT_MASK) && (int_status & BMI2_GYR_DRDY_INT_MASK)) {
+      /* Get accel and gyro data for x, y and z axis. */
+      rslt = bmi2_get_sensor_data(&sensor_data, &bmi2_dev);
+      bmi2_error_codes_print_result(rslt);
+
+      /* Converting lsb to meter per second squared for 16 bit accelerometer at 2G range. */
+      tacc[0] = lsb_to_mps2(sensor_data.acc.y, 2, bmi2_dev.resolution) / GRAVITY_EARTH;
+      tacc[1] = -1.0f * lsb_to_mps2(sensor_data.acc.x, 2, bmi2_dev.resolution) / GRAVITY_EARTH;
+      tacc[2] = lsb_to_mps2(sensor_data.acc.z, 2, bmi2_dev.resolution) / GRAVITY_EARTH;
+      // printk("\nAccX=%4.2f,Y=%4.2f,Z=%4.2f\n", tacc[0], tacc[1], tacc[2]);
+      /* Converting lsb to degree per second for 16 bit gyro at 2000dps range. */
+
+      tgyr[0] = lsb_to_dps(sensor_data.gyr.y, 2000, bmi2_dev.resolution);
+      tgyr[1] = -1.0f * lsb_to_dps(sensor_data.gyr.x, 2000, bmi2_dev.resolution);
+      tgyr[2] = lsb_to_dps(sensor_data.gyr.z, 2000, bmi2_dev.resolution);
+      // printk("GyrX=%4.2f,Y=%4.2f,Z=%4.2f\n", tgyr[0], tgyr[1], tgyr[2]);
+      accValid = true;
+      gyrValid = true;
     }
-		if(sensor_channel_get(bmi2_dev, SENSOR_CHAN_GYRO_XYZ, gyr)) {
-      gyrValid=true;
-      tgyr[0] = gyr[0].val1 + (float)gyr[0].val2 / 1000000;
-      tgyr[1] = gyr[1].val1 + (float)gyr[1].val2 / 1000000;
-      tgyr[2] = gyr[2].val1 + (float)gyr[2].val2 / 1000000;
-    }
-
-    // int8_t rslt;
-    // uint16_t int_status = 0;
-    // struct bmi2_sens_data sensor_data = {{0}};
-    // rslt = bmi2_get_int_status(&int_status, &bmi2_dev);
-    // bmi2_error_codes_print_result(rslt);
-    // /* To check the data ready interrupt status and print the status for 10 samples. */
-    // if ((int_status & BMI2_ACC_DRDY_INT_MASK) && (int_status & BMI2_GYR_DRDY_INT_MASK)) {
-    //   /* Get accel and gyro data for x, y and z axis. */
-    //   rslt = bmi2_get_sensor_data(&sensor_data, &bmi2_dev);
-    //   bmi2_error_codes_print_result(rslt);
-
-    //   /* Converting lsb to meter per second squared for 16 bit accelerometer at 2G range. */
-    //   tacc[0] = lsb_to_mps2(sensor_data.acc.y, 2, bmi2_dev.resolution) / GRAVITY_EARTH;
-    //   tacc[1] = -1.0f * lsb_to_mps2(sensor_data.acc.x, 2, bmi2_dev.resolution) / GRAVITY_EARTH;
-    //   tacc[2] = lsb_to_mps2(sensor_data.acc.z, 2, bmi2_dev.resolution) / GRAVITY_EARTH;
-    //   // printk("\nAccX=%4.2f,Y=%4.2f,Z=%4.2f\n", tacc[0], tacc[1], tacc[2]);
-    //   /* Converting lsb to degree per second for 16 bit gyro at 2000dps range. */
-
-    //   tgyr[0] = lsb_to_dps(sensor_data.gyr.y, 2000, bmi2_dev.resolution);
-    //   tgyr[1] = -1.0f * lsb_to_dps(sensor_data.gyr.x, 2000, bmi2_dev.resolution);
-    //   tgyr[2] = lsb_to_dps(sensor_data.gyr.z, 2000, bmi2_dev.resolution);
-    //   // printk("GyrX=%4.2f,Y=%4.2f,Z=%4.2f\n", tgyr[0], tgyr[1], tgyr[2]);
-    //   accValid = true;
-    //   gyrValid = true;
-    // }*/
-
 #endif
 
 #if defined(HAS_BMM150)
-    int8_t rbslt;
-    struct bmm150_mag_data mag_data;
-    rbslt = bmm150_read_mag_data(&mag_data, &bmm1_dev);
-    bmm150_error_codes_print_result("bmm150_read_mag_data", rbslt);
-    tmag[0] = mag_data.y;
-    tmag[1] = mag_data.x;
-    tmag[2] = mag_data.z;
-    magValid = true;
+    if(hasMag) {
+      int8_t rbslt;
+      struct bmm150_mag_data mag_data;
+      rbslt = bmm150_read_mag_data(&mag_data, &bmm1_dev);
+      bmm150_error_codes_print_result("bmm150_read_mag_data", rbslt);
+      tmag[0] = mag_data.y;
+      tmag[1] = mag_data.x;
+      tmag[2] = mag_data.z;
+      magValid = true;
+    }
 #endif
 
 #if defined(HAS_LSM6DS3)
@@ -951,8 +883,10 @@ void sensor_Thread()
 #endif
 
 #if defined(HAS_QMC5883)
-    if (qmc5883Read(tmag)) {
-      magValid = true;
+    if(hasMag) {
+      if (qmc5883Read(tmag)) {
+        magValid = true;
+      }
     }
 #endif
 
@@ -1069,7 +1003,7 @@ void sensor_Thread()
     }
 
     // Run Gyro Calibration, only on good gyro data
-    //if (gyrValid) gyroCalibrate();
+    if (gyrValid) gyroCalibrate();
 
     // Only do this update after the first mag and accel data have been read.
     if (madgreads == 0) {
@@ -1118,12 +1052,7 @@ void sensor_Thread()
       if(delttime > 0.1f) {
         LOG_ERR("Deltatime too large: %f", (double)delttime);
       }
-      gyrx = 0.0f;
-      gyry = 0.0f;
-      gyrz = 0.0f;
-      accx = 0.0f;
-      accy = 0.0f;
-      accz = 1.0f;
+
       madgwick.update(gyrx * DEG_TO_RAD, gyry * DEG_TO_RAD, gyrz * DEG_TO_RAD, accx, accy, accz,
                       magx, magy, magz, delttime);
 //      LOG_INF("Values for AHRS: %f,%f,%f,%f,%f,%f,%f,%f,%f", gyrx, gyry, gyrz, accx, accy, accz,

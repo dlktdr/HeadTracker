@@ -102,8 +102,8 @@ void start(void)
 #endif
 
   // Load settings from flash - trackersettings.cpp
-  trkset.loadFromEEPROM();
   LOG_INF("Loading Settings");
+  //trkset.loadFromEEPROM();
 
   // Check if center button is held down, force BT Configuration mode
   LOG_INF("Checking Center Button");
@@ -119,8 +119,8 @@ void start(void)
   // Monitor if saving to EEPROM is required
   while (1) {
     if (!k_sem_take(&saveToFlash_sem, K_FOREVER)) {
-      trkset.saveToEEPROM();
       LOG_INF("Saving Settings");
+      //trkset.saveToEEPROM();
     }
   }
 }

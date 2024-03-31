@@ -77,7 +77,8 @@ int8_t bmm150_user_i2c_reg_read(uint8_t reg_addr, uint8_t *reg_data, uint32_t le
   }
 
   uint8_t dev_addr = *(uint8_t *)intf_ptr;
-  return i2c_burst_read(i2c_dev, dev_addr, reg_addr, reg_data, length);
+  i2c_burst_read(i2c_dev, dev_addr, reg_addr, reg_data, length);
+  return 0;
 }
 
 /*!
