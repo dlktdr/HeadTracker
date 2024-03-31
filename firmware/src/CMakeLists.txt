@@ -63,7 +63,7 @@ if((${BOARD} STREQUAL "arduino_nano_33_ble") OR
   endif()
 
 #ESP32C3 Boards
-elseif(${BOARD} STREQUAL "esp32c3")
+elseif(${BOARD} STREQUAL "esp32c3_devkitm")
   message(STATUS "  Board is a ESP32C3 based board")
   set (CONF_FILE zephyr/esp32c3_prj.conf)
 
