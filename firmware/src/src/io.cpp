@@ -9,6 +9,10 @@
 #include <zephyr/drivers/spi.h>
 #endif
 
+#if defined(CONFIG_SOC_SERIES_NRF52X)
+#include <nrfx_gpiote.h>
+#endif
+
 #include "soc_flash.h"
 #include "trackersettings.h"
 #include "log.h"
@@ -24,6 +28,8 @@ const device *gpios[2];
 
 volatile int butpin;
 volatile uint32_t _ledmode = 0;
+
+
 
 // LED Blink Patterns
 typedef struct {
@@ -251,13 +257,29 @@ void io_init()
 #if defined(CONFIG_BOARD_ARDUINO_NANO_33_BLE)
   pinMode(IO_VDDENA, GPIO_OUTPUT);
   pinMode(IO_I2C_PU, GPIO_OUTPUT);
+  // Set pin to High Drive - TODO find how to do in in new zephyr versions
+  if(PIN_TO_NRFPORT(PIN_NAME_TO_NUM(IO_I2C_PU)) == 0) {
+    NRF_P0->PIN_CNF[PIN_TO_NRFPIN(PIN_NAME_TO_NUM(IO_I2C_PU))] = (NRF_P0->PIN_CNF[PIN_TO_NRFPIN(PIN_NAME_TO_NUM(IO_I2C_PU))] & ~GPIO_PIN_CNF_DRIVE_Msk) |
+          GPIO_PIN_CNF_DRIVE_H0H1 << GPIO_PIN_CNF_DRIVE_Pos;
+  } else {
+    NRF_P1->PIN_CNF[PIN_TO_NRFPIN(PIN_NAME_TO_NUM(IO_I2C_PU))] = (NRF_P1->PIN_CNF[PIN_TO_NRFPIN(PIN_NAME_TO_NUM(IO_I2C_PU))] & ~GPIO_PIN_CNF_DRIVE_Msk) |
+          GPIO_PIN_CNF_DRIVE_H0H1 << GPIO_PIN_CNF_DRIVE_Pos;
+  }
+  // Set pin to High Drive - TODO find how to do in new zephyr versions
+  if(PIN_TO_NRFPORT(PIN_NAME_TO_NUM(IO_VDDENA)) == 0) {
+    NRF_P0->PIN_CNF[PIN_TO_NRFPIN(PIN_NAME_TO_NUM(IO_VDDENA))] = (NRF_P0->PIN_CNF[PIN_TO_NRFPIN(PIN_NAME_TO_NUM(IO_VDDENA))] & ~GPIO_PIN_CNF_DRIVE_Msk) |
+          GPIO_PIN_CNF_DRIVE_H0H1 << GPIO_PIN_CNF_DRIVE_Pos;
+  } else {
+    NRF_P1->PIN_CNF[PIN_TO_NRFPIN(PIN_NAME_TO_NUM(IO_VDDENA))] = (NRF_P1->PIN_CNF[PIN_TO_NRFPIN(PIN_NAME_TO_NUM(IO_VDDENA))] & ~GPIO_PIN_CNF_DRIVE_Msk) |
+          GPIO_PIN_CNF_DRIVE_H0H1 << GPIO_PIN_CNF_DRIVE_Pos;
+  }
   digitalWrite(IO_VDDENA, 1);
   digitalWrite(IO_I2C_PU, 1);
 #endif
 
-#if defined(PCB_XIAOSENSE)
+#if defined(CONFIG_BOARD_XIAO_BLE)
   // 10K I2C Pull up Resistors on internal LSM6DS3, High Drive Strength
-  pinMode(IO_LSM6DS3PWR, GPIO_OUTPUT | GPIO_DS_ALT_LOW | GPIO_DS_ALT_HIGH);
+  pinMode(IO_LSM6DS3PWR, GPIO_OUTPUT);
   // Shut Sensor off
   digitalWrite(IO_LSM6DS3PWR, 0);
   k_msleep(100);

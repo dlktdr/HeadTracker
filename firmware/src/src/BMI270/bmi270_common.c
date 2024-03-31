@@ -66,7 +66,8 @@ BMI2_INTF_RETURN_TYPE bmi2_i2c_write(uint8_t reg_addr, const uint8_t *reg_data, 
   }
 
   uint8_t dev_addr = *(uint8_t *)intf_ptr;
-  return i2c_burst_write(i2c_dev, dev_addr, reg_addr, reg_data, len);
+  i2c_burst_write(i2c_dev, dev_addr, reg_addr, reg_data, len);
+  return 0;
 }
 
 /*!
