@@ -96,8 +96,6 @@ static void interrupt_handler(const struct device *dev, void *user_data)
 
 int serial_init()
 {
-  int ret;
-
   // Use the device tree alias to specify the UART device to use
   dev = DEVICE_DT_GET(DT_ALIAS(guiuart));
   if (!device_is_ready(dev)) {
@@ -112,8 +110,8 @@ int serial_init()
   k_mutex_init(&ring_rx_mutex);
 
   /* They are optional, we use them to test the interrupt endpoint */
-#if defined(CONFIG_SOC_SERIES_NRF52X)
-  ret = uart_line_ctrl_set(dev, UART_LINE_CTRL_DCD, 1);
+#if defined(DT_N_INST_0_zephyr_cdc_acm_uart)
+  int ret = uart_line_ctrl_set(dev, UART_LINE_CTRL_DCD, 1);
   ret = uart_line_ctrl_set(dev, UART_LINE_CTRL_DSR, 1);
 #endif
 
@@ -152,7 +150,7 @@ void serial_Thread()
 
     k_mutex_lock(&ring_tx_mutex, K_FOREVER);
 
-#if defined(CONFIG_SOC_SERIES_NRF52X)
+#if defined(DT_N_INST_0_zephyr_cdc_acm_uart)
     // lost connection
     if (dtr && !new_dtr) {
       ring_buf_reset(&ringbuf_tx);
@@ -184,7 +182,7 @@ void serial_Thread()
           // LOG_ERR("USB CDC Ring Buffer Full, Dropped data");
         }
       }
-#if defined(CONFIG_SOC_SERIES_NRF52X)
+#if defined(DT_N_INST_0_zephyr_cdc_acm_uart)
     } else {
       ring_buf_reset(&ringbuf_tx);  // Clear buffer
     }
