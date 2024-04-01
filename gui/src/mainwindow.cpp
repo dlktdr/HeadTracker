@@ -1420,6 +1420,7 @@ void MainWindow::boardDiscovered(BoardType *brd)
        brd->boardName() == "DTQSYS" ||
        brd->boardName() == "XIAOSENSE" ||
        brd->boardName() == "ESP32C3" ||
+        brd->boardName() == "RPI_PICO" ||
        brd->boardName() == "M5CSTICK_PLUS") {
         addToLog(tr("Connected to a ") + brd->boardName() + "\n");
         ui->cmdStartGraph->setVisible(false);
@@ -1440,6 +1441,7 @@ void MainWindow::boardDiscovered(BoardType *brd)
 
         if(brd->boardName() == "DTQSYS" ||
            brd->boardName() == "XIAOSENSE" ||
+           brd->boardName() == "RPI_PICO" ||
            brd->boardName() == "M5CSTICK_PLUS") { // Pins are all fixed
             ui->cmbPpmInPin->setVisible(false);
             ui->lblPPMInPin->setVisible(false);

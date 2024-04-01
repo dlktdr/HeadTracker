@@ -34,6 +34,9 @@
 #elif defined(CONFIG_BOARD_M5STICKC_PLUS)
 #define FW_BOARD "M5CSTICK_PLUS"
 #include "boards/m5stickc_plus.h"
+#elif defined(CONFIG_BOARD_RPI_PICO)
+#define FW_BOARD "RPI_PICO"
+#include "boards/rpi_pico.h"
 #else
 #error NO COMPATIBLE BOARD DEFINED
 #endif

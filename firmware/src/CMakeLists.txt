@@ -68,13 +68,41 @@ elseif(${BOARD} STREQUAL "esp32c3_devkitm")
   set (CONF_FILE zephyr/esp32c3_prj.conf)
 
 # M5Stick CPLUS1
-elseif(${BOARD} STREQUAL "m5stickc_plus/esp32/procpu")
+elseif((${BOARD} STREQUAL "m5stickc_plus/esp32/procpu") OR
+      (${BOARD} STREQUAL "m5stickc_plus"))
   message(STATUS "  Board is a ESP32 PICO based board")
   set(CONF_FILE zephyr/m5stickc_plus_prj.conf)
-else()
 
+# Raspberry Pi Pico
+elseif((${BOARD} STREQUAL "rpi_pico/rp2040/w") OR
+      (${BOARD} STREQUAL "rpi_pico"))
+  message(STATUS "  Board is a Raspberry Pi 2040 Pico")
+  set(CONF_FILE zephyr/rpi_pico.conf)
+
+else()
   message(FATAL_ERROR "ERROR: Board is not supported")
 endif()
+
+# Set the output filename in release mode
+string(TOLOWER "${CMAKE_BUILD_TYPE}" build_type)
+if(NOT build_type STREQUAL "debug")
+  message(STATUS "Building in Release mode")
+  string(REPLACE "." "_" output_name "${BOARD}_${GIT_TAG}_${GIT_REV}")
+  string(REPLACE "/" "_" output_name "${output_name}")
+  if(DEFINED BOARD_REV_SR2)
+    set(output_name "${output_name}_SR2")
+  endif()
+  set(CONFIG_KERNEL_BIN_NAME "\"${output_name}\"" CACHE INTERNAL "")
+  message(STATUS "Output File Name=${output_name}")
+# Set KConfig Option to disable some optimizations in debug mode
+# do this here so it's easy in VScode with a task to set the build type
+else()
+  message(STATUS "Building in Debug mode")
+  set(CONFIG_DEBUG_OPTIMIZATIONS "y" CACHE INTERNAL "")
+  set(NO_BUILD_TYPE_WARNING "y")
+endif()
+
+
 
 find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 project(HeadTracker DESCRIPTION "HeadTracker")
