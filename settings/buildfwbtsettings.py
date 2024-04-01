@@ -88,7 +88,7 @@ ssize_t btrd_{lowername}(struct bt_conn *conn, const struct bt_gatt_attr *attr, 
 
 f.close()
 
-f = open("../firmware/src/src/blechars.h","w")
+f = open("../firmware/src/src/include/blechars.h","w")
 f.write("""\
 /*
 * This file is part of the Head Tracker distribution (https://github.com/dlktdr/headtracker)
