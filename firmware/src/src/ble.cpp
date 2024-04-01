@@ -28,6 +28,8 @@
 #include "soc_flash.h"
 #include "trackersettings.h"
 
+#if defined(CONFIG_BT)
+
 // Globals
 volatile bool bleconnected = false;
 volatile bool btscanonly = false;
@@ -269,3 +271,16 @@ void lephyupdated(struct bt_conn *conn, struct bt_conn_le_phy_info *param)
 {
   LOGI("Bluetooth PHY Updated. RxPHY:%s TxPHY:%s", param->rx_phy, param->tx_phy);
 }
+
+#else
+
+void bt_init() {}
+void BTSetMode(btmodet mode) {}
+btmodet BTGetMode() { return BTDISABLE; }
+uint16_t BTGetChannel(int chno) { return 0; }
+void BTSetChannel(int channel, const uint16_t value) {}
+bool BTGetConnected() { return false; }
+const char *BTGetAddress() { return "NO_BLUETOOTH"; }
+int8_t BTGetRSSI() { return -1; }
+
+#endif

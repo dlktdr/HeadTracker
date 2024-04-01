@@ -31,6 +31,7 @@
 #include "htmain.h"
 #include "trackersettings.h"
 
+#if defined(CONFIG_BT)
 
 static hidreport_s report;
 static uint16_t bthidchans[16];
@@ -265,5 +266,6 @@ void BTJoystickExecute()
 
 void BTJoystickSetChannel(int channel, const uint16_t value) { bthidchans[channel] = value; }
 
-
 const char *BTJoystickGetAddress() { return _address; }
+
+#endif

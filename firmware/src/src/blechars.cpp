@@ -30,6 +30,8 @@
 #include "trackersettings.h"
 #include "log.h"
 
+#if defined(CONFIG_BT)
+
 uint16_t bt_rll_min;
 uint16_t bt_rll_max;
 uint16_t bt_rll_cnt;
@@ -752,3 +754,4 @@ ssize_t btrd_dismag(struct bt_conn *conn, const struct bt_gatt_attr *attr, void 
   return bt_gatt_attr_read(conn, attr, buf, len, offset, value, sizeof(bool));
 }
 
+#endif

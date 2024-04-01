@@ -31,6 +31,8 @@
 #include "blechars.h"
 #include "trackersettings.h"
 
+#if defined(CONFIG_BT)
+
 void sendTrainer();
 int setTrainer(uint8_t *addr);
 void pushByte(uint8_t byte);
@@ -445,3 +447,5 @@ int setTrainer(uint8_t *addr)
 
   return bufferIndex;
 }
+
+#endif

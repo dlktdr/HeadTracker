@@ -31,6 +31,7 @@
 #include "opentxbt.h"
 #include "trackersettings.h"
 
+#if defined(CONFIG_BT)
 
 static uint16_t chan_vals[TrackerSettings::BT_CHANNELS];
 uint16_t chanoverrides = 0xFFFF;  // Default to all enabled
@@ -570,3 +571,9 @@ void BTRmtExecute()
     clearLEDFlag(LED_BTCONNECTED);
   }
 }
+
+#else
+
+void BTRmtSendButtonPress(bool longpress){}
+
+#endif
