@@ -30,7 +30,7 @@
 #include <stdlib.h>
 #include "io.h"
 #include "log.h"
-#include "nano33ble.h"
+#include "htmain.h"
 #include "soc_flash.h"
 #include "trackersettings.h"
 #include "ucrc16lib.h"

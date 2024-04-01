@@ -1,5 +1,5 @@
 
-#include "nano33ble.h"
+#include "htmain.h"
 
 #include <zephyr/logging/log.h>
 #include <zephyr/usb/usb_device.h>
@@ -108,13 +108,18 @@ void start(void)
   // Check if center button is held down, force BT Configuration mode
   LOG_INF("Checking Center Button");
   if (readCenterButton()) {
+    LOG_INF("Center Button Held Down, Foring BT Configurator Mode");
     trkset.setBtMode(BTPARAHEAD);
     setLEDFlag(LED_BTCONFIGURATOR);
   }
 
   // Start the BT Thread
+  #if defined(CONFIG_SOC_SERIES_NRF52X) // TODO** ESP work needed here, crash easy
+  #if defined(CONFIG_BT)
   LOG_INF("Starting Bluetooth");
   bt_init();
+  #endif
+  #endif
 
   // Monitor if saving to EEPROM is required
   while (1) {
@@ -128,8 +133,12 @@ void start(void)
 // Threads
 K_THREAD_DEFINE(io_Thread_id, IO_STACK_SIZE, io_Thread, NULL, NULL, NULL, IO_THREAD_PRIO, K_FP_REGS, 0);
 K_THREAD_DEFINE(serial_Thread_id, SERIAL_STACK_SIZE, serial_Thread, NULL, NULL, NULL, SERIAL_THREAD_PRIO, K_FP_REGS, 1000);
+#if defined(CONFIG_SOC_SERIES_NRF52X) // TODO** ESP work needed here, crash easy
+#if defined(CONFIG_BT)
 K_THREAD_DEFINE(bt_Thread_id, BT_STACK_SIZE, bt_Thread, NULL, NULL, NULL, BT_THREAD_PRIO, 0, 0);
-K_THREAD_DEFINE(sensor_Thread_id, SENSOR_STACK_SIZE, sensor_Thread, NULL, NULL, NULL, SENSOR_THREAD_PRIO, K_FP_REGS, 2000);
+#endif
+#endif
+K_THREAD_DEFINE(sensor_Thread_id, SENSOR_STACK_SIZE, sensor_Thread, NULL, NULL, NULL, SENSOR_THREAD_PRIO, K_FP_REGS, 1500);
 K_THREAD_DEFINE(calculate_Thread_id, CALCULATE_STACK_SIZE, calculate_Thread, NULL, NULL, NULL, CALCULATE_THREAD_PRIO, K_FP_REGS, 2000);
-//K_THREAD_DEFINE(uartTx_Thread_ID, UARTTX_STACK_SIZE, uartTx_Thread, NULL, NULL, NULL, UARTTX_THREAD_PRIO, 0, 1000);
-//K_THREAD_DEFINE(uartRx_Thread_ID, UARTRX_STACK_SIZE, uartRx_Thread, NULL, NULL, NULL, UARTRX_THREAD_PRIO, 0, 1000);
+K_THREAD_DEFINE(uartTx_Thread_ID, UARTTX_STACK_SIZE, uartTx_Thread, NULL, NULL, NULL, UARTTX_THREAD_PRIO, 0, 1000);
+K_THREAD_DEFINE(uartRx_Thread_ID, UARTRX_STACK_SIZE, uartRx_Thread, NULL, NULL, NULL, UARTRX_THREAD_PRIO, 0, 1000);
