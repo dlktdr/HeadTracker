@@ -5,8 +5,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 /dts-v1/;
-#include <dt-bindings/led/led.h>
+
 #include <nordic/nrf52840_qiaa.dtsi>
+#include <dt-bindings/led/led.h>
 
 / {
 	model = "DTQSYS Head Tracker";
@@ -16,11 +17,13 @@
 		zephyr,sram = &sram0;
 		zephyr,flash = &flash0;
 		zephyr,code-partition = &code_partition;
+		zephyr,ieee802154 = &ieee802154;
 	};
 
 	aliases {
 		adcctrl = &adc;
     i2csensor = &i2c1;
+		guiuart = &cdc_acm_uart0;
 	};
 };
 
@@ -36,8 +39,8 @@
 			read-only;
 		};
 
-		datapt_partition: partition@FC000 {
-			label = "datapt";
+		storage_partition: partition@FC000 {
+			label = "storagept";
 			reg = <0xFC000 0x4000>;
 		};
 	};
@@ -122,11 +125,20 @@
 	};
 };
 
-/* USB CDC Device */
 zephyr_udc0: &usbd {
-  compatible = "nordic,nrf-usbd";
+	compatible = "nordic,nrf-usbd";
 	status = "okay";
-	cdc_acm_uart0 {
+  cdc_acm_uart0: cdc_acm_uart0 {
 		compatible = "zephyr,cdc-acm-uart";
 	};
+
+  // Uncomment the below lines for kernel logging to a second USB CDC port
+	/*
+	cdc_acm_uart1: cdc_acm_uart1 {
+		compatible = "zephyr,cdc-acm-uart";
+	}; */
+};
+
+&ieee802154 {
+	status = "okay";
 };

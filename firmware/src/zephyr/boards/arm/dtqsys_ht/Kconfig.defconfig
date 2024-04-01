@@ -2,14 +2,9 @@
 # SPDX-License-Identifier: Apache-2.0
 
 if BOARD_DTQSYS_HT
-config BOARD
-	default "dtqsys_ht"
 
 config BT_CTLR
 	default BT
-
-config BOARD_DTQSYS_INIT
-	default y
 
 config I2C
   default y
