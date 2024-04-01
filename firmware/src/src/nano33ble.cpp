@@ -103,7 +103,7 @@ void start(void)
 
   // Load settings from flash - trackersettings.cpp
   LOG_INF("Loading Settings");
-  //trkset.loadFromEEPROM();
+  trkset.loadFromEEPROM();
 
   // Check if center button is held down, force BT Configuration mode
   LOG_INF("Checking Center Button");
@@ -120,7 +120,7 @@ void start(void)
   while (1) {
     if (!k_sem_take(&saveToFlash_sem, K_FOREVER)) {
       LOG_INF("Saving Settings");
-      //trkset.saveToEEPROM();
+      trkset.saveToEEPROM();
     }
   }
 }
@@ -128,7 +128,7 @@ void start(void)
 // Threads
 K_THREAD_DEFINE(io_Thread_id, IO_STACK_SIZE, io_Thread, NULL, NULL, NULL, IO_THREAD_PRIO, K_FP_REGS, 0);
 K_THREAD_DEFINE(serial_Thread_id, SERIAL_STACK_SIZE, serial_Thread, NULL, NULL, NULL, SERIAL_THREAD_PRIO, K_FP_REGS, 1000);
-//K_THREAD_DEFINE(bt_Thread_id, BT_STACK_SIZE, bt_Thread, NULL, NULL, NULL, BT_THREAD_PRIO, 0, 0);
+K_THREAD_DEFINE(bt_Thread_id, BT_STACK_SIZE, bt_Thread, NULL, NULL, NULL, BT_THREAD_PRIO, 0, 0);
 K_THREAD_DEFINE(sensor_Thread_id, SENSOR_STACK_SIZE, sensor_Thread, NULL, NULL, NULL, SENSOR_THREAD_PRIO, K_FP_REGS, 2000);
 K_THREAD_DEFINE(calculate_Thread_id, CALCULATE_STACK_SIZE, calculate_Thread, NULL, NULL, NULL, CALCULATE_THREAD_PRIO, K_FP_REGS, 2000);
 //K_THREAD_DEFINE(uartTx_Thread_ID, UARTTX_STACK_SIZE, uartTx_Thread, NULL, NULL, NULL, UARTTX_THREAD_PRIO, 0, 1000);

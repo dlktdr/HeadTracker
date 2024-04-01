@@ -1,10 +1,11 @@
 #pragma once
 
-#define STORAGE_PAGES 4
+#include <stdint.h>
 
 extern volatile bool pauseForFlash;
 
-int socWriteFlash(const char *data, int len);
+int socReadFlash(char *dataout, int len);
+int socWriteFlash(const uint8_t *data, int len);
 void socClearFlash();
+const uint8_t *socGetMMFlashPtr();
 
-const char *get_flashSpace();

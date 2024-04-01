@@ -22,6 +22,7 @@
 #include <zephyr/usb/usb_device.h>
 #include <zephyr/drivers/uart.h>
 #include <zephyr/sys/ring_buffer.h>
+#include <zephyr/logging/log.h>
 #include <zephyr/usb/class/usb_cdc.h>
 #include <zephyr/sys/reboot.h>
 #include <math.h>
@@ -111,7 +112,7 @@ int serial_init()
   k_mutex_init(&ring_rx_mutex);
 
   /* They are optional, we use them to test the interrupt endpoint */
-#if defined(CONFIG_SOC_NRF52840_QIAA)
+#if defined(CONFIG_SOC_SERIES_NRF52X)
   ret = uart_line_ctrl_set(dev, UART_LINE_CTRL_DCD, 1);
   ret = uart_line_ctrl_set(dev, UART_LINE_CTRL_DSR, 1);
 #endif

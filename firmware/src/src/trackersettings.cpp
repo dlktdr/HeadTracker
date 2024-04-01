@@ -17,6 +17,7 @@
 
 #include "trackersettings.h"
 
+#include <zephyr/logging/log.h>
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
@@ -27,6 +28,8 @@
 #include "log.h"
 #include "sense.h"
 #include "soc_flash.h"
+
+LOG_MODULE_REGISTER(trackersettings);
 
 void TrackerSettings::setRollReversed(bool value)
 {
@@ -96,7 +99,7 @@ void TrackerSettings::pinsChanged()
 // Saves current data to flash
 void TrackerSettings::saveToEEPROM()
 {
-  char buffer[TX_RNGBUF_SIZE];
+  uint8_t buffer[TX_RNGBUF_SIZE];
 
   k_mutex_lock(&data_mutex, K_FOREVER);
   setJSONSettings(json);
@@ -118,15 +121,21 @@ void TrackerSettings::loadFromEEPROM()
   DeserializationError de;
 
   k_mutex_lock(&data_mutex, K_FOREVER);
-  de = deserializeJson(json, get_flashSpace());
+  const uint8_t *memptr = socGetMMFlashPtr();
+  if(memptr == NULL) {
+    LOG_ERR("Unable to get flash memory pointer");
+    k_mutex_unlock(&data_mutex);
+    return;
+  }
+  de = deserializeJson(json, memptr);
 
   if (de != DeserializationError::Ok) LOGE("Invalid JSON Data");
 
   if (json["UUID"] == 837727) {
-    LOGI("Device has been freshly programmed, no data found");
+    LOG_INF("Device has been freshly programmed, no data found");
 
   } else {
-    LOGI("Loading settings from flash");
+    LOG_INF("Loading settings from flash");
     loadJSONSettings(json);
   }
   k_mutex_unlock(&data_mutex);
