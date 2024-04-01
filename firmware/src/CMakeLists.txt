@@ -22,21 +22,11 @@ endfunction()
 message(STATUS "Git Revision ${GIT_REV}")
 message(STATUS "Git Tag ${GIT_TAG}")
 
-# Set the output filename in release mode
-string(TOLOWER "${CMAKE_BUILD_TYPE}" build_type)
-if(NOT build_type STREQUAL "debug")
-  message(STATUS "Building in Release mode")
-  string(REPLACE "." "_" output_name "${BOARD}_${GIT_TAG}_${GIT_REV}")
-  string(REPLACE "/" "_" output_name "${output_name}")
-  set(CONFIG_KERNEL_BIN_NAME "\"${output_name}\"" CACHE INTERNAL "")
-  message(STATUS "Output File Name=${output_name}")
-# Set KConfig Option to disable some optimizations in debug mode
-# do this here so it's easy in VScode with a task to set the build type
-else()
-  message(STATUS "Building in Debug mode")
-  set(CONFIG_DEBUG_OPTIMIZATIONS "y" CACHE INTERNAL "")
-  set(NO_BUILD_TYPE_WARNING "y")
-endif()
+# Rebuild all the the settings for the project
+message(STATUS "Building the settings files (buildsettings.py) from ../settings.csv")
+execute_process(
+  COMMAND ../settings/python buildsettings.py
+)
 
 message(STATUS "Board=${BOARD}")
 
