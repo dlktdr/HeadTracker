@@ -177,8 +177,11 @@ LOG_INF("Waiting for I2C Sensor Bus To Be Ready");
     k_msleep(10);
   }
   k_msleep(20);
+
   i2c_recover_bus(i2c_dev);
   LOG_INF("I2C Sensor Bus Ready");
+
+  hasMag = false;
 
 #if defined(HAS_LSM9DS1)
   if (!IMU.begin()) {
