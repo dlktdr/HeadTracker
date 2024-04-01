@@ -60,7 +60,6 @@ const uint8_t *socGetMMFlashPtr()
 
     /* map selected region */
     spi_flash_mmap(FLASH_ADDRESS, FLASH_SIZE, SPI_FLASH_MMAP_DATA, (const void **)&mem_ptr, &handle);
-    LOG_INF("memory-mapped pointer address: %p", mem_ptr);
     isFlashMemMapped = true;
   }
   #elif defined(CONFIG_SOC_SERIES_NRF52X)

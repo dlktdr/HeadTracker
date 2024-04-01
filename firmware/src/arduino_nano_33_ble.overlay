@@ -30,6 +30,8 @@
  *    NVM Data      0xFC000 - 0x100000 (Size 0x4000 16384 Bytes)
  */
 
+/delete-node/ &storage_partition;
+
 &flash0 {
 	partitions {
 		compatible = "fixed-partitions";
@@ -42,8 +44,8 @@
 			read-only;
 		};
 
-    datapt_partition: partition@FC000 {
-        label = "datapt";
+    storage_partition: partition@FC000 {
+        label = "storagept";
         reg = <0xFC000 0x4000>;
     };
 	};

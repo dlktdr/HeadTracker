@@ -112,6 +112,8 @@
   // dma-names = "tx", "rx";
 };
 
+/delete-node/ &storage_partition;
+
 &flash0 {
 	status = "okay";
 	partitions {
@@ -144,8 +146,8 @@
 			   reg = <0x00210000 0x00040000>;
 		};
 
-    datapt_partition: partition@250000 {
-      label = "datapt";
+    storage_partition: partition@250000 {
+      label = "storagept";
       reg = <0x00250000 0x4000>;
   };
 	};

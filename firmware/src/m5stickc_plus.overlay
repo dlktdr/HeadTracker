@@ -88,6 +88,8 @@
 
 };*/
 
+/delete-node/ &storage_partition;
+
 &flash0 {
 	status = "okay";
 	partitions {
@@ -121,7 +123,7 @@
 		};
 
 		storage_partition: partition@250000 {
-			label = "datapt";
+			label = "storagept";
 			reg = <0x00250000 0x00006000>;
 		};
 	};
