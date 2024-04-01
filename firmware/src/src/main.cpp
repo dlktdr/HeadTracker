@@ -12,7 +12,7 @@
 #include <zephyr/kernel.h>
 
 #include "io.h"
-#include "nano33ble.h"
+#include "htmain.h"
 
 #if defined(CONFIG_SOC_SERIES_NRF52X)
 #include <nrfx_rtc.h>

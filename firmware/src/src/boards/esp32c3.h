@@ -9,7 +9,7 @@
 
 // Board Features
 #define HAS_LSM6DS3
-#define HAS_CENTERBTN
+#define HAS_CENTERBTN_ACTIVELOW
 #define HAS_PPMIN
 #define HAS_PPMOUT
 

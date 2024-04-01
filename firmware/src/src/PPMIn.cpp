@@ -108,8 +108,8 @@ void PpmIn_setPin(int pinNum)
   static bool initalized = false;
   if(initalized) return;
   initalized = true;
-  int pin = PIN_TO_NRFPIN(PIN_NAME_TO_NUM(IO_PPMIN));
-  int port = PIN_TO_NRFPORT(PIN_NAME_TO_NUM(IO_PPMIN));
+  int pin = PIN_TO_GPIN(PIN_NAME_TO_NUM(IO_PPMIN));
+  int port = PIN_TO_GPORT(PIN_NAME_TO_NUM(IO_PPMIN));
   int setPin_pin = pin;
   int setPin_port = port;
 #endif

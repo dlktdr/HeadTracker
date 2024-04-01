@@ -9,7 +9,7 @@
 
 // Board Features
 //#define HAS_LSM6DS3
-#define HAS_CENTERBTN
+#define HAS_CENTERBTN_ACTIVELOW
 #define HAS_NOTIFYLED
 #define HAS_MPU6886
 #define HAS_BUZZER
@@ -50,10 +50,9 @@ const int8_t PinNumber[] = {
 #undef PIN
 };
 
-// Required pin setting functions
-#define pinMode(pin, mode) gpio_pin_configure(gpios[0], PIN_NAME_TO_NUM(pin), mode)
-#define digitalWrite(pin, value) gpio_pin_set(gpios[0], PIN_NAME_TO_NUM(pin), value)
-#define digitalRead(pin) gpio_pin_get(gpios[0], PIN_NAME_TO_NUM(pin))
+#define pinMode(pin, mode) gpio_pin_configure(gpios[PIN_TO_GPORT(PIN_NAME_TO_NUM(pin))], PIN_TO_GPIN(PIN_NAME_TO_NUM(pin)), mode)
+#define digitalWrite(pin, value) gpio_pin_set(gpios[PIN_TO_GPORT(PIN_NAME_TO_NUM(pin))], PIN_TO_GPIN(PIN_NAME_TO_NUM(pin)), value)
+#define digitalRead(pin) gpio_pin_get(gpios[PIN_TO_GPORT(PIN_NAME_TO_NUM(pin))], PIN_TO_GPIN(PIN_NAME_TO_NUM(pin)))
 
 // TODO Find good values here
 // Values below were determined by plotting Gyro Output (See sense.cpp, gyroCalibration())

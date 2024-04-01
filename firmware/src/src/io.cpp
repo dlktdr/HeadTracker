@@ -29,14 +29,124 @@ const device *gpios[2];
 volatile int butpin;
 volatile uint32_t _ledmode = 0;
 
-
-
 // LED Blink Patterns
 typedef struct {
   uint32_t RGB = 0;
   uint16_t time = 0;
 } rgb_s;
 rgb_s led_sequence[LED_MAX_SEQUENCE_COUNT];
+
+void io_init()
+{
+  gpios[0] = DEVICE_DT_GET(DT_NODELABEL(gpio0));
+#if defined(DT_N_NODELABEL_gpio1)
+  gpios[1] = DEVICE_DT_GET(DT_NODELABEL(gpio1));
+#endif
+
+#if defined(CONFIG_BOARD_ARDUINO_NANO_33_BLE)
+  pinMode(IO_VDDENA, GPIO_OUTPUT);
+  pinMode(IO_I2C_PU, GPIO_OUTPUT);
+  // Set pin to High Drive - TODO find how to do in in new zephyr versions
+  if(PIN_TO_GPORT(PIN_NAME_TO_NUM(IO_I2C_PU)) == 0) {
+    NRF_P0->PIN_CNF[PIN_TO_GPIN(PIN_NAME_TO_NUM(IO_I2C_PU))] = (NRF_P0->PIN_CNF[PIN_TO_GPIN(PIN_NAME_TO_NUM(IO_I2C_PU))] & ~GPIO_PIN_CNF_DRIVE_Msk) |
+          GPIO_PIN_CNF_DRIVE_H0H1 << GPIO_PIN_CNF_DRIVE_Pos;
+  } else {
+    NRF_P1->PIN_CNF[PIN_TO_GPIN(PIN_NAME_TO_NUM(IO_I2C_PU))] = (NRF_P1->PIN_CNF[PIN_TO_GPIN(PIN_NAME_TO_NUM(IO_I2C_PU))] & ~GPIO_PIN_CNF_DRIVE_Msk) |
+          GPIO_PIN_CNF_DRIVE_H0H1 << GPIO_PIN_CNF_DRIVE_Pos;
+  }
+  // Set pin to High Drive - TODO find how to do in new zephyr versions
+  if(PIN_TO_GPORT(PIN_NAME_TO_NUM(IO_VDDENA)) == 0) {
+    NRF_P0->PIN_CNF[PIN_TO_GPIN(PIN_NAME_TO_NUM(IO_VDDENA))] = (NRF_P0->PIN_CNF[PIN_TO_GPIN(PIN_NAME_TO_NUM(IO_VDDENA))] & ~GPIO_PIN_CNF_DRIVE_Msk) |
+          GPIO_PIN_CNF_DRIVE_H0H1 << GPIO_PIN_CNF_DRIVE_Pos;
+  } else {
+    NRF_P1->PIN_CNF[PIN_TO_GPIN(PIN_NAME_TO_NUM(IO_VDDENA))] = (NRF_P1->PIN_CNF[PIN_TO_GPIN(PIN_NAME_TO_NUM(IO_VDDENA))] & ~GPIO_PIN_CNF_DRIVE_Msk) |
+          GPIO_PIN_CNF_DRIVE_H0H1 << GPIO_PIN_CNF_DRIVE_Pos;
+  }
+  digitalWrite(IO_VDDENA, 1);
+  digitalWrite(IO_I2C_PU, 1);
+#endif
+
+#if defined(CONFIG_BOARD_XIAO_BLE)
+  // 10K I2C Pull up Resistors on internal LSM6DS3, High Drive Strength
+  pinMode(IO_LSM6DS3PWR, GPIO_OUTPUT);
+  // Shut Sensor off
+  digitalWrite(IO_LSM6DS3PWR, 0);
+  k_msleep(100);
+  // Enable Sensor
+  digitalWrite(IO_LSM6DS3PWR, 1);
+
+  // Enable Battery Voltage Monitor
+  pinMode(IO_ANBATT_ENA, GPIO_OUTPUT);
+  digitalWrite(IO_ANBATT_ENA, 0);
+#endif
+
+#if defined(HAS_POWERHOLD)
+  pinMode(IO_PWRHOLD, GPIO_OUTPUT);
+  digitalWrite(IO_PWRHOLD, 1);
+#endif
+
+#if defined(HAS_CENTERBTN_ACTIVELOW)
+  pinMode(IO_CENTER_BTN, INPUT_PULLUP);
+#endif
+
+#if defined(HAS_CENTERBTN_ACTIVEHIGH)
+  pinMode(IO_CENTER_BTN, GPIO_INPUT);
+#endif
+
+#if defined(HAS_BUZZER)
+  pinMode(IO_BUZZ, GPIO_OUTPUT);
+  // Startup beep, beep
+  digitalWrite(IO_BUZZ, 1);
+  k_busy_wait(100000);
+  digitalWrite(IO_BUZZ, 0);
+  k_busy_wait(100000);
+  digitalWrite(IO_BUZZ, 1);
+  k_busy_wait(100000);
+  digitalWrite(IO_BUZZ, 0);
+#endif
+
+#if defined(HAS_3DIODE_RGB)
+  pinMode(IO_LEDR, GPIO_OUTPUT);
+  pinMode(IO_LEDG, GPIO_OUTPUT);
+  pinMode(IO_LEDB, GPIO_OUTPUT);
+  digitalWrite(IO_LEDR, 1);
+  digitalWrite(IO_LEDG, 1);
+  digitalWrite(IO_LEDB, 1);
+#endif
+
+#if defined(HAS_POWERLED)
+  pinMode(IO_PWR, GPIO_OUTPUT);
+  digitalWrite(IO_PWR, 1);
+#endif
+
+#if defined(HAS_NOTIFYLED)
+  pinMode(IO_LED, GPIO_OUTPUT);
+#endif
+
+#if defined(HAS_PWMOUTPUTS)
+  pinMode(IO_PWM0, GPIO_OUTPUT);  // PWM 0
+  pinMode(IO_PWM1, GPIO_OUTPUT);  // PWM 1
+  pinMode(IO_PWM2, GPIO_OUTPUT);  // PWM 2
+  pinMode(IO_PWM3, GPIO_OUTPUT);  // PWM 3
+#endif
+
+#if defined(AN0)
+  pinMode(IO_AN0, GPIO_INPUT);
+#endif
+#if defined(AN1)
+  pinMode(IO_AN1, GPIO_INPUT);
+#endif
+#if defined(AN2)
+  pinMode(IO_AN2, GPIO_INPUT);
+#endif
+#if defined(AN3)
+  pinMode(IO_AN3, GPIO_INPUT);
+#endif
+
+  setLEDFlag(LED_GYROCAL);
+
+  k_poll_signal_raise(&ioThreadRunSignal, 1);
+}
 
 // Reset Button Pressed Flag on Read
 bool wasButtonPressed()
@@ -241,116 +351,13 @@ bool readCenterButton()
       return false;
     pinMode(D_TO_ENUM(butpin), INPUT_PULLUP);
     return digitalRead(D_TO_ENUM(butpin)) == 0;
-#else
+#elif defined(HAS_CENTERBTN_ACTIVELOW)
     pinMode(IO_CENTER_BTN, INPUT_PULLUP);
     return digitalRead(IO_CENTER_BTN) == 0;
+#elif defined(HAS_CENTERBTN_ACTIVEHIGH)
+    pinMode(IO_CENTER_BTN, GPIO_INPUT);
+    return digitalRead(IO_CENTER_BTN);
+#else
+    return false;
 #endif
-}
-
-void io_init()
-{
-  gpios[0] = DEVICE_DT_GET(DT_NODELABEL(gpio0));  // device_get_binding("GPIO_0");
-#if defined(CONFIG_SOC_SERIES_NRF52X)
-  gpios[1] = DEVICE_DT_GET(DT_NODELABEL(gpio1));  // device_get_binding("GPIO_1");
-#endif
-
-#if defined(CONFIG_BOARD_ARDUINO_NANO_33_BLE)
-  pinMode(IO_VDDENA, GPIO_OUTPUT);
-  pinMode(IO_I2C_PU, GPIO_OUTPUT);
-  // Set pin to High Drive - TODO find how to do in in new zephyr versions
-  if(PIN_TO_NRFPORT(PIN_NAME_TO_NUM(IO_I2C_PU)) == 0) {
-    NRF_P0->PIN_CNF[PIN_TO_NRFPIN(PIN_NAME_TO_NUM(IO_I2C_PU))] = (NRF_P0->PIN_CNF[PIN_TO_NRFPIN(PIN_NAME_TO_NUM(IO_I2C_PU))] & ~GPIO_PIN_CNF_DRIVE_Msk) |
-          GPIO_PIN_CNF_DRIVE_H0H1 << GPIO_PIN_CNF_DRIVE_Pos;
-  } else {
-    NRF_P1->PIN_CNF[PIN_TO_NRFPIN(PIN_NAME_TO_NUM(IO_I2C_PU))] = (NRF_P1->PIN_CNF[PIN_TO_NRFPIN(PIN_NAME_TO_NUM(IO_I2C_PU))] & ~GPIO_PIN_CNF_DRIVE_Msk) |
-          GPIO_PIN_CNF_DRIVE_H0H1 << GPIO_PIN_CNF_DRIVE_Pos;
-  }
-  // Set pin to High Drive - TODO find how to do in new zephyr versions
-  if(PIN_TO_NRFPORT(PIN_NAME_TO_NUM(IO_VDDENA)) == 0) {
-    NRF_P0->PIN_CNF[PIN_TO_NRFPIN(PIN_NAME_TO_NUM(IO_VDDENA))] = (NRF_P0->PIN_CNF[PIN_TO_NRFPIN(PIN_NAME_TO_NUM(IO_VDDENA))] & ~GPIO_PIN_CNF_DRIVE_Msk) |
-          GPIO_PIN_CNF_DRIVE_H0H1 << GPIO_PIN_CNF_DRIVE_Pos;
-  } else {
-    NRF_P1->PIN_CNF[PIN_TO_NRFPIN(PIN_NAME_TO_NUM(IO_VDDENA))] = (NRF_P1->PIN_CNF[PIN_TO_NRFPIN(PIN_NAME_TO_NUM(IO_VDDENA))] & ~GPIO_PIN_CNF_DRIVE_Msk) |
-          GPIO_PIN_CNF_DRIVE_H0H1 << GPIO_PIN_CNF_DRIVE_Pos;
-  }
-  digitalWrite(IO_VDDENA, 1);
-  digitalWrite(IO_I2C_PU, 1);
-#endif
-
-#if defined(CONFIG_BOARD_XIAO_BLE)
-  // 10K I2C Pull up Resistors on internal LSM6DS3, High Drive Strength
-  pinMode(IO_LSM6DS3PWR, GPIO_OUTPUT);
-  // Shut Sensor off
-  digitalWrite(IO_LSM6DS3PWR, 0);
-  k_msleep(100);
-  // Enable Sensor
-  digitalWrite(IO_LSM6DS3PWR, 1);
-
-  // Enable Battery Voltage Monitor
-  pinMode(IO_ANBATT_ENA, GPIO_OUTPUT);
-  digitalWrite(IO_ANBATT_ENA, 0);
-#endif
-
-#if defined(HAS_POWERHOLD)
-  pinMode(IO_PWRHOLD, GPIO_OUTPUT);
-  digitalWrite(IO_PWRHOLD, 1);
-#endif
-
-#if defined(HAS_CENTERBTN)
-  pinMode(IO_CENTER_BTN, INPUT_PULLUP);
-#endif
-
-#if defined(HAS_BUZZER)
-  pinMode(IO_BUZZ, GPIO_OUTPUT);
-  // Startup beep, beep
-  digitalWrite(IO_BUZZ, 1);
-  k_busy_wait(100000);
-  digitalWrite(IO_BUZZ, 0);
-  k_busy_wait(100000);
-  digitalWrite(IO_BUZZ, 1);
-  k_busy_wait(100000);
-  digitalWrite(IO_BUZZ, 0);
-#endif
-
-#if defined(HAS_3DIODE_RGB)
-  pinMode(IO_LEDR, GPIO_OUTPUT);
-  pinMode(IO_LEDG, GPIO_OUTPUT);
-  pinMode(IO_LEDB, GPIO_OUTPUT);
-  digitalWrite(IO_LEDR, 1);
-  digitalWrite(IO_LEDG, 1);
-  digitalWrite(IO_LEDB, 1);
-#endif
-
-#if defined(HAS_POWERLED)
-  pinMode(IO_PWR, GPIO_OUTPUT);
-  digitalWrite(IO_PWR, 1);
-#endif
-
-#if defined(HAS_NOTIFYLED)
-  pinMode(IO_LED, GPIO_OUTPUT);
-#endif
-
-#if defined(HAS_PWMOUTPUTS)
-  pinMode(IO_PWM0, GPIO_OUTPUT);  // PWM 0
-  pinMode(IO_PWM1, GPIO_OUTPUT);  // PWM 1
-  pinMode(IO_PWM2, GPIO_OUTPUT);  // PWM 2
-  pinMode(IO_PWM3, GPIO_OUTPUT);  // PWM 3
-#endif
-
-#if defined(AN0)
-  pinMode(IO_AN0, GPIO_INPUT);
-#endif
-#if defined(AN1)
-  pinMode(IO_AN1, GPIO_INPUT);
-#endif
-#if defined(AN2)
-  pinMode(IO_AN2, GPIO_INPUT);
-#endif
-#if defined(AN3)
-  pinMode(IO_AN3, GPIO_INPUT);
-#endif
-
-  setLEDFlag(LED_GYROCAL);
-
-  k_poll_signal_raise(&ioThreadRunSignal, 1);
 }

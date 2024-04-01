@@ -144,8 +144,8 @@ void PpmOut_setPin(int pinNum)
   int setPin_pin = D_TO_PIN(setPin);
   int setPin_port = D_TO_PORT(setPin);
 #else
-  int pin = PIN_TO_NRFPIN(PIN_NAME_TO_NUM(IO_PPMOUT));
-  int port = PIN_TO_NRFPORT(PIN_NAME_TO_NUM(IO_PPMOUT));
+  int pin = PIN_TO_GPIN(PIN_NAME_TO_NUM(IO_PPMOUT));
+  int port = PIN_TO_GPORT(PIN_NAME_TO_NUM(IO_PPMOUT));
   int setPin_pin = pin;
   int setPin_port = port;
 #endif

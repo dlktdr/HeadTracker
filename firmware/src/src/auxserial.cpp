@@ -37,24 +37,24 @@ static bool serialopened = false;
 #define SERIAL_UARTE_IRQ CONCAT(CONCAT(UARTE, SERIAL_UARTE_CH), _IRQn)
 
 // Aux Serial Output Pins
-#define AUXSERIALIN_PIN  PIN_TO_NRFPIN(PinNumber[IO_RX])
-#define AUXSERIALIN_PORT PIN_TO_NRFPORT(PinNumber[IO_RX])
+#define AUXSERIALIN_PIN  PIN_TO_GPIN(PinNumber[IO_RX])
+#define AUXSERIALIN_PORT PIN_TO_GPORT(PinNumber[IO_RX])
 
 // Aux Serial Output Pins
-#define AUXSERIALOUT_PIN  PIN_TO_NRFPIN(PinNumber[IO_TX])
-#define AUXSERIALOUT_PORT PIN_TO_NRFPORT(PinNumber[IO_TX])
+#define AUXSERIALOUT_PIN  PIN_TO_GPIN(PinNumber[IO_TX])
+#define AUXSERIALOUT_PORT PIN_TO_GPORT(PinNumber[IO_TX])
 
 // Temp Pin, They are not broken out on the NANO33BLE
-#define SERIALOUT_TPIN  PIN_TO_NRFPIN(PinNumber[IO_TXINV])
-#define SERIALOUT_TPORT PIN_TO_NRFPORT(PinNumber[IO_TXINV])
+#define SERIALOUT_TPIN  PIN_TO_GPIN(PinNumber[IO_TXINV])
+#define SERIALOUT_TPORT PIN_TO_GPORT(PinNumber[IO_TXINV])
 
 // Pin RXINVO + RXINVI must be soldered together for inverted SBUS input
-#define SERIALIN_TPIN_OUT  PIN_TO_NRFPIN(PinNumber[IO_RXINVO])
-#define SERIALIN_TPORT_OUT PIN_TO_NRFPORT(PinNumber[IO_RXINVO])
+#define SERIALIN_TPIN_OUT  PIN_TO_GPIN(PinNumber[IO_RXINVO])
+#define SERIALIN_TPORT_OUT PIN_TO_GPORT(PinNumber[IO_RXINVO])
 
 // This is the pin the UARTE RX input is hooked up to.
-#define SERIALIN_TPIN_IN  PIN_TO_NRFPIN(PinNumber[IO_RXINVI])
-#define SERIALIN_TPORT_IN PIN_TO_NRFPORT(PinNumber[IO_RXINVI])
+#define SERIALIN_TPIN_IN  PIN_TO_GPIN(PinNumber[IO_RXINVI])
+#define SERIALIN_TPORT_IN PIN_TO_GPORT(PinNumber[IO_RXINVI])
 
 static uint8_t serialDMATx[SERIAL_TX_SIZE];  // DMA Access Buffer Write
 
