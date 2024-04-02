@@ -18,6 +18,9 @@
 #include "auxserial.h"
 
 #include <zephyr/kernel.h>
+#include <zephyr/logging/log.h>
+
+LOG_MODULE_REGISTER(auxserial);
 
 #if defined(CONFIG_SOC_SERIES_NRF52X)
 #include <nrfx.h>
@@ -393,13 +396,92 @@ uint32_t AuxSerial_Read(uint8_t *buffer, uint32_t bufsize)
 
 bool AuxSerial_Available() { return serialRxBuf.getOccupied() > 0; }
 
-#elif defined(CONFIG_SOC_ESP32C3)
+// Is a AUXUART port defined in the device tree?
+#elif defined(DT_N_ALIAS_auxuart)
+#define UART_DEVICE_NODE DT_ALIAS(auxuart)
 
-int AuxSerial_Open(uint32_t baudrate, uint16_t settings, uint8_t inversions) {return 0;}
-bool AuxSerial_Available() {return 0;}
-void AuxSerial_Close() {}
-uint32_t AuxSerial_Write(const uint8_t* buffer, uint32_t len) {return 0;}
-uint32_t AuxSerial_Read(uint8_t* buffer, uint32_t bufsize) {return 0;}
+#include <zephyr/sys/ring_buffer.h>
+#include <zephyr/drivers/uart.h>
+
+static const struct device *const uart_dev = DEVICE_DT_GET(UART_DEVICE_NODE);
+RING_BUF_DECLARE(auxrx_ring_buf, 512);
+
+/*
+ * Read characters from UART until line end is detected. Afterwards push the
+ * data to the message queue.
+ */
+void auxserial_cb(const struct device *dev, void *user_data)
+{
+	uint8_t c;
+
+	if (!uart_irq_update(uart_dev)) {
+		return;
+	}
+
+	if (!uart_irq_rx_ready(uart_dev)) {
+		return;
+	}
+
+	// read until FIFO empty
+	while (uart_fifo_read(uart_dev, &c, 1) == 1) {
+    ring_buf_put(&auxrx_ring_buf, &c, 1);
+	}
+}
+
+int AuxSerial_Open(uint32_t baudrate, uint16_t settings, uint8_t inversions)
+{
+  LOG_INF("Opening UART device %s", uart_dev->name);
+  	if (!device_is_ready(uart_dev)) {
+		LOG_ERR("UART device not found!");
+		return -1;
+	}
+  const struct uart_config uart_cfg = {
+    .baudrate = baudrate,
+    .parity = UART_CFG_PARITY_NONE,
+    .stop_bits = UART_CFG_STOP_BITS_1,
+    .data_bits = UART_CFG_DATA_BITS_8,
+    .flow_ctrl = UART_CFG_FLOW_CTRL_NONE};
+  uart_configure(uart_dev, &uart_cfg);
+
+	/* configure interrupt and callback to receive data */
+	int ret = uart_irq_callback_user_data_set(uart_dev, auxserial_cb, NULL);
+  if (ret < 0) {
+		if (ret == -ENOTSUP) {
+			LOG_ERR("Interrupt-driven UART API support not enabled\n");
+		} else if (ret == -ENOSYS) {
+			LOG_ERR("UART device does not support interrupt-driven API\n");
+		} else {
+			LOG_ERR("Error setting UART callback: %d\n", ret);
+		}
+		return -1;
+	}
+  ring_buf_reset(&auxrx_ring_buf);
+  uart_irq_rx_enable(uart_dev);
+  return 0;
+}
+
+bool AuxSerial_Available()
+{
+  if(ring_buf_size_get(&auxrx_ring_buf) > 0)
+    return true;
+  return false;
+}
+void AuxSerial_Close() {
+  uart_irq_rx_disable(uart_dev);
+}
+
+uint32_t AuxSerial_Write(const uint8_t* buffer, uint32_t len)
+{
+  for(uint32_t i=0; i<len; i++)
+    uart_poll_out(uart_dev, buffer[i]);
+  return len;
+}
+
+uint32_t AuxSerial_Read(uint8_t* buffer, uint32_t bufsize)
+{
+  uint32_t readlen = MIN(bufsize,ring_buf_size_get(&auxrx_ring_buf));
+  return ring_buf_get(&auxrx_ring_buf, buffer, readlen);
+}
 
 #else
 
