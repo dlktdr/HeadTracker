@@ -1,4 +1,5 @@
 #include <zephyr/kernel.h>
+#include <zephyr/logging/log.h>
 
 #include "io.h"
 #include "defines.h"
@@ -16,6 +17,8 @@
 #include "soc_flash.h"
 #include "trackersettings.h"
 #include "log.h"
+
+LOG_MODULE_REGISTER(io);
 
 K_SEM_DEFINE(button_sem, 0, 1);
 K_SEM_DEFINE(lngbutton_sem, 0, 1);
