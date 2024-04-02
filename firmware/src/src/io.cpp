@@ -1,5 +1,6 @@
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
+#include <zephyr/drivers/gpio.h>
 
 #include "io.h"
 #include "defines.h"
@@ -38,6 +39,10 @@ typedef struct {
   uint16_t time = 0;
 } rgb_s;
 rgb_s led_sequence[LED_MAX_SEQUENCE_COUNT];
+
+// Center button definded in the device tree?
+#define CENTERBTN_NODE	DT_ALIAS(centerbtn)
+static const struct gpio_dt_spec cbutton = GPIO_DT_SPEC_GET_OR(CENTERBTN_NODE, gpios, {0});
 
 void io_init()
 {
@@ -86,6 +91,17 @@ void io_init()
 #if defined(HAS_POWERHOLD)
   pinMode(IO_PWRHOLD, GPIO_OUTPUT);
   digitalWrite(IO_PWRHOLD, 1);
+#endif
+
+// Center Button defined in the device tree
+#if DT_NODE_HAS_STATUS(CENTERBTN_NODE, okay)
+	if (!gpio_is_ready_dt(&cbutton)) {
+		LOG_ERR("Error: button device %s is not ready\n", cbutton.port->name);
+	}
+  int ret = gpio_pin_configure_dt(&cbutton, GPIO_INPUT);
+	if (ret != 0) {
+		LOG_ERR("Error %d: failed to configure %s pin %d\n", ret, cbutton.port->name, cbutton.pin);
+	}
 #endif
 
 #if defined(HAS_CENTERBTN_ACTIVELOW)
@@ -360,6 +376,8 @@ bool readCenterButton()
 #elif defined(HAS_CENTERBTN_ACTIVEHIGH)
     pinMode(IO_CENTER_BTN, GPIO_INPUT);
     return digitalRead(IO_CENTER_BTN);
+#elif DT_NODE_HAS_STATUS(CENTERBTN_NODE, okay)
+    return gpio_pin_get_dt(&cbutton);
 #else
     return false;
 #endif

@@ -336,7 +336,7 @@ void calculate_Thread()
     if(k_mutex_lock(&sensor_mutex, K_MSEC(2)) == 0) {
       // Zero button was pressed, adjust all values to zero
       if (wasButtonPressed()) {
-        LOG_INF("Reset Center Pressed");
+        LOG_INF("Reset Center Short Pressed");
         rolloffset = roll;
         panoffset = pan;
         tiltoffset = tilt;

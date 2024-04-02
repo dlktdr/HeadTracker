@@ -9,7 +9,7 @@
 
 // Board Features
 //#define HAS_LSM6DS3
-#define HAS_CENTERBTN_ACTIVELOW
+// Center button defined in device tree
 #define HAS_NOTIFYLED
 #define HAS_MPU6886
 #define HAS_BUZZER
@@ -25,7 +25,6 @@
 // TODO: ** Replace these with devicetree overlay files
 
 #define PIN_X \
-  PIN(CENTER_BTN,   ESPPIN(37), "Center Button") \
   PIN(LED,          ESPPIN(19), "Notification LED") \
   PIN(TX,           ESPPIN(32), "UART Transmit")  \
   PIN(RX,           ESPPIN(33), "UART Receive") \
