@@ -753,7 +753,6 @@ void calculate_Thread()
 
 void sensor_Thread()
 {
-  static int cnttt=0;
   LOG_INF("Sensor Thread Loaded");
   while (1) {
     // Do not execute below until after initialization has happened
