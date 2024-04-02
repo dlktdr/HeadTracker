@@ -42,10 +42,9 @@ class Madgwick
   float pitch;
   float yaw;
   float deltat;
-  float lastUpdate;
+  uint32_t lastUpdate;
   char anglesComputed;
   float _copyQuat[4];  // copy buffer to protect the quaternion values since getters!=setters
-  float Now;
   void computeAngles();
   void align(float ax, float ay, float az, float bx, float by, float bz);
   void combine(float p0, float p1, float p2, float p3);
@@ -101,10 +100,11 @@ class Madgwick
 
   float deltatUpdate()
   {
-    Now = micros64();
-    deltat = ((Now - lastUpdate) /
-              1000000.0f);  // set integration time by time elapsed since last filter update
-    lastUpdate = Now;
+    uint32_t now = k_cycle_get_32();
+    uint32_t dt = now - lastUpdate;
+    lastUpdate = now;
+    deltat = ((float)(k_cyc_to_us_floor32(dt)) /
+              1000000.0f);
     return deltat;
   }
 };
