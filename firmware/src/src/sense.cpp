@@ -307,16 +307,10 @@ void calculate_Thread()
 
     usduration = micros64();
 
-    // Use a mutex so sensor data can't be updated part way
-    k_mutex_lock(&sensor_mutex, K_FOREVER);
-    roll = madgwick.getPitch();
-    tilt = madgwick.getRoll();
-    pan = madgwick.getYaw();
-    k_mutex_unlock(&sensor_mutex);
-
     // Toggles output on and off if long pressed
     bool butlngdwn = false;
     if (wasButtonLongPressed()) {
+      LOG_INF("Reset Center Long Pressed");
       trpOutputEnabled = !trpOutputEnabled;
       butlngdwn = true;
     }
@@ -331,15 +325,44 @@ void calculate_Thread()
       }
     }
 
-    // Zero button was pressed, adjust all values to zero
+    float tiltout = 0.0f;
+    float panout = 0.0f;
+    float rollout = 0.0f;
+
+    // roll, tilt, pan float values are updated in the sensor thread
+    // Use a mutex for data safety. Wait here until the mutex is available
     bool butdnw = false;
-    if (wasButtonPressed()) {
-      LOG_INF("Reset Center Activated");
-      rolloffset = roll;
-      panoffset = pan;
-      tiltoffset = tilt;
-      butdnw = true;
+
+    if(k_mutex_lock(&sensor_mutex, K_MSEC(2)) == 0) {
+      // Zero button was pressed, adjust all values to zero
+      if (wasButtonPressed()) {
+        LOG_INF("Reset Center Pressed");
+        rolloffset = roll;
+        panoffset = pan;
+        tiltoffset = tilt;
+        butdnw = true;
+      }
+
+      // Tilt output
+      tiltout = (tilt - tiltoffset) * trkset.getTlt_Gain() * (trkset.isTiltReversed() ? -1.0f : 1.0f);
+
+      // Roll output
+      rollout = (roll - rolloffset) * trkset.getRll_Gain() * (trkset.isRollReversed() ? -1.0f : 1.0f);
+
+      // Pan output, Normalize to +/- 180 Degrees
+      panout = normalize((pan - panoffset), -180, 180) * trkset.getPan_Gain() *
+                    (trkset.isPanReversed() ? -1.0f : 1.0f);
+      k_mutex_unlock(&sensor_mutex);
+    } else {
+      LOG_ERR("Sensor Mutex Lock Failed");
     }
+
+    uint16_t tiltout_ui = tiltout + trkset.getTlt_Cnt();  // Apply Center Offset
+    tiltout_ui = MAX(MIN(tiltout_ui, trkset.getTlt_Max()), trkset.getTlt_Min());  // Limit Output
+    uint16_t rollout_ui = rollout + trkset.getRll_Cnt();  // Apply Center Offset
+    rollout_ui = MAX(MIN(rollout_ui, trkset.getRll_Max()), trkset.getRll_Min());  // Limit Output
+    uint16_t panout_ui = panout + trkset.getPan_Cnt();  // Apply Center Offset
+    panout_ui = MAX(MIN(panout_ui, trkset.getPan_Max()), trkset.getPan_Min());  // Limit Output
 
     // If button was pressed and this is a remote bluetooth boart send the button press back
     static bool btbtnupdated = false;
@@ -351,24 +374,6 @@ void calculate_Thread()
         btbtnupdated = false;
       }
     }
-
-    // Tilt output
-    float tiltout =
-        (tilt - tiltoffset) * trkset.getTlt_Gain() * (trkset.isTiltReversed() ? -1.0f : 1.0f);
-    uint16_t tiltout_ui = tiltout + trkset.getTlt_Cnt();  // Apply Center Offset
-    tiltout_ui = MAX(MIN(tiltout_ui, trkset.getTlt_Max()), trkset.getTlt_Min());  // Limit Output
-
-    // Roll output
-    float rollout =
-        (roll - rolloffset) * trkset.getRll_Gain() * (trkset.isRollReversed() ? -1.0f : 1.0f);
-    uint16_t rollout_ui = rollout + trkset.getRll_Cnt();  // Apply Center Offset
-    rollout_ui = MAX(MIN(rollout_ui, trkset.getRll_Max()), trkset.getRll_Min());  // Limit Output
-
-    // Pan output, Normalize to +/- 180 Degrees
-    float panout = normalize((pan - panoffset), -180, 180) * trkset.getPan_Gain() *
-                   (trkset.isPanReversed() ? -1.0f : 1.0f);
-    uint16_t panout_ui = panout + trkset.getPan_Cnt();  // Apply Center Offset
-    panout_ui = MAX(MIN(panout_ui, trkset.getPan_Max()), trkset.getPan_Min());  // Limit Output
 
     // Reset on tilt
     static bool doresetontilt = false;
@@ -686,9 +691,12 @@ void calculate_Thread()
       trkset.setDataOff_MagY(magy);
       trkset.setDataOff_MagZ(magz);
 
-      trkset.setDataTilt(tilt);
-      trkset.setDataRoll(roll);
-      trkset.setDataPan(pan);
+      if(k_mutex_lock(&sensor_mutex, K_NO_WAIT) == 0) { // Ignore if locked
+        trkset.setDataTilt(tilt);
+        trkset.setDataRoll(roll);
+        trkset.setDataPan(pan);
+        k_mutex_unlock(&sensor_mutex);
+      }
 
       trkset.setDataTiltOff(tilt - tiltoffset);
       trkset.setDataRollOff(roll - rolloffset);
@@ -716,11 +724,18 @@ void calculate_Thread()
       k_mutex_unlock(&data_mutex);
     }
 
+    static uint16_t lasttilt = 1500;
+    if(abs(tiltout_ui - lasttilt) > 200) {
+      LOG_ERR("Tilt Jumped %d %d", tiltout_ui, lasttilt);
+      k_panic();
+    }
+    lasttilt = tiltout_ui;
+
     // Adjust sleep for a more accurate period
     usduration = micros64() - usduration;
     if (CALCULATE_PERIOD - usduration <
         CALCULATE_PERIOD * 0.7) {  // Took a long time. Will crash if sleep is too short
-      LOG_INF("Calculate Thread Overrun %lld", usduration);
+      LOG_ERR("Calculate Thread Overrun %lld", usduration);
       k_usleep(CALCULATE_PERIOD);
     } else {
       k_usleep(CALCULATE_PERIOD - usduration);
@@ -745,6 +760,7 @@ void calculate_Thread()
 
 void sensor_Thread()
 {
+  static int cnttt=0;
   LOG_INF("Sensor Thread Loaded");
   while (1) {
     // Do not execute below until after initialization has happened
@@ -916,9 +932,24 @@ void sensor_Thread()
 #if defined(HAS_MPU6886)
     if(!mpu6886.getAccelData(&tacc[0], &tacc[1], &tacc[2]))
       accValid = true;
-    if(!mpu6886.getGyroData(&tgyr[0], &tgyr[1], &tgyr[2]))
+    if(!mpu6886.getGyroData(&tgyr[0], &tgyr[1], &tgyr[2])) {
       gyrValid = true;
+    }
 #endif
+
+    // Sanity Checks, should never get exactly zero from x,y,z sensor
+    if(accValid && tacc[0] == 0.0f && tacc[1] == 0.0f && tacc[2] == 0.0f) {
+      accValid = false;
+      LOG_ERR("Sensor Fault - Accel Zero");
+    }
+    if(gyrValid && tgyr[0] == 0.0f && tgyr[1] == 0.0f && tgyr[2] == 0.0f) {
+      gyrValid = false;
+      LOG_ERR("Sensor Fault - Gyro Zero");
+    }
+    if(magValid && tmag[0] == 0.0f && tmag[1] == 0.0f && tmag[2] == 0.0f) {
+      magValid = false;
+      LOG_ERR("Sensor Fault - Mag Zero");
+    }
 
     k_mutex_lock(&sensor_mutex, K_FOREVER);
 
@@ -1052,14 +1083,12 @@ void sensor_Thread()
     if (madgreads == MADGSTART_SAMPLES) {
       // Period Between Samples
       float delttime = madgwick.deltatUpdate();
-      if(delttime > 0.1f) {
-        LOG_ERR("Deltatime too large: %f", (double)delttime);
-      }
 
       madgwick.update(gyrx * DEG_TO_RAD, gyry * DEG_TO_RAD, gyrz * DEG_TO_RAD, accx, accy, accz,
                       magx, magy, magz, delttime);
-//      LOG_INF("Values for AHRS: %f,%f,%f,%f,%f,%f,%f,%f,%f", gyrx, gyry, gyrz, accx, accy, accz,
-  //            magx, magy, magz);
+      roll = madgwick.getPitch();
+      tilt = madgwick.getRoll();
+      pan = madgwick.getYaw();
 
       if (firstrun && pan != 0) {
         panoffset = pan;
@@ -1073,7 +1102,7 @@ void sensor_Thread()
     senseUsDuration = micros64() - senseUsDuration;
     if (SENSOR_PERIOD - senseUsDuration <
         SENSOR_PERIOD * 0.7) {  // Took a long time. Will crash if sleep is too short
-      LOG_INF("Sensor Thread Overrun");
+      LOG_ERR("Sensor Thread Overrun %lld", senseUsDuration);
       k_usleep(SENSOR_PERIOD);
     } else {
       k_usleep(SENSOR_PERIOD - senseUsDuration);
@@ -1102,6 +1131,9 @@ void gyroCalibrate()
   static bool sent_gyro_cal_msg = false;
   static uint32_t filter_samples = 0;
   static uint64_t lasttime = 0;
+
+  if(gyroCalibrated)
+    return;
 
   uint64_t time = micros64();
   if (lasttime == 0) {  // Skip first run
@@ -1150,8 +1182,8 @@ void gyroCalibrate()
           fabsf(gyryoff - filt_gyry) > GYRO_FLASH_IF_OFFSET ||
           fabsf(gyrzoff - filt_gyrz) > GYRO_FLASH_IF_OFFSET) {
         if (!sent_gyro_cal_msg) {
-          //k_sem_give(&saveToFlash_sem);
-          LOGW("Gyro calibration differs from saved value. Updating flash, x=%.3f,y=%.3f,z=%.3f",
+          k_sem_give(&saveToFlash_sem);
+          LOG_INF("Gyro calibration differs from saved value. Updating flash, x=%.3f,y=%.3f,z=%.3f",
                (double)filt_gyrx, (double)filt_gyry, (double)filt_gyrz);
           sent_gyro_cal_msg = true;
         }
