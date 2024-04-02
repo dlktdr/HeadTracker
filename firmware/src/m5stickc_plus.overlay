@@ -35,9 +35,10 @@
 	};
 };
 
+// Debug Log Port
 &uart1 {
   status = "okay";
-  current-speed = < 115200 >;
+  current-speed = < 921600 >;
   pinctrl-0 = <&uart1_default>;
   pinctrl-names = "default";
 };
@@ -55,7 +56,7 @@
 	pinctrl-names = "default";
 };
 
-/*&spi3 {
+&spi3 {
 	status = "okay";
   cs-gpios = < &gpio0 5 GPIO_ACTIVE_LOW >;
 
@@ -85,8 +86,7 @@
 		ram-param = [00 F0]; //b0
 		rgb-param = [CD 08 14];
   };
-
-};*/
+};
 
 /delete-node/ &storage_partition;
 
