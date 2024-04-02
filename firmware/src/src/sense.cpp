@@ -724,13 +724,6 @@ void calculate_Thread()
       k_mutex_unlock(&data_mutex);
     }
 
-    static uint16_t lasttilt = 1500;
-    if(abs(tiltout_ui - lasttilt) > 200) {
-      LOG_ERR("Tilt Jumped %d %d", tiltout_ui, lasttilt);
-      k_panic();
-    }
-    lasttilt = tiltout_ui;
-
     // Adjust sleep for a more accurate period
     usduration = micros64() - usduration;
     if (CALCULATE_PERIOD - usduration <
