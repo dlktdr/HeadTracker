@@ -114,11 +114,9 @@ void start(void)
   }
 
   // Start the BT Thread
-  #if defined(CONFIG_SOC_SERIES_NRF52X) // TODO** ESP work needed here, crash easy
   #if defined(CONFIG_BT)
   LOG_INF("Starting Bluetooth");
   bt_init();
-  #endif
   #endif
 
   // Monitor if saving to EEPROM is required
@@ -133,10 +131,8 @@ void start(void)
 // Threads
 K_THREAD_DEFINE(io_Thread_id, IO_STACK_SIZE, io_Thread, NULL, NULL, NULL, IO_THREAD_PRIO, K_FP_REGS, 0);
 K_THREAD_DEFINE(serial_Thread_id, SERIAL_STACK_SIZE, serial_Thread, NULL, NULL, NULL, SERIAL_THREAD_PRIO, K_FP_REGS, 1000);
-#if defined(CONFIG_SOC_SERIES_NRF52X) // TODO** ESP work needed here, crash easy
 #if defined(CONFIG_BT)
 K_THREAD_DEFINE(bt_Thread_id, BT_STACK_SIZE, bt_Thread, NULL, NULL, NULL, BT_THREAD_PRIO, 0, 0);
-#endif
 #endif
 K_THREAD_DEFINE(sensor_Thread_id, SENSOR_STACK_SIZE, sensor_Thread, NULL, NULL, NULL, SENSOR_THREAD_PRIO, K_FP_REGS, 1500);
 K_THREAD_DEFINE(calculate_Thread_id, CALCULATE_STACK_SIZE, calculate_Thread, NULL, NULL, NULL, CALCULATE_THREAD_PRIO, K_FP_REGS, 2000);
