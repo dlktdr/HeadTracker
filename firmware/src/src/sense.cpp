@@ -805,7 +805,7 @@ void sensor_Thread()
     float rotation[3] = {trkset.getRotX(), trkset.getRotY(), trkset.getRotZ()};
 
     // Read the data from the sensors
-    float tacc[3], tgyr[3], tmag[3];
+    float tacc[3] = {0.0f,0.0f,0.0f}, tgyr[3]  = {0.0f,0.0f,0.0f}, tmag[3] = {0.0f,0.0f,0.0f};
     bool accValid = false;
     bool gyrValid = false;
     bool magValid = false;
