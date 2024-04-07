@@ -10,7 +10,11 @@
 // Board Features
 #define HAS_3DIODE_RGB
 #define HAS_NOTIFYLED
+#if defined(PCB_XIAOSENSE)
 #define HAS_LSM6DS3
+#else // Otherwise it's the XIAO52840
+#define HAS_NOIMU
+#endif
 #define HAS_CENTERBTN
 #define HAS_PPMIN
 #define HAS_PPMOUT
