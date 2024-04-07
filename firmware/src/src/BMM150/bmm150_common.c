@@ -8,8 +8,8 @@
 #include "bmm150_common.h"
 
 
+#include <zephyr/drivers/i2c.h>
 #include <stdio.h>
-#include "drivers/i2c.h"
 #include "bmm150.h"
 #include "log.h"
 
@@ -56,7 +56,7 @@ void bmm150_user_delay_us(uint32_t period_us, void *intf_ptr)
 int8_t bmm150_user_i2c_reg_write(uint8_t reg_addr, const uint8_t *reg_data, uint32_t length,
                                  void *intf_ptr)
 {
-  const struct device *i2c_dev = DEVICE_DT_GET(DT_NODELABEL(i2c1));
+  const struct device *i2c_dev = DEVICE_DT_GET(DT_ALIAS(i2csensor));
   if (!i2c_dev) {
     return -1;
   }
@@ -71,13 +71,14 @@ int8_t bmm150_user_i2c_reg_write(uint8_t reg_addr, const uint8_t *reg_data, uint
 int8_t bmm150_user_i2c_reg_read(uint8_t reg_addr, uint8_t *reg_data, uint32_t length,
                                 void *intf_ptr)
 {
-  const struct device *i2c_dev = DEVICE_DT_GET(DT_NODELABEL(i2c1));
+  const struct device *i2c_dev = DEVICE_DT_GET(DT_ALIAS(i2csensor));
   if (!i2c_dev) {
     return -1;
   }
 
   uint8_t dev_addr = *(uint8_t *)intf_ptr;
-  return i2c_burst_read(i2c_dev, dev_addr, reg_addr, reg_data, length);
+  i2c_burst_read(i2c_dev, dev_addr, reg_addr, reg_data, length);
+  return 0;
 }
 
 /*!

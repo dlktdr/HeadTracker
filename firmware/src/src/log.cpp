@@ -16,7 +16,7 @@
  */
 #include "log.h"
 
-#include <kernel.h>
+#include <zephyr/kernel.h>
 #include <stdio.h>
 
 #include "serial.h"

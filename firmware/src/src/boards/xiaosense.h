@@ -11,7 +11,7 @@
 #define HAS_3DIODE_RGB
 #define HAS_NOTIFYLED
 #define HAS_LSM6DS3
-#define HAS_CENTERBTN
+#define HAS_CENTERBTN_ACTIVELOW
 #define HAS_PPMIN
 #define HAS_PPMOUT
 
@@ -22,10 +22,10 @@
 #define AN3 5 //
 
 // Pins (name, number, description)
-// NOTE: These pins are an enum entry. e.g. IO_D2 = 0
+// NOTE: These pins are an enum entry. e.g. IO_AN0 = 0
 //     - Use PIN_NAME_TO_NUM(IO_D2) to get actual the pin number
 //     - The pin number can be converted back into the NRF port/pin
-//       using functions PIN_TO_NRFPORT & PIN_TO_NRFPIN
+//       using functions PIN_TO_GPORT & PIN_TO_GPIN
 //     - The string descrition for D2 would be StrPins[IO_D2]
 
 #define PIN_X \
@@ -70,9 +70,9 @@ const int8_t PinNumber[] = {
 };
 
 // Required pin setting functions
-#define pinMode(pin, mode) gpio_pin_configure(gpios[PIN_TO_NRFPORT(PIN_NAME_TO_NUM(pin))], PIN_TO_NRFPIN(PIN_NAME_TO_NUM(pin)), mode)
-#define digitalWrite(pin, value) gpio_pin_set(gpios[PIN_TO_NRFPORT(PIN_NAME_TO_NUM(pin))], PIN_TO_NRFPIN(PIN_NAME_TO_NUM(pin)), value)
-#define digitalRead(pin) gpio_pin_get(gpios[PIN_TO_NRFPORT(PIN_NAME_TO_NUM(pin))], PIN_TO_NRFPIN(PIN_NAME_TO_NUM(pin)))
+#define pinMode(pin, mode) gpio_pin_configure(gpios[PIN_TO_GPORT(PIN_NAME_TO_NUM(pin))], PIN_TO_GPIN(PIN_NAME_TO_NUM(pin)), mode)
+#define digitalWrite(pin, value) gpio_pin_set(gpios[PIN_TO_GPORT(PIN_NAME_TO_NUM(pin))], PIN_TO_GPIN(PIN_NAME_TO_NUM(pin)), value)
+#define digitalRead(pin) gpio_pin_get(gpios[PIN_TO_GPORT(PIN_NAME_TO_NUM(pin))], PIN_TO_GPIN(PIN_NAME_TO_NUM(pin)))
 
 // TODO Find good values here
 // Values below were determined by plotting Gyro Output (See sense.cpp, gyroCalibration())

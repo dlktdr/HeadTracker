@@ -1,3 +1,8 @@
 .pio
-.vscode
-
+.vscode/*.json
+!.vscode/c_cpp_properties.json
+.cortex-debug.*
+*.log
+build*
+!build_all*
+_deps*

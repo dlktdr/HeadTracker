@@ -1,0 +1,26 @@
+{
+    "configurations": [
+        {
+            "name": "Zephyr",
+            "includePath": [
+                "src/**",
+                "src/include/**",
+                "third-party/BMI270_SensorAPI/**",
+                "../zephyr/**"
+            ],
+            "browse": {
+                "limitSymbolsToIncludedHeaders": true,
+                "path": [
+                    "src/**",
+                    "src/include/**",
+                    "third-party/BMI270_SensorAPI/**",
+                    "../zephyr/**"
+                ]
+            },
+            "cStandard": "c99",
+            "cppStandard": "c++11",
+            "compilerPath": "../zephyr-sdk/arm-zephyr-eabi/bin/arm-zephyr-eabi-gcc.exe"
+        }
+      ],
+    "version": 4
+}

@@ -21,7 +21,7 @@
 
 #include "APDS9960.h"
 
-#include <drivers/i2c.h>
+#include <zephyr/drivers/i2c.h>
 
 #include "defines.h"
 #include "io.h"
@@ -47,7 +47,7 @@ APDS9960::~APDS9960() {}
 
 bool APDS9960::begin()
 {
-  i2c_dev = device_get_binding("I2C_1");
+  i2c_dev = DEVICE_DT_GET(DT_ALIAS(i2csensor));
   if (!i2c_dev) {
     LOGE("Could not get device binding for I2C");
     return false;
@@ -71,7 +71,7 @@ bool APDS9960::begin()
   if (!setATIME(256 - (10 / 2.78))) return false;
   // set ADC gain 4x (0x00 => 1x, 0x01 => 4x, 0x02 => 16x, 0x03 => 64x)
   if (!setCONTROL(0x02)) return false;
-  rt_sleep_ms(10);
+  k_msleep(10);
   // enable power
   if (!enablePower()) return false;
 
@@ -456,6 +456,6 @@ int APDS9960::readProximity()
   return (255 - r);
 }
 
-#ifdef PCB_NANO33BLE
+#ifdef CONFIG_BOARD_ARDUINO_NANO_33_BLE
 APDS9960 APDS(-1);
 #endif

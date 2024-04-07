@@ -1,7 +1,7 @@
 #pragma once
 
-#include <drivers/i2c.h>
-#include <zephyr.h>
+#include <zephyr/drivers/i2c.h>
+#include <zephyr/kernel.h>
 
 #include "LSM6DS3/lsm6ds3tr-c_reg.h"
 

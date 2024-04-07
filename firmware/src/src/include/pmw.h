@@ -17,11 +17,14 @@
 
 #pragma once
 
+#if defined(CONFIG_SOC_SERIES_NRF52X)
 #include <nrfx_gpiote.h>
 #include <nrfx_ppi.h>
+#endif
 
 #include "defines.h"
 
+#include <stdint.h>
 
 int PWM_Init(int updateRate);
 void setPWMValue(int ch, uint16_t value);

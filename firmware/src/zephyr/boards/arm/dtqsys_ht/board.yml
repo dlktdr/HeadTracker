@@ -1,0 +1,6 @@
+board:
+  name: dtqsys_ht
+  vendor: dtqsys
+  socs:
+  - name: nrf52840
+

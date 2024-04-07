@@ -41,11 +41,11 @@
 
 #define _i2c_write   i2c_writeBytes
 #define i2c_read    i2c_readBytes
-#define delay_ms    rt_sleep_ms
+#define delay_ms    k_msleep
 
-#include <device.h>
-#include <drivers/i2c.h>
-#include <zephyr.h>
+#include <zephyr/kernel.h>
+#include <zephyr/device.h>
+#include <zephyr/drivers/i2c.h>
 
 #include "log.h"
 

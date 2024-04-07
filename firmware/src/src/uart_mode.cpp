@@ -17,7 +17,7 @@
 
 #include "uart_mode.h"
 
-#include <zephyr.h>
+#include <zephyr/kernel.h>
 
 #include "CRSF/crsfin.h"
 #include "CRSF/crsfout.h"
@@ -67,7 +67,7 @@ void uartRx_Thread()
 {
   while (1) {
     k_poll(uartRxRunEvents, 1, K_FOREVER);
-    rt_sleep_us(UART_PERIOD);
+    k_usleep(UART_PERIOD);
 
     if (pauseForFlash) {
       continue;
@@ -116,17 +116,17 @@ void uartTx_Thread()
   while (1) {
     k_poll(uartTxRunEvents, 1, K_FOREVER);
     if (pauseForFlash) {
-      rt_sleep_ms(1000);
+      k_msleep(1000);
       continue;
     }
 
     switch (curmode) {
       case UARTSBUSIO:
         SbusTx();
-        rt_sleep_us((1.0 / (float)trkset.getSbusTxRate()) * 1.0e6);
+        k_usleep((1.0f / (float)trkset.getSbusTxRate()) * 1.0e6f);
         break;
       case UARTCRSFOUT:
-        rt_sleep_us((1.0 / (float)trkset.getCrsfTxRate()) * 1.0e6);
+        k_usleep((1.0f / (float)trkset.getCrsfTxRate()) * 1.0e6f);
         crsfout.sendRCFrameToFC();
         /*crsfout.AttitudeDataOut.pitch = 10;
         crsfout.AttitudeDataOut.roll = 30;
@@ -134,7 +134,7 @@ void uartTx_Thread()
         crsfout.sendAttitideToFC();*/
         break;
       default:
-        rt_sleep_ms(1000);
+        k_msleep(1000);
         break;
     }
   }

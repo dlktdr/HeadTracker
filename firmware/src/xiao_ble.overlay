@@ -1,0 +1,113 @@
+/ {
+	model = "Xiao BLE";
+	compatible = "seeed,xiao-ble";
+
+	chosen {
+		/delete-property/ zephyr,console;
+		/delete-property/ zephyr,shell-uart;
+		/delete-property/ zephyr,uart-mcumgr;
+		/delete-property/ zephyr,bt-mon-uart;
+		/delete-property/ zephyr,bt-c2h-uart;
+    /delete-property/ zephyr,ieee802154;
+		zephyr,sram = &sram0;
+		zephyr,flash = &flash0;
+		zephyr,code-partition = &code_partition;
+
+		// Uncomment the below line for kernel logging to a second USB CDC port
+		// Also uncomment the extra cdc at the bottom of the file
+		//   zephyr,console = &cdc_acm_uart1;
+	};
+
+  aliases {
+    adcctrl = &adc;
+    i2csensor = &i2c0;
+		guiuart = &cdc_acm_uart0;
+  };
+
+};
+
+/* Flash Layout
+ *    Bootloader    0x00000 - 0x10000 (Size 0x10000 65536 Bytes)
+ *    Code          0x10000 - 0xFC000 (Size 0xEC000 966656 Bytes)
+ *    NVM Data      0xFC000 - 0x100000 (Size 0x4000 16384 Bytes)
+ */
+
+/delete-node/ &storage_partition;
+
+&flash0 {
+	partitions {
+		compatible = "fixed-partitions";
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		sd_partition: partition@0 {
+			label = "softdevice";
+			reg = <0x00000000 0x00027000>;
+		};
+
+		code_partition: partition@27000 {
+			label = "code_partition";
+			reg = <0x00027000 0x000c5000>;
+		};
+
+		storage_partition: partition@ec000 {
+			label = "storagept";
+			reg = <0x000ec000 0x00008000>;
+		};
+
+		boot_partition: partition@f4000 {
+			label = "adafruit_boot";
+			reg = <0x000f4000 0x0000c000>;
+		};
+	};
+};
+
+&adc {
+	status = "okay";
+};
+
+&i2c0 {
+	compatible = "nordic,nrf-twim";
+	/* Cannot be used together with spi0. */
+	status = "okay";
+	pinctrl-0 = <&i2c0_default>;
+	pinctrl-1 = <&i2c0_sleep>;
+	pinctrl-names = "default", "sleep";
+	clock-frequency = <I2C_BITRATE_FAST>;
+};
+
+&uart0 {
+	status = "disabled";
+};
+
+/* Disable Timer3, used by PPM output
+ */
+&timer3 {
+    status = "disabled";
+};
+
+/* Disable Timer4, used by PPM input
+ */
+&timer4 {
+    status = "disabled";
+};
+
+/delete-node/ &usb_cdc_acm_uart; /* We use cdc_acm_uart0 */
+
+zephyr_udc0: &usbd {
+	compatible = "nordic,nrf-usbd";
+	status = "okay";
+  cdc_acm_uart0: cdc_acm_uart0 {
+		compatible = "zephyr,cdc-acm-uart";
+	};
+
+  // Uncomment the below lines for kernel logging to a second USB CDC port
+	/*
+	cdc_acm_uart1: cdc_acm_uart1 {
+		compatible = "zephyr,cdc-acm-uart";
+	};
+	*/
+};
+
+
+

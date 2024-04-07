@@ -13,7 +13,7 @@
 #define HAS_NOTIFYLED
 #define HAS_MPU6500
 #define HAS_QMC5883
-#define HAS_CENTERBTN
+#define HAS_CENTERBTN_ACTIVELOW
 #define HAS_PPMOUT
 #define HAS_PPMIN
 #define AN0 1 // Battery V on analog 0
@@ -25,7 +25,7 @@
 // NOTE: These pins are an enum entry. IO_ is prepended e.g. IO_AN0 = 0
 //     - Use PIN_NAME_TO_NUM(IO_AN0) to get actual the pin number
 //     - The pin number can be converted back into the NRF port/pin
-//       using functions PIN_TO_NRFPORT & PIN_TO_NRFPIN
+//       using functions PIN_TO_GPORT & PIN_TO_GPIN
 //     - The string descrition for AN0 would be StrPins[IO_AN0]
 
 #define PIN_X \
@@ -61,10 +61,10 @@ const int8_t PinNumber[] = {
 };
 
 // Required pin setting functions
-#define pinMode(pin, mode) gpio_pin_configure(gpios[PIN_TO_NRFPORT(PIN_NAME_TO_NUM(pin))], PIN_TO_NRFPIN(PIN_NAME_TO_NUM(pin)), mode)
-#define digitalWrite(pin, value) gpio_pin_set(gpios[PIN_TO_NRFPORT(PIN_NAME_TO_NUM(pin))], PIN_TO_NRFPIN(PIN_NAME_TO_NUM(pin)), value)
-#define digitalRead(pin) gpio_pin_get(gpios[PIN_TO_NRFPORT(PIN_NAME_TO_NUM(pin))], PIN_TO_NRFPIN(PIN_NAME_TO_NUM(pin)))
+#define pinMode(pin, mode) gpio_pin_configure(gpios[PIN_TO_GPORT(PIN_NAME_TO_NUM(pin))], PIN_TO_GPIN(PIN_NAME_TO_NUM(pin)), mode)
+#define digitalWrite(pin, value) gpio_pin_set(gpios[PIN_TO_GPORT(PIN_NAME_TO_NUM(pin))], PIN_TO_GPIN(PIN_NAME_TO_NUM(pin)), value)
+#define digitalRead(pin) gpio_pin_get(gpios[PIN_TO_GPORT(PIN_NAME_TO_NUM(pin))], PIN_TO_GPIN(PIN_NAME_TO_NUM(pin)))
 
 // Values below were determined by plotting Gyro Output (See sense.cpp, gyroCalibration())
 #define GYRO_STABLE_DIFF 200.0f
-#define ACC_STABLE_DIFF 3.5
+#define ACC_STABLE_DIFF 3.5f

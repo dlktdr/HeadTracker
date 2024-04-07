@@ -28,9 +28,9 @@
 #ifndef LSM9DS1_V2
 #define LSM9DS1_V2
 
-#include <device.h>
-#include <drivers/i2c.h>
-#include <zephyr.h>
+#include <zephyr/device.h>
+#include <zephyr/drivers/i2c.h>
+#include <zephyr/kernel.h>
 
 
 #define accelerationSampleRate getAccelODR
@@ -73,7 +73,7 @@
 #define bitToggle(value, bit) ((value) ^= (1UL << (bit)))
 #define bitWrite(value, bit, bitvalue) (bitvalue ? bitSet(value, bit) : bitClear(value, bit))
 
-#define I2C_DEV DT_NODELABEL(i2c1)
+#define I2C_DEV DT_ALIAS(i2csensor)
 
 class LSM9DS1Class
 {

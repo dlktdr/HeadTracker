@@ -8,7 +8,7 @@
 #define INPUT_PULLUP (GPIO_INPUT | GPIO_PULL_UP)
 
 // Board Features
-#if defined(PCB_NANO33BLE_SENSE2)
+#if defined(BOARD_REV_SR2)
   #define HAS_BMI270
   #define HAS_BMM150
 #else
@@ -33,7 +33,7 @@
 // NOTE: These pins are an enum entry. e.g. IO_D2 = 0
 //     - Use PIN_NAME_TO_NUM(IO_D2) to get actual the pin number
 //     - The pin number can be converted back into the NRF port/pin
-//       using functions PIN_TO_NRFPORT & PIN_TO_NRFPIN
+//       using functions PIN_TO_GPORT & PIN_TO_GPIN
 //     - The string descrition for D2 would be StrPins[IO_D2]
 
 #define PIN_X \
@@ -86,9 +86,9 @@ const int8_t PinNumber[] = {
 };
 
 // Required pin setting functions
-#define pinMode(pin, mode) gpio_pin_configure(gpios[PIN_TO_NRFPORT(PIN_NAME_TO_NUM(pin))], PIN_TO_NRFPIN(PIN_NAME_TO_NUM(pin)), mode)
-#define digitalWrite(pin, value) gpio_pin_set(gpios[PIN_TO_NRFPORT(PIN_NAME_TO_NUM(pin))], PIN_TO_NRFPIN(PIN_NAME_TO_NUM(pin)), value)
-#define digitalRead(pin) gpio_pin_get(gpios[PIN_TO_NRFPORT(PIN_NAME_TO_NUM(pin))], PIN_TO_NRFPIN(PIN_NAME_TO_NUM(pin)))
+#define pinMode(pin, mode) gpio_pin_configure(gpios[PIN_TO_GPORT(PIN_NAME_TO_NUM(pin))], PIN_TO_GPIN(PIN_NAME_TO_NUM(pin)), mode)
+#define digitalWrite(pin, value) gpio_pin_set(gpios[PIN_TO_GPORT(PIN_NAME_TO_NUM(pin))], PIN_TO_GPIN(PIN_NAME_TO_NUM(pin)), value)
+#define digitalRead(pin) gpio_pin_get(gpios[PIN_TO_GPORT(PIN_NAME_TO_NUM(pin))], PIN_TO_GPIN(PIN_NAME_TO_NUM(pin)))
 
 //                        0   1   2  3   4   5   6   7   8   9  10 11 12  13
 const int dpintoport[] = {1,  1,  1, 1,  1,  1,  1,  0,  0,  0,  1, 1, 1,  0};

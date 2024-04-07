@@ -1,17 +1,25 @@
-#include <zephyr.h>
+#include <zephyr/kernel.h>
+#include <zephyr/logging/log.h>
+#include <zephyr/drivers/gpio.h>
 
 #include "io.h"
 #include "defines.h"
 
 #if defined(HAS_WS2812)
-#include <device.h>
-#include <drivers/led_strip.h>
-#include <drivers/spi.h>
+#include <zephyr/device.h>
+#include <zephyr/drivers/led_strip.h>
+#include <zephyr/drivers/spi.h>
+#endif
+
+#if defined(CONFIG_SOC_SERIES_NRF52X)
+#include <nrfx_gpiote.h>
 #endif
 
 #include "soc_flash.h"
 #include "trackersettings.h"
 #include "log.h"
+
+LOG_MODULE_REGISTER(io);
 
 K_SEM_DEFINE(button_sem, 0, 1);
 K_SEM_DEFINE(lngbutton_sem, 0, 1);
@@ -31,6 +39,133 @@ typedef struct {
   uint16_t time = 0;
 } rgb_s;
 rgb_s led_sequence[LED_MAX_SEQUENCE_COUNT];
+
+// Center button definded in the device tree?
+#define CENTERBTN_NODE	DT_ALIAS(centerbtn)
+static const struct gpio_dt_spec cbutton = GPIO_DT_SPEC_GET_OR(CENTERBTN_NODE, gpios, {0});
+
+void io_init()
+{
+  gpios[0] = DEVICE_DT_GET(DT_NODELABEL(gpio0));
+#if defined(DT_N_NODELABEL_gpio1)
+  gpios[1] = DEVICE_DT_GET(DT_NODELABEL(gpio1));
+#endif
+
+#if defined(CONFIG_BOARD_ARDUINO_NANO_33_BLE)
+  pinMode(IO_VDDENA, GPIO_OUTPUT);
+  pinMode(IO_I2C_PU, GPIO_OUTPUT);
+  // Set pin to High Drive - TODO find how to do in in new zephyr versions
+  if(PIN_TO_GPORT(PIN_NAME_TO_NUM(IO_I2C_PU)) == 0) {
+    NRF_P0->PIN_CNF[PIN_TO_GPIN(PIN_NAME_TO_NUM(IO_I2C_PU))] = (NRF_P0->PIN_CNF[PIN_TO_GPIN(PIN_NAME_TO_NUM(IO_I2C_PU))] & ~GPIO_PIN_CNF_DRIVE_Msk) |
+          GPIO_PIN_CNF_DRIVE_H0H1 << GPIO_PIN_CNF_DRIVE_Pos;
+  } else {
+    NRF_P1->PIN_CNF[PIN_TO_GPIN(PIN_NAME_TO_NUM(IO_I2C_PU))] = (NRF_P1->PIN_CNF[PIN_TO_GPIN(PIN_NAME_TO_NUM(IO_I2C_PU))] & ~GPIO_PIN_CNF_DRIVE_Msk) |
+          GPIO_PIN_CNF_DRIVE_H0H1 << GPIO_PIN_CNF_DRIVE_Pos;
+  }
+  // Set pin to High Drive - TODO find how to do in new zephyr versions
+  if(PIN_TO_GPORT(PIN_NAME_TO_NUM(IO_VDDENA)) == 0) {
+    NRF_P0->PIN_CNF[PIN_TO_GPIN(PIN_NAME_TO_NUM(IO_VDDENA))] = (NRF_P0->PIN_CNF[PIN_TO_GPIN(PIN_NAME_TO_NUM(IO_VDDENA))] & ~GPIO_PIN_CNF_DRIVE_Msk) |
+          GPIO_PIN_CNF_DRIVE_H0H1 << GPIO_PIN_CNF_DRIVE_Pos;
+  } else {
+    NRF_P1->PIN_CNF[PIN_TO_GPIN(PIN_NAME_TO_NUM(IO_VDDENA))] = (NRF_P1->PIN_CNF[PIN_TO_GPIN(PIN_NAME_TO_NUM(IO_VDDENA))] & ~GPIO_PIN_CNF_DRIVE_Msk) |
+          GPIO_PIN_CNF_DRIVE_H0H1 << GPIO_PIN_CNF_DRIVE_Pos;
+  }
+  digitalWrite(IO_VDDENA, 1);
+  digitalWrite(IO_I2C_PU, 1);
+#endif
+
+#if defined(CONFIG_BOARD_XIAO_BLE)
+  // 10K I2C Pull up Resistors on internal LSM6DS3, High Drive Strength
+  pinMode(IO_LSM6DS3PWR, GPIO_OUTPUT);
+  // Shut Sensor off
+  digitalWrite(IO_LSM6DS3PWR, 0);
+  k_msleep(100);
+  // Enable Sensor
+  digitalWrite(IO_LSM6DS3PWR, 1);
+
+  // Enable Battery Voltage Monitor
+  pinMode(IO_ANBATT_ENA, GPIO_OUTPUT);
+  digitalWrite(IO_ANBATT_ENA, 0);
+#endif
+
+#if defined(HAS_POWERHOLD)
+  pinMode(IO_PWRHOLD, GPIO_OUTPUT);
+  digitalWrite(IO_PWRHOLD, 1);
+#endif
+
+// Center Button defined in the device tree
+#if DT_NODE_HAS_STATUS(CENTERBTN_NODE, okay)
+	if (!gpio_is_ready_dt(&cbutton)) {
+		LOG_ERR("Error: button device %s is not ready\n", cbutton.port->name);
+	}
+  int ret = gpio_pin_configure_dt(&cbutton, GPIO_INPUT);
+	if (ret != 0) {
+		LOG_ERR("Error %d: failed to configure %s pin %d\n", ret, cbutton.port->name, cbutton.pin);
+	}
+#endif
+
+#if defined(HAS_CENTERBTN_ACTIVELOW)
+  pinMode(IO_CENTER_BTN, INPUT_PULLUP);
+#endif
+
+#if defined(HAS_CENTERBTN_ACTIVEHIGH)
+  pinMode(IO_CENTER_BTN, GPIO_INPUT);
+#endif
+
+#if defined(HAS_BUZZER)
+  pinMode(IO_BUZZ, GPIO_OUTPUT);
+  // Startup beep, beep
+  digitalWrite(IO_BUZZ, 1);
+  k_busy_wait(100000);
+  digitalWrite(IO_BUZZ, 0);
+  k_busy_wait(100000);
+  digitalWrite(IO_BUZZ, 1);
+  k_busy_wait(100000);
+  digitalWrite(IO_BUZZ, 0);
+#endif
+
+#if defined(HAS_3DIODE_RGB)
+  pinMode(IO_LEDR, GPIO_OUTPUT);
+  pinMode(IO_LEDG, GPIO_OUTPUT);
+  pinMode(IO_LEDB, GPIO_OUTPUT);
+  digitalWrite(IO_LEDR, 1);
+  digitalWrite(IO_LEDG, 1);
+  digitalWrite(IO_LEDB, 1);
+#endif
+
+#if defined(HAS_POWERLED)
+  pinMode(IO_PWR, GPIO_OUTPUT);
+  digitalWrite(IO_PWR, 1);
+#endif
+
+#if defined(HAS_NOTIFYLED)
+  pinMode(IO_LED, GPIO_OUTPUT);
+#endif
+
+#if defined(HAS_PWMOUTPUTS)
+  pinMode(IO_PWM0, GPIO_OUTPUT);  // PWM 0
+  pinMode(IO_PWM1, GPIO_OUTPUT);  // PWM 1
+  pinMode(IO_PWM2, GPIO_OUTPUT);  // PWM 2
+  pinMode(IO_PWM3, GPIO_OUTPUT);  // PWM 3
+#endif
+
+#if defined(AN0)
+  pinMode(IO_AN0, GPIO_INPUT);
+#endif
+#if defined(AN1)
+  pinMode(IO_AN1, GPIO_INPUT);
+#endif
+#if defined(AN2)
+  pinMode(IO_AN2, GPIO_INPUT);
+#endif
+#if defined(AN3)
+  pinMode(IO_AN3, GPIO_INPUT);
+#endif
+
+  setLEDFlag(LED_GYROCAL);
+
+  k_poll_signal_raise(&ioThreadRunSignal, 1);
+}
 
 // Reset Button Pressed Flag on Read
 bool wasButtonPressed()
@@ -72,7 +207,7 @@ void io_Thread()
   uint32_t _counter = 0;
 
   while (1) {
-    rt_sleep_ms(IO_PERIOD);
+    k_msleep(IO_PERIOD);
     k_poll(ioRunEvents, 1, K_FOREVER);
 
     if (pauseForFlash) continue;
@@ -184,7 +319,6 @@ void io_Thread()
 
 #if defined(HAS_WS2812)
     const struct device *strip = DEVICE_DT_GET(DT_NODELABEL(led_strip));
-    //strip = device_get_binding(DT_NODELABEL(led_strip));
 	  if (strip) {
       struct led_rgb pixel;
       pixel.b = curcolor & 0xFF;
@@ -230,99 +364,21 @@ void io_Thread()
 
 bool readCenterButton()
 {
-#if defined(PCB_NANO33BLE)
+#if defined(CONFIG_BOARD_ARDUINO_NANO_33_BLE)
     int butpin = trkset.getButtonPin();
     if (butpin < 1 || butpin > 13)
       return false;
     pinMode(D_TO_ENUM(butpin), INPUT_PULLUP);
     return digitalRead(D_TO_ENUM(butpin)) == 0;
-#else
+#elif defined(HAS_CENTERBTN_ACTIVELOW)
     pinMode(IO_CENTER_BTN, INPUT_PULLUP);
     return digitalRead(IO_CENTER_BTN) == 0;
+#elif defined(HAS_CENTERBTN_ACTIVEHIGH)
+    pinMode(IO_CENTER_BTN, GPIO_INPUT);
+    return digitalRead(IO_CENTER_BTN);
+#elif DT_NODE_HAS_STATUS(CENTERBTN_NODE, okay)
+    return gpio_pin_get_dt(&cbutton);
+#else
+    return false;
 #endif
-}
-
-void io_init()
-{
-  gpios[0] = DEVICE_DT_GET(DT_NODELABEL(gpio0));  // device_get_binding("GPIO_0");
-  gpios[1] = DEVICE_DT_GET(DT_NODELABEL(gpio1));  // device_get_binding("GPIO_1");
-
-#if defined(PCB_NANO33BLE)
-  pinMode(IO_VDDENA, GPIO_OUTPUT | GPIO_DS_ALT_HIGH  );
-  pinMode(IO_I2C_PU, GPIO_OUTPUT);
-  digitalWrite(IO_VDDENA, 1);
-  digitalWrite(IO_I2C_PU, 1);
-#endif
-
-#if defined(PCB_XIAOSENSE)
-  // 10K I2C Pull up Resistors on internal LSM6DS3, High Drive Strength
-  pinMode(IO_LSM6DS3PWR, GPIO_OUTPUT | GPIO_DS_ALT_LOW | GPIO_DS_ALT_HIGH);
-  // Shut Sensor off
-  digitalWrite(IO_LSM6DS3PWR, 0);
-  k_msleep(100);
-  // Enable Sensor
-  digitalWrite(IO_LSM6DS3PWR, 1);
-
-  // Enable Battery Voltage Monitor
-  pinMode(IO_ANBATT_ENA, GPIO_OUTPUT);
-  digitalWrite(IO_ANBATT_ENA, 0);
-#endif
-
-#if defined(HAS_CENTERBTN)
-  pinMode(IO_CENTER_BTN, INPUT_PULLUP);
-#endif
-
-#if defined(HAS_BUZZER)
-  pinMode(IO_BUZZ, GPIO_OUTPUT);
-  // Startup beep, beep
-  digitalWrite(IO_BUZZ, 1);
-  k_busy_wait(100000);
-  digitalWrite(IO_BUZZ, 0);
-  k_busy_wait(100000);
-  digitalWrite(IO_BUZZ, 1);
-  k_busy_wait(100000);
-  digitalWrite(IO_BUZZ, 0);
-#endif
-
-#if defined(HAS_3DIODE_RGB)
-  pinMode(IO_LEDR, GPIO_OUTPUT);
-  pinMode(IO_LEDG, GPIO_OUTPUT);
-  pinMode(IO_LEDB, GPIO_OUTPUT);
-  digitalWrite(IO_LEDR, 1);
-  digitalWrite(IO_LEDG, 1);
-  digitalWrite(IO_LEDB, 1);
-#endif
-
-#if defined(HAS_POWERLED)
-  pinMode(IO_PWR, GPIO_OUTPUT);
-  digitalWrite(IO_PWR, 1);
-#endif
-
-#if defined(HAS_NOTIFYLED)
-  pinMode(IO_LED, GPIO_OUTPUT);
-#endif
-
-#if defined(HAS_PWMOUTPUTS)
-  pinMode(IO_PWM0, GPIO_OUTPUT);  // PWM 0
-  pinMode(IO_PWM1, GPIO_OUTPUT);  // PWM 1
-  pinMode(IO_PWM2, GPIO_OUTPUT);  // PWM 2
-  pinMode(IO_PWM3, GPIO_OUTPUT);  // PWM 3
-#endif
-
-#if defined(AN0)
-  pinMode(IO_AN0, GPIO_INPUT);
-#endif
-#if defined(AN1)
-  pinMode(IO_AN1, GPIO_INPUT);
-#endif
-#if defined(AN2)
-  pinMode(IO_AN2, GPIO_INPUT);
-#endif
-#if defined(AN3)
-  pinMode(IO_AN3, GPIO_INPUT);
-#endif
-
-  setLEDFlag(LED_GYROCAL);
-
-  k_poll_signal_raise(&ioThreadRunSignal, 1);
 }

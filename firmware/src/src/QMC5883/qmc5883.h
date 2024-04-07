@@ -1,8 +1,8 @@
 #pragma once
 
-#include <device.h>
-#include <drivers/i2c.h>
-#include <zephyr.h>
+#include <zephyr/device.h>
+#include <zephyr/drivers/i2c.h>
+#include <zephyr/kernel.h>
 
 #include "log.h"
 

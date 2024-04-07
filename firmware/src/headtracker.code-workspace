@@ -12,9 +12,9 @@
   ],
   "extensions": {
     "recommendations": [
-      "platformio.platformio-ide",
       "ms-vscode.cpptools",
       "xaver.clang-format",
+      "cortex-debug.cortex-debug",
     ]
   },
   "settings": {
@@ -24,40 +24,218 @@
       "titleBar.activeBackground": "#020081",
       "titleBar.activeForeground": "#ffffff"
     },
-    "files.associations": {
-      "map": "cpp",
-      "format": "cpp",
-      "istream": "cpp",
-      "memory": "cpp",
-      "type_traits": "cpp",
-      "xlocmes": "cpp",
-      "xlocmon": "cpp",
-      "xlocnum": "cpp",
-      "xloctime": "cpp",
-      "functional": "cpp",
-      "log.h": "c",
-      "xstring": "cpp"
+    "terminal.integrated.env.windows": {
+      "ZEPHYR_BASE": "${workspaceRoot:src}\\..\\zephyr\\zephyr"
     },
+    "files.associations": {
+      "random": "cpp",
+      "system_error": "cpp",
+      "stdio.h": "c"
+    },
+
   },
   "launch": {
     "configurations": [
       {
-        "type": "chrome",
-        "name": "http://127.0.0.1:8080",
+        "name": "Jlink - Arduino Nano 33 BLE",
+        "device": "nRF52840_XXAA",
+        "cwd": "${workspaceRoot:src}",
+        "executable": "build/zephyr/zephyr.elf",
         "request": "launch",
-        "url": "http://127.0.0.1:8080"
+        "type": "cortex-debug",
+        "runToEntryPoint": "main",
+        "servertype": "jlink",
+        "rtos": "Zephyr",
+        //"showDevDebugOutput":"raw",
+        "serverpath": "C:/Program Files/SEGGER/JLink/JLinkGDBServerCL.exe", // Check path to Jlink installation
+        "armToolchainPath": "${workspaceRoot:src}/../zephyr-sdk/arm-zephyr-eabi/bin", // NOTE Check version & path of SDK here
+        "toolchainPrefix": "arm-zephyr-eabi",
+        "preLaunchTask": "Build (Arduino Nano 33 BLE) - Debug",
+        "svdFile": "${workspaceRoot:src}/nrf52840.svd",
       },
       {
-        "type": "chrome",
-        "name": "http://127.0.0.1",
+        "name": "Jlink - Arduino Nano 33 BLE SR2",
+        "device": "nRF52840_XXAA",
+        "cwd": "${workspaceRoot:src}",
+        "executable": "build/zephyr/zephyr.elf",
         "request": "launch",
-        "url": "http://127.0.0.1"
+        "type": "cortex-debug",
+        "runToEntryPoint": "main",
+        "servertype": "jlink",
+        "rtos": "Zephyr",
+        //"showDevDebugOutput":"raw",
+        "serverpath": "C:/Program Files/SEGGER/JLink/JLinkGDBServerCL.exe", // Check path to Jlink installation
+        "armToolchainPath": "${workspaceRoot:src}/../zephyr-sdk/arm-zephyr-eabi/bin", // NOTE Check version & path of SDK here
+        "toolchainPrefix": "arm-zephyr-eabi",
+        "preLaunchTask": "Build (Arduino Nano 33 BLE Rev 2) - Debug",
+        "svdFile": "${workspaceRoot:src}/nrf52840.svd",
       },
       {
-        "type": "chrome",
-        "name": "http://localhost:8080",
+        "name": "Jlink - XIAO NRF52840 Sense",
+        "device": "nRF52840_XXAA",
+        "cwd": "${workspaceRoot:src}",
+        "executable": "build/zephyr/zephyr.elf",
         "request": "launch",
-        "url": "http://localhost:8080"
+        "type": "cortex-debug",
+        "runToEntryPoint": "main",
+        "servertype": "jlink",
+        "rtos": "Zephyr",
+        "showDevDebugOutput":"raw",
+        "serverpath": "C:/Program Files/SEGGER/JLink/JLinkGDBServerCL.exe", // Check path to Jlink installation
+        "armToolchainPath": "${workspaceRoot:src}/../zephyr-sdk/arm-zephyr-eabi/bin", // NOTE Check version & path of SDK here
+        "toolchainPrefix": "arm-zephyr-eabi",
+        "preLaunchTask": "Build (XIAO NRF52840 Sense) - Debug",
+        "svdFile": "${workspaceRoot:src}/nrf52840.svd",
+      },
+      {
+        "name": "Jlink - RPI_PICO",
+        "device": "RP2040_M0_0",
+        "cwd": "${workspaceRoot:src}",
+        "executable": "build/zephyr/zephyr.elf",
+        "request": "launch",
+        "type": "cortex-debug",
+        "runToEntryPoint": "main",
+        "servertype": "jlink",
+        "rtos": "Zephyr",
+        "showDevDebugOutput":"raw",
+        "serverpath": "C:/Program Files/SEGGER/JLink/JLinkGDBServerCL.exe", // Check path to Jlink installation
+        "armToolchainPath": "${workspaceRoot:src}/../zephyr-sdk/arm-zephyr-eabi/bin", // NOTE Check version & path of SDK here
+        "toolchainPrefix": "arm-zephyr-eabi",
+        "preLaunchTask": "Build (RPI_PICO) - Debug",
+        "svdFile": "${workspaceRoot:src}/rp2040.svd",
+      },
+      {
+        "name": "Jlink - DTQSYS HT",
+        "device": "nRF52840_XXAA",
+        "cwd": "${workspaceRoot:src}",
+        "executable": "build/zephyr/zephyr.elf",
+        "request": "launch",
+        "type": "cortex-debug",
+        "runToEntryPoint": "main",
+        "servertype": "jlink",
+        "rtos": "Zephyr",
+        //"showDevDebugOutput":"raw",
+        "serverpath": "C:/Program Files/SEGGER/JLink/JLinkGDBServerCL.exe", // Check path to Jlink installation
+        "armToolchainPath": "${workspaceRoot:src}/../zephyr-sdk/arm-zephyr-eabi/bin", // NOTE Check version & path of SDK here
+        "toolchainPrefix": "arm-zephyr-eabi",
+        "preLaunchTask": "Build (DTQSYS HT) - Debug",
+        "svdFile": "${workspaceRoot:src}/nrf52840.svd",
+      },
+      {
+        "name": "OpenOCD - ESP32C3_DevKitM (RISC-V)",
+        "type": "cppdbg",
+        "request": "launch",
+        "cwd": "${workspaceRoot:src}/build",
+        "program": "${workspaceRoot:src}/build/zephyr/zephyr.elf",
+        "miDebuggerPath": "${workspaceRoot:src}/../zephyr-sdk/riscv64-zephyr-elf/bin/riscv64-zephyr-elf-gdb.exe",
+        "setupCommands": [
+          { "text": "target extended-remote 127.0.0.1:3333" },
+          { "text": "set remote hardware-watchpoint-limit 2" },
+          { "text": "monitor reset halt" },
+          { "text": "flushregs" }
+        ],
+        "filterStderr": true,
+        "MIMode": "gdb",
+        "stopAtEntry": true,
+        "debugServerPath": "openocd.exe",
+        "debugServerArgs": "-c \"set ESP_RTOS \\\"hwthread\\\"\" -d2 -f ${workspaceRoot:src}\\..\\zephyr-lateset\\zephyr\\boards\\riscv\\esp32c3_devkitm\\support\\openocd.cfg",
+        "logging": {
+          "moduleLoad": true
+        }
+      },]},
+  "tasks": {
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "Build (Arduino Nano 33 BLE) - Debug",
+        "type": "shell",
+        "command": "west",
+        "args": [
+          "build",
+          "-p", "auto",
+          "-b", "arduino_nano_33_ble",
+          "--", "-DCMAKE_BUILD_TYPE=Debug"
+        ],
+        "problemMatcher": [
+          "$tsc"
+        ],
+        "presentation": {
+          "reveal": "always"
+        },
+        "group": "build"
+      },
+      {
+        "label": "Build (Arduino Nano 33 BLE Rev 2) - Debug",
+        "type": "shell",
+        "command": "west",
+        "args": [
+          "build",
+          "-p", "auto",
+          "-b", "arduino_nano_33_ble",
+          "--", "-DBOARD_REV_SR2=y",
+          "-DCMAKE_BUILD_TYPE=Debug"
+        ],
+        "problemMatcher": [
+          "$tsc"
+        ],
+        "presentation": {
+          "reveal": "always"
+        },
+        "group": "build"
+      },
+      {
+        "label": "Build (XIAO NRF52840 Sense) - Debug",
+        "type": "shell",
+        "command": "west",
+        "args": [
+          "build",
+          "-p", "auto",
+          "-b", "xiao_ble/nrf52840/sense",
+          "--", "-DCMAKE_BUILD_TYPE=Debug"
+        ],
+        "problemMatcher": [
+          "$tsc"
+        ],
+        "presentation": {
+          "reveal": "always"
+        },
+        "group": "build"
+      },
+      {
+        "label": "Build (RPI_PICO) - Debug",
+        "type": "shell",
+        "command": "west",
+        "args": [
+          "build",
+          "-p", "auto",
+          "-b", "rpi_pico",
+          "--", "-DCMAKE_BUILD_TYPE=Debug"
+        ],
+        "problemMatcher": [
+          "$tsc"
+        ],
+        "presentation": {
+          "reveal": "always"
+        },
+        "group": "build"
+      },
+      {
+        "label": "Build (DTQSYS HT) - Debug",
+        "type": "shell",
+        "command": "west",
+        "args": [
+          "build",
+          "-p", "auto",
+          "-b", "dtqsys_ht",
+          "--", "-DCMAKE_BUILD_TYPE=Debug"
+        ],
+        "problemMatcher": [
+          "$tsc"
+        ],
+        "presentation": {
+          "reveal": "always"
+        },
+        "group": "build"
       }
     ]
   }

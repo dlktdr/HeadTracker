@@ -1,12 +1,11 @@
 #pragma once
 
 #include <string>
-#define ARDUINOJSON_USE_DOUBLE 0
-#include <include/arduinojsonwrp.h>
+#include "arduinojsonwrp.h"
 
 #include "defines.h"
 
-void serial_init();
+int serial_init();
 void serial_Thread();
 
 // ONLY use these serial write methods, they are buffered & thread safe

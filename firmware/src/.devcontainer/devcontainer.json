@@ -1,0 +1,12 @@
+{
+	"name": "zephyr-dev",
+	"image": "docker.io/dlktdr/zephyr:latest",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.cpptools",
+        "trond-snekvik.devicetree"
+      ]
+    }
+  }
+}

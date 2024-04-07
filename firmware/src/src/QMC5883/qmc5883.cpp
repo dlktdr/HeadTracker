@@ -131,9 +131,9 @@ bool qmc5883Read(float mag[3])
     mag[1] = (int16_t)(buf[3] << 8 | buf[2]);
     mag[2] = (int16_t)(buf[5] << 8 | buf[4]);
 
-    mag[0] /= 163.84; // 16Bit +/-2 Gauss to uT
-    mag[1] /= 163.84;
-    mag[2] /= 163.84;
+    mag[0] /= 163.84f; // 16Bit +/-2 Gauss to uT
+    mag[1] /= 163.84f;
+    mag[2] /= 163.84f;
 
     return true;
 }

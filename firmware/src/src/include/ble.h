@@ -1,6 +1,6 @@
 #pragma once
 
-#include <bluetooth/conn.h>
+#include <zephyr/bluetooth/conn.h>
 
 #include "btparahead.h"
 #include "btpararmt.h"
