@@ -33,19 +33,19 @@ jobs:
         with:
           fetch-depth: 0
           submodules: 'true'
+      - name: Change User Permissions
+        run: |
+          chown -R $(id -u):$(id -g) /src
       - name: Create a binary output folder
         run: |
           mkdir /src/firmware/src/build_bins
-
-      - name: Set Zephyr Base Environment Variables
+      - name: Set Zephyr Base Environment Variable
         run: |
           echo "ZEPHYR_BASE=/root/zephyr/zephyr" >> "$GITHUB_ENV"
-
       - name: Register Zephyr CMAKE Package
         run: |
           cd /root/zephyr-sdk
           ./setup.sh -c
-
       - name: Build Firmware Arduino Nano 33 BLE (Sense)
         run: |
           cd /src/firmware/src
@@ -77,10 +77,10 @@ jobs:
           west build -p -b dtqsys_ht
           cp ./build/zephyr/*.bin build_bins/
 
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-        if: ${{ failure() }}
-        timeout-minutes: 15
+      # - name: Setup tmate session
+      #   uses: mxschmitt/action-tmate@v3
+      #   if: ${{ failure() }}
+      #   timeout-minutes: 15
 
       # Runs a set of commands using the runners shell
       - name: Package Firmware
