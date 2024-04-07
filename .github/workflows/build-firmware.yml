@@ -37,28 +37,26 @@ jobs:
         run: |
           mkdir /src/firmware/src/build_bins
 
-      - name: Source Zephyr Environment Vars
+      - name: Set Zephyr Base Environment Variables
         run: |
-          cd /root/zephyr/zephyr
-          chmod u+x zephyr-env.sh
-          . ./zephyr-env.sh
+          echo "ZEPHYR_BASE=/root/zephyr/zephyr" >> "$GITHUB_ENV"
 
       - name: Register Zephyr CMAKE Package
         run: |
           cd /root/zephyr-sdk
           ./setup.sh -c
 
-      - name: Build Firmware Nano 33 BLE
+      - name: Build Firmware Arduino Nano 33 BLE (Sense)
         run: |
           cd /src/firmware/src
           west build -p -b arduino_nano_33_ble
           cp ./build/zephyr/*.bin build_bins/
-      - name: Build Firmware Arduino Nano 33 BLE Sense Rev 2
+      - name: Build Firmware Arduino Nano 33 BLE (Sense) Rev 2
         run: |
           cd /src/firmware/src
           west build -p -b arduino_nano_33_ble -- -DBOARD_REV_SR2=y
           cp ./build/zephyr/*.bin build_bins/
-      - name: Build Firmware XIAO Sense
+      - name: Build Firmware XIAO NRF52840 Sense
         run: |
           cd /src/firmware/src
           west build -p -b xiao_ble/nrf52840/sense
