@@ -67,6 +67,11 @@ jobs:
           west build -p -b dtqsys_ht
           cp ./build/zephyr/*.bin build_bins/
 
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        if: ${{ failure() }}
+        timeout-minutes: 15
+
       # Runs a set of commands using the runners shell
       - name: Package Firmware
         uses: 'actions/upload-artifact@v2'
