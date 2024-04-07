@@ -36,6 +36,18 @@ jobs:
       - name: Create a binary output folder
         run: |
           mkdir /src/firmware/src/build_bins
+
+      - name: Source Zephyr Environment Vars
+        run: |
+          cd /root/zephyr/zephyr
+          chmod u+x zephyr-env.sh
+          . ./zephyr-env.sh
+
+      - name: Register Zephyr CMAKE Package
+        run: |
+          cd /root/zephyr-sdk
+          ./setup.sh -c
+
       - name: Build Firmware Nano 33 BLE
         run: |
           cd /src/firmware/src
