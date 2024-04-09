@@ -17,6 +17,7 @@
 
 #define HAS_CENTERBTN
 #define HAS_APDS9960
+#define HAS_AUXSERIAL
 #define HAS_3DIODE_RGB
 #define HAS_POWERLED
 #define HAS_NOTIFYLED

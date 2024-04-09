@@ -8,6 +8,7 @@
 #define INPUT_PULLUP (GPIO_INPUT | GPIO_PULL_UP)
 
 // Board Features
+#define HAS_AUXSERIAL
 #define HAS_3DIODE_RGB
 #define HAS_NOTIFYLED
 #define HAS_CENTERBTN
