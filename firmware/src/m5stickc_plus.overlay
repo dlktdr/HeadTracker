@@ -12,7 +12,7 @@
     i2csensor = &i2c0;
     spisensor = &spi2;
     guiuart = &uart0;
-		auxuart = &uart1;
+		auxserial = &uart1;
 		centerbtn = &user_button_0;
   };
 

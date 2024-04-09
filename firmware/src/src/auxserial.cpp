@@ -397,8 +397,8 @@ uint32_t AuxSerial_Read(uint8_t *buffer, uint32_t bufsize)
 bool AuxSerial_Available() { return serialRxBuf.getOccupied() > 0; }
 
 // Is a AUXUART port defined in the device tree?
-#elif defined(DT_N_ALIAS_auxuart)
-#define UART_DEVICE_NODE DT_ALIAS(auxuart)
+#elif defined(DT_N_ALIAS_auxserial)
+#define UART_DEVICE_NODE DT_ALIAS(auxserial)
 
 #include <zephyr/sys/ring_buffer.h>
 #include <zephyr/drivers/uart.h>
