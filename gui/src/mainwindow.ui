@@ -940,7 +940,7 @@
               </item>
              </layout>
             </widget>
-            <widget class="QWidget" name="tabExtras">
+            <widget class="QWidget" name="tabUart">
              <attribute name="title">
               <string>UART</string>
              </attribute>

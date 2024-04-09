@@ -1260,6 +1260,7 @@ void MainWindow::featuresReceiveComplete()
     ui->tabBT->setEnabled(false);
     ui->tabPWM->setEnabled(false);
     ui->tabAnaAux->setEnabled(false);
+    ui->tabUart->setEnabled(false);
 
     // Show only the features the board has
     if(features.contains("IMU")) {
@@ -1305,6 +1306,12 @@ void MainWindow::featuresReceiveComplete()
         features.contains("AN3CH") ||
         features.contains("AN4CH")) {
         ui->tabAnaAux->setEnabled(true); // FixMe, Aux Shouldn't be hidden
+    }
+    if(features.contains("AUXSERIAL")) {
+        ui->tabUart->setEnabled(true);
+        if(features.contains("AUXINVERT")) {
+            // TODO
+        }
     }
     resize(100,100);
 }
