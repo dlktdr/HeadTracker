@@ -394,7 +394,7 @@
                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sets the output channel you want tilt on&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                 <property name="text">
-                 <string>Center on Proximity Detect (BLE Sense Only)</string>
+                 <string>Center on Proximity Detect</string>
                 </property>
                </widget>
               </item>
@@ -493,6 +493,7 @@
                <widget class="QLabel" name="lblCenterBtn">
                 <property name="font">
                  <font>
+                  <pointsize>10</pointsize>
                   <bold>true</bold>
                  </font>
                 </property>
@@ -870,6 +871,7 @@
                   <widget class="QLabel" name="lblPPMOutputPin">
                    <property name="font">
                     <font>
+                     <pointsize>10</pointsize>
                      <bold>true</bold>
                     </font>
                    </property>
@@ -898,6 +900,7 @@
                   <widget class="QLabel" name="lblPPMInputPin">
                    <property name="font">
                     <font>
+                     <pointsize>10</pointsize>
                      <bold>true</bold>
                     </font>
                    </property>
