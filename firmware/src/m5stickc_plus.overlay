@@ -13,7 +13,6 @@
     spisensor = &spi2;
     guiuart = &uart0;
 		auxserial = &uart1;
-		centerbtn = &user_button_0;
   };
 
 	// Define the PPM output pin

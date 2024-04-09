@@ -8,7 +8,6 @@ ChannelViewer::ChannelViewer(TrackerSettings *trk, QWidget *parent) :
 {
     ui->setupUi(this);
     trkset = trk;
-    board = nullptr;
     connect(ui->tabWidget,SIGNAL(currentChanged(int)),this,SLOT(tabChanged(int)));
     connect(trkset,SIGNAL(liveDataChanged()),this,SLOT(chDataUpdated()));
     connect(ui->cmdClose,SIGNAL(clicked()),this,SLOT(closeClicked()));
@@ -33,8 +32,6 @@ ChannelViewer::~ChannelViewer()
 
 void ChannelViewer::tabChanged(int index)
 {
-    if(board == nullptr)
-        return;
     QMap<QString,bool> di;
     di["chout"] = false;
     di["btch"] = false;
@@ -68,8 +65,7 @@ void ChannelViewer::closeClicked()
     di["btch"] = false;
     di["ppmch"] = false;
     di["uartch"] = false;
-    if(board != nullptr)
-        trkset->setDataItemSend(di);
+    trkset->setDataItemSend(di);
     hide();
 }
 

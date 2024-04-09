@@ -18,7 +18,6 @@
 #include "channelviewer.h"
 #include "diagnosticdisplay.h"
 #include "boardjson.h"
-#include "boardbno055.h"
 #include "imageviewer/imageviewer.h"
 
 #ifndef GIT_CURRENT_SHA
@@ -67,7 +66,6 @@ protected:
 
 private:
     Ui::MainWindow *ui;
-    QList<BoardType*> boards;
     QSerialPort *serialcon;
     TrackerSettings trkset;
     QByteArray serialData;
@@ -78,7 +76,9 @@ private:
     QTimer saveToRAMTimer;
     QTimer requestParamsTimer;
     bool waitingOnParameters;
-    int boardRequestIndex;
+    bool waitingOnFeatures;
+    bool boardDiscover;
+    bool boardDiscoveryStarted;
 
     QString logd;    
     FirmwareWizard *firmwareWizard;
@@ -93,8 +93,6 @@ private:
     volatile bool sending;
 
     BoardJson *jsonht;
-    BoardBNO055 *bno055;
-    BoardType *currentboard;
     bool channelViewerOpen=false;
 
     void parseSerialData();
@@ -124,7 +122,6 @@ private slots:
     void bleAddressDiscovered(QString str);
     void liveDataChanged();
     void serialReadReady();
-    void manualSend();
     void storeToNVM();
     void storeToRAM();
     void resetCenter();
@@ -139,7 +136,6 @@ private slots:
     void showSerialDiagClicked();
     void showChannelViewerClicked();
     void BLE33tabChanged();
-//    void BTModeChanged();
     void reboot();
     void openHelp();
     void openDiscord();
@@ -155,11 +151,14 @@ private slots:
     void paramReceiveStart();
     void paramReceiveComplete();
     void paramReceiveFailure(int);
+    void featuresReceiveStart();
+    void featuresReceiveComplete();
+    void featuresReceiveFailure(int);
     void calibrationSuccess();
     void calibrationFailure();
     void serialTxReady();
-    void needsCalibration();    
-    void boardDiscovered(BoardType *);
+    void needsCalibration();
+    void boardDiscovered();
     void statusMessage(QString,int timeout=0);
 };
 #endif // MAINWINDOW_H

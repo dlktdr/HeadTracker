@@ -70,7 +70,7 @@ ssize_t btwr_{lowername}(struct bt_conn *conn, const struct bt_gatt_attr *attr, 
   if(len == sizeof({ctype})) {{
     {ctype} newvalue;
     memcpy(&newvalue, buf, len);
-    //LOGD("BT_Wr {name} (0x{addr})");
+    //LOG_DBG("BT_Wr {name} (0x{addr})");
     trkset.set{name}(newvalue);
   }}
   return len;
@@ -78,7 +78,7 @@ ssize_t btwr_{lowername}(struct bt_conn *conn, const struct bt_gatt_attr *attr, 
 ssize_t btrd_{lowername}(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf, uint16_t len, uint16_t offset)
 {{
   char *value = (char *)attr->user_data;
-  //LOGD("BT_Rd {name} (0x{addr})");
+  //LOG_DBG("BT_Rd {name} (0x{addr})");
   bt_{lowername} = trkset.get{name}();
   return bt_gatt_attr_read(conn, attr, buf, len, offset, value, sizeof({ctype}));
 }}

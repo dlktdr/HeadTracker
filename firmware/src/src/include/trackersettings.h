@@ -29,7 +29,6 @@ class TrackerSettings : public BaseTrackerSettings
   TrackerSettings() {}
 
   void resetFusion() override;
-  void pinsChanged() override;
 
   void setRollReversed(bool value);
   void setPanReversed(bool Value);

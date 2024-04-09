@@ -74,7 +74,7 @@ void io_init()
   digitalWrite(IO_I2C_PU, 1);
 #endif
 
-#if defined(CONFIG_BOARD_XIAO_BLE)
+#if defined(CONFIG_BOARD_XIAO_BLE_NRF52840_SENSE)
   // 10K I2C Pull up Resistors on internal LSM6DS3, High Drive Strength
   pinMode(IO_LSM6DS3PWR, GPIO_OUTPUT);
   // Shut Sensor off
@@ -82,7 +82,9 @@ void io_init()
   k_msleep(100);
   // Enable Sensor
   digitalWrite(IO_LSM6DS3PWR, 1);
+#endif
 
+#if defined(CONFIG_BOARD_XIAO_BLE)
   // Enable Battery Voltage Monitor
   pinMode(IO_ANBATT_ENA, GPIO_OUTPUT);
   digitalWrite(IO_ANBATT_ENA, 0);
@@ -104,12 +106,8 @@ void io_init()
 	}
 #endif
 
-#if defined(HAS_CENTERBTN_ACTIVELOW)
+#if defined(HAS_CENTERBTN)
   pinMode(IO_CENTER_BTN, INPUT_PULLUP);
-#endif
-
-#if defined(HAS_CENTERBTN_ACTIVEHIGH)
-  pinMode(IO_CENTER_BTN, GPIO_INPUT);
 #endif
 
 #if defined(HAS_BUZZER)
@@ -364,21 +362,8 @@ void io_Thread()
 
 bool readCenterButton()
 {
-#if defined(CONFIG_BOARD_ARDUINO_NANO_33_BLE)
-    int butpin = trkset.getButtonPin();
-    if (butpin < 1 || butpin > 13)
-      return false;
-    pinMode(D_TO_ENUM(butpin), INPUT_PULLUP);
-    return digitalRead(D_TO_ENUM(butpin)) == 0;
-#elif defined(HAS_CENTERBTN_ACTIVELOW)
+#if defined(HAS_CENTERBTN)
     pinMode(IO_CENTER_BTN, INPUT_PULLUP);
     return digitalRead(IO_CENTER_BTN) == 0;
-#elif defined(HAS_CENTERBTN_ACTIVEHIGH)
-    pinMode(IO_CENTER_BTN, GPIO_INPUT);
-    return digitalRead(IO_CENTER_BTN);
-#elif DT_NODE_HAS_STATUS(CENTERBTN_NODE, okay)
-    return gpio_pin_get_dt(&cbutton);
-#else
-    return false;
 #endif
 }

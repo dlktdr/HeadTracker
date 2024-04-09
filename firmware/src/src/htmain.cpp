@@ -20,7 +20,7 @@
 #include "trackersettings.h"
 #include "uart_mode.h"
 
-LOG_MODULE_REGISTER(main);
+LOG_MODULE_REGISTER(htmain);
 
 TrackerSettings trkset;
 

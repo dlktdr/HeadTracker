@@ -8,11 +8,10 @@
 #include <QQueue>
 #include <QTimer>
 
-#include "boardtype.h"
 #include "trackersettings.h"
 #include "calibrateble.h"
 
-class BoardJson : public BoardType
+class BoardJson : public QObject
 {
     Q_OBJECT
 public:
@@ -26,6 +25,7 @@ public:
     bool isBoardSavedToRAM() {return savedToRAM;}
     bool isBoardSavedToNVM() {return savedToNVM;}
 
+    QString boardName() {return _boardName;}
     void disconnected();
     void resetCenter();
     void saveToRAM();
@@ -33,11 +33,13 @@ public:
     void reboot();
     void erase();
     void requestHardware();
+    void requestFeatures();
     void requestParameters();
     void startCalibration();
     void startData();
     void stopData();
-    void allowAccessChanged(bool acc);
+    QStringList getFeatures() {return _features;}
+    QMap<QString, QVariant> getPins() {return _pins;}
     static uint16_t escapeCRC(uint16_t crc);
 
 private:
@@ -53,16 +55,24 @@ private:
     bool paramRXErrorSent;
     int jsonwaitingack;
     int rxparamfaults;
+    bool featuresTXErrorSent;
+    bool featuresRXErrorSent;
+    int rxfeaturesfaults;
+    QStringList _features;
+    QMap<QString, QVariant> _pins;
+
     QByteArray serialDataOut;
     QByteArray lastjson;
     QQueue<QByteArray> jsonqueue;
     QTimer imheretimout;
     QTimer updatesettingstmr;
     QTimer rxParamsTimer;
+    QTimer rxFeaturesTimer;
     QTimer reqDataItemsChanged;
     QMap<QString, bool> cursendingdataitems;
-
+    TrackerSettings *trkset;
     CalibrateBLE *bleCalibratorDialog;
+    QString _boardName;
 
     void sendSerialJSON(QString command, QVariantMap map=QVariantMap());
     void parseIncomingJSON(const QVariantMap &map);
@@ -81,13 +91,31 @@ private:
     };
 
 private slots:
-
     void ihTimeout();
     void rxParamsTimeout();
+    void rxFeaturesTimeout();
     void changeDataItems();
     void reqDataItemChanged();
     void calibrationCancel();
     void calibrationComplete();
+
+signals:
+    void paramSendStart();
+    void paramSendComplete();
+    void paramSendFailure(int);
+    void paramReceiveStart();
+    void paramReceiveComplete();
+    void paramReceiveFailure(int);
+    void featuresReceiveStart();
+    void featuresReceiveComplete();
+    void featuresReceiveFailure(int);
+    void calibrationSuccess();
+    void calibrationFailure();
+    void serialTxReady();
+    void addToLog(QString log, int ll=0);
+    void needsCalibration();
+    void boardDiscovered();
+    void statusMessage(QString,int timeout=0);
 };
 
 

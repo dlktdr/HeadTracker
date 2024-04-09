@@ -27,7 +27,7 @@ int is_ready(const struct log_backend *const backend)
 
 int format_set(const struct log_backend *const backend, uint32_t log_type)
 {
-
+  return 0;
 }
 
 void notify(const struct log_backend *const backend, enum log_backend_evt event, union log_backend_evt_arg *arg)

@@ -9,19 +9,27 @@
 
 // Board Features
 #define HAS_NOTIFYLED
-#define HAS_CENTERBTN_ACTIVELOW
+#define HAS_CENTERBTN
 
-// Pins (name, number, description)
-// NOTE: These pins are an enum entry. e.g. IO_AN0 = 0
-//     - Use PIN_NAME_TO_NUM(IO_D2) to get actual the pin number
-//     - The pin number can be converted back into the NRF port/pin
-//       using functions PIN_TO_GPORT & PIN_TO_GPIN
-//     - The string descrition for D2 would be StrPins[IO_D2]
+/*  Pins (name, number, description)
+   NOTE: These pins are an enum entry. e.g. IO_CENTER_BTN = 0
+       - Use PIN_NAME_TO_NUM(IO_D2) to get actual the pin number
+       - The pin number can be converted back into the NRF port/pin
+         using functions PIN_TO_GPORT & PIN_TO_GPIN
+       - The string descrition for CENTER_BTN would be StrPinDescriptions[IO_CENTER_BTN]
+       - The string of the pin name would be StrPins[CENTER_BTN]
+
+   Change the pins to whatever you wish here. Some pins might be defined in the
+   board's devicetree overlay file (e.g. UART). You will have to change them there
+   & should make sure they match here so the GUI can show the correct pinout.
+
+   Leave descriptions empty for pins if you don't want it to
+   show up in the pinout on the GUI
+   */
 
 #define PIN_X \
   PIN(LED,          RP2040PIN(25), "Notification LED") \
-  PIN(CENTER_BTN,   RP2040PIN(22), "Center Button") \
-  END_IO_PINS \
+  PIN(CENTER_BTN,   RP2040PIN(22), "Center Button")
 
 typedef enum {
 #define PIN(NAME, PINNO, DESC) IO_##NAME,

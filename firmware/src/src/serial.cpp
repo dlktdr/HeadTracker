@@ -34,6 +34,7 @@
 #include "soc_flash.h"
 #include "trackersettings.h"
 #include "ucrc16lib.h"
+#include "boards/features.h"
 
 LOG_MODULE_REGISTER(serial);
 
@@ -368,6 +369,13 @@ void parseData(DynamicJsonDocument &json)
     fwjson["Hard"] = FW_BOARD;
     fwjson["Git"] = STRINGIFY(FW_GIT_REV);
     serialWriteJSON(fwjson);
+
+    // Board Features Request
+  } else if (strcmp(command, "FE") == 0) {
+    json.clear();
+    getBoardFeatures(json);
+    json["Cmd"] = "FE";
+    serialWriteJSON(json);
 
     // Unknown Command
   } else {

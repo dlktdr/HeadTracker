@@ -24,10 +24,14 @@
 #define FW_BOARD "DTQSYS"
 #include "boards/dtqsys_ht.h"
 #define ARDUINO_BOOTLOADER
-#elif defined(CONFIG_BOARD_XIAO_BLE_SENSE) || defined(CONFIG_BOARD_XIAO_BLE)
-#define FW_BOARD "XIAOSENSE"
-#include "boards/xiaosense.h"
+#elif defined(CONFIG_BOARD_XIAO_BLE)
+#include "boards/xiaoble.h"
 #define SEEED_BOOTLOADER
+#if defined(CONFIG_BOARD_XIAO_BLE_NRF52840_SENSE)
+#define FW_BOARD "XIAOSENSE"
+#else
+#define FW_BOARD "XIAO52840"
+#endif
 #elif defined(CONFIG_SOC_ESP32C3)
 #define FW_BOARD "ESP32C3"
 #include "boards/esp32c3.h"

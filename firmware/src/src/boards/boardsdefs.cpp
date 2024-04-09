@@ -6,3 +6,8 @@ const char* StrPins[] = {
 #undef PIN
 };
 
+const char* StrPinDescriptions[] = {
+#define PIN(NAME, _PIN, DESC) DESC,
+  PIN_X
+#undef PIN
+};

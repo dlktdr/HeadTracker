@@ -137,9 +137,6 @@ public:
     _setting["rotx"] = 0;
     _setting["roty"] = 0;
     _setting["rotz"] = 0;
-    _setting["buttonpin"] = 2;
-    _setting["ppmoutpin"] = 10;
-    _setting["ppminpin"] = -1;
     _setting["uartmode"] = 0;
     _setting["crsftxrate"] = 140;
     _setting["sbustxrate"] = 80;
@@ -250,9 +247,6 @@ public:
     descriptions["rotx"] = "Board Rotation X";
     descriptions["roty"] = "Board Rotation Y";
     descriptions["rotz"] = "Board Rotation Z";
-    descriptions["buttonpin"] = "Button Pin";
-    descriptions["ppmoutpin"] = "PPM Output Pin";
-    descriptions["ppminpin"] = "PPM Input Pin";
     descriptions["uartmode"] = "Uart Mode (0- Off, 1-SBUS, 2-CRSFIN, 3-CRSFOUT)";
     descriptions["crsftxrate"] = "CRSF Transmit Frequncy";
     descriptions["sbustxrate"] = "SBUS Transmit Freqency";
@@ -1085,42 +1079,6 @@ public:
     return false;
   }
 
-
-  // Button Pin
-  int8_t getButtonPin() {
-    return _setting["buttonpin"].toInt();
-  }
-  bool setButtonPin(int8_t val=2) {
-    if(val >= -1 && val <= 64) {
-      _setting["buttonpin"] = val;
-      return true;
-    }
-    return false;
-  }
-
-  // PPM Output Pin
-  int8_t getPpmOutPin() {
-    return _setting["ppmoutpin"].toInt();
-  }
-  bool setPpmOutPin(int8_t val=10) {
-    if(val >= -1 && val <= 64) {
-      _setting["ppmoutpin"] = val;
-      return true;
-    }
-    return false;
-  }
-
-  // PPM Input Pin
-  int8_t getPpmInPin() {
-    return _setting["ppminpin"].toInt();
-  }
-  bool setPpmInPin(int8_t val=-1) {
-    if(val >= -1 && val <= 64) {
-      _setting["ppminpin"] = val;
-      return true;
-    }
-    return false;
-  }
 
   // Uart Mode (0- Off, 1-SBUS, 2-CRSFIN, 3-CRSFOUT)
   uint8_t getUartMode() {

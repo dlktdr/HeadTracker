@@ -2,27 +2,26 @@
 #include "diagnosticdisplay.h"
 #include "ui_diagnosticdisplay.h"
 
-DiagnosticDisplay::DiagnosticDisplay(TrackerSettings *ts, QWidget *parent) :
+
+DiagnosticDisplay::DiagnosticDisplay(TrackerSettings *ts, BoardJson *board, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::DiagnosticDisplay),
-    trkset(ts)
+    trkset(ts),
+    brd(board)
 {
     ui->setupUi(this);
     connect(trkset,&TrackerSettings::liveDataChanged,this,&DiagnosticDisplay::updated);
+    connect(brd,&BoardJson::featuresReceiveComplete, this, &DiagnosticDisplay::featUpdate);
     updated();
     ui->tblParams->verticalHeader()->setVisible(false);
     ui->tblParams->horizontalHeader()->setVisible(false);
     ui->tblParams->horizontalHeader()->setStretchLastSection(true);
     ui->tblParams->setColumnWidth(0,100);
-    //buildSettingsModel();
 
     model = new DataModel(trkset);
     ui->tblLiveData->setModel(model);
-    //ui->tblLiveData->setStyleSheet("QTreeView::item {padding-left: 0px; border: 0px}");
-    ui->tblLiveData->resizeColumnToContents(0);
     ui->tblLiveData->horizontalHeader()->setSectionResizeMode(2,QHeaderView::Stretch);
-
-    ui->tabWidget->setCurrentIndex(0);
+    ui->tabWidget->setCurrentIndex(0);    
 }
 
 DiagnosticDisplay::~DiagnosticDisplay()
@@ -56,6 +55,31 @@ void DiagnosticDisplay::updated()
         ui->tblParams->setItem(row,1,value);
         ui->tblParams->setItem(row++,2,description);
     }
+}
+
+void DiagnosticDisplay::featUpdate()
+{
+    ui->tblPins->clear();
+    ui->tblPins->setColumnCount(2);
+    ui->tblPins->setRowCount(brd->getPins().count());
+    int i=0;
+    for (auto [key, value] : brd->getPins().asKeyValueRange()) {
+        QTableWidgetItem *keyItem = new QTableWidgetItem(key);
+        QTableWidgetItem *valItem = new QTableWidgetItem(value.toString());
+        if(value.toString()!="") {
+            ui->tblPins->setItem(i,0,keyItem);
+            ui->tblPins->setItem(i++,1,valItem);
+        }
+    }
+    ui->lstFeatures->clear();
+    QStringList features = brd->getFeatures();
+    foreach (auto feat, features) {
+        ui->lstFeatures->addItem(feat);
+    }
+    ui->tblPins->setRowCount(i);
+    ui->tblPins->horizontalHeader()->setStretchLastSection(true);
+    ui->tblPins->verticalHeader()->setVisible(false);
+    ui->tblPins->horizontalHeader()->setVisible(false);
 }
 
 DataModel::DataModel(TrackerSettings *ts, QObject *parent)

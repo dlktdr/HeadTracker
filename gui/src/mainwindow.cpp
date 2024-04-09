@@ -27,16 +27,12 @@ MainWindow::MainWindow(QWidget *parent)
     imageViewer->setWindowTitle(tr("Pinout"));
     imageViewer->resize(800,600);
 
-    // Start the board interface
+    // Board interface
+    boardDiscover = false;
+    boardDiscoveryStarted = false;
     jsonht = new BoardJson(&trkset);
-    bno055 = new BoardBNO055(&trkset);
-
-    // Add it to the list of available boards
-    boards.append(jsonht);
-    boards.append(bno055);
 
     // Once correct board is discovered this will be set to one of the above boards
-    currentboard = nullptr;
     ui->tabBLE->setCurrentIndex(0);
 
     QString guiDisplayVersion = version;
@@ -47,7 +43,7 @@ MainWindow::MainWindow(QWidget *parent)
     serialcon = new QSerialPort;
 
     // Diagnostic Display + Serial Debug
-    diagnostic = new DiagnosticDisplay(&trkset,this);
+    diagnostic = new DiagnosticDisplay(&trkset, jsonht, this);
     diagnostic->setWindowFlags(Qt::Window);
     serialDebug = new QTextEdit(this);
     serialDebug->setWindowFlags(Qt::Window);
@@ -61,11 +57,6 @@ MainWindow::MainWindow(QWidget *parent)
     diagnostic->show();
 #endif
 
-    // Hide these buttons until connected
-    ui->cmdStartGraph->setVisible(false);
-    ui->cmdStopGraph->setVisible(false);
-    ui->chkRawData->setVisible(false);
-
     // Firmware loader loader dialog
     firmwareWizard = nullptr;
 
@@ -78,22 +69,23 @@ MainWindow::MainWindow(QWidget *parent)
     // Update default settings to UI
     updateToUI();
 
-    // Board Connections, connects all boards signals to same end points
-    foreach(BoardType *brd, boards) {
-        connect(brd, &BoardType::paramSendStart, this,  &MainWindow::paramSendStart);
-        connect(brd, &BoardType::paramSendComplete, this,  &MainWindow::paramSendComplete);
-        connect(brd, &BoardType::paramSendFailure, this,  &MainWindow::paramSendFailure);
-        connect(brd, &BoardType::paramReceiveStart, this,  &MainWindow::paramReceiveStart);
-        connect(brd, &BoardType::paramReceiveComplete, this,  &MainWindow::paramReceiveComplete);
-        connect(brd, &BoardType::paramReceiveFailure, this,  &MainWindow::paramReceiveFailure);
-        connect(brd, &BoardType::calibrationSuccess, this,  &MainWindow::calibrationSuccess);
-        connect(brd, &BoardType::calibrationFailure, this,  &MainWindow::calibrationFailure);
-        connect(brd, &BoardType::serialTxReady, this,  &MainWindow::serialTxReady);
-        connect(brd, &BoardType::addToLog,this, &MainWindow::addToLog);
-        connect(brd, &BoardType::needsCalibration,this, &MainWindow::needsCalibration);
-        connect(brd, &BoardType::boardDiscovered,this, &MainWindow::boardDiscovered);
-        connect(brd, &BoardType::statusMessage,this, &MainWindow::statusMessage);
-    }
+    connect(jsonht, &BoardJson::paramSendStart, this,  &MainWindow::paramSendStart);
+    connect(jsonht, &BoardJson::paramSendComplete, this,  &MainWindow::paramSendComplete);
+    connect(jsonht, &BoardJson::paramSendFailure, this,  &MainWindow::paramSendFailure);
+    connect(jsonht, &BoardJson::paramReceiveStart, this,  &MainWindow::paramReceiveStart);
+    connect(jsonht, &BoardJson::paramReceiveComplete, this,  &MainWindow::paramReceiveComplete);
+    connect(jsonht, &BoardJson::paramReceiveFailure, this,  &MainWindow::paramReceiveFailure);
+    connect(jsonht, &BoardJson::featuresReceiveStart, this,  &MainWindow::featuresReceiveStart);
+    connect(jsonht, &BoardJson::featuresReceiveComplete, this,  &MainWindow::featuresReceiveComplete);
+    connect(jsonht, &BoardJson::featuresReceiveFailure, this,  &MainWindow::featuresReceiveFailure);
+    connect(jsonht, &BoardJson::calibrationSuccess, this,  &MainWindow::calibrationSuccess);
+    connect(jsonht, &BoardJson::calibrationFailure, this,  &MainWindow::calibrationFailure);
+    connect(jsonht, &BoardJson::serialTxReady, this,  &MainWindow::serialTxReady);
+    connect(jsonht, &BoardJson::addToLog,this, &MainWindow::addToLog);
+    connect(jsonht, &BoardJson::needsCalibration,this, &MainWindow::needsCalibration);
+    connect(jsonht, &BoardJson::boardDiscovered,this, &MainWindow::boardDiscovered);
+    connect(jsonht, &BoardJson::statusMessage,this, &MainWindow::statusMessage);
+
 
     // Serial data ready
     connect(serialcon, &QSerialPort::readyRead,this, &MainWindow::serialReadReady);
@@ -101,9 +93,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Buttons
     connect(ui->cmdConnect,&QPushButton::clicked,this,&MainWindow::connectDisconnectClicked);
-    connect(ui->cmdSend, &QPushButton::clicked,this, &MainWindow::manualSend);
-    //connect(ui->cmdStartGraph, &QPushButton::clicked,this, &MainWindow::startGraph);
-    //connect(ui->cmdStopGraph, &QPushButton::clicked,this, &MainWindow::stopGraph);
     connect(ui->cmdResetCenter, &QPushButton::clicked,this,  &MainWindow::resetCenter);
     connect(ui->cmdCalibrate, &QPushButton::clicked,this,  &MainWindow::startCalibration);
     connect(ui->cmdSaveNVM, &QPushButton::clicked,this, &MainWindow::storeToNVM);
@@ -170,27 +159,11 @@ MainWindow::MainWindow(QWidget *parent)
     connect(&trkset,&TrackerSettings::liveDataChanged,this,&MainWindow::liveDataChanged);
     connect(&trkset,&TrackerSettings::bleAddressDiscovered,this,&MainWindow::bleAddressDiscovered);
 
-    // Combo Boxes
-        // Add Remap Choices + The corresponding values
-    ui->cmbRemap->addItem("X,Y,Z",AXES_MAP(AXIS_X,AXIS_Y,AXIS_Z));
-    ui->cmbRemap->addItem("X,Z,Y",AXES_MAP(AXIS_X,AXIS_Z,AXIS_Y));
-    ui->cmbRemap->addItem("Y,X,Z",AXES_MAP(AXIS_Y,AXIS_X,AXIS_Z));
-    ui->cmbRemap->addItem("Y,Z,X",AXES_MAP(AXIS_Y,AXIS_Z,AXIS_X));
-    ui->cmbRemap->addItem("Z,X,Y",AXES_MAP(AXIS_Z,AXIS_X,AXIS_Y));
-    ui->cmbRemap->addItem("Z,Y,Z",AXES_MAP(AXIS_Z,AXIS_Y,AXIS_X));
-    ui->cmbRemap->setCurrentIndex(0);
-
     connect(ui->cmbpanchn,  &QComboBox::currentIndexChanged, this, &MainWindow::updateFromUI);
     connect(ui->cmbtiltchn, &QComboBox::currentIndexChanged, this, &MainWindow::updateFromUI);
     connect(ui->cmbrllchn, &QComboBox::currentIndexChanged, this, &MainWindow::updateFromUI);
     connect(ui->cmbalertchn, &QComboBox::currentIndexChanged, this, &MainWindow::updateFromUI);
-    connect(ui->cmbRemap, &QComboBox::currentIndexChanged, this, &MainWindow::updateFromUI);
-    connect(ui->cmbSigns, &QComboBox::currentIndexChanged, this, &MainWindow::updateFromUI);
-    connect(ui->cmbButtonPin, &QComboBox::currentIndexChanged, this, &MainWindow::updateFromUI);
-    connect(ui->cmbPpmInPin, &QComboBox::currentIndexChanged, this, &MainWindow::updateFromUI);
-    connect(ui->cmbPpmOutPin, &QComboBox::currentIndexChanged, this, &MainWindow::updateFromUI);
     connect(ui->cmbBtMode, &QComboBox::currentIndexChanged, this, &MainWindow::updateFromUI);
-    //connect(ui->cmbResetOnPPM, &QComboBox::currentIndexChanged,this,&MainWindow::updateFromUI));
     connect(ui->cmbPPMChCount, &QComboBox::currentIndexChanged, this, &MainWindow::updateFromUI);
     connect(ui->cmbA0Ch, &QComboBox::currentIndexChanged, this, &MainWindow::updateFromUI);
     connect(ui->cmbA1Ch, &QComboBox::currentIndexChanged, this, &MainWindow::updateFromUI);
@@ -252,7 +225,6 @@ MainWindow::~MainWindow()
 {
     delete serialcon;
     delete jsonht;
-    delete bno055;
     if(firmwareWizard != nullptr)
         delete firmwareWizard;
     delete serialDebug;
@@ -331,23 +303,19 @@ void MainWindow::serialDisconnect()
         serialcon->close();
     }
 
-    foreach(BoardType *brd, boards) {
-        brd->_disconnected();
-        brd->allowAccess(false);
-    }
+    boardDiscover = false;
+    boardDiscoveryStarted = false;
+    jsonht->disconnected();
 
     statusMessage(tr("Disconnected"));
     ui->cmdConnect->setText(tr(" Connect"));
     ui->cmdConnect->setIcon(QIcon(":/Icons/images/connect.svg"));
     ui->cmdChannelViewer->setEnabled(false);
-    ui->cmdStopGraph->setEnabled(false);
-    ui->cmdStartGraph->setEnabled(false);
     ui->cmdSaveNVM->setEnabled(false);
     ui->cmdReboot->setEnabled(false);
     ui->servoPan->setShowActualPosition(true);
     ui->servoTilt->setShowActualPosition(true);
     ui->servoRoll->setShowActualPosition(true);
-    ui->cmdSend->setEnabled(false);
     ui->cmdCalibrate->setEnabled(false);
     ui->cmdResetCenter->setEnabled(false);
     ui->stackedWidget->setCurrentIndex(0);
@@ -357,15 +325,13 @@ void MainWindow::serialDisconnect()
     ui->actionEraseFlash->setEnabled(false);
 
     sending = false;
-    currentboard = nullptr;
-    boardRequestIndex=0;
     connectTimer.stop();
     saveToRAMTimer.stop();
     requestTimer.stop();
     requestParamsTimer.stop();
     waitingOnParameters = false;
+    waitingOnFeatures = false;
     serialData.clear();
-    channelviewer->setBoard(nullptr);
     if(channelviewer->isVisible()) {
         channelViewerOpen = true;
         channelviewer->hide();
@@ -402,7 +368,7 @@ void MainWindow::serialError(QSerialPort::SerialPortError err)
 
 void MainWindow::connectTimeout()
 {
-    if(currentboard != nullptr && serialcon->isOpen()) {
+    if(serialcon->isOpen()) {
         QMessageBox::information(this,tr("Error"), tr("No valid board detected\nPlease check COM port or flash proper code"));
         serialDisconnect();
     }
@@ -577,10 +543,11 @@ void MainWindow::updateToUI()
     ui->chkCRSFInv->setChecked(trkset.getCrsfTxInv());
 
     // Button Press Mode - Enable/Disable on long press (Disable if no button pin selected)
-    if(trkset.getButtonPin() > 0)
+/*    if(trkset.getButtonPin() > 0)
         ui->chkLngBttnPress->setEnabled(true);
     else
         ui->chkLngBttnPress->setEnabled(false);
+*/
 
     ui->spnPPMFrameLen->setMinimum((double)TrackerSettings::PPM_MIN_FRAME / 1000.0);
     ui->spnPPMFrameLen->setMaximum((double)TrackerSettings::PPM_MAX_FRAME / 1000.0);
@@ -641,8 +608,6 @@ void MainWindow::updateToUI()
     ui->cmbPWM2->setCurrentIndex(pwm2Ch==-1?0:pwm2Ch);
     ui->cmbPWM3->setCurrentIndex(pwm3Ch==-1?0:pwm3Ch);
 
-    ui->cmbRemap->setCurrentIndex(ui->cmbRemap->findData(trkset.axisRemap()));
-    ui->cmbSigns->setCurrentIndex(trkset.axisSign());
     ui->cmbBtMode->setCurrentIndex(trkset.getBtMode());
     int rot[3];
     trkset.orientation(rot[0],rot[1],rot[2]);
@@ -653,15 +618,6 @@ void MainWindow::updateToUI()
     ui->til_gain->setValue(trkset.getTlt_Gain()*10);
     ui->pan_gain->setValue(trkset.getPan_Gain()*10);
     ui->rll_gain->setValue(trkset.getRll_Gain()*10);
-
-    int ppout_index = trkset.getPpmOutPin()-1;
-    int ppin_index = trkset.getPpmInPin()-1;
-    int but_index = trkset.getButtonPin()-1;
-    //int resppm_index = trkset.resetCntPPM();
-    ui->cmbPpmOutPin->setCurrentIndex(ppout_index < 1 ? 0 : ppout_index);
-    ui->cmbPpmInPin->setCurrentIndex(ppin_index < 1 ? 0 : ppin_index);
-    ui->cmbButtonPin->setCurrentIndex(but_index < 1 ? 0 : but_index);
-    //ui->cmbResetOnPPM->setCurrentIndex(resppm_index < 0 ? 0: resppm_index);
 
     // PPM Output Settings
     int channels = trkset.getPpmChCnt();
@@ -782,70 +738,11 @@ void MainWindow::updateFromUI()
     trkset.setPwm2(pwmCh2==0?-1:pwmCh2);
     trkset.setPwm3(pwmCh3==0?-1:pwmCh3);
 
-    // BNO Axis Remapping
-    trkset.setAxisRemap(ui->cmbRemap->currentData().toUInt());
-    trkset.setAxisSign(ui->cmbSigns->currentIndex());
-
-
-    // Check all pins for duplicates
-
-    // Shift the index of the disabled choice to -1 in settings
-    enum {PIN_PPMIN,PIN_PPMOUT,PIN_BUTRESET,PIN_SBUSIN1,PIN_SBUSIN2};
-    int pins[5] {-1,-1,-1,-1,-1};
-
-    int ppout_index = ui->cmbPpmOutPin->currentIndex()+1;
-    pins[PIN_PPMOUT] = ppout_index==1?-1:ppout_index;
-    int ppin_index = ui->cmbPpmInPin->currentIndex()+1;
-    pins[PIN_PPMIN] = ppin_index==1?-1:ppin_index;
-    int but_index = ui->cmbButtonPin->currentIndex()+1;
-    pins[PIN_BUTRESET] = but_index==1?-1:but_index;
-
-    bool sbusinchecked = ui->chkSbusInInv->isChecked();
-    if(!sbusinchecked) {
-        pins[PIN_SBUSIN1] = 5;
-        pins[PIN_SBUSIN2] = 6;
-    }
-
-    // Loop through all possibilites checking for duplicates
-    bool duplicates=false;
-    for(int i=0; i < 4; i++) {
-        for(int y=i+1; y < 5; y++) {
-            if(pins[i] > 0 && pins[y] > 0 && pins[i] == pins[y]) {
-                duplicates = true;
-                break;
-            }
-        }
-    }
-
-    // Check for pin duplicates
-    if(duplicates) {
-        QString message = tr("Cannot pick dulplicate pins");
-        if(!sbusinchecked)
-            message += tr("\n  * non-inverted SBUS receive requires  D5 and D6 connected together");
-        QMessageBox::information(this,tr("Error"), message);
-
-        // Reset gui to old values
-        ppout_index = trkset.getPpmOutPin()-1;
-        ppin_index = trkset.getPpmInPin()-1;
-        but_index = trkset.getButtonPin()-1;
-        sbusinchecked = trkset.getSbInInv();
-        ui->cmbPpmOutPin->setCurrentIndex(ppout_index < 1 ? 0 : ppout_index);
-        ui->cmbPpmInPin->setCurrentIndex(ppin_index < 1 ? 0 : ppin_index);
-        ui->cmbButtonPin->setCurrentIndex(but_index < 1 ? 0 : but_index);
-        ui->chkSbusInInv->setChecked(sbusinchecked);
-
-    } else {
-        trkset.setPpmOutPin(pins[PIN_PPMOUT]);
-        trkset.setPpmInPin(pins[PIN_PPMIN]);
-        trkset.setButtonPin(pins[PIN_BUTRESET]);
-        trkset.setSbInInv(sbusinchecked);
-    }
-
     // Button Press Mode - Enable/Disable on long press (Disable if no button pin selected)
-    if(trkset.getButtonPin() > 0)
+    /*if(trkset.getButtonPin() > 0)
         ui->chkLngBttnPress->setEnabled(true);
     else
-        ui->chkLngBttnPress->setEnabled(false);
+        ui->chkLngBttnPress->setEnabled(false);*/
 
     trkset.setButLngPs(ui->chkLngBttnPress->isChecked());
     trkset.setRstOnTlt(ui->chkRstOnTlt->isChecked());
@@ -939,18 +836,10 @@ void MainWindow::serialReadReady()
             return;
         }
 
-        // Send complete lines to
-        foreach(BoardType *brd, boards) {
-            brd->_dataIn(data);
-        }
+        jsonht->dataIn(data);
 
         serialData = serialData.right(serialData.length()-nlindex-2);
     }
-}
-
-void MainWindow::manualSend()
-{
-    sendSerialData(ui->txtCommand->text().toLatin1());
 }
 
 /* offOrientChanged()
@@ -1058,21 +947,17 @@ void MainWindow::loadSettings()
 
 bool MainWindow::checkSaved()
 {
-    foreach(BoardType *brd, boards) {
-        if(!brd->isAccessAllowed())
-            continue;
-        if(!brd->_isBoardSavedToRAM()) {
-            QMessageBox::StandardButton rval = QMessageBox::question(this,tr("Changes not sent"),tr("Are you sure you want to disconnect?\n"\
-                                  "Changes haven't been sent to the headtracker\nClick \"Send Changes\" first"),QMessageBox::Yes|QMessageBox::No);
-            if(rval != QMessageBox::Yes)
-                return false;
+    if(!jsonht->isBoardSavedToRAM()) {
+        QMessageBox::StandardButton rval = QMessageBox::question(this,tr("Changes not sent"),tr("Are you sure you want to disconnect?\n"\
+                              "Changes haven't been sent to the headtracker\nClick \"Send Changes\" first"),QMessageBox::Yes|QMessageBox::No);
+        if(rval != QMessageBox::Yes)
+            return false;
 
-        } else if (!brd->_isBoardSavedToNVM()) {
-            QMessageBox::StandardButton rval = QMessageBox::question(this,tr("Changes not saved on tracker"),tr("Are you sure you want to disconnect?\n"\
-                                  "Changes haven't been permanently stored on headtracker\nClick \"Save settings\" first"),QMessageBox::Yes|QMessageBox::No);
-            if(rval != QMessageBox::Yes)
-                return false;
-        }
+    } else if (!jsonht->isBoardSavedToNVM()) {
+        QMessageBox::StandardButton rval = QMessageBox::question(this,tr("Changes not saved on tracker"),tr("Are you sure you want to disconnect?\n"\
+                              "Changes haven't been permanently stored on headtracker\nClick \"Save settings\" first"),QMessageBox::Yes|QMessageBox::No);
+        if(rval != QMessageBox::Yes)
+            return false;
     }
     return true;
 }
@@ -1091,57 +976,40 @@ void MainWindow::uploadFirmwareWizard()
 
 /* requestTimeout()
  *      This timeout is called after waiting for the board to boot
- * it requests the hardware and version from the board, gives each board
- * 300ms to respond before trying the next one. Sets the allowAccess so
- * other boards won't respond on the serial line at the same time.
+ * it requests the hardware and version from the board
  */
 
 void MainWindow::requestTimeout()
 {
-    // Was a board discovered, if so just quit
-    if(currentboard != nullptr)
+    if(boardDiscoveryStarted == false) {
+        boardDiscoveryStarted = true;
+        // Request hardware information from the new board
+        addToLog(tr("Trying to connect to Head Tracker\n"));
+        jsonht->requestHardware();
+        requestTimer.start(WAIT_BETWEEN_BOARD_CONNECTIONS);
         return;
+    }
 
-    // Otherwise increment to the next board and try again
-    if(boardRequestIndex == boards.length()) {
-        msgbox->setText(tr("Was unable to determine the board type\n\nHave you written the firmware to the board yet?"));
+    if(!boardDiscover && boardDiscoveryStarted) {
+        msgbox->setText(tr("Was unable to determine the board type\n\nHave you written firmware to the board yet?"));
         msgbox->setWindowTitle("Error");
         msgbox->show();
         statusMessage(tr("Board discovery failed"));
         serialDisconnect();
-        return;
     }
-
-    // Prevent last board class from interfering
-    if(boardRequestIndex > 0)
-        boards[boardRequestIndex-1]->allowAccess(false);
-
-    // Request hardware information from the new board
-    addToLog(tr("Trying to connect to ") + boards[boardRequestIndex]->boardName() + "\n");
-    boards[boardRequestIndex]->allowAccess(true);
-    boards[boardRequestIndex]->requestHardware();
-    requestTimer.start(WAIT_BETWEEN_BOARD_CONNECTIONS);
-
-    // Move to next board
-    boardRequestIndex++;
 }
 
 void MainWindow::saveToRAMTimeout()
 {
-    // Request hardware from all board types
-    foreach(BoardType *brd, boards) {
-        brd->_saveToRAM();
-    }
+    jsonht->saveToRAM();
 }
 
 void MainWindow::requestParamsTimeout()
 {
     waitingOnParameters=true;
+    jsonht->requestParameters();
 
-    // Request hardware from all board types
-    foreach(BoardType *brd, boards) {
-        brd->_requestParameters();
-    }
+
 }
 
 /**
@@ -1149,18 +1017,15 @@ void MainWindow::requestParamsTimeout()
  */
 void MainWindow::eraseFlash()
 {
-  if(currentboard && (currentboard->boardName() == "NANO33BLE" ||
-                      currentboard->boardName() == "DTQSYS")) {
     if(QMessageBox::question(this, tr("Set Defaults?"), tr("This will erase all settings to defaults\r\nAre you sure?")) == QMessageBox::Yes) {
-      currentboard->_erase();
-      currentboard->_reboot();
+      jsonht->erase();
+      jsonht->reboot();
       QTime dieTime= QTime::currentTime().addMSecs(RECONNECT_AFT_REBT);
       while (QTime::currentTime() < dieTime)
           QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
 
       serialConnect();
     }
-  }
 }
 
 // Start the various calibration dialogs
@@ -1171,40 +1036,30 @@ void MainWindow::startCalibration()
         return;
     }
 
-    foreach(BoardType *brd, boards) {
-        brd->_startCalibration();
-    }
+    jsonht->startCalibration();
 }
 
 // Tell the board to start sending data again
 void MainWindow::startData()
 {
-    foreach(BoardType *brd, boards) {
-        brd->_startData();
-    }
+    jsonht->startData();
 }
 
 void MainWindow::storeToNVM()
 {
-    foreach(BoardType *brd, boards) {
-        brd->_saveToNVM();
-    }
+    jsonht->saveToNVM();
     statusMessage(tr("Storing Parameters to memory"));
     ui->cmdSaveNVM->setEnabled(false);
 }
 
 void MainWindow::storeToRAM()
 {
-    foreach(BoardType *brd, boards) {
-        brd->_saveToRAM();
-    }
+    jsonht->saveToRAM();
 }
 
 void MainWindow::resetCenter()
 {
-    foreach(BoardType *brd, boards) {
-        brd->_resetCenter();
-    }
+    jsonht->resetCenter();
 }
 
 void MainWindow::showDiagsClicked()
@@ -1230,16 +1085,15 @@ void MainWindow::showChannelViewerClicked()
 
 void MainWindow::BLE33tabChanged()
 {
-    if(currentboard == nullptr)
-        return;
-
     QMap<QString,bool> dataitms;
-    dataitms["tiltoff"] = true;
-    dataitms["rolloff"] = true;
-    dataitms["panoff"] = true;
-    dataitms["tiltout"] = true;
-    dataitms["rollout"] = true;
-    dataitms["panout"] = true;
+    if(jsonht->getFeatures().contains("IMU")) {
+        dataitms["tiltoff"] = true;
+        dataitms["rolloff"] = true;
+        dataitms["panoff"] = true;
+        dataitms["tiltout"] = true;
+        dataitms["rollout"] = true;
+        dataitms["panout"] = true;
+    }
     dataitms["btcon"] = false;
     dataitms["gyrocal"] = false;
     dataitms["btaddr"] = false;
@@ -1247,7 +1101,8 @@ void MainWindow::BLE33tabChanged()
 
     switch(ui->tabBLE->currentIndex()) {
     case 0: { // General
-        dataitms["gyrocal"] = true;
+        if(jsonht->getFeatures().contains("IMU"))
+            dataitms["gyrocal"] = true;
         break;
     }
     case 1: { // Output
@@ -1257,9 +1112,11 @@ void MainWindow::BLE33tabChanged()
         break;
     }
     case 3: { // Bluetooth
-        dataitms["btcon"] = true;
-        dataitms["btrmt"] = true;
-        dataitms["btaddr"] = true;
+        if(jsonht->getFeatures().contains("BT")) {
+            dataitms["btcon"] = true;
+            dataitms["btrmt"] = true;
+            dataitms["btaddr"] = true;
+        }
         break;
     }
     case 4: { // PWM
@@ -1275,45 +1132,23 @@ void MainWindow::BLE33tabChanged()
     trkset.setDataItemSend(dataitms);
 }
 
-/*void MainWindow::BTModeChanged()
-{
-    updateFromUI();
-
-    QMessageBox::StandardButton reply;
-    reply = QMessageBox::question(this, tr("Reboot Required"),
-                                  tr("Bluetooth mode change requires reboot.\n"
-                                  "Save and reboot now?"),
-                                  QMessageBox::Yes | QMessageBox::No);
-    if(reply == QMessageBox::Yes) {
-        storeToNVM();
-        QTime dieTime= QTime::currentTime().addMSecs(800);
-        while (QTime::currentTime() < dieTime)
-            QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
-        reboot();
-    }
-}*/
-
 void MainWindow::reboot()
 {
-    foreach(BoardType *brd, boards) {
-        bool reboot=true;
-        if(!brd->isAccessAllowed())
-            continue;
-        if(!brd->_isBoardSavedToNVM()) {
-            QMessageBox::StandardButton rval = QMessageBox::question(this,tr("Changes not saved"),tr("Are you sure you want to reboot?\n"\
-                                  "Changes haven't been saved\nClick \"Save Settings\" first"),QMessageBox::Yes|QMessageBox::No);
-            if(rval != QMessageBox::Yes) {
-                reboot = false;
-            }
+    bool reboot=true;
+    if(!jsonht->isBoardSavedToNVM()) {
+        QMessageBox::StandardButton rval = QMessageBox::question(this,tr("Changes not saved"),tr("Are you sure you want to reboot?\n"\
+                              "Changes haven't been saved\nClick \"Save Settings\" first"),QMessageBox::Yes|QMessageBox::No);
+        if(rval != QMessageBox::Yes) {
+            reboot = false;
         }
-        if(reboot) {
-            brd->_reboot();
-            QTime dieTime= QTime::currentTime().addMSecs(RECONNECT_AFT_REBT);
-            while (QTime::currentTime() < dieTime)
-                QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+    }
+    if(reboot) {
+        jsonht->reboot();
+        QTime dieTime= QTime::currentTime().addMSecs(RECONNECT_AFT_REBT);
+        while (QTime::currentTime() < dieTime)
+            QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
 
-            serialConnect();
-        }
+        serialConnect();
     }
 }
 
@@ -1370,10 +1205,10 @@ void MainWindow::paramReceiveComplete()
 {
     statusMessage(tr("Parameters Request Complete"),5000);
     waitingOnParameters = false;
-    updateToUI();
-    BLE33tabChanged(); // Request Data to be sent
-    trkset.setDataItemSend("isCalibrated",true);
-    trkset.setDataItemSend("trpenabled",true);
+
+    // Request the Features
+    jsonht->requestFeatures();
+    waitingOnFeatures = true;
 }
 
 void MainWindow::paramReceiveFailure(int)
@@ -1384,6 +1219,106 @@ void MainWindow::paramReceiveFailure(int)
     statusMessage("Parameter Received Failure");
     serialDisconnect();
 }
+
+void MainWindow::featuresReceiveStart()
+{
+    statusMessage(tr("Features Request Started"),5000);
+}
+
+void MainWindow::featuresReceiveComplete()
+{
+    statusMessage(tr("Features Request Complete"),5000);
+    waitingOnFeatures = false;
+    updateToUI();
+    BLE33tabChanged(); // Request Data to be sent
+    trkset.setDataItemSend("isCalibrated",true);
+    trkset.setDataItemSend("trpenabled",true);
+    QMap<QString, QVariant> pins = jsonht->getPins();
+    QStringList features = jsonht->getFeatures();
+
+    // Hide Everything
+    ui->grpLocalGraph->setVisible(false);
+    ui->grpRangeSel->setVisible(false);
+    ui->lblGyroCal->setVisible(false);
+    ui->gyroLed->setVisible(false);
+    ui->cmdResetCenter->setVisible(false);
+    ui->cmdResetCenter->setEnabled(true);
+    ui->cmdCalibrate->setVisible(false);
+    ui->cmdCalibrate->setEnabled(true);
+    ui->cmdReboot->setEnabled(true);
+    ui->stackedWidget->setCurrentIndex(2);
+    ui->cmdChannelViewer->setEnabled(true);
+    ui->grpPPMInput->setVisible(false);
+    ui->grpPPMOutput->setVisible(false);
+    ui->cmdSaveNVM->setVisible(true);
+    ui->cmdSaveNVM->setEnabled(true);
+    ui->grpBoardRotation->setVisible(false);
+    ui->chkLngBttnPress->setVisible(false);
+    ui->chkResetCenterWave->setVisible(false);
+
+    ui->tabPPM->setEnabled(false);
+    ui->tabBT->setEnabled(false);
+    ui->tabPWM->setEnabled(false);
+    ui->tabAnaAux->setEnabled(false);
+
+    // Show only the features the board has
+    if(features.contains("IMU")) {
+        ui->grpLocalGraph->setVisible(true);
+        ui->grpRangeSel->setVisible(true);
+        ui->lblGyroCal->setVisible(true);
+        ui->gyroLed->setVisible(true);
+        ui->cmdResetCenter->setVisible(true);
+        ui->cmdCalibrate->setVisible(true);
+        ui->grpBoardRotation->setVisible(true);
+        ui->chkLngBttnPress->setVisible(true);
+    }
+    if(features.contains("PROXIMITY")) {
+        ui->chkResetCenterWave->setVisible(true);
+    }
+    if(features.contains("CENTER")) {
+        ui->lblCenterBtn->setText(pins["CENTER_BTN"].toString());
+    } else {
+        ui->lblCenterBtn->setText("No Center Button Defined");
+    }
+    if(features.contains("PPMIN")) {
+        ui->grpPPMInput->setVisible(true);
+        ui->lblPPMInputPin->setText(pins["PPMIN"].toString());
+    }
+    if(features.contains("PPMOUT")) {
+        ui->grpPPMOutput->setVisible(true);
+        ui->lblPPMOutputPin->setText(pins["PPMOUT"].toString());
+    }
+    if(features.contains("PPMIN") || features.contains("PPMOUT")) {
+        ui->tabPPM->setEnabled(true);
+    }
+    if(features.contains("BT")) {
+        ui->tabBT->setEnabled(true);
+    }
+    if(features.contains("PWM1CH") ||
+       features.contains("PWM2CH") ||
+       features.contains("PWM3CH") ||
+       features.contains("PWM4CH")) {
+        ui->tabPWM->setEnabled(true);
+    }
+    if(features.contains("AN1CH") ||
+        features.contains("AN2CH") ||
+        features.contains("AN3CH") ||
+        features.contains("AN4CH")) {
+        ui->tabAnaAux->setEnabled(true); // FixMe, Aux Shouldn't be hidden
+    }
+    resize(100,100);
+}
+
+
+void MainWindow::featuresReceiveFailure(int)
+{
+    msgbox->setText(tr("Unable to receive the boards features"));
+    msgbox->setWindowTitle("Error");
+    msgbox->show();
+    statusMessage("Features Receive Failure");
+    serialDisconnect();
+}
+
 
 void MainWindow::calibrationSuccess()
 {
@@ -1397,9 +1332,7 @@ void MainWindow::calibrationFailure()
 
 void MainWindow::serialTxReady()
 {
-    foreach(BoardType *brd, boards) {
-        sendSerialData(brd->_dataout());
-    }
+    sendSerialData(jsonht->dataout());
 }
 
 void MainWindow::needsCalibration()
@@ -1409,115 +1342,37 @@ void MainWindow::needsCalibration()
     msgbox->show();
 }
 
-void MainWindow::boardDiscovered(BoardType *brd)
-{
-    // Board discovered, save it
-    currentboard = brd;
+void MainWindow::boardDiscovered()
+{    
+    // Check Firmware Version is Compatible
 
-    // GUI changes info depending on board type
-    // TODO *** MUST CHANGE
-    if(brd->boardName() == "NANO33BLE" ||
-       brd->boardName() == "DTQSYS" ||
-       brd->boardName() == "XIAOSENSE" ||
-       brd->boardName() == "ESP32C3" ||
-        brd->boardName() == "RPI_PICO" ||
-       brd->boardName() == "M5CSTICK_PLUS") {
-        addToLog(tr("Connected to a ") + brd->boardName() + "\n");
-        ui->cmdStartGraph->setVisible(false);
-        ui->cmdStopGraph->setVisible(false);
-        ui->chkRawData->setVisible(false);
-        ui->cmbRemap->setVisible(false);
-        ui->cmbSigns->setVisible(false);
-        ui->cmdSaveNVM->setVisible(true);
-        ui->cmdStopGraph->setEnabled(true);
-        ui->cmdStartGraph->setEnabled(true);
-        ui->cmdSend->setEnabled(true);
-        ui->cmdSaveNVM->setEnabled(true);
-        ui->cmdCalibrate->setEnabled(true);
-        ui->cmdResetCenter->setEnabled(true);
-        ui->cmdReboot->setEnabled(true);
-        ui->stackedWidget->setCurrentIndex(3);
-        ui->cmdChannelViewer->setEnabled(true);
+    // GUI Version
+    QString lfver = version;
+    lfver.remove(0,1);
+    lfver.remove(1,1);
+    int lmajver = lfver.left(2).toInt();   // Major Version 1.1x == 11
 
-        if(brd->boardName() == "DTQSYS" ||
-           brd->boardName() == "XIAOSENSE" ||
-           brd->boardName() == "RPI_PICO" ||
-           brd->boardName() == "M5CSTICK_PLUS") { // Pins are all fixed
-            ui->cmbPpmInPin->setVisible(false);
-            ui->lblPPMInPin->setVisible(false);
-            ui->cmbPpmOutPin->setVisible(false);
-            ui->lblPPMOutPin->setVisible(false);
-            ui->cmbButtonPin->setVisible(false);
-            ui->lblButtonPin->setVisible(false);
-            ui->tabBLE->setTabVisible(4,false);
-            ui->lblAn4->setText(tr("Battery Voltage"));
-            ui->lblAn5->setText(tr("Analog 1 (0.29)"));
-            ui->lblAn6->setText(tr("Analog 2 (0.02)"));
-            ui->lblAn7->setText(tr("Analog 3 (0.28)"));
-        } else {
-            ui->cmbPpmInPin->setVisible(true);
-            ui->lblPPMInPin->setVisible(true);
-            ui->cmbPpmOutPin->setVisible(true);
-            ui->lblPPMOutPin->setVisible(true);
-            ui->cmbButtonPin->setVisible(true);
-            ui->lblButtonPin->setVisible(true);
-            ui->tabBLE->setTabVisible(4,true);
-            ui->lblAn4->setText(tr("Analog A4"));
-            ui->lblAn5->setText(tr("Analog A5"));
-            ui->lblAn6->setText(tr("Analog A6"));
-            ui->lblAn7->setText(tr("Analog A7"));
-        }
+    // Remote Version
+    int rmajver = trkset.fwVersion().remove(1,1).left(2).toInt();    // Major Version 1.1x == 11
 
-        // Check Firmware Version is Compatible
-
-        // GUI Version
-        QString lfver = version;
-        lfver.remove(0,1);
-        lfver.remove(1,1);
-        int lmajver = lfver.left(2).toInt();   // Major Version 1.1x == 11
-
-        // Remote Version
-        int rmajver = trkset.fwVersion().remove(1,1).left(2).toInt();    // Major Version 1.1x == 11
-
-        // Firmware is too old
-        if(lmajver > rmajver) {
-            msgbox->setText(tr("The firmware on the board is too old. Upload a ") + QString::number((float)lmajver/10,'f',1) + "x version of firmware for this GUI");
-            msgbox->setWindowTitle(tr("Firmware Version Mismatch"));
-            msgbox->show();
-            serialDisconnect();
-
-        // Firmware is too new
-        } else if (lmajver < rmajver) {
-            msgbox->setText(tr("Firmware is newer than supported by this application\nDownload the GUI v") + QString::number((float)rmajver/10,'f',1) +" from www.github.com/dlktdr/headtracker");
-            msgbox->setWindowTitle(tr("Firmware Version Mismatch"));
-            msgbox->show();
-            serialDisconnect();
-        }
-        channelviewer->setBoard(currentboard);
-        if(channelViewerOpen) {
-            channelviewer->show();
-        }
-    } else if (brd->boardName() == "BNO055") {
-        addToLog(tr("Connected to a ") + brd->boardName() + "\n");
-        ui->cmdStartGraph->setVisible(true);
-        ui->cmdStopGraph->setVisible(true);
-        ui->cmbRemap->setVisible(true);
-        ui->cmbSigns->setVisible(true);
-        ui->chkRawData->setVisible(true);
-        ui->cmdSaveNVM->setVisible(false);
-        ui->cmdStopGraph->setEnabled(true);
-        ui->cmdStartGraph->setEnabled(true);
-        ui->cmdSend->setEnabled(true);
-        ui->cmdSaveNVM->setEnabled(true);
-        ui->cmdCalibrate->setEnabled(true);
-        ui->stackedWidget->setCurrentIndex(2);
-    } else {
-        msgbox->setText(tr("Unknown board type"));
-        msgbox->setWindowTitle(tr("Error"));
+    // Firmware is too old
+    if(lmajver > rmajver) {
+        msgbox->setText(tr("The firmware on the board is too old. Upload a ") + QString::number((float)lmajver/10,'f',1) + "x version of firmware for this GUI");
+        msgbox->setWindowTitle(tr("Firmware Version Mismatch"));
         msgbox->show();
-        statusMessage(tr("Unknown board type"));
+        serialDisconnect();
+
+    // Firmware is too new
+    } else if (lmajver < rmajver) {
+        msgbox->setText(tr("Firmware is newer than supported by this application\nDownload the GUI v") + QString::number((float)rmajver/10,'f',1) +" from www.github.com/dlktdr/headtracker");
+        msgbox->setWindowTitle(tr("Firmware Version Mismatch"));
+        msgbox->show();
         serialDisconnect();
     }
+    if(channelViewerOpen) {
+        channelviewer->show();
+    }
+    boardDiscover = true;
 
     requestParamsTimer.stop();
     requestParamsTimer.start(50);

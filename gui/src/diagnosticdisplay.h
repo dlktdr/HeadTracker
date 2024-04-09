@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QStandardItemModel>
 #include "trackersettings.h"
+#include "boardjson.h"
 
 namespace Ui {
 class DiagnosticDisplay;
@@ -16,16 +17,20 @@ class DiagnosticDisplay : public QWidget
     Q_OBJECT
 
 public:
-    explicit DiagnosticDisplay(TrackerSettings *ts, QWidget *parent = nullptr);
+    explicit DiagnosticDisplay(TrackerSettings *ts, BoardJson *board, QWidget *parent = nullptr);
     ~DiagnosticDisplay();
 
 private:
     Ui::DiagnosticDisplay *ui;
-     TrackerSettings *trkset;
-     QVariantMap livedata;
-     DataModel *model;
+    TrackerSettings *trkset;
+    QVariantMap livedata;
+    DataModel *model;
+    BoardJson *brd;
+
 public slots:
-     void updated();
+    void updated();
+    void featUpdate();
+
 };
 
 class DataItem

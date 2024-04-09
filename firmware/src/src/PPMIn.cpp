@@ -26,7 +26,7 @@
 
 LOG_MODULE_REGISTER(ppmin);
 
-#if defined(CONFIG_SOC_SERIES_NRF52X)
+#if defined(CONFIG_SOC_SERIES_NRF52X) && defined(HAS_PPMIN)
 
 #include <nrfx_gpiote.h>
 #include <nrfx_ppi.h>
@@ -96,16 +96,16 @@ ISR_DIRECT_DECLARE(PPMInGPIOTE_ISR)
 // Set pin to -1 to disable
 void PpmIn_setPin(int pinNum)
 {
-  // Same pin, just quit
+// Same pin, just quit
 
-#if defined(CONFIG_BOARD_ARDUINO_NANO_33_BLE) // Nano33, can pick D2-D12
-  if (pinNum == setPin) return;
-  int pin = D_TO_PIN(pinNum);
-  int port = D_TO_PORT(pinNum);
-  int setPin_pin = D_TO_PIN(setPin);
-  int setPin_port = D_TO_PORT(setPin);
-#else
-#if defined(HAS_PPMIN)
+// #if defined(CONFIG_BOARD_ARDUINO_NANO_33_BLE) // Nano33, can pick D2-D12
+//   if (pinNum == setPin) return;
+//   int pin = D_TO_PIN(pinNum);
+//   int port = D_TO_PORT(pinNum);
+//   int setPin_pin = D_TO_PIN(setPin);
+//   int setPin_port = D_TO_PORT(setPin);
+// #else
+
   // If pin is fixed don't allow turning it off
   static bool initalized = false;
   if(initalized) return;
@@ -114,8 +114,6 @@ void PpmIn_setPin(int pinNum)
   int port = PIN_TO_GPORT(PIN_NAME_TO_NUM(IO_PPMIN));
   int setPin_pin = pin;
   int setPin_port = port;
-#endif
-#endif
 
   // Stop Interrupts
   uint32_t key = irq_lock();
@@ -285,8 +283,6 @@ void PpmIn_setPin(int pinNum) {}
 void PpmIn_execute() {}
 
 #else
-
-#warning "No PPMInput Support"
 
 int PpmIn_init() {return -1;}
 int PpmIn_getChannels(uint16_t *ch) {return 0;}

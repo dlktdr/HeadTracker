@@ -63,39 +63,6 @@ bool TrackerSettings::isPanReversed() { return (servoreverse & PAN_REVERSE_BIT);
 
 void TrackerSettings::resetFusion() { reset_fusion(); }
 
-void TrackerSettings::pinsChanged()
-{
-  enum { PIN_PPMIN, PIN_PPMOUT, PIN_BUTRESET, PIN_SBUSIN1, PIN_SBUSIN2 };
-  int pins[5]{-1, -1, -1, -1, -1};
-  pins[PIN_PPMOUT] = getPpmOutPin();
-  pins[PIN_PPMIN] = getPpmInPin();
-  pins[PIN_BUTRESET] = getButtonPin();
-  if (!getSbInInv()) {
-    pins[PIN_SBUSIN1] = 5;
-    pins[PIN_SBUSIN2] = 6;
-  }
-
-  // Loop through all possibilites checking for duplicates
-  bool duplicates = false;
-  for (int i = 0; i < 4; i++) {
-    for (int y = i + 1; y < 5; y++) {
-      if (pins[i] > 0 && pins[y] > 0 && pins[i] == pins[y]) {
-        duplicates = true;
-        break;
-      }
-    }
-  }
-
-  if (!duplicates) {
-    PpmIn_setPin(-1);
-    PpmOut_setPin(-1);
-    PpmIn_setPin(getPpmInPin());
-    PpmOut_setPin(getPpmOutPin());
-  } else {
-    LOG_ERR("Cannot pick duplicate pins. Note: SBUS in uses D5+D6 when not inverted");
-  }
-}
-
 // Saves current data to flash
 void TrackerSettings::saveToEEPROM()
 {

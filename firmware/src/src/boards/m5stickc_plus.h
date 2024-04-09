@@ -8,8 +8,7 @@
 #define INPUT_PULLUP (GPIO_INPUT | GPIO_PULL_UP)
 
 // Board Features
-//#define HAS_LSM6DS3
-// Center button defined in device tree
+#define HAS_CENTERBTN
 #define HAS_NOTIFYLED
 #define HAS_MPU6886
 #define HAS_BUZZER
@@ -17,20 +16,29 @@
 //#define HAS_PPMIN
 //#define HAS_PPMOUT
 
-// Pins (name, number, description)
-// NOTE: These pins are an enum entry. e.g. IO_D2 = 0
-//     - Use PIN_NAME_TO_NUM(IO_D2) to get actual the pin number
-//     - The string descrition for D2 would be StrPins[IO_D2]
+/*  Pins (name, number, description)
+   NOTE: These pins are an enum entry. e.g. IO_CENTER_BTN = 0
+       - Use PIN_NAME_TO_NUM(IO_D2) to get actual the pin number
+       - The pin number can be converted back into the NRF port/pin
+         using functions PIN_TO_GPORT & PIN_TO_GPIN
+       - The string descrition for CENTER_BTN would be StrPinDescriptions[IO_CENTER_BTN]
+       - The string of the pin name would be StrPins[CENTER_BTN]
 
-// TODO: ** Replace these with devicetree overlay files
+   Change the pins to whatever you wish here. Some pins might be defined in the
+   board's devicetree overlay file (e.g. UART). You will have to change them there
+   & should make sure they match here so the GUI can show the correct pinout.
+
+   Leave descriptions empty for pins if you don't want it to
+   show up in the pinout on the GUI
+   */
 
 #define PIN_X \
+  PIN(CENTER_BTN,   ESPPIN(37), "Center Button") \
   PIN(LED,          ESPPIN(19), "Notification LED") \
   PIN(TX,           ESPPIN(32), "UART Transmit")  \
   PIN(RX,           ESPPIN(33), "UART Receive") \
   PIN(PWRHOLD,      ESPPIN( 4), "Hold High=Powered") \
-  PIN(BUZZ,         ESPPIN( 2), "Buzzer") \
-  END_IO_PINS \
+  PIN(BUZZ,         ESPPIN( 2), "Buzzer")
 
 /*
   PIN(PPMOUT,       ESPPIN(10),"PPM Output Pin") \

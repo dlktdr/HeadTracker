@@ -24,7 +24,7 @@
 #include "serial.h"
 #include "trackersettings.h"
 
-#if defined(CONFIG_SOC_SERIES_NRF52X)
+#if defined(CONFIG_SOC_SERIES_NRF52X) && defined(HAS_PPMOUT)
 #include <nrfx_gpiote.h>
 #include <nrfx_ppi.h>
 
@@ -138,17 +138,17 @@ void PpmOut_setPin(int pinNum)
   // Same pin, just quit
   if (pinNum == setPin) return;
 
-#if defined(CONFIG_BOARD_ARDUINO_NANO_33_BLE) // Nano33, can pick D2-D12
-  int pin = D_TO_PIN(pinNum);
-  int port = D_TO_PORT(pinNum);
-  int setPin_pin = D_TO_PIN(setPin);
-  int setPin_port = D_TO_PORT(setPin);
-#else
+// #if defined(CONFIG_BOARD_ARDUINO_NANO_33_BLE) // Nano33, can pick D2-D12
+//   int pin = D_TO_PIN(pinNum);
+//   int port = D_TO_PORT(pinNum);
+//   int setPin_pin = D_TO_PIN(setPin);
+//   int setPin_port = D_TO_PORT(setPin);
+// #else
   int pin = PIN_TO_GPIN(PIN_NAME_TO_NUM(IO_PPMOUT));
   int port = PIN_TO_GPORT(PIN_NAME_TO_NUM(IO_PPMOUT));
   int setPin_pin = pin;
   int setPin_port = port;
-#endif
+// #endif
 
   if (!ppmoutstarted) {
     resetChannels();
@@ -271,9 +271,7 @@ void PpmOut_setChannel(int chan, uint16_t val) {}
 void PpmOut_execute() {}
 int PpmOut_getChnCount() {return 0;}
 
-
 #else
-#warning "No PPMOutput Support"
 
 int PpmOut_init() {return -1;}
 void PpmOut_setPin(int pinNum) {}

@@ -88,6 +88,23 @@
         "svdFile": "${workspaceRoot:src}/nrf52840.svd",
       },
       {
+        "name": "Jlink - XIAO NRF52840",
+        "device": "nRF52840_XXAA",
+        "cwd": "${workspaceRoot:src}",
+        "executable": "build/zephyr/zephyr.elf",
+        "request": "launch",
+        "type": "cortex-debug",
+        "runToEntryPoint": "main",
+        "servertype": "jlink",
+        "rtos": "Zephyr",
+        "showDevDebugOutput":"raw",
+        "serverpath": "C:/Program Files/SEGGER/JLink/JLinkGDBServerCL.exe", // Check path to Jlink installation
+        "armToolchainPath": "${workspaceRoot:src}/../zephyr-sdk/arm-zephyr-eabi/bin", // NOTE Check version & path of SDK here
+        "toolchainPrefix": "arm-zephyr-eabi",
+        "preLaunchTask": "Build (XIAO NRF52840) - Debug",
+        "svdFile": "${workspaceRoot:src}/nrf52840.svd",
+      },
+      {
         "name": "Jlink - RPI_PICO",
         "device": "RP2040_M0_0",
         "cwd": "${workspaceRoot:src}",
@@ -191,6 +208,24 @@
           "build",
           "-p", "auto",
           "-b", "xiao_ble/nrf52840/sense",
+          "--", "-DCMAKE_BUILD_TYPE=Debug"
+        ],
+        "problemMatcher": [
+          "$tsc"
+        ],
+        "presentation": {
+          "reveal": "always"
+        },
+        "group": "build"
+      },
+      {
+        "label": "Build (XIAO NRF52840) - Debug",
+        "type": "shell",
+        "command": "west",
+        "args": [
+          "build",
+          "-p", "auto",
+          "-b", "xiao_ble/nrf52840",
           "--", "-DCMAKE_BUILD_TYPE=Debug"
         ],
         "problemMatcher": [

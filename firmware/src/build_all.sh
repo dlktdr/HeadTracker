@@ -4,6 +4,8 @@ west build -p -b arduino_nano_33_ble &&
 cp ./build/zephyr/*.bin build_bins/ &&
 west build -p -b arduino_nano_33_ble -- -DBOARD_REV_SR2=y &&
 cp ./build/zephyr/*.bin build_bins/ &&
+west build -p -b xiao_ble/nrf52840 &&
+cp ./build/zephyr/*.uf2 build_bins/ &&
 west build -p -b xiao_ble/nrf52840/sense &&
 cp ./build/zephyr/*.uf2 build_bins/ &&
 west build -p -b esp32c3_devkitm &&

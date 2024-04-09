@@ -8,7 +8,6 @@
 #include <QVBoxLayout>
 #include <QShowEvent>
 #include "trackersettings.h"
-#include "boardtype.h"
 
 #define CHANNELS 16
 #define BTCHANNELS 8
@@ -24,7 +23,6 @@ class ChannelViewer : public QWidget
 public:
     explicit ChannelViewer(TrackerSettings *trk, QWidget *parent = nullptr);
     ~ChannelViewer();
-    void setBoard(BoardType *b) {board = b;}
 private slots:
     void tabChanged(int);
     void closeClicked();
@@ -43,7 +41,6 @@ private:
     QLabel *lblSBUSin;
     QLabel *lblBTin;
     TrackerSettings *trkset;
-    BoardType *board;
     QProgressBar *outbars[CHANNELS];
     QProgressBar *ppminbars[CHANNELS];
     QProgressBar *sbusinbars[CHANNELS];

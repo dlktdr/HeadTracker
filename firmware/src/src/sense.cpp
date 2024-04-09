@@ -148,6 +148,9 @@ static float amag[3] = {0, 0, 0};
 // Analog Filters
 SF1eFilter *anFilter[AN_CH_CNT];
 
+// Battery Voltage Filter
+SF1eFilter *anVoltFilter;
+
 static struct k_poll_signal senseThreadRunSignal = K_POLL_SIGNAL_INITIALIZER(senseThreadRunSignal);
 struct k_poll_event senseRunEvents[1] = {
     K_POLL_EVENT_INITIALIZER(K_POLL_TYPE_SIGNAL, K_POLL_MODE_NOTIFY_ONLY, &senseThreadRunSignal),
@@ -277,6 +280,9 @@ LOG_INF("Waiting for I2C Sensor Bus To Be Ready");
     anFilter[i] = SF1eFilterCreate(AN_FILT_FREQ, AN_FILT_MINCO, AN_FILT_SLOPE, AN_FILT_DERCO);
     SF1eFilterInit(anFilter[i]);
   }
+  // Create battery voltage filter
+  anVoltFilter = SF1eFilterCreate(AN_FILT_FREQ, AN_FILT_MINCO, AN_FILT_SLOPE, AN_FILT_DERCO);
+  SF1eFilterInit(anVoltFilter);
 
   // Start reading the IMU sensors + fusion algorithm
   k_poll_signal_raise(&senseThreadRunSignal, 1);
@@ -532,7 +538,14 @@ void calculate_Thread()
     }
 
     // 7) Set Analog Channels
-#ifdef AN0
+    // Battery voltage monitor is always analog zero if it has the feature
+#if defined(ANVOLTMON)
+    float anbatt = SF1eFilterDo(anVoltFilter, analogRead(ANVOLTMON));
+    anbatt *= ANVOLTMON_SCALE;
+    anbatt += ANVOLTMON_OFFSET;
+#endif
+
+#if defined(AN0)
     if (trkset.getAn0Ch() > 0) {
       float an4 = SF1eFilterDo(anFilter[0], analogRead(AN0));
       an4 *= trkset.getAn0Gain();
@@ -599,7 +612,7 @@ void calculate_Thread()
     //   always enable the T/R/P outputs
     static bool lastbutmode = false;
     bool buttonpresmode = trkset.getButLngPs();
-    if (buttonpresmode == false || trkset.getButtonPin() == 0) trpOutputEnabled = true;
+    if (buttonpresmode == false) trpOutputEnabled = true;
 
     // On user enabling the button press mode in the GUI default to TRP output off.
     if (lastbutmode == false && buttonpresmode == true) {

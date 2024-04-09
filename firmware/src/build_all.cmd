@@ -9,6 +9,9 @@ copy .\build\zephyr\*.bin build_bins\
 west build -p -b xiao_ble/nrf52840/sense || exit /b
 copy .\build\zephyr\xiao*.uf2 build_bins\
 
+west build -p -b xiao_ble/nrf52840 || exit /b
+copy .\build\zephyr\xiao*.uf2 build_bins\
+
 west build -p -b esp32c3_devkitm || exit /b
 copy .\build\zephyr\*.bin build_bins\
 
