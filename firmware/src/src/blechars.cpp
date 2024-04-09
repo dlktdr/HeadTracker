@@ -28,9 +28,6 @@
 
 #include "blechars.h"
 #include "trackersettings.h"
-#include "log.h"
-
-#if defined(CONFIG_BT)
 
 uint16_t bt_rll_min;
 uint16_t bt_rll_max;
@@ -111,7 +108,7 @@ ssize_t btwr_rll_min(struct bt_conn *conn, const struct bt_gatt_attr *attr, cons
   if(len == sizeof(uint16_t)) {
     uint16_t newvalue;
     memcpy(&newvalue, buf, len);
-    //LOGD("BT_Wr Rll_Min (0xF000)");
+    //LOG_DBG("BT_Wr Rll_Min (0xF000)");
     trkset.setRll_Min(newvalue);
   }
   return len;
@@ -119,7 +116,7 @@ ssize_t btwr_rll_min(struct bt_conn *conn, const struct bt_gatt_attr *attr, cons
 ssize_t btrd_rll_min(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf, uint16_t len, uint16_t offset)
 {
   char *value = (char *)attr->user_data;
-  //LOGD("BT_Rd Rll_Min (0xF000)");
+  //LOG_DBG("BT_Rd Rll_Min (0xF000)");
   bt_rll_min = trkset.getRll_Min();
   return bt_gatt_attr_read(conn, attr, buf, len, offset, value, sizeof(uint16_t));
 }
@@ -129,7 +126,7 @@ ssize_t btwr_rll_max(struct bt_conn *conn, const struct bt_gatt_attr *attr, cons
   if(len == sizeof(uint16_t)) {
     uint16_t newvalue;
     memcpy(&newvalue, buf, len);
-    //LOGD("BT_Wr Rll_Max (0xF001)");
+    //LOG_DBG("BT_Wr Rll_Max (0xF001)");
     trkset.setRll_Max(newvalue);
   }
   return len;
@@ -137,7 +134,7 @@ ssize_t btwr_rll_max(struct bt_conn *conn, const struct bt_gatt_attr *attr, cons
 ssize_t btrd_rll_max(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf, uint16_t len, uint16_t offset)
 {
   char *value = (char *)attr->user_data;
-  //LOGD("BT_Rd Rll_Max (0xF001)");
+  //LOG_DBG("BT_Rd Rll_Max (0xF001)");
   bt_rll_max = trkset.getRll_Max();
   return bt_gatt_attr_read(conn, attr, buf, len, offset, value, sizeof(uint16_t));
 }
@@ -147,7 +144,7 @@ ssize_t btwr_rll_cnt(struct bt_conn *conn, const struct bt_gatt_attr *attr, cons
   if(len == sizeof(uint16_t)) {
     uint16_t newvalue;
     memcpy(&newvalue, buf, len);
-    //LOGD("BT_Wr Rll_Cnt (0xF002)");
+    //LOG_DBG("BT_Wr Rll_Cnt (0xF002)");
     trkset.setRll_Cnt(newvalue);
   }
   return len;
@@ -155,7 +152,7 @@ ssize_t btwr_rll_cnt(struct bt_conn *conn, const struct bt_gatt_attr *attr, cons
 ssize_t btrd_rll_cnt(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf, uint16_t len, uint16_t offset)
 {
   char *value = (char *)attr->user_data;
-  //LOGD("BT_Rd Rll_Cnt (0xF002)");
+  //LOG_DBG("BT_Rd Rll_Cnt (0xF002)");
   bt_rll_cnt = trkset.getRll_Cnt();
   return bt_gatt_attr_read(conn, attr, buf, len, offset, value, sizeof(uint16_t));
 }
@@ -165,7 +162,7 @@ ssize_t btwr_rll_gain(struct bt_conn *conn, const struct bt_gatt_attr *attr, con
   if(len == sizeof(float)) {
     float newvalue;
     memcpy(&newvalue, buf, len);
-    //LOGD("BT_Wr Rll_Gain (0xF003)");
+    //LOG_DBG("BT_Wr Rll_Gain (0xF003)");
     trkset.setRll_Gain(newvalue);
   }
   return len;
@@ -173,7 +170,7 @@ ssize_t btwr_rll_gain(struct bt_conn *conn, const struct bt_gatt_attr *attr, con
 ssize_t btrd_rll_gain(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf, uint16_t len, uint16_t offset)
 {
   char *value = (char *)attr->user_data;
-  //LOGD("BT_Rd Rll_Gain (0xF003)");
+  //LOG_DBG("BT_Rd Rll_Gain (0xF003)");
   bt_rll_gain = trkset.getRll_Gain();
   return bt_gatt_attr_read(conn, attr, buf, len, offset, value, sizeof(float));
 }
@@ -183,7 +180,7 @@ ssize_t btwr_tlt_min(struct bt_conn *conn, const struct bt_gatt_attr *attr, cons
   if(len == sizeof(uint16_t)) {
     uint16_t newvalue;
     memcpy(&newvalue, buf, len);
-    //LOGD("BT_Wr Tlt_Min (0xF004)");
+    //LOG_DBG("BT_Wr Tlt_Min (0xF004)");
     trkset.setTlt_Min(newvalue);
   }
   return len;
@@ -191,7 +188,7 @@ ssize_t btwr_tlt_min(struct bt_conn *conn, const struct bt_gatt_attr *attr, cons
 ssize_t btrd_tlt_min(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf, uint16_t len, uint16_t offset)
 {
   char *value = (char *)attr->user_data;
-  //LOGD("BT_Rd Tlt_Min (0xF004)");
+  //LOG_DBG("BT_Rd Tlt_Min (0xF004)");
   bt_tlt_min = trkset.getTlt_Min();
   return bt_gatt_attr_read(conn, attr, buf, len, offset, value, sizeof(uint16_t));
 }
@@ -201,7 +198,7 @@ ssize_t btwr_tlt_max(struct bt_conn *conn, const struct bt_gatt_attr *attr, cons
   if(len == sizeof(uint16_t)) {
     uint16_t newvalue;
     memcpy(&newvalue, buf, len);
-    //LOGD("BT_Wr Tlt_Max (0xF005)");
+    //LOG_DBG("BT_Wr Tlt_Max (0xF005)");
     trkset.setTlt_Max(newvalue);
   }
   return len;
@@ -209,7 +206,7 @@ ssize_t btwr_tlt_max(struct bt_conn *conn, const struct bt_gatt_attr *attr, cons
 ssize_t btrd_tlt_max(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf, uint16_t len, uint16_t offset)
 {
   char *value = (char *)attr->user_data;
-  //LOGD("BT_Rd Tlt_Max (0xF005)");
+  //LOG_DBG("BT_Rd Tlt_Max (0xF005)");
   bt_tlt_max = trkset.getTlt_Max();
   return bt_gatt_attr_read(conn, attr, buf, len, offset, value, sizeof(uint16_t));
 }
@@ -219,7 +216,7 @@ ssize_t btwr_tlt_cnt(struct bt_conn *conn, const struct bt_gatt_attr *attr, cons
   if(len == sizeof(uint16_t)) {
     uint16_t newvalue;
     memcpy(&newvalue, buf, len);
-    //LOGD("BT_Wr Tlt_Cnt (0xF006)");
+    //LOG_DBG("BT_Wr Tlt_Cnt (0xF006)");
     trkset.setTlt_Cnt(newvalue);
   }
   return len;
@@ -227,7 +224,7 @@ ssize_t btwr_tlt_cnt(struct bt_conn *conn, const struct bt_gatt_attr *attr, cons
 ssize_t btrd_tlt_cnt(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf, uint16_t len, uint16_t offset)
 {
   char *value = (char *)attr->user_data;
-  //LOGD("BT_Rd Tlt_Cnt (0xF006)");
+  //LOG_DBG("BT_Rd Tlt_Cnt (0xF006)");
   bt_tlt_cnt = trkset.getTlt_Cnt();
   return bt_gatt_attr_read(conn, attr, buf, len, offset, value, sizeof(uint16_t));
 }
@@ -237,7 +234,7 @@ ssize_t btwr_tlt_gain(struct bt_conn *conn, const struct bt_gatt_attr *attr, con
   if(len == sizeof(float)) {
     float newvalue;
     memcpy(&newvalue, buf, len);
-    //LOGD("BT_Wr Tlt_Gain (0xF007)");
+    //LOG_DBG("BT_Wr Tlt_Gain (0xF007)");
     trkset.setTlt_Gain(newvalue);
   }
   return len;
@@ -245,7 +242,7 @@ ssize_t btwr_tlt_gain(struct bt_conn *conn, const struct bt_gatt_attr *attr, con
 ssize_t btrd_tlt_gain(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf, uint16_t len, uint16_t offset)
 {
   char *value = (char *)attr->user_data;
-  //LOGD("BT_Rd Tlt_Gain (0xF007)");
+  //LOG_DBG("BT_Rd Tlt_Gain (0xF007)");
   bt_tlt_gain = trkset.getTlt_Gain();
   return bt_gatt_attr_read(conn, attr, buf, len, offset, value, sizeof(float));
 }
@@ -255,7 +252,7 @@ ssize_t btwr_pan_min(struct bt_conn *conn, const struct bt_gatt_attr *attr, cons
   if(len == sizeof(uint16_t)) {
     uint16_t newvalue;
     memcpy(&newvalue, buf, len);
-    //LOGD("BT_Wr Pan_Min (0xF008)");
+    //LOG_DBG("BT_Wr Pan_Min (0xF008)");
     trkset.setPan_Min(newvalue);
   }
   return len;
@@ -263,7 +260,7 @@ ssize_t btwr_pan_min(struct bt_conn *conn, const struct bt_gatt_attr *attr, cons
 ssize_t btrd_pan_min(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf, uint16_t len, uint16_t offset)
 {
   char *value = (char *)attr->user_data;
-  //LOGD("BT_Rd Pan_Min (0xF008)");
+  //LOG_DBG("BT_Rd Pan_Min (0xF008)");
   bt_pan_min = trkset.getPan_Min();
   return bt_gatt_attr_read(conn, attr, buf, len, offset, value, sizeof(uint16_t));
 }
@@ -273,7 +270,7 @@ ssize_t btwr_pan_max(struct bt_conn *conn, const struct bt_gatt_attr *attr, cons
   if(len == sizeof(uint16_t)) {
     uint16_t newvalue;
     memcpy(&newvalue, buf, len);
-    //LOGD("BT_Wr Pan_Max (0xF009)");
+    //LOG_DBG("BT_Wr Pan_Max (0xF009)");
     trkset.setPan_Max(newvalue);
   }
   return len;
@@ -281,7 +278,7 @@ ssize_t btwr_pan_max(struct bt_conn *conn, const struct bt_gatt_attr *attr, cons
 ssize_t btrd_pan_max(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf, uint16_t len, uint16_t offset)
 {
   char *value = (char *)attr->user_data;
-  //LOGD("BT_Rd Pan_Max (0xF009)");
+  //LOG_DBG("BT_Rd Pan_Max (0xF009)");
   bt_pan_max = trkset.getPan_Max();
   return bt_gatt_attr_read(conn, attr, buf, len, offset, value, sizeof(uint16_t));
 }
@@ -291,7 +288,7 @@ ssize_t btwr_pan_cnt(struct bt_conn *conn, const struct bt_gatt_attr *attr, cons
   if(len == sizeof(uint16_t)) {
     uint16_t newvalue;
     memcpy(&newvalue, buf, len);
-    //LOGD("BT_Wr Pan_Cnt (0xF010)");
+    //LOG_DBG("BT_Wr Pan_Cnt (0xF010)");
     trkset.setPan_Cnt(newvalue);
   }
   return len;
@@ -299,7 +296,7 @@ ssize_t btwr_pan_cnt(struct bt_conn *conn, const struct bt_gatt_attr *attr, cons
 ssize_t btrd_pan_cnt(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf, uint16_t len, uint16_t offset)
 {
   char *value = (char *)attr->user_data;
-  //LOGD("BT_Rd Pan_Cnt (0xF010)");
+  //LOG_DBG("BT_Rd Pan_Cnt (0xF010)");
   bt_pan_cnt = trkset.getPan_Cnt();
   return bt_gatt_attr_read(conn, attr, buf, len, offset, value, sizeof(uint16_t));
 }
@@ -309,7 +306,7 @@ ssize_t btwr_pan_gain(struct bt_conn *conn, const struct bt_gatt_attr *attr, con
   if(len == sizeof(float)) {
     float newvalue;
     memcpy(&newvalue, buf, len);
-    //LOGD("BT_Wr Pan_Gain (0xF011)");
+    //LOG_DBG("BT_Wr Pan_Gain (0xF011)");
     trkset.setPan_Gain(newvalue);
   }
   return len;
@@ -317,7 +314,7 @@ ssize_t btwr_pan_gain(struct bt_conn *conn, const struct bt_gatt_attr *attr, con
 ssize_t btrd_pan_gain(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf, uint16_t len, uint16_t offset)
 {
   char *value = (char *)attr->user_data;
-  //LOGD("BT_Rd Pan_Gain (0xF011)");
+  //LOG_DBG("BT_Rd Pan_Gain (0xF011)");
   bt_pan_gain = trkset.getPan_Gain();
   return bt_gatt_attr_read(conn, attr, buf, len, offset, value, sizeof(float));
 }
@@ -327,7 +324,7 @@ ssize_t btwr_tltch(struct bt_conn *conn, const struct bt_gatt_attr *attr, const 
   if(len == sizeof(int8_t)) {
     int8_t newvalue;
     memcpy(&newvalue, buf, len);
-    //LOGD("BT_Wr TltCh (0xF100)");
+    //LOG_DBG("BT_Wr TltCh (0xF100)");
     trkset.setTltCh(newvalue);
   }
   return len;
@@ -335,7 +332,7 @@ ssize_t btwr_tltch(struct bt_conn *conn, const struct bt_gatt_attr *attr, const 
 ssize_t btrd_tltch(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf, uint16_t len, uint16_t offset)
 {
   char *value = (char *)attr->user_data;
-  //LOGD("BT_Rd TltCh (0xF100)");
+  //LOG_DBG("BT_Rd TltCh (0xF100)");
   bt_tltch = trkset.getTltCh();
   return bt_gatt_attr_read(conn, attr, buf, len, offset, value, sizeof(int8_t));
 }
@@ -345,7 +342,7 @@ ssize_t btwr_rllch(struct bt_conn *conn, const struct bt_gatt_attr *attr, const 
   if(len == sizeof(int8_t)) {
     int8_t newvalue;
     memcpy(&newvalue, buf, len);
-    //LOGD("BT_Wr RllCh (0xF101)");
+    //LOG_DBG("BT_Wr RllCh (0xF101)");
     trkset.setRllCh(newvalue);
   }
   return len;
@@ -353,7 +350,7 @@ ssize_t btwr_rllch(struct bt_conn *conn, const struct bt_gatt_attr *attr, const 
 ssize_t btrd_rllch(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf, uint16_t len, uint16_t offset)
 {
   char *value = (char *)attr->user_data;
-  //LOGD("BT_Rd RllCh (0xF101)");
+  //LOG_DBG("BT_Rd RllCh (0xF101)");
   bt_rllch = trkset.getRllCh();
   return bt_gatt_attr_read(conn, attr, buf, len, offset, value, sizeof(int8_t));
 }
@@ -363,7 +360,7 @@ ssize_t btwr_panch(struct bt_conn *conn, const struct bt_gatt_attr *attr, const 
   if(len == sizeof(int8_t)) {
     int8_t newvalue;
     memcpy(&newvalue, buf, len);
-    //LOGD("BT_Wr PanCh (0xF102)");
+    //LOG_DBG("BT_Wr PanCh (0xF102)");
     trkset.setPanCh(newvalue);
   }
   return len;
@@ -371,7 +368,7 @@ ssize_t btwr_panch(struct bt_conn *conn, const struct bt_gatt_attr *attr, const 
 ssize_t btrd_panch(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf, uint16_t len, uint16_t offset)
 {
   char *value = (char *)attr->user_data;
-  //LOGD("BT_Rd PanCh (0xF102)");
+  //LOG_DBG("BT_Rd PanCh (0xF102)");
   bt_panch = trkset.getPanCh();
   return bt_gatt_attr_read(conn, attr, buf, len, offset, value, sizeof(int8_t));
 }
@@ -381,7 +378,7 @@ ssize_t btwr_alertch(struct bt_conn *conn, const struct bt_gatt_attr *attr, cons
   if(len == sizeof(int8_t)) {
     int8_t newvalue;
     memcpy(&newvalue, buf, len);
-    //LOGD("BT_Wr AlertCh (0xF103)");
+    //LOG_DBG("BT_Wr AlertCh (0xF103)");
     trkset.setAlertCh(newvalue);
   }
   return len;
@@ -389,7 +386,7 @@ ssize_t btwr_alertch(struct bt_conn *conn, const struct bt_gatt_attr *attr, cons
 ssize_t btrd_alertch(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf, uint16_t len, uint16_t offset)
 {
   char *value = (char *)attr->user_data;
-  //LOGD("BT_Rd AlertCh (0xF103)");
+  //LOG_DBG("BT_Rd AlertCh (0xF103)");
   bt_alertch = trkset.getAlertCh();
   return bt_gatt_attr_read(conn, attr, buf, len, offset, value, sizeof(int8_t));
 }
@@ -399,7 +396,7 @@ ssize_t btwr_pwm0(struct bt_conn *conn, const struct bt_gatt_attr *attr, const v
   if(len == sizeof(int8_t)) {
     int8_t newvalue;
     memcpy(&newvalue, buf, len);
-    //LOGD("BT_Wr Pwm0 (0xF104)");
+    //LOG_DBG("BT_Wr Pwm0 (0xF104)");
     trkset.setPwm0(newvalue);
   }
   return len;
@@ -407,7 +404,7 @@ ssize_t btwr_pwm0(struct bt_conn *conn, const struct bt_gatt_attr *attr, const v
 ssize_t btrd_pwm0(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf, uint16_t len, uint16_t offset)
 {
   char *value = (char *)attr->user_data;
-  //LOGD("BT_Rd Pwm0 (0xF104)");
+  //LOG_DBG("BT_Rd Pwm0 (0xF104)");
   bt_pwm0 = trkset.getPwm0();
   return bt_gatt_attr_read(conn, attr, buf, len, offset, value, sizeof(int8_t));
 }
@@ -417,7 +414,7 @@ ssize_t btwr_pwm1(struct bt_conn *conn, const struct bt_gatt_attr *attr, const v
   if(len == sizeof(int8_t)) {
     int8_t newvalue;
     memcpy(&newvalue, buf, len);
-    //LOGD("BT_Wr Pwm1 (0xF105)");
+    //LOG_DBG("BT_Wr Pwm1 (0xF105)");
     trkset.setPwm1(newvalue);
   }
   return len;
@@ -425,7 +422,7 @@ ssize_t btwr_pwm1(struct bt_conn *conn, const struct bt_gatt_attr *attr, const v
 ssize_t btrd_pwm1(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf, uint16_t len, uint16_t offset)
 {
   char *value = (char *)attr->user_data;
-  //LOGD("BT_Rd Pwm1 (0xF105)");
+  //LOG_DBG("BT_Rd Pwm1 (0xF105)");
   bt_pwm1 = trkset.getPwm1();
   return bt_gatt_attr_read(conn, attr, buf, len, offset, value, sizeof(int8_t));
 }
@@ -435,7 +432,7 @@ ssize_t btwr_pwm2(struct bt_conn *conn, const struct bt_gatt_attr *attr, const v
   if(len == sizeof(int8_t)) {
     int8_t newvalue;
     memcpy(&newvalue, buf, len);
-    //LOGD("BT_Wr Pwm2 (0xF106)");
+    //LOG_DBG("BT_Wr Pwm2 (0xF106)");
     trkset.setPwm2(newvalue);
   }
   return len;
@@ -443,7 +440,7 @@ ssize_t btwr_pwm2(struct bt_conn *conn, const struct bt_gatt_attr *attr, const v
 ssize_t btrd_pwm2(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf, uint16_t len, uint16_t offset)
 {
   char *value = (char *)attr->user_data;
-  //LOGD("BT_Rd Pwm2 (0xF106)");
+  //LOG_DBG("BT_Rd Pwm2 (0xF106)");
   bt_pwm2 = trkset.getPwm2();
   return bt_gatt_attr_read(conn, attr, buf, len, offset, value, sizeof(int8_t));
 }
@@ -453,7 +450,7 @@ ssize_t btwr_pwm3(struct bt_conn *conn, const struct bt_gatt_attr *attr, const v
   if(len == sizeof(int8_t)) {
     int8_t newvalue;
     memcpy(&newvalue, buf, len);
-    //LOGD("BT_Wr Pwm3 (0xF107)");
+    //LOG_DBG("BT_Wr Pwm3 (0xF107)");
     trkset.setPwm3(newvalue);
   }
   return len;
@@ -461,7 +458,7 @@ ssize_t btwr_pwm3(struct bt_conn *conn, const struct bt_gatt_attr *attr, const v
 ssize_t btrd_pwm3(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf, uint16_t len, uint16_t offset)
 {
   char *value = (char *)attr->user_data;
-  //LOGD("BT_Rd Pwm3 (0xF107)");
+  //LOG_DBG("BT_Rd Pwm3 (0xF107)");
   bt_pwm3 = trkset.getPwm3();
   return bt_gatt_attr_read(conn, attr, buf, len, offset, value, sizeof(int8_t));
 }
@@ -471,7 +468,7 @@ ssize_t btwr_an0ch(struct bt_conn *conn, const struct bt_gatt_attr *attr, const 
   if(len == sizeof(int8_t)) {
     int8_t newvalue;
     memcpy(&newvalue, buf, len);
-    //LOGD("BT_Wr An0Ch (0xF108)");
+    //LOG_DBG("BT_Wr An0Ch (0xF108)");
     trkset.setAn0Ch(newvalue);
   }
   return len;
@@ -479,7 +476,7 @@ ssize_t btwr_an0ch(struct bt_conn *conn, const struct bt_gatt_attr *attr, const 
 ssize_t btrd_an0ch(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf, uint16_t len, uint16_t offset)
 {
   char *value = (char *)attr->user_data;
-  //LOGD("BT_Rd An0Ch (0xF108)");
+  //LOG_DBG("BT_Rd An0Ch (0xF108)");
   bt_an0ch = trkset.getAn0Ch();
   return bt_gatt_attr_read(conn, attr, buf, len, offset, value, sizeof(int8_t));
 }
@@ -489,7 +486,7 @@ ssize_t btwr_an1ch(struct bt_conn *conn, const struct bt_gatt_attr *attr, const 
   if(len == sizeof(int8_t)) {
     int8_t newvalue;
     memcpy(&newvalue, buf, len);
-    //LOGD("BT_Wr An1Ch (0xF109)");
+    //LOG_DBG("BT_Wr An1Ch (0xF109)");
     trkset.setAn1Ch(newvalue);
   }
   return len;
@@ -497,7 +494,7 @@ ssize_t btwr_an1ch(struct bt_conn *conn, const struct bt_gatt_attr *attr, const 
 ssize_t btrd_an1ch(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf, uint16_t len, uint16_t offset)
 {
   char *value = (char *)attr->user_data;
-  //LOGD("BT_Rd An1Ch (0xF109)");
+  //LOG_DBG("BT_Rd An1Ch (0xF109)");
   bt_an1ch = trkset.getAn1Ch();
   return bt_gatt_attr_read(conn, attr, buf, len, offset, value, sizeof(int8_t));
 }
@@ -507,7 +504,7 @@ ssize_t btwr_an2ch(struct bt_conn *conn, const struct bt_gatt_attr *attr, const 
   if(len == sizeof(int8_t)) {
     int8_t newvalue;
     memcpy(&newvalue, buf, len);
-    //LOGD("BT_Wr An2Ch (0xF10A)");
+    //LOG_DBG("BT_Wr An2Ch (0xF10A)");
     trkset.setAn2Ch(newvalue);
   }
   return len;
@@ -515,7 +512,7 @@ ssize_t btwr_an2ch(struct bt_conn *conn, const struct bt_gatt_attr *attr, const 
 ssize_t btrd_an2ch(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf, uint16_t len, uint16_t offset)
 {
   char *value = (char *)attr->user_data;
-  //LOGD("BT_Rd An2Ch (0xF10A)");
+  //LOG_DBG("BT_Rd An2Ch (0xF10A)");
   bt_an2ch = trkset.getAn2Ch();
   return bt_gatt_attr_read(conn, attr, buf, len, offset, value, sizeof(int8_t));
 }
@@ -525,7 +522,7 @@ ssize_t btwr_an3ch(struct bt_conn *conn, const struct bt_gatt_attr *attr, const 
   if(len == sizeof(int8_t)) {
     int8_t newvalue;
     memcpy(&newvalue, buf, len);
-    //LOGD("BT_Wr An3Ch (0xF10B)");
+    //LOG_DBG("BT_Wr An3Ch (0xF10B)");
     trkset.setAn3Ch(newvalue);
   }
   return len;
@@ -533,7 +530,7 @@ ssize_t btwr_an3ch(struct bt_conn *conn, const struct bt_gatt_attr *attr, const 
 ssize_t btrd_an3ch(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf, uint16_t len, uint16_t offset)
 {
   char *value = (char *)attr->user_data;
-  //LOGD("BT_Rd An3Ch (0xF10B)");
+  //LOG_DBG("BT_Rd An3Ch (0xF10B)");
   bt_an3ch = trkset.getAn3Ch();
   return bt_gatt_attr_read(conn, attr, buf, len, offset, value, sizeof(int8_t));
 }
@@ -543,7 +540,7 @@ ssize_t btwr_aux0ch(struct bt_conn *conn, const struct bt_gatt_attr *attr, const
   if(len == sizeof(int8_t)) {
     int8_t newvalue;
     memcpy(&newvalue, buf, len);
-    //LOGD("BT_Wr Aux0Ch (0xF10C)");
+    //LOG_DBG("BT_Wr Aux0Ch (0xF10C)");
     trkset.setAux0Ch(newvalue);
   }
   return len;
@@ -551,7 +548,7 @@ ssize_t btwr_aux0ch(struct bt_conn *conn, const struct bt_gatt_attr *attr, const
 ssize_t btrd_aux0ch(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf, uint16_t len, uint16_t offset)
 {
   char *value = (char *)attr->user_data;
-  //LOGD("BT_Rd Aux0Ch (0xF10C)");
+  //LOG_DBG("BT_Rd Aux0Ch (0xF10C)");
   bt_aux0ch = trkset.getAux0Ch();
   return bt_gatt_attr_read(conn, attr, buf, len, offset, value, sizeof(int8_t));
 }
@@ -561,7 +558,7 @@ ssize_t btwr_aux1ch(struct bt_conn *conn, const struct bt_gatt_attr *attr, const
   if(len == sizeof(int8_t)) {
     int8_t newvalue;
     memcpy(&newvalue, buf, len);
-    //LOGD("BT_Wr Aux1Ch (0xF10D)");
+    //LOG_DBG("BT_Wr Aux1Ch (0xF10D)");
     trkset.setAux1Ch(newvalue);
   }
   return len;
@@ -569,7 +566,7 @@ ssize_t btwr_aux1ch(struct bt_conn *conn, const struct bt_gatt_attr *attr, const
 ssize_t btrd_aux1ch(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf, uint16_t len, uint16_t offset)
 {
   char *value = (char *)attr->user_data;
-  //LOGD("BT_Rd Aux1Ch (0xF10D)");
+  //LOG_DBG("BT_Rd Aux1Ch (0xF10D)");
   bt_aux1ch = trkset.getAux1Ch();
   return bt_gatt_attr_read(conn, attr, buf, len, offset, value, sizeof(int8_t));
 }
@@ -579,7 +576,7 @@ ssize_t btwr_aux2ch(struct bt_conn *conn, const struct bt_gatt_attr *attr, const
   if(len == sizeof(int8_t)) {
     int8_t newvalue;
     memcpy(&newvalue, buf, len);
-    //LOGD("BT_Wr Aux2Ch (0xF10E)");
+    //LOG_DBG("BT_Wr Aux2Ch (0xF10E)");
     trkset.setAux2Ch(newvalue);
   }
   return len;
@@ -587,7 +584,7 @@ ssize_t btwr_aux2ch(struct bt_conn *conn, const struct bt_gatt_attr *attr, const
 ssize_t btrd_aux2ch(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf, uint16_t len, uint16_t offset)
 {
   char *value = (char *)attr->user_data;
-  //LOGD("BT_Rd Aux2Ch (0xF10E)");
+  //LOG_DBG("BT_Rd Aux2Ch (0xF10E)");
   bt_aux2ch = trkset.getAux2Ch();
   return bt_gatt_attr_read(conn, attr, buf, len, offset, value, sizeof(int8_t));
 }
@@ -597,7 +594,7 @@ ssize_t btwr_an0gain(struct bt_conn *conn, const struct bt_gatt_attr *attr, cons
   if(len == sizeof(float)) {
     float newvalue;
     memcpy(&newvalue, buf, len);
-    //LOGD("BT_Wr An0Gain (0xF10F)");
+    //LOG_DBG("BT_Wr An0Gain (0xF10F)");
     trkset.setAn0Gain(newvalue);
   }
   return len;
@@ -605,7 +602,7 @@ ssize_t btwr_an0gain(struct bt_conn *conn, const struct bt_gatt_attr *attr, cons
 ssize_t btrd_an0gain(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf, uint16_t len, uint16_t offset)
 {
   char *value = (char *)attr->user_data;
-  //LOGD("BT_Rd An0Gain (0xF10F)");
+  //LOG_DBG("BT_Rd An0Gain (0xF10F)");
   bt_an0gain = trkset.getAn0Gain();
   return bt_gatt_attr_read(conn, attr, buf, len, offset, value, sizeof(float));
 }
@@ -615,7 +612,7 @@ ssize_t btwr_an1gain(struct bt_conn *conn, const struct bt_gatt_attr *attr, cons
   if(len == sizeof(float)) {
     float newvalue;
     memcpy(&newvalue, buf, len);
-    //LOGD("BT_Wr An1Gain (0xF110)");
+    //LOG_DBG("BT_Wr An1Gain (0xF110)");
     trkset.setAn1Gain(newvalue);
   }
   return len;
@@ -623,7 +620,7 @@ ssize_t btwr_an1gain(struct bt_conn *conn, const struct bt_gatt_attr *attr, cons
 ssize_t btrd_an1gain(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf, uint16_t len, uint16_t offset)
 {
   char *value = (char *)attr->user_data;
-  //LOGD("BT_Rd An1Gain (0xF110)");
+  //LOG_DBG("BT_Rd An1Gain (0xF110)");
   bt_an1gain = trkset.getAn1Gain();
   return bt_gatt_attr_read(conn, attr, buf, len, offset, value, sizeof(float));
 }
@@ -633,7 +630,7 @@ ssize_t btwr_an2gain(struct bt_conn *conn, const struct bt_gatt_attr *attr, cons
   if(len == sizeof(float)) {
     float newvalue;
     memcpy(&newvalue, buf, len);
-    //LOGD("BT_Wr An2Gain (0xF111)");
+    //LOG_DBG("BT_Wr An2Gain (0xF111)");
     trkset.setAn2Gain(newvalue);
   }
   return len;
@@ -641,7 +638,7 @@ ssize_t btwr_an2gain(struct bt_conn *conn, const struct bt_gatt_attr *attr, cons
 ssize_t btrd_an2gain(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf, uint16_t len, uint16_t offset)
 {
   char *value = (char *)attr->user_data;
-  //LOGD("BT_Rd An2Gain (0xF111)");
+  //LOG_DBG("BT_Rd An2Gain (0xF111)");
   bt_an2gain = trkset.getAn2Gain();
   return bt_gatt_attr_read(conn, attr, buf, len, offset, value, sizeof(float));
 }
@@ -651,7 +648,7 @@ ssize_t btwr_an3gain(struct bt_conn *conn, const struct bt_gatt_attr *attr, cons
   if(len == sizeof(float)) {
     float newvalue;
     memcpy(&newvalue, buf, len);
-    //LOGD("BT_Wr An3Gain (0xF112)");
+    //LOG_DBG("BT_Wr An3Gain (0xF112)");
     trkset.setAn3Gain(newvalue);
   }
   return len;
@@ -659,7 +656,7 @@ ssize_t btwr_an3gain(struct bt_conn *conn, const struct bt_gatt_attr *attr, cons
 ssize_t btrd_an3gain(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf, uint16_t len, uint16_t offset)
 {
   char *value = (char *)attr->user_data;
-  //LOGD("BT_Rd An3Gain (0xF112)");
+  //LOG_DBG("BT_Rd An3Gain (0xF112)");
   bt_an3gain = trkset.getAn3Gain();
   return bt_gatt_attr_read(conn, attr, buf, len, offset, value, sizeof(float));
 }
@@ -669,7 +666,7 @@ ssize_t btwr_an0off(struct bt_conn *conn, const struct bt_gatt_attr *attr, const
   if(len == sizeof(float)) {
     float newvalue;
     memcpy(&newvalue, buf, len);
-    //LOGD("BT_Wr An0Off (0xF113)");
+    //LOG_DBG("BT_Wr An0Off (0xF113)");
     trkset.setAn0Off(newvalue);
   }
   return len;
@@ -677,7 +674,7 @@ ssize_t btwr_an0off(struct bt_conn *conn, const struct bt_gatt_attr *attr, const
 ssize_t btrd_an0off(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf, uint16_t len, uint16_t offset)
 {
   char *value = (char *)attr->user_data;
-  //LOGD("BT_Rd An0Off (0xF113)");
+  //LOG_DBG("BT_Rd An0Off (0xF113)");
   bt_an0off = trkset.getAn0Off();
   return bt_gatt_attr_read(conn, attr, buf, len, offset, value, sizeof(float));
 }
@@ -687,7 +684,7 @@ ssize_t btwr_an1off(struct bt_conn *conn, const struct bt_gatt_attr *attr, const
   if(len == sizeof(float)) {
     float newvalue;
     memcpy(&newvalue, buf, len);
-    //LOGD("BT_Wr An1Off (0xF114)");
+    //LOG_DBG("BT_Wr An1Off (0xF114)");
     trkset.setAn1Off(newvalue);
   }
   return len;
@@ -695,7 +692,7 @@ ssize_t btwr_an1off(struct bt_conn *conn, const struct bt_gatt_attr *attr, const
 ssize_t btrd_an1off(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf, uint16_t len, uint16_t offset)
 {
   char *value = (char *)attr->user_data;
-  //LOGD("BT_Rd An1Off (0xF114)");
+  //LOG_DBG("BT_Rd An1Off (0xF114)");
   bt_an1off = trkset.getAn1Off();
   return bt_gatt_attr_read(conn, attr, buf, len, offset, value, sizeof(float));
 }
@@ -705,7 +702,7 @@ ssize_t btwr_an2off(struct bt_conn *conn, const struct bt_gatt_attr *attr, const
   if(len == sizeof(float)) {
     float newvalue;
     memcpy(&newvalue, buf, len);
-    //LOGD("BT_Wr An2Off (0xF115)");
+    //LOG_DBG("BT_Wr An2Off (0xF115)");
     trkset.setAn2Off(newvalue);
   }
   return len;
@@ -713,7 +710,7 @@ ssize_t btwr_an2off(struct bt_conn *conn, const struct bt_gatt_attr *attr, const
 ssize_t btrd_an2off(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf, uint16_t len, uint16_t offset)
 {
   char *value = (char *)attr->user_data;
-  //LOGD("BT_Rd An2Off (0xF115)");
+  //LOG_DBG("BT_Rd An2Off (0xF115)");
   bt_an2off = trkset.getAn2Off();
   return bt_gatt_attr_read(conn, attr, buf, len, offset, value, sizeof(float));
 }
@@ -723,7 +720,7 @@ ssize_t btwr_an3off(struct bt_conn *conn, const struct bt_gatt_attr *attr, const
   if(len == sizeof(float)) {
     float newvalue;
     memcpy(&newvalue, buf, len);
-    //LOGD("BT_Wr An3Off (0xF116)");
+    //LOG_DBG("BT_Wr An3Off (0xF116)");
     trkset.setAn3Off(newvalue);
   }
   return len;
@@ -731,7 +728,7 @@ ssize_t btwr_an3off(struct bt_conn *conn, const struct bt_gatt_attr *attr, const
 ssize_t btrd_an3off(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf, uint16_t len, uint16_t offset)
 {
   char *value = (char *)attr->user_data;
-  //LOGD("BT_Rd An3Off (0xF116)");
+  //LOG_DBG("BT_Rd An3Off (0xF116)");
   bt_an3off = trkset.getAn3Off();
   return bt_gatt_attr_read(conn, attr, buf, len, offset, value, sizeof(float));
 }
@@ -741,7 +738,7 @@ ssize_t btwr_dismag(struct bt_conn *conn, const struct bt_gatt_attr *attr, const
   if(len == sizeof(bool)) {
     bool newvalue;
     memcpy(&newvalue, buf, len);
-    //LOGD("BT_Wr DisMag (0xF117)");
+    //LOG_DBG("BT_Wr DisMag (0xF117)");
     trkset.setDisMag(newvalue);
   }
   return len;
@@ -749,9 +746,8 @@ ssize_t btwr_dismag(struct bt_conn *conn, const struct bt_gatt_attr *attr, const
 ssize_t btrd_dismag(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf, uint16_t len, uint16_t offset)
 {
   char *value = (char *)attr->user_data;
-  //LOGD("BT_Rd DisMag (0xF117)");
+  //LOG_DBG("BT_Rd DisMag (0xF117)");
   bt_dismag = trkset.getDisMag();
   return bt_gatt_attr_read(conn, attr, buf, len, offset, value, sizeof(bool));
 }
 
-#endif

@@ -12,7 +12,7 @@
 #include "io.h"
 #include "joystick.h"
 #include "btjoystick.h"
-#include "log.h"
+
 #include "pmw.h"
 #include "sense.h"
 #include "serial.h"
@@ -66,7 +66,6 @@ void start(void)
 
   // Ininitialize GUI logging and GUI Serial
   LOG_INF("Starting GUI Serial");
-  logger_init();
   if(serial_init()) {
     LOG_ERR("Serial_init failed");
     setLEDFlag(LED_HARDFAULT);

@@ -22,14 +22,17 @@
 #include <zephyr/bluetooth/gatt.h>
 #include <zephyr/bluetooth/hci.h>
 #include <zephyr/bluetooth/uuid.h>
+#include <zephyr/logging/log.h>
 #include <zephyr/kernel.h>
 
 #include "defines.h"
 #include "io.h"
-#include "log.h"
+
 #include "htmain.h"
 #include "blechars.h"
 #include "trackersettings.h"
+
+LOG_MODULE_REGISTER(btparahead);
 
 #if defined(CONFIG_BT)
 
@@ -161,7 +164,7 @@ void BTHeadStart()
     chan_vals[i] = TrackerSettings::PPM_CENTER;
   }
 
-  LOGI("BLE Starting Head Bluetooth");
+  LOG_INF("BLE Starting Head Bluetooth");
 
   bt_gatt_service_register(&bthead_svc);
   bt_conn_cb_register(&conn_callbacks);
@@ -170,11 +173,11 @@ void BTHeadStart()
   // Start Advertising
   int err = bt_le_adv_start(&my_param, ad, ARRAY_SIZE(ad), NULL, 0);
   if (err) {
-    LOGE("Advertising failed to start (err %d)", err);
+    LOG_ERR("Advertising failed to start (err %d)", err);
     return;
   }
 
-  LOGI("BLE Started Advertising");
+  LOG_INF("BLE Started Advertising");
 
   // Discover BT Address
   bt_id_get(addrarry, &addrcnt);
@@ -186,18 +189,18 @@ void BTHeadStart()
 
 void BTHeadStop()
 {
-  LOGI("BLE Stopping Head Bluetooth");
+  LOG_INF("BLE Stopping Head Bluetooth");
 
   // Stop Advertising
   int rv = bt_le_adv_stop();
   if (rv) {
-    LOGE("BLE Unable to Stop advertising");
+    LOG_ERR("BLE Unable to Stop advertising");
   } else {
-    LOGI("BLE Stopped Advertising");
+    LOG_INF("BLE Stopped Advertising");
   }
 
   if (curconn) {
-    LOGI("BLE Disconnecting Active Connection");
+    LOG_INF("BLE Disconnecting Active Connection");
     bt_conn_disconnect(curconn, 0);
     bt_conn_unref(curconn);
   }
@@ -249,7 +252,7 @@ void BTHeadSetChannel(int channel, const uint16_t value)
 
   // Send a notify if override ch's have changed
   if (lovch != ovridech) {
-    LOGI("Updating Notify Channels");
+    LOG_INF("Updating Notify Channels");
     bt_gatt_notify(NULL, &bthead_svc.attrs[4], &ovridech, 2);
   }
   lovch = ovridech;
@@ -266,12 +269,12 @@ int8_t BTHeadGetRSSI()
 
 static void ct_ccc_cfg_changed_overr(const struct bt_gatt_attr *attr, uint16_t value)
 {
-  LOGI("Override CCC Value Changed (%d)", value);
+  LOG_INF("Override CCC Value Changed (%d)", value);
 }
 
 static void ct_ccc_cfg_changed_frsky(const struct bt_gatt_attr *attr, uint16_t value)
 {
-  LOGI("FrSky CCC Value Changed (%d)", value);
+  LOG_INF("FrSky CCC Value Changed (%d)", value);
 }
 
 static ssize_t read_ct(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf,
@@ -291,10 +294,10 @@ static ssize_t write_ct(struct bt_conn *conn, const struct bt_gatt_attr *attr, c
 static ssize_t write_cmd(struct bt_conn *conn, const struct bt_gatt_attr *attr, const void *buf,
                           uint16_t len, uint16_t offset, uint8_t flags)
 {
-  LOGI("BLE:%.*s", len, buf);
+  LOG_INF("BLE:%.*s", len, (char*)buf);
 
   if(strncmp((const char *)buf, "Flash", 5) == 0) {
-    LOGI("Bluetooth Configurator Requested Flash");
+    LOG_INF("Bluetooth Configurator Requested Flash");
     k_sem_give(&saveToFlash_sem);
   }
 
@@ -306,7 +309,7 @@ static ssize_t read_over(struct bt_conn *conn, const struct bt_gatt_attr *attr, 
 {
   char *value = (char *)attr->user_data;
 
-  LOGI("Override Ch's Read");
+  LOG_INF("Override Ch's Read");
   memcpy(overdata, (void *)&ovridech, sizeof(ovridech));
 
   return bt_gatt_attr_read(conn, attr, buf, len, offset, value, sizeof(overdata));
@@ -318,10 +321,10 @@ static ssize_t write_but(struct bt_conn *conn, const struct bt_gatt_attr *attr, 
   if (len == 1) {
     char ccenet = ((const char *)buf)[0];
     if (ccenet == 'R') {
-      LOGI("Remote BT Button Pressed");
+      LOG_INF("Remote BT Button Pressed");
       pressButton();
     } else if (ccenet == 'L') {
-      LOGI("Remote BT Button Long Pressed");
+      LOG_INF("Remote BT Button Long Pressed");
       longPressButton();
     }
   }
@@ -341,9 +344,9 @@ void hasSecurityChangedTimer(struct k_timer *tmr)
   if (sl == BT_SECURITY_L1) {
     uint8_t ccv = BT_GATT_CCC_NOTIFY;
     bt_gatt_attr_write_ccc(curconn, &bthead_svc.attrs[3], &ccv, 1, 0, 0);
-    LOGI("Detected a CC2650 Chip (PARA Wireless)");
+    LOG_INF("Detected a CC2650 Chip (PARA Wireless)");
   } else
-    LOGI("Detected a CC2540 Chip (non-PARA)");
+    LOG_INF("Detected a CC2540 Chip (non-PARA)");
 }
 
 K_TIMER_DEFINE(my_timer, hasSecurityChangedTimer, NULL);
@@ -351,9 +354,9 @@ K_TIMER_DEFINE(my_timer, hasSecurityChangedTimer, NULL);
 static void connected(struct bt_conn *conn, uint8_t err)
 {
   if (err) {
-    LOGE("Bluetooth Connection failed %d", err);
+    LOG_ERR("Bluetooth Connection failed %d", err);
   } else {
-    LOGI("Bluetooth connected :)");
+    LOG_INF("Bluetooth connected :)");
   }
 
   // Stop Advertising
@@ -367,17 +370,17 @@ static void connected(struct bt_conn *conn, uint8_t err)
   char addr_str[50];
   bt_addr_le_to_str(info.le.dst, addr_str, sizeof(addr_str));
 
-  LOGI("Connected to Address %s", addr_str);
+  LOG_INF("Connected to Address %s", addr_str);
 
   bt_conn_info info2;
   bt_conn_get_info(conn, &info2);
-  LOGI("PHY Connection Rx:%s TX:%s", printPhy(info2.le.phy->rx_phy),
+  LOG_INF("PHY Connection Rx:%s TX:%s", printPhy(info2.le.phy->rx_phy),
        printPhy(info2.le.phy->tx_phy));
 
   // Set Connection Parameters - Request updated rate
   bt_conn_le_param_update(curconn, conparms);
 
-  LOGI("Requesting coded PHY - %s",
+  LOG_INF("Requesting coded PHY - %s",
        bt_conn_le_phy_update(curconn, &phy_params) ? "FAILED" : "Success");
 
   // Start a Timer, If we don't see a Security Change within this time
@@ -389,12 +392,12 @@ static void connected(struct bt_conn *conn, uint8_t err)
 
 static void disconnected(struct bt_conn *conn, uint8_t reason)
 {
-  LOGW("Bluetooth disconnected (reason %d)", reason);
+  LOG_WRN("Bluetooth disconnected (reason %d)", reason);
 
   // Start advertising
   int err = bt_le_adv_start(&my_param, ad, ARRAY_SIZE(ad), NULL, 0);
   if (err) {
-    LOGE("Advertising failed to start (err %d)", err);
+    LOG_ERR("Advertising failed to start (err %d)", err);
     return;
   }
 

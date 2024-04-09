@@ -6,19 +6,22 @@
 #include "crsfin.h"
 
 #include <string.h>
+#include <zephyr/logging/log.h>
 
 #include "crsfout.h"
 #include "defines.h"
-#include "log.h"
+
 #include "uart_mode.h"
 
 #define CRSF_LOG_RATE 500 // 500mS
+
+LOG_MODULE_REGISTER(crsfin);
 
 CrsfSerial *crsfin = nullptr;
 
 static void crsfShiftyByte(uint8_t b)
 {
-  // LOGI("CRSF, shifty byte %c", b);
+  // LOG_INF("CRSF, shifty byte %c", b);
 }
 
 static void packetChannels() { PacketCount++; }
@@ -64,7 +67,7 @@ static void packetLinkStatistics(crsfLinkStatistics_t *link)
 {
   static int64_t mmic = millis64() + CRSF_LOG_RATE;
   if (mmic < millis64()) {
-    LOGI("CRSF Qlty %d%%, Mode(%d) %s, Rssi %d, SNR %d", link->uplink_Link_quality, link->rf_Mode,
+    LOG_INF("CRSF Qlty %d%%, Mode(%d) %s, Rssi %d, SNR %d", link->uplink_Link_quality, link->rf_Mode,
          getELRSMode(link->rf_Mode), link->uplink_RSSI_1, link->uplink_SNR);
     mmic = millis64() + CRSF_LOG_RATE;
   }

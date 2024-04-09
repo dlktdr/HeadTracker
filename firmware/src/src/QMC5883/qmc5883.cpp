@@ -26,10 +26,13 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <zephyr/logging/log.h>
 
 #include <math.h>
 
 #include "qmc5883.h"
+
+LOG_MODULE_REGISTER(qmc5883);
 
 #define QMC5883L_MAG_I2C_ADDRESS     0x0D
 
@@ -69,10 +72,10 @@ static bool i2c_writeBytes(uint8_t devAddr, uint8_t regAddr, uint8_t length, uin
 {
   const struct device* i2c_dev = device_get_binding(I2C_DEV);
   if (!i2c_dev) {
-    LOGE("Could not get device binding for I2C");
+    LOG_ERR("Could not get device binding for I2C");
   }
   if(length > 49) {
-    LOGE("I2C: Buffer too small");
+    LOG_ERR("I2C: Buffer too small");
     return false;
   }
 
@@ -86,7 +89,7 @@ static bool i2c_readBytes(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint
 {
   const struct device* i2c_dev = device_get_binding(I2C_DEV);
   if (!i2c_dev) {
-    LOGE("Could not get device binding for I2C");
+    LOG_ERR("Could not get device binding for I2C");
     return -1;
   }
 

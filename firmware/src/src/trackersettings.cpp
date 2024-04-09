@@ -25,7 +25,7 @@
 #include "SBUS/sbus.h"
 #include "base64.h"
 #include "io.h"
-#include "log.h"
+
 #include "sense.h"
 #include "soc_flash.h"
 
@@ -92,7 +92,7 @@ void TrackerSettings::pinsChanged()
     PpmIn_setPin(getPpmInPin());
     PpmOut_setPin(getPpmOutPin());
   } else {
-    LOGE("Cannot pick duplicate pins. Note: SBUS in uses D5+D6 when not inverted");
+    LOG_ERR("Cannot pick duplicate pins. Note: SBUS in uses D5+D6 when not inverted");
   }
 }
 
@@ -107,9 +107,9 @@ void TrackerSettings::saveToEEPROM()
   k_mutex_unlock(&data_mutex);
 
   if (socWriteFlash(buffer, len)) {
-    LOGE("Flash Write Failed");
+    LOG_ERR("Flash Write Failed");
   } else {
-    LOGI("Saved to Flash");
+    LOG_INF("Saved to Flash");
   }
 }
 
@@ -129,7 +129,7 @@ void TrackerSettings::loadFromEEPROM()
   }
   de = deserializeJson(json, memptr);
 
-  if (de != DeserializationError::Ok) LOGE("Invalid JSON Data");
+  if (de != DeserializationError::Ok) LOG_ERR("Invalid JSON Data");
 
   if (json["UUID"] == 837727) {
     LOG_INF("Device has been freshly programmed, no data found");

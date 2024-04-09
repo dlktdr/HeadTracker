@@ -23,13 +23,15 @@
 #include <zephyr/bluetooth/gatt.h>
 #include <zephyr/bluetooth/hci.h>
 #include <zephyr/bluetooth/uuid.h>
+#include <zephyr/logging/log.h>
 
 #include "defines.h"
 #include "io.h"
 #include "joystick.h"
-#include "log.h"
 #include "htmain.h"
 #include "trackersettings.h"
+
+LOG_MODULE_REGISTER(btjoystick);
 
 #if defined(CONFIG_BT)
 
@@ -104,7 +106,7 @@ static ssize_t read_report(struct bt_conn *conn, const struct bt_gatt_attr *attr
 
 static void input_ccc_changed(const struct bt_gatt_attr *attr, uint16_t value)
 {
-  LOGI("BLE - Notifications Requested");
+  LOG_INF("BLE - Notifications Requested");
   simulate_input = (value == BT_GATT_CCC_NOTIFY) ? 1 : 0;
 }
 
@@ -167,7 +169,7 @@ static void connected(struct bt_conn *conn, uint8_t err)
   curconn = bt_conn_ref(conn);
 
   if (err) {
-    LOGE("Failed to connect to %s (%u)\n", addr, err);
+    LOG_ERR("Failed to connect to %s (%u)\n", addr, err);
     return;
   }
 
@@ -175,17 +177,17 @@ static void connected(struct bt_conn *conn, uint8_t err)
   bt_conn_get_info(conn, &info);
   char addr_str[50];
   bt_addr_le_to_str(info.le.dst, addr_str, sizeof(addr_str));
-  LOGI("Connected to Address %s", addr_str);
+  LOG_INF("Connected to Address %s", addr_str);
 }
 
 static void disconnected(struct bt_conn *conn, uint8_t reason)
 {
-  LOGW("Bluetooth disconnected (reason %d)", reason);
+  LOG_WRN("Bluetooth disconnected (reason %d)", reason);
 
   // Start advertising
   int err = bt_le_adv_start(&my_param, ad, ARRAY_SIZE(ad), NULL, 0);
   if (err) {
-    LOGE("Advertising failed to start (err %d)", err);
+    LOG_ERR("Advertising failed to start (err %d)", err);
     return;
   }
 
@@ -222,7 +224,7 @@ static size_t addrcnt = 1;
 
 void BTJoystickStart()
 {
-  LOGI("Starting Bluetooth HID Joystick");
+  LOG_INF("Starting Bluetooth HID Joystick");
   bleconnected = false;
 
   for (int i = 0; i < 16; i++) {
@@ -235,7 +237,7 @@ void BTJoystickStart()
 
   int err = bt_le_adv_start(&my_param, ad, ARRAY_SIZE(ad), NULL, 0);
   if (err) {
-    LOGE("Advertising failed to start (err %d)\n", err);
+    LOG_ERR("Advertising failed to start (err %d)\n", err);
     return;
   }
 
@@ -244,7 +246,7 @@ void BTJoystickStart()
   if (addrcnt > 0) bt_addr_le_to_str(&addrarry[0], _address, sizeof(_address));
 
 
-  LOGI("Advertising successfully started\n");
+  LOG_INF("Advertising successfully started\n");
 }
 
 void BTJoystickExecute()

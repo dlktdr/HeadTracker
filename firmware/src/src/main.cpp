@@ -6,13 +6,15 @@
 #include <zephyr/drivers/uart.h>
 #include <zephyr/pm/pm.h>
 #include <string.h>
-#include <zephyr/sys/printk.h>
+#include <zephyr/logging/log.h>
 #include <zephyr/sys/util.h>
 #include <zephyr/usb/usb_device.h>
 #include <zephyr/kernel.h>
 
 #include "io.h"
 #include "htmain.h"
+
+LOG_MODULE_REGISTER(main);
 
 #if defined(CONFIG_SOC_SERIES_NRF52X)
 #include <nrfx_rtc.h>
@@ -30,12 +32,12 @@ extern "C" int main(void)
   // Force High Accuracy Clock
   clock0 = DEVICE_DT_GET(DT_NODELABEL(clock));
   if (clock0 == NULL) {
-    printk("Failed to fetch clock");
+    LOG_ERR("Failed to fetch clock");
   }
   clock_control_on(clock0, CLOCK_CONTROL_NRF_SUBSYS_HF);
 #else
 
 #endif
-  start();  // Call Our C++ Main
+   start();  // Call Our C++ Main
   return 0;
 }

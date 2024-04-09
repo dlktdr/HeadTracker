@@ -22,10 +22,12 @@
 #include "APDS9960.h"
 
 #include <zephyr/drivers/i2c.h>
+#include <zephyr/logging/log.h>
 
 #include "defines.h"
 #include "io.h"
-#include "log.h"
+
+LOG_MODULE_REGISTER(apds9960);
 
 APDS9960::APDS9960(int intPin) :
     _intPin(intPin),
@@ -49,7 +51,7 @@ bool APDS9960::begin()
 {
   i2c_dev = DEVICE_DT_GET(DT_ALIAS(i2csensor));
   if (!i2c_dev) {
-    LOGE("Could not get device binding for I2C");
+    LOG_ERR("Could not get device binding for I2C");
     return false;
   }
 

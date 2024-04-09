@@ -46,17 +46,20 @@
 #include <zephyr/kernel.h>
 #include <zephyr/device.h>
 #include <zephyr/drivers/i2c.h>
+#include <zephyr/logging/log.h>
 
-#include "log.h"
+
+
+LOG_MODULE_REGISTER(mpu6xxx);
 
 bool i2c_writeBytes(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint8_t *data)
 {
   const struct device* i2c_dev = device_get_binding(I2C_DEV);
   if (!i2c_dev) {
-    LOGE("Could not get device binding for I2C");
+    LOG_ERR("Could not get device binding for I2C");
   }
   if(length > 49) {
-    LOGE("I2C: Buffer too small");
+    LOG_ERR("I2C: Buffer too small");
     return false;
   }
 
@@ -70,7 +73,7 @@ bool i2c_readBytes(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint8_t *da
 {
   const struct device* i2c_dev = device_get_binding(I2C_DEV);
   if (!i2c_dev) {
-    LOGE("Could not get device binding for I2C");
+    LOG_ERR("Could not get device binding for I2C");
     return -1;
   }
 

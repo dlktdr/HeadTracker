@@ -29,7 +29,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "io.h"
-#include "log.h"
+
 #include "htmain.h"
 #include "soc_flash.h"
 #include "trackersettings.h"
@@ -88,7 +88,7 @@ static void interrupt_handler(const struct device *dev, void *user_data)
       k_mutex_unlock(&ring_rx_mutex);
 
       if (rb_len < recv_len) {
-        // LOGE("RX Ring Buffer Full");
+        // LOG_ERR("RX Ring Buffer Full");
       }
     }
   }
@@ -225,7 +225,7 @@ void serialrx_Process()
     } else {
       // Check how much free data is in the buffer
       if (jsonbufptr >= jsonbuffer + sizeof(jsonbuffer) - 3) {
-        LOGE("Error JSON data too long, overflow");
+        LOG_ERR("Error JSON data too long, overflow");
         jsonbufptr = jsonbuffer;  // Reset Buffer
 
         // Add data to buffer
@@ -258,17 +258,17 @@ void JSON_Process(char *jsonbuf)
     DeserializationError de = deserializeJson(json, jsonbuf);
     if (de) {
       if (de == DeserializationError::IncompleteInput)
-        LOGE("DeserializeJson() Failed - Incomplete Input");
+        LOG_ERR("DeserializeJson() Failed - Incomplete Input");
       else if (de == DeserializationError::InvalidInput)
-        LOGE("DeserializeJson() Failed - Invalid Input");
+        LOG_ERR("DeserializeJson() Failed - Invalid Input");
       else if (de == DeserializationError::NoMemory)
-        LOGE("DeserializeJson() Failed - NoMemory");
+        LOG_ERR("DeserializeJson() Failed - NoMemory");
       else if (de == DeserializationError::EmptyInput)
-        LOGE("DeserializeJson() Failed - Empty Input");
+        LOG_ERR("DeserializeJson() Failed - Empty Input");
       else if (de == DeserializationError::TooDeep)
-        LOGE("DeserializeJson() Failed - TooDeep");
+        LOG_ERR("DeserializeJson() Failed - TooDeep");
       else
-        LOGE("DeserializeJson() Failed - Other");
+        LOG_ERR("DeserializeJson() Failed - Other");
     } else {
       // Parse The JSON Data in dataparser.cpp
       parseData(json);
@@ -283,7 +283,7 @@ void parseData(DynamicJsonDocument &json)
 {
   JsonVariant v = json["Cmd"];
   if (v.isNull()) {
-    LOGE("Invalid JSON, No Command");
+    LOG_ERR("Invalid JSON, No Command");
     return;
   }
 
@@ -293,22 +293,22 @@ void parseData(DynamicJsonDocument &json)
   // Reset Center
   if (strcmp(command, "RstCnt") == 0) {
     // TODO we should also log when the button on the device issues a Reset Center
-    LOGI("Resetting Center");
+    LOG_INF("Resetting Center");
     pressButton();
 
     // Settings Sent from UI
   } else if (strcmp(command, "Set") == 0) {
     trkset.loadJSONSettings(json);
-    LOGI("Storing Settings");
+    LOG_INF("Storing Settings");
 
     // Save to Flash
   } else if (strcmp(command, "Flash") == 0) {
-    LOGI("Saving to Flash");
+    LOG_INF("Saving to Flash");
     k_sem_give(&saveToFlash_sem);
 
     // Erase
   } else if (strcmp(command, "Erase") == 0) {
-    LOGI("Clearing Flash");
+    LOG_INF("Clearing Flash");
     socClearFlash();
 
     // Reboot
@@ -328,7 +328,7 @@ void parseData(DynamicJsonDocument &json)
 
     // Get settings
   } else if (strcmp(command, "Get") == 0) {
-    LOGI("Sending Settings");
+    LOG_INF("Sending Settings");
     json.clear();
     trkset.setJSONSettings(json);
     json["Cmd"] = "Set";
@@ -347,12 +347,12 @@ void parseData(DynamicJsonDocument &json)
 
     // Stop All Data Items
   } else if (strcmp(command, "D--") == 0) {
-    LOGI("Clearing Data List");
+    LOG_INF("Clearing Data List");
     trkset.stopAllData();
 
     // Request Data Items
   } else if (strcmp(command, "RD") == 0) {
-    LOGI("Data Added/Remove");
+    LOG_INF("Data Added/Remove");
     // using C++11 syntax (preferred):
     JsonObject root = json.as<JsonObject>();
     for (JsonPair kv : root) {
@@ -371,7 +371,7 @@ void parseData(DynamicJsonDocument &json)
 
     // Unknown Command
   } else {
-    LOGW("Unknown Command");
+    LOG_WRN("Unknown Command");
     return;
   }
 }

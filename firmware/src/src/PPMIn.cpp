@@ -18,11 +18,13 @@
 #include "PPMIn.h"
 
 #include <zephyr/kernel.h>
+#include <zephyr/logging/log.h>
 
 #include "defines.h"
 #include "io.h"
-#include "log.h"
 #include "trackersettings.h"
+
+LOG_MODULE_REGISTER(ppmin);
 
 #if defined(CONFIG_SOC_SERIES_NRF52X)
 
@@ -231,7 +233,7 @@ void PpmIn_execute()
 
   if (micros64() - runtime > 60000) {
     if (sentconn == false) {
-      LOGW("PPM Input Data Lost");
+      LOG_WRN("PPM Input Data Lost");
       sentconn = true;
       ch_count = 0;
     }
@@ -241,7 +243,7 @@ void PpmIn_execute()
       cyclescount++;
     else {
       if (sentconn == true && ch_count >= 4 && ch_count <= 16) {
-        LOGI("PPM Input Data Received");
+        LOG_INF("PPM Input Data Received");
         sentconn = false;
       }
     }

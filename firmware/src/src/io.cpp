@@ -17,7 +17,7 @@
 
 #include "soc_flash.h"
 #include "trackersettings.h"
-#include "log.h"
+
 
 LOG_MODULE_REGISTER(io);
 

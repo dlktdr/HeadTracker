@@ -23,7 +23,7 @@
 
 #include "auxserial.h"
 #include "io.h"
-#include "log.h"
+
 #include "soc_flash.h"
 #include "trackersettings.h"
 #include "uart_mode.h"
@@ -124,7 +124,7 @@ bool SbusReadChannels(uint16_t ch_[16])
   bool newdata = false;
   while (SbusRx_Parse()) {  // Get most recent data if more than 1 packet came in
     PacketCount++;
-    //if (newdata) LOGE("Lost Sbus Data");
+    //if (newdata) LOG_ERR("Lost Sbus Data");
     newdata = true;
   }
   if (newdata) {
@@ -156,7 +156,7 @@ bool SbusReadChannels(uint16_t ch_[16])
     static int64_t mmic = millis64() + 1000;
     if (mmic < millis64()) {  // Every Second
       mmic = millis64() + 1000;
-      LOGI("sbus rate = %d", mcount);
+      LOG_INF("sbus rate = %d", mcount);
       mcount = 0;
     }
     mcount++;

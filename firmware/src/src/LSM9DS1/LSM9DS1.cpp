@@ -30,9 +30,12 @@
 #include "LSM9DS1.h"
 
 #include <math.h>
+#include <zephyr/logging/log.h>
 
 #include "defines.h"
-#include "log.h"
+
+
+LOG_MODULE_REGISTER(lsm9ds1);
 
 #define LSM9DS1_ADDRESS 0x6b
 
@@ -62,7 +65,7 @@ int LSM9DS1Class::begin()
 {
   i2c_dev = DEVICE_DT_GET(DT_ALIAS(i2csensor));
   if (!i2c_dev) {
-    LOGE("Could not get device binding for I2C");
+    LOG_ERR("Could not get device binding for I2C");
     return 0;
   }
 

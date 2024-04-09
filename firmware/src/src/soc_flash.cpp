@@ -31,7 +31,7 @@ spi_flash_mmap_handle_t handle;
 #endif
 
 #include "defines.h"
-#include "log.h"
+
 
 LOG_MODULE_REGISTER(flash);
 
@@ -39,7 +39,19 @@ LOG_MODULE_REGISTER(flash);
 #define FLASH_SIZE FIXED_PARTITION_SIZE(storage_partition)
 
 volatile bool pauseForFlash = false;
+
+
+// Use a pointer to flash on these architectures
+#if defined(CONFIG_SOC_ESP32) ||\
+    defined(CONFIG_SOC_ESP32C3) ||\
+    defined(CONFIG_SOC_ESP32S3) ||\
+    defined(CONFIG_SOC_SERIES_NRF52X)
 const uint8_t *mem_ptr = NULL;
+#else
+uint8_t mem_ptr[FLASH_SIZE];
+#endif
+
+int socReadFlash(uint8_t dataout[FLASH_SIZE]);
 
 /* Get the flash space as a memory mapped pointer
  *   on ESP it must call spi_flash_mmap to map the flash space
@@ -64,14 +76,18 @@ const uint8_t *socGetMMFlashPtr()
   }
   #elif defined(CONFIG_SOC_SERIES_NRF52X)
   mem_ptr = (const uint8_t *)FLASH_ADDRESS;
+  #else
+  #warning "No memory mapping for this SOC"
+  socReadFlash(mem_ptr);
   #endif
-  if(mem_ptr != NULL && *mem_ptr == 0xFF) {
+  // Is flash memory blank. Return a indicator there is nothing to be read
+  if(*mem_ptr == 0xFF) {
     return (uint8_t *)"{\"UUID\":837727}";
   }
   return mem_ptr;
 }
 
-/*int socReadFlash(uint8_t dataout[FLASH_SIZE])
+int socReadFlash(uint8_t dataout[FLASH_SIZE])
 {
   const struct device *flash_device = DEVICE_DT_GET(DT_CHOSEN(zephyr_flash_controller));
 	if (!device_is_ready(flash_device)) {
@@ -81,13 +97,13 @@ const uint8_t *socGetMMFlashPtr()
   memset(dataout, 0, FLASH_SIZE);
 	flash_read(flash_device, FLASH_ADDRESS, dataout, FLASH_SIZE);
   return 0;
-}*/
+}
 
 void socClearFlash()
 {
   const struct device *flash_device = DEVICE_DT_GET(DT_CHOSEN(zephyr_flash_controller));
   if (!flash_device) {
-    LOGE("Flash Device Not Found!");
+    LOG_ERR("Flash Device Not Found!");
     return;
   }
 

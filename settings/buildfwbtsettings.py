@@ -37,7 +37,6 @@ f.write("""\
 
 #include "blechars.h"
 #include "trackersettings.h"
-#include "log.h"
 
 """)
 

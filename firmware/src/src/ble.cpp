@@ -20,13 +20,15 @@
 #include <zephyr/bluetooth/bluetooth.h>
 #include <zephyr/bluetooth/conn.h>
 #include <zephyr/bluetooth/uuid.h>
+#include <zephyr/logging/log.h>
 #include <zephyr/kernel.h>
 
 #include "io.h"
-#include "log.h"
 #include "htmain.h"
 #include "soc_flash.h"
 #include "trackersettings.h"
+
+LOG_MODULE_REGISTER(ble);
 
 #if defined(CONFIG_BT)
 
@@ -58,10 +60,10 @@ void bt_init()
 {
   int err = bt_enable(bt_ready);
   if (err) {
-    LOGE("Bluetooth init failed (err %d)", err);
+    LOG_ERR("Bluetooth init failed (err %d)", err);
     return;
   }
-  LOGI("Bluetooth initialized");
+  LOG_INF("Bluetooth initialized");
 }
 
 void bt_Thread()
@@ -237,19 +239,19 @@ int8_t BTGetRSSI()
 
 bool leparamrequested(struct bt_conn *conn, struct bt_le_conn_param *param)
 {
-  LOGI("Bluetooth Params Request. IntMax:%d IntMin:%d Lat:%d Timeout:%d", param->interval_max,
+  LOG_INF("Bluetooth Params Request. IntMax:%d IntMin:%d Lat:%d Timeout:%d", param->interval_max,
        param->interval_min, param->latency, param->timeout);
   return true;
 }
 
 void leparamupdated(struct bt_conn *conn, uint16_t interval, uint16_t latency, uint16_t timeout)
 {
-  LOGI("Bluetooth Params Updated. Int:%d Lat:%d Timeout:%d", interval, latency, timeout);
+  LOG_INF("Bluetooth Params Updated. Int:%d Lat:%d Timeout:%d", interval, latency, timeout);
 }
 
 void securitychanged(struct bt_conn *conn, bt_security_t level, enum bt_security_err err)
 {
-  LOGI("Bluetooth Security Changed. Lvl:%d Err:%d", level, err);
+  LOG_INF("Bluetooth Security Changed. Lvl:%d Err:%d", level, err);
 }
 
 const char *printPhy(int phy)
@@ -269,7 +271,7 @@ const char *printPhy(int phy)
 
 void lephyupdated(struct bt_conn *conn, struct bt_conn_le_phy_info *param)
 {
-  LOGI("Bluetooth PHY Updated. RxPHY:%s TxPHY:%s", param->rx_phy, param->tx_phy);
+  LOG_INF("Bluetooth PHY Updated. RxPHY:%d TxPHY:%d", param->rx_phy, param->tx_phy);
 }
 
 #else

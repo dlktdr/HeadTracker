@@ -31,7 +31,7 @@
 #include "filters/SF1eFilter.h"
 #include "io.h"
 #include "joystick.h"
-#include "log.h"
+
 #include "htmain.h"
 #include "pmw.h"
 #include "soc_flash.h"
@@ -185,7 +185,7 @@ LOG_INF("Waiting for I2C Sensor Bus To Be Ready");
 
 #if defined(HAS_LSM9DS1)
   if (!IMU.begin()) {
-    LOGE("Failed to initalize sensors");
+    LOG_ERR("Failed to initalize sensors");
     return -1;
   }
 #endif
@@ -231,7 +231,7 @@ LOG_INF("Waiting for I2C Sensor Bus To Be Ready");
 
 #if defined(HAS_LSM6DS3)
   if (initailizeLSM6DS3(&dev_ctx)) {
-    printk("Unable to init LSM6DS3\n");
+    LOG_ERR("Unable to init LSM6DS3\n");
     return -1;
   } else {
     hasMag = true;
@@ -473,7 +473,7 @@ void calculate_Thread()
     static bool recmsgsent = false;
     if (!isUartValid) {
       if (!lostmsgsent) {
-        LOGE("Uart(SBUS/CRSF) Data Lost");
+        LOG_ERR("Uart(SBUS/CRSF) Data Lost");
         lostmsgsent = true;
       }
       recmsgsent = false;
@@ -483,7 +483,7 @@ void calculate_Thread()
         channel_data[i] = uart_in_chans[i];
       }
       if (!recmsgsent) {
-        LOGD("Uart(SBUS/CRSF) Data Received");
+        LOG_DBG("Uart(SBUS/CRSF) Data Received");
         recmsgsent = true;
       }
       lostmsgsent = false;
@@ -512,7 +512,7 @@ void calculate_Thread()
     static bool hasrstppm=false;
     if(rstppmch >= 0 && rstppmch < 16) {
         if(channel_data[rstppmch] > 1800 && hasrstppm == false) {
-            LOGI("Reset Center - Input Channel %d > 1800us", rstppmch+1);
+            LOG_INF("Reset Center - Input Channel %d > 1800us", rstppmch+1);
             pressButton();
             hasrstppm = true;
         } else if (channel_data[rstppmch] < 1700 && hasrstppm == true) {
@@ -777,7 +777,7 @@ void sensor_Thread()
         if (APDS.proximityAvailable()) {
           int proximity = APDS.readProximity();
 
-          LOGT("Prox=%d", proximity);
+          LOG_DBG("Prox=%d", proximity);
 
           // Store High and Low Values, Generate reset thresholds
           maxproximity = MAX(proximity, maxproximity);
@@ -789,7 +789,7 @@ void sensor_Thread()
           if (highthreshold - lowthreshold > APDS_HYSTERISIS * 2) {
             if (proximity < lowthreshold && lastproximity == false) {
               pressButton();
-              LOGI("Reset center from a close proximity");
+              LOG_INF("Reset center from a close proximity");
               lastproximity = true;
             } else if (proximity > highthreshold) {
               // Clear flag on proximity clear
@@ -1257,7 +1257,7 @@ void reset_fusion()
   amag[0] = 0;
   amag[1] = 0;
   amag[2] = 0;
-  LOGI("Resetting fusion algorithm");
+  LOG_INF("Resetting fusion algorithm");
 }
 
 /* Builds data for auxiliary functions

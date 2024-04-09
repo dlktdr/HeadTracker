@@ -24,7 +24,7 @@
 #include "SBUS/sbus.h"
 #include "defines.h"
 #include "io.h"
-#include "log.h"
+
 #include "soc_flash.h"
 #include "trackersettings.h"
 
@@ -79,7 +79,7 @@ void uartRx_Thread()
     static int64_t mic = millis64() + 1000;
     if (mic < millis64()) {  // Every Second
       mic = millis64() + 1000;
-      LOGI("UART Rate = %d", PacketCount);
+      LOG_INF("UART Rate = %d", PacketCount);
       PacketCount = 0;
     }
 #endif

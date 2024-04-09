@@ -2,10 +2,10 @@
 
 #include <zephyr/kernel.h>
 #include <zephyr/drivers/adc.h>
+#include <zephyr/logging/log.h>
 #include <string.h>
 
-#include "log.h"
-#include "serial.h"
+LOG_MODULE_REGISTER(analog);
 
 // Simple analog input method
 // this just reads a sample then waits then returns it
@@ -41,7 +41,7 @@ static const struct device *init_adc(int channel)
   int ret;
   const struct device *adc_dev = DEVICE_DT_GET(DT_ALIAS(adcctrl));
   if (!adc_dev) {
-    LOGE("Could not get device binding for ADC");
+    LOG_ERR("Could not get device binding for ADC");
     return 0;
   }
   if (_LastChannel != channel) {
