@@ -33,11 +33,19 @@ message(STATUS "Board=${BOARD}")
 # NRF52 Boards
 if((${BOARD} STREQUAL "arduino_nano_33_ble") OR
    (${BOARD} STREQUAL "xiao_ble/nrf52840/sense") OR
+   (${BOARD} STREQUAL "xiao_ble/nrf52840") OR
    (${BOARD} STREQUAL "dtqsys_ht"))
   message(STATUS "  Board is a NRF52 based board")
 
   # Pick the correct project file for this architecture
   set (CONF_FILE zephyr/nrf_prj.conf)
+
+  # The sense revision 2 uses the same board file as the original
+  # but a few different defines in the code.
+  if(DEFINED BOARD_REV_XIAO52840)
+    message(STATUS "  Board is the basic XIAO 52840")
+    # SEE BELOW for defined passed to compiler
+  endif()
 
   # The sense revision 2 uses the same board file as the original
   # but a few different defines in the code.

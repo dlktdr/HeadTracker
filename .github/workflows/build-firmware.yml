@@ -61,6 +61,11 @@ jobs:
           cd /src/firmware/src
           west build -p -b xiao_ble/nrf52840/sense
           cp ./build/zephyr/*.uf2 build_bins/
+      - name: Build Firmware XIAO NRF52840
+        run: |
+          cd /src/firmware/src
+          west build -p -b xiao_ble/nrf52840
+          cp ./build/zephyr/*.uf2 build_bins/
       - name: Build Firmware ESP32C3 DevkitM
         run: |
           cd /src/firmware/src
