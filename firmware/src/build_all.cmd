@@ -3,7 +3,7 @@ del /q build_bins\*.*
 west build -p -b arduino_nano_33_ble || exit /b
 copy .\build\zephyr\*.bin build_bins\
 
-west build -p -b arduino_nano_33_ble -- -DBOARD_REV_SR2=y || exit /b
+west build -p -b arduino_nano_33_ble -- -DBOARD_REV2=y || exit /b
 copy .\build\zephyr\*.bin build_bins\
 
 west build -p -b xiao_ble/nrf52840/sense || exit /b

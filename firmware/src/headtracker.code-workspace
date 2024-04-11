@@ -54,7 +54,7 @@
         "svdFile": "${workspaceRoot:src}/nrf52840.svd",
       },
       {
-        "name": "Jlink - Arduino Nano 33 BLE SR2",
+        "name": "Jlink - Arduino Nano 33 BLE Rev2",
         "device": "nRF52840_XXAA",
         "cwd": "${workspaceRoot:src}",
         "executable": "build/zephyr/zephyr.elf",
@@ -189,7 +189,7 @@
           "build",
           "-p", "auto",
           "-b", "arduino_nano_33_ble",
-          "--", "-DBOARD_REV_SR2=y",
+          "--", "-DBOARD_REV2=y",
           "-DCMAKE_BUILD_TYPE=Debug"
         ],
         "problemMatcher": [

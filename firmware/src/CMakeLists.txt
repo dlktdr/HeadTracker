@@ -49,8 +49,8 @@ if((${BOARD} STREQUAL "arduino_nano_33_ble") OR
 
   # The sense revision 2 uses the same board file as the original
   # but a few different defines in the code.
-  if(DEFINED BOARD_REV_SR2)
-    message(STATUS "  Board is a Revision 2 Nano 33 BLE Sense")
+  if(DEFINED BOARD_REV2)
+    message(STATUS "  Board is a Revision 2 Nano 33 BLE")
     set (BOARD "arduino_nano_33_ble")
     # SEE BELOW for defined passed to compiler
   endif()
@@ -87,7 +87,7 @@ if(NOT build_type STREQUAL "debug")
   message(STATUS "Building in Release mode")
   string(REPLACE "." "_" output_name "${BOARD}_${GIT_TAG}_${GIT_REV}")
   string(REPLACE "/" "_" output_name "${output_name}")
-  if(DEFINED BOARD_REV_SR2)
+  if(DEFINED BOARD_REV2)
     set(output_name "${output_name}_SR2")
   endif()
   set(CONFIG_KERNEL_BIN_NAME "\"${output_name}\"" CACHE INTERNAL "")
@@ -116,8 +116,8 @@ if(${BOARD} MATCHES "esp32c3")
 endif()
 
 # Arduino Nano Sense Rev 2
-if(DEFINED BOARD_REV_SR2)
-  target_compile_definitions(app PUBLIC BOARD_REV_SR2=1)
+if(DEFINED BOARD_REV2)
+  target_compile_definitions(app PUBLIC BOARD_REV2=1)
 endif()
 
 target_compile_definitions(app PUBLIC FW_GIT_REV=${GIT_REV})
