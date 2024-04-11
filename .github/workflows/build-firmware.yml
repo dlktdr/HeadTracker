@@ -54,7 +54,7 @@ jobs:
       - name: Build Firmware Arduino Nano 33 BLE (Sense) Rev 2
         run: |
           cd /src/firmware/src
-          west build -p -b arduino_nano_33_ble -- -DBOARD_REV_SR2=y
+          west build -p -b arduino_nano_33_ble -- -DBOARD_REV2=y
           cp ./build/zephyr/*.bin build_bins/
       - name: Build Firmware XIAO NRF52840 Sense
         run: |
