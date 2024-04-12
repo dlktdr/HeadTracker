@@ -973,7 +973,7 @@ void sensor_Thread()
 
       // Apply Rotation
       float tmpacc[3] = {accx, accy, accz};
-      //rotate(tmpacc, rotation);
+      rotate(tmpacc, rotation);
       accx = tmpacc[0];
       accy = tmpacc[1];
       accz = tmpacc[2];
