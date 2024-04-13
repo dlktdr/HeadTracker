@@ -50,6 +50,7 @@ if((${BOARD} STREQUAL "arduino_nano_33_ble") OR
   # The sense revision 2 uses the same board file as the original
   # but a few different defines in the code.
   if(DEFINED BOARD_REV2)
+    set(ignoreMe "${BOARD_REV2}")
     message(STATUS "  Board is a Revision 2 Nano 33 BLE")
     set (BOARD "arduino_nano_33_ble")
     # SEE BELOW for defined passed to compiler
