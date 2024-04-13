@@ -2,7 +2,10 @@
 
 #include "defines.h"
 #include "io.h"
+#include "lsm_common.h"
 
+
+#if defined(HAS_LSM6DS3)
 
 int32_t platform_read_lsm6(void *handle, uint8_t reg, uint8_t *bufp, uint16_t len)
 {
@@ -20,8 +23,8 @@ int initailizeLSM6DS3(stmdev_ctx_t *dev_ctx)
 {
   uint8_t whoamI = 0, rst;
   /* Initialize mems driver interface */
-  dev_ctx->write_reg = platform_write_lsm;
-  dev_ctx->read_reg = platform_read_lsm;
+  dev_ctx->write_reg = platform_write_lsm6;
+  dev_ctx->read_reg = platform_read_lsm6;
   /* Wait sensor boot time */
   k_msleep(BOOT_TIME);
   /* Check device ID */
@@ -44,16 +47,43 @@ int initailizeLSM6DS3(stmdev_ctx_t *dev_ctx)
   return 0;
 }
 
+#elif defined(HAS_LSM9DS1)
+
+int32_t platform_read_lsm9_imu(void *handle, uint8_t reg, uint8_t *bufp, uint16_t len)
+{
+  const struct device *i2c_dev = DEVICE_DT_GET(DT_ALIAS(i2csensor));
+  return i2c_burst_read(i2c_dev, LSM9DS1_IMU_ID, reg, bufp, len);
+}
+
+int32_t platform_read_lsm9_mag(void *handle, uint8_t reg, uint8_t *bufp, uint16_t len)
+{
+  const struct device *i2c_dev = DEVICE_DT_GET(DT_ALIAS(i2csensor));
+  return i2c_burst_read(i2c_dev, LSM9DS1_MAG_ID, reg, bufp, len);
+}
+
+int32_t platform_write_lsm9_imu(void *handle, uint8_t reg, const uint8_t *bufp, uint16_t len)
+{
+  const struct device *i2c_dev = DEVICE_DT_GET(DT_ALIAS(i2csensor));
+  return i2c_burst_write(i2c_dev, LSM9DS1_IMU_ID, reg, bufp, len);
+}
+
+
+int32_t platform_write_lsm9_mag(void *handle, uint8_t reg, const uint8_t *bufp, uint16_t len)
+{
+  const struct device *i2c_dev = DEVICE_DT_GET(DT_ALIAS(i2csensor));
+  return i2c_burst_write(i2c_dev, LSM9DS1_MAG_ID, reg, bufp, len);
+}
+
 int initailizeLSM9DS1(stmdev_ctx_t *dev_ctx_imu, stmdev_ctx_t *dev_ctx_mag)
 {
   lsm9ds1_id_t whoamI;
   uint8_t rst;
   /* Initialize mems driver interface */
-  dev_ctx_imu->write_reg = platform_write_lsm;
-  dev_ctx_imu->read_reg = platform_read_lsm;
+  dev_ctx_imu->write_reg = platform_write_lsm9_imu;
+  dev_ctx_imu->read_reg = platform_read_lsm9_imu;
   /* Initialize mems driver interface */
-  dev_ctx_mag->write_reg = platform_write_lsm;
-  dev_ctx_mag->read_reg = platform_read_lsm;
+  dev_ctx_mag->write_reg = platform_write_lsm9_mag;
+  dev_ctx_mag->read_reg = platform_read_lsm9_mag;
   /* Wait sensor boot time */
   k_msleep(BOOT_TIME);
   /* Check device ID */
@@ -85,3 +115,5 @@ int initailizeLSM9DS1(stmdev_ctx_t *dev_ctx_imu, stmdev_ctx_t *dev_ctx_mag)
 
   return 0;
 }
+
+#endif

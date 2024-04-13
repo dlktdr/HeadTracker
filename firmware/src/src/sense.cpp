@@ -41,10 +41,7 @@
 #if defined(HAS_APDS9960)
 #include "APDS9960/APDS9960.h"
 #endif
-#if defined(HAS_LSM9DS1)
-#include "LSM9DS1/LSM9DS1.h"
-#endif
-#if defined(HAS_LSM6DS3)
+#if defined(HAS_LSM9DS1) || defined(HAS_LSM6DS3)
 #include "LSMCommon/lsm_common.h"
 #endif
 #if defined(HAS_MPU6500)
@@ -111,9 +108,9 @@ static bool lastproximity = false;
 #if defined(HAS_LSM6DS3)
 stmdev_ctx_t dev_ctx;
 #endif
-
-#if defined(HAS_LSM9DS1)
-LSM9DS1Class IMU;
+#if  defined(HAS_LSM9DS1)
+stmdev_ctx_t dev_ctx_imu;
+stmdev_ctx_t dev_ctx_mag;
 #endif
 
 #if defined(HAS_BMI270)
@@ -186,10 +183,12 @@ LOG_INF("Waiting for I2C Sensor Bus To Be Ready");
 
   hasMag = false;
 
-#if defined(HAS_LSM9DS1)
-  if (!IMU.begin()) {
-    LOG_ERR("Failed to initalize sensors");
+#if defined(HAS_LSM9D1)
+  if (initailizeLSM9DS1(&dev_ctx)) {
+    LOG_ERR("Unable to init LSM6DS3\n");
     return -1;
+  } else {
+    hasMag = true;
   }
 #endif
 
@@ -824,19 +823,36 @@ void sensor_Thread()
     bool magValid = false;
 
 #if defined(HAS_LSM9DS1)
-    if (IMU.accelerationAvailable()) {
-      IMU.readRawAccel(tacc[0], tacc[1], tacc[2]);
-      tacc[0] *= -1.0f;  // Flip X
+    int16_t data_raw_acceleration[3];
+    int16_t data_raw_angular_rate[3];
+    int16_t data_raw_magnetic_field[3];
+    lsm9ds1_status_t  reg;
+    lsm9ds1_dev_status_get(&dev_ctx_mag, &dev_ctx_imu, &reg);
+    if (reg.status_imu.xlda) {
+      /* Read magnetic field data */
+      memset(data_raw_acceleration, 0x00, 3 * sizeof(int16_t));
+      lsm9ds1_acceleration_raw_get(&dev_ctx_imu, data_raw_acceleration);
+      tacc[0] = (float)lsm9ds1_from_fs2g_to_mg(data_raw_acceleration[0]) / 1000.0f;
+      tacc[1] = (float)lsm9ds1_from_fs2g_to_mg(data_raw_acceleration[1]) / 1000.0f;
+      tacc[2] = (float)lsm9ds1_from_fs2g_to_mg(data_raw_acceleration[2]) / 1000.0f;
       accValid = true;
     }
-    if (IMU.magneticFieldAvailable()) {
-      IMU.readRawMagnet(tmag[0], tmag[1], tmag[2]);
-      magValid = true;
-    }
-    if (IMU.gyroscopeAvailable()) {
-      IMU.readRawGyro(tgyr[0], tgyr[1], tgyr[2]);
-      tgyr[0] *= -1.0f;  // Flip X to match other sensors
+    if (reg.status_imu.gda) {
+      memset(data_raw_angular_rate, 0x00, 3 * sizeof(int16_t));
+      lsm9ds1_angular_rate_raw_get(&dev_ctx_imu, data_raw_angular_rate);
+      tgyr[0] = (float)lsm9ds1_from_fs2g_to_mg(data_raw_angular_rate[0]) / 1000.0f;
+      tgyr[1] = (float)lsm9ds1_from_fs2g_to_mg(data_raw_angular_rate[1]) / 1000.0f;
+      tgyr[2] = (float)lsm9ds1_from_fs2g_to_mg(data_raw_angular_rate[2]) / 1000.0f;
       gyrValid = true;
+    }
+    if(reg.status_mag.zyxda) {
+      /* Read magnetometer data */
+      memset(data_raw_magnetic_field, 0x00, 3 * sizeof(int16_t));
+      lsm9ds1_magnetic_raw_get(&dev_ctx_mag, data_raw_magnetic_field);
+      tmag[0] = (float)lsm9ds1_from_fs16gauss_to_mG(data_raw_magnetic_field[0]) / 1000.0f;
+      tmag[1] = (float)lsm9ds1_from_fs16gauss_to_mG(data_raw_magnetic_field[1]) / 1000.0f;
+      tmag[2] = (float)lsm9ds1_from_fs16gauss_to_mG(data_raw_magnetic_field[2]) / 1000.0f;
+      magValid = true;
     }
 #endif
 
@@ -903,7 +919,6 @@ void sensor_Thread()
       tgyr[2] = (float)lsm6ds3tr_c_from_fs2000dps_to_mdps(data_raw_angular_rate[2]) / 1000.0f;
       gyrValid = true;
     }
-
 #endif
 
 #if defined(HAS_QMC5883)
