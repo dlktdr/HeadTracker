@@ -1008,8 +1008,6 @@ void MainWindow::requestParamsTimeout()
 {
     waitingOnParameters=true;
     jsonht->requestParameters();
-
-
 }
 
 /**
@@ -1204,6 +1202,7 @@ void MainWindow::paramReceiveStart()
 void MainWindow::paramReceiveComplete()
 {
     statusMessage(tr("Parameters Request Complete"),5000);
+    updateToUI();
     waitingOnParameters = false;
 
     // Request the Features
@@ -1229,7 +1228,6 @@ void MainWindow::featuresReceiveComplete()
 {
     statusMessage(tr("Features Request Complete"),5000);
     waitingOnFeatures = false;
-    updateToUI();
     BLE33tabChanged(); // Request Data to be sent
     trkset.setDataItemSend("isCalibrated",true);
     trkset.setDataItemSend("trpenabled",true);
