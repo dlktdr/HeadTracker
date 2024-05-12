@@ -69,7 +69,7 @@ void uartRx_Thread()
     k_poll(uartRxRunEvents, 1, K_FOREVER);
     k_usleep(UART_PERIOD);
 
-    if (pauseForFlash) {
+    if (k_sem_count_get(&flashWriteSemaphore) == 1) {
       continue;
     }
 
@@ -115,8 +115,8 @@ void uartTx_Thread()
 {
   while (1) {
     k_poll(uartTxRunEvents, 1, K_FOREVER);
-    if (pauseForFlash) {
-      k_msleep(1000);
+    if (k_sem_count_get(&flashWriteSemaphore) == 1) {
+      k_msleep(10);
       continue;
     }
 

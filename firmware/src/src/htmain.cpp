@@ -35,6 +35,10 @@ void start(void)
   LOG_INF("Starting IO");
   io_init();
 
+  // Load settings from flash - trackersettings.cpp
+  LOG_INF("Loading Settings");
+  trkset.loadFromEEPROM();
+
   // Serial Setup, we have a CDC Device, enable USB
 #if defined(DT_N_INST_0_zephyr_cdc_acm_uart)
   LOG_INF("Starting USB\n");
@@ -99,10 +103,6 @@ void start(void)
   LOG_INF("Starting PWM");
   PWM_Init(PWM_FREQUENCY);
 #endif
-
-  // Load settings from flash - trackersettings.cpp
-  LOG_INF("Loading Settings");
-  trkset.loadFromEEPROM();
 
   // Check if center button is held down, force BT Configuration mode
   LOG_INF("Checking Center Button");

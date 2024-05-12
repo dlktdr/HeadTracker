@@ -141,7 +141,7 @@ void serial_Thread()
     k_poll(serialRunEvents, 1, K_FOREVER);
     k_msleep(SERIAL_PERIOD);
 
-    if (pauseForFlash) {
+    if (k_sem_count_get(&flashWriteSemaphore) == 1) {
       continue;
     }
 

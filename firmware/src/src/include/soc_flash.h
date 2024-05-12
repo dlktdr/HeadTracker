@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-extern volatile bool pauseForFlash;
+extern struct k_sem flashWriteSemaphore;
 
 int socReadFlash(char *dataout, int len);
 int socWriteFlash(const uint8_t *data, int len);

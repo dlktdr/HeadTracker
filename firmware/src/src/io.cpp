@@ -208,7 +208,7 @@ void io_Thread()
     k_msleep(IO_PERIOD);
     k_poll(ioRunEvents, 1, K_FOREVER);
 
-    if (pauseForFlash) continue;
+    if (k_sem_count_get(&flashWriteSemaphore) == 1) continue;
 
 #if defined(HAS_NOTIFYLED)
     // LEDS
@@ -254,6 +254,16 @@ void io_Thread()
       led_sequence[1].RGB = RGB_RED;
       led_sequence[1].time = 20;
       led_sequence[2].time = 0;  // End Sequence
+
+    // Gyro not calibrated, bluetooth is searching. Red Pulsing, Pulse of Blue
+    } else if (_ledmode & LED_GYROCAL && _ledmode & LED_BTSCANNING) {
+      led_sequence[0].RGB = RGB_BLUE;
+      led_sequence[0].time = 50;
+      led_sequence[1].RGB = RGB_RED;
+      led_sequence[1].time = 400;
+      led_sequence[2].RGB = RGB_OFF;
+      led_sequence[2].time = 350;
+      led_sequence[3].time = 0;  // End Sequence
 
     // Gyro Calibration Mode - Red slow, equal flashing
     } else if (_ledmode & LED_GYROCAL) { // Priority 2

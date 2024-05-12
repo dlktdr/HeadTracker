@@ -72,7 +72,7 @@ void bt_Thread()
   while (1) {
     k_poll(btRunEvents, 1, K_FOREVER);
 
-    if (pauseForFlash || k_sem_count_get(&btPauseSem) == 1) {
+    if (k_sem_count_get(&flashWriteSemaphore) == 1 || k_sem_count_get(&btPauseSem) == 1) {
       k_msleep(10);
       continue;
     }

@@ -63,7 +63,7 @@
 #define CALCULATE_PERIOD 7000  // (us) Channel Calculations
 #define UART_PERIOD 4000       // (us) Update rate of UART
 #define PWM_FREQUENCY 50       // (ms) PWM Period
-#define PAUSE_BEFORE_FLASH 60  // (ms) Time to pause all threads before Flash writing
+#define PAUSE_BEFORE_FLASH 30  // (ms) Time to pause all threads before Flash writing
 
 // Thread Stack Sizes
 #if defined(CONFIG_SOC_SERIES_NRF52X)
@@ -110,8 +110,8 @@
 #define IO_THREAD_PRIO PRIORITY_LOW
 #define SERIAL_THREAD_PRIO PRIORITY_LOW
 #define DATA_THREAD_PRIO PRIORITY_LOW
-#define BT_THREAD_PRIO PRIORITY_HIGH
-#define SENSOR_THREAD_PRIO PRIORITY_MED
+#define BT_THREAD_PRIO -PRIORITY_HIGH
+#define SENSOR_THREAD_PRIO PRIORITY_HIGH
 #define CALCULATE_THREAD_PRIO PRIORITY_HIGH
 #define UARTRX_THREAD_PRIO PRIORITY_LOW - 2
 #define UARTTX_THREAD_PRIO PRIORITY_HIGH

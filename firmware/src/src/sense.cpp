@@ -306,7 +306,7 @@ void calculate_Thread()
     // Do not execute below until after initialization has happened
     k_poll(calculateRunEvents, 1, K_FOREVER);
 
-    if (pauseForFlash) {
+    if (k_sem_count_get(&flashWriteSemaphore) == 1) {
       k_msleep(10);
       continue;
     }
@@ -771,7 +771,7 @@ void sensor_Thread()
     // Do not execute below until after initialization has happened
     k_poll(senseRunEvents, 1, K_FOREVER);
 
-    if (pauseForFlash) {
+    if (k_sem_count_get(&flashWriteSemaphore) == 1) {
       k_msleep(10);
       continue;
     }

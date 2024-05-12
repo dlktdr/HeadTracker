@@ -181,7 +181,7 @@ void BTHeadStart()
 
   // Discover BT Address
   bt_id_get(addrarry, &addrcnt);
-  if (addrcnt > 0) bt_addr_le_to_str(&addrarry[0], _address, sizeof(_address));
+  if (addrcnt == 1) bt_addr_le_to_str(&addrarry[0], _address, sizeof(_address));
 
   crc = 0;
   bufferIndex = 0;

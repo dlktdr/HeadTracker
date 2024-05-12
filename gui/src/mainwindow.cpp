@@ -1202,8 +1202,8 @@ void MainWindow::paramReceiveStart()
 void MainWindow::paramReceiveComplete()
 {
     statusMessage(tr("Parameters Request Complete"),5000);
-    updateToUI();
     waitingOnParameters = false;
+    updateToUI();
 
     // Request the Features
     jsonht->requestFeatures();
