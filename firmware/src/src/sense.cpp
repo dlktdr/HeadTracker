@@ -1043,10 +1043,12 @@ void sensor_Thread()
     }
 
     // Run Gyro Calibration, only on good gyro data
-    if (gyrValid) 
+    if (gyrValid)
     {
       gyroCalibrate();
-      detectDoubleTap();
+      // If double tap detection is enabled, check for it
+      if(trkset.getRstOnDbltTap())
+        detectDoubleTap();
     }
 
     // Only do this update after the first mag and accel data have been read.
@@ -1148,12 +1150,12 @@ void detectDoubleTap()
   float acc_dif = (acc_magnitude - last_acc_mag) / deltatime;
   last_acc_mag = acc_magnitude;
 
-  if (acc_dif > 80.0)
+  if (acc_dif > trkset.getRstOnDblTapThres())
   {
       timediff = time - lasttaptime;
       LOG_INF("Tap detected, mag=%.1f, time=%lld, timediff=%lld", (double)acc_dif, time, timediff);
-      
-      if (timediff > 100 && timediff < 500)
+
+      if (timediff > trkset.getRstOnDblTapMin() && timediff < trkset.getRstOnDblTapMin() + trkset.getRstOnDblTapMax())
       {
         LOG_INF("Double Tap detected !!!");
         pressButton();

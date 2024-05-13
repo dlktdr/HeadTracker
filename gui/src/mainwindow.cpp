@@ -113,6 +113,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->chkRstOnTlt, &QPushButton::clicked, this, &MainWindow::updateFromUI);
     connect(ui->chkCh5Arm, &QPushButton::clicked, this ,&MainWindow::updateFromUI);
     connect(ui->chkCRSFInv, &QPushButton::clicked, this, &MainWindow::updateFromUI);
+    connect(ui->chkResetDblTap, &QPushButton::clicked, this, &MainWindow::updateFromUI);
 
     //connect(ui->chkRawData,&QPushButton::clicked,this, &MainWindow::setDataMode(bool)));
 
@@ -132,6 +133,9 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->spnRotZ, &QSpinBox::valueChanged, this, &MainWindow::updateFromUI);
     connect(ui->spnSBUSRate, &QSpinBox::valueChanged, this, &MainWindow::updateFromUI);
     connect(ui->spnCRSFRate, &QSpinBox::valueChanged, this, &MainWindow::updateFromUI);
+    connect(ui->spnRstDblTapMax, &QSpinBox::valueChanged, this, &MainWindow::updateFromUI);
+    connect(ui->spnRstDblTapMin, &QSpinBox::valueChanged, this, &MainWindow::updateFromUI);
+    connect(ui->spnRstDblTapThres, &QSpinBox::valueChanged, this, &MainWindow::updateFromUI);
 
     // Gain Sliders
     connect(ui->til_gain, &GainSlider::valueChanged, this, &MainWindow::updateFromUI);
@@ -564,6 +568,22 @@ void MainWindow::updateToUI()
     ui->spnSBUSRate->setValue(trkset.getSbusTxRate());
     ui->spnCRSFRate->setValue(trkset.getCrsfTxRate());
 
+    // Reset on double tap
+    if(trkset.getRstOnDbltTap()) {
+        ui->spnRstDblTapMax->setEnabled(true);
+        ui->spnRstDblTapMin->setEnabled(true);
+        ui->spnRstDblTapThres->setEnabled(true);
+        ui->chkResetDblTap->setChecked(true);
+    } else {
+        ui->spnRstDblTapMax->setEnabled(false);
+        ui->spnRstDblTapMin->setEnabled(false);
+        ui->spnRstDblTapThres->setEnabled(false);
+        ui->chkResetDblTap->setChecked(false);
+    }
+    ui->spnRstDblTapMax->setValue(trkset.getRstOnDblTapMax());
+    ui->spnRstDblTapMin->setValue(trkset.getRstOnDblTapMin());
+    ui->spnRstDblTapThres->setValue(trkset.getRstOnDblTapThres());
+
     int panCh = trkset.getPanCh();
     int rllCh = trkset.getRllCh();
     int tltCh = trkset.getTltCh();
@@ -746,6 +766,21 @@ void MainWindow::updateFromUI()
 
     trkset.setButLngPs(ui->chkLngBttnPress->isChecked());
     trkset.setRstOnTlt(ui->chkRstOnTlt->isChecked());
+
+    // Reset on Double Tap
+    trkset.setRstOnDblTapMax(ui->spnRstDblTapMax->value());
+    trkset.setRstOnDblTapMin(ui->spnRstDblTapMin->value());
+    trkset.setRstOnDblTapThres(ui->spnRstDblTapThres->value());
+    trkset.setRstOnDbltTap(ui->chkResetDblTap->isChecked());
+    if(ui->chkResetDblTap->isChecked()) {
+        ui->spnRstDblTapMax->setEnabled(true);
+        ui->spnRstDblTapMin->setEnabled(true);
+        ui->spnRstDblTapThres->setEnabled(true);
+    } else {
+        ui->spnRstDblTapMax->setEnabled(false);
+        ui->spnRstDblTapMin->setEnabled(false);
+        ui->spnRstDblTapThres->setEnabled(false);
+    }
 
     trkset.setSbOutInv(ui->chkSbusOutInv->isChecked());
     trkset.setSbusTxRate(ui->spnSBUSRate->value());
