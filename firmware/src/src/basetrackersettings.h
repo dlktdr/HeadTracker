@@ -773,6 +773,40 @@ public:
   inline const bool& getRstOnTlt() {return rstontlt;}
   void setRstOnTlt(bool val=false) { rstontlt = val; }
 
+  // Reset on a double tap
+  inline const bool& getRstOnDbltTap() {return rstondblttap;}
+  void setRstOnDbltTap(bool val=false) { rstondblttap = val; }
+
+  // Double Tap Threshold
+  inline const float& getRstOnDblTapThres() {return rstondbltapthres;}
+  bool setRstOnDblTapThres(float val=80) {
+    if(val >= 50 && val <= 200) {
+      rstondbltapthres = val;
+      return true;
+    }
+    return false;
+  }
+
+  // Double Tap Min Time
+  inline const float& getRstOnDblTapMin() {return rstondbltapmin;}
+  bool setRstOnDblTapMin(float val=100) {
+    if(val >= 50 && val <= 400) {
+      rstondbltapmin = val;
+      return true;
+    }
+    return false;
+  }
+
+  // Double Tap Max Time
+  inline const float& getRstOnDblTapMax() {return rstondbltapmax;}
+  bool setRstOnDblTapMax(float val=400) {
+    if(val >= 20 && val <= 1000) {
+      rstondbltapmax = val;
+      return true;
+    }
+    return false;
+  }
+
   // Invert PPM Output
   inline const bool& getPpmOutInvert() {return ppmoutinvert;}
   void setPpmOutInvert(bool val=false) { ppmoutinvert = val; }
@@ -1022,6 +1056,10 @@ public:
     json["rstonwave"] = rstonwave;
     json["butlngps"] = butlngps;
     json["rstontlt"] = rstontlt;
+    json["rstondblttap"] = rstondblttap;
+    json["rstondbltapthres"] = rstondbltapthres;
+    json["rstondbltapmin"] = rstondbltapmin;
+    json["rstondbltapmax"] = rstondbltapmax;
     json["ppmoutinvert"] = ppmoutinvert;
     json["ppmininvert"] = ppmininvert;
     json["ppmframe"] = ppmframe;
@@ -1106,6 +1144,10 @@ public:
     v = json["rstonwave"]; if(!v.isNull()) {setRstOnWave(v);}
     v = json["butlngps"]; if(!v.isNull()) {setButLngPs(v);}
     v = json["rstontlt"]; if(!v.isNull()) {setRstOnTlt(v);}
+    v = json["rstondblttap"]; if(!v.isNull()) {setRstOnDbltTap(v);}
+    v = json["rstondbltapthres"]; if(!v.isNull()) {setRstOnDblTapThres(v);}
+    v = json["rstondbltapmin"]; if(!v.isNull()) {setRstOnDblTapMin(v);}
+    v = json["rstondbltapmax"]; if(!v.isNull()) {setRstOnDblTapMax(v);}
     v = json["ppmoutinvert"]; if(!v.isNull()) {setPpmOutInvert(v);}
     v = json["ppmininvert"]; if(!v.isNull()) {setPpmInInvert(v);}
     v = json["ppmframe"]; if(!v.isNull()) {setPpmFrame(v);}
@@ -1514,6 +1556,10 @@ protected:
   bool rstonwave = false; // Reset on Proximity Sense
   bool butlngps = false; // Long Press on the Button to Enable/Disable Tilt Roll and Pan
   bool rstontlt = false; // Reset Center on a Head Tilt
+  bool rstondblttap = false; // Reset on a double tap
+  float rstondbltapthres = 80; // Double Tap Threshold
+  float rstondbltapmin = 100; // Double Tap Min Time
+  float rstondbltapmax = 400; // Double Tap Max Time
   bool ppmoutinvert = false; // Invert PPM Output
   bool ppmininvert = false; // Invert PPM Output
   uint16_t ppmframe = 22500; // PPM Frame Length (us)
