@@ -1113,8 +1113,8 @@ void sensor_Thread()
     // Adjust sleep for a more accurate period
     senseUsDuration = micros64() - senseUsDuration;
     if (SENSOR_PERIOD - senseUsDuration <
-        SENSOR_PERIOD * 0.7) {  // Took a long time. Will crash if sleep is too short
-      //LOG_ERR("Sensor Thread Overrun %lld", senseUsDuration);
+        SENSOR_PERIOD * 0.5) {  // Took a long time. Will crash if sleep is too short
+      LOG_ERR("Sensor Thread Overrun %lld", senseUsDuration);
       k_usleep(SENSOR_PERIOD);
     } else {
       k_usleep(SENSOR_PERIOD - senseUsDuration);
