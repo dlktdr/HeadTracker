@@ -148,6 +148,10 @@ public:
     _setting["rstonwave"] = false;
     _setting["butlngps"] = false;
     _setting["rstontlt"] = false;
+    _setting["rstondblttap"] = false;
+    _setting["rstondbltapthres"] = 80;
+    _setting["rstondbltapmin"] = 100;
+    _setting["rstondbltapmax"] = 400;
     _setting["ppmoutinvert"] = false;
     _setting["ppmininvert"] = false;
     _setting["ppmframe"] = 22500;
@@ -258,6 +262,10 @@ public:
     descriptions["rstonwave"] = "Reset on Proximity Sense";
     descriptions["butlngps"] = "Long Press on the Button to Enable/Disable Tilt Roll and Pan";
     descriptions["rstontlt"] = "Reset Center on a Head Tilt";
+    descriptions["rstondblttap"] = "Reset on a double tap";
+    descriptions["rstondbltapthres"] = "Double Tap Threshold";
+    descriptions["rstondbltapmin"] = "Double Tap Min Time";
+    descriptions["rstondbltapmax"] = "Double Tap Max Time";
     descriptions["ppmoutinvert"] = "Invert PPM Output";
     descriptions["ppmininvert"] = "Invert PPM Output";
     descriptions["ppmframe"] = "PPM Frame Length (us)";
@@ -1155,6 +1163,49 @@ public:
   // Reset Center on a Head Tilt
   bool getRstOnTlt() {return _setting["rstontlt"].toBool();}
   void setRstOnTlt(bool val=false) { _setting["rstontlt"] = val; }
+
+  // Reset on a double tap
+  bool getRstOnDbltTap() {return _setting["rstondblttap"].toBool();}
+  void setRstOnDbltTap(bool val=false) { _setting["rstondblttap"] = val; }
+
+  // Double Tap Threshold
+  float getRstOnDblTapThres() {
+    return _setting["rstondbltapthres"].toFloat();
+  }
+  bool setRstOnDblTapThres(float val=80) {
+    if(val >= 50 && val <= 200) {
+      _setting["rstondbltapthres"] = QString::number(val,'g',4);
+      return true;
+    }
+    return false;
+  }
+
+
+  // Double Tap Min Time
+  float getRstOnDblTapMin() {
+    return _setting["rstondbltapmin"].toFloat();
+  }
+  bool setRstOnDblTapMin(float val=100) {
+    if(val >= 50 && val <= 400) {
+      _setting["rstondbltapmin"] = QString::number(val,'g',4);
+      return true;
+    }
+    return false;
+  }
+
+
+  // Double Tap Max Time
+  float getRstOnDblTapMax() {
+    return _setting["rstondbltapmax"].toFloat();
+  }
+  bool setRstOnDblTapMax(float val=400) {
+    if(val >= 20 && val <= 1000) {
+      _setting["rstondbltapmax"] = QString::number(val,'g',4);
+      return true;
+    }
+    return false;
+  }
+
 
   // Invert PPM Output
   bool getPpmOutInvert() {return _setting["ppmoutinvert"].toBool();}

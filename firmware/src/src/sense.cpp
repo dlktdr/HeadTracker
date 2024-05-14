@@ -69,6 +69,7 @@
 // #define DEBUG_SENSOR_RATES
 
 void gyroCalibrate();
+void detectDoubleTap();
 
 static float auxdata[10];
 static float raccx = 0, raccy = 0, raccz = 0;
@@ -1042,7 +1043,13 @@ void sensor_Thread()
     }
 
     // Run Gyro Calibration, only on good gyro data
-    if (gyrValid) gyroCalibrate();
+    if (gyrValid)
+    {
+      gyroCalibrate();
+      // If double tap detection is enabled, check for it
+      if(trkset.getRstOnDbltTap())
+        detectDoubleTap();
+    }
 
     // Only do this update after the first mag and accel data have been read.
     if (madgreads == 0) {
@@ -1106,7 +1113,7 @@ void sensor_Thread()
     // Adjust sleep for a more accurate period
     senseUsDuration = micros64() - senseUsDuration;
     if (SENSOR_PERIOD - senseUsDuration <
-        SENSOR_PERIOD * 0.7) {  // Took a long time. Will crash if sleep is too short
+        SENSOR_PERIOD * 0.5) {  // Took a long time. Will crash if sleep is too short
       LOG_ERR("Sensor Thread Overrun %lld", senseUsDuration);
       k_usleep(SENSOR_PERIOD);
     } else {
@@ -1124,6 +1131,39 @@ void sensor_Thread()
     if (accValid) mcount++;
 #endif
   }  // END THREAD
+}
+
+void detectDoubleTap()
+{
+
+  static float last_acc_mag = 0;
+  static uint64_t lasttaptime = 0;
+  static uint64_t lasttime = 0;
+  uint64_t time = millis64();
+  uint64_t timediff;
+
+  float deltatime = (float)(time - lasttime) / 1000.0f;
+  if (deltatime == 0.0f) return;
+  lasttime = time;
+
+  float acc_magnitude = sqrtf(raccx * raccx + raccy * raccy + raccz * raccz);
+  float acc_dif = (acc_magnitude - last_acc_mag) / deltatime;
+  last_acc_mag = acc_magnitude;
+
+  if (acc_dif > trkset.getRstOnDblTapThres())
+  {
+      timediff = time - lasttaptime;
+      LOG_INF("Tap detected, mag=%.1f, time=%lld, timediff=%lld", (double)acc_dif, time, timediff);
+
+      if (timediff > trkset.getRstOnDblTapMin() && timediff < trkset.getRstOnDblTapMin() + trkset.getRstOnDblTapMax())
+      {
+        LOG_INF("Double Tap detected !!!");
+        pressButton();
+      }
+
+      lasttaptime = time;
+  }
+
 }
 
 void gyroCalibrate()
