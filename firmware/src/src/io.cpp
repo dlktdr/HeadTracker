@@ -19,6 +19,18 @@
 #include "trackersettings.h"
 
 
+// TODO: Find how to do this in new version of Zephyr
+void setPinHighDrive(uint32_t pin) {
+
+  if(PIN_TO_GPORT(PIN_NAME_TO_NUM(pin)) == 0) {
+    NRF_P0->PIN_CNF[PIN_TO_GPIN(PIN_NAME_TO_NUM(pin))] = (NRF_P0->PIN_CNF[PIN_TO_GPIN(PIN_NAME_TO_NUM(pin))] & ~GPIO_PIN_CNF_DRIVE_Msk) |
+          GPIO_PIN_CNF_DRIVE_H0H1 << GPIO_PIN_CNF_DRIVE_Pos;
+  } else {
+    NRF_P1->PIN_CNF[PIN_TO_GPIN(PIN_NAME_TO_NUM(pin))] = (NRF_P1->PIN_CNF[PIN_TO_GPIN(PIN_NAME_TO_NUM(pin))] & ~GPIO_PIN_CNF_DRIVE_Msk) |
+          GPIO_PIN_CNF_DRIVE_H0H1 << GPIO_PIN_CNF_DRIVE_Pos;
+  }
+}
+
 LOG_MODULE_REGISTER(io);
 
 K_SEM_DEFINE(button_sem, 0, 1);
@@ -54,33 +66,21 @@ void io_init()
 #if defined(CONFIG_BOARD_ARDUINO_NANO_33_BLE)
   pinMode(IO_VDDENA, GPIO_OUTPUT);
   pinMode(IO_I2C_PU, GPIO_OUTPUT);
-  // Set pin to High Drive - TODO find how to do in in new zephyr versions
-  if(PIN_TO_GPORT(PIN_NAME_TO_NUM(IO_I2C_PU)) == 0) {
-    NRF_P0->PIN_CNF[PIN_TO_GPIN(PIN_NAME_TO_NUM(IO_I2C_PU))] = (NRF_P0->PIN_CNF[PIN_TO_GPIN(PIN_NAME_TO_NUM(IO_I2C_PU))] & ~GPIO_PIN_CNF_DRIVE_Msk) |
-          GPIO_PIN_CNF_DRIVE_H0H1 << GPIO_PIN_CNF_DRIVE_Pos;
-  } else {
-    NRF_P1->PIN_CNF[PIN_TO_GPIN(PIN_NAME_TO_NUM(IO_I2C_PU))] = (NRF_P1->PIN_CNF[PIN_TO_GPIN(PIN_NAME_TO_NUM(IO_I2C_PU))] & ~GPIO_PIN_CNF_DRIVE_Msk) |
-          GPIO_PIN_CNF_DRIVE_H0H1 << GPIO_PIN_CNF_DRIVE_Pos;
-  }
-  // Set pin to High Drive - TODO find how to do in new zephyr versions
-  if(PIN_TO_GPORT(PIN_NAME_TO_NUM(IO_VDDENA)) == 0) {
-    NRF_P0->PIN_CNF[PIN_TO_GPIN(PIN_NAME_TO_NUM(IO_VDDENA))] = (NRF_P0->PIN_CNF[PIN_TO_GPIN(PIN_NAME_TO_NUM(IO_VDDENA))] & ~GPIO_PIN_CNF_DRIVE_Msk) |
-          GPIO_PIN_CNF_DRIVE_H0H1 << GPIO_PIN_CNF_DRIVE_Pos;
-  } else {
-    NRF_P1->PIN_CNF[PIN_TO_GPIN(PIN_NAME_TO_NUM(IO_VDDENA))] = (NRF_P1->PIN_CNF[PIN_TO_GPIN(PIN_NAME_TO_NUM(IO_VDDENA))] & ~GPIO_PIN_CNF_DRIVE_Msk) |
-          GPIO_PIN_CNF_DRIVE_H0H1 << GPIO_PIN_CNF_DRIVE_Pos;
-  }
-  digitalWrite(IO_VDDENA, 1);
+  setPinHighDrive(IO_VDDENA);
+  setPinHighDrive(IO_I2C_PU);
   digitalWrite(IO_I2C_PU, 1);
+  // Hard Reset Sensor
+  digitalWrite(IO_VDDENA, 0);
+  k_msleep(200);
+  digitalWrite(IO_VDDENA, 1);
 #endif
 
 #if defined(CONFIG_BOARD_XIAO_BLE_NRF52840_SENSE)
-  // 10K I2C Pull up Resistors on internal LSM6DS3, High Drive Strength
   pinMode(IO_LSM6DS3PWR, GPIO_OUTPUT);
-  // Shut Sensor off
+  setPinHighDrive(IO_LSM6DS3PWR);
+  // Hard Reset Sensor
   digitalWrite(IO_LSM6DS3PWR, 0);
-  k_msleep(100);
-  // Enable Sensor
+  k_msleep(200);
   digitalWrite(IO_LSM6DS3PWR, 1);
 #endif
 

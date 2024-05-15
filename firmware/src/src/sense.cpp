@@ -673,8 +673,12 @@ void calculate_Thread()
       }
     }
 
-    // 14 Set USB Joystick Channels, Only 8 channels
-    set_JoystickChannels(channel_data);
+    // 14 Set USB Joystick Channels, Only 8 channels, Half rate or USB is overwhelmed
+    static uint32_t joystick_update = 0;
+    if(joystick_update++ > 0) {
+      joystick_update = 0;
+      set_JoystickChannels(channel_data);
+    }
 
     // Update the settings for the GUI
     // Serial also uses this data, make sure writes are complete.
@@ -942,20 +946,6 @@ void sensor_Thread()
       gyrValid = true;
     }
 #endif
-
-    // Sanity Checks, should never get exactly zero from x,y,z sensor
-    if(accValid && tacc[0] == 0.0f && tacc[1] == 0.0f && tacc[2] == 0.0f) {
-      accValid = false;
-      LOG_ERR("Sensor Fault - Accel Zero");
-    }
-    if(gyrValid && tgyr[0] == 0.0f && tgyr[1] == 0.0f && tgyr[2] == 0.0f) {
-      gyrValid = false;
-      LOG_ERR("Sensor Fault - Gyro Zero");
-    }
-    if(magValid && tmag[0] == 0.0f && tmag[1] == 0.0f && tmag[2] == 0.0f) {
-      magValid = false;
-      LOG_ERR("Sensor Fault - Mag Zero");
-    }
 
     k_mutex_lock(&sensor_mutex, K_FOREVER);
 

@@ -48,6 +48,7 @@ MainWindow::MainWindow(QWidget *parent)
     serialDebug = new QTextEdit(this);
     serialDebug->setWindowFlags(Qt::Window);
     serialDebug->setWindowTitle(tr("Serial Information"));
+    serialDebug->setLineWrapMode(QTextEdit::NoWrap);
     serialDebug->resize(600,300);
     channelviewer = new ChannelViewer(&trkset, this);
     channelviewer->setWindowFlags(Qt::Window);
@@ -403,7 +404,7 @@ void MainWindow::sendSerialData(QByteArray data)
         if(QString(sdata).contains("{\"Cmd\":\"IH\"}"))
             return;
 
-        addToLog("GUI: " + sdata + "\n");
+        addToLog("GUI: " + sdata.mid(1,sdata.length()-6));
         data = data.right(data.length()-nlindex-2);
     }
 
@@ -441,10 +442,11 @@ void MainWindow::slowSerialSend()
 
 void MainWindow::addToLog(QString log, int ll)
 {
+    log = log.trimmed();
     QString color = "black";
     if(ll==2) // Debug
         color = "red";
-    else if(log.contains("HT:")) // TODO change this to detect logger messages
+    else if(log.left(1)[0] == '[') // TODO change this to detect logger messages
         color = "green";
     else if(log.contains("GUI:"))
         color = "blue";

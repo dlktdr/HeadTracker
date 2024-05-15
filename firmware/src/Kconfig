@@ -1,0 +1,6 @@
+mainmenu "Zephyr Kernel Configuration"
+
+source "Kconfig.zephyr"
+
+
+rsource "Kconfig.ht"

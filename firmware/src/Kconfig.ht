@@ -1,0 +1,13 @@
+config LOG_BACKEND_HTGUI
+	bool "HeadTracker GUI backend"
+	select LOG_OUTPUT
+	help
+	  Backend that sends log messages over the HeadTracker GUI interface
+
+if LOG_BACKEND_HTGUI
+
+backend = HTGUI
+backend-str = htgui
+source "subsys/logging/Kconfig.template.log_format_config"
+
+endif # LOG_BACKEND_BLE

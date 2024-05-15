@@ -75,8 +75,10 @@ void BoardJson::dataIn(QByteArray &data)
         nakError();
 
         // Other data sent, show the user
-    } else {
-        emit addToLog(data + "\n");
+    } else if(data.left(1)[0] == (char)0x01 && data.right(1)[0] == (char)0x03) { // Log information
+        QByteArray unescape = unescapeLog(data.mid(1,data.length()-2));
+        QString logd= QString::fromLatin1(unescape);
+        emit addToLog(logd.toHtmlEscaped() + "\n");
     }
 
 }
@@ -363,7 +365,6 @@ void BoardJson::parseIncomingJSON(const QVariantMap &map)
                 }
             }
         }
-
     // Board Features
     } else if(map["Cmd"].toString() == "FE") {
         _features = map["FEAT"].toStringList();
@@ -458,6 +459,19 @@ uint16_t BoardJson::escapeCRC(uint16_t crc)
     return (uint16_t)crclow | ((uint16_t)crchigh << 8);
 }
 
+QByteArray BoardJson::unescapeLog(QByteArray data)
+{
+    QByteArray rval;
+    for(int i=0; i < data.length(); i++) {
+        if(data[i] == 0x1B) {
+            rval.append(data[i+1] ^ 0xFF);
+            i++;
+        } else {
+            rval.append(data[i]);
+        }
+    }
+    return rval;
+}
 void BoardJson::nakError()
 {
     // If too many faults, disconnect.

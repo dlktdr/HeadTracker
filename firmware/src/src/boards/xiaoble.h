@@ -47,18 +47,18 @@
    */
 
 #define PIN_X \
-  PIN(CENTER_BTN,   NRFPIN(1, 13), "D8") \
-  PIN(PPMOUT,       NRFPIN(1, 15), "D10") \
-  PIN(PPMIN,        NRFPIN(1, 14), "D9") \
-  PIN(VOLTMON,      NRFPIN(0, 31), "Analog Battery Voltage") \
-  PIN(ANBATT_ENA,   NRFPIN(0, 14), "Battery Monitor Enable") \
-  PIN(AN0,          NRFPIN(0,  3), "Analog 1 (AIN_1)") \
-  PIN(AN1,          NRFPIN(0, 28), "Analog 2 (AIN_4)") \
-  PIN(AN2,          NRFPIN(0, 29), "Analog 3 (AIN_5)") \
-  PIN(TX,           NRFPIN(1, 11), "TX")  \
-  PIN(RX,           NRFPIN(1, 12), "RX") \
-  PIN(RXINVO,       NRFPIN(0, 10), "UART RX, Out Inv") \
-  PIN(RXINVI,       NRFPIN(0,  9), "UART RX, Inp Inv") \
+  PIN(CENTER_BTN,   NRFPIN(1, 13), "P1.13 D8") \
+  PIN(PPMOUT,       NRFPIN(1, 15), "P1.15 D10") \
+  PIN(PPMIN,        NRFPIN(1, 14), "P1.14 D9") \
+  PIN(VOLTMON,      NRFPIN(0, 31), "P0.31 Analog Battery Voltage") \
+  PIN(ANBATT_ENA,   NRFPIN(0, 14), "P0.14 Battery Monitor Enable") \
+  PIN(AN0,          NRFPIN(0,  3), "P0.03 Analog 1 (AIN_1)") \
+  PIN(AN1,          NRFPIN(0, 28), "P0.28 Analog 2 (AIN_4)") \
+  PIN(AN2,          NRFPIN(0, 29), "P0.29 Analog 3 (AIN_5)") \
+  PIN(TX,           NRFPIN(1, 11), "P1.11 TX")  \
+  PIN(RX,           NRFPIN(1, 12), "P1.12 RX") \
+  PIN(RXINVO,       NRFPIN(0, 10), "P0.10 UART RX, Out Inv") \
+  PIN(RXINVI,       NRFPIN(0,  9), "P0.09 UART RX, Inp Inv") \
   PIN(LEDR,         NRFPIN(0, 26), "") \
   PIN(LEDG,         NRFPIN(0, 30), "") \
   PIN(LEDB,         NRFPIN(0,  6), "") \
@@ -71,8 +71,8 @@
   PIN(FLSH_HLD,     NRFPIN(0, 23), "") \
   PIN(I2CSCL,       NRFPIN(0, 27), "") \
   PIN(I2CSDA,       NRFPIN(0,  7), "") \
-  PIN(LSM6DS3PWR,   NRFPIN(1,  8), "LSM6DS3 Power 6DPWR") \
-  PIN(LSM6DS3INT,   NRFPIN(0, 11), "LSM6DS3 Interrupt")
+  PIN(LSM6DS3PWR,   NRFPIN(1,  8), "P1.08 LSM6DS3 Power 6DPWR") \
+  PIN(LSM6DS3INT,   NRFPIN(0, 11), "P0.11 LSM6DS3 Interrupt")
 
 typedef enum {
 #define PIN(NAME, PINNO, DESC) IO_##NAME,

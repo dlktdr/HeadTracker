@@ -41,6 +41,7 @@ public:
     QStringList getFeatures() {return _features;}
     QMap<QString, QVariant> getPins() {return _pins;}
     static uint16_t escapeCRC(uint16_t crc);
+    QByteArray unescapeLog(QByteArray data);
 
 private:
     static const int IMHERETIME=8000; // milliseconds before sending another I'm Here Message to keep communication open
