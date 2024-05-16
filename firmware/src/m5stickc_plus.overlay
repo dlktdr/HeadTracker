@@ -16,10 +16,14 @@
   };
 
 	// Define the PPM output pin
-	/*ppm_output: ppm_output {
+	ppm_output: ppm_output {
 		compatible = "ppm-output-gpio";
 		gpios = <&gpio0 26 GPIO_ACTIVE_HIGH>;
-	};*/
+	};
+};
+
+&timer0 {
+	status = "okay";
 };
 
 &pinctrl {

@@ -19,6 +19,7 @@
 #include "trackersettings.h"
 
 
+#if defined(CONFIG_SOC_SERIES_NRF52X)
 // TODO: Find how to do this in new version of Zephyr
 void setPinHighDrive(uint32_t pin) {
 
@@ -30,6 +31,7 @@ void setPinHighDrive(uint32_t pin) {
           GPIO_PIN_CNF_DRIVE_H0H1 << GPIO_PIN_CNF_DRIVE_Pos;
   }
 }
+#endif
 
 LOG_MODULE_REGISTER(io);
 
