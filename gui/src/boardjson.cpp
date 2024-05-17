@@ -78,7 +78,9 @@ void BoardJson::dataIn(QByteArray &data)
     } else if(data.left(1)[0] == (char)0x01 && data.right(1)[0] == (char)0x03) { // Log information
         QByteArray unescape = unescapeLog(data.mid(1,data.length()-2));
         QString logd= QString::fromLatin1(unescape);
-        emit addToLog(logd.toHtmlEscaped() + "\n");
+        if(logd.length()) {
+            emit addToLog(logd + "\n");
+        }
     }
 
 }
@@ -464,7 +466,8 @@ QByteArray BoardJson::unescapeLog(QByteArray data)
     QByteArray rval;
     for(int i=0; i < data.length(); i++) {
         if(data[i] == 0x1B) {
-            rval.append(data[i+1] ^ 0xFF);
+            if(i+1 < data.length())
+                rval.append(data[i+1] ^ 0xFF);
             i++;
         } else {
             rval.append(data[i]);

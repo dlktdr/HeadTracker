@@ -133,7 +133,7 @@ int serial_init()
 
 void serial_Thread()
 {
-  uint8_t buffer[64];
+  uint8_t buffer[256];
   static uint32_t datacounter = 0;
   LOG_INF("Serial Thread Loaded");
 
@@ -154,15 +154,11 @@ void serial_Thread()
 #if defined(DT_N_INST_0_zephyr_cdc_acm_uart)
     // lost connection
     if (dtr && !new_dtr) {
-      ring_buf_reset(&ringbuf_tx);
-      uart_tx_abort(dev);
       trkset.stopAllData();
     }
 
     // gaining new connection
     if (!dtr && new_dtr) {
-      ring_buf_reset(&ringbuf_tx);
-      uart_tx_abort(dev);
 
       // Force bootloader if baud set to 1200bps TODO (Test Me)
       /*uint32_t baud=0;
@@ -172,20 +168,18 @@ void serial_Thread()
         NVIC_SystemReset();
       }*/
     }
-
     // Port is open, send data
     if (new_dtr) {
 #endif
       int rb_len = ring_buf_get(&ringbuf_tx, buffer, sizeof(buffer));
       if (rb_len) {
-        int send_len = uart_fifo_fill(dev, buffer, rb_len);
+        int send_len = uart_fifo_fill(dev, buffer, rb_len); // TODO this is wrong, needs to be in an ISR according to the Zephyr docs
         if (send_len < rb_len) {
           // LOG_ERR("USB CDC Ring Buffer Full, Dropped data");
         }
       }
+
 #if defined(DT_N_INST_0_zephyr_cdc_acm_uart)
-    } else {
-      ring_buf_reset(&ringbuf_tx);  // Clear buffer
     }
     dtr = new_dtr;
 #endif

@@ -176,20 +176,20 @@ int sense_Init()
     LOG_INF("I2C Config: 0x%x", i2c_cfg);
   }
 
-LOG_INF("Waiting for I2C Sensor Bus To Be Ready");
+  LOG_INF("Waiting for I2C Sensor Bus To Be Ready");
   while(!device_is_ready(DEVICE_DT_GET(DT_ALIAS(i2csensor)))) {
     k_msleep(10);
   }
   k_msleep(20);
 
   i2c_recover_bus(i2c_dev);
-  LOG_INF("I2C Sensor Bus Ready");
+  LOG_INF("I2C Ready");
 
   hasMag = false;
 
 #if defined(HAS_LSM9DS1)
   if (!IMU.begin()) {
-    LOG_ERR("Failed to initalize sensors");
+    LOG_ERR("Failed to initalize LSM9DS1 Sensor");
     return -1;
   }
 #endif
@@ -230,6 +230,8 @@ LOG_INF("Waiting for I2C Sensor Bus To Be Ready");
       bmm150_error_codes_print_result("set_config", rbslt);
     }
     hasMag = true;
+  } else {
+    LOG_ERR("Unable to init BMM150 - Continueing with no magnetomer\n");
   }
 #endif
 
@@ -1143,7 +1145,7 @@ void detectDoubleTap()
   if (acc_dif > trkset.getRstOnDblTapThres())
   {
       timediff = time - lasttaptime;
-      LOG_INF("Tap detected, mag=%.1f, time=%lld, timediff=%lld", (double)acc_dif, time, timediff);
+      LOG_DBG("Tap detected, mag=%.1f, time=%lld, timediff=%lld", (double)acc_dif, time, timediff);
 
       if (timediff > trkset.getRstOnDblTapMin() && timediff < trkset.getRstOnDblTapMin() + trkset.getRstOnDblTapMax())
       {
@@ -1153,7 +1155,6 @@ void detectDoubleTap()
 
       lasttaptime = time;
   }
-
 }
 
 void gyroCalibrate()

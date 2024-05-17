@@ -13,7 +13,6 @@
 static char stdout_buff[_STDOUT_BUF_SIZE];
 static char outbuf[_JSONOUT_BUF_SIZE];
 static int n_pend = 0;
-static bool isready = true;
 
 static uint32_t log_format_current = CONFIG_LOG_BACKEND_HTGUI_OUTPUT_DEFAULT;
 
@@ -42,18 +41,6 @@ int logescape(const char *inbuf, char *outbuf, uint32_t len, uint32_t maxlen)
   return outpos+1;
 }
 
-uint16_t logescapeCRC(uint16_t crc)
-{
-  // Characters to escape out
-  uint8_t crclow = crc & 0xFF;
-  uint8_t crchigh = (crc >> 8) & 0xFF;
-  if (crclow == 0x00 || crchigh == 0x01 || crclow == 0x02 || crclow == 0x03 || crclow == 0x06 || crclow == 0x15)
-    crclow ^= 0xFF;  //?? why not..
-  if (crchigh == 0x00 || crchigh == 0x01 || crchigh == 0x02 || crchigh == 0x03 || crchigh == 0x06 || crchigh == 0x15)
-    crchigh ^= 0xFF;  //?? why not..
-  return (uint16_t)crclow | ((uint16_t)crchigh << 8);
-}
-
 static void preprint_char(int c)
 {
 	int printnow = 0;
@@ -69,19 +56,17 @@ static void preprint_char(int c)
 		printnow = 1;
 	}
 
-	if (n_pend >= _STDOUT_BUF_SIZE - 1) {
+	if (n_pend >= _STDOUT_BUF_SIZE) {
 		printnow = 1;
 	}
 
 	if (printnow) {
-    if( isready == true ) {
-      outbuf[0] = 0x01; // Start of Heading
-      uint32_t br = logescape(stdout_buff, outbuf+1, n_pend, _JSONOUT_BUF_SIZE-4);
-      outbuf[br] = 0x03; // End of Text
-      outbuf[br+1] = '\r';
-      outbuf[br+2] = '\n';
-      serialWrite(outbuf, br+3);
-    }
+    outbuf[0] = 0x01; // Start of Heading
+    uint32_t br = logescape(stdout_buff, outbuf+1, n_pend, _JSONOUT_BUF_SIZE-4);
+    outbuf[br] = 0x03; // End of Text
+    outbuf[br+1] = '\r';
+    outbuf[br+2] = '\n';
+    serialWrite(outbuf, br+3);
 		n_pend = 0;
 		stdout_buff[0] = 0;
 	}
@@ -98,7 +83,6 @@ static int char_out(uint8_t *data, size_t length, void *ctx)
 	return length;
 }
 
-
 LOG_OUTPUT_DEFINE(log_output_htgui, char_out, buf, sizeof(buf));
 
 void process(const struct log_backend *const backend, union log_msg_generic *msg)
@@ -112,7 +96,10 @@ void process(const struct log_backend *const backend, union log_msg_generic *msg
 
 void dropped(const struct log_backend *const backend, uint32_t cnt)
 {
-
+  char buffer[64];
+  int len = snprintf(buffer, 64, "\x01 Dropped %d log messages\x03\r\n", cnt);
+  buffer[len] = 0;
+  serialWrite(buffer, len);
 }
 
 void panic(const struct log_backend *const backend)
@@ -144,7 +131,7 @@ void notify(const struct log_backend *const backend, enum log_backend_evt event,
 
 const struct log_backend_api lbe = {
   .process = process,
-  .dropped = NULL,
+  .dropped = dropped,
   .panic = panic,
   .init = init,
   .is_ready = is_ready,

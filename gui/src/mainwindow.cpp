@@ -446,12 +446,19 @@ void MainWindow::addToLog(QString log, int ll)
     QString color = "black";
     if(ll==2) // Debug
         color = "red";
-    else if(log.left(1)[0] == '[') // TODO change this to detect logger messages
-        color = "green";
+    else if(log.contains("<inf>"))
+        color = "darkgreen";
+    else if(log.contains("<err>"))
+        color = "red";
+    else if(log.contains("<wrn>"))
+        color = "orange";
+    else if(log.contains("<dbg>"))
+        color = "DodgerBlue";
     else if(log.contains("GUI:"))
         color = "blue";
     else if(log.contains("\"Cmd\":\"Data\"")) // Don't show return measurment data
         return;
+    log = log.toHtmlEscaped();
 
     logd += "<font color=\"" + color + "\">" + log + "</font><br>";
 

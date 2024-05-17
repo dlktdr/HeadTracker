@@ -151,7 +151,7 @@
 
 // Buffer Sizes for Serial/JSON
 #define JSON_BUF_SIZE 3000
-#define TX_RNGBUF_SIZE 1500
+#define TX_RNGBUF_SIZE 2000
 #define RX_RNGBUF_SIZE 1500
 
 // Math Defines
