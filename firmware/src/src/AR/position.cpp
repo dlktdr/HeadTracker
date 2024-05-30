@@ -333,9 +333,11 @@ void position_add_point(struct Position_Data_T point_data)
     return;
   }
 
-  if (point_data.azimuth == 0xffffffff || point_data.azimuth == 0 ||
-      point_data.pitch == 0xffffffff || point_data.pitch == 0 ||
-      point_data.distance == 0xffffffff || point_data.distance == 0) {
+//  LOGI("Point azimuth = %d, pitch = %d, name = %s", (uint32_t)(point_data.azimuth * 100), (uint32_t)(point_data.pitch * 100), point_data.name);
+
+  if (   point_data.azimuth == 0xffffffff // || point_data.azimuth == 0.0
+      || point_data.pitch == 0xffffffff // || point_data.pitch == 0.0
+      || point_data.distance == 0xffffffff || point_data.distance == 0) {
     LOGI("Deleting point %s", point_data.name);
     position_del_point(point_data.name, strlen(point_data.name));
     return;
@@ -395,7 +397,7 @@ void position_Thread()
   // rt_sleep_ms(3000);
   LOGI("Position thread started");
 
-  oled_init(100);
+  oled_init(3000);
 
 /* generate initial points to be displayed */
   struct Position_Data_T point_data;
@@ -470,7 +472,8 @@ void position_Thread()
 
 // DEBUG START Demo to be removed
     if (counter1 == 40) {
-      LOGI("Updating counter");
+      // LOGI("Updating counter");
+
       counter1 = 0;
       counter2++;
       point_data.azimuth += azimuth;
@@ -480,14 +483,14 @@ void position_Thread()
 
     if (counter2 == 15) {
       counter2++;
-      LOGI("counter2 == 15");
+      // LOGI("counter2 == 15");
       azimuth = 1.0;
       dist = -13;
       position_add_point(point_data);
     }
 
     if (counter2 == 30) {
-      LOGI("counter2 == 30");
+      // LOGI("counter2 == 30");
       counter2 = 0;
       point_data.azimuth = 345.0;
       point_data.distance = 60;

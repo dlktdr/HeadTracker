@@ -206,6 +206,8 @@ typedef struct __attribute__((__packed__))  {
     uint32_t distance;
 } mydata_s;
 
+#include "AR/position.h"
+
 static ssize_t write_ct(struct bt_conn *conn, const struct bt_gatt_attr *attr, const void *buf, uint16_t len, uint16_t offset, uint8_t flags)
 {
   // Just got some data, here you could split it up back into a struct
@@ -214,8 +216,14 @@ static ssize_t write_ct(struct bt_conn *conn, const struct bt_gatt_attr *attr, c
   if(len == sizeof(mydata_s)) {
     memcpy(&incoming_friendly, buf, len);
     // As first step it should be enough ;]
-    LOGI("Something was received, distance = %d, tilt = %d, pan = %d", incoming_friendly.distance, incoming_friendly.tilt, incoming_friendly.pan);
-    // set_oled_pan_roll(incoming_friendly.pan, incoming_friendly.tilt);
+    LOGI("Something was received, Name = %c%c%c%c, distance = %d, pitch = %d, azimuth = %d", incoming_friendly.name[0], incoming_friendly.name[1], incoming_friendly.name[2],incoming_friendly.name[3], incoming_friendly.distance, incoming_friendly.tilt, incoming_friendly.pan);
+    struct Position_Data_T position_data = {0};
+    memcpy(position_data.name, incoming_friendly.name, 4);
+    position_data.distance = incoming_friendly.distance;
+    position_data.azimuth = incoming_friendly.pan/100;
+    position_data.pitch = incoming_friendly.tilt/100;
+    position_data.point_type = DIAMOND;
+    position_add_point(position_data);
   }
 
   return len;
