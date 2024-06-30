@@ -28,8 +28,8 @@
    */
 
 #define PIN_X \
-  PIN(LED,          RP2040PIN(25), "Notification LED") \
-  PIN(CENTER_BTN,   RP2040PIN(22), "Center Button")
+  PIN(LED,          RP2040PIN(25), "P25 Notification LED") \
+  PIN(CENTER_BTN,   RP2040PIN(22), "P22 Center Button")
 
 typedef enum {
 #define PIN(NAME, PINNO, DESC) IO_##NAME,
