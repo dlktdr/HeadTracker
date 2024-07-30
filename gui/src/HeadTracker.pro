@@ -41,7 +41,6 @@ SOURCES += \
     graph.cpp \
     popupslider.cpp \
     servominmax.cpp \
-    signalbars.cpp \
     trackersettings.cpp \
     ucrc16lib.cpp
 
@@ -63,7 +62,6 @@ HEADERS += \
     graph.h \
     popupslider.h \
     servominmax.h \
-    signalbars.h \
     trackersettings.h \
     ucrc16lib.h \
     basetrackersettings.h
@@ -124,7 +122,6 @@ macx: {
     ICON = images/iconbuilder.icns
 }
 
-DISTFILES += \
-    Revisions.txt
+DISTFILES +=
 
 
