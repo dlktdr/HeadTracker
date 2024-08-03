@@ -211,8 +211,10 @@ int sense_Init()
       rslt = bmi2_sensor_enable(sensor_list, 2, &bmi2_dev);
       bmi2_error_codes_print_result(rslt);
     }
-  } else
+  } else {
+    LOG_ERR("Failed to initalize BMI270");
     return -1;
+    }
 #endif
 
 #if defined(HAS_BMM150)
@@ -231,7 +233,7 @@ int sense_Init()
     }
     hasMag = true;
   } else {
-    LOG_ERR("Unable to init BMM150 - Continueing with no magnetomer\n");
+    LOG_ERR("Unable to init BMM150 - Continuing with no magnetomer\n");
   }
 #endif
 
@@ -265,6 +267,7 @@ int sense_Init()
   if (!APDS.begin()) {
     blesenseboard = false;
   } else {
+    LOG_ERR("APDS9960 Proximity Sensor Not Found");
     blesenseboard = true;
   }
 #endif
