@@ -8,6 +8,6 @@
 #include <stdint.h>
 
 int PpmIn_init();
-void PpmIn_setPin(int pinNum);
+void PpmIn_startStop(bool stop=false);
 int PpmIn_getChannels(uint16_t *ch);
 void PpmIn_execute();

@@ -83,20 +83,32 @@ void start(void)
   }
 
   // Start PPM Output
-  LOG_INF("Starting PPMOut");
+#if defined(HAS_PPMOUT)
+  LOG_INF("PPMOut Starting");
   if(PpmOut_init()) {
-    LOG_WRN("PPMOut_init failed");
+    LOG_WRN("PPMOut initalization failed");
   }
+#elif
+  LOG_INF("PPMOut is not supported on this board");
+#endif
 
   // Start PPM Input
-  LOG_INF("Starting PPMIn");
+#if defined(HAS_PPMIN)
+  LOG_INF("PPMIn Starting");
   if(PpmIn_init()) {
-    LOG_WRN("PPMIn_init failed");
+    LOG_WRN("PPMIn initalization failed");
   }
+#elif
+  LOG_INF("PPMIn is not supported on this board");
+#endif
 
   // Start External UART
-  LOG_INF("Starting AuxUART");
+#if defined(HAS_AUXSERIAL)
+  LOG_INF("AuxUART Starting");
   uart_init();
+#elif
+  LOG_INF("AuxUART is not supported on this board");
+#endif
 
   // PWM Outputs - Fixed to A0-A3
 #if defined(HAS_PWMOUTPUTS)

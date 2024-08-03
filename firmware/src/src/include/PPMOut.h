@@ -8,7 +8,7 @@
 #include <stdint.h>
 
 int PpmOut_init();
-void PpmOut_setPin(int pinNum);
+void PpmOut_startStop(bool stop=false);
 void PpmOut_setChannel(int chan, uint16_t val);
 void PpmOut_execute();
 int PpmOut_getChnCount();

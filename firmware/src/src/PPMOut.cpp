@@ -40,10 +40,8 @@ volatile bool interrupt = false;
 
 static volatile bool ppmoutstarted = false;
 static volatile bool ppmoutinverted = false;
-static int setPin = -1;
 
 // Used in ISR
-
 // Used to read data at once, read with isr disabled
 static uint16_t ch_values[16];
 static int ch_count;
@@ -136,22 +134,10 @@ ISR_DIRECT_DECLARE(PPMTimerISR)
 
 // Set pin to -1 to disable
 
-void PpmOut_setPin(int pinNum)
+void PpmOut_startStop(bool stop)
 {
-  // Same pin, just quit
-  if (pinNum == setPin) return;
-
-// #if defined(CONFIG_BOARD_ARDUINO_NANO_33_BLE) // Nano33, can pick D2-D12
-//   int pin = D_TO_PIN(pinNum);
-//   int port = D_TO_PORT(pinNum);
-//   int setPin_pin = D_TO_PIN(setPin);
-//   int setPin_port = D_TO_PORT(setPin);
-// #else
   int pin = PIN_TO_GPIN(PIN_NAME_TO_NUM(IO_PPMOUT));
   int port = PIN_TO_GPORT(PIN_NAME_TO_NUM(IO_PPMOUT));
-  int setPin_pin = pin;
-  int setPin_port = port;
-// #endif
 
   if (!ppmoutstarted) {
     resetChannels();
@@ -179,20 +165,8 @@ void PpmOut_setPin(int pinNum)
   // Disable PPI
   NRF_PPI->CHENCLR = PPMOUT_PPICH_MSK;
 
-  // Set current pin back to low drive  , if enabled
-  if (setPin > 0) {
-    if (setPin_port == 0)
-      NRF_P0->PIN_CNF[setPin_pin] =
-          (NRF_P0->PIN_CNF[setPin_pin] & ~GPIO_PIN_CNF_DRIVE_Msk) |
-          GPIO_PIN_CNF_DRIVE_S0S1 << GPIO_PIN_CNF_DRIVE_Pos;
-    else if (setPin_port == 1)
-      NRF_P1->PIN_CNF[setPin_pin] =
-          (NRF_P1->PIN_CNF[setPin_pin] & ~GPIO_PIN_CNF_DRIVE_Msk) |
-          GPIO_PIN_CNF_DRIVE_S0S1 << GPIO_PIN_CNF_DRIVE_Pos;
-  }
-
   // If we want to enable it....
-  if (pinNum > 0) {
+  if (stop == false) {
     // Setup GPOITE[7] to toggle output on every timer capture
     NRF_GPIOTE->CONFIG[PPMOUT_GPIOTE] =
         (GPIOTE_CONFIG_MODE_Task << GPIOTE_CONFIG_MODE_Pos) |
@@ -238,7 +212,6 @@ void PpmOut_setPin(int pinNum)
     PPMOUT_TIMER->INTENSET = PPMOUT_TMRCOMP_CH_MSK;
   }
 
-  setPin = pinNum;
   irq_unlock(key);
 }
 
@@ -259,7 +232,12 @@ void PpmOut_setChannel(int chan, uint16_t val)
 }
 
 int PpmOut_getChnCount() { return ch_count; }
-int PpmOut_init() {return 0;}
+int PpmOut_init()
+{
+  LOG_INF("Using pin %s", StrPinDescriptions[IO_PPMOUT]);
+  PpmOut_startStop();
+  return 0;
+ }
 
 #elif DT_NODE_EXISTS(DT_NODELABEL(ppm_output))
 #include <zephyr/device.h>

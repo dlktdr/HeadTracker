@@ -41,7 +41,6 @@ LOG_MODULE_REGISTER(ppmin);
 static bool framestarted = false;
 static bool ppminstarted = false;
 static bool ppminverted = false;
-static int setPin = -1;
 
 // Used in ISR
 static uint16_t isrchannels[16];
@@ -94,19 +93,9 @@ ISR_DIRECT_DECLARE(PPMInGPIOTE_ISR)
 }
 
 // Set pin to -1 to disable
-void PpmIn_setPin(int pinNum)
+void PpmIn_startStop(bool stop)
 {
-// Same pin, just quit
 
-// #if defined(CONFIG_BOARD_ARDUINO_NANO_33_BLE) // Nano33, can pick D2-D12
-//   if (pinNum == setPin) return;
-//   int pin = D_TO_PIN(pinNum);
-//   int port = D_TO_PORT(pinNum);
-//   int setPin_pin = D_TO_PIN(setPin);
-//   int setPin_port = D_TO_PORT(setPin);
-// #else
-
-  // If pin is fixed don't allow turning it off
   static bool initalized = false;
   if(initalized) return;
   initalized = true;
@@ -118,7 +107,7 @@ void PpmIn_setPin(int pinNum)
   // Stop Interrupts
   uint32_t key = irq_lock();
 
-  if (pinNum < 0 && ppminstarted) {  // Disable
+  if (stop && ppminstarted) {  // Disable
 
     // Stop Interrupt
     NRF_GPIOTE->INTENCLR = PPMIN_GPIOTE_MASK;
@@ -143,12 +132,8 @@ void PpmIn_setPin(int pinNum)
           GPIO_PIN_CNF_PULL_Disabled << GPIO_PIN_CNF_PULL_Pos;
 
     // Set pin num and started flag
-    setPin = pinNum;
     ppminstarted = false;
-
   } else {
-    setPin = pinNum;
-
     // Disable Interrupt, Clear event
     NRF_GPIOTE->INTENCLR = PPMIN_GPIOTE_MASK;
     NRF_GPIOTE->EVENTS_IN[PPMIN_GPIOTE] = 0;
@@ -210,15 +195,15 @@ void PpmIn_setPin(int pinNum)
   irq_unlock(key);
 }
 
+// TODO REMOVE ME. This function works inverted or not.
 void PpmIn_setInverted(bool inv)
 {
   if (!ppminstarted) return;
 
   if (ppminverted != inv) {
-    int op = setPin;
-    PpmIn_setPin(-1);
+    PpmIn_startStop(true);
     ppminverted = inv;
-    PpmIn_setPin(op);
+    PpmIn_startStop();
   }
 }
 
@@ -231,7 +216,7 @@ void PpmIn_execute()
 
   if (micros64() - runtime > 60000) {
     if (sentconn == false) {
-      LOG_WRN("PPM Input Data Lost");
+      LOG_INF("PPM Input Data Lost");
       sentconn = true;
       ch_count = 0;
     }
@@ -269,24 +254,31 @@ int PpmIn_getChannels(uint16_t *ch)
   return rval;
 }
 
-int PpmIn_init() {return 0;}
+int PpmIn_init() {
+  LOG_INF("Using pin %s", StrPinDescriptions[IO_PPMIN]);
+  PpmIn_startStop();
+  return 0;
+}
 
 #elif DT_NODE_EXISTS(DT_NODELABEL(ppm_input))
 #warning "PPMIn using DT_NODELABEL(ppm_input) pin"
 
-int PpmIn_init() {return 0;}
+int PpmIn_init() {
+  LOG_ERR("PPM In function is not completed. We need helpers here");
+  return 0;
+}
 int PpmIn_getChannels(uint16_t *ch)
 {
   return 0;
 }
-void PpmIn_setPin(int pinNum) {}
+void PpmIn_startStop(bool stop) {}
 void PpmIn_execute() {}
 
 #else
 
 int PpmIn_init() {return -1;}
 int PpmIn_getChannels(uint16_t *ch) {return 0;}
-void PpmIn_setPin(int pinNum) {}
+void PpmIn_startStop(bool stop) {}
 void PpmIn_execute() {}
 
 #endif
