@@ -89,7 +89,8 @@ jobs:
 
       # Runs a set of commands using the runners shell
       - name: Package Firmware
-        uses: 'actions/upload-artifact@v2'
+        uses: 'actions/upload-artifact@v4'
+        id: artifact-upload-step
         with:
           name: Firmware_Binaries
           path: |
@@ -97,3 +98,7 @@ jobs:
             /src/firmware/src/build_bins/*.uf2
           retention-days: 90
           if-no-files-found: error
+          
+      - name: Output artifact ID
+        run:  echo 'Artifact ID is ${{ steps.artifact-upload-step.outputs.artifact-id }}'
+
