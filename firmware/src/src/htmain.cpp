@@ -41,21 +41,21 @@ void start(void)
 
   // Serial Setup, we have a CDC Device, enable USB
 #if defined(DT_N_INST_0_zephyr_cdc_acm_uart)
-  LOG_INF("Starting USB\n");
+  LOG_INF("USB starting");
   int ret = usb_enable(NULL);
   if (ret != 0) {
-    LOG_ERR("Unable to enable USB\n");
+    LOG_ERR("USB unable to start");
     setLEDFlag(LED_HARDFAULT);
   }
 #endif
 
   // USB Joystick
-  LOG_INF("Starting Joystick");
+  LOG_INF("Joystick starting");
   joystick_init();
 
 // Pause code here until connected via serial
 #ifdef WAITFOR_DTR
-  LOG_INF("Waiting for Serial Connection");
+  LOG_INF("PAUSING FOR SERIAL CONNECTION");
   const struct device *dev = DEVICE_DT_GET(DT_ALIAS(guiuart));
   uint32_t dtr = 0U;
   while (true) {
@@ -69,66 +69,69 @@ void start(void)
 #endif
 
   // Ininitialize GUI logging and GUI Serial
-  LOG_INF("Starting GUI Serial");
+  LOG_INF("GUISerial starting");
   if(serial_init()) {
-    LOG_ERR("Serial_init failed");
+    LOG_ERR("GUISerial initialization failed");
     setLEDFlag(LED_HARDFAULT);
   }
 
   // Actual Calculations - sense.cpp
-  LOG_INF("Starting Sense");
+  LOG_INF("Sense starting");
   if(sense_Init()) {
-    LOG_ERR("Sense_Init failed");
+    LOG_ERR("Sense initialization failed");
     setLEDFlag(LED_HARDFAULT);
   }
 
   // Start PPM Output
 #if defined(HAS_PPMOUT)
-  LOG_INF("PPMOut Starting");
+  LOG_INF("PPMOut starting");
   if(PpmOut_init()) {
-    LOG_WRN("PPMOut initalization failed");
+    LOG_WRN("PPMOut initialization failed");
   }
-#elif
+#else
   LOG_INF("PPMOut is not supported on this board");
 #endif
 
   // Start PPM Input
 #if defined(HAS_PPMIN)
-  LOG_INF("PPMIn Starting");
+  LOG_INF("PPMIn starting");
   if(PpmIn_init()) {
     LOG_WRN("PPMIn initalization failed");
   }
-#elif
+#else
   LOG_INF("PPMIn is not supported on this board");
 #endif
 
   // Start External UART
 #if defined(HAS_AUXSERIAL)
-  LOG_INF("AuxUART Starting");
+  LOG_INF("AuxUART starting");
   uart_init();
-#elif
+#else
   LOG_INF("AuxUART is not supported on this board");
 #endif
 
   // PWM Outputs - Fixed to A0-A3
 #if defined(HAS_PWMOUTPUTS)
-  LOG_INF("Starting PWM");
+  LOG_INF("PWM starting");
   PWM_Init(PWM_FREQUENCY);
+#else
+  LOG_INF("PWM is not supported on this board");
 #endif
 
+  // Start Bluetooth
+#if defined(CONFIG_BT)
+  LOG_INF("Bluetooth starting");
   // Check if center button is held down, force BT Configuration mode
-  LOG_INF("Checking Center Button");
+  LOG_INF("Checking if center button is pressed");
   if (readCenterButton()) {
-    LOG_INF("Center Button Held Down, Foring BT Configurator Mode");
+    LOG_INF("Button is pressed. Forcing bluetooth into configurator mode");
     trkset.setBtMode(BTPARAHEAD);
     setLEDFlag(LED_BTCONFIGURATOR);
   }
-
-  // Start the BT Thread
-  #if defined(CONFIG_BT)
-  LOG_INF("Starting Bluetooth");
   bt_init();
-  #endif
+#else
+  LOG_INF("Bluetooth is not supported on this board");
+#endif
 
   // Monitor if saving to EEPROM is required
   while (1) {
