@@ -32,7 +32,7 @@ spi_flash_mmap_handle_t handle;
 
 #include "defines.h"
 
-LOG_MODULE_REGISTER(flash);
+LOG_MODULE_DECLARE(flash);
 
 #define FALSH_PARTITION	storage_partition
 #define FLASH_OFFSET FIXED_PARTITION_OFFSET(FALSH_PARTITION)
