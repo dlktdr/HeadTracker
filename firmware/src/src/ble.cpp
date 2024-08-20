@@ -85,10 +85,10 @@ void bt_Thread()
 
     switch (curmode) {
       case BTPARAHEAD:
-        BTHeadExecute();
+        BTHeadExecute(); // Peripheral BLE device
         break;
       case BTPARARMT:
-        BTRmtExecute();
+        BTRmtExecute(); // Central BLE device
         break;
       case BTSCANONLY:
         break;

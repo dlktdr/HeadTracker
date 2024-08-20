@@ -146,12 +146,6 @@ static struct bt_conn_cb conn_callbacks = {
     //.security_changed = securitychanged
 };
 
-static struct bt_conn_le_phy_param phy_params = {
-    .options = BT_CONN_LE_PHY_OPT_CODED_S8,
-    .pref_tx_phy = BT_GAP_LE_PHY_CODED,
-    .pref_rx_phy = BT_GAP_LE_PHY_CODED,
-};
-
 static bt_addr_le_t addrarry[CONFIG_BT_ID_MAX];
 static size_t addrcnt = 1;
 
@@ -379,9 +373,6 @@ static void connected(struct bt_conn *conn, uint8_t err)
 
   // Set Connection Parameters - Request updated rate
   bt_conn_le_param_update(curconn, conparms);
-
-  LOG_INF("Requesting coded PHY - %s",
-       bt_conn_le_phy_update(curconn, &phy_params) ? "FAILED" : "Success");
 
   // Start a Timer, If we don't see a Security Change within this time
   // e.g. a CC2540 chip then force a subscription for the PARA chip
