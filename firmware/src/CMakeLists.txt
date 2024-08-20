@@ -29,6 +29,7 @@ execute_process(
 )
 
 message(STATUS "Board=${BOARD}")
+set (BOARD_HW_REV "")
 
 # NRF52 Boards
 if((${BOARD} STREQUAL "arduino_nano_33_ble") OR
@@ -51,6 +52,7 @@ if((${BOARD} STREQUAL "arduino_nano_33_ble") OR
   # but a few different defines in the code.
   if(DEFINED BOARD_REV2)
     set(ignoreMe "${BOARD_REV2}")
+    set (BOARD_HW_REV "2")
     message(STATUS "  Board is a Revision 2 Nano 33 BLE")
     set (BOARD "arduino_nano_33_ble")
     # SEE BELOW for defined passed to compiler
@@ -86,11 +88,12 @@ endif()
 string(TOLOWER "${CMAKE_BUILD_TYPE}" build_type)
 if(NOT build_type STREQUAL "debug")
   message(STATUS "Building in Release mode")
-  string(REPLACE "." "_" output_name "${BOARD}_${GIT_TAG}_${GIT_REV}")
-  string(REPLACE "/" "_" output_name "${output_name}")
-  if(DEFINED BOARD_REV2)
-    set(output_name "${output_name}_REV2")
+  set(output_name "${BOARD}")
+  if(NOT BOARD_HW_REV STREQUAL "")
+    set(output_name "${output_name}_rev${BOARD_HW_REV}")
   endif()
+  string(REPLACE "." "_" output_name "${output_name}-${GIT_TAG}-${GIT_REV}")
+  string(REPLACE "/" "_" output_name "${output_name}")
   set(CONFIG_KERNEL_BIN_NAME "\"${output_name}\"" CACHE INTERNAL "")
   message(STATUS "Output File Name=${output_name}")
 # Set KConfig Option to disable some optimizations in debug mode
