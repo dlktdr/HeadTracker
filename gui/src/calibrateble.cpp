@@ -142,7 +142,7 @@ void CalibrateBLE::useMagToggle()
 void CalibrateBLE::setButtonText()
 {
     if(step == 0) {
-        ui->cmdPrevious->setText(tr("Cancel")));
+        ui->cmdPrevious->setText(tr("Cancel"));
     } else {
         ui->cmdPrevious->setText(tr("Back"));
     }
