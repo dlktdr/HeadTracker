@@ -791,7 +791,7 @@
     <message>
         <location filename="../calibrateble.cpp" line="112"/>
         <source>Accelerometer Calibration Complete</source>
-        <translation>Accelerometer Calibration Complete</translation>
+        <translation>加速度计校准完成</translation>
     </message>
     <message>
         <location filename="../calibrateble.cpp" line="147"/>
