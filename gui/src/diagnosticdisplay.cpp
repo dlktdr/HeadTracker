@@ -48,7 +48,7 @@ void DiagnosticDisplay::updated()
             key->setBackground(QBrush(Qt::lightGray));
             value->setBackground(QBrush(Qt::lightGray));
             description->setBackground(QBrush(Qt::lightGray));
-            description->setText("Description");
+            description->setText(tr("Description"));
         }
 
         ui->tblParams->setItem(row,0,key);

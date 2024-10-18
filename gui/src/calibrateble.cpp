@@ -142,17 +142,17 @@ void CalibrateBLE::useMagToggle()
 void CalibrateBLE::setButtonText()
 {
     if(step == 0) {
-        ui->cmdPrevious->setText("Cancel");
+        ui->cmdPrevious->setText(tr("Cancel")));
     } else {
-        ui->cmdPrevious->setText("Back");
+        ui->cmdPrevious->setText(tr("Back"));
     }
     if(step < STEP_END) {
-        ui->cmdNext->setText("Next");
+        ui->cmdNext->setText(tr("Next"));
     } else {
-        ui->cmdNext->setText("Save");
+        ui->cmdNext->setText(tr("Save"));
     }
     if(hasMagnetometer == false && step == STEP_ACCELCAL) {
-        ui->cmdPrevious->setText("Cancel");
+        ui->cmdPrevious->setText(tr("Cancel"));
     }
     ui->cmdPrevious->setDisabled(false);
     ui->cmdNext->setDisabled(false);

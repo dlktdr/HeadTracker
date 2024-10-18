@@ -2,6 +2,610 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="zh_CN">
 <context>
+    <name>BaseTrackerSettings</name>
+    <message>
+        <location filename="../basetrackersettings.h" line="192"/>
+        <source>Roll Minimum</source>
+        <translation>翻转(Roll) 最小值</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="193"/>
+        <source>Roll Maximum</source>
+        <translation>翻转(Roll) 最大值</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="194"/>
+        <source>Roll Center</source>
+        <translation>翻转(Roll) 中心</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="195"/>
+        <source>Roll Gain</source>
+        <translation>翻转(Roll) 增益</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="196"/>
+        <source>Tilt Minimum</source>
+        <translation>倾斜(Tilt) 最小值</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="197"/>
+        <source>Tilt Maximum</source>
+        <translation>倾斜(Tilt) 最大值</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="198"/>
+        <source>Tilt Center</source>
+        <translation>倾斜(Tilt) 中心</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="199"/>
+        <source>Tilt Gain</source>
+        <translation>倾斜(Tilt) 增益</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="200"/>
+        <source>Pan Minimum</source>
+        <translation>旋转(Pan) 最小值</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="201"/>
+        <source>Pan Maximum</source>
+        <translation>旋转(Pan) 最大值</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="202"/>
+        <source>Pan Center</source>
+        <translation>旋转(Pan) 中心</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="203"/>
+        <source>Pan Gain</source>
+        <translation>旋转(Pan) 增益</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="204"/>
+        <source>Tilt Output Channel</source>
+        <translation>倾斜(Tilt) 输出通道</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="205"/>
+        <source>Roll Output Channel</source>
+        <translation>翻转(Roll) 输出通道</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="206"/>
+        <source>Pan Output Channel</source>
+        <translation>旋转(Pan) 输出通道</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="207"/>
+        <source>Alert Output Channel</source>
+        <translation>警报输出通道</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="208"/>
+        <source>PWM 0 Channel</source>
+        <translation>PWM 0 通道</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="209"/>
+        <source>PWM 1 Channel</source>
+        <translation>PWM 1 通道</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="210"/>
+        <source>PWM 2 Channel</source>
+        <translation>PWM 2 通道</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="211"/>
+        <source>PWM 3 Channel</source>
+        <translation>PWM 3 通道</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="212"/>
+        <source>Analog 0 Channel</source>
+        <translation>模拟 0 通道</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="213"/>
+        <source>Analog 1 Channel</source>
+        <translation>模拟 1 通道</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="214"/>
+        <source>Analog 2 Channel</source>
+        <translation>模拟 2 通道</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="215"/>
+        <source>Analog 3 Channel</source>
+        <translation>模拟 3 通道</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="216"/>
+        <source>Auxilary Function 0 Channel</source>
+        <translation>Aux 功能 0 通道</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="217"/>
+        <source>Auxilary Function 1 Channel</source>
+        <translation>Aux 功能 1 通道</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="218"/>
+        <source>Auxilary Function 2 Channel</source>
+        <translation>Aux 功能 2 通道</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="219"/>
+        <source>Reset Center on PPM Input Channel</source>
+        <translation>PPM 输入通道上重置中心</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="220"/>
+        <source>Auxilary Function 0</source>
+        <translation>Aux 功能 0</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="221"/>
+        <source>Auxilary Function 1</source>
+        <translation>Aux 功能 1</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="222"/>
+        <source>Auxilary Function 2</source>
+        <translation>Aux 功能 2</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="223"/>
+        <source>Analog 0 Gain</source>
+        <translation>模拟 0 增益</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="224"/>
+        <source>Analog 1 Gain</source>
+        <translation>模拟 1 增益</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="225"/>
+        <source>Analog 2 Gain</source>
+        <translation>模拟 2 增益</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="226"/>
+        <source>Analog 3 Gain</source>
+        <translation>模拟 3 增益</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="227"/>
+        <source>Analog 0 Offset</source>
+        <translation>模拟 0 偏移</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="228"/>
+        <source>Analog 1 Offset</source>
+        <translation>模拟 1 偏移</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="229"/>
+        <source>Analog 2 Offset</source>
+        <translation>模拟 2 偏移</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="230"/>
+        <source>Analog 3 Offset</source>
+        <translation>模拟 3 偏移</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="231"/>
+        <source>Servo Reverse (BitMask)</source>
+        <translation>舵机反向 (BitMask)</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="232"/>
+        <source>Magnetometer X Calibration Offset</source>
+        <translation>磁力计 X 校准偏移</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="233"/>
+        <source>Magnetometer Y Calibration Offset</source>
+        <translation>磁力计 Y 校准偏移</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="234"/>
+        <source>Magnetometer Z Calibration Offset</source>
+        <translation>磁力计 Z 校准偏移</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="235"/>
+        <source>Accelerometer X Calibration Offset</source>
+        <translation>加速度计 X 校准偏移</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="236"/>
+        <source>Accelerometer Y Calibration Offset</source>
+        <translation>加速度计 Y 校准偏移</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="237"/>
+        <source>Accelerometer Z Calibration Offset</source>
+        <translation>加速度计 Z 校准偏移</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="238"/>
+        <source>Gyrometer X Calibration Offset</source>
+        <translation>陀螺仪 X 校准偏移</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="239"/>
+        <source>Gyrometer Y Calibration Offset</source>
+        <translation>陀螺仪 Y 校准偏移</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="240"/>
+        <source>Gyrometer Z Calibration Offset</source>
+        <translation>陀螺仪 Z 校准偏移</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="241"/>
+        <source>Soft Iron Offset 00</source>
+        <translation>Soft Iron 偏移 00</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="242"/>
+        <source>Soft Iron Offset 01</source>
+        <translation>Soft Iron 偏移 01</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="243"/>
+        <source>Soft Iron Offset 02</source>
+        <translation>Soft Iron 偏移 02</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="244"/>
+        <source>Soft Iron Offset 10</source>
+        <translation>Soft Iron 偏移 10</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="245"/>
+        <source>Soft Iron Offset 11</source>
+        <translation>Soft Iron 偏移 11</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="246"/>
+        <source>Soft Iron Offset 12</source>
+        <translation>Soft Iron 偏移 12</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="247"/>
+        <source>Soft Iron Offset 20</source>
+        <translation>Soft Iron 偏移 20</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="248"/>
+        <source>Soft Iron Offset 21</source>
+        <translation>Soft Iron 偏移 21</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="249"/>
+        <source>Soft Iron Offset 22</source>
+        <translation>Soft Iron 偏移 22</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="250"/>
+        <source>Disable Magnetometer</source>
+        <translation>禁用磁力计</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="251"/>
+        <source>Board Rotation X</source>
+        <translation>设备旋转 X</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="252"/>
+        <source>Board Rotation Y</source>
+        <translation>设备旋转 Y</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="253"/>
+        <source>Board Rotation Z</source>
+        <translation>设备旋转 Z</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="254"/>
+        <source>Uart Mode (0-Off, 1-SBUS, 2-CRSFIN, 3-CRSFOUT)</source>
+        <translation>Uart 模式（0-关闭，1-SBUS，2-CRSFIN，3-CRSFOUT）</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="255"/>
+        <source>CRSF Transmit Frequncy</source>
+        <translation>CRSF 发送频率</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="256"/>
+        <source>SBUS Transmit Freqency</source>
+        <translation>SBUS 发送频率</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="257"/>
+        <source>SBUS Receieve Inverted</source>
+        <translation>SBUS 接收频率</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="258"/>
+        <source>SBUS Transmit Inverted</source>
+        <translation>SBUS 发送反相</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="259"/>
+        <source>Invert CRSF output</source>
+        <translation>CRSF 输出反相</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="260"/>
+        <source>Set channel 5 to 2000us</source>
+        <translation>将通道 5 设置为 2000us</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="261"/>
+        <source>Bluetooth Mode (0-Off, 1- Head, 2-Receive, 3-Scanner, BT_HID_Joystick)</source>
+        <translation>蓝牙模式（0-关闭、1-头部、2-接收、3-扫描，蓝牙 HID 控制器）</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="262"/>
+        <source>Reset on Proximity Sense</source>
+        <translation>近距离感应重置</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="263"/>
+        <source>Long Press on the Button to Enable/Disable Tilt Roll and Pan</source>
+        <translation>长按按钮启用/禁用 倾斜(Tilt)翻准(Roll)和旋转(Pan)</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="264"/>
+        <source>Reset Center on a Head Tilt</source>
+        <translation>在头部 倾斜(Tilt) 时重新设定中心</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="265"/>
+        <source>Reset on a double tap</source>
+        <translation>双击重置</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="266"/>
+        <source>Double Tap Threshold</source>
+        <translation>双击阈值</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="267"/>
+        <source>Double Tap Min Time</source>
+        <translation>双击最小时间</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="268"/>
+        <source>Double Tap Max Time</source>
+        <translation>双击最大时间</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="269"/>
+        <location filename="../basetrackersettings.h" line="270"/>
+        <source>Invert PPM Output</source>
+        <translation>PPM 输出反相</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="271"/>
+        <source>PPM Frame Length (us)</source>
+        <translation>PPM 帧长 (us)</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="272"/>
+        <source>PPM Sync Pulse Length (us)</source>
+        <translation>PPM 同步脉冲长度 (us)</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="273"/>
+        <source>PPM channels to output</source>
+        <translation>PPM 输出通道</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="274"/>
+        <source>Raw Sensor Mag X</source>
+        <translation>原始传感器 磁力计 X</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="275"/>
+        <source>Raw Sensor Mag Y</source>
+        <translation>原始传感器 磁力计 Y</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="276"/>
+        <source>Raw Sensor Mag Z</source>
+        <translation>原始传感器 磁力计 Z</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="277"/>
+        <source>Raw Sensor Gyro X</source>
+        <translation>原始传感器 陀螺仪 X</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="278"/>
+        <source>Raw Sensor Gyro Y</source>
+        <translation>原始传感器 陀螺仪 Y</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="279"/>
+        <source>Raw Sensor Gyro Z</source>
+        <translation>原始传感器 陀螺仪 Z</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="280"/>
+        <source>Raw Sensor Accel X</source>
+        <translation>原始传感器 加速度计 X</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="281"/>
+        <source>Raw Sensor Accel Y</source>
+        <translation>原始传感器 加速度计 Y</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="282"/>
+        <source>Raw Sensor Accel Z</source>
+        <translation>原始传感器 加速度计 Z</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="283"/>
+        <source>Calibrated Mag X</source>
+        <translation>已校准的 磁力计 X</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="284"/>
+        <source>Calibrated Mag Y</source>
+        <translation>已校准的 磁力计 Y</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="285"/>
+        <source>Calibrated Mag Z</source>
+        <translation>已校准的 磁力计 Z</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="286"/>
+        <source>Calibrated Gyro X</source>
+        <translation>已校准的 陀螺仪 X</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="287"/>
+        <source>Calibrated Gyro Y</source>
+        <translation>已校准的 陀螺仪 Y</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="288"/>
+        <source>Calibrated Gyro Z</source>
+        <translation>已校准的 陀螺仪 Z</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="289"/>
+        <source>Calibrated Accel X</source>
+        <translation>已校准的 加速度计 X</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="290"/>
+        <source>Calibrated Accel Y</source>
+        <translation>已校准的 加速度计 Y</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="291"/>
+        <source>Calibrated Accel Z</source>
+        <translation>已校准的 加速度计 Z</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="292"/>
+        <source>Board Tilt Output (us)</source>
+        <translation>设备 倾斜(Tilt) 输出 (us)</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="293"/>
+        <source>Board Roll Output (us)</source>
+        <translation>设备 翻转(Roll) 输出 (us)</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="294"/>
+        <source>Board Pan Output (us)</source>
+        <translation>设备 旋转(Pan) 输出 (us)</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="295"/>
+        <source>Has the board been Calibrated</source>
+        <translation>设备是否已校准</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="296"/>
+        <source>Bluetooth is connected</source>
+        <translation>蓝牙已连接</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="297"/>
+        <source>Tilt/Roll/Pan Output Enabled</source>
+        <translation>倾斜(Tilt)/翻转(Roll)/旋转(Pan) 输出已启用</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="298"/>
+        <source>Raw Tilt in Degrees</source>
+        <translation>原始 倾斜(Tilt) 角度</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="299"/>
+        <source>Raw Roll in Degrees</source>
+        <translation>原始 翻转(Roll) 角度</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="300"/>
+        <source>Raw Pan in Degrees</source>
+        <translation>原始 旋转(Pan) 角度</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="301"/>
+        <source>Offset Tilt in Degrees</source>
+        <translation>偏移 倾斜(Tilt) 角度</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="302"/>
+        <source>Offset Roll in Degrees</source>
+        <translation>偏移 翻转(Roll) 角度</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="303"/>
+        <source>Offset Pan in Degrees</source>
+        <translation>偏移 旋转(Pan) 角度</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="304"/>
+        <source>Gyro Has Been Calibrated</source>
+        <translation>陀螺仪已校准</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="305"/>
+        <source>Bluetooth Remote address to Pair With</source>
+        <translation>蓝牙远程配对地址</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="306"/>
+        <source>Channel Outputs</source>
+        <translation>通道输出</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="307"/>
+        <source>Bluetooth Inputs</source>
+        <translation>蓝牙输入</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="308"/>
+        <source>PPM Inputs</source>
+        <translation>PPM 输入</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="309"/>
+        <source>Uart Channels (Sbus/Crsf)</source>
+        <translation>UART 通道(SBUS/CRSF)</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="310"/>
+        <source>Quaternion Output (Tilt / Roll / Pan)</source>
+        <translation>四元数输出 (倾斜(Tilt)/翻转(Roll)/旋转(Pan))</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="311"/>
+        <source>Local Bluetooth Address</source>
+        <translation>本地蓝牙地址</translation>
+    </message>
+    <message>
+        <location filename="../basetrackersettings.h" line="312"/>
+        <source>Remote Bluetooth Address</source>
+        <translation>远程蓝牙地址</translation>
+    </message>
+</context>
+<context>
     <name>CalAccelerometer</name>
     <message>
         <location filename="../calibratewizard/calaccelerometer.ui" line="26"/>
@@ -173,11 +777,14 @@
     </message>
     <message>
         <location filename="../calibrateble.ui" line="712"/>
+        <location filename="../calibrateble.cpp" line="145"/>
+        <location filename="../calibrateble.cpp" line="155"/>
         <source>Cancel</source>
         <translation>取消</translation>
     </message>
     <message>
         <location filename="../calibrateble.ui" line="749"/>
+        <location filename="../calibrateble.cpp" line="150"/>
         <source>Next</source>
         <translation>下一步</translation>
     </message>
@@ -185,6 +792,16 @@
         <location filename="../calibrateble.cpp" line="112"/>
         <source>Accelerometer Calibration Complete</source>
         <translation>Accelerometer Calibration Complete</translation>
+    </message>
+    <message>
+        <location filename="../calibrateble.cpp" line="147"/>
+        <source>Back</source>
+        <translation>返回</translation>
+    </message>
+    <message>
+        <location filename="../calibrateble.cpp" line="152"/>
+        <source>Save</source>
+        <translation>保存</translation>
     </message>
 </context>
 <context>
@@ -221,6 +838,26 @@
         <location filename="../channelviewer.ui" line="62"/>
         <source>&amp;Close</source>
         <translation>&amp;关闭</translation>
+    </message>
+    <message>
+        <location filename="../channelviewer.cpp" line="23"/>
+        <source>Channel Viewer</source>
+        <translation>通道查看器</translation>
+    </message>
+    <message>
+        <location filename="../channelviewer.cpp" line="221"/>
+        <source>No PPM Input channels detected</source>
+        <translation>未检测到 PPM 输入通道</translation>
+    </message>
+    <message>
+        <location filename="../channelviewer.cpp" line="240"/>
+        <source>No UART (Sbus/Crsf) input channels detected</source>
+        <translation>未检测到 UART (SBUS/CRSF) 输入通道</translation>
+    </message>
+    <message>
+        <location filename="../channelviewer.cpp" line="259"/>
+        <source>No BT Input channels detected</source>
+        <translation>未检测到 蓝牙 输入通道</translation>
     </message>
 </context>
 <context>
@@ -277,6 +914,11 @@
         <location filename="../diagnosticdisplay.ui" line="96"/>
         <source>Close</source>
         <translation>关闭</translation>
+    </message>
+    <message>
+        <location filename="../diagnosticdisplay.cpp" line="51"/>
+        <source>Description</source>
+        <translation>描述</translation>
     </message>
 </context>
 <context>
@@ -1022,6 +1664,9 @@ Killed programmer process!
         <location filename="../mainwindow.ui" line="538"/>
         <location filename="../mainwindow.ui" line="554"/>
         <location filename="../mainwindow.ui" line="580"/>
+        <location filename="../mainwindow.cpp" line="896"/>
+        <location filename="../mainwindow.cpp" line="897"/>
+        <location filename="../mainwindow.cpp" line="898"/>
         <source>°</source>
         <translation>°</translation>
     </message>
@@ -1206,6 +1851,8 @@ Killed programmer process!
     <message>
         <location filename="../mainwindow.ui" line="1097"/>
         <location filename="../mainwindow.ui" line="1186"/>
+        <location filename="../mainwindow.cpp" line="661"/>
+        <location filename="../mainwindow.cpp" line="808"/>
         <source> Hz</source>
         <translation> Hz</translation>
     </message>
@@ -1808,7 +2455,10 @@ Killed programmer process!
     <message>
         <location filename="../mainwindow.cpp" line="272"/>
         <location filename="../mainwindow.cpp" line="377"/>
+        <location filename="../mainwindow.cpp" line="1039"/>
         <location filename="../mainwindow.cpp" line="1235"/>
+        <location filename="../mainwindow.cpp" line="1260"/>
+        <location filename="../mainwindow.cpp" line="1365"/>
         <source>Error</source>
         <translation>错误</translation>
     </message>
@@ -1898,9 +2548,20 @@ Please check COM port or flash proper code</source>
         <translation>打开文件</translation>
     </message>
     <message>
+        <location filename="../mainwindow.cpp" line="962"/>
         <location filename="../mainwindow.cpp" line="979"/>
         <source>Config Files (*.ini)</source>
         <translation>配置文件 (*.ini)</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="273"/>
+        <source>Could not open </source>
+        <translation>无法打开 </translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="962"/>
+        <source>Save Settings</source>
+        <translation>保存设置</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="995"/>
@@ -2028,6 +2689,11 @@ Click &quot;Save Settings&quot; first</source>
         <translation>无法接收参数</translation>
     </message>
     <message>
+        <location filename="../mainwindow.cpp" line="1262"/>
+        <source>Parameter Received Failure</source>
+        <translation>参数接收失败</translation>
+    </message>
+    <message>
         <location filename="../mainwindow.cpp" line="1268"/>
         <source>Features Request Started</source>
         <translation>功能请求开始</translation>
@@ -2041,6 +2707,11 @@ Click &quot;Save Settings&quot; first</source>
         <location filename="../mainwindow.cpp" line="1364"/>
         <source>Unable to receive the boards features</source>
         <translation>无法接收设备功能</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="1367"/>
+        <source>Features Receive Failure</source>
+        <translation>功能接收失败</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1374"/>
@@ -2094,11 +2765,34 @@ Download the GUI v</source>
     </message>
 </context>
 <context>
+    <name>PopupSlider</name>
+    <message>
+        <location filename="../popupslider.cpp" line="29"/>
+        <source> uS</source>
+        <translation> uS</translation>
+    </message>
+</context>
+<context>
     <name>ServoMinMax</name>
     <message>
         <location filename="../servominmax.cpp" line="54"/>
         <source>Context menu</source>
         <translation>右键菜单</translation>
+    </message>
+    <message>
+        <location filename="../servominmax.cpp" line="56"/>
+        <source>Default Values</source>
+        <translation>默认值</translation>
+    </message>
+    <message>
+        <location filename="../servominmax.cpp" line="57"/>
+        <source>Re-Center</source>
+        <translation>回中</translation>
+    </message>
+    <message>
+        <location filename="../servominmax.cpp" line="58"/>
+        <source>Maximum Values</source>
+        <translation>最大值</translation>
     </message>
 </context>
 <context>
