@@ -1924,7 +1924,7 @@ Killed programmer process!
     <message>
         <location filename="../mainwindow.ui" line="1295"/>
         <source>FrSky - Wireless Receiver (Remote)</source>
-        <translation>FrSky - 无线发射器 (远程)</translation>
+        <translation>FrSky - 无线接收器 (远程)</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="1300"/>
