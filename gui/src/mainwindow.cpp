@@ -927,7 +927,7 @@ void MainWindow::liveDataChanged()
     else
         ui->lblBTConnected->setText(tr("Not connected"));
     if(trkset.getBtMode() == TrackerSettings::BTDISABLE)
-        ui->lblBTConnected->setText("Disabled");
+        ui->lblBTConnected->setText(tr("Disabled"));
     if(trkset.getDataTrpEnabled()) {
       ui->servoPan->setShowActualPosition(true);
       ui->servoTilt->setShowActualPosition(true);

@@ -280,6 +280,198 @@
     </message>
 </context>
 <context>
+    <name>FirmwareWizard</name>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="23"/>
+        <source>Programmer Log</source>
+        <translation>烧录日志</translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="69"/>
+        <source>Local File</source>
+        <translation>本地文件</translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="80"/>
+        <source>Program</source>
+        <translation>烧录</translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="95"/>
+        <source>Open File</source>
+        <translation>打开文件</translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="95"/>
+        <source>Fimware files (*.hex *.bin)</source>
+        <translation>固件文件 (*.hex *.bin)</translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="116"/>
+        <location filename="../firmwarewizard.cpp" line="168"/>
+        <location filename="../firmwarewizard.cpp" line="359"/>
+        <location filename="../firmwarewizard.cpp" line="381"/>
+        <location filename="../firmwarewizard.cpp" line="536"/>
+        <source>Error</source>
+        <translation>错误</translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="116"/>
+        <source>Unable to open firmware file </source>
+        <translation>无法打开文件 </translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="126"/>
+        <source>Determining what type of file this is...</source>
+        <translation>正在确定这是什么类型的文件...</translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="132"/>
+        <source>  Firmware is for the Arduino Nano BLE 33 in bin format</source>
+        <translation>  固件为 Arduino Nano BLE 33 的 bin 格式</translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="143"/>
+        <source>  Firmware is for the Arduino Nano BLE 33 in hex format</source>
+        <translation>  固件为 Arduino Nano BLE 33 的 hex 格式</translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="155"/>
+        <source>  Firmware is for the Arduino Nano in intel hex format</source>
+        <translation>  固件为 Arduino Nano 的 intel hex 格式</translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="168"/>
+        <source>Unknown firmware type</source>
+        <translation>固件类型未知</translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="177"/>
+        <location filename="../firmwarewizard.cpp" line="181"/>
+        <source>Starting: </source>
+        <translation>开始: </translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="239"/>
+        <source>Using firmware from local file </source>
+        <translation>正在从本地文件使用固件 </translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="244"/>
+        <source>Downloaded firmware from the internet</source>
+        <translation>正在从网上下载固件</translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="305"/>
+        <source>Cancel</source>
+        <translation>取消</translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="306"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&apos;center&apos;&gt;&lt;span style=&apos; font-size:18pt;&apos;&gt;Connect your board&lt;/span&gt;&lt;span style=&apos; font-size:14pt;&apos;&gt;&lt;br/&gt;&lt;/span&gt;If already connected, disconnect and reconnect&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&apos;center&apos;&gt;&lt;span style=&apos; font-size:18pt;&apos;&gt;请连接你的设备&lt;/span&gt;&lt;span style=&apos; font-size:14pt;&apos;&gt;&lt;br/&gt;&lt;/span&gt;如果已连接，请断开并重新连接&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="343"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&apos;center&apos;&gt;&lt;span style=&apos; font-size:18pt;&apos;&gt;Programming Successful&lt;/span&gt;&lt;span style=&apos; font-size:14pt;&apos;&gt;&lt;br/&gt;&lt;/span&gt;You may close this window&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&apos;center&apos;&gt;&lt;span style=&apos; font-size:18pt;&apos;&gt;烧录成功&lt;/span&gt;&lt;span style=&apos; font-size:14pt;&apos;&gt;&lt;br/&gt;&lt;/span&gt;您可以关闭此窗口&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="345"/>
+        <source>Close</source>
+        <translation>关闭</translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="359"/>
+        <source>Unable to set bootloader, could not open port </source>
+        <translation>无法设置 bootloader，无法打开端口 </translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="359"/>
+        <source> at 1200baud</source>
+        <translation> 波特率 1200baud</translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="360"/>
+        <source>Unable to set bootloader - </source>
+        <translation>无法设置 bootloader - </translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="388"/>
+        <source>Fetching Firmwares Error</source>
+        <translation>获取固件错误</translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="398"/>
+        <source>Fetching Binary Error</source>
+        <translation>获取二进制错误</translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="462"/>
+        <source>Loading local file </source>
+        <translation>正在加载本地文件 </translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="492"/>
+        <source>Downloading </source>
+        <translation>正在下载 </translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="529"/>
+        <source>Starting </source>
+        <translation>正在开始 </translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="536"/>
+        <source>Unable to open </source>
+        <translation>无法打开 </translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="541"/>
+        <source>Programmer Error </source>
+        <translation>烧录错误 </translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="557"/>
+        <source>Programming Failure</source>
+        <translation>烧录失败</translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="557"/>
+        <source>Programming Failed</source>
+        <translation>烧录失败</translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="558"/>
+        <source>Programmer Exit Error(%1) %2</source>
+        <translation>烧录器退出错误 (%1) %2</translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="574"/>
+        <source>Wasn&apos;t able to set bootloader mode, trying first port found</source>
+        <translation>无法设置 bootloader 模式，正在尝试找到的第一个端口</translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="576"/>
+        <source>Couldn&apos;t enter bootloader, trying original port</source>
+        <translation>无法进入 bootloader，正在尝试原始端口</translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="629"/>
+        <source>Discovered a new port </source>
+        <translation>发现一个新端口 </translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="675"/>
+        <source>
+Killed programmer process!
+</source>
+        <translation>
+已结束烧录器进程！
+</translation>
+    </message>
+</context>
+<context>
     <name>ImageViewer</name>
     <message>
         <location filename="../imageviewer/imageviewer.cpp" line="107"/>
@@ -981,6 +1173,7 @@
     <message>
         <location filename="../mainwindow.ui" line="1050"/>
         <location filename="../mainwindow.ui" line="1285"/>
+        <location filename="../mainwindow.cpp" line="930"/>
         <source>Disabled</source>
         <translation>关闭</translation>
     </message>

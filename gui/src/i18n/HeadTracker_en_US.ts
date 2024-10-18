@@ -280,6 +280,196 @@
     </message>
 </context>
 <context>
+    <name>FirmwareWizard</name>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="23"/>
+        <source>Programmer Log</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="69"/>
+        <source>Local File</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="80"/>
+        <source>Program</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="95"/>
+        <source>Open File</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="95"/>
+        <source>Fimware files (*.hex *.bin)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="116"/>
+        <location filename="../firmwarewizard.cpp" line="168"/>
+        <location filename="../firmwarewizard.cpp" line="359"/>
+        <location filename="../firmwarewizard.cpp" line="381"/>
+        <location filename="../firmwarewizard.cpp" line="536"/>
+        <source>Error</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="116"/>
+        <source>Unable to open firmware file </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="126"/>
+        <source>Determining what type of file this is...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="132"/>
+        <source>  Firmware is for the Arduino Nano BLE 33 in bin format</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="143"/>
+        <source>  Firmware is for the Arduino Nano BLE 33 in hex format</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="155"/>
+        <source>  Firmware is for the Arduino Nano in intel hex format</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="168"/>
+        <source>Unknown firmware type</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="177"/>
+        <location filename="../firmwarewizard.cpp" line="181"/>
+        <source>Starting: </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="239"/>
+        <source>Using firmware from local file </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="244"/>
+        <source>Downloaded firmware from the internet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="305"/>
+        <source>Cancel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="306"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&apos;center&apos;&gt;&lt;span style=&apos; font-size:18pt;&apos;&gt;Connect your board&lt;/span&gt;&lt;span style=&apos; font-size:14pt;&apos;&gt;&lt;br/&gt;&lt;/span&gt;If already connected, disconnect and reconnect&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="343"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&apos;center&apos;&gt;&lt;span style=&apos; font-size:18pt;&apos;&gt;Programming Successful&lt;/span&gt;&lt;span style=&apos; font-size:14pt;&apos;&gt;&lt;br/&gt;&lt;/span&gt;You may close this window&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="345"/>
+        <source>Close</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="359"/>
+        <source>Unable to set bootloader, could not open port </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="359"/>
+        <source> at 1200baud</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="360"/>
+        <source>Unable to set bootloader - </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="388"/>
+        <source>Fetching Firmwares Error</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="398"/>
+        <source>Fetching Binary Error</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="462"/>
+        <source>Loading local file </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="492"/>
+        <source>Downloading </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="529"/>
+        <source>Starting </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="536"/>
+        <source>Unable to open </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="541"/>
+        <source>Programmer Error </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="557"/>
+        <source>Programming Failure</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="557"/>
+        <source>Programming Failed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="558"/>
+        <source>Programmer Exit Error(%1) %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="574"/>
+        <source>Wasn&apos;t able to set bootloader mode, trying first port found</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="576"/>
+        <source>Couldn&apos;t enter bootloader, trying original port</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="629"/>
+        <source>Discovered a new port </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../firmwarewizard.cpp" line="675"/>
+        <source>
+Killed programmer process!
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>ImageViewer</name>
     <message>
         <location filename="../imageviewer/imageviewer.cpp" line="107"/>
@@ -981,6 +1171,7 @@
     <message>
         <location filename="../mainwindow.ui" line="1050"/>
         <location filename="../mainwindow.ui" line="1285"/>
+        <location filename="../mainwindow.cpp" line="930"/>
         <source>Disabled</source>
         <translation type="unfinished"></translation>
     </message>
