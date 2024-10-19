@@ -1416,7 +1416,7 @@ void MainWindow::boardDiscovered()
         msgbox->setText(tr("Firmware is newer than supported by this application\nDownload the GUI v") + QString::number((float)rmajver/10,'f',1) +tr(" from www.github.com/dlktdr/headtracker"));
         msgbox->setWindowTitle(tr("Firmware Version Mismatch"));
         msgbox->show();
-        serialDisconnect();
+        // serialDisconnect();
     }
     if(channelViewerOpen) {
         channelviewer->show();

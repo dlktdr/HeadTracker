@@ -286,9 +286,6 @@
             <property name="autoFillBackground">
              <bool>false</bool>
             </property>
-            <property name="styleSheet">
-             <string notr="true">background: white</string>
-            </property>
             <property name="frameShape">
              <enum>QFrame::Box</enum>
             </property>
@@ -3045,9 +3042,6 @@
          <property name="autoFillBackground">
           <bool>false</bool>
          </property>
-         <property name="styleSheet">
-          <string notr="true">background-color: #d9d9d9</string>
-         </property>
          <property name="frameShape">
           <enum>QFrame::Box</enum>
          </property>
@@ -3364,9 +3358,6 @@
          <property name="autoFillBackground">
           <bool>false</bool>
          </property>
-         <property name="styleSheet">
-          <string notr="true">background-color: #d9d9d9</string>
-         </property>
          <property name="frameShape">
           <enum>QFrame::Box</enum>
          </property>
@@ -3672,9 +3663,6 @@
          <property name="autoFillBackground">
           <bool>false</bool>
          </property>
-         <property name="styleSheet">
-          <string notr="true">background-color: #d9d9d9</string>
-         </property>
          <property name="frameShape">
           <enum>QFrame::Box</enum>
          </property>
@@ -3858,7 +3846,7 @@
          <property name="minimumSize">
           <size>
            <width>0</width>
-           <height>50</height>
+           <height>55</height>
           </size>
          </property>
         </widget>

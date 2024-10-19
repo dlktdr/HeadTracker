@@ -84,8 +84,9 @@ void PopupSlider::paintEvent(QPaintEvent *event)
     path.lineTo(0,height()-widvertoff);
     path.closeSubpath();
 
-    painter.setBrush(Qt::yellow);
-    painter.setPen(Qt::black);
+    QPalette palette = QApplication::palette();
+    painter.setBrush(palette.color(QPalette::ToolTipBase));
+    painter.setPen(palette.color(QPalette::ToolTipText));
     painter.drawPath(path);
 }
 
