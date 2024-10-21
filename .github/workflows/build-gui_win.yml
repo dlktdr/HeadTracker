@@ -28,31 +28,32 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Cache Qt
-        id: cache-qt
-        uses: actions/cache@v3
-        with:
-          path: qt/
-          key: ${{ runner.os }}-QtCache
+      # - name: Cache Qt
+      #   id: cache-qt
+      #   uses: actions/cache@v3
+      #   with:
+      #     path: qt/
+      #     key: ${{ runner.os }}-QtCache
 
       - name: Install Qt
-        uses: jurplel/install-qt-action@v3
+        uses: jurplel/install-qt-action@v4
         with:
-          aqtversion: '==2.1.*'
+          aqtversion: '==3.1.*'
           version: '6.4.1'
           target: 'desktop'
           arch: 'win64_mingw'
           modules: 'qtserialport'
           dir: '${{ github.workspace }}/qt'
           install-deps: 'true'
-          cached: ${{ steps.cache-qt.outputs.cache-hit }}
+          cache: 'true'
+          cache-key-prefix: 'install-qt-action'
 
       - name: Set up MinGW
         uses: egor-tensin/setup-mingw@v2
         with:
             platform: x64
             static: 0
-            
+
       - name: Build
         working-directory: ${{github.workspace}}
         run: |
