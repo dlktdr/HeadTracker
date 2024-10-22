@@ -20,7 +20,7 @@ ChannelViewer::ChannelViewer(TrackerSettings *trk, QWidget *parent) :
     staleData = true;
     nodataTimer.setInterval(1000);
     nodataTimer.start();
-    setWindowTitle("Channel Viewer");
+    setWindowTitle(tr("Channel Viewer"));
 
     ui->tabsbusin->setVisible(false);
 }
@@ -218,7 +218,7 @@ void ChannelViewer::addBars()
     layoutppmin->addWidget(lblPPMin);
     lblPPMin->setVisible(false);
     lblPPMin->setAlignment(Qt::AlignHCenter|Qt::AlignVCenter);
-    lblPPMin->setText("No PPM Input channels detected");
+    lblPPMin->setText(tr("No PPM Input channels detected"));
 
     // SBUS Inputs
     layoutsbusin = new QVBoxLayout(ui->tabsbusin);
@@ -237,7 +237,7 @@ void ChannelViewer::addBars()
     layoutsbusin->addWidget(lblSBUSin);
     lblSBUSin->setVisible(false);
     lblSBUSin->setAlignment(Qt::AlignHCenter|Qt::AlignVCenter);
-    lblSBUSin->setText("No UART (Sbus/Crsf) input channels detected");
+    lblSBUSin->setText(tr("No UART (Sbus/Crsf) input channels detected"));
 
     // BT Inputs
     layoutbtin = new QVBoxLayout(ui->tabbtin);
@@ -256,7 +256,7 @@ void ChannelViewer::addBars()
     layoutbtin->addWidget(lblBTin);
     lblBTin->setVisible(false);
     lblBTin->setAlignment(Qt::AlignHCenter|Qt::AlignVCenter);
-    lblBTin->setText("No BT Input channels detected");
+    lblBTin->setText(tr("No BT Input channels detected"));
 }
 
 void ChannelViewer::showEvent(QShowEvent *event)

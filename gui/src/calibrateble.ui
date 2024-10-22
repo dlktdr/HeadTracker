@@ -243,7 +243,7 @@
             <enum>QFrame::Sunken</enum>
            </property>
            <property name="text">
-            <string>TextLabel</string>
+            <string notr="true">TextLabel</string>
            </property>
           </widget>
          </item>
@@ -268,7 +268,7 @@
             <enum>QFrame::Sunken</enum>
            </property>
            <property name="text">
-            <string>TextLabel</string>
+            <string notr="true">TextLabel</string>
            </property>
           </widget>
          </item>
@@ -293,7 +293,7 @@
             <enum>QFrame::Sunken</enum>
            </property>
            <property name="text">
-            <string>TextLabel</string>
+            <string notr="true">TextLabel</string>
            </property>
           </widget>
          </item>
@@ -318,7 +318,7 @@
             <enum>QFrame::Sunken</enum>
            </property>
            <property name="text">
-            <string>TextLabel</string>
+            <string notr="true">TextLabel</string>
            </property>
           </widget>
          </item>
@@ -434,7 +434,7 @@
             <enum>QFrame::Raised</enum>
            </property>
            <property name="text">
-            <string>TextLabel</string>
+            <string notr="true">TextLabel</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignCenter</set>
