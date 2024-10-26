@@ -71,7 +71,7 @@ bluetoothMode bluetoothModes[] = {
 };
 */
 
-typedef enum { BTDISABLE = 0, BTPARAHEAD, BTPARARMT, BTSCANONLY, BTJOYSTICK } btmodet;
+typedef enum { BTNOTINIT = -1, BTDISABLE = 0, BTPARAHEAD, BTPARARMT, BTSCANONLY, BTJOYSTICK } btmodet;
 
 void bt_Thread();
 void bt_init();

@@ -33,12 +33,15 @@
 
 LOG_MODULE_REGISTER(btjoystick);
 
-#if defined(CONFIG_BT)
+#if defined(CONFIG_BT) && defined(CONFIG_BT_SETTINGS)
 
-static hidreport_s report;
+static struct HidReportInput1 btreport;
 static uint16_t bthidchans[16];
 static struct bt_conn *curconn = NULL;
 static char _address[18] = "00:00:00:00:00:00";
+static char _joystickname[] = "HT";
+
+K_SEM_DEFINE(btJoystick_sem, 0, 1);
 
 enum {
   HIDS_REMOTE_WAKE = BIT(0),
@@ -62,16 +65,6 @@ static struct hids_info info = {
     .flags = HIDS_NORMALLY_CONNECTABLE,
 };
 
-static struct bt_le_adv_param my_param = {
-    .id = BT_ID_DEFAULT,
-    .sid = 0,
-    .secondary_max_skip = 0,
-    .options = BT_LE_ADV_OPT_CONNECTABLE | BT_LE_ADV_OPT_USE_NAME,
-    .interval_min = (BT_GAP_ADV_FAST_INT_MIN_2),
-    .interval_max = (BT_GAP_ADV_FAST_INT_MAX_2),
-    .peer = (NULL),
-};
-
 enum {
   HIDS_INPUT = 0x01,
   HIDS_OUTPUT = 0x02,
@@ -79,35 +72,42 @@ enum {
 };
 
 static struct hids_report input = {
-    .id = 0x00,
+    .id = 0x01,
     .type = HIDS_INPUT,
 };
 
-static uint8_t simulate_input;
+static uint8_t notify_hid_subscribed = false;
 static uint8_t ctrl_point;
+static int btinterval = 0;
 
 static ssize_t read_info(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf,
                          uint16_t len, uint16_t offset)
 {
+  LOG_INF("BLE - Reading Info");
   return bt_gatt_attr_read(conn, attr, buf, len, offset, attr->user_data, sizeof(struct hids_info));
 }
 
 static ssize_t read_report_map(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf,
                                uint16_t len, uint16_t offset)
 {
-  return bt_gatt_attr_read(conn, attr, buf, len, offset, hid_report_desc, sizeof(hid_report_desc));
+  LOG_INF("BLE - Reading Report Map");
+  return bt_gatt_attr_read(conn, attr, buf, len, offset, hid_gamepad_report_desc, sizeof(hid_gamepad_report_desc));
 }
 
 static ssize_t read_report(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf,
                            uint16_t len, uint16_t offset)
 {
-  return bt_gatt_attr_read(conn, attr, buf, len, offset, attr->user_data, sizeof(hidreport_s));
+  LOG_INF("BLE - Reading Report");
+  return bt_gatt_attr_read(conn, attr, buf, len, offset, attr->user_data, sizeof(struct hids_report));
 }
 
 static void input_ccc_changed(const struct bt_gatt_attr *attr, uint16_t value)
 {
   LOG_INF("BLE - Notifications Requested");
-  simulate_input = (value == BT_GATT_CCC_NOTIFY) ? 1 : 0;
+  notify_hid_subscribed = (value == BT_GATT_CCC_NOTIFY) ? 1 : 0;
+  // On subscribe, give semaphore to initiate notifications
+  if(notify_hid_subscribed)
+    k_sem_give(&btJoystick_sem);
 }
 
 static ssize_t read_input_report(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf,
@@ -142,9 +142,9 @@ struct bt_gatt_attr bthid_attr[] = {
                            read_report_map, NULL, NULL),
     // Attribute 5,6
     BT_GATT_CHARACTERISTIC(BT_UUID_HIDS_REPORT, BT_GATT_CHRC_READ | BT_GATT_CHRC_NOTIFY,
-                           BT_GATT_PERM_READ, read_input_report, NULL, NULL),
+                           BT_GATT_PERM_READ_ENCRYPT, read_input_report, NULL, NULL),
     // Attribute 7
-    BT_GATT_CCC(input_ccc_changed, BT_GATT_PERM_READ | BT_GATT_PERM_WRITE),
+    BT_GATT_CCC(input_ccc_changed, BT_GATT_PERM_READ_ENCRYPT | BT_GATT_PERM_WRITE_ENCRYPT),
     BT_GATT_DESCRIPTOR(BT_UUID_HIDS_REPORT_REF, BT_GATT_PERM_READ, read_report, NULL, &input),
     BT_GATT_CHARACTERISTIC(BT_UUID_HIDS_CTRL_POINT, BT_GATT_CHRC_WRITE_WITHOUT_RESP,
                            BT_GATT_PERM_WRITE, NULL, write_ctrl_point, &ctrl_point),
@@ -152,71 +152,127 @@ struct bt_gatt_attr bthid_attr[] = {
 
 struct bt_gatt_service bthid_svc = BT_GATT_SERVICE(bthid_attr);
 
-static const struct bt_data ad[] = {
+// static struct bt_le_adv_param my_joyparam = {
+//     .id = BT_ID_DEFAULT,
+//     .sid = 0,
+//     .secondary_max_skip = 0,
+//     .options = BT_LE_ADV_OPT_CONNECTABLE | BT_LE_ADV_OPT_ONE_TIME,
+//     .interval_min = (BT_GAP_ADV_FAST_INT_MIN_2),
+//     .interval_max = (BT_GAP_ADV_FAST_INT_MAX_2),
+//     .peer = (NULL),
+// };
+
+static const struct bt_data hidad[] = {
     BT_DATA_BYTES(BT_DATA_FLAGS, (BT_LE_AD_GENERAL | BT_LE_AD_NO_BREDR)),
-    BT_DATA_BYTES(BT_DATA_UUID16_ALL, BT_UUID_16_ENCODE(BT_UUID_HIDS_VAL),
-                  BT_UUID_16_ENCODE(BT_UUID_BAS_VAL)),
+    BT_DATA_BYTES(BT_DATA_UUID16_ALL, BT_UUID_16_ENCODE(BT_UUID_HIDS_VAL)),
+    BT_DATA(BT_DATA_NAME_COMPLETE, _joystickname, 2),
     BT_DATA_BYTES(BT_DATA_GAP_APPEARANCE, 0xC4, 0x03),
 };
 
+char addr_str[50];
+
 static void connected(struct bt_conn *conn, uint8_t err)
 {
-  char addr[BT_ADDR_LE_STR_LEN];
-  bleconnected = true;
-
-  // Stop Advertising
-  bt_le_adv_stop();
-  curconn = bt_conn_ref(conn);
-
-  if (err) {
-    LOG_ERR("Failed to connect to %s (%u)\n", addr, err);
+  if(bleconnected) {
+    LOG_WRN("Bluetooth already connected");
     return;
   }
 
+  // Stop Advertising
+  LOG_INF("Stopping Advertising");
+ // bt_le_adv_stop();
+  bleconnected = true;
+
+  curconn = bt_conn_ref(conn);
+  if(curconn == NULL) {
+    LOG_ERR("Failed to get connection reference");
+    return;
+  }
   struct bt_conn_info info;
-  bt_conn_get_info(conn, &info);
-  char addr_str[50];
+  bt_conn_get_info(curconn, &info);
+
   bt_addr_le_to_str(info.le.dst, addr_str, sizeof(addr_str));
   LOG_INF("Connected to Address %s", addr_str);
+
+  int rv = bt_conn_set_security(curconn, BT_SECURITY_L2);
+	if (rv) {
+		LOG_ERR("Failed to set security (err %d)", rv);
+	}
 }
+
+// Joystick HID Report notify complete callback. This is called when the report has been sent.
+// prevent bufffer from filling.
+
+void btJoystickNotifyCompleteCB(struct bt_conn *conn, void *user_data)
+{
+  k_sem_give(&btJoystick_sem);
+}
+
+int startAdvertising()
+{
+  int err;
+  err = bt_le_adv_start(BT_LE_ADV_CONN_ONE_TIME, hidad, ARRAY_SIZE(hidad), NULL, 0);
+  if (err) {
+    LOG_ERR("Advertising failed to start (err %d) (size %d)", err, ARRAY_SIZE(hidad));
+    return err;
+  } else {
+    LOG_INF("Advertising successfully (size %d)", ARRAY_SIZE(hidad));
+  }
+  return err;
+}
+
 
 static void disconnected(struct bt_conn *conn, uint8_t reason)
 {
   LOG_WRN("Bluetooth disconnected (reason %d)", reason);
 
-  // Start advertising
-  int err = bt_le_adv_start(&my_param, ad, ARRAY_SIZE(ad), NULL, 0);
-  if (err) {
-    LOG_ERR("Advertising failed to start (err %d)", err);
-    return;
-  }
-
-  if (curconn) bt_conn_unref(curconn);
-
-  curconn = NULL;
+  // if (curconn) {
+  //   LOG_WRN("Cleaning up connection");
+  //   bt_conn_unref(curconn);
+  // }
+  //curconn = NULL;
   bleconnected = false;
+  notify_hid_subscribed = false;
+  //k_sem_reset(&btJoystick_sem);
+ // startAdvertising();
 }
 
-static struct bt_conn_cb conn_callbacks = {
+void btjoyparamupdated(struct bt_conn *conn, uint16_t interval, uint16_t latency, uint16_t timeout)
+{
+  LOG_INF("Params Updated. Int:%d Lat:%d Timeout:%d", interval, latency, timeout);
+  btinterval = interval;
+}
+
+static struct bt_conn_cb btj_conn_callbacks = {
     .connected = connected,
     .disconnected = disconnected,
     .le_param_req = leparamrequested,
-    .le_param_updated = leparamupdated,
+    .le_param_updated = btjoyparamupdated,
+    .security_changed = securitychanged,
     .le_phy_updated = lephyupdated,
 };
 
+
 void BTJoystickStop()
 {
+
+  // Stop Advertising
+  LOG_INF("Stopping Advertising");
   // Stop Advertising
   bt_le_adv_stop();
 
   // If connection open kill it
   if (curconn) {
+    LOG_INF("Disconnecting Active Connection");
     bt_conn_disconnect(curconn, 0);
     bt_conn_unref(curconn);
   }
-
+  curconn = NULL;
+  notify_hid_subscribed = false;
+  bleconnected = false;
+  LOG_INF("Unregistering HID Service");
   bt_gatt_service_unregister(&bthid_svc);
+  bt_conn_cb_register(NULL);
 }
 
 static bt_addr_le_t addrarry[CONFIG_BT_ID_MAX];
@@ -224,50 +280,83 @@ static size_t addrcnt = 1;
 
 void BTJoystickStart()
 {
-  LOG_INF("Starting Bluetooth HID Joystick");
+  LOG_INF("Starting HID Joystick");
   bleconnected = false;
+  btinterval = 0;
+  notify_hid_subscribed = false;
+  k_sem_reset(&btJoystick_sem);
 
   for (int i = 0; i < 16; i++) {
     bthidchans[i] = TrackerSettings::PPM_CENTER;
   }
+  bt_set_name(_joystickname);
 
-  bt_gatt_service_register(&bthid_svc);
-  bt_conn_cb_register(&conn_callbacks);
-  bt_set_name("HeadTracker Joystick");
-
-  int err = bt_le_adv_start(&my_param, ad, ARRAY_SIZE(ad), NULL, 0);
-  if (err) {
-    LOG_ERR("Advertising failed to start (err %d)\n", err);
-    return;
+  LOG_INF("Registering HID Service");
+  if(bt_gatt_service_register(&bthid_svc)) {
+    LOG_ERR("Failed to register HID Service");
   }
+  LOG_INF("Registering Callbacks");
+  bt_conn_cb_register(&btj_conn_callbacks);
 
-    // Discover BT Address
+  // Discover BT Address
   bt_id_get(addrarry, &addrcnt);
   if (addrcnt > 0) bt_addr_le_to_str(&addrarry[0], _address, sizeof(_address));
 
-
-  LOG_INF("Advertising successfully started\n");
+  startAdvertising();
 }
 
-void BTJoystickExecute()
+struct bt_gatt_notify_params ntfy_params = {
+  .uuid = BT_UUID_HIDS_REPORT,
+  .attr = NULL,
+  .data = static_cast<void*>(&btreport.buttons[0]),
+  .len = sizeof(struct HidReportInput1) - sizeof(HidReportInput1::ReportId),
+  .func = btJoystickNotifyCompleteCB,
+  .user_data = NULL,
+};
+
+int BTJoystickExecute()
 {
   if (bleconnected) {
     clearLEDFlag(LED_BTSCANNING);
     setLEDFlag(LED_BTCONNECTED);
 
-    buildJoystickHIDReport(report, bthidchans);
-    if (simulate_input)
-      bt_gatt_notify(NULL, &bthid_svc.attrs[6], (void *)&report, sizeof(report));
+    // Send notifications if subsribed and buffer is free
+    if (notify_hid_subscribed) {
+      if (k_sem_take(&btJoystick_sem, K_NO_WAIT) == 0) {
+        buildJoystickHIDReport(btreport, bthidchans);
+        bt_gatt_notify_cb(curconn,&ntfy_params);
 
+        static int mcount = 0;
+        static int64_t mmic = millis64() + 1000;
+        if (mmic < millis64()) {  // Every Second
+          mmic = millis64() + 1000;
+          LOG_INF("Notify Rate = %d", mcount);
+          mcount = 0;
+        }
+        mcount++;
+
+      }
+    }
   } else {
     // Scanning
     setLEDFlag(LED_BTSCANNING);
     clearLEDFlag(LED_BTCONNECTED);
   }
+  return btinterval;
 }
 
 void BTJoystickSetChannel(int channel, const uint16_t value) { bthidchans[channel] = value; }
-
 const char *BTJoystickGetAddress() { return _address; }
+
+#else
+
+// BT_SETTINGS not configured. Cannnot use an BLE HID without encryption. Device will not re-connect
+// after connection loss without persistent settings.
+
+void BTJoystickStop() {}
+void BTJoystickStart() {}
+int BTJoystickExecute() {return 0;}
+void BTJoystickSetChannel(int channel, const uint16_t value) {}
+const char *BTJoystickGetAddress() { return "BT_DISABLED"; }
 
 #endif

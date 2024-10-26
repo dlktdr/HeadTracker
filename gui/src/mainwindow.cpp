@@ -1336,6 +1336,20 @@ void MainWindow::featuresReceiveComplete()
     }
     if(features.contains("BT")) {
         ui->tabBT->setEnabled(true);
+        ui->cmbBtMode->blockSignals(true);
+        ui->cmbBtMode->clear();
+        ui->cmbBtMode->addItem("Disabled");
+        ui->cmbBtMode->addItem("FrSky - Wireless Transmitter (Head)");
+        ui->cmbBtMode->addItem("FrSky - Wireless Receiver (Remote)");
+        ui->cmbBtMode->addItem("FrSky - Wireless Receiver - Scanner Mode");
+        if(features.contains("BTJOYSTICK")) {
+            ui->cmbBtMode->addItem("Bluetooth HID Joystick");
+            ui->cmbBtMode->setCurrentIndex(trkset.getBtMode()<=4?trkset.getBtMode():0);
+        } else {
+            ui->cmbBtMode->setCurrentIndex(trkset.getBtMode()<=3?trkset.getBtMode():0);
+        }
+        ui->cmbBtMode->blockSignals(false);
+
     }
     if(features.contains("PWM1CH") ||
        features.contains("PWM2CH") ||

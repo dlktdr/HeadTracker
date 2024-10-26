@@ -69,14 +69,15 @@ void TrackerSettings::saveToEEPROM()
   uint8_t buffer[TX_RNGBUF_SIZE];
 
   k_mutex_lock(&data_mutex, K_FOREVER);
+  json.clear();
   setJSONSettings(json);
   int len = serializeJson(json, buffer, TX_RNGBUF_SIZE);
   k_mutex_unlock(&data_mutex);
 
   if (socWriteFlash(buffer, len)) {
-    LOG_ERR("Flash Write Failed");
+    LOG_ERR("Flash Write Failed size(%d)", len);
   } else {
-    LOG_INF("Saved to Flash");
+    LOG_INF("Saved to Flash size(%d)", len);
   }
 }
 

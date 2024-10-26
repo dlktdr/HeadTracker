@@ -97,7 +97,7 @@ static uint16_t channel_data[16];
 
 Madgwick madgwick;
 
-int64_t usduration = 0;
+int64_t usduration = 0; //TODO unsinged
 int64_t senseUsDuration = 0;
 
 const struct device *i2c_dev = nullptr;
@@ -680,7 +680,7 @@ void calculate_Thread()
 
     // 14 Set USB Joystick Channels, Only 8 channels, Half rate or USB is overwhelmed
     static uint32_t joystick_update = 0;
-    if(joystick_update++ > 0) {
+    if(joystick_update++ > 1) {
       joystick_update = 0;
       set_JoystickChannels(channel_data);
     }

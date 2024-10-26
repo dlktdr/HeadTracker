@@ -34,7 +34,7 @@ spi_flash_mmap_handle_t handle;
 
 LOG_MODULE_REGISTER(soc_flash);
 
-#define FLASH_PARTITION	storage_partition
+#define FLASH_PARTITION	ht_data_partition
 #define FLASH_OFFSET FIXED_PARTITION_OFFSET(FLASH_PARTITION)
 #define FLASH_SIZE FIXED_PARTITION_SIZE(FLASH_PARTITION)
 #define FLASH_DEVICE FIXED_PARTITION_DEVICE(FLASH_PARTITION)
@@ -156,7 +156,7 @@ int socWriteFlash(const uint8_t *datain, int len)
     return -1;
   }
 
-  LOG_INF("Flash write succeeded");
+  LOG_INF("Flash write succeeded, %d%% used", (len * 100) / FLASH_SIZE);
   k_sem_take(&flashWriteSemaphore, K_NO_WAIT);
 
   return 0;
