@@ -13,73 +13,77 @@
 
 #include "io.h"
 #include "joystick.h"
+#include "trackersettings.h"
 
 LOG_MODULE_REGISTER(joystick);
 
 static const struct device *hdev;
-static hidreport_s report;
+static struct HidReportInput1 usb_hid_report;
 
-const uint8_t hid_report_desc[] = {
-    0x05, 0x01,  //     USAGE_PAGE (Generic Desktop)
-    0x09, 0x05,  //     USAGE (Game Pad)
-    0xa1, 0x01,  //     COLLECTION (Application)
-    0xa1, 0x00,  //       COLLECTION (Physical)
-    0x05, 0x09,  //         USAGE_PAGE (Button)
-    0x19, 0x01,  //         USAGE_MINIMUM (Button 1)
-    0x29, 0x10,  //         USAGE_MAXIMUM (Button 8)
-    0x15, 0x00,  //         LOG_INFCAL_MINIMUM (0)
-    0x25, 0x01,  //         LOG_INFCAL_MAXIMUM (1)
-    0x95, 0x10,  //         REPORT_COUNT (8)
-    0x75, 0x01,  //         REPORT_SIZE (1)
-    0x81, 0x02,  //         INPUT (Data,Var,Abs)
-    0x05, 0x01,        //         USAGE_PAGE (Generic Desktop)
-    0x09, 0x30,        //         USAGE (X)
-    0x09, 0x31,        //         USAGE (Y)
-    0x09, 0x32,        //         USAGE (Z)
-    0x09, 0x33,        //         USAGE (Rx)
-    0x09, 0x34,        //         USAGE (Ry)
-    0x09, 0x35,        //         USAGE (Rz)
-    0x09, 0x36,        //         USAGE (Slider)
-    0x09, 0x36,        //         USAGE (Slider)
-    0x16, 0x00, 0x00,  //         LOG_INFCAL_MINIMUM (0)
-    0x26, 0xFF, 0x03,  //         LOG_INFCAL_MAXIMUM (1024)
-    0x75, 0x10,        //         REPORT_SIZE (16)
-    0x95, 0x08,        //         REPORT_COUNT (8)
-    0x81, 0x02,        //         INPUT (Data,Var,Abs)
-    0xc0,              //       END_COLLECTION
-    0xc0               //     END_COLLECTION
-};
-
-void buildJoystickHIDReport(hidreport_s &report, uint16_t chans[16])
+void buildJoystickHIDReport(struct HidReportInput1 &report, uint16_t chans[16])
 {
-  memcpy(report.channels, chans, sizeof(report.channels));
-
-  report.but[0] = 0;
-  report.but[1] = 0;
+  for(unsigned int i = 0; i < sizeof(struct HidReportInput1); i++)
+    ((uint8_t *)&report)[i] = 0;
+  report.ReportId = 1;
 
   for (int i = 0; i < 8; i++) {
-    if (report.channels[i] == 0)  // If disabled, center it
-      report.channels[i] = 1500;
+    int curchval = (int)chans[i];
+    if (curchval == 0)  // If disabled (equals zero), center it
+      curchval = TrackerSettings::PPM_CENTER;
 
-    if (report.channels[i] >= JOYSTICK_BUTTON_HIGH) {
-      report.but[0] |= 1 << (i * 2);
-      report.but[1] |= 1 << ((i - 4) * 2);
+    curchval -= TrackerSettings::PPM_CENTER;  // Shift the center to zero
+
+    if(curchval > 511) curchval = 511;
+    if(curchval < -511) curchval = -511;
+
+    if (curchval >= JOYSTICK_BUTTON_HIGH) {
+      if(i < 4)
+        report.buttons[0] |= (1 << (i * 2) & 0xFF);
+      else
+        report.buttons[1] |= (1 << ((i - 4) * 2) & 0xFF);
     }
 
-    if (report.channels[i] <= JOYSTICK_BUTTON_LOW) {
-      report.but[0] |= 1 << ((i * 2) + 1);
-      report.but[1] |= 1 << (((i - 4) * 2) + 1);
+    if (curchval <= JOYSTICK_BUTTON_LOW) {
+      if(i < 4)
+        report.buttons[0] |= (1 << (i * 2 + 1) & 0xFF);
+      else
+        report.buttons[1] |= (1 << ((i - 4) * 2 + 1) & 0xFF);
     }
-
-    report.channels[i] -= 988;  // Shift from center so it's 0-1024
+    switch(i) {
+      case 0:
+        report.ch1 = curchval;
+        break;
+      case 1:
+        report.ch2 = curchval;
+        break;
+      case 2:
+        report.ch3 = curchval;
+        break;
+      case 3:
+        report.ch4 = curchval;
+        break;
+      case 4:
+        report.ch5 = curchval;
+        break;
+      case 5:
+        report.ch6 = curchval;
+        break;
+      case 6:
+        report.ch7 = curchval;
+        break;
+      case 7:
+        report.ch8 = curchval;
+        break;
+    }
   }
+
 }
 
 void set_JoystickChannels(uint16_t chans[16])
 {
-  buildJoystickHIDReport(report, chans);
 #if defined(CONFIG_USB_DEVICE_HID)
-  hid_int_ep_write(hdev, (uint8_t *)&report, sizeof(report), NULL);
+  buildJoystickHIDReport(usb_hid_report, chans);
+  hid_int_ep_write(hdev, (uint8_t *)&usb_hid_report, sizeof(usb_hid_report), NULL);
 #endif
 }
 
@@ -96,9 +100,8 @@ void joystick_init(void)
     return;
   }
 
-  usb_hid_register_device(hdev, hid_report_desc, sizeof(hid_report_desc), NULL);
+  usb_hid_register_device(hdev, hid_gamepad_report_desc, sizeof(hid_gamepad_report_desc), NULL);
 
   usb_hid_init(hdev);
-
   // USB enabled in serial.cpp
 }
