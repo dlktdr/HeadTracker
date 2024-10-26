@@ -3,6 +3,6 @@
 
 void BTJoystickStop();
 void BTJoystickStart();
-void BTJoystickExecute();
+int BTJoystickExecute();
 const char *BTJoystickGetAddress();
 void BTJoystickSetChannel(int channel, const uint16_t value);

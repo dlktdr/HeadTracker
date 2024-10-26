@@ -30,6 +30,7 @@ SOURCES += \
     calibratewizard/calaccelerometer.cpp \
     calibration.cpp \
     channelviewer.cpp \
+    comboboxdelegate.cpp \
     diagnosticdisplay.cpp \
     firmwarewizard.cpp \
     gainslider.cpp \
@@ -52,6 +53,7 @@ HEADERS += \
     calibratewizard/calaccelerometer.h \
     calibration.h \
     channelviewer.h \
+    comboboxdelegate.h \
     diagnosticdisplay.h \
     firmwarewizard.h \
     gainslider.h \

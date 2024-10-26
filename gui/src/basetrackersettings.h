@@ -258,7 +258,7 @@ public:
     descriptions["sboutinv"] = "SBUS Transmit Inverted";
     descriptions["crsftxinv"] = "Invert CRSF output";
     descriptions["ch5arm"] = "Set channel 5 to 2000us";
-    descriptions["btmode"] = "Bluetooth Mode (0-Off, 1- Head, 2-Receive, 3-Scanner, BT_HID_Joystick)";
+    descriptions["btmode"] = "Bluetooth Mode (-1=Uninit, 0-Disable, 1-Head, 2-Receive, 3-Scanner, 4-Gamepad)";
     descriptions["rstonwave"] = "Reset on Proximity Sense";
     descriptions["butlngps"] = "Long Press on the Button to Enable/Disable Tilt Roll and Pan";
     descriptions["rstontlt"] = "Reset Center on a Head Tilt";
@@ -271,24 +271,24 @@ public:
     descriptions["ppmframe"] = "PPM Frame Length (us)";
     descriptions["ppmsync"] = "PPM Sync Pulse Length (us)";
     descriptions["ppmchcnt"] = "PPM channels to output";
-    descriptions["magx"] = "Raw Sensor Mag X";
-    descriptions["magy"] = "Raw Sensor Mag Y";
-    descriptions["magz"] = "Raw Sensor Mag Z";
-    descriptions["gyrox"] = "Raw Sensor Gyro X";
-    descriptions["gyroy"] = "Raw Sensor Gyro Y";
-    descriptions["gyroz"] = "Raw Sensor Gyro Z";
-    descriptions["accx"] = "Raw Sensor Accel X";
-    descriptions["accy"] = "Raw Sensor Accel Y";
-    descriptions["accz"] = "Raw Sensor Accel Z";
-    descriptions["off_magx"] = "Calibrated Mag X";
-    descriptions["off_magy"] = "Calibrated Mag Y";
-    descriptions["off_magz"] = "Calibrated Mag Z";
-    descriptions["off_gyrox"] = "Calibrated Gyro X";
-    descriptions["off_gyroy"] = "Calibrated Gyro Y";
-    descriptions["off_gyroz"] = "Calibrated Gyro Z";
-    descriptions["off_accx"] = "Calibrated Accel X";
-    descriptions["off_accy"] = "Calibrated Accel Y";
-    descriptions["off_accz"] = "Calibrated Accel Z";
+    descriptions["magx"] = "Raw Sensor Mag X(uT)";
+    descriptions["magy"] = "Raw Sensor Mag Y(uT)";
+    descriptions["magz"] = "Raw Sensor Mag Z(uT)";
+    descriptions["gyrox"] = "Raw Sensor Gyro X(dps)";
+    descriptions["gyroy"] = "Raw Sensor Gyro Y(dps)";
+    descriptions["gyroz"] = "Raw Sensor Gyro Z(dps)";
+    descriptions["accx"] = "Raw Sensor Accel X(g)";
+    descriptions["accy"] = "Raw Sensor Accel Y(g)";
+    descriptions["accz"] = "Raw Sensor Accel Z(g)";
+    descriptions["off_magx"] = "Calibrated Mag X(uT)";
+    descriptions["off_magy"] = "Calibrated Mag Y(uT)";
+    descriptions["off_magz"] = "Calibrated Mag Z(uT)";
+    descriptions["off_gyrox"] = "Calibrated Gyro X(dps)";
+    descriptions["off_gyroy"] = "Calibrated Gyro Y(dps)";
+    descriptions["off_gyroz"] = "Calibrated Gyro Z(dps)";
+    descriptions["off_accx"] = "Calibrated Accel X(g)";
+    descriptions["off_accy"] = "Calibrated Accel Y(g)";
+    descriptions["off_accz"] = "Calibrated Accel Z(g)";
     descriptions["tiltout"] = "Board Tilt Output (us)";
     descriptions["rollout"] = "Board Roll Output (us)";
     descriptions["panout"] = "Board Pan Output (us)";
@@ -1140,12 +1140,12 @@ public:
   bool getCh5Arm() {return _setting["ch5arm"].toBool();}
   void setCh5Arm(bool val=false) { _setting["ch5arm"] = val; }
 
-  // Bluetooth Mode (0-Off, 1- Head, 2-Receive, 3-Scanner, BT_HID_Joystick)
-  uint8_t getBtMode() {
-    return _setting["btmode"].toUInt();
+  // Bluetooth Mode (-1=Uninit, 0-Disable, 1-Head, 2-Receive, 3-Scanner, 4-Gamepad)
+  int8_t getBtMode() {
+    return _setting["btmode"].toInt();
   }
-  bool setBtMode(uint8_t val=0) {
-    if(val <= 4) {
+  bool setBtMode(int8_t val=0) {
+    if(val >= 0 && val <= 4) {
       _setting["btmode"] = val;
       return true;
     }
@@ -1259,58 +1259,58 @@ public:
     _setting["btpairedaddress"] = val;
   }
 
-  // Raw Sensor Mag X
+  // Raw Sensor Mag X(uT)
   float getDataMagX() { return _data["magx"].toFloat(); }
 
-  // Raw Sensor Mag Y
+  // Raw Sensor Mag Y(uT)
   float getDataMagY() { return _data["magy"].toFloat(); }
 
-  // Raw Sensor Mag Z
+  // Raw Sensor Mag Z(uT)
   float getDataMagZ() { return _data["magz"].toFloat(); }
 
-  // Raw Sensor Gyro X
+  // Raw Sensor Gyro X(dps)
   float getDataGyroX() { return _data["gyrox"].toFloat(); }
 
-  // Raw Sensor Gyro Y
+  // Raw Sensor Gyro Y(dps)
   float getDataGyroY() { return _data["gyroy"].toFloat(); }
 
-  // Raw Sensor Gyro Z
+  // Raw Sensor Gyro Z(dps)
   float getDataGyroZ() { return _data["gyroz"].toFloat(); }
 
-  // Raw Sensor Accel X
+  // Raw Sensor Accel X(g)
   float getDataAccX() { return _data["accx"].toFloat(); }
 
-  // Raw Sensor Accel Y
+  // Raw Sensor Accel Y(g)
   float getDataAccY() { return _data["accy"].toFloat(); }
 
-  // Raw Sensor Accel Z
+  // Raw Sensor Accel Z(g)
   float getDataAccZ() { return _data["accz"].toFloat(); }
 
-  // Calibrated Mag X
+  // Calibrated Mag X(uT)
   float getDataOff_MagX() { return _data["off_magx"].toFloat(); }
 
-  // Calibrated Mag Y
+  // Calibrated Mag Y(uT)
   float getDataOff_MagY() { return _data["off_magy"].toFloat(); }
 
-  // Calibrated Mag Z
+  // Calibrated Mag Z(uT)
   float getDataOff_MagZ() { return _data["off_magz"].toFloat(); }
 
-  // Calibrated Gyro X
+  // Calibrated Gyro X(dps)
   float getDataOff_GyroX() { return _data["off_gyrox"].toFloat(); }
 
-  // Calibrated Gyro Y
+  // Calibrated Gyro Y(dps)
   float getDataOff_GyroY() { return _data["off_gyroy"].toFloat(); }
 
-  // Calibrated Gyro Z
+  // Calibrated Gyro Z(dps)
   float getDataOff_GyroZ() { return _data["off_gyroz"].toFloat(); }
 
-  // Calibrated Accel X
+  // Calibrated Accel X(g)
   float getDataOff_AccX() { return _data["off_accx"].toFloat(); }
 
-  // Calibrated Accel Y
+  // Calibrated Accel Y(g)
   float getDataOff_AccY() { return _data["off_accy"].toFloat(); }
 
-  // Calibrated Accel Z
+  // Calibrated Accel Z(g)
   float getDataOff_AccZ() { return _data["off_accz"].toFloat(); }
 
   // Board Tilt Output (us)

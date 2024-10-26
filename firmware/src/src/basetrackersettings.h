@@ -751,9 +751,9 @@ public:
   inline const bool& getCh5Arm() {return ch5arm;}
   void setCh5Arm(bool val=false) { ch5arm = val; }
 
-  // Bluetooth Mode (0-Off, 1- Head, 2-Receive, 3-Scanner, BT_HID_Joystick)
-  inline const uint8_t& getBtMode() {return btmode;}
-  bool setBtMode(uint8_t val=0) {
+  // Bluetooth Mode (-1=Uninit, 0-Disable, 1-Head, 2-Receive, 3-Scanner, 4-Gamepad)
+  inline const int8_t& getBtMode() {return btmode;}
+  bool setBtMode(int8_t val=0) {
     if(val >= 0 && val <= 4) {
       btmode = val;
       return true;
@@ -852,58 +852,58 @@ public:
     btpairedaddress[17] = '\0';
   }
 
-  // Raw Sensor Mag X
+  // Raw Sensor Mag X(uT)
   void setDataMagX(float val) { magx = val; }
 
-  // Raw Sensor Mag Y
+  // Raw Sensor Mag Y(uT)
   void setDataMagY(float val) { magy = val; }
 
-  // Raw Sensor Mag Z
+  // Raw Sensor Mag Z(uT)
   void setDataMagZ(float val) { magz = val; }
 
-  // Raw Sensor Gyro X
+  // Raw Sensor Gyro X(dps)
   void setDataGyroX(float val) { gyrox = val; }
 
-  // Raw Sensor Gyro Y
+  // Raw Sensor Gyro Y(dps)
   void setDataGyroY(float val) { gyroy = val; }
 
-  // Raw Sensor Gyro Z
+  // Raw Sensor Gyro Z(dps)
   void setDataGyroZ(float val) { gyroz = val; }
 
-  // Raw Sensor Accel X
+  // Raw Sensor Accel X(g)
   void setDataAccX(float val) { accx = val; }
 
-  // Raw Sensor Accel Y
+  // Raw Sensor Accel Y(g)
   void setDataAccY(float val) { accy = val; }
 
-  // Raw Sensor Accel Z
+  // Raw Sensor Accel Z(g)
   void setDataAccZ(float val) { accz = val; }
 
-  // Calibrated Mag X
+  // Calibrated Mag X(uT)
   void setDataOff_MagX(float val) { off_magx = val; }
 
-  // Calibrated Mag Y
+  // Calibrated Mag Y(uT)
   void setDataOff_MagY(float val) { off_magy = val; }
 
-  // Calibrated Mag Z
+  // Calibrated Mag Z(uT)
   void setDataOff_MagZ(float val) { off_magz = val; }
 
-  // Calibrated Gyro X
+  // Calibrated Gyro X(dps)
   void setDataOff_GyroX(float val) { off_gyrox = val; }
 
-  // Calibrated Gyro Y
+  // Calibrated Gyro Y(dps)
   void setDataOff_GyroY(float val) { off_gyroy = val; }
 
-  // Calibrated Gyro Z
+  // Calibrated Gyro Z(dps)
   void setDataOff_GyroZ(float val) { off_gyroz = val; }
 
-  // Calibrated Accel X
+  // Calibrated Accel X(g)
   void setDataOff_AccX(float val) { off_accx = val; }
 
-  // Calibrated Accel Y
+  // Calibrated Accel Y(g)
   void setDataOff_AccY(float val) { off_accy = val; }
 
-  // Calibrated Accel Z
+  // Calibrated Accel Z(g)
   void setDataOff_AccZ(float val) { off_accz = val; }
 
   // Board Tilt Output (us)
@@ -1552,7 +1552,7 @@ protected:
   bool sboutinv = true; // SBUS Transmit Inverted
   bool crsftxinv = false; // Invert CRSF output
   bool ch5arm = false; // Set channel 5 to 2000us
-  uint8_t btmode = 0; // Bluetooth Mode (0-Off, 1- Head, 2-Receive, 3-Scanner, BT_HID_Joystick)
+  int8_t btmode = 0; // Bluetooth Mode (-1=Uninit, 0-Disable, 1-Head, 2-Receive, 3-Scanner, 4-Gamepad)
   bool rstonwave = false; // Reset on Proximity Sense
   bool butlngps = false; // Long Press on the Button to Enable/Disable Tilt Roll and Pan
   bool rstontlt = false; // Reset Center on a Head Tilt
@@ -1570,24 +1570,24 @@ protected:
   char btpairedaddress[19]; // Bluetooth Remote address to Pair With
 
   // Real Time Data
-  float magx = 0; // Raw Sensor Mag X
-  float  magy = 0; // Raw Sensor Mag Y
-  float  magz = 0; // Raw Sensor Mag Z
-  float gyrox = 0; // Raw Sensor Gyro X
-  float gyroy = 0; // Raw Sensor Gyro Y
-  float gyroz = 0; // Raw Sensor Gyro Z
-  float accx = 0; // Raw Sensor Accel X
-  float accy = 0; // Raw Sensor Accel Y
-  float accz = 0; // Raw Sensor Accel Z
-  float off_magx = 0; // Calibrated Mag X
-  float off_magy = 0; // Calibrated Mag Y
-  float off_magz = 0; // Calibrated Mag Z
-  float off_gyrox = 0; // Calibrated Gyro X
-  float off_gyroy = 0; // Calibrated Gyro Y
-  float off_gyroz = 0; // Calibrated Gyro Z
-  float off_accx = 0; // Calibrated Accel X
-  float off_accy = 0; // Calibrated Accel Y
-  float off_accz = 0; // Calibrated Accel Z
+  float magx = 0; // Raw Sensor Mag X(uT)
+  float  magy = 0; // Raw Sensor Mag Y(uT)
+  float  magz = 0; // Raw Sensor Mag Z(uT)
+  float gyrox = 0; // Raw Sensor Gyro X(dps)
+  float gyroy = 0; // Raw Sensor Gyro Y(dps)
+  float gyroz = 0; // Raw Sensor Gyro Z(dps)
+  float accx = 0; // Raw Sensor Accel X(g)
+  float accy = 0; // Raw Sensor Accel Y(g)
+  float accz = 0; // Raw Sensor Accel Z(g)
+  float off_magx = 0; // Calibrated Mag X(uT)
+  float off_magy = 0; // Calibrated Mag Y(uT)
+  float off_magz = 0; // Calibrated Mag Z(uT)
+  float off_gyrox = 0; // Calibrated Gyro X(dps)
+  float off_gyroy = 0; // Calibrated Gyro Y(dps)
+  float off_gyroz = 0; // Calibrated Gyro Z(dps)
+  float off_accx = 0; // Calibrated Accel X(g)
+  float off_accy = 0; // Calibrated Accel Y(g)
+  float off_accz = 0; // Calibrated Accel Z(g)
   uint16_t tiltout = 0; // Board Tilt Output (us)
   uint16_t rollout = 0; // Board Roll Output (us)
   uint16_t panout = 0; // Board Pan Output (us)

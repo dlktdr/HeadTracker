@@ -82,6 +82,9 @@ void getBoardFeatures(DynamicJsonDocument &json)
   #endif
   #if defined(CONFIG_BT)
   array.add("BT");
+    #if defined(CONFIG_BT_SETTINGS)
+    array.add("BTJOYSTICK");
+    #endif
   #endif
   #if defined(CONFIG_WIFI)
   array.add("WIFI");

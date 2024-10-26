@@ -158,7 +158,7 @@ void BTHeadStart()
     chan_vals[i] = TrackerSettings::PPM_CENTER;
   }
 
-  LOG_INF("BLE Starting Head Bluetooth");
+  LOG_INF("Starting Head Bluetooth");
 
   bt_gatt_service_register(&bthead_svc);
   bt_conn_cb_register(&conn_callbacks);
@@ -171,7 +171,7 @@ void BTHeadStart()
     return;
   }
 
-  LOG_INF("BLE Started Advertising");
+  LOG_INF("Started Advertising");
 
   // Discover BT Address
   bt_id_get(addrarry, &addrcnt);
@@ -183,18 +183,18 @@ void BTHeadStart()
 
 void BTHeadStop()
 {
-  LOG_INF("BLE Stopping Head Bluetooth");
+  LOG_INF("Stopping Head Bluetooth");
 
   // Stop Advertising
   int rv = bt_le_adv_stop();
   if (rv) {
-    LOG_ERR("BLE Unable to Stop advertising");
+    LOG_ERR("Unable to Stop advertising");
   } else {
-    LOG_INF("BLE Stopped Advertising");
+    LOG_INF("Stopped Advertising");
   }
 
   if (curconn) {
-    LOG_INF("BLE Disconnecting Active Connection");
+    LOG_INF("Disconnecting Active Connection");
     bt_conn_disconnect(curconn, 0);
     bt_conn_unref(curconn);
   }
@@ -291,7 +291,7 @@ static ssize_t write_cmd(struct bt_conn *conn, const struct bt_gatt_attr *attr, 
   LOG_INF("BLE:%.*s", len, (char*)buf);
 
   if(strncmp((const char *)buf, "Flash", 5) == 0) {
-    LOG_INF("Bluetooth Configurator Requested Flash");
+    LOG_INF("Configurator Requested Flash");
     k_sem_give(&saveToFlash_sem);
   }
 
@@ -348,9 +348,9 @@ K_TIMER_DEFINE(my_timer, hasSecurityChangedTimer, NULL);
 static void connected(struct bt_conn *conn, uint8_t err)
 {
   if (err) {
-    LOG_ERR("Bluetooth Connection failed %d", err);
+    LOG_ERR("Connection failed %d", err);
   } else {
-    LOG_INF("Bluetooth connected :)");
+    LOG_INF("Connected :)");
   }
 
   // Stop Advertising

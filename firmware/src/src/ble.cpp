@@ -21,6 +21,7 @@
 #include <zephyr/bluetooth/conn.h>
 #include <zephyr/bluetooth/uuid.h>
 #include <zephyr/logging/log.h>
+#include <zephyr/settings/settings.h>
 #include <zephyr/kernel.h>
 
 #include "io.h"
@@ -35,7 +36,7 @@ LOG_MODULE_REGISTER(ble);
 // Globals
 volatile bool bleconnected = false;
 volatile bool btscanonly = false;
-btmodet curmode = BTDISABLE;
+btmodet curmode = BTNOTINIT;
 
 // UUID's
 struct bt_uuid_16 ccc = BT_UUID_INIT_16(0x2902);
@@ -53,22 +54,30 @@ struct k_poll_event btRunEvents[1] = {
 
 void bt_ready(int error)
 {
+  if (IS_ENABLED(CONFIG_SETTINGS)) {
+    LOG_INF("Loading Presistent Settings");
+		settings_load_subtree("bt");
+	}
   k_poll_signal_raise(&btThreadRunSignal, 1);
+  LOG_INF("Ready");
 }
 
 void bt_init()
 {
+  LOG_INF("Initializing");
   int err = bt_enable(bt_ready);
   if (err) {
-    LOG_ERR("Bluetooth init failed (err %d)", err);
+    LOG_ERR("Initialization failed (err %d)", err);
     return;
   }
-  LOG_INF("Bluetooth initialized");
+
 }
 
 void bt_Thread()
 {
-  int64_t usduration = 0;
+  uint64_t usduration = 0;
+  int bt_inverval = 0;
+  uint64_t btPeriod = BT_PERIOD;
   while (1) {
     k_poll(btRunEvents, 1, K_FOREVER);
 
@@ -77,12 +86,15 @@ void bt_Thread()
       continue;
     }
 
+    // Check if bluetooth mode has changed
+    if(curmode != trkset.getBtMode()) {
+      btPeriod = BT_PERIOD;
+      BTSetMode((btmodet)trkset.getBtMode());
+    }
+
     usduration = micros64();
 
-    // Check if bluetooth mode has changed
-    if(curmode != trkset.getBtMode())
-      BTSetMode((btmodet)trkset.getBtMode());
-
+    int rv = 0;
     switch (curmode) {
       case BTPARAHEAD:
         BTHeadExecute(); // Peripheral BLE device
@@ -93,7 +105,16 @@ void bt_Thread()
       case BTSCANONLY:
         break;
       case BTJOYSTICK:
-        BTJoystickExecute();
+        rv = BTJoystickExecute();
+        if(rv != bt_inverval) {
+          bt_inverval = rv;
+          btPeriod = bt_inverval * 1250;
+          if(btPeriod < 7500) {
+            LOG_ERR("Joystick Interval Too Short, Setting to 7500");
+            btPeriod = 7500;
+          }
+          LOG_INF("Joystick Interval Set to %d, Period %llu", bt_inverval, btPeriod);
+        }
         break;
       default:
         break;
@@ -101,11 +122,11 @@ void bt_Thread()
 
     // Adjust sleep for a more accurate period
     usduration = micros64() - usduration;
-    if (BT_PERIOD - usduration <
-        BT_PERIOD * 0.7) {  // Took a long time. Will crash if sleep is too short
-      k_usleep(BT_PERIOD);
+    if (usduration > btPeriod) {  // Took a long time. Will crash if sleep is too short
+      LOG_ERR("Missed deadline (%llu) period(%llu)", usduration, btPeriod);
+      k_usleep(btPeriod);
     } else {
-      k_usleep(BT_PERIOD - usduration);
+      k_usleep(btPeriod - usduration);
     }
   }
 }
@@ -117,18 +138,24 @@ void BTSetMode(btmodet mode)
 
   k_sem_give(&btPauseSem);
 
+  // Clear persistent pairing data if the user changed the mode
+  //  otherwise if mode = BTNOTINIT, then we are just starting up
+  if(IS_ENABLED(CONFIG_SETTINGS) && curmode != BTNOTINIT) {
+    LOG_INF("Clearing Pairing Data");
+    bt_unpair(BT_ID_DEFAULT, NULL);
+  }
+
   // Shut Down
+  btscanonly = false;
   switch (curmode) {
     case BTPARAHEAD:
       BTHeadStop();
       break;
     case BTPARARMT:
       BTRmtStop();
-      btscanonly = false;
       break;
     case BTSCANONLY:
       BTRmtStop();
-      btscanonly = false;
       break;
     case BTJOYSTICK:
       BTJoystickStop();
@@ -159,10 +186,9 @@ void BTSetMode(btmodet mode)
     default:
       break;
   }
+  curmode = mode;
 
   k_sem_take(&btPauseSem, K_NO_WAIT);
-
-  curmode = mode;
 }
 
 btmodet BTGetMode() { return curmode; }
@@ -239,19 +265,19 @@ int8_t BTGetRSSI()
 
 bool leparamrequested(struct bt_conn *conn, struct bt_le_conn_param *param)
 {
-  LOG_INF("Bluetooth Params Request. IntMax:%d IntMin:%d Lat:%d Timeout:%d", param->interval_max,
+  LOG_INF("Params Requested. IntMax:%d IntMin:%d Lat:%d Timeout:%d", param->interval_max,
        param->interval_min, param->latency, param->timeout);
   return true;
 }
 
 void leparamupdated(struct bt_conn *conn, uint16_t interval, uint16_t latency, uint16_t timeout)
 {
-  LOG_INF("Bluetooth Params Updated. Int:%d Lat:%d Timeout:%d", interval, latency, timeout);
+  LOG_INF("Params Updated. Int:%d Lat:%d Timeout:%d", interval, latency, timeout);
 }
 
 void securitychanged(struct bt_conn *conn, bt_security_t level, enum bt_security_err err)
 {
-  LOG_INF("Bluetooth Security Changed. Lvl:%d Err:%d", level, err);
+  LOG_INF("Security Changed. Lvl:%d Err:%d", level, err);
 }
 
 const char *printPhy(int phy)
@@ -271,7 +297,7 @@ const char *printPhy(int phy)
 
 void lephyupdated(struct bt_conn *conn, struct bt_conn_le_phy_info *param)
 {
-  LOG_INF("Bluetooth PHY Updated. RxPHY:%d TxPHY:%d", param->rx_phy, param->tx_phy);
+  LOG_INF("PHY Updated. RxPHY:%s TxPHY:%s", printPhy(param->rx_phy), printPhy(param->tx_phy));
 }
 
 #else
