@@ -641,7 +641,7 @@ void FirmwareWizard::cmbSourceChanged(int index)
 {
     Q_UNUSED(index);
     bool local=false;
-    if(ui->cmbSource->currentText() == "Local File")
+    if(ui->cmbSource->currentText() == tr("Local File"))
         local = true;
 
     ui->cmdOpenFile->setVisible(local);
