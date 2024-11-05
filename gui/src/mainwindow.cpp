@@ -270,7 +270,7 @@ void MainWindow::serialConnect()
 
     if(!serialcon->open(QIODevice::ReadWrite)) {
         QMessageBox::critical(this,tr("Error"),tr("Could not open Com ") + serialcon->portName());
-        addToLog("Could not open " + serialcon->portName(),2);
+        addToLog(tr("Could not open ") + serialcon->portName(),2);
         serialDisconnect();
         return;
     }
@@ -658,7 +658,7 @@ void MainWindow::updateToUI()
     if(maxframelen > setframelen) {
         ui->lblPPMOut->setText(tr("<b>Warning!</b> PPM Frame length possibly too short to support channel data"));
     } else {
-        ui->lblPPMOut->setText(tr("PPM data will fit in frame. Refresh rate: ") + QString::number(1/(static_cast<float>(setframelen)/1000000.0),'f',2) + " Hz");
+        ui->lblPPMOut->setText(tr("PPM data will fit in frame. Refresh rate: ") + QString::number(1/(static_cast<float>(setframelen)/1000000.0),'f',2) + tr(" Hz"));
     }
 
     // BT Pair Address
@@ -805,7 +805,7 @@ void MainWindow::updateFromUI()
     if(maxframelen > setframelen) {
         ui->lblPPMOut->setText(tr("<b>Warning!</b> PPM Frame length possibly too short to support channel data"));
     } else {
-        ui->lblPPMOut->setText(tr("PPM data will fit in frame. Refresh rate: ") + QString::number(1/(static_cast<float>(setframelen)/1000000.0),'f',2) + " Hz");
+        ui->lblPPMOut->setText(tr("PPM data will fit in frame. Refresh rate: ") + QString::number(1/(static_cast<float>(setframelen)/1000000.0),'f',2) + tr(" Hz"));
     }
 
     //int rstppm_index = ui->cmbResetOnPPM->currentIndex();
@@ -893,9 +893,9 @@ void MainWindow::serialReadReady()
 void MainWindow::offOrientChanged(float t,float r,float p)
 {
     ui->graphView->addDataPoints(t,r,p);
-    ui->lblTiltValue->setText(QString::number(t,'f',1) + "°");
-    ui->lblRollValue->setText(QString::number(r,'f',1) + "°");
-    ui->lblPanValue->setText(QString::number(p,'f',1) + "°");
+    ui->lblTiltValue->setText(QString::number(t,'f',1) + tr("°"));
+    ui->lblRollValue->setText(QString::number(r,'f',1) + tr("°"));
+    ui->lblPanValue->setText(QString::number(p,'f',1) + tr("°"));
 }
 
 void MainWindow::ppmOutChanged(int t,int r,int p)
@@ -927,7 +927,7 @@ void MainWindow::liveDataChanged()
     else
         ui->lblBTConnected->setText(tr("Not connected"));
     if(trkset.getBtMode() == TrackerSettings::BTDISABLE)
-        ui->lblBTConnected->setText("Disabled");
+        ui->lblBTConnected->setText(tr("Disabled"));
     if(trkset.getDataTrpEnabled()) {
       ui->servoPan->setShowActualPosition(true);
       ui->servoTilt->setShowActualPosition(true);
@@ -959,7 +959,7 @@ void MainWindow::txledtimeout()
 
 void MainWindow::saveSettings()
 {
-    QString filename = QFileDialog::getSaveFileName(this,"Save Settings",QString(), "Config Files (*.ini)");
+    QString filename = QFileDialog::getSaveFileName(this,tr("Save Settings"),QString(), tr("Config Files (*.ini)"));
     if(!filename.isEmpty()) {
         QSettings settings(filename,QSettings::IniFormat);
         trkset.storeSettings(&settings);
@@ -1036,7 +1036,7 @@ void MainWindow::requestTimeout()
 
     if(!boardDiscover && boardDiscoveryStarted) {
         msgbox->setText(tr("Was unable to determine the board type\n\nHave you written firmware to the board yet?"));
-        msgbox->setWindowTitle("Error");
+        msgbox->setWindowTitle(tr("Error"));
         msgbox->show();
         statusMessage(tr("Board discovery failed"));
         serialDisconnect();
@@ -1257,9 +1257,9 @@ void MainWindow::paramReceiveComplete()
 void MainWindow::paramReceiveFailure(int)
 {
     msgbox->setText(tr("Unable to receive the parameters"));
-    msgbox->setWindowTitle("Error");
+    msgbox->setWindowTitle(tr("Error"));
     msgbox->show();
-    statusMessage("Parameter Received Failure");
+    statusMessage(tr("Parameter Received Failure"));
     serialDisconnect();
 }
 
@@ -1362,9 +1362,9 @@ void MainWindow::featuresReceiveComplete()
 void MainWindow::featuresReceiveFailure(int)
 {
     msgbox->setText(tr("Unable to receive the boards features"));
-    msgbox->setWindowTitle("Error");
+    msgbox->setWindowTitle(tr("Error"));
     msgbox->show();
-    statusMessage("Features Receive Failure");
+    statusMessage(tr("Features Receive Failure"));
     serialDisconnect();
 }
 
@@ -1406,17 +1406,17 @@ void MainWindow::boardDiscovered()
 
     // Firmware is too old
     if(lmajver > rmajver) {
-        msgbox->setText(tr("The firmware on the board is too old. Upload a ") + QString::number((float)lmajver/10,'f',1) + "x version of firmware for this GUI");
+        msgbox->setText(tr("The firmware on the board is too old. Upload a ") + QString::number((float)lmajver/10,'f',1) + tr("x version of firmware for this GUI"));
         msgbox->setWindowTitle(tr("Firmware Version Mismatch"));
         msgbox->show();
         serialDisconnect();
 
     // Firmware is too new
     } else if (lmajver < rmajver) {
-        msgbox->setText(tr("Firmware is newer than supported by this application\nDownload the GUI v") + QString::number((float)rmajver/10,'f',1) +" from www.github.com/dlktdr/headtracker");
+        msgbox->setText(tr("Firmware is newer than supported by this application\nDownload the GUI v") + QString::number((float)rmajver/10,'f',1) +tr(" from www.github.com/dlktdr/headtracker"));
         msgbox->setWindowTitle(tr("Firmware Version Mismatch"));
         msgbox->show();
-        serialDisconnect();
+        // serialDisconnect();
     }
     if(channelViewerOpen) {
         channelviewer->show();

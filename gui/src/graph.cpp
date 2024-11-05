@@ -1,4 +1,5 @@
 #include "graph.h"
+#include "qapplication.h"
 const int pointcount = 100;
 
 Graph::Graph(QWidget *parent) : QWidget(parent)
@@ -36,13 +37,13 @@ void Graph::paintEvent(QPaintEvent *event)
     painter.setRenderHint(QPainter::Antialiasing,true);
 
     // Background
-    QLinearGradient lg(0,0,0,height());
-    QColor bg(qRgb(153, 201, 255));
-    lg.setColorAt(0,bg.lighter(120));
-    lg.setColorAt(0.5,bg);
-    lg.setColorAt(1,bg.lighter(120));
-    painter.setBrush(QBrush(lg));
-    painter.drawRect(rect().adjusted(0,0,-1,-1));
+    // QLinearGradient lg(0,0,0,height());
+    // QColor bg(qRgb(153, 201, 255));
+    // lg.setColorAt(0,bg.lighter(120));
+    // lg.setColorAt(0.5,bg);
+    // lg.setColorAt(1,bg.lighter(120));
+    // painter.setBrush(QBrush(lg));
+    // painter.drawRect(rect().adjusted(0,0,-1,-1));
 
     // Zero Line
 
@@ -114,27 +115,28 @@ void Graph::paintEvent(QPaintEvent *event)
     painter.drawPath(panpath);
 
     // Legend
-    pen.setColor(Qt::black);
+    QPalette palette = QApplication::palette();
+    pen.setColor(palette.color(QPalette::Text));
     painter.setPen(pen);
     QFont legfont = QFont("Times", 10, QFont::Bold);
     const int offset=6;
     int fonth = QFontMetrics(legfont).height();    
     painter.setFont(legfont);
-    painter.drawText(10,offset+fonth/2,"+180"); // Top
+    painter.drawText(10,offset+fonth/2,"+180°"); // Top
     painter.drawText(10,(height()/2),"0"); // Center
-    painter.drawText(10,height()-offset,"-180");
-    painter.setBrush(Qt::black);
-    painter.setPen(Qt::white);
+    painter.drawText(10,height()-offset,"-180°");
+    painter.setBrush(palette.color(QPalette::Dark));
+    painter.setPen(palette.color(QPalette::ToolTipText));
     painter.drawRect(width()-47,2,38,50);
     pen.setColor(Qt::red);
     painter.setPen(pen);
-    painter.drawText( width() - 40,17, "Tilt");
+    painter.drawText(width() - 40,17, "Tilt");
     pen.setColor(Qt::green);
     painter.setPen(pen);
-    painter.drawText( width() - 40,32, "Roll");
+    painter.drawText(width() - 40,32, "Roll");
     pen.setColor(Qt::yellow);
     painter.setPen(pen);
-    painter.drawText( width() - 40,47, "Pan");
+    painter.drawText(width() - 40,47, "Pan");
 
 }
 
