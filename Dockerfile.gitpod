@@ -3,6 +3,9 @@ FROM gitpod/workspace-base:2025-02-12-08-12-04
 ARG ZEPHYR_VERSION_TAG=3.7.1
 ARG ZEPHYR_SDK_VERSION=0.17.0
 
+SHELL [ "/bin/bash", "-c" ]
+ENV SHELL=/bin/bash
+
 #Install build dependencies
 RUN sudo install-packages git cmake ninja-build gperf \
   ccache dfu-util device-tree-compiler wget \
