@@ -1,25 +1,40 @@
-FROM gitpod/workspace-base:2024-03-06-11-21-33
+FROM gitpod/workspace-base:2025-02-12-08-12-04
 
+ARG ZEPHYR_VERSION_TAG=3.7.1
+ARG ZEPHYR_SDK_VERSION=0.17.0
+
+#Install build dependencies
 RUN sudo install-packages git cmake ninja-build gperf \
   ccache dfu-util device-tree-compiler wget \
-  python3-dev python3-pip python3-setuptools python3-tk python3-wheel xz-utils file \
+  python3-dev python3-pip python3-venv python3-setuptools python3-tk python3-wheel xz-utils file \
   make gcc gcc-multilib g++-multilib libsdl2-dev libmagic1
 
+#Install zephyr-sdk. Don't include all tools
 RUN cd ~ && \
-    wget --progress=bar:force:noscroll https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v0.16.5-1/zephyr-sdk-0.16.5-1_linux-x86_64_minimal.tar.xz && \
-    tar xvf zephyr-sdk-0.16.5-1_linux-x86_64_minimal.tar.xz && \
-    rm zephyr-sdk-0.16.5-1_linux-x86_64_minimal.tar.xz && \
-    cd zephyr-sdk-0.16.5-1 && \
+    wget --progress=bar:force:noscroll https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v${ZEPHYR_SDK_VERSION}/zephyr-sdk-${ZEPHYR_SDK_VERSION}_linux-x86_64_minimal.tar.xz && \
+    tar xvf zephyr-sdk-${ZEPHYR_SDK_VERSION}_linux-x86_64_minimal.tar.xz && \
+    rm zephyr-sdk-${ZEPHYR_SDK_VERSION}_linux-x86_64_minimal.tar.xz && \
+    cd zephyr-sdk-${ZEPHYR_SDK_VERSION} && \
     ./setup.sh -t arm-zephyr-eabi -t xtensa-espressif_esp32_zephyr-elf -t riscv64-zephyr-elf -h && \
-    ln -s ~/zephyr-sdk-0.16.5-1/ ~/zephyr-sdk
+    ln -s ~/zephyr-sdk-${ZEPHYR_SDK_VERSION}/ ~/zephyr-sdk
 
-RUN pip3 install west
+# Make a virtual python env and use it
+RUN python3 -m venv ~/zephyr_py_env/.venv    
 
-RUN west init ~/zephyr && \
-    cd zephyr && \
-    west update && \
+#Install west
+RUN source ~/zephyr_py_env/.venv/bin/activate && \
+    pip3 install west
+
+#Install zephyr
+RUN source ~/zephyr_py_env/.venv/bin/activate && \
+    west init ~/zephyr && \
+    cd ~/zephyr/zephyr && \
+	git checkout v${ZEPHYR_VERSION_TAG} && \
+	cd ~/zephyr && \
+    west update --narrow && \	
     west -z ~/zephyr zephyr-export && \
     pip3 install -r ~/zephyr/zephyr/scripts/requirements.txt && \
     west blobs fetch hal_espressif
 
 RUN echo source /home/gitpod/zephyr/zephyr/zephyr-env.sh >> ~/.bashrc
+RUN echo source /home/gitpod/zephyr_py_env/.venv/bin/activate >> ~/.bashrc
