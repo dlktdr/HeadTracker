@@ -50,13 +50,18 @@
 		 */
 		code_partition: partition@100 {
 			label = "code-partition";
-			reg = <0x100 (DT_SIZE_M(2) - 0x2100)>;
+			reg = <0x100 (DT_SIZE_M(2) - 0x8100)>;
 			read-only;
 		};
 
- 		storage_partition: partition@250000 {
+ 		storage_partition: partition@1F80000 {
 			label = "storagept";
-			reg = <(0x100 + (DT_SIZE_M(2) - 0x2100)) 0x00002000>;
+			reg = <(0x100 + (DT_SIZE_M(2) - 0x8100)) 0x00004000>;
+		};
+
+		ht_data_partition: partition@1FC0000 {
+			label = "htdatapt";
+			reg = <(0x100 + (DT_SIZE_M(2) - 0x4100)) 0x00004000>;
 		};
 	};
 };

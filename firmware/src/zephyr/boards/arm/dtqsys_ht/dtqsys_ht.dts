@@ -39,10 +39,15 @@
 			read-only;
 		};
 
-		storage_partition: partition@FC000 {
+		storage_partition: partition@FB000 {
 			label = "storagept";
-			reg = <0xFC000 0x4000>;
+			reg = <0xFB000 0x3000>;
 		};
+
+    ht_data_partition: partition@FD000 {
+        label = "htdatapt";
+        reg = <0xFE000 0x2000>;
+    };
 	};
 };
 

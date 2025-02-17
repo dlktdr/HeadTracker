@@ -120,15 +120,20 @@
 			reg = <0x00110000 0x00100000>;
 		};
 
-		/* Reserve 256kB for the scratch partition */
+		/* Reserve 128kB for the scratch partition */
 		scratch_partition: partition@210000 {
 			label = "image-scratch";
-			reg = <0x00210000 0x00040000>;
+			reg = <0x00210000 0x20000>;
 		};
 
-		storage_partition: partition@250000 {
-			label = "storagept";
-			reg = <0x00250000 0x00006000>;
+    storage_partition: partition@230000 {
+      label = "storagept";
+      reg = <0x00230000 0x8000>;
+  	};
+
+		ht_data_partition: partition@238000 {
+			label = "htdatapt";
+			reg = <0x238000 0x4000>;
 		};
 	};
 };

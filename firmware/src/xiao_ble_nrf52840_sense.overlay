@@ -55,7 +55,7 @@
 			reg = <0x000ec000 0x00006000>;
 		};
 
-		ht_data_partition: partition@F2000 {
+    ht_data_partition: partition@F2000 {
 			label = "htdatapt";
 			reg = <0xF2000 0x2000>;
 		};

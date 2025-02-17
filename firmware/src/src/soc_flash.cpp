@@ -24,7 +24,7 @@
 #include <zephyr/logging/log.h>
 
 #if defined(CONFIG_SOC_ESP32) || defined(CONFIG_SOC_ESP32C3) || defined(CONFIG_SOC_ESP32S3)
-#include <esp_spi_flash.h>
+#include <spi_flash_mmap.h>
 #include <soc.h>
 static bool isFlashMemMapped = false;
 spi_flash_mmap_handle_t handle;
@@ -49,6 +49,7 @@ K_SEM_DEFINE(flashWriteSemaphore, 0, 1);
     defined(CONFIG_SOC_SERIES_NRF52X)
 const uint8_t *mem_ptr = NULL;
 #else
+// Architecture does not support memory mapping, use a buffer
 uint8_t mem_ptr[FLASH_SIZE];
 #endif
 
@@ -78,7 +79,6 @@ const uint8_t *socGetMMFlashPtr()
   #elif defined(CONFIG_SOC_SERIES_NRF52X)
   mem_ptr = (const uint8_t *)FLASH_OFFSET;
   #else
-  #warning "No memory mapping for this SOC"
   socReadFlash(mem_ptr);
   #endif
   // Is flash memory blank. Return a indicator there is nothing to be read

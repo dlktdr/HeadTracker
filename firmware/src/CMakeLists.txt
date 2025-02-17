@@ -43,13 +43,6 @@ if((${BOARD} STREQUAL "arduino_nano_33_ble") OR
 
   # The sense revision 2 uses the same board file as the original
   # but a few different defines in the code.
-  if(DEFINED BOARD_REV_XIAO52840)
-    message(STATUS "  Board is the basic XIAO 52840")
-    # SEE BELOW for defined passed to compiler
-  endif()
-
-  # The sense revision 2 uses the same board file as the original
-  # but a few different defines in the code.
   if(DEFINED BOARD_REV2)
     set(ignoreMe "${BOARD_REV2}")
     set (BOARD_HW_REV "2")
