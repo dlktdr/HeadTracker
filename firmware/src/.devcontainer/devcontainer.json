@@ -1,6 +1,6 @@
 {
 	"name": "zephyr-dev",
-	"image": "docker.io/dlktdr/zephyr:latest",
+	"image": "docker.io/dlktdr/ht_zephyr:3.7.1",
   "customizations": {
     "vscode": {
       "extensions": [
