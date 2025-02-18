@@ -1,0 +1,66 @@
+#!/bin/bash
+
+# Create and clear the build_bins directory
+mkdir -p build_bins
+rm -f build_bins/*
+
+# Function to build a specific board
+build_board() {
+    origin_dir=$PWD
+    self_path="$(readlink -f "$0")"
+    self_dir="$(dirname "$self_path")"
+
+    cd $self_dir/firmware/src
+    local board=$1
+    local extra_flags=$2
+    local file_extension=$3
+
+    echo "Building for $board with flags $extra_flags"
+    west build -p -b $board $extra_flags && \
+    cp ./build/zephyr/*.$file_extension build_bins/
+
+    cd $origin_dir
+}
+
+while [ -n "$1" ]; do
+	case $1 in
+	    arduino_nano_33_ble)
+	        build_board "arduino_nano_33_ble" "" "bin"
+	        ;;
+	    arduino_nano_33_ble_sense)
+	        build_board "arduino_nano_33_ble" "-- -DBOARD_REV2=y" "bin"
+	        ;;
+	    xiao_ble)
+	        build_board "xiao_ble/nrf52840" "-- -DDTC_OVERLAY_FILE='./xiao_ble.overlay'" "uf2"
+	        ;;
+	    xiao_ble_sense)
+	        build_board "xiao_ble/nrf52840/sense" "-- -DDTC_OVERLAY_FILE='./xiao_ble.overlay'" "uf2"
+	        ;;
+	    esp32c3_devkitm)
+	        build_board "esp32c3_devkitm" "" "bin"
+	        ;;
+	    m5stickc_plus)
+	        build_board "m5stickc_plus/esp32/procpu" "" "bin"
+	        ;;
+	    rpi_pico)
+	        build_board "rpi_pico/rp2040/w" "" "uf2"
+	        ;;
+	    dtqsys_ht)
+	        build_board "dtqsys_ht" "" "bin"
+	        ;;
+	    all)
+	        build_board "arduino_nano_33_ble" "" "bin"
+	        build_board "arduino_nano_33_ble" "-- -DBOARD_REV2=y" "bin"
+	        build_board "xiao_ble/nrf52840" "" "uf2"
+	        build_board "xiao_ble/nrf52840/sense" "" "uf2"
+	        build_board "esp32c3_devkitm" "" "bin"
+	        build_board "m5stickc_plus/esp32/procpu" "" "bin"
+	        build_board "rpi_pico/rp2040/w" "" "uf2"
+	        build_board "dtqsys_ht" "" "bin"
+	        ;;
+	    *)
+	        echo "Usage: $0 {arduino_nano_33_ble|arduino_nano_33_ble_sense|xiao_ble|xiao_ble_sense|esp32c3_devkitm|m5stickc_plus|rpi_pico|dtqsys_ht|all}"
+	        ;;
+	esac
+	shift
+done
