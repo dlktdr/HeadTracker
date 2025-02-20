@@ -322,6 +322,12 @@ int sense_Init()
     LOG_ERR("QMC5883 Magnetometer Not Found");
 #endif
 
+  // No Gyro, no need to calibrate
+  if(hasGyr == false) {
+    gyroCalibrated = true;
+    clearLEDFlag(LED_GYROCAL);
+  }
+
   for (int i = 0; i < TrackerSettings::BT_CHANNELS; i++) {
     bt_chansf[i] = 0;
   }
