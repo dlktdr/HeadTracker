@@ -32,6 +32,7 @@
  */
 
 /delete-node/ &storage_partition;
+/delete-node/ &code_partition;
 
 &flash0 {
 	partitions {
@@ -39,20 +40,26 @@
 		#address-cells = <1>;
 		#size-cells = <1>;
 
-		code_partition: partition@10000 {
-			label = "code";
-			reg = <0x10000 0xEB000>;
+		boot_partition: partition@0 {
+			label = "sam-ba";
+			reg = <0x00000000 0x00010000>;
 			read-only;
 		};
 
-		storage_partition: partition@FB000 {
-			label = "storagept";
-			reg = <0xFB000 0x3000>;
+		code_partition: partition@10000 {
+			label = "code";
+			reg = <0x10000 0xE8000>;
+			read-only;
 		};
 
-    ht_data_partition: partition@FD000 {
+		storage_partition: partition@F8000 {
+			label = "storagept";
+			reg = <0xF8000 0x4000>;
+		};
+
+    ht_data_partition: partition@FC000 {
         label = "htdatapt";
-        reg = <0xFE000 0x2000>;
+        reg = <0xFC000 0x4000>;
     };
 	};
 };
