@@ -838,15 +838,12 @@ void sensor_Thread()
     static int sensecount = 0;
     static int minproximity = 100;  // Keeps smallest proximity read.
     static int maxproximity = 0;    // Keeps largest proximity value read.
-    if (blesenseboard && sensecount++ == 10) {
+    if (blesenseboard && sensecount++ >= 10) {
       sensecount = 0;
       if (trkset.getRstOnWave()) {
         // Reset on Proximity
-        if (APDS.proximityAvailable()) {
-          int proximity = APDS.readProximity();
-
-          LOG_DBG("Prox=%d", proximity);
-
+        int proximity = APDS.readProximity();
+        if (proximity != 1) {
           // Store High and Low Values, Generate reset thresholds
           maxproximity = MAX(proximity, maxproximity);
           minproximity = MIN(proximity, minproximity);

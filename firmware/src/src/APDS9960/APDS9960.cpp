@@ -81,6 +81,8 @@ bool APDS9960::begin()
     pinMode(_intPin, GPIO_INPUT);
   }
 
+  enableProximity();
+
   return true;
 }
 
@@ -453,7 +455,7 @@ int APDS9960::readProximity()
     return -1;
   }
 
-  disableProximity();
+  //disableProximity();
 
   return (255 - r);
 }
