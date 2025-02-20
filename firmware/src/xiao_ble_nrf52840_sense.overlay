@@ -19,17 +19,19 @@
 	};
 
   aliases {
-    adcctrl = &adc;
-    i2csensor = &i2c0;
+		adcctrl = &adc;
+		i2csensor = &i2c0;
+		//i2csensorext = &i2c1;
 		guiuart = &cdc_acm_uart0;
   };
-
 };
 
 /* Flash Layout
- *    Bootloader    0x00000 - 0x10000 (Size 0x10000 65536 Bytes)
- *    Code          0x10000 - 0xFC000 (Size 0xEC000 966656 Bytes)
- *    NVM Data      0xFC000 - 0x100000 (Size 0x4000 16384 Bytes)
+ *    Soft Dev      0x00000 - 0x27000 (Size 0x27000)
+ *    Code          0x27000 - 0xEC000 (Size 0xC5000)
+ *    NVM Data      0xEC000 - 0xF0000 (Size 0x4000)
+ *    HT Settings   0xF0000 - 0xF4000 (Size 0x4000)
+ *    Boot          0xF4000 - 0x100000 (Size 0xC000)
  */
 
 /delete-node/ &storage_partition;
@@ -47,22 +49,22 @@
 
 		code_partition: partition@27000 {
 			label = "code_partition";
-			reg = <0x00027000 0x000c5000>;
+			reg = <0x27000 0xC5000>;
 		};
 
-		storage_partition: partition@ec000 {
+		storage_partition: partition@EC000 {
 			label = "storagept";
-			reg = <0x000ec000 0x00006000>;
+			reg = <0x000EC000 0x00004000>;
 		};
 
-    ht_data_partition: partition@F2000 {
+		ht_data_partition: partition@F0000 {
 			label = "htdatapt";
-			reg = <0xF2000 0x2000>;
+			reg = <0xF0000 0x4000>;
 		};
 
 		boot_partition: partition@f4000 {
 			label = "adafruit_boot";
-			reg = <0x000f4000 0x0000c000>;
+			reg = <0x000F4000 0xC000>;
 		};
 	};
 };
@@ -71,13 +73,14 @@
 	status = "okay";
 };
 
+// HT doesn't use Zephyr's driver here
+/delete-node/ &lsm6ds3tr_c;
+
 &i2c0 {
-	compatible = "nordic,nrf-twim";
-	/* Cannot be used together with spi0. */
-	status = "okay";
-	pinctrl-0 = <&i2c0_default>;
-	pinctrl-1 = <&i2c0_sleep>;
-	pinctrl-names = "default", "sleep";
+	clock-frequency = <I2C_BITRATE_FAST>;
+};
+
+&i2c1 {
 	clock-frequency = <I2C_BITRATE_FAST>;
 };
 
@@ -103,7 +106,7 @@ zephyr_udc0: &usbd {
 	compatible = "nordic,nrf-usbd";
 	status = "okay";
   cdc_acm_uart0: cdc_acm_uart0 {
-		compatible = "zephyr,cdc-acm-uart";
+	compatible = "zephyr,cdc-acm-uart";
 	};
 
   // Uncomment the below lines for kernel logging to a second USB CDC port

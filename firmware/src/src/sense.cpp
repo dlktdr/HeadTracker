@@ -102,6 +102,8 @@ int64_t senseUsDuration = 0;
 
 const struct device *i2c_dev = nullptr;
 
+static bool hasAcc = false;
+static bool hasGyr = false;
 static bool hasMag = false;
 
 #if defined(HAS_APDS9960)
@@ -166,6 +168,8 @@ struct k_poll_event calculateRunEvents[1] = {
 
 int sense_Init()
 {
+  // If an I2C bus is defined in the device tree, initialize it
+#if DT_NODE_EXISTS(DT_ALIAS(i2csensor))
   const struct device *i2c_dev = DEVICE_DT_GET(DT_ALIAS(i2csensor));
   if (!i2c_dev) {
     LOG_ERR("Could not get device binding for I2C");
@@ -184,7 +188,35 @@ int sense_Init()
 
   i2c_recover_bus(i2c_dev);
   LOG_INF("I2C Ready");
+#endif
 
+  // If an External I2C bus is defined in the device tree, initialize it
+#if DT_NODE_EXISTS(DT_ALIAS(i2csensorext))
+  const struct device *i2cext_dev = DEVICE_DT_GET(DT_ALIAS(i2csensorext));
+  if (!i2cext_dev) {
+    LOG_ERR("Could not get device binding for I2C");
+    return false;
+  }
+  uint32_t i2cext_cfg = 0;
+  if(!i2c_get_config(i2cext_dev, &i2cext_cfg)){
+    LOG_INF("I2C Config: 0x%x", i2cext_cfg);
+  }
+
+  LOG_INF("Waiting for I2C External Sensor Bus To Be Ready");
+  while(!device_is_ready(DEVICE_DT_GET(DT_ALIAS(i2csensorext)))) {
+    k_msleep(10);
+  }
+  k_msleep(20);
+
+  i2c_recover_bus(i2cext_dev);
+  LOG_INF("I2CEXT Ready");
+#endif
+
+  // If a ACC&GYR sensor is defined in the device tree but not found
+  // will cause a hardfault. If a mag is not found, the system will
+  // continue to run without it. TODO.. notify in GUI
+  hasAcc = false;
+  hasGyr = false;
   hasMag = false;
 
 #if defined(HAS_LSM9DS1)
@@ -192,6 +224,9 @@ int sense_Init()
     LOG_ERR("Failed to initalize LSM9DS1 Sensor");
     return -1;
   }
+  hasAcc = true;
+  hasGyr = true;
+  hasMag = true;
 #endif
 
 #if defined(HAS_BMI270)
@@ -211,6 +246,8 @@ int sense_Init()
       rslt = bmi2_sensor_enable(sensor_list, 2, &bmi2_dev);
       bmi2_error_codes_print_result(rslt);
     }
+    hasAcc = true;
+    hasGyr = true;
   } else {
     LOG_ERR("Failed to initalize BMI270");
     return -1;
@@ -255,11 +292,15 @@ int sense_Init()
   mpu_set_accel_fsr(2);
   mpu_set_sample_rate(140);
   mpu_configure_fifo(INV_XYZ_GYRO | INV_XYZ_ACCEL);
+  hasAcc = true;
+  hasGyr = true;
 #endif
 
 #if defined(HAS_MPU6886)
   LOG_INF("MPU6886 Initializing");
-  mpu6886.Init();
+  mpu6886.Init(); // ToDo add error checking
+  hasAcc = true;
+  hasGyr = true;
 #endif
 
 #if defined(HAS_APDS9960)
@@ -273,8 +314,12 @@ int sense_Init()
 #endif
 
 #if defined(HAS_QMC5883)
-  qmc5883Init();
-  hasMag = true;
+  if(qmc5883Init()) {
+    hasMag = true;
+    LOG_INF("QMC5883 Magnetometer Initialized");
+  }
+  else
+    LOG_ERR("QMC5883 Magnetometer Not Found");
 #endif
 
   for (int i = 0; i < TrackerSettings::BT_CHANNELS; i++) {

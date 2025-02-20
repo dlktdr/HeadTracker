@@ -3,14 +3,12 @@
     /delete-property/ zephyr,shell-uart;
     /delete-property/ zephyr,console;
     zephyr,display = &st7789v;
-    //zephyr,console = &uart1;
-    //zephyr,shell-uart = &uart1;
+    zephyr,console = &uart1;
   };
 
   aliases {
     adcctrl = &adc0;
     i2csensor = &i2c0;
-    spisensor = &spi2;
     guiuart = &uart0;
 		auxserial = &uart1;
   };
@@ -51,48 +49,8 @@
   status = "okay";
 };
 
-&i2c0 {
-	status = "okay";
-	clock-frequency = <I2C_BITRATE_FAST>;
-	sda-gpios = <&gpio0 21 GPIO_OPEN_DRAIN>;
-	scl-gpios = <&gpio0 22 GPIO_OPEN_DRAIN>;
-	pinctrl-0 = <&i2c0_sda_gpio21 &i2c0_scl_gpio22>;
-	pinctrl-names = "default";
-};
-
-&spi3 {
-	status = "okay";
-  cs-gpios = < &gpio0 5 GPIO_ACTIVE_LOW >;
-
-  st7789v: st7789v@0 {
-    compatible = "sitronix,st7789v";
-    reg = <0>;
-    spi-max-frequency = <20000000>;
-    reset-gpios = <&gpio0 12 GPIO_ACTIVE_LOW>;
-    cmd-data-gpios = < &gpio0 14 GPIO_ACTIVE_LOW >;
-    width = < 240 >;
-    height = < 135 >;
-    x-offset = < 0 >;
-    y-offset = < 0 >;
-    vcom = < 0x28 >; // bb
-		gctrl = <0x35 >; // b7
-		vrhs = <0x10>; //c3, vrh_value
-		vdvs = <0x20>; //c4 vdv_value
-		mdac = <0x04>; //36
-		gamma = <0x01>;
-		colmod = <0x55>; //3a
-		lcm = <0x0c>; //c0
-		porch-param = [0c 0c 00 33 33]; //b2
-		cmd2en-param = [5a 69 02 01]; //df
-		pwctrl1-param = [a4 a1]; //d0
-		pvgam-param = [D0 00 02 07 0a 28 32 44 42 06 0e 12 14 17]; //e0
-		nvgam-param = [D0 00 02 07 0a 28 31 54 47 0e 1c 17 1b 1e]; //e1
-		ram-param = [00 F0]; //b0
-		rgb-param = [CD 08 14];
-  };
-};
-
 /delete-node/ &storage_partition;
+/delete-node/ &scratch_partition;
 
 &flash0 {
 	status = "okay";
