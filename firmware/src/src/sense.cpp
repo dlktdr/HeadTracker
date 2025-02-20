@@ -1254,38 +1254,31 @@ float normalize(const float value, const float start, const float end)
 void rotate(float pn[3], const float rotation[3])
 {
   float rot[3] = {0, 0, 0};
-  memcpy(rot, rotation, sizeof(rot[0]) * 3);
+  float out[3] = {0, 0, 0};
+  std::copy(rotation, rotation + 3, rot);
 
   // Passed in Degrees
   rot[0] *= DEG_TO_RAD;
   rot[1] *= DEG_TO_RAD;
   rot[2] *= DEG_TO_RAD;
 
-  float out[3];
-
   // X Rotation
-  if (rotation[0] != 0) {
-    out[0] = pn[0] * 1 + pn[1] * 0 + pn[2] * 0;
-    out[1] = pn[0] * 0 + pn[1] * cosf(rot[0]) - pn[2] * sinf(rot[0]);
-    out[2] = pn[0] * 0 + pn[1] * sinf(rot[0]) + pn[2] * cosf(rot[0]);
-    memcpy(pn, out, sizeof(out[0]) * 3);
-  }
+  out[0] = pn[0] * 1 + pn[1] * 0 + pn[2] * 0;
+  out[1] = pn[0] * 0 + pn[1] * cosf(rot[0]) - pn[2] * sinf(rot[0]);
+  out[2] = pn[0] * 0 + pn[1] * sinf(rot[0]) + pn[2] * cosf(rot[0]);
+  std::copy(out, out + 3, pn);
 
   // Y Rotation
-  if (rotation[1] != 0) {
-    out[0] = pn[0] * cosf(rot[1]) - pn[1] * 0 + pn[2] * sinf(rot[1]);
-    out[1] = pn[0] * 0 + pn[1] * 1 + pn[2] * 0;
-    out[2] = -pn[0] * sinf(rot[1]) + pn[1] * 0 + pn[2] * cosf(rot[1]);
-    memcpy(pn, out, sizeof(out[0]) * 3);
-  }
+  out[0] = pn[0] * cosf(rot[1]) - pn[1] * 0 + pn[2] * sinf(rot[1]);
+  out[1] = pn[0] * 0 + pn[1] * 1 + pn[2] * 0;
+  out[2] = -pn[0] * sinf(rot[1]) + pn[1] * 0 + pn[2] * cosf(rot[1]);
+  std::copy(out, out + 3, pn);
 
   // Z Rotation
-  if (rotation[2] != 0) {
-    out[0] = pn[0] * cosf(rot[2]) - pn[1] * sinf(rot[2]) + pn[2] * 0.0f;
-    out[1] = pn[0] * sinf(rot[2]) + pn[1] * cosf(rot[2]) + pn[2] * 0.0f;
-    out[2] = pn[0] * 0.0f + pn[1] * 0.0f + pn[2] * 1.0f;
-    memcpy(pn, out, sizeof(out[0]) * 3);
-  }
+  out[0] = pn[0] * cosf(rot[2]) - pn[1] * sinf(rot[2]) + pn[2] * 0.0f;
+  out[1] = pn[0] * sinf(rot[2]) + pn[1] * cosf(rot[2]) + pn[2] * 0.0f;
+  out[2] = pn[0] * 0.0f + pn[1] * 0.0f + pn[2] * 1.0f;
+  std::copy(out, out + 3, pn);
 }
 
 /* reset_fusion()

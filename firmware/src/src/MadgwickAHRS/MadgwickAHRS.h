@@ -64,17 +64,17 @@ class Madgwick
   float getRoll()
   {
     if (!anglesComputed) computeAngles();
-    return roll * 57.29578f;
+    return roll * RAD_TO_DEG;
   }
   float getPitch()
   {
     if (!anglesComputed) computeAngles();
-    return pitch * 57.29578f;
+    return pitch * RAD_TO_DEG;
   }
   float getYaw()
   {
     if (!anglesComputed) computeAngles();
-    return yaw * 57.29578f;
+    return yaw * RAD_TO_DEG;
   }
   float getRollRadians()
   {
@@ -100,11 +100,10 @@ class Madgwick
 
   float deltatUpdate()
   {
-    uint32_t now = k_cycle_get_32();
+    uint32_t now = micros();
     uint32_t dt = now - lastUpdate;
     lastUpdate = now;
-    deltat = ((float)(k_cyc_to_us_floor32(dt)) /
-              1000000.0f);
+    deltat = ((float)(dt) / 1000000.0f);
     return deltat;
   }
 };

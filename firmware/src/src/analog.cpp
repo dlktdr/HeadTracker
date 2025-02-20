@@ -7,6 +7,8 @@
 
 LOG_MODULE_REGISTER(analog);
 
+#if DT_NODE_EXISTS(DT_ALIAS(adcctrl))
+
 // Simple analog input method
 // this just reads a sample then waits then returns it
 
@@ -110,3 +112,13 @@ float analogRead(int channel)
   }
   return (float)sv / 287.0f;
 }
+
+#else
+
+// No analog support
+
+float analogRead(int channel) {
+  return 0.0f;
+}
+
+#endif

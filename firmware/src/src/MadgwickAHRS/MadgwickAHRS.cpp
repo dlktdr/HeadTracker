@@ -35,7 +35,7 @@ LOG_MODULE_REGISTER(madgwick);
 //-------------------------------------------------------------------------------------------
 // Definitions
 
-#define betaDef 0.08f  // 2 * proportional gain
+#define betaDef 0.04f  // 2 * proportional gain
 
 //============================================================================================
 // Functions
