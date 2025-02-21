@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>600</width>
+    <width>601</width>
     <height>751</height>
    </rect>
   </property>
@@ -336,7 +336,7 @@
              <bool>false</bool>
             </property>
             <property name="currentIndex">
-             <number>0</number>
+             <number>3</number>
             </property>
             <widget class="QWidget" name="tabGeneral">
              <attribute name="title">
@@ -477,7 +477,7 @@
               <item row="2" column="1" colspan="2">
                <widget class="QCheckBox" name="chkLngBttnPress">
                 <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This function allows you to enable the tilt/roll/pan outputs after a long press of the reset button. Another long press will disable the output&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This function allows you to enable the tilt/roll/pan outputs after a long press of the reset button. Another long press will disable the output. &lt;span style=&quot; font-weight:700;&quot;&gt;Note&lt;/span&gt;: Output is disabled on startup with this enabled&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                 <property name="text">
                  <string>Enable Tilt/Roll/Pan after a long button press</string>
@@ -1324,7 +1324,7 @@
               <item row="5" column="0" colspan="3">
                <widget class="QLabel" name="label_30">
                 <property name="text">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:10pt; font-weight:600;&quot;&gt;Bluetooth supports 8 channels&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Change the BT mode, Save Settings and Reboot for this to take effect&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;Any channels that are set higher than 8 won't be sent/received.&lt;br/&gt;&lt;br/&gt;If set as a receiver you will usually want to leave all the channels set OFF allowing the remote bluetooth channels to pass through.&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;&lt;br/&gt;&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt; font-weight:600;&quot;&gt;Bluetooth ony supports channels 1-8&lt;br/&gt;&lt;/span&gt;Any channels that are set higher than 8 won't be sent or received.&lt;br/&gt;&lt;br/&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;FrSky Receiver&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;- Leaving all channels set to off on the receiver board lets every incoming signal pass through unfiltered, which is ideal for most users.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;BLE Joystick&lt;/span&gt; -&lt;span style=&quot; font-size:8pt;&quot;&gt;Since there is no dedicated pairing button, if pairing fails, try again. Pairing information is cleared when a fault occurs. Ensure channels are configured for Tilt, Roll, and Pan (e.g., Ch1 = Joystick X, Ch2 = Joystick Y, Ch3 = Joystick Z, etc.).&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                 <property name="wordWrap">
                  <bool>true</bool>
@@ -3873,7 +3873,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>600</width>
+     <width>601</width>
      <height>22</height>
     </rect>
    </property>
