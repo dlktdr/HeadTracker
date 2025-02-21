@@ -176,9 +176,6 @@ static void connected(struct bt_conn *conn, uint8_t err)
     return;
   }
 
-  // Stop Advertising
-  LOG_INF("Stopping Advertising");
- // bt_le_adv_stop();
   bleconnected = true;
 
   curconn = bt_conn_ref(conn);
@@ -232,7 +229,6 @@ static void disconnected(struct bt_conn *conn, uint8_t reason)
   bleconnected = false;
   notify_hid_subscribed = false;
   k_sem_reset(&btJoystick_sem);
-//  startAdvertising();
 }
 
 void btjoyparamupdated(struct bt_conn *conn, uint16_t interval, uint16_t latency, uint16_t timeout)
@@ -251,20 +247,25 @@ static struct bt_conn_cb btj_conn_callbacks = {
 };
 
 
+void joy_disconnect_conn_foreach(struct bt_conn *conn, void *data) {
+  bt_conn_disconnect(conn, 0);
+}
+
 void BTJoystickStop()
 {
-
   // Stop Advertising
   LOG_INF("Stopping Advertising");
-  // Stop Advertising
   bt_le_adv_stop();
 
-  // If connection open kill it
+  // Kill current connection
   if (curconn) {
     LOG_INF("Disconnecting Active Connection");
     bt_conn_disconnect(curconn, 0);
     bt_conn_unref(curconn);
   }
+
+  // Kill any other connections
+  bt_conn_foreach(BT_CONN_TYPE_ALL, joy_disconnect_conn_foreach, NULL);
   curconn = NULL;
   notify_hid_subscribed = false;
   bleconnected = false;
@@ -324,7 +325,8 @@ int BTJoystickExecute()
         buildJoystickHIDReport(btreport, bthidchans);
         bt_gatt_notify_cb(curconn,&ntfy_params);
 
-        /* For debugging time between notifications
+        /*
+        // For debugging time between notifications
         static int mcount = 0;
         static int64_t mmic = millis64() + 1000;
         if (mmic < millis64()) {  // Every Second

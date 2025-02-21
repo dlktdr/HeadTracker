@@ -36,6 +36,8 @@ LOG_MODULE_REGISTER(btparahead);
 
 #if defined(CONFIG_BT)
 
+K_SEM_DEFINE(btParaHead_sem, 0, 1);
+
 void sendTrainer();
 int setTrainer(uint8_t *addr);
 void pushByte(uint8_t byte);
@@ -62,7 +64,7 @@ static uint8_t buffer[BLUETOOTH_LINE_LENGTH + 1];
 static uint16_t chan_vals[TrackerSettings::BT_CHANNELS];
 static uint8_t bufferIndex;
 static uint8_t crc;
-static uint8_t ct[40];
+static uint8_t ct[BLUETOOTH_LINE_LENGTH+1];
 static uint8_t overdata[2];
 static char _address[18] = "00:00:00:00:00:00";
 uint16_t ovridech = 0xFFFF;
@@ -151,6 +153,7 @@ static size_t addrcnt = 1;
 
 void BTHeadStart()
 {
+  k_sem_reset(&btParaHead_sem);
   bleconnected = false;
 
   // Center all Channels
@@ -181,40 +184,75 @@ void BTHeadStart()
   bufferIndex = 0;
 }
 
+void ph_disconnect_conn_foreach(struct bt_conn *conn, void *data) {
+  bt_conn_disconnect(conn, 0);
+}
+
 void BTHeadStop()
 {
-  LOG_INF("Stopping Head Bluetooth");
-
   // Stop Advertising
-  int rv = bt_le_adv_stop();
-  if (rv) {
-    LOG_ERR("Unable to Stop advertising");
-  } else {
-    LOG_INF("Stopped Advertising");
-  }
+  LOG_INF("Stopping Advertising");
+  bt_le_adv_stop();
 
+  // Kill current connection
   if (curconn) {
     LOG_INF("Disconnecting Active Connection");
     bt_conn_disconnect(curconn, 0);
     bt_conn_unref(curconn);
   }
+
+  // Kill any other connections
+  bt_conn_foreach(BT_CONN_TYPE_ALL, ph_disconnect_conn_foreach, NULL);
   curconn = NULL;
   bleconnected = false;
-
-  bt_gatt_service_register(&bthead_svc);
+  LOG_INF("Unregistering HID Service");
+  bt_gatt_service_unregister(&bthead_svc);
+  bt_conn_cb_register(NULL);
 }
+
+
+// Joystick HID Report notify complete callback. This is called when the report has been sent.
+// prevent bufffer from filling.
+
+void btHeadNotifyCompleteCB(struct bt_conn *conn, void *user_data)
+{
+  k_sem_give(&btParaHead_sem);
+}
+
+uint8_t btdataoutput[BLUETOOTH_LINE_LENGTH];
+
+struct bt_gatt_notify_params ph_ntfy_params = {
+  .uuid = &frskychar.uuid,
+  .attr = &bthead_svc.attrs[1],
+  .data = static_cast<void*>(btdataoutput),
+  .len = sizeof(btdataoutput),
+  .func = btHeadNotifyCompleteCB,
+  .user_data = NULL,
+};
 
 void BTHeadExecute()
 {
   if (bleconnected) {
     clearLEDFlag(LED_BTSCANNING);
     setLEDFlag(LED_BTCONNECTED);
-    // Send Trainer Data
-    uint8_t output[BLUETOOTH_LINE_LENGTH + 1];
-    int len;
-    len = setTrainer(output);
 
-    bt_gatt_notify(NULL, &bthead_svc.attrs[1], output, len);
+    if (k_sem_take(&btParaHead_sem, K_NO_WAIT) == 0) {
+      setTrainer(btdataoutput);
+      bt_gatt_notify_cb(NULL, &ph_ntfy_params);
+
+      // For debugging time between notifications
+      /*
+      static int mcount = 0;
+      static int64_t mmic = millis64() + 1000;
+      if (mmic < millis64()) {  // Every Second
+        mmic = millis64() + 1000;
+        LOG_INF("PH Notify Rate = %d", mcount);
+        mcount = 0;
+      }
+      mcount++;
+      */
+    }
+
   } else {
     // Scanning
     setLEDFlag(LED_BTSCANNING);
@@ -269,6 +307,11 @@ static void ct_ccc_cfg_changed_overr(const struct bt_gatt_attr *attr, uint16_t v
 static void ct_ccc_cfg_changed_frsky(const struct bt_gatt_attr *attr, uint16_t value)
 {
   LOG_INF("FrSky CCC Value Changed (%d)", value);
+  // If notifications are requested, give semaphore to send a notify
+  if(value == BT_GATT_CCC_NOTIFY) {
+    LOG_INF("Sending Data");
+    k_sem_give(&btParaHead_sem);
+  }
 }
 
 static ssize_t read_ct(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf,
@@ -334,7 +377,7 @@ void hasSecurityChangedTimer(struct k_timer *tmr)
   bt_security_t sl = bt_conn_get_security(curconn);
 
   // If a CC2540 device, is should have changed the security level to 2 by now
-  // If you force the notify subscription on a CC2540 right away it won't send data
+  // PARA requires the ccc notify to be forced, it isn't requestd.
   if (sl == BT_SECURITY_L1) {
     uint8_t ccv = BT_GATT_CCC_NOTIFY;
     bt_gatt_attr_write_ccc(curconn, &bthead_svc.attrs[3], &ccv, 1, 0, 0);
@@ -396,6 +439,7 @@ static void disconnected(struct bt_conn *conn, uint8_t reason)
 
   curconn = NULL;
   bleconnected = false;
+  k_sem_reset(&btParaHead_sem);
 }
 
 // Part of setTrainer to calculate CRC

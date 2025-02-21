@@ -33,7 +33,7 @@ LOG_MODULE_REGISTER(ble);
 
 #if defined(CONFIG_BT)
 
-#define BT_RESTART_DELAY_Ms 300
+#define BT_RESTART_DELAY_MS 500
 
 // Globals
 volatile bool bleconnected = false;
@@ -170,7 +170,7 @@ void BTSetMode(btmodet mode)
   clearLEDFlag(LED_BTSCANNING);
 
   // Pause before restarting
-  k_msleep(BT_RESTART_DELAY_Ms);
+  k_msleep(BT_RESTART_DELAY_MS);
 
   // Start Up
   switch (mode) {
