@@ -305,11 +305,12 @@ int sense_Init()
 
 #if defined(HAS_APDS9960)
   // Initalize Gesture Sensor
-  if (!APDS.begin()) {
-    blesenseboard = false;
-  } else {
-    LOG_ERR("APDS9960 Proximity Sensor Not Found");
+  if (APDS.begin()) {
     blesenseboard = true;
+    LOG_INF("APDS9960 Proximity Sensor Found");
+  } else {
+    blesenseboard = false;
+    LOG_ERR("APDS9960 Proximity Sensor Not Found");
   }
 #endif
 
