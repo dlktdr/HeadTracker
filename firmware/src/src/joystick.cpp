@@ -82,8 +82,10 @@ void buildJoystickHIDReport(struct HidReportInput1 &report, uint16_t chans[16])
 void set_JoystickChannels(uint16_t chans[16])
 {
 #if defined(CONFIG_USB_DEVICE_HID)
-  buildJoystickHIDReport(usb_hid_report, chans);
-  hid_int_ep_write(hdev, (uint8_t *)&usb_hid_report, sizeof(usb_hid_report), NULL);
+  if(hdev) {
+    buildJoystickHIDReport(usb_hid_report, chans);
+    hid_int_ep_write(hdev, (uint8_t *)&usb_hid_report, sizeof(usb_hid_report), NULL);
+  }
 #endif
 }
 

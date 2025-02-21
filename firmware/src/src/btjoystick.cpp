@@ -40,6 +40,10 @@ static uint16_t bthidchans[16];
 static struct bt_conn *curconn = NULL;
 static char _address[18] = "00:00:00:00:00:00";
 static char _joystickname[] = "HT";
+static uint8_t notify_hid_subscribed = false;
+static uint8_t ctrl_point;
+static int btinterval = 0;
+char addr_str[50];
 
 K_SEM_DEFINE(btJoystick_sem, 0, 1);
 
@@ -75,10 +79,6 @@ static struct hids_report input = {
     .id = 0x01,
     .type = HIDS_INPUT,
 };
-
-static uint8_t notify_hid_subscribed = false;
-static uint8_t ctrl_point;
-static int btinterval = 0;
 
 static ssize_t read_info(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf,
                          uint16_t len, uint16_t offset)
@@ -169,8 +169,6 @@ static const struct bt_data hidad[] = {
     BT_DATA_BYTES(BT_DATA_GAP_APPEARANCE, 0xC4, 0x03),
 };
 
-char addr_str[50];
-
 static void connected(struct bt_conn *conn, uint8_t err)
 {
   if(bleconnected) {
@@ -211,7 +209,7 @@ void btJoystickNotifyCompleteCB(struct bt_conn *conn, void *user_data)
 int startAdvertising()
 {
   int err;
-  err = bt_le_adv_start(BT_LE_ADV_CONN_ONE_TIME, hidad, ARRAY_SIZE(hidad), NULL, 0);
+  err = bt_le_adv_start(BT_LE_ADV_CONN, hidad, ARRAY_SIZE(hidad), NULL, 0);
   if (err) {
     LOG_ERR("Advertising failed to start (err %d) (size %d)", err, ARRAY_SIZE(hidad));
     return err;
@@ -226,15 +224,15 @@ static void disconnected(struct bt_conn *conn, uint8_t reason)
 {
   LOG_WRN("Bluetooth disconnected (reason %d)", reason);
 
-  // if (curconn) {
-  //   LOG_WRN("Cleaning up connection");
-  //   bt_conn_unref(curconn);
-  // }
-  //curconn = NULL;
+  if (curconn) {
+    LOG_WRN("Cleaning up connection");
+    bt_conn_unref(curconn);
+  }
+  curconn = NULL;
   bleconnected = false;
   notify_hid_subscribed = false;
-  //k_sem_reset(&btJoystick_sem);
- // startAdvertising();
+  k_sem_reset(&btJoystick_sem);
+//  startAdvertising();
 }
 
 void btjoyparamupdated(struct bt_conn *conn, uint16_t interval, uint16_t latency, uint16_t timeout)
@@ -326,6 +324,7 @@ int BTJoystickExecute()
         buildJoystickHIDReport(btreport, bthidchans);
         bt_gatt_notify_cb(curconn,&ntfy_params);
 
+        /* For debugging time between notifications
         static int mcount = 0;
         static int64_t mmic = millis64() + 1000;
         if (mmic < millis64()) {  // Every Second
@@ -334,6 +333,7 @@ int BTJoystickExecute()
           mcount = 0;
         }
         mcount++;
+        */
 
       }
     }

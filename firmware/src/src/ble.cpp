@@ -33,6 +33,8 @@ LOG_MODULE_REGISTER(ble);
 
 #if defined(CONFIG_BT)
 
+#define BT_RESTART_DELAY_Ms 300
+
 // Globals
 volatile bool bleconnected = false;
 volatile bool btscanonly = false;
@@ -56,7 +58,7 @@ void bt_ready(int error)
 {
   if (IS_ENABLED(CONFIG_SETTINGS)) {
     LOG_INF("Loading Presistent Settings");
-		settings_load_subtree("bt");
+    settings_load();
 	}
   k_poll_signal_raise(&btThreadRunSignal, 1);
   LOG_INF("Ready");
@@ -70,7 +72,6 @@ void bt_init()
     LOG_ERR("Initialization failed (err %d)", err);
     return;
   }
-
 }
 
 void bt_Thread()
@@ -167,6 +168,9 @@ void BTSetMode(btmodet mode)
   // Stop Bluetooth LED Modes
   clearLEDFlag(LED_BTCONNECTED);
   clearLEDFlag(LED_BTSCANNING);
+
+  // Pause before restarting
+  k_msleep(BT_RESTART_DELAY_Ms);
 
   // Start Up
   switch (mode) {
@@ -278,6 +282,12 @@ void leparamupdated(struct bt_conn *conn, uint16_t interval, uint16_t latency, u
 void securitychanged(struct bt_conn *conn, bt_security_t level, enum bt_security_err err)
 {
   LOG_INF("Security Changed. Lvl:%d Err:%d", level, err);
+
+  // Since there is no bind button, we will clear the bonding data if we get an authentication error
+  if(level == BT_SECURITY_L1 && err == BT_SECURITY_ERR_AUTH_REQUIREMENT) {
+    LOG_ERR("Security Error: Clearing Bonding Data");
+    bt_unpair(BT_ID_DEFAULT, NULL);
+  }
 }
 
 const char *printPhy(int phy)
