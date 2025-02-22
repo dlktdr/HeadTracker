@@ -33,15 +33,19 @@ jobs:
         with:
           fetch-depth: 0
           submodules: 'true'
+      - name: Activate Python VirtualEnv
+        run: |
+          . /root/zephyr_py_env/.venv/bin/activate
+          echo PATH=$PATH >> $GITHUB_ENV
+      - name: Set Zephyr Base Environment Variable
+        run: |
+          echo "ZEPHYR_BASE=/root/zephyr/zephyr" >> "$GITHUB_ENV"
       - name: Change User Permissions
         run: |
           chown -R $(id -u):$(id -g) /src
       - name: Create a binary output folder
         run: |
           mkdir /src/firmware/src/build_bins
-      - name: Set Zephyr Base Environment Variable
-        run: |
-          echo "ZEPHYR_BASE=/root/zephyr/zephyr" >> "$GITHUB_ENV"
       - name: Register Zephyr CMAKE Package
         run: |
           cd /root/zephyr-sdk
