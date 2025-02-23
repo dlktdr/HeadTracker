@@ -307,6 +307,7 @@ void BoardJson::disconnected()
     imheretimout.stop();
     updatesettingstmr.stop();    
     rxParamsTimer.stop();
+    rxFeaturesTimer.stop();
 }
 
 void BoardJson::resetCenter()
@@ -357,14 +358,16 @@ void BoardJson::parseIncomingJSON(const QVariantMap &map)
         trkset->setAllData(map);
         emit paramReceiveComplete();
         // Remind user to calibrate
-        if(!map["dismag"].toBool()) {
-            if((fabs(trkset->getMagXOff()) < 0.0001 &&
-               fabs(trkset->getMagYOff()) < 0.0001 &&
-               fabs(trkset->getMagZOff()) < 0.0001)) {
-                if(calmsgshowed == false) {
-                    emit needsCalibration();
-                    calmsgshowed = true;
-                }
+        if((fabs(trkset->getAccXOff()) < 0.0001 &&
+            fabs(trkset->getAccXOff()) < 0.0001 &&
+            fabs(trkset->getAccXOff()) < 0.0001) ||
+            (map["dismag"].toBool() == false &&
+            fabs(trkset->getMagXOff()) < 0.0001 &&
+            fabs(trkset->getMagYOff()) < 0.0001 &&
+            fabs(trkset->getMagZOff()) < 0.0001)) {
+            if(calmsgshowed == false) {
+                emit needsCalibration();
+                calmsgshowed = true;
             }
         }
     // Board Features
