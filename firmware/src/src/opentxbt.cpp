@@ -1,7 +1,7 @@
 #include "opentxbt.h"
 
 #include <zephyr/kernel.h>
-
+#include <btpararmt.h>
 
 constexpr uint8_t START_STOP = 0x7E;
 constexpr uint8_t BYTE_STUFF = 0x7D;
@@ -35,6 +35,7 @@ void processTrainerFrame(const uint8_t* otxbuffer)
     BtChannelsIn[channel + 1] = ((otxbuffer[i + 1] & 0x0f) << 4) +
                                 ((otxbuffer[i + 2] & 0xf0) >> 4) + ((otxbuffer[i + 2] & 0x0f) << 8);
   }
+  btChannelsDecoded(BtChannelsIn);
 }
 
 void processTrainerByte(uint8_t data)

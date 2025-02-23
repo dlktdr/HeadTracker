@@ -176,6 +176,10 @@ static void connected(struct bt_conn *conn, uint8_t err)
     return;
   }
 
+  if(curconn) {
+    LOG_ERR("A connection already exists");
+  }
+
   bleconnected = true;
 
   curconn = bt_conn_ref(conn);
@@ -271,7 +275,7 @@ void BTJoystickStop()
   bleconnected = false;
   LOG_INF("Unregistering HID Service");
   bt_gatt_service_unregister(&bthid_svc);
-  bt_conn_cb_register(NULL);
+  bt_conn_cb_unregister(&btj_conn_callbacks);
 }
 
 static bt_addr_le_t addrarry[CONFIG_BT_ID_MAX];

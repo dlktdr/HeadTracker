@@ -85,6 +85,68 @@ bt_gatt_read_params rparm = {
     .func = read_overrides,
 };
 
+// This function is intended to be called periodically.
+// It uses static variables to store the time of the last call and accumulates
+// frequency measurements in order to compute an average frequency and jitter.
+void notifyMetrics() {
+  // Static variables preserve their values between calls.
+  static uint32_t lastCallTime = micros();
+  static int callCount = 0;
+  static float frequencySum = 0.0;
+  static float frequencySquaredSum = 0.0;
+
+  // Get the current time and compute the elapsed time (in seconds)
+  uint32_t currentTime = micros();
+  float elapsed = float(currentTime - lastCallTime) / 1e6f;
+  if(currentTime == lastCallTime) {
+    // Avoid division by zero
+    return;
+  }
+  lastCallTime = currentTime;
+
+  // Calculate instantaneous frequency (Hz) as the inverse of the elapsed time.
+  // Note: If the function is called very quickly, you may need to guard against division by zero.
+  float instantaneousFrequency = 1.0f / elapsed;
+
+  // Update the sample count and cumulative sums
+  callCount++;
+  frequencySum += instantaneousFrequency;
+  frequencySquaredSum += instantaneousFrequency * instantaneousFrequency;
+
+  // Compute the average frequency
+  float averageFrequency = frequencySum / callCount;
+
+  // Compute variance and then jitter (standard deviation) of the frequency samples
+  float variance = (frequencySquaredSum / callCount) - (averageFrequency * averageFrequency);
+  float jitter = sqrt(variance);
+
+  // For debugging time between notifications
+
+  static int mcount = 0;
+  static uint32_t mmic = millis() + 500;
+  if (mmic < millis()) {  // Every Second
+    mmic = millis() + 1000;
+    LOG_INF("BLE Ins Frequency = %f", instantaneousFrequency);
+    LOG_INF("BLE Avg Frequency = %f", averageFrequency);
+    LOG_INF("BLE Std Deviation = %f", jitter);
+    mcount = 0;
+  }
+  mcount++;
+}
+
+/* called when the bluetooh channel data is complete and
+*  crc is correct.
+*/
+
+void btChannelsDecoded(uint16_t *channels) {
+  // Store all channels
+  for (int i = 0; i < TrackerSettings::BT_CHANNELS; i++) {
+    // Only set the data on channels that are allowed to be overriden
+    chan_vals[i] = channels[i];
+  }
+  notifyMetrics();
+}
+
 /* Nofify function when bluetooth channel data has been sent
  */
 
@@ -100,11 +162,11 @@ static uint8_t notify_func(struct bt_conn *conn, struct bt_gatt_subscribe_params
     processTrainerByte(((uint8_t *)data)[i]);
   }
 
-  // Store all channels
-  for (int i = 0; i < TrackerSettings::BT_CHANNELS; i++) {
-    // Only set the data on channels that are allowed to be overriden
-    chan_vals[i] = BtChannelsIn[i];
-  }
+  // // Store all channels
+  // for (int i = 0; i < TrackerSettings::BT_CHANNELS; i++) {
+  //   // Only set the data on channels that are allowed to be overriden
+  //   chan_vals[i] = BtChannelsIn[i];
+  // }
 
   return BT_GATT_ITER_CONTINUE;
 }

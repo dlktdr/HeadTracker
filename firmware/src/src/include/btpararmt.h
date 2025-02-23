@@ -4,6 +4,8 @@
 
 extern uint16_t chanoverrides;
 
+void btChannelsDecoded(uint16_t *channels);
+
 void BTRmtStop();
 void BTRmtStart();
 void BTRmtExecute();

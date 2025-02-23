@@ -396,6 +396,10 @@ static void connected(struct bt_conn *conn, uint8_t err)
     LOG_INF("Connected :)");
   }
 
+  if(curconn) {
+    LOG_ERR("A connection already exists");
+  }
+
   // Stop Advertising
   bt_le_adv_stop();
 
@@ -415,7 +419,7 @@ static void connected(struct bt_conn *conn, uint8_t err)
        printPhy(info2.le.phy->tx_phy));
 
   // Set Connection Parameters - Request updated rate
-  bt_conn_le_param_update(curconn, conparms);
+  bt_conn_le_param_update(conn, conparms);
 
   // Start a Timer, If we don't see a Security Change within this time
   // e.g. a CC2540 chip then force a subscription for the PARA chip
