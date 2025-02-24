@@ -279,7 +279,7 @@ int sense_Init()
     LOG_ERR("Unable to init LSM6DS3\n");
     return -1;
   } else {
-    hasMag = true;
+    hasGyr = true;
   }
 #endif
 
