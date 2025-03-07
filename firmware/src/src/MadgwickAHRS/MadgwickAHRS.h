@@ -101,10 +101,10 @@ class Madgwick
 
   float deltatUpdate()
   {
-    Now = micros64();
-    deltat = ((Now - lastUpdate) /
-              1000000.0f);  // set integration time by time elapsed since last filter update
-    lastUpdate = Now;
+    uint32_t now = micros();
+    uint32_t dt = now - lastUpdate;
+    lastUpdate = now;
+    deltat = ((float)(dt) / 1000000.0f);
     return deltat;
   }
 };

@@ -1014,6 +1014,9 @@ void gyroCalibrate()
   static uint32_t filter_samples = 0;
   static uint64_t lasttime = 0;
 
+  if(gyroCalibrated)
+    return;
+
   uint64_t time = micros64();
   if (lasttime == 0) {  // Skip first run
     lasttime = time;
