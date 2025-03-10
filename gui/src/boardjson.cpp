@@ -105,6 +105,7 @@ void BoardJson::saveToRAM()
     d2s.remove("axisremap");
     d2s.remove("axissign");
     d2s.remove("Hard");
+    d2s.remove("Git");
     d2s.remove("Vers");
     // If no changes, return
     if(d2s.count() == 0)
@@ -239,6 +240,7 @@ void BoardJson::calibrationComplete()
     // Only request the ones that were active on calibration start
     trkset->setDataItemSend(cursendingdataitems);
     saveToRAM();
+    emit calibrationSuccess();
 }
 
 // Add/Remove data items to be received from the board
@@ -373,6 +375,7 @@ void BoardJson::parseIncomingJSON(const QVariantMap &map)
     // Board Features
     } else if(map["Cmd"].toString() == "FE") {
         _features = map["FEAT"].toStringList();
+        trkset->setFeatures(_features);
         _pins = map["PINS"].toMap();
 
         qDebug() << "PINS" << _pins;

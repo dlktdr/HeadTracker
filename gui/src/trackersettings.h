@@ -72,10 +72,12 @@ public:
     QString hardware() {return _setting["Hard"].toString();}
     QString fwVersion() {return _setting["Vers"].toString();}
     void setHardware(QString vers,QString hard, QString git="");
+    void setFeatures(const QStringList &feat) {_features = feat;}
+    QStringList getFeatures() {return _features;}
 
     void setSoftIronOffsets(float soo[3][3]);
 
-    void clear() {_data.clear(); _setting.clear();}
+    void clear() {_data.clear(); _setting.clear(); _features.clear();}
 
     // Realtime data requested from the board
     // Keeps track of them in _data2send list
@@ -100,6 +102,7 @@ signals:
 
 private:
     QStringList bleAddresses;
+    QStringList _features;
 };
 
 #endif // TRACKERSETTINGS_H
