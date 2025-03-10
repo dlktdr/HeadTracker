@@ -85,6 +85,9 @@ bt_gatt_read_params rparm = {
     .func = read_overrides,
 };
 
+
+#ifdef DEBUG_BT_METRICS
+
 // This function is intended to be called periodically.
 // It uses static variables to store the time of the last call and accumulates
 // frequency measurements in order to compute an average frequency and jitter.
@@ -134,6 +137,8 @@ void notifyMetrics() {
   mcount++;
 }
 
+#endif
+
 /* called when the bluetooh channel data is complete and
 *  crc is correct.
 */
@@ -144,7 +149,9 @@ void btChannelsDecoded(uint16_t *channels) {
     // Only set the data on channels that are allowed to be overriden
     chan_vals[i] = channels[i];
   }
+#ifdef DEBUG_BT_METRICS
   notifyMetrics();
+#endif
 }
 
 /* Nofify function when bluetooth channel data has been sent
@@ -162,11 +169,11 @@ static uint8_t notify_func(struct bt_conn *conn, struct bt_gatt_subscribe_params
     processTrainerByte(((uint8_t *)data)[i]);
   }
 
-  // // Store all channels
-  // for (int i = 0; i < TrackerSettings::BT_CHANNELS; i++) {
-  //   // Only set the data on channels that are allowed to be overriden
-  //   chan_vals[i] = BtChannelsIn[i];
-  // }
+  // Store all channels
+  for (int i = 0; i < TrackerSettings::BT_CHANNELS; i++) {
+    // Only set the data on channels that are allowed to be overriden
+    chan_vals[i] = BtChannelsIn[i];
+  }
 
   return BT_GATT_ITER_CONTINUE;
 }
