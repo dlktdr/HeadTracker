@@ -290,7 +290,7 @@ int sense_Init()
   mpu_set_sensors(INV_XYZ_GYRO | INV_XYZ_ACCEL);
   mpu_set_gyro_fsr(2000);
   mpu_set_accel_fsr(2);
-  mpu_set_sample_rate(140);
+  mpu_set_sample_rate(300);
   mpu_configure_fifo(INV_XYZ_GYRO | INV_XYZ_ACCEL);
   hasAcc = true;
   hasGyr = true;
