@@ -179,7 +179,7 @@ for row in s.dataarrays:
   f.write(txt)
 
 # Write all JSON Settings
-f.write("  void setJSONSettings(DynamicJsonDocument &json) {\n")
+f.write("  void setJSONSettings(JsonDocument &json) {\n")
 for row in s.settings:
   f.write("    json[\"" + row[s.colname].lower() + "\"] = " + row[s.colname].lower() + ";\n")
 for row in s.settingsarrays:
@@ -197,7 +197,7 @@ for row in s.settingsarrays:
 f.write("  }\n")
 
 # Read JSON Settings
-f.write("\n  void loadJSONSettings(DynamicJsonDocument &json) {\n    JsonVariant v;\n")
+f.write("\n  void loadJSONSettings(JsonDocument &json) {\n    JsonVariant v;\n")
 for row in events: # On change call required
   if row != "":
     f.write("    bool ch" + row.lower() + " = false;\n");
@@ -229,8 +229,8 @@ for row in events: # Do the on Change call
 f.write("  }\n")
 
 # All JSON data Items
-f.write("\n  void setJSONDataList(DynamicJsonDocument &json)\n  {\n")
-f.write("    JsonArray array = json.createNestedArray();\n")
+f.write("\n  void setJSONDataList(JsonDocument &json)\n  {\n")
+f.write("    JsonArray array = json.add<JsonArray>();\n")
 for row in s.data:
   f.write("    array.add(\""+ row[s.colname].lower() + "\");\n")
 for row in s.dataarrays:
@@ -271,7 +271,7 @@ for row in s.dataarrays:
 f.write("  }\n")
 
 f.write("""\n\
-  void sendArray(DynamicJsonDocument &json,
+  void sendArray(JsonDocument &json,
                  uint8_t bit,
                  const uint32_t counter,
                  int divisor,
@@ -302,7 +302,7 @@ f.write("""\n\
   """)
 
 # Transmit Data items back to the gui
-f.write("\n  void setJSONData(DynamicJsonDocument &json)\n  {\n")
+f.write("\n  void setJSONData(JsonDocument &json)\n  {\n")
 f.write("""\
     // Sends only requested data items
     // Updates only as often as specified, 1 = every cycle

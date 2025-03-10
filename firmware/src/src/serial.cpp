@@ -40,7 +40,7 @@ LOG_MODULE_REGISTER(serial);
 
 void serialrx_Process();
 char *getJSONBuffer();
-void parseData(DynamicJsonDocument &json);
+void parseData(JsonDocument &json);
 uint16_t escapeCRC(uint16_t crc);
 int buffersFilled();
 
@@ -58,7 +58,7 @@ K_MUTEX_DEFINE(ring_rx_mutex);
 // JSON Data
 char jsonbuffer[JSON_BUF_SIZE];
 char *jsonbufptr = jsonbuffer;
-DynamicJsonDocument json(JSON_BUF_SIZE);
+JsonDocument json;
 
 // Mutex to protect Sense & Data Writes
 K_MUTEX_DEFINE(data_mutex);
@@ -274,7 +274,7 @@ void JSON_Process(char *jsonbuf)
 }
 
 // New JSON data received from the PC
-void parseData(DynamicJsonDocument &json)
+void parseData(JsonDocument &json)
 {
   JsonVariant v = json["Cmd"];
   if (v.isNull()) {
@@ -357,7 +357,7 @@ void parseData(DynamicJsonDocument &json)
 
     // Firmware Reqest
   } else if (strcmp(command, "FW") == 0) {
-    DynamicJsonDocument fwjson(100);
+    JsonDocument fwjson;
     fwjson["Cmd"] = "FW";
     fwjson["Vers"] = STRINGIFY(FW_VER_TAG);
     fwjson["Hard"] = FW_BOARD;
@@ -426,7 +426,7 @@ int serialWriteF(const char *format, ...)
 }
 
 // FIX Me to Not use as Much Stack.
-void serialWriteJSON(DynamicJsonDocument &json)
+void serialWriteJSON(JsonDocument &json)
 {
   char data[TX_RNGBUF_SIZE];
 

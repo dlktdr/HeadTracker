@@ -3,9 +3,9 @@
 #include "boardsdefs.h"
 
 // Tells the GUI What Features are Available on this board
-void getBoardFeatures(DynamicJsonDocument &json)
+void getBoardFeatures(JsonDocument &json)
 {
-  JsonArray array = json.createNestedArray("FEAT");
+  JsonArray array = json["FEAT"].to<JsonArray>();
   #if defined(HAS_LSM6DS3)
   array.add("IMU");
   #endif
@@ -94,7 +94,7 @@ void getBoardFeatures(DynamicJsonDocument &json)
   #endif
 
   // Pin Mappings
-  JsonObject pobj = json.createNestedObject("PINS");
+  JsonObject pobj = json["PINS"].to<JsonObject>();
   for(unsigned int i=0; i < sizeof(PinNumber)/sizeof(PinNumber[0]); i++) {
     pobj[StrPins[i]] = StrPinDescriptions[i];
   }

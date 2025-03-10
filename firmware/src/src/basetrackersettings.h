@@ -982,7 +982,7 @@ public:
     btrmt[18] = '\0';
   }
 
-  void setJSONSettings(DynamicJsonDocument &json) {
+  void setJSONSettings(JsonDocument &json) {
     json["rll_min"] = rll_min;
     json["rll_max"] = rll_max;
     json["rll_cnt"] = rll_cnt;
@@ -1068,7 +1068,7 @@ public:
     json["btpairedaddress"] = btpairedaddress;
   }
 
-  void loadJSONSettings(DynamicJsonDocument &json) {
+  void loadJSONSettings(JsonDocument &json) {
     JsonVariant v;
     bool chresetfusion = false;
     v = json["rll_min"]; if(!v.isNull()) {setRll_Min(v);}
@@ -1158,9 +1158,9 @@ public:
       resetFusion();
   }
 
-  void setJSONDataList(DynamicJsonDocument &json)
+  void setJSONDataList(JsonDocument &json)
   {
-    JsonArray array = json.createNestedArray();
+    JsonArray array = json.add<JsonArray>();
     array.add("magx");
     array.add("magy");
     array.add("magz");
@@ -1358,7 +1358,7 @@ public:
     }
   }
 
-  void sendArray(DynamicJsonDocument &json,
+  void sendArray(JsonDocument &json,
                  uint8_t bit,
                  const uint32_t counter,
                  int divisor,
@@ -1387,7 +1387,7 @@ public:
     }
   }
   
-  void setJSONData(DynamicJsonDocument &json)
+  void setJSONData(JsonDocument &json)
   {
     // Sends only requested data items
     // Updates only as often as specified, 1 = every cycle

@@ -12,9 +12,9 @@ void serial_Thread();
 void serialWrite(const char *data, int len);
 void serialWrite(const char *data);
 int serialWriteF(const char *format, ...);
-void serialWriteJSON(DynamicJsonDocument &json);
+void serialWriteJSON(JsonDocument &json);
 
 void JSON_Process(char *jsonbuf);
 
 extern struct k_mutex data_mutex;
-extern DynamicJsonDocument json;
+extern JsonDocument json;

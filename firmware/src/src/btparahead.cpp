@@ -70,7 +70,7 @@ static char _address[18] = "00:00:00:00:00:00";
 uint16_t ovridech = 0xFFFF;
 
 // JSON Ring Buffer Reader
-DynamicJsonDocument blejson(JSON_BUF_SIZE);
+JsonDocument blejson;
 char blejsonbuffer[JSON_BUF_SIZE] = "";
 char *blejsonbufptr = blejsonbuffer;
 

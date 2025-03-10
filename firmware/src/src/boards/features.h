@@ -3,6 +3,6 @@
 
 #include "arduinojsonwrp.h"
 
-void getBoardFeatures(DynamicJsonDocument &json);
+void getBoardFeatures(JsonDocument &json);
 
 #endif
