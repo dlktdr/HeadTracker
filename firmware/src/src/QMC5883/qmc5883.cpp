@@ -70,7 +70,7 @@ LOG_MODULE_REGISTER(qmc5883);
 
 static bool i2c_writeBytes(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint8_t *data)
 {
-  const struct device* i2c_dev = device_get_binding(I2C_DEV);
+  const struct device* i2c_dev = DEVICE_DT_GET(DT_ALIAS(i2csensor));
   if (!i2c_dev) {
     LOG_ERR("Could not get device binding for I2C");
   }
@@ -87,7 +87,7 @@ static bool i2c_writeBytes(uint8_t devAddr, uint8_t regAddr, uint8_t length, uin
 
 static bool i2c_readBytes(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint8_t *data)
 {
-  const struct device* i2c_dev = device_get_binding(I2C_DEV);
+  const struct device* i2c_dev = DEVICE_DT_GET(DT_ALIAS(i2csensor));
   if (!i2c_dev) {
     LOG_ERR("Could not get device binding for I2C");
     return -1;
