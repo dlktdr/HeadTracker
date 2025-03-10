@@ -9,7 +9,7 @@ void getBoardFeatures(DynamicJsonDocument &json)
   #if defined(HAS_LSM6DS3)
   array.add("IMU");
   #endif
-  #if defined(HAS_MPU6886)
+  #if defined(HAS_MPU6500)
   array.add("IMU");
   #endif
   #if defined(HAS_QMC5883)
@@ -19,9 +19,6 @@ void getBoardFeatures(DynamicJsonDocument &json)
   array.add("MAG");
   #endif
   #if defined(HAS_BMI270)
-  array.add("IMU");
-  #endif
-  #if defined(HAS_MPU6886)
   array.add("IMU");
   #endif
   #if defined(HAS_LSM9DS1)

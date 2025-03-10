@@ -13,6 +13,7 @@
 #define HAS_NOTIFYLED
 #define HAS_MPU6500
 #define HAS_QMC5883
+#define HAS_AUXSERIAL
 #define HAS_CENTERBTN
 #define HAS_PPMOUT
 #define HAS_PPMIN
