@@ -668,8 +668,9 @@ void MainWindow::updateToUI()
         bleAddressDiscovered(trkset.getBtPairedAddress());
         ui->cmbBTRmtMode->setCurrentText(trkset.getBtPairedAddress());
     }
-
-    if(ui->cmbBtMode->currentIndex() > 1) // Remote or Scanner Mode
+    // "Bluetooth Mode (-1=Uninit, 0-Disable, 1-Head, 2-Receive, 3-Scanner, 4-Gamepad)";
+    if(ui->cmbBtMode->currentIndex() == TrackerSettings::BT_MODE_REMOTE ||
+       ui->cmbBtMode->currentIndex() == TrackerSettings::BT_MODE_SCANNER)
     {
         ui->lblPairWith->setVisible(true);
         ui->cmbBTRmtMode->setVisible(true);
@@ -1292,8 +1293,7 @@ void MainWindow::featuresReceiveComplete()
     ui->cmdChannelViewer->setEnabled(true);
     ui->grpPPMInput->setVisible(false);
     ui->grpPPMOutput->setVisible(false);
-    ui->cmdSaveNVM->setVisible(true);
-    ui->cmdSaveNVM->setEnabled(true);
+    ui->cmdSaveNVM->setEnabled(false);
     ui->grpBoardRotation->setVisible(false);
     ui->chkLngBttnPress->setVisible(false);
     ui->chkResetCenterWave->setVisible(false);
@@ -1372,7 +1372,6 @@ void MainWindow::featuresReceiveComplete()
     resize(100,100);
 }
 
-
 void MainWindow::featuresReceiveFailure(int)
 {
     msgbox->setText(tr("Unable to receive the boards features"));
@@ -1386,6 +1385,7 @@ void MainWindow::featuresReceiveFailure(int)
 void MainWindow::calibrationSuccess()
 {
     statusMessage(tr("Calibration Success"),5000);
+    ui->cmdSaveNVM->setEnabled(true);
 }
 
 void MainWindow::calibrationFailure()
