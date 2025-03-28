@@ -120,21 +120,21 @@ void Graph::paintEvent(QPaintEvent *event)
     const int offset=6;
     int fonth = QFontMetrics(legfont).height();    
     painter.setFont(legfont);
-    painter.drawText(10,offset+fonth/2,"+180"); // Top
+    painter.drawText(10,offset+fonth/2,"+180°"); // Top
     painter.drawText(10,(height()/2),"0"); // Center
-    painter.drawText(10,height()-offset,"-180");
+    painter.drawText(10,height()-offset,"-180°");
     painter.setBrush(Qt::black);
     painter.setPen(Qt::white);
     painter.drawRect(width()-47,2,38,50);
     pen.setColor(Qt::red);
     painter.setPen(pen);
-    painter.drawText( width() - 40,17, "Tilt");
+    painter.drawText(width() - 40,17, "Tilt");
     pen.setColor(Qt::green);
     painter.setPen(pen);
-    painter.drawText( width() - 40,32, "Roll");
+    painter.drawText(width() - 40,32, "Roll");
     pen.setColor(Qt::yellow);
     painter.setPen(pen);
-    painter.drawText( width() - 40,47, "Pan");
+    painter.drawText(width() - 40,47, "Pan");
 
 }
 

@@ -270,7 +270,7 @@ void MainWindow::serialConnect()
 
     if(!serialcon->open(QIODevice::ReadWrite)) {
         QMessageBox::critical(this,tr("Error"),tr("Could not open Com ") + serialcon->portName());
-        addToLog("Could not open " + serialcon->portName(),2);
+        addToLog(tr("Could not open ") + serialcon->portName(),2);
         serialDisconnect();
         return;
     }
@@ -658,7 +658,7 @@ void MainWindow::updateToUI()
     if(maxframelen > setframelen) {
         ui->lblPPMOut->setText(tr("<b>Warning!</b> PPM Frame length possibly too short to support channel data"));
     } else {
-        ui->lblPPMOut->setText(tr("PPM data will fit in frame. Refresh rate: ") + QString::number(1/(static_cast<float>(setframelen)/1000000.0),'f',2) + " Hz");
+        ui->lblPPMOut->setText(tr("PPM data will fit in frame. Refresh rate: ") + QString::number(1/(static_cast<float>(setframelen)/1000000.0),'f',2) + tr(" Hz"));
     }
 
     // BT Pair Address
@@ -806,7 +806,7 @@ void MainWindow::updateFromUI()
     if(maxframelen > setframelen) {
         ui->lblPPMOut->setText(tr("<b>Warning!</b> PPM Frame length possibly too short to support channel data"));
     } else {
-        ui->lblPPMOut->setText(tr("PPM data will fit in frame. Refresh rate: ") + QString::number(1/(static_cast<float>(setframelen)/1000000.0),'f',2) + " Hz");
+        ui->lblPPMOut->setText(tr("PPM data will fit in frame. Refresh rate: ") + QString::number(1/(static_cast<float>(setframelen)/1000000.0),'f',2) + tr(" Hz"));
     }
 
     //int rstppm_index = ui->cmbResetOnPPM->currentIndex();
@@ -928,7 +928,7 @@ void MainWindow::liveDataChanged()
     else
         ui->lblBTConnected->setText(tr("Not connected"));
     if(trkset.getBtMode() == TrackerSettings::BTDISABLE)
-        ui->lblBTConnected->setText("Disabled");
+        ui->lblBTConnected->setText(tr("Disabled"));
     if(trkset.getDataTrpEnabled()) {
       ui->servoPan->setShowActualPosition(true);
       ui->servoTilt->setShowActualPosition(true);
@@ -960,7 +960,7 @@ void MainWindow::txledtimeout()
 
 void MainWindow::saveSettings()
 {
-    QString filename = QFileDialog::getSaveFileName(this,"Save Settings",QString(), "Config Files (*.ini)");
+    QString filename = QFileDialog::getSaveFileName(this,tr("Save Settings"),QString(), tr("Config Files (*.ini)"));
     if(!filename.isEmpty()) {
         QSettings settings(filename,QSettings::IniFormat);
         trkset.storeSettings(&settings);
@@ -1037,7 +1037,7 @@ void MainWindow::requestTimeout()
 
     if(!boardDiscover && boardDiscoveryStarted) {
         msgbox->setText(tr("Was unable to determine the board type\n\nHave you written firmware to the board yet?"));
-        msgbox->setWindowTitle("Error");
+        msgbox->setWindowTitle(tr("Error"));
         msgbox->show();
         statusMessage(tr("Board discovery failed"));
         serialDisconnect();
@@ -1258,9 +1258,9 @@ void MainWindow::paramReceiveComplete()
 void MainWindow::paramReceiveFailure(int)
 {
     msgbox->setText(tr("Unable to receive the parameters"));
-    msgbox->setWindowTitle("Error");
+    msgbox->setWindowTitle(tr("Error"));
     msgbox->show();
-    statusMessage("Parameter Received Failure");
+    statusMessage(tr("Parameter Received Failure"));
     serialDisconnect();
 }
 
@@ -1321,7 +1321,7 @@ void MainWindow::featuresReceiveComplete()
     if(features.contains("CENTER")) {
         ui->lblCenterBtn->setText(pins["CENTER_BTN"].toString());
     } else {
-        ui->lblCenterBtn->setText("No Center Button Defined");
+        ui->lblCenterBtn->setText(tr("No Center Button Defined"));
     }
     if(features.contains("PPMIN")) {
         ui->grpPPMInput->setVisible(true);
@@ -1338,12 +1338,12 @@ void MainWindow::featuresReceiveComplete()
         ui->tabBT->setEnabled(true);
         ui->cmbBtMode->blockSignals(true);
         ui->cmbBtMode->clear();
-        ui->cmbBtMode->addItem("Disabled");
-        ui->cmbBtMode->addItem("FrSky - Wireless Transmitter (Head)");
-        ui->cmbBtMode->addItem("FrSky - Wireless Receiver (Remote)");
-        ui->cmbBtMode->addItem("FrSky - Wireless Receiver - Scanner Mode");
+        ui->cmbBtMode->addItem(tr("Disabled"));
+        ui->cmbBtMode->addItem(tr("FrSky - Wireless Transmitter (Head)"));
+        ui->cmbBtMode->addItem(tr("FrSky - Wireless Receiver (Remote)"));
+        ui->cmbBtMode->addItem(tr("FrSky - Wireless Receiver - Scanner Mode"));
         if(features.contains("BTJOYSTICK")) {
-            ui->cmbBtMode->addItem("Bluetooth HID Joystick");
+            ui->cmbBtMode->addItem(tr("Bluetooth HID Joystick"));
             ui->cmbBtMode->setCurrentIndex(trkset.getBtMode()<=4?trkset.getBtMode():0);
         } else {
             ui->cmbBtMode->setCurrentIndex(trkset.getBtMode()<=3?trkset.getBtMode():0);
@@ -1375,9 +1375,9 @@ void MainWindow::featuresReceiveComplete()
 void MainWindow::featuresReceiveFailure(int)
 {
     msgbox->setText(tr("Unable to receive the boards features"));
-    msgbox->setWindowTitle("Error");
+    msgbox->setWindowTitle(tr("Error"));
     msgbox->show();
-    statusMessage("Features Receive Failure");
+    statusMessage(tr("Features Receive Failure"));
     serialDisconnect();
 }
 

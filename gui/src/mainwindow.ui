@@ -877,7 +877,7 @@
                  <item row="5" column="0">
                   <widget class="QLabel" name="lblPPMOut">
                    <property name="text">
-                    <string>TextLabel</string>
+                    <string notr="true">TextLabel</string>
                    </property>
                   </widget>
                  </item>
@@ -1264,7 +1264,7 @@
               <item row="3" column="1">
                <widget class="QLabel" name="lblBLEAddress">
                 <property name="text">
-                 <string>TextLabel</string>
+                 <string notr="true">TextLabel</string>
                 </property>
                </widget>
               </item>
@@ -1324,7 +1324,7 @@
               <item row="5" column="0" colspan="3">
                <widget class="QLabel" name="label_30">
                 <property name="text">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt; font-weight:600;&quot;&gt;Bluetooth ony supports channels 1-8&lt;br/&gt;&lt;/span&gt;Any channels that are set higher than 8 won't be sent or received.&lt;br/&gt;&lt;br/&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;FrSky Receiver&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;- Leaving all channels set to off on the receiver board lets every incoming signal pass through unfiltered, which is ideal for most users.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;BLE Joystick&lt;/span&gt; -&lt;span style=&quot; font-size:8pt;&quot;&gt;Since there is no dedicated pairing button, if pairing fails, try again. Pairing information is cleared when a fault occurs. Ensure channels are configured for Tilt, Roll, and Pan (e.g., Ch1 = Joystick X, Ch2 = Joystick Y, Ch3 = Joystick Z, etc.).&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt; font-weight:600;&quot;&gt;Bluetooth only supports channels 1-8&lt;br/&gt;&lt;/span&gt;Any channels that are set higher than 8 won't be sent or received.&lt;br/&gt;&lt;br/&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;FrSky Receiver&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;- Leaving all channels set to off on the receiver board lets every incoming signal pass through unfiltered, which is ideal for most users.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;BLE Joystick&lt;/span&gt; -&lt;span style=&quot; font-size:8pt;&quot;&gt;Since there is no dedicated pairing button, if pairing fails, try again. Pairing information is cleared when a fault occurs. Ensure channels are configured for Tilt, Roll, and Pan (e.g., Ch1 = Joystick X, Ch2 = Joystick Y, Ch3 = Joystick Z, etc.).&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                 <property name="wordWrap">
                  <bool>true</bool>
@@ -2558,7 +2558,7 @@
                 <item row="0" column="1">
                  <widget class="QLabel" name="label_36">
                   <property name="text">
-                   <string>Function'</string>
+                   <string>Function</string>
                   </property>
                  </widget>
                 </item>
