@@ -26,7 +26,7 @@ PopupSlider::PopupSlider(QWidget *parent) : QWidget(parent)
     resize(100,30 + padding + widvertoff);
     spinbox->move(padding/2,padding/2);
     spinbox->resize(width()-padding,height()-padding-widvertoff);
-    spinbox->setSuffix(" uS");
+    spinbox->setSuffix(tr(" uS"));
     spinbox->setAlignment(Qt::AlignCenter);
     connect(spinbox, SIGNAL(valueChanged(double)), this, SLOT(valueCh(double)));
     setFocusPolicy(Qt::ClickFocus);

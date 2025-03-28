@@ -79,21 +79,21 @@ for row in s.data:
 
 # Add the descriptions
 for row in s.settings:
-  f.write("    descriptions[\"" + row[s.colname].lower() + "\"] = \"" + row[s.coldesc] + "\";\n")
+  f.write("    descriptions[\"" + row[s.colname].lower() + "\"] = tr(\"" + row[s.coldesc] + "\");\n")
 for row in s.data:
-  f.write("    descriptions[\"" + row[s.colname].lower() + "\"] = \"" + row[s.coldesc] + "\";\n")
+  f.write("    descriptions[\"" + row[s.colname].lower() + "\"] = tr(\"" + row[s.coldesc] + "\");\n")
 for row in s.settingsarrays:
   start = row[s.colname].find("[")
   end = row[s.colname].find("]")
   arraylength = row[s.colname][start+1:end]
   name = row[s.colname][:start].lower()
-  f.write("    descriptions[\"" + name.lower() + "\"] = \"" + row[s.coldesc] + "\";\n")
+  f.write("    descriptions[\"" + name.lower() + "\"] = tr(\"" + row[s.coldesc] + "\");\n")
 for row in s.dataarrays:
   start = row[s.colname].find("[")
   end = row[s.colname].find("]")
   arraylength = row[s.colname][start+1:end]
   name = row[s.colname][:start].lower()
-  f.write("    descriptions[\"" + name.lower() + "\"] = \"" + row[s.coldesc] + "\";\n")
+  f.write("    descriptions[\"" + name.lower() + "\"] = tr(\"" + row[s.coldesc] + "\");\n")
 
 for row in s.dataarrays:
   start = row[s.colname].find("[")

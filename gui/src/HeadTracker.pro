@@ -74,6 +74,13 @@ FORMS += \
     firmwarewizard.ui \
     mainwindow.ui
 
+#Localization
+CONFIG += lrelease
+CONFIG += embed_translations
+TRANSLATIONS += \
+    i18n/HeadTracker_en_US.ts \
+    i18n/HeadTracker_zh_CN.ts
+
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /usr/bin

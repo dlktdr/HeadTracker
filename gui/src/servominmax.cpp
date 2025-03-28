@@ -53,9 +53,9 @@ void ServoMinMax::showContextMenu(const QPoint &pos)
 {
        QMenu contextMenu(tr("Context menu"), this);
 
-       QAction action1("Default Values", this);
-       QAction action2("Re-Center", this);
-       QAction action3("Maximum Values", this);
+       QAction action1(tr("Default Values"), this);
+       QAction action2(tr("Re-Center"), this);
+       QAction action3(tr("Maximum Values"), this);
 
        connect(&action1, SIGNAL(triggered()), this, SLOT(setDefaults()));
        connect(&action2, SIGNAL(triggered()), this, SLOT(reCenter()));
