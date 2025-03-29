@@ -20,7 +20,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: Check out the repo
@@ -29,9 +29,9 @@ jobs:
           fetch-depth: 0
 
       - name: Install Qt
-        uses: jurplel/install-qt-action@v3
+        uses: jurplel/install-qt-action@v4
         with:
-          aqtversion: '==2.1.*'
+          aqtversion: '==3.1.*'
           version: '6.4.1'
           target: 'desktop'
           modules: 'qtserialport'
@@ -78,7 +78,7 @@ jobs:
         uses: 'actions/upload-artifact@v4'
         id: artifact-upload-step
         with:
-          name: headtracker_linux_appimage
+          name: HeadTracker_Linux_Appimage
           path: ${{github.workspace}}/HeadTracker*.AppImage
           retention-days: 90
           if-no-files-found: error
