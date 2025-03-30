@@ -22,27 +22,25 @@ on:
 
 jobs:
   build:
-    runs-on: macos-11
+    runs-on: macos-latest
 
     steps:
       - name: Select XCode version
         uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: '12.5.1'
+          xcode-version: latest-stable
 
       - name: Check out the repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
-          submodules: recursive
           fetch-depth: 0
 
       - name: Install Qt
-        uses: jurplel/install-qt-action@v3
+        uses: jurplel/install-qt-action@v4
         with:
-          aqtversion: '==2.1.*'
+          aqtversion: '==3.1.*'
           version: '6.4.1'
           modules: 'qtserialport'
-          setup-python: false
 
       - name: Generate Icons
         working-directory: ${{github.workspace}}
@@ -144,8 +142,14 @@ jobs:
           done
 
       - name: Archive production artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
+        id: artifact-upload-step
         with:
-          name: HeadTracker_MacOs
+          name: HeadTracker_macOS
           path: ${{github.workspace}}/output/dmg
-          retention-days: 60
+          retention-days: 90
+          if-no-files-found: error
+
+      - name: Output artifact ID
+        run:  echo 'Artifact ID is ${{ steps.artifact-upload-step.outputs.artifact-id }}'
+  
