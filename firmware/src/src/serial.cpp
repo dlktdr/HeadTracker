@@ -95,6 +95,24 @@ static void interrupt_handler(const struct device *dev, void *user_data)
   }
 }
 
+static void reset_to_bootloader(void)
+{
+  #if defined(ARDUINO_BOOTLOADER)
+  (*((volatile uint32_t *)0x20007FFCul)) = 0x07738135;
+  sys_reboot(SYS_REBOOT_COLD);
+#elif defined(SEEED_BOOTLOADER)
+  //__disable_irq();
+  //sys_reboot(SYS_REBOOT_COLD);
+  return;
+#define DFU_MAGIC_UF2_RESET           0x57
+  NRF_POWER->GPREGRET = DFU_MAGIC_UF2_RESET;
+  sys_reboot(SYS_REBOOT_COLD);
+#endif
+  // Not supported
+  return;
+}
+
+
 int serial_init()
 {
   // Use the device tree alias to specify the UART device to use
@@ -159,14 +177,12 @@ void serial_Thread()
 
     // gaining new connection
     if (!dtr && new_dtr) {
-
-      // Force bootloader if baud set to 1200bps TODO (Test Me)
-      /*uint32_t baud=0;
+      // Reset to bootloader if connected at 1200bps.
+      uint32_t baud=0;
       uart_line_ctrl_get(dev,UART_LINE_CTRL_BAUD_RATE, &baud);
       if(baud == 1200) {
-        (*((volatile uint32_t *) 0x20007FFCul)) = 0x07738135;
-        NVIC_SystemReset();
-      }*/
+        reset_to_bootloader();
+      }
     }
     // Port is open, send data
     if (new_dtr) {
@@ -312,14 +328,7 @@ void parseData(JsonDocument &json)
 
     // Force Bootloader
   } else if (strcmp(command, "Boot") == 0) {
-#if defined(ARDUINO_BOOTLOADER)
-    (*((volatile uint32_t *)0x20007FFCul)) = 0x07738135;
-#elif defined(SEEED_BOOTLOADER)
-    __disable_irq();
-#define DFU_MAGIC_UF2_RESET           0x57
-    NRF_POWER->GPREGRET = DFU_MAGIC_UF2_RESET;
-#endif
-    sys_reboot(SYS_REBOOT_COLD);
+    reset_to_bootloader();
 
     // Get settings
   } else if (strcmp(command, "Get") == 0) {
