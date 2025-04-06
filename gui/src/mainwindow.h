@@ -75,10 +75,15 @@ private:
     QTimer connectTimer;
     QTimer saveToRAMTimer;
     QTimer requestParamsTimer;
+
     bool waitingOnParameters;
     bool waitingOnFeatures;
     bool boardDiscover;
     bool boardDiscoveryStarted;
+
+    QMap<QString, bool> cursendingdataitems;
+    bool setOrientationStart;
+    bool setForwardStart;
 
     QString logd;    
     FirmwareWizard *firmwareWizard;
@@ -142,7 +147,10 @@ private slots:
     void openDonate();
     void openGitHub();
     void showPinView();
-
+    void setOrientationClicked();
+    void setForwardClicked();
+    void calAccelChanged(float x, float y, float z);
+    void quaternionChanged(QQuaternion q);
 
     // Board Connections
     void paramSendStart();

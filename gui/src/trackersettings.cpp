@@ -47,21 +47,6 @@ bool TrackerSettings::isPanReversed()
     return (_setting["servoreverse"].toUInt() & PAN_REVERSE_BIT);
 }
 
-void TrackerSettings::orientation(int &x,int &y,int &z)
-{
-    x = _setting["rotx"].toInt();
-    y = _setting["roty"].toInt();
-    z = _setting["rotz"].toInt();
-    return;
-}
-
-void TrackerSettings::setOrientation(int x,int y,int z)
-{
-    _setting["rotx"] = x;
-    _setting["roty"] = y;
-    _setting["rotz"] = z;
-}
-
 void TrackerSettings::gyroOffset(float &x, float &y, float &z)
 {
     x=_setting["gyrxoff"].toFloat();
@@ -215,7 +200,7 @@ void TrackerSettings::setLiveDataMap(const QVariantMap &datalist, bool reset)
       _data[ll.key()] = ll.value();
 
     // Emit if a value has been updated
-    bool ge=false,ae=false,me=false,oe=false,ooe=false,ppm=false;
+    bool ge=false,ae=false,me=false,oe=false,ooe=false,ppm=false,ofa=false,qu=false;
     QMapIterator<QString, QVariant> i(datalist);
     while (i.hasNext()) {
         i.next();
@@ -246,15 +231,28 @@ void TrackerSettings::setLiveDataMap(const QVariantMap &datalist, bool reset)
         }
         if((key == "tiltoff" || key == "rolloff" || key == "panoff") && !ooe) {
             emit(offOrientChanged(_data["tiltoff"].toFloat(),
-                                _data["rolloff"].toFloat(),
-                                _data["panoff"].toFloat()));
+                                  _data["rolloff"].toFloat(),
+                                  _data["panoff"].toFloat()));
             ooe = true;
+        }
+        if((key == "off_accx" || key == "off_accy" || key == "off_accz") && !ofa) {
+            emit(calAccelChanged(_data["off_accx"].toFloat(),
+                                  _data["off_accy"].toFloat(),
+                                  _data["off_accz"].toFloat()));
+            ofa = true;
         }
         if((key == "panout" || key == "tiltout" || key == "rollout") && !ppm) {
             emit(ppmOutChanged(_data["tiltout"].toUInt(),
                                 _data["rollout"].toUInt(),
                                 _data["panout"].toUInt()));
             ppm = true;
+        }
+        if((key == "quat[3]") && !qu) {
+            emit(quaternionChanged(QQuaternion(_data["quat[0]"].toFloat(),
+                                               _data["quat[1]"].toFloat(),
+                                               _data["quat[2]"].toFloat(),
+                                               _data["quat[3]"].toFloat())));
+            qu = true;
         }
         if(key == "btrmt") {
             if(_data["btrmt"] != "")

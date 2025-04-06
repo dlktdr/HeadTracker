@@ -675,30 +675,40 @@ public:
   inline const bool& getDisMag() {return dismag;}
   void setDisMag(bool val=1) { dismag = val; }
 
-  // Board Rotation X
+  // Board Rotation Quaternion W
+  inline const float& getRotW() {return rotw;}
+  bool setRotW(float val=1) {
+    if(val >= -1 && val <= 1) {
+      rotw = val;
+      return true;
+    }
+    return false;
+  }
+
+  // Board Rotation Quaternion X
   inline const float& getRotX() {return rotx;}
   bool setRotX(float val=0) {
-    if(val >= -360 && val <= 360) {
+    if(val >= -1 && val <= 1) {
       rotx = val;
       return true;
     }
     return false;
   }
 
-  // Board Rotation Y
+  // Board Rotation Quaternion Y
   inline const float& getRotY() {return roty;}
   bool setRotY(float val=0) {
-    if(val >= -360 && val <= 360) {
+    if(val >= -1 && val <= 1) {
       roty = val;
       return true;
     }
     return false;
   }
 
-  // Board Rotation Z
+  // Board Rotation Quaternion Z
   inline const float& getRotZ() {return rotz;}
   bool setRotZ(float val=0) {
-    if(val >= -360 && val <= 360) {
+    if(val >= -1 && val <= 1) {
       rotz = val;
       return true;
     }
@@ -1042,6 +1052,7 @@ public:
     json["so21"] = so21;
     json["so22"] = so22;
     json["dismag"] = dismag;
+    json["rotw"] = rotw;
     json["rotx"] = rotx;
     json["roty"] = roty;
     json["rotz"] = rotz;
@@ -1130,6 +1141,7 @@ public:
     v = json["so21"]; if(!v.isNull()) {setso21(v); chresetfusion = true;}
     v = json["so22"]; if(!v.isNull()) {setso22(v); chresetfusion = true;}
     v = json["dismag"]; if(!v.isNull()) {setDisMag(v);}
+    v = json["rotw"]; if(!v.isNull()) {setRotW(v); chresetfusion = true;}
     v = json["rotx"]; if(!v.isNull()) {setRotX(v); chresetfusion = true;}
     v = json["roty"]; if(!v.isNull()) {setRotY(v); chresetfusion = true;}
     v = json["rotz"]; if(!v.isNull()) {setRotZ(v); chresetfusion = true;}
@@ -1542,9 +1554,10 @@ protected:
   float so21 = 0; // Soft Iron Offset 21
   float so22 = 1; // Soft Iron Offset 22
   bool dismag = 1; // Disable Magnetometer
-  float rotx = 0; // Board Rotation X
-  float roty = 0; // Board Rotation Y
-  float rotz = 0; // Board Rotation Z
+  float rotw = 1; // Board Rotation Quaternion W
+  float rotx = 0; // Board Rotation Quaternion X
+  float roty = 0; // Board Rotation Quaternion Y
+  float rotz = 0; // Board Rotation Quaternion Z
   uint8_t uartmode = 0; // Uart Mode (0- Off, 1-SBUS, 2-CRSFIN, 3-CRSFOUT)
   uint8_t crsftxrate = 140; // CRSF Transmit Frequncy
   uint8_t sbustxrate = 80; // SBUS Transmit Freqency

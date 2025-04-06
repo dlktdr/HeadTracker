@@ -50,6 +50,10 @@ Madgwick::Madgwick()
   q1 = 0.0f;
   q2 = 0.0f;
   q3 = 0.0f;
+  qrot[0] = 1.0f;
+  qrot[1] = 0.0f;
+  qrot[2] = 0.0f;
+  qrot[3] = 0.0f;
   anglesComputed = 0;
 }
 
@@ -99,6 +103,22 @@ void Madgwick::begin(float ax, float ay, float az, float mx, float my, float mz)
 
   // Reset cache
   anglesComputed = 0;
+}
+
+void Madgwick::alignToAccelVect(float ax, float ay, float az)
+{
+  LOG_INF("alignToAccelVect: ax=%f, ay=%f, az=%f",(double)ax, (double)ay, (double)az);
+
+  float va, vx, vy, vz;  // rotation angle and vector
+  cross(ax, ay, az, 0, 0, 1, vx, vy, vz);
+  norm(ax, ay, az);
+  norm(vx, vy, vz);
+  va = acos(dot(ax, ay, az, 0, 0, 1));
+  qrot[0] = cos(va / 2.0f);
+  qrot[1] = vx * sin(va / 2.0f);
+  qrot[2] = vy * sin(va / 2.0f);
+  qrot[3] = vz * sin(va / 2.0f);
+  normalizeQuat(qrot[0], qrot[1], qrot[2], qrot[3]);
 }
 
 void Madgwick::update(float gx, float gy, float gz, float ax, float ay, float az, float mx,
@@ -210,12 +230,7 @@ void Madgwick::update(float gx, float gy, float gz, float ax, float ay, float az
   q2 += qDot3 * deltat;
   q3 += qDot4 * deltat;
 
-  // Normalise quaternion
-  recipNorm = invSqrt(q0 * q0 + q1 * q1 + q2 * q2 + q3 * q3);
-  q0 *= recipNorm;
-  q1 *= recipNorm;
-  q2 *= recipNorm;
-  q3 *= recipNorm;
+  normalizeQuat(q0, q1, q2, q3); // Normalise quaternion
   anglesComputed = 0;
 }
 
@@ -285,12 +300,7 @@ void Madgwick::updateIMU(float gx, float gy, float gz, float ax, float ay, float
   q2 += qDot3 * deltat;
   q3 += qDot4 * deltat;
 
-  // Normalise quaternion
-  recipNorm = invSqrt(q0 * q0 + q1 * q1 + q2 * q2 + q3 * q3);
-  q0 *= recipNorm;
-  q1 *= recipNorm;
-  q2 *= recipNorm;
-  q3 *= recipNorm;
+  normalizeQuat(q0, q1, q2, q3); // Normalise quaternion
   anglesComputed = 0;
 }
 
@@ -310,6 +320,17 @@ float Madgwick::invSqrt(float x)
   y = y * (1.5f - (halfx * y * y));
   y = y * (1.5f - (halfx * y * y));
   return y;
+}
+
+
+
+void Madgwick::normalizeQuat(float &qi0, float &qi1, float &qi2, float &qi3)
+{
+  float recipNorm = invSqrt(qi0 * qi0 + qi1 * qi1 + qi2 * qi2 + qi3 * qi3);
+  qi0 *= recipNorm;
+  qi1 *= recipNorm;
+  qi2 *= recipNorm;
+  qi3 *= recipNorm;
 }
 
 // Aligns two vectors (changes quaternion!)
@@ -382,8 +403,21 @@ void Madgwick::norm(float &ax, float &ay, float &az)
 
 void Madgwick::computeAngles()
 {
-  roll = atan2f(q0 * q1 + q2 * q3, 0.5f - q1 * q1 - q2 * q2);
-  pitch = asinf(-2.0f * (q1 * q3 - q0 * q2));
-  yaw = atan2f(q1 * q2 + q0 * q3, 0.5f - q2 * q2 - q3 * q3);
+  float a2 = q0;
+  float b2 = q1;
+  float c2 = q2;
+  float d2 = q3;
+  float a1 =  qrot[0];
+  float b1 = -qrot[1];
+  float c1 = -qrot[2];
+  float d1 = -qrot[3];
+  float qo0, qo1, qo2, qo3;
+  qo0 = a1 * a2 - b1 * b2 - c1 * c2 - d1 * d2;
+  qo1 = a1 * b2 + b1 * a2 - c1 * d2 + d1 * c2;
+  qo2 = a1 * c2 + c1 * a2 - d1 * b2 + b1 * d2;
+  qo3 = a1 * d2 + d1 * a2 - b1 * c2 + c1 * b2;
+  roll = atan2f(qo0 * qo1 + qo2 * qo3, 0.5f - qo1 * qo1 - qo2 * qo2);
+  pitch = asinf(-2.0f * (qo1 * qo3 - qo0 * qo2));
+  yaw = atan2f(qo1 * qo2 + qo0 * qo3, 0.5f - qo2 * qo2 - qo3 * qo3);
   anglesComputed = 1;
 }

@@ -79,7 +79,7 @@ static float accx = 0, accy = 0, accz = 0;
 static float magx = 0, magy = 0, magz = 0;
 static float gyrx = 0, gyry = 0, gyrz = 0;
 static float tilt = 0, roll = 0, pan = 0;
-static float rolloffset = 0, panoffset = 0, tiltoffset = 0;
+static float panoffset = 0;
 static float magxoff = 0, magyoff = 0, magzoff = 0;
 static float accxoff = 0, accyoff = 0, acczoff = 0;
 static float gyrxoff = 0, gyryoff = 0, gyrzoff = 0;
@@ -401,17 +401,16 @@ void calculate_Thread()
       // Zero button was pressed, adjust all values to zero
       if (wasButtonPressed()) {
         LOG_INF("Reset Center Short Pressed");
-        rolloffset = roll;
-        panoffset = pan;
-        tiltoffset = tilt;
+
+        //panoffset = pan;
         butdnw = true;
       }
 
       // Tilt output
-      tiltout = (tilt - tiltoffset) * trkset.getTlt_Gain() * (trkset.isTiltReversed() ? -1.0f : 1.0f);
+      tiltout = tilt * trkset.getTlt_Gain() * (trkset.isTiltReversed() ? -1.0f : 1.0f);
 
       // Roll output
-      rollout = (roll - rolloffset) * trkset.getRll_Gain() * (trkset.isRollReversed() ? -1.0f : 1.0f);
+      rollout = roll * trkset.getRll_Gain() * (trkset.isRollReversed() ? -1.0f : 1.0f);
 
       // Pan output, Normalize to +/- 180 Degrees
       panout = normalize((pan - panoffset), -180, 180) * trkset.getPan_Gain() *
@@ -770,12 +769,18 @@ void calculate_Thread()
         trkset.setDataTilt(tilt);
         trkset.setDataRoll(roll);
         trkset.setDataPan(pan);
+
+        // Qaternion Data
+        float qd[4];
+        madgwick.getQuat(qd);
+        trkset.setDataQuat(qd);
+
         k_mutex_unlock(&sensor_mutex);
       }
 
-      trkset.setDataTiltOff(tilt - tiltoffset);
-      trkset.setDataRollOff(roll - rolloffset);
       trkset.setDataPanOff(normalize(pan - panoffset, -180, 180));
+      trkset.setDataTiltOff(tilt);
+      trkset.setDataRollOff(roll);
 
       trkset.setDataTiltOut(tiltout_ui);
       trkset.setDataRollOut(rollout_ui);
@@ -789,10 +794,6 @@ void calculate_Thread()
 
       trkset.setDataTrpEnabled(trpOutputEnabled);
       trkset.setDataGyroCal(gyroCalibrated);
-
-      // Qauterion Data
-      float *qd = madgwick.getQuat();
-      trkset.setDataQuat(qd);
 
       // Bluetooth connected
       trkset.setDataBtCon(bleconnected);
@@ -828,6 +829,7 @@ void calculate_Thread()
 
 void sensor_Thread()
 {
+  static bool resetfus=true;
   LOG_INF("Sensor Thread Loaded");
   while (1) {
     // Do not execute below until after initialization has happened
@@ -836,6 +838,12 @@ void sensor_Thread()
     if (k_sem_count_get(&flashWriteSemaphore) == 1) {
       k_msleep(10);
       continue;
+    }
+
+    // Reset fustion algorithm on startup
+    if(resetfus) {
+      reset_fusion();
+      resetfus = false;
     }
 
     senseUsDuration = micros64();
@@ -872,9 +880,6 @@ void sensor_Thread()
       }
     }
 #endif
-
-    // Setup Rotations
-    float rotation[3] = {trkset.getRotX(), trkset.getRotY(), trkset.getRotZ()};
 
     // Read the data from the sensors
     float tacc[3] = {0.0f,0.0f,0.0f}, tgyr[3]  = {0.0f,0.0f,0.0f}, tmag[3] = {0.0f,0.0f,0.0f};
@@ -1016,13 +1021,6 @@ void sensor_Thread()
       accy = raccy - accyoff;
       accz = raccz - acczoff;
 
-      // Apply Rotation
-      float tmpacc[3] = {accx, accy, accz};
-      rotate(tmpacc, rotation);
-      accx = tmpacc[0];
-      accy = tmpacc[1];
-      accz = tmpacc[2];
-
       // For intial orientation setup
       madgsensbits |= MADGINIT_ACCEL;
     }
@@ -1039,13 +1037,6 @@ void sensor_Thread()
       gyrx = rgyrx - gyrxoff;
       gyry = rgyry - gyryoff;
       gyrz = rgyrz - gyrzoff;
-
-      // Apply Rotation
-      float tmpgyr[3] = {gyrx, gyry, gyrz};
-      rotate(tmpgyr, rotation);
-      gyrx = tmpgyr[0];
-      gyry = tmpgyr[1];
-      gyrz = tmpgyr[2];
     }
 
     if (!trkset.getDisMag()) {
@@ -1068,13 +1059,6 @@ void sensor_Thread()
         magx = (magx * magsioff[0]) + (magy * magsioff[1]) + (magz * magsioff[2]);
         magy = (magx * magsioff[3]) + (magy * magsioff[4]) + (magz * magsioff[5]);
         magz = (magx * magsioff[6]) + (magy * magsioff[7]) + (magz * magsioff[8]);
-
-        // Apply Rotation
-        float tmpmag[3] = {magx, magy, magz};
-        rotate(tmpmag, rotation);
-        magx = tmpmag[0];
-        magy = tmpmag[1];
-        magz = tmpmag[2];
 
         // For inital orientation setup
         madgsensbits |= MADGINIT_MAG;
@@ -1147,7 +1131,7 @@ void sensor_Thread()
       pan = madgwick.getYaw();
 
       if (firstrun && pan != 0) {
-        panoffset = pan;
+//        panoffset = pan;
         firstrun = false;
       }
     }
@@ -1298,38 +1282,6 @@ float normalize(const float value, const float start, const float end)
   // + start to reset back to start of original range
 }
 
-// Rotate, in Order X -> Y -> Z
-
-void rotate(float pn[3], const float rotation[3])
-{
-  float rot[3] = {0, 0, 0};
-  float out[3] = {0, 0, 0};
-  std::copy(rotation, rotation + 3, rot);
-
-  // Passed in Degrees
-  rot[0] *= DEG_TO_RAD;
-  rot[1] *= DEG_TO_RAD;
-  rot[2] *= DEG_TO_RAD;
-
-  // X Rotation
-  out[0] = pn[0] * 1 + pn[1] * 0 + pn[2] * 0;
-  out[1] = pn[0] * 0 + pn[1] * cosf(rot[0]) - pn[2] * sinf(rot[0]);
-  out[2] = pn[0] * 0 + pn[1] * sinf(rot[0]) + pn[2] * cosf(rot[0]);
-  std::copy(out, out + 3, pn);
-
-  // Y Rotation
-  out[0] = pn[0] * cosf(rot[1]) - pn[1] * 0 + pn[2] * sinf(rot[1]);
-  out[1] = pn[0] * 0 + pn[1] * 1 + pn[2] * 0;
-  out[2] = -pn[0] * sinf(rot[1]) + pn[1] * 0 + pn[2] * cosf(rot[1]);
-  std::copy(out, out + 3, pn);
-
-  // Z Rotation
-  out[0] = pn[0] * cosf(rot[2]) - pn[1] * sinf(rot[2]) + pn[2] * 0.0f;
-  out[1] = pn[0] * sinf(rot[2]) + pn[1] * cosf(rot[2]) + pn[2] * 0.0f;
-  out[2] = pn[0] * 0.0f + pn[1] * 0.0f + pn[2] * 1.0f;
-  std::copy(out, out + 3, pn);
-}
-
 /* reset_fusion()
  *      Causes the madgwick filter to reset. Used when board rotation changes
  */
@@ -1340,6 +1292,8 @@ void reset_fusion()
   madgreads = 0;
   madgsensbits = 0;
   firstrun = true;
+  madgwick.setRotQuat(trkset.getRotW(), trkset.getRotX(), trkset.getRotY(),
+                     trkset.getRotZ());  // Set the rotation quaternion
   aacc[0] = 0;
   aacc[1] = 0;
   aacc[2] = 0;

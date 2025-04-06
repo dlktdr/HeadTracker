@@ -3,6 +3,8 @@
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QDesktopServices>
+#include <QQuaternion>
+#include <QVector3D>
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -100,6 +102,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->cmdReboot, &QPushButton::clicked,this, &MainWindow::reboot);
     connect(ui->cmdChannelViewer, &QPushButton::clicked, ui->actionChannel_Viewer, &QAction::trigger);
     connect(ui->cmdRefresh,&QPushButton::clicked,this,&MainWindow::findSerialPorts);
+    connect(ui->cmdSetOrientation,&QPushButton::clicked,this,&MainWindow::setOrientationClicked);
+    connect(ui->cmdSetForward,&QPushButton::clicked,this,&MainWindow::setForwardClicked);
 
     // Check Boxes
     connect(ui->chkpanrev, &QPushButton::clicked, this, &MainWindow::updateFromUI);
@@ -129,9 +133,6 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->spnA2Off, &QSpinBox::valueChanged, this, &MainWindow::updateFromUI);
     connect(ui->spnA3Gain, &QDoubleSpinBox::valueChanged, this, &MainWindow::updateFromUI);
     connect(ui->spnA3Off, &QSpinBox::valueChanged, this, &MainWindow::updateFromUI);
-    connect(ui->spnRotX, &QSpinBox::valueChanged, this, &MainWindow::updateFromUI);
-    connect(ui->spnRotY, &QSpinBox::valueChanged, this, &MainWindow::updateFromUI);
-    connect(ui->spnRotZ, &QSpinBox::valueChanged, this, &MainWindow::updateFromUI);
     connect(ui->spnSBUSRate, &QSpinBox::valueChanged, this, &MainWindow::updateFromUI);
     connect(ui->spnCRSFRate, &QSpinBox::valueChanged, this, &MainWindow::updateFromUI);
     connect(ui->spnRstDblTapMax, &QSpinBox::valueChanged, this, &MainWindow::updateFromUI);
@@ -162,6 +163,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(&trkset,&TrackerSettings::offOrientChanged,this,&MainWindow::offOrientChanged);
     connect(&trkset,&TrackerSettings::ppmOutChanged,this,&MainWindow::ppmOutChanged);
     connect(&trkset,&TrackerSettings::liveDataChanged,this,&MainWindow::liveDataChanged);
+    connect(&trkset,&TrackerSettings::calAccelChanged ,this,&MainWindow::calAccelChanged);
+    connect(&trkset,&TrackerSettings::quaternionChanged ,this,&MainWindow::quaternionChanged);
     connect(&trkset,&TrackerSettings::bleAddressDiscovered,this,&MainWindow::bleAddressDiscovered);
 
     connect(ui->cmbpanchn,  &QComboBox::currentIndexChanged, this, &MainWindow::updateFromUI);
@@ -310,6 +313,8 @@ void MainWindow::serialDisconnect()
 
     boardDiscover = false;
     boardDiscoveryStarted = false;
+    setOrientationStart = false;
+    setForwardStart = false;
     jsonht->disconnected();
 
     statusMessage(tr("Disconnected"));
@@ -328,6 +333,7 @@ void MainWindow::serialDisconnect()
     ui->servoTilt->setShowActualPosition(false);
     ui->servoRoll->setShowActualPosition(false);
     ui->actionEraseFlash->setEnabled(false);
+    ui->cmdSetForward->setEnabled(false);
 
     sending = false;
     connectTimer.stop();
@@ -638,11 +644,6 @@ void MainWindow::updateToUI()
     ui->cmbPWM3->setCurrentIndex(pwm3Ch==-1?0:pwm3Ch);
 
     ui->cmbBtMode->setCurrentIndex(trkset.getBtMode());
-    int rot[3];
-    trkset.orientation(rot[0],rot[1],rot[2]);
-    ui->spnRotX->setValue(rot[0]);
-    ui->spnRotY->setValue(rot[1]);
-    ui->spnRotZ->setValue(rot[2]);
 
     ui->til_gain->setValue(trkset.getTlt_Gain()*10);
     ui->pan_gain->setValue(trkset.getPan_Gain()*10);
@@ -828,10 +829,6 @@ void MainWindow::updateFromUI()
     } else {
         trkset.setBtPairedAddress(ui->cmbBTRmtMode->currentText().simplified());
     }
-
-    trkset.setOrientation(ui->spnRotX->value(),
-                          ui->spnRotY->value(),
-                          ui->spnRotZ->value());
 
     trkset.setPpmOutInvert(ui->chkInvertedPPM->isChecked());
     trkset.setPpmInInvert(ui->chkInvertedPPMIn->isChecked());
@@ -1217,7 +1214,106 @@ void MainWindow::openGitHub()
 
 void MainWindow::showPinView()
 {
-    imageViewer->show();
+  imageViewer->show();
+}
+
+void MainWindow::setOrientationClicked()
+{
+  // Save a list if the currently sending data items
+  //  to be restored on calibration completed/canceled
+  cursendingdataitems = trkset.getDataItems();
+  QMap<QString, bool> dat = cursendingdataitems;
+
+  QMapIterator<QString, bool> i(dat);
+  while (i.hasNext()) {
+        i.next();
+        dat[i.key()] = false;
+  }
+  dat["off_accx"] = true;
+  dat["off_accy"] = true;
+  dat["off_accz"] = true;
+  trkset.setDataItemSend(dat);
+  setOrientationStart = true;
+}
+
+void MainWindow::setForwardClicked()
+{
+  // Save a list if the currently sending data items
+  //  to be restored on calibration completed/canceled
+  cursendingdataitems = trkset.getDataItems();
+  QMap<QString, bool> dat = cursendingdataitems;
+
+  QMapIterator<QString, bool> i(dat);
+  while (i.hasNext()) {
+        i.next();
+        dat[i.key()] = false;
+  }
+  dat["quat"] = true;
+  trkset.setDataItemSend(dat);
+  setForwardStart = true;
+}
+
+void MainWindow::calAccelChanged(float x, float y, float z)
+{
+  if(setOrientationStart) {
+        QVector3D accv(x,y,z);
+        QVector3D desv(0,0,1);
+        accv.normalize();
+        QQuaternion rot = QQuaternion::rotationTo(accv,desv);
+        rot.normalize();
+
+        cursendingdataitems["off_accx"] = false;
+        cursendingdataitems["off_accy"] = false;
+        cursendingdataitems["off_accz"] = false;
+        trkset.setDataItemSend(cursendingdataitems);
+
+        trkset.setRotW(rot.scalar());
+        trkset.setRotX(rot.x());
+        trkset.setRotY(rot.y());
+        trkset.setRotZ(rot.z());
+
+        ui->cmdSaveNVM->setEnabled(true);
+        ui->cmdSetForward->setEnabled(true);
+        // Use timer to prevent too many writes while drags, etc.. happen
+        saveToRAMTimer.start(500);
+
+        setOrientationStart = false;
+  }
+}
+
+void MainWindow::quaternionChanged(QQuaternion q)
+{
+  if(setForwardStart) {
+        QQuaternion rot(trkset.getRotW(),
+                        trkset.getRotX(),
+                        trkset.getRotY(),
+                        trkset.getRotZ());
+
+        QQuaternion oprot;
+        QQuaternion curr = q;
+        q.normalize();
+
+        qreal x = asinf(-2.0f * (q.x() * q.z() - q.scalar() * q.y()));
+        qreal y = atan2f(q.scalar() * q.x() + q.y() * q.z(), 0.5f - q.x() * q.x() - q.y() * q.y());
+        qreal magxy = sqrt(x*x + y*y);
+        qreal yaw = qRadiansToDegrees(qAtan2(y,x));
+
+        QQuaternion rotationCorrection = QQuaternion::fromAxisAndAngle(0, 0, 1, yaw);
+
+        oprot = rot * rotationCorrection;
+
+        trkset.setRotW(oprot.scalar());
+        trkset.setRotX(oprot.x());
+        trkset.setRotY(oprot.y());
+        trkset.setRotZ(oprot.z());
+
+        cursendingdataitems["quat"] = false;
+        trkset.setDataItemSend(cursendingdataitems);
+        ui->cmdSaveNVM->setEnabled(true);
+        ui->cmdSetForward->setEnabled(false);
+        saveToRAMTimer.start(500);
+        setForwardStart = false;
+  }
 }
 
 void MainWindow::paramSendStart()
