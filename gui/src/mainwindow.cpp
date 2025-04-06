@@ -1256,6 +1256,7 @@ void MainWindow::setForwardClicked()
 void MainWindow::calAccelChanged(float x, float y, float z)
 {
   if(setOrientationStart) {
+        setOrientationStart = false;
         QVector3D accv(x,y,z);
         QVector3D desv(0,0,1);
         accv.normalize();
@@ -1276,43 +1277,44 @@ void MainWindow::calAccelChanged(float x, float y, float z)
         ui->cmdSetForward->setEnabled(true);
         // Use timer to prevent too many writes while drags, etc.. happen
         saveToRAMTimer.start(500);
-
-        setOrientationStart = false;
   }
 }
 
 void MainWindow::quaternionChanged(QQuaternion q)
 {
   if(setForwardStart) {
+        setForwardStart = false;
         QQuaternion rot(trkset.getRotW(),
                         trkset.getRotX(),
                         trkset.getRotY(),
                         trkset.getRotZ());
 
-        QQuaternion oprot;
-        QQuaternion curr = q;
         q.normalize();
 
-        qreal x = asinf(-2.0f * (q.x() * q.z() - q.scalar() * q.y()));
-        qreal y = atan2f(q.scalar() * q.x() + q.y() * q.z(), 0.5f - q.x() * q.x() - q.y() * q.y());
-        qreal magxy = sqrt(x*x + y*y);
+        qreal y = -1.0 * asinf(-2.0f * (q.x() * q.z() - q.scalar() * q.y()));
+        qreal x = -1.0 * atan2f(q.scalar() * q.x() + q.y() * q.z(), 0.5f - q.x() * q.x() - q.y() * q.y());
+
+        qreal xd = qRadiansToDegrees(x);
+        qreal yd = qRadiansToDegrees(y);
         qreal yaw = qRadiansToDegrees(qAtan2(y,x));
+        qreal magxy = sqrt(xd*xd + yd*yd);
+        if(magxy < 20) {
+            QMessageBox::information(this, "Error","Unable to determine forward direction\nNot enough tilt");
+        } else {
+            QQuaternion rotationCorrection = QQuaternion::fromAxisAndAngle(0, 0, 1, yaw);
+            QQuaternion oprot = rotationCorrection * rot;
 
-        QQuaternion rotationCorrection = QQuaternion::fromAxisAndAngle(0, 0, 1, yaw);
-
-        oprot = rot * rotationCorrection;
-
-        trkset.setRotW(oprot.scalar());
-        trkset.setRotX(oprot.x());
-        trkset.setRotY(oprot.y());
-        trkset.setRotZ(oprot.z());
+            trkset.setRotW(oprot.scalar());
+            trkset.setRotX(oprot.x());
+            trkset.setRotY(oprot.y());
+            trkset.setRotZ(oprot.z());
+            ui->cmdSaveNVM->setEnabled(true);
+            saveToRAMTimer.start(500);
+            ui->cmdSetForward->setEnabled(false);
+        }
 
         cursendingdataitems["quat"] = false;
-        trkset.setDataItemSend(cursendingdataitems);
-        ui->cmdSaveNVM->setEnabled(true);
-        ui->cmdSetForward->setEnabled(false);
-        saveToRAMTimer.start(500);
-        setForwardStart = false;
+        trkset.setDataItemSend(cursendingdataitems);        
   }
 }
 

@@ -402,7 +402,7 @@ void calculate_Thread()
       if (wasButtonPressed()) {
         LOG_INF("Reset Center Short Pressed");
 
-        //panoffset = pan;
+        panoffset = pan;
         butdnw = true;
       }
 
@@ -1131,7 +1131,7 @@ void sensor_Thread()
       pan = madgwick.getYaw();
 
       if (firstrun && pan != 0) {
-//        panoffset = pan;
+        panoffset = pan;
         firstrun = false;
       }
     }
