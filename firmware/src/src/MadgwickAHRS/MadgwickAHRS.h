@@ -49,6 +49,8 @@ class Madgwick
   void align(float ax, float ay, float az, float bx, float by, float bz);
   void combine(float p0, float p1, float p2, float p3);
   void rotate(float &ax, float &ay, float &az);
+  void normalizeQuat(float &q0, float &q1, float &q2, float &q3);
+  float qrot[4];
 
   //-------------------------------------------------------------------------------------------
   // Function declarations
@@ -56,6 +58,15 @@ class Madgwick
   Madgwick(void);
   void begin(float pitch, float roll, float yaw);
   void begin(float ax, float ay, float az, float mx, float my, float mz);
+  void alignToAccelVect(float ax, float ay, float az);
+  void setRotQuat(float qw, float qx, float qy, float qz)
+  {
+    qrot[0] = qw;
+    qrot[1] = qx;
+    qrot[2] = qy;
+    qrot[3] = qz;
+    normalizeQuat(qrot[0], qrot[1], qrot[2], qrot[3]);
+  }
   void setGain(float gain) { beta = gain; }
   void update(float gx, float gy, float gz, float ax, float ay, float az, float mx, float my,
               float mz, float deltat);
@@ -92,10 +103,20 @@ class Madgwick
     return yaw;
   }
 
-  float *getQuat()
+  void getQuat(float dest[4])
   {
-    memcpy(_copyQuat, &q0, sizeof(float) * 4);
-    return _copyQuat;
+    float a2 = q0;
+    float b2 = q1;
+    float c2 = q2;
+    float d2 = q3;
+    float a1 =  qrot[0];
+    float b1 = -qrot[1];
+    float c1 = -qrot[2];
+    float d1 = -qrot[3];
+    dest[0] = a1 * a2 - b1 * b2 - c1 * c2 - d1 * d2;
+    dest[1] = a1 * b2 + b1 * a2 - c1 * d2 + d1 * c2;
+    dest[2] = a1 * c2 + c1 * a2 - d1 * b2 + b1 * d2;
+    dest[3] = a1 * d2 + d1 * a2 - b1 * c2 + c1 * b2;
   }
 
   float deltatUpdate()

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>601</width>
-    <height>751</height>
+    <width>621</width>
+    <height>817</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -336,7 +336,7 @@
              <bool>false</bool>
             </property>
             <property name="currentIndex">
-             <number>3</number>
+             <number>0</number>
             </property>
             <widget class="QWidget" name="tabGeneral">
              <attribute name="title">
@@ -518,82 +518,56 @@
                 </property>
                 <layout class="QVBoxLayout" name="verticalLayout_8">
                  <item>
-                  <layout class="QGridLayout" name="gridLayout_7">
-                   <item row="2" column="0">
-                    <widget class="QLabel" name="label_45">
-                     <property name="toolTip">
-                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Please see the video online &lt;span style=&quot; font-weight:700;&quot;&gt;Help-&amp;gt;Online Help -&amp;gt; GUI Setup -&amp;gt; General&lt;/span&gt; for an explanation&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  <widget class="QLabel" name="label_8">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="text">
+                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;1) Mount your board on your headset in any position.&lt;br/&gt;2) Holding it level and as still as possible. Press &lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:700;&quot;&gt;Set Orientation&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;. This will set tilt and roll parallel to earth.&lt;br/&gt;3) Look straight down at least 20degrees then press &lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:700;&quot;&gt;Set Forward&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; button. This will set which way is looking forward (Tilt).&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   </property>
+                   <property name="scaledContents">
+                    <bool>true</bool>
+                   </property>
+                   <property name="wordWrap">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <layout class="QHBoxLayout" name="horizontalLayout_14">
+                   <item>
+                    <spacer name="horizontalSpacer">
+                     <property name="orientation">
+                      <enum>Qt::Horizontal</enum>
+                     </property>
+                     <property name="sizeHint" stdset="0">
+                      <size>
+                       <width>40</width>
+                       <height>20</height>
+                      </size>
+                     </property>
+                    </spacer>
+                   </item>
+                   <item>
+                    <widget class="QPushButton" name="cmdSetOrientation">
+                     <property name="minimumSize">
+                      <size>
+                       <width>0</width>
+                       <height>20</height>
+                      </size>
                      </property>
                      <property name="text">
-                      <string>Tilt (X)</string>
+                      <string>Set Orientation</string>
                      </property>
                     </widget>
                    </item>
-                   <item row="3" column="2">
-                    <widget class="QSpinBox" name="spnRotZ">
-                     <property name="toolTip">
-                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Please see the video online &lt;span style=&quot; font-weight:700;&quot;&gt;Help-&amp;gt;Online Help -&amp;gt; GUI Setup -&amp;gt; General&lt;/span&gt; for an explanation&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                     </property>
-                     <property name="suffix">
-                      <string>°</string>
-                     </property>
-                     <property name="minimum">
-                      <number>-360</number>
-                     </property>
-                     <property name="maximum">
-                      <number>360</number>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="3" column="1">
-                    <widget class="QSpinBox" name="spnRotY">
-                     <property name="toolTip">
-                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Please see the video online &lt;span style=&quot; font-weight:700;&quot;&gt;Help-&amp;gt;Online Help -&amp;gt; GUI Setup -&amp;gt; General&lt;/span&gt; for an explanation&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                     </property>
-                     <property name="suffix">
-                      <string>°</string>
-                     </property>
-                     <property name="minimum">
-                      <number>-360</number>
-                     </property>
-                     <property name="maximum">
-                      <number>360</number>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="2" column="2">
-                    <widget class="QLabel" name="label_47">
-                     <property name="toolTip">
-                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Please see the video online &lt;span style=&quot; font-weight:700;&quot;&gt;Help-&amp;gt;Online Help -&amp;gt; GUI Setup -&amp;gt; General&lt;/span&gt; for an explanation&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                     </property>
+                   <item>
+                    <widget class="QPushButton" name="cmdSetForward">
                      <property name="text">
-                      <string>Pan (Z)</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="3" column="0">
-                    <widget class="QSpinBox" name="spnRotX">
-                     <property name="toolTip">
-                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Please see the video online &lt;span style=&quot; font-weight:700;&quot;&gt;Help-&amp;gt;Online Help -&amp;gt; GUI Setup -&amp;gt; General&lt;/span&gt; for an explanation&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                     </property>
-                     <property name="suffix">
-                      <string>°</string>
-                     </property>
-                     <property name="minimum">
-                      <number>-360</number>
-                     </property>
-                     <property name="maximum">
-                      <number>360</number>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="2" column="1">
-                    <widget class="QLabel" name="label_46">
-                     <property name="toolTip">
-                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Please see the video online &lt;span style=&quot; font-weight:700;&quot;&gt;Help-&amp;gt;Online Help -&amp;gt; GUI Setup -&amp;gt; General&lt;/span&gt; for an explanation&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                     </property>
-                     <property name="text">
-                      <string>Roll (Y)</string>
+                      <string>Set Forward</string>
                      </property>
                     </widget>
                    </item>
@@ -609,8 +583,8 @@
                 </property>
                 <property name="sizeHint" stdset="0">
                  <size>
-                  <width>20</width>
-                  <height>40</height>
+                  <width>0</width>
+                  <height>0</height>
                  </size>
                 </property>
                </spacer>
@@ -3873,7 +3847,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>601</width>
+     <width>621</width>
      <height>22</height>
     </rect>
    </property>
@@ -4035,9 +4009,6 @@
   <tabstop>cmdRefresh</tabstop>
   <tabstop>cmdConnect</tabstop>
   <tabstop>cmdReboot</tabstop>
-  <tabstop>spnRotX</tabstop>
-  <tabstop>spnRotY</tabstop>
-  <tabstop>spnRotZ</tabstop>
   <tabstop>spnPPMFrameLen</tabstop>
   <tabstop>cmbBtMode</tabstop>
   <tabstop>cmbBTRmtMode</tabstop>

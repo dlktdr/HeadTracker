@@ -2,6 +2,7 @@
 #define TRACKERSETTINGS_H
 
 #include <QObject>
+#include <QQuaternion>
 #include <QSettings>
 
 #include "basetrackersettings.h"
@@ -92,9 +93,11 @@ public:
 signals:
     void rawGyroChanged(float x, float y, float z);
     void rawAccelChanged(float x, float y, float z);
+    void calAccelChanged(float x, float y, float z);
     void rawMagChanged(float x, float y, float z);
     void rawOrientChanged(float t, float r, float p);
     void offOrientChanged(float t, float r, float p);
+    void quaternionChanged(QQuaternion qu);
     void bleAddressDiscovered(QString);
     void ppmOutChanged(int t, int r, int p);
     void liveDataChanged();
