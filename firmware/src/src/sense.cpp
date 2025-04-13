@@ -23,7 +23,7 @@
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
 
-#include "MadgwickAHRS/MadgwickAHRS.h"
+#include "aqua.h"
 #include "analog.h"
 #include "ble.h"
 #include "defines.h"
@@ -95,7 +95,14 @@ static float bt_chansf[TrackerSettings::BT_CHANNELS];
 // Output channel data
 static uint16_t channel_data[16];
 
-Madgwick madgwick;
+// Aqua config;
+struct zsl_fus_aqua_cfg aqua_cfg = {
+	.alpha = 0.1,
+	.beta = 0.1,
+	.e_a = 0.1,
+	.e_m = 0.2,
+};
+struct zsl_quat q = {0.0f, 0.0f, 0.0f, 1.0f};
 
 int64_t usduration = 0; //TODO unsinged
 int64_t senseUsDuration = 0;
@@ -791,8 +798,8 @@ void calculate_Thread()
       trkset.setDataGyroCal(gyroCalibrated);
 
       // Qauterion Data
-      float *qd = madgwick.getQuat();
-      trkset.setDataQuat(qd);
+      // float *qd = madgwick.getQuat();
+      // trkset.setDataQuat(qd);
 
       // Bluetooth connected
       trkset.setDataBtCon(bleconnected);
@@ -829,6 +836,9 @@ void calculate_Thread()
 void sensor_Thread()
 {
   LOG_INF("Sensor Thread Loaded");
+
+  zsl_fus_aqua_init(150 ,&aqua_cfg);
+
   while (1) {
     // Do not execute below until after initialization has happened
     k_poll(senseRunEvents, 1, K_FOREVER);
@@ -1131,20 +1141,47 @@ void sensor_Thread()
     } else if (madgreads == MADGSTART_SAMPLES - 1) {
       LOG_INF("Initial Orientation Set");
       // Pass it averaged values
-      madgwick.begin(aacc[0], aacc[1], aacc[2], amag[0], amag[1], amag[2]);
+
       madgreads = MADGSTART_SAMPLES;
     }
 
     // Do the AHRS calculations
     if (madgreads == MADGSTART_SAMPLES) {
       // Period Between Samples
-      float delttime = madgwick.deltatUpdate();
+      ZSL_VECTOR_DEF(a, 3);
+      ZSL_VECTOR_DEF(m, 3);
+      ZSL_VECTOR_DEF(g, 3);
+      a.data[0] = accx * GRAVITY_EARTH;
+      a.data[1] = accy * GRAVITY_EARTH;
+      a.data[2] = accz * GRAVITY_EARTH;
+      m.data[0] = magx;
+      m.data[1] = magy;
+      m.data[2] = magz;
+      g.data[0] = gyrx * DEG_TO_RAD;
+      g.data[1] = gyry * DEG_TO_RAD;
+      g.data[2] = gyrz  * DEG_TO_RAD;
 
-      madgwick.update(gyrx * DEG_TO_RAD, gyry * DEG_TO_RAD, gyrz * DEG_TO_RAD, accx, accy, accz,
-                      magx, magy, magz, delttime);
-      roll = madgwick.getPitch();
-      tilt = madgwick.getRoll();
-      pan = madgwick.getYaw();
+      struct zsl_vec *ap = NULL;
+      struct zsl_vec *mp = NULL;
+      struct zsl_vec *gp = NULL;
+
+      if(accValid) {
+        ap = &a;
+      }
+      if(magValid && !trkset.getDisMag()) {
+        mp = &m;
+      }
+      if(gyrValid) {
+        gp = &g;
+      }
+
+      zsl_fus_aqua_feed(ap, mp, gp, NULL, &q, &aqua_cfg);
+      struct zsl_euler euler;
+      zsl_quat_to_euler(&q, &euler);
+
+      roll = euler.y * RAD_TO_DEG;
+      tilt = euler.x * RAD_TO_DEG;
+      pan = euler.z * RAD_TO_DEG;
 
       if (firstrun && pan != 0) {
         panoffset = pan;

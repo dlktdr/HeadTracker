@@ -28,9 +28,18 @@
       "ZEPHYR_BASE": "${workspaceRoot:src}\\..\\zephyr\\zephyr"
     },
     "files.associations": {
+      "*.module": "php",
       "random": "cpp",
       "system_error": "cpp",
-      "stdio.h": "c"
+      "stdio.h": "c",
+      "chrono": "c",
+      "xlocale": "c",
+      "array": "cpp",
+      "ranges": "cpp",
+      "span": "cpp",
+      "vector": "cpp",
+      "xstring": "cpp",
+      "xutility": "cpp"
     },
 
   },
