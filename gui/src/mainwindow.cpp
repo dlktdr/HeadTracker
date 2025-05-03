@@ -137,6 +137,10 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->spnRstDblTapMax, &QSpinBox::valueChanged, this, &MainWindow::updateFromUI);
     connect(ui->spnRstDblTapMin, &QSpinBox::valueChanged, this, &MainWindow::updateFromUI);
     connect(ui->spnRstDblTapThres, &QSpinBox::valueChanged, this, &MainWindow::updateFromUI);
+    connect(ui->spnAqA, &QDoubleSpinBox::valueChanged, this, &MainWindow::updateFromUI);
+    connect(ui->spnAqB, &QDoubleSpinBox::valueChanged, this, &MainWindow::updateFromUI);
+    connect(ui->spnAqEa, &QDoubleSpinBox::valueChanged, this, &MainWindow::updateFromUI);
+    connect(ui->spnAqEm, &QDoubleSpinBox::valueChanged, this, &MainWindow::updateFromUI);
 
     // Gain Sliders
     connect(ui->til_gain, &GainSlider::valueChanged, this, &MainWindow::updateFromUI);
@@ -593,6 +597,11 @@ void MainWindow::updateToUI()
     ui->spnRstDblTapMin->setValue(trkset.getRstOnDblTapMin());
     ui->spnRstDblTapThres->setValue(trkset.getRstOnDblTapThres());
 
+    ui->spnAqA->setValue(trkset.getAqA());
+    ui->spnAqB->setValue(trkset.getAqB());
+    ui->spnAqEa->setValue(trkset.getAqEa());
+    ui->spnAqEm->setValue(trkset.getAqEm());
+
     int panCh = trkset.getPanCh();
     int rllCh = trkset.getRllCh();
     int tltCh = trkset.getTltCh();
@@ -746,6 +755,11 @@ void MainWindow::updateFromUI()
     trkset.setAn1Ch(an1Ch==0?-1:an1Ch);
     trkset.setAn2Ch(an2Ch==0?-1:an2Ch);
     trkset.setAn3Ch(an3Ch==0?-1:an3Ch);
+
+    trkset.setAqA(ui->spnAqA->value());
+    trkset.setAqB(ui->spnAqB->value());
+    trkset.setAqEa(ui->spnAqEa->value());
+    trkset.setAqEm(ui->spnAqEm->value());
 
     // Aux
     int auxF0Ch = ui->cmbAuxFn0Ch->currentIndex();
