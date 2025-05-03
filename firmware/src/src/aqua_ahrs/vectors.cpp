@@ -198,7 +198,7 @@
 
  int zsl_vec_dot(struct zsl_vec *v, struct zsl_vec *w, zsl_real_t *d)
  {
-   zsl_real_t res = 0.0;
+   zsl_real_t res = 0.0f;
 
  #if CONFIG_ZSL_BOUNDS_CHECKS
    /* Make sure v and w are equal length. */
@@ -262,7 +262,7 @@
      zsl_vec_scalar_mult(v, 1.0f / norm);
    } else {
      /* TODO: What is the best approach here? */
-     /* On div by zero clear vector and return v[0] = 1.0. */
+     /* On div by zero clear vector and return v[0] = 1.0f. */
      zsl_vec_init(v);
      v->data[0] = 1.0f;
    }
@@ -338,7 +338,7 @@
      return -EINVAL;
    }
 
-   *m = 0.0;
+   *m = 0.0f;
    for (size_t i = 0; i < v->sz; i++) {
      *m += v->data[i];
    }
@@ -376,7 +376,7 @@
        for (size_t p = g - x; p < (v->sz - 1); p++) {
          v->data[p] = v->data[p + 1];
        }
-       v->data[v->sz - 1] = 0.0;
+       v->data[v->sz - 1] = 0.0f;
        x++;
      }
    }
@@ -503,7 +503,7 @@
 
    /* Add back the repeated values in the correct order into the vector 'w'. */
    for (i = 0; i < count; i++) {
-     for (k = 0; k < zsl_vec_contains(v, u.data[i], 1E-5f); k++) {
+     for (k = 0; k < static_cast<size_t>(zsl_vec_contains(v, u.data[i], 1E-5f)); k++) {
        w->data[count2] = u.data[i];
        count2++;
      }

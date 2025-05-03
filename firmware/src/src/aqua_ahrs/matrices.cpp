@@ -36,7 +36,7 @@
  int
  zsl_mtx_entry_fn_identity(struct zsl_mtx *m, size_t i, size_t j)
  {
-   return zsl_mtx_set(m, i, j, i == j ? 1.0 : 0);
+   return zsl_mtx_set(m, i, j, i == j ? 1.0f : 0);
  }
 
  int
@@ -53,7 +53,7 @@
 
    for (size_t i = 0; i < m->sz_rows; i++) {
      for (size_t j = 0; j < m->sz_cols; j++) {
-       /* If entry_fn is NULL, assign 0.0 values. */
+       /* If entry_fn is NULL, assign 0.0f values. */
        if (entry_fn == NULL) {
          rc = zsl_mtx_entry_fn_empty(m, i, j);
        } else {
@@ -194,10 +194,10 @@
    for (size_t i = 0; i < m->sz_cols * m->sz_rows; i++) {
      switch (op) {
      case ZSL_MTX_UNARY_OP_INCREMENT:
-       m->data[i] += 1.0;
+       m->data[i] += 1.0f;
        break;
      case ZSL_MTX_UNARY_OP_DECREMENT:
-       m->data[i] -= 1.0;
+       m->data[i] -= 1.0f;
        break;
      case ZSL_MTX_UNARY_OP_NEGATIVE:
        m->data[i] = -m->data[i];
@@ -306,14 +306,14 @@
        mc->data[i] = ma->data[i] * mb->data[i];
        break;
      case ZSL_MTX_BINARY_OP_DIV:
-       if (mb->data[i] == 0.0) {
-         mc->data[i] = 0.0;
+       if (mb->data[i] == 0.0f) {
+         mc->data[i] = 0.0f;
        } else {
          mc->data[i] = ma->data[i] / mb->data[i];
        }
        break;
      case ZSL_MTX_BINARY_OP_MEAN:
-       mc->data[i] = (ma->data[i] + mb->data[i]) / 2.0;
+       mc->data[i] = (ma->data[i] + mb->data[i]) / 2.0f;
      case ZSL_MTX_BINARY_OP_EXPON:
        mc->data[i] = ZSL_POW(ma->data[i], mb->data[i]);
      case ZSL_MTX_BINARY_OP_MIN:
@@ -323,17 +323,17 @@
        mc->data[i] = ma->data[i] > mb->data[i] ?
                ma->data[i] : mb->data[i];
      case ZSL_MTX_BINARY_OP_EQUAL:
-       mc->data[i] = ma->data[i] == mb->data[i] ? 1.0 : 0.0;
+       mc->data[i] = ma->data[i] == mb->data[i] ? 1.0f : 0.0f;
      case ZSL_MTX_BINARY_OP_NEQUAL:
-       mc->data[i] = ma->data[i] != mb->data[i] ? 1.0 : 0.0;
+       mc->data[i] = ma->data[i] != mb->data[i] ? 1.0f : 0.0f;
      case ZSL_MTX_BINARY_OP_LESS:
-       mc->data[i] = ma->data[i] < mb->data[i] ? 1.0 : 0.0;
+       mc->data[i] = ma->data[i] < mb->data[i] ? 1.0f : 0.0f;
      case ZSL_MTX_BINARY_OP_GREAT:
-       mc->data[i] = ma->data[i] > mb->data[i] ? 1.0 : 0.0;
+       mc->data[i] = ma->data[i] > mb->data[i] ? 1.0f : 0.0f;
      case ZSL_MTX_BINARY_OP_LEQ:
-       mc->data[i] = ma->data[i] <= mb->data[i] ? 1.0 : 0.0;
+       mc->data[i] = ma->data[i] <= mb->data[i] ? 1.0f : 0.0f;
      case ZSL_MTX_BINARY_OP_GEQ:
-       mc->data[i] = ma->data[i] >= mb->data[i] ? 1.0 : 0.0;
+       mc->data[i] = ma->data[i] >= mb->data[i] ? 1.0f : 0.0f;
      default:
        /* Not yet implemented! */
        return -ENOSYS;
@@ -589,9 +589,9 @@
 
    for (size_t i = 0; i < m->sz_cols; i++) {
      for (size_t j = 0; j < m->sz_cols; j++) {
-       sign = 1.0;
+       sign = 1.0f;
        if ((i + j) % 2 != 0) {
-         sign = -1.0;
+         sign = -1.0f;
        }
        zsl_mtx_reduce(m, &mr, i, j);
        zsl_mtx_deter(&mr, &d);
@@ -621,7 +621,7 @@
    ZSL_MATRIX_DEF(b, m->sz_cols, 1);
 
    zsl_mtx_init(&A, NULL);
-   A.data[(m->sz_cols * m->sz_cols - 1)] = 1.0;
+   A.data[(m->sz_cols * m->sz_cols - 1)] = 1.0f;
 
    for (size_t i = 0; i < m->sz_rows; i++) {
      zsl_mtx_get_row(m, i, Av.data);
@@ -794,7 +794,7 @@
    ZSL_MATRIX_DEF(mr, (m->sz_rows - 1), (m->sz_rows - 1));
 
    /* Clear determinant output before starting. */
-   *d = 0.0;
+   *d = 0.0f;
 
    /*
     * Iterate across row 0, removing columns one by one.
@@ -807,14 +807,14 @@
      zsl_mtx_init(&mr, NULL);        /* Clear mr. */
      zsl_mtx_reduce(m, &mr, 0, g);   /* Remove row 0, column g. */
      rc = zsl_mtx_deter(&mr, &dtmp); /* Calc. determinant of mr. */
-     sign = 1.0;
+     sign = 1.0f;
      if (rc) {
        return -EINVAL;
      }
 
      /* Uneven elements are negative. */
      if (g % 2 != 0) {
-       sign = -1.0;
+       sign = -1.0f;
      }
 
      /* Add current determinant to final output value. */
@@ -830,7 +830,7 @@
  {
    int rc;
    zsl_real_t x, y;
-   zsl_real_t epsilon = 1E-6;
+   zsl_real_t epsilon = 1E-6f;
 
    /* Make a copy of matrix m. */
    rc = zsl_mtx_copy(mg, m);
@@ -860,7 +860,7 @@
      }
      /* Get the value of (p, j), aborting if value is zero. */
      zsl_mtx_get(mg, p, j, &x);
-     if ((x >= 1E-6) || (x <= -1E-6)) {
+     if ((x >= 1E-6f) || (x <= -1E-6f)) {
        rc = zsl_mtx_sum_rows_scaled_d(mg, p, i, -(x / y));
 
        if (rc) {
@@ -887,7 +887,7 @@
          struct zsl_mtx *mg)
  {
    zsl_real_t v[m->sz_rows];
-   zsl_real_t epsilon = 1E-6;
+   zsl_real_t epsilon = 1E-6f;
    zsl_real_t x;
    zsl_real_t y;
 
@@ -986,7 +986,7 @@
  {
    int rc;
    zsl_real_t x;
-   zsl_real_t epsilon = 1E-6;
+   zsl_real_t epsilon = 1E-6f;
 
    /* Make a copy of matrix m. */
    rc = zsl_mtx_copy(mn, m);
@@ -1000,17 +1000,17 @@
      return rc;
    }
 
-   /* If the value is 0.0, abort. */
+   /* If the value is 0.0f, abort. */
    if ((x >= 0 && x < epsilon) || (x <= 0 && x > -epsilon)) {
      return 0;
    }
 
-   rc = zsl_mtx_scalar_mult_row_d(mn, i, (1.0 / x));
+   rc = zsl_mtx_scalar_mult_row_d(mn, i, (1.0f / x));
    if (rc) {
      return -EINVAL;
    }
 
-   rc = zsl_mtx_scalar_mult_row_d(mi, i, (1.0 / x));
+   rc = zsl_mtx_scalar_mult_row_d(mi, i, (1.0f / x));
    if (rc) {
      return -EINVAL;
    }
@@ -1064,7 +1064,7 @@
 
    /* Scale the output using the determinant. */
    if (d != 0) {
-     s = 1.0 / d;
+     s = 1.0f / d;
      rc = zsl_mtx_scalar_mult_d(mi, s);
    } else {
      /* Provide an identity matrix if the determinant is zero. */
@@ -1083,7 +1083,7 @@
  zsl_mtx_inv(struct zsl_mtx *m, struct zsl_mtx *mi)
  {
    int rc;
-   zsl_real_t d = 0.0;
+   zsl_real_t d = 0.0f;
 
    /* Shortcut for 3x3 matrices. */
    if (m->sz_rows == 3) {
@@ -1164,7 +1164,7 @@
    zsl_real_t sum, x, y;
    zsl_mtx_init(l, zsl_mtx_entry_fn_empty);
    for (size_t j = 0; j < m->sz_cols; j++) {
-     sum = 0.0;
+     sum = 0.0f;
      for (size_t k = 0; k < j; k++) {
        zsl_mtx_get(l, j, k, &x);
        sum += x * x;
@@ -1173,7 +1173,7 @@
      zsl_mtx_set(l, j, j, ZSL_SQRT(x - sum));
 
      for (size_t i = j + 1; i < m->sz_cols; i++) {
-       sum = 0.0;
+       sum = 0.0f;
        for (size_t k = 0; k < j; k++) {
          zsl_mtx_get(l, j, k, &x);
          zsl_mtx_get(l, i, k, &y);
@@ -1230,28 +1230,28 @@
        }
 
        /* TODO: Extend with a check against epsilon? */
-       if (col != 0.0 && row != 0.0) {
-         row2 = row / 2.0;
-         col2 = 1.0;
+       if (col != 0.0f && row != 0.0f) {
+         row2 = row / 2.0f;
+         col2 = 1.0f;
          sum = col + row;
 
          while (col < row2) {
-           col2 *= 2.0;
-           col *= 4.0;
+           col2 *= 2.0f;
+           col *= 4.0f;
          }
 
-         row2 = row * 2.0;
+         row2 = row * 2.0f;
 
          while (col > row2) {
-           col2 /= 2.0;
-           col /= 4.0;
+           col2 /= 2.0f;
+           col /= 4.0f;
          }
 
-         if ((col + row) / col2 < 0.95 * sum) {
+         if ((col + row) / col2 < 0.95f * sum) {
            done = false;
-           row2 = 1.0 / col2;
+           row2 = 1.0f / col2;
 
-           for (int k = 0; k < m->sz_rows; k++) {
+           for (size_t k = 0; k < m->sz_rows; k++) {
              mout->data[(i * m->sz_rows) + k]
                *= row2;
              mout->data[(k * m->sz_rows) + i]
@@ -1260,8 +1260,8 @@
          }
        }
 
-       row = 0.0;
-       col = 0.0;
+       row = 0.0f;
+       col = 0.0f;
      }
    }
 
@@ -1290,7 +1290,7 @@
 
    /* Create the e1 vector, i.e. the vector (1, 0, 0, ...). */
    zsl_vec_init(&e1);
-   e1.data[0] = 1.0;
+   e1.data[0] = 1.0f;
 
    /* Get the first column of the input matrix. */
    zsl_mtx_get_col(m, 0, v2.data);
@@ -1302,10 +1302,10 @@
 
    /* Change the 'sign' value according to the sign of the first
     * coefficient of the matrix. */
-   zsl_real_t sign = 1.0;
+   zsl_real_t sign = 1.0f;
 
    if (v.data[0] < 0) {
-     sign = -1.0;
+     sign = -1.0f;
    }
 
    /* Calculate the vector 'v' that will later be used to calculate the
@@ -1429,9 +1429,9 @@
     * if any coimplekx values were found. Increasing the number of
     * iterations will move these values closer to 0, but when using
     * single-precision floats the numbers can still be quite large, so
-    * we need to set a delta of +/- 0.001 in this case. */
+    * we need to set a delta of +/- 0.0f01 in this case. */
 
-   zsl_real_t epsilon = 1E-6;
+   zsl_real_t epsilon = 1E-6f;
 
    ZSL_MATRIX_DEF(mout, m->sz_rows, m->sz_rows);
    ZSL_MATRIX_DEF(mtemp, m->sz_rows, m->sz_rows);
@@ -1533,7 +1533,7 @@
    size_t count = 0;       /* Number of eigenvectors for an eigenvalue. */
    size_t ga = 0;
 
-   zsl_real_t epsilon = 1E-6;
+   zsl_real_t epsilon = 1E-6f;
    zsl_real_t x;
 
    /* The vector where all eigenvalues will be stored. */
@@ -1574,7 +1574,7 @@
    }
 
    /* If zero is also an eigenvalue, copy it once in 'o'. */
-   if (zsl_vec_contains(&k, 0.0, epsilon) > 0) {
+   if (zsl_vec_contains(&k, 0.0f, epsilon) > 0) {
      e_vals++;
    }
 
@@ -1595,8 +1595,8 @@
         * there are for each eigenvalue. */
        for (size_t h = 0; h < m->sz_rows; h++) {
          zsl_mtx_get(&mi, h, h, &x);
-         if ((x >= 0.0 && x < epsilon) ||
-             (x <= 0.0 && x > -epsilon)) {
+         if ((x >= 0.0f && x < epsilon) ||
+             (x <= 0.0f && x > -epsilon)) {
            count++;
          }
        }
@@ -1609,8 +1609,8 @@
         * them as the columns of 'evec'. */
        for (size_t h = 0; h < m->sz_rows; h++) {
          zsl_mtx_get(&mi, h, h, &x);
-         if ((x >= 0.0 && x < epsilon) ||
-             (x <= 0.0 && x > -epsilon)) {
+         if ((x >= 0.0f && x < epsilon) ||
+             (x <= 0.0f && x > -epsilon)) {
            zsl_mtx_set(&mi, h, h, -1);
            zsl_mtx_get_col(&mi, h, f.data);
            zsl_vec_neg(&f);
@@ -1638,8 +1638,8 @@
         * them in 'mev2'. */
        for (size_t h = 0; h < m->sz_rows; h++) {
          zsl_mtx_get(&mi, h, h, &x);
-         if ((x >= 0.0 && x < epsilon) ||
-             (x <= 0.0 && x > -epsilon)) {
+         if ((x >= 0.0f && x < epsilon) ||
+             (x <= 0.0f && x > -epsilon)) {
            zsl_mtx_set(&mi, h, h, -1);
            zsl_mtx_get_col(&mi, h, f.data);
            zsl_vec_neg(&f);
@@ -1688,7 +1688,7 @@
    zsl_real_t d;
    size_t pu = 0;
    size_t min = m->sz_cols;
-   zsl_real_t epsilon = 1E-6;
+   zsl_real_t epsilon = 1E-6f;
 
    zsl_mtx_trans(m, &at);
 
@@ -1731,7 +1731,7 @@
       * eniegnvectors by the square root its eigenvalue and
       * multiplying them by the input matrix. */
      zsl_mtx_mult(m, &ui2, &ui3);
-     if ((d >= 0.0 && d < epsilon) || (d <= 0.0 && d > -epsilon)) {
+     if ((d >= 0.0f && d < epsilon) || (d <= 0.0f && d > -epsilon)) {
        pu++;
      } else {
        zsl_mtx_scalar_mult_d(&ui3, (1 / d));
@@ -1759,7 +1759,7 @@
  {
    zsl_real_t x;
    size_t min = m->sz_cols;
-   zsl_real_t epsilon = 1E-6;
+   zsl_real_t epsilon = 1E-6f;
 
    ZSL_MATRIX_DEF(u, m->sz_rows, m->sz_rows);
    ZSL_MATRIX_DEF(e, m->sz_rows, m->sz_cols);
@@ -1897,7 +1897,7 @@
  zsl_mtx_is_notneg(struct zsl_mtx *m)
  {
    for (size_t i = 0; i < m->sz_rows * m->sz_cols; i++) {
-     if (m->data[i] < 0.0) {
+     if (m->data[i] < 0.0f) {
        return false;
      }
    }
@@ -1911,7 +1911,7 @@
    zsl_real_t x;
    zsl_real_t y;
    zsl_real_t diff;
-   zsl_real_t epsilon = 1E-6;
+   zsl_real_t epsilon = 1E-6f;
 
    for (size_t i = 0; i < m->sz_rows; i++) {
      for (size_t j = 0; j < m->sz_cols; j++) {
