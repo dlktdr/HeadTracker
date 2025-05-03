@@ -9,9 +9,12 @@
  #include <math.h>
  #include <errno.h>
  #include "aqua.h"
+ #include "defines.h"
 
  static uint32_t zsl_fus_aqua_freq;
  static uint32_t zsl_fus_aqua_initialised;
+ static uint32_t lastUpdate;
+ float deltaT = 1.0f / 150.0f;
 
  static int zsl_fus_aqua(struct zsl_vec *a, struct zsl_vec *m,
        struct zsl_vec *g, zsl_real_t *e_a, zsl_real_t *e_m,
@@ -25,7 +28,7 @@
    /* Calculate an estimation of the orientation using only the data of the
     * gyroscope and quaternion integration. */
    zsl_vec_scalar_mult(g, -1.0f);
-   zsl_quat_from_ang_vel(g, q, 1.0f / zsl_fus_aqua_freq, q);
+   zsl_quat_from_ang_vel(g, q, deltaT, q);
 
    /* Continue with the calculations only if the data from the accelerometer
     * is valid (non zero). */
@@ -172,8 +175,14 @@
      return -EINVAL;
    }
 
+   uint32_t now = micros();
+   uint32_t dt = now - lastUpdate;
+   lastUpdate = now;
+   deltaT = ((float)(dt) / 1000000.0f);
+
    /* This functions should only be called once. */
    if (!zsl_fus_aqua_initialised) {
+    deltaT = 1.0f / zsl_fus_aqua_freq;
      zsl_fus_aqua_alpha_init(a, &(mcfg->alpha));
    }
 
