@@ -59,7 +59,6 @@
 #if defined(HAS_BMI270)
 #include "bmi270.h"
 #include "BMI270/bmi270_common.h"
-
 #endif
 #if defined(HAS_BMM150)
 #include "BMM150/bmm150.h"
@@ -257,6 +256,7 @@ int sense_Init()
 #if defined(HAS_BMM150)
   /* Status of api are returned to this variable */
   int8_t rbslt;
+  struct bmm150_settings settings;
 
   rbslt = bmm150_interface_selection(&bmm1_dev);
   bmm150_error_codes_print_result("bmm150_interface_selection", rbslt);
@@ -265,10 +265,21 @@ int sense_Init()
     bmm150_error_codes_print_result("bmm150_init", rbslt);
 
     if (rbslt == BMM150_OK) {
-      rbslt = set_config(&bmm1_dev);
-      bmm150_error_codes_print_result("set_config", rbslt);
+      settings.pwr_mode = BMM150_POWERMODE_NORMAL;
+      rslt = bmm150_set_op_mode(&settings, &bmm1_dev);
+      bmm150_error_codes_print_result("set_op_mode", rbslt);
+      if (rslt == BMM150_OK) {
+        settings.data_rate = BMM150_DATA_RATE_30HZ;
+        settings.xy_rep = 15;  // Repetitions for X/Y-axis (from datasheet)
+        settings.z_rep = 15;  // Repetitions for Z-axis
+        rslt = bmm150_set_sensor_settings(BMM150_SEL_XY_REP | BMM150_SEL_Z_REP | BMM150_SEL_DATA_RATE, &settings, &bmm1_dev);
+        bmm150_error_codes_print_result("bmm150_set_sensor_settings", rslt);
+        if (rslt == BMM150_OK) {
+          LOG_INF("BMM150 Magnetometer Initialized");
+          hasMag = true;
+        }
+      }
     }
-    hasMag = true;
   } else {
     LOG_ERR("Unable to init BMM150 - Continuing with no magnetomer\n");
   }
@@ -930,13 +941,24 @@ void sensor_Thread()
 #if defined(HAS_BMM150)
     if(hasMag) {
       int8_t rbslt;
-      struct bmm150_mag_data mag_data;
-      rbslt = bmm150_read_mag_data(&mag_data, &bmm1_dev);
-      bmm150_error_codes_print_result("bmm150_read_mag_data", rbslt);
-      tmag[0] = mag_data.y;
-      tmag[1] = mag_data.x;
-      tmag[2] = mag_data.z;
-      magValid = true;
+      uint8_t data_ready = 0;
+      rslt = bmm150_get_regs(BMM150_REG_DATA_READY_STATUS, &data_ready, 1, &bmm1_dev);
+      if(rslt == BMM150_OK) {
+        if(data_ready & 0x01) {
+          struct bmm150_mag_data mag_data;
+          rbslt = bmm150_read_mag_data(&mag_data, &bmm1_dev);
+          if (rbslt != BMM150_OK) {
+            bmm150_error_codes_print_result("bmm150_read_mag_data", rbslt);
+          } else {
+            tmag[0] = mag_data.y;
+            tmag[1] = mag_data.x;
+            tmag[2] = mag_data.z;
+            magValid = true;
+          }
+        }
+      } else {
+        bmm150_error_codes_print_result("bmm150_get_regs", rslt);
+      }
     }
 #endif
 
