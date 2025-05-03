@@ -15,8 +15,7 @@ extern "C" {
 #include <stdio.h>
 #include <stdbool.h>
 #include "bmi2.h"
-
-#define GRAVITY_EARTH  (9.80665f)
+#include "defines.h"
 
 #define ACCEL          UINT8_C(0x00)
 #define GYRO           UINT8_C(0x01)

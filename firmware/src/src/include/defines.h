@@ -163,6 +163,7 @@
 #define GYRO_STABLE_SAMPLES 400
 #define GYRO_SAMPLE_WEIGHT 0.05f
 #define GYRO_FLASH_IF_OFFSET 0.5f // Save to flash if gyro is off more than 0.5 degrees/sec from flash value
+#define GRAVITY_EARTH  9.80665f
 
 // Time macros
 #include "zephyr/kernel.h"
