@@ -6,7 +6,7 @@ on:
       - '*'
     branches:
       - main
-      - v2.2x
+      - v2.4x
     paths:
       - '.github/workflows/build-gui_mac_no_signed.yml'
       - 'gui/src/**'

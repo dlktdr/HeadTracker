@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - master
-      - v2.2x
+      - v2.4x
     paths:
       - '.github/workflows/build-firmware.yml'
       - 'firmware/src/**'
