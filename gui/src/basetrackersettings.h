@@ -137,6 +137,10 @@ public:
     _setting["rotx"] = 0;
     _setting["roty"] = 0;
     _setting["rotz"] = 0;
+    _setting["aqa"] = 0.03;
+    _setting["aqb"] = 0.03;
+    _setting["aqea"] = 0.9;
+    _setting["aqem"] = 0.9;
     _setting["uartmode"] = 0;
     _setting["crsftxrate"] = 140;
     _setting["sbustxrate"] = 80;
@@ -251,6 +255,10 @@ public:
     descriptions["rotx"] = tr("Board Rotation X");
     descriptions["roty"] = tr("Board Rotation Y");
     descriptions["rotz"] = tr("Board Rotation Z");
+    descriptions["aqa"] = tr("Aqua Filter Alpha (Accelerometer Gain)");
+    descriptions["aqb"] = tr("Aqua Filter Beta (Magnetometer Gain)");
+    descriptions["aqea"] = tr("Aqua Filter Ea (Accelerometer Weight)");
+    descriptions["aqem"] = tr("Aqua Filter Em (Magnetometer Weight)");
     descriptions["uartmode"] = tr("Uart Mode (0- Off, 1-SBUS, 2-CRSFIN, 3-CRSFOUT)");
     descriptions["crsftxrate"] = tr("CRSF Transmit Frequncy");
     descriptions["sbustxrate"] = tr("SBUS Transmit Freqency");
@@ -1082,6 +1090,58 @@ public:
   bool setRotZ(float val=0) {
     if(val >= -360 && val <= 360) {
       _setting["rotz"] = QString::number(val,'g',4);
+      return true;
+    }
+    return false;
+  }
+
+
+  // Aqua Filter Alpha (Accelerometer Gain)
+  float getAqA() {
+    return _setting["aqa"].toFloat();
+  }
+  bool setAqA(float val=0.03) {
+    if(val >= 0 && val <= 1) {
+      _setting["aqa"] = QString::number(val,'g',4);
+      return true;
+    }
+    return false;
+  }
+
+
+  // Aqua Filter Beta (Magnetometer Gain)
+  float getAqB() {
+    return _setting["aqb"].toFloat();
+  }
+  bool setAqB(float val=0.03) {
+    if(val >= 0 && val <= 1) {
+      _setting["aqb"] = QString::number(val,'g',4);
+      return true;
+    }
+    return false;
+  }
+
+
+  // Aqua Filter Ea (Accelerometer Weight)
+  float getAqEa() {
+    return _setting["aqea"].toFloat();
+  }
+  bool setAqEa(float val=0.9) {
+    if(val >= 0 && val <= 1) {
+      _setting["aqea"] = QString::number(val,'g',4);
+      return true;
+    }
+    return false;
+  }
+
+
+  // Aqua Filter Em (Magnetometer Weight)
+  float getAqEm() {
+    return _setting["aqem"].toFloat();
+  }
+  bool setAqEm(float val=0.9) {
+    if(val >= 0 && val <= 1) {
+      _setting["aqem"] = QString::number(val,'g',4);
       return true;
     }
     return false;

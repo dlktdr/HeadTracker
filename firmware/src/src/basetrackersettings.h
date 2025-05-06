@@ -705,6 +705,46 @@ public:
     return false;
   }
 
+  // Aqua Filter Alpha (Accelerometer Gain)
+  inline const float& getAqA() {return aqa;}
+  bool setAqA(float val=0.03) {
+    if(val >= 0 && val <= 1) {
+      aqa = val;
+      return true;
+    }
+    return false;
+  }
+
+  // Aqua Filter Beta (Magnetometer Gain)
+  inline const float& getAqB() {return aqb;}
+  bool setAqB(float val=0.03) {
+    if(val >= 0 && val <= 1) {
+      aqb = val;
+      return true;
+    }
+    return false;
+  }
+
+  // Aqua Filter Ea (Accelerometer Weight)
+  inline const float& getAqEa() {return aqea;}
+  bool setAqEa(float val=0.9) {
+    if(val >= 0 && val <= 1) {
+      aqea = val;
+      return true;
+    }
+    return false;
+  }
+
+  // Aqua Filter Em (Magnetometer Weight)
+  inline const float& getAqEm() {return aqem;}
+  bool setAqEm(float val=0.9) {
+    if(val >= 0 && val <= 1) {
+      aqem = val;
+      return true;
+    }
+    return false;
+  }
+
   // Uart Mode (0- Off, 1-SBUS, 2-CRSFIN, 3-CRSFOUT)
   inline const uint8_t& getUartMode() {return uartmode;}
   bool setUartMode(uint8_t val=0) {
@@ -1045,6 +1085,10 @@ public:
     json["rotx"] = rotx;
     json["roty"] = roty;
     json["rotz"] = rotz;
+    json["aqa"] = aqa;
+    json["aqb"] = aqb;
+    json["aqea"] = aqea;
+    json["aqem"] = aqem;
     json["uartmode"] = uartmode;
     json["crsftxrate"] = crsftxrate;
     json["sbustxrate"] = sbustxrate;
@@ -1133,6 +1177,10 @@ public:
     v = json["rotx"]; if(!v.isNull()) {setRotX(v); chresetfusion = true;}
     v = json["roty"]; if(!v.isNull()) {setRotY(v); chresetfusion = true;}
     v = json["rotz"]; if(!v.isNull()) {setRotZ(v); chresetfusion = true;}
+    v = json["aqa"]; if(!v.isNull()) {setAqA(v); chresetfusion = true;}
+    v = json["aqb"]; if(!v.isNull()) {setAqB(v); chresetfusion = true;}
+    v = json["aqea"]; if(!v.isNull()) {setAqEa(v); chresetfusion = true;}
+    v = json["aqem"]; if(!v.isNull()) {setAqEm(v); chresetfusion = true;}
     v = json["uartmode"]; if(!v.isNull()) {setUartMode(v);}
     v = json["crsftxrate"]; if(!v.isNull()) {setCrsfTxRate(v);}
     v = json["sbustxrate"]; if(!v.isNull()) {setSbusTxRate(v);}
@@ -1545,6 +1593,10 @@ protected:
   float rotx = 0; // Board Rotation X
   float roty = 0; // Board Rotation Y
   float rotz = 0; // Board Rotation Z
+  float aqa = 0.03; // Aqua Filter Alpha (Accelerometer Gain)
+  float aqb = 0.03; // Aqua Filter Beta (Magnetometer Gain)
+  float aqea = 0.9; // Aqua Filter Ea (Accelerometer Weight)
+  float aqem = 0.9; // Aqua Filter Em (Magnetometer Weight)
   uint8_t uartmode = 0; // Uart Mode (0- Off, 1-SBUS, 2-CRSFIN, 3-CRSFOUT)
   uint8_t crsftxrate = 140; // CRSF Transmit Frequncy
   uint8_t sbustxrate = 80; // SBUS Transmit Freqency
