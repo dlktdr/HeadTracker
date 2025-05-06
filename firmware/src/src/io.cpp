@@ -18,6 +18,8 @@
 #include "soc_flash.h"
 #include "trackersettings.h"
 
+void rstTimerFunc(struct k_timer *timer_id);
+K_TIMER_DEFINE(rstCenterTimer, rstTimerFunc, NULL);
 
 #if defined(CONFIG_SOC_SERIES_NRF52X)
 // TODO: Find how to do this in new version of Zephyr
@@ -181,8 +183,16 @@ bool wasButtonLongPressed()
   return true;
 }
 
-// Reset Center
-void pressButton() { k_sem_give(&button_sem); }
+// Called after the reset center delay.
+void rstTimerFunc(struct k_timer *timer_id) {
+  k_sem_give(&button_sem);
+}
+
+// Call reset center after delay
+void pressButton() {
+  /* start a periodic timer that expires once every second */
+  k_timer_start(&rstCenterTimer, K_MSEC(static_cast<uint16_t>(trkset.getRstDelay()*1000.0f)), K_NO_WAIT);
+}
 
 void longPressButton() { k_sem_give(&lngbutton_sem); }
 
