@@ -137,6 +137,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->spnRstDblTapMax, &QSpinBox::valueChanged, this, &MainWindow::updateFromUI);
     connect(ui->spnRstDblTapMin, &QSpinBox::valueChanged, this, &MainWindow::updateFromUI);
     connect(ui->spnRstDblTapThres, &QSpinBox::valueChanged, this, &MainWindow::updateFromUI);
+    connect(ui->spnResetDelay, &QDoubleSpinBox::valueChanged, this, &MainWindow::updateFromUI);
 
     // Gain Sliders
     connect(ui->til_gain, &GainSlider::valueChanged, this, &MainWindow::updateFromUI);
@@ -574,6 +575,9 @@ void MainWindow::updateToUI()
     ui->spnA3Gain->setValue(trkset.getAn3Gain());
     ui->spnA3Off->setValue(trkset.getAn3Off());
 
+    // Reset Delay
+    ui->spnResetDelay->setValue(trkset.getRstDelay());
+
     ui->spnSBUSRate->setValue(trkset.getSbusTxRate());
     ui->spnCRSFRate->setValue(trkset.getCrsfTxRate());
 
@@ -791,6 +795,9 @@ void MainWindow::updateFromUI()
         ui->spnRstDblTapMin->setEnabled(false);
         ui->spnRstDblTapThres->setEnabled(false);
     }
+
+    // Reset Delay
+    trkset.setRstDelay(ui->spnResetDelay->value());
 
     trkset.setSbOutInv(ui->chkSbusOutInv->isChecked());
     trkset.setSbusTxRate(ui->spnSBUSRate->value());

@@ -148,6 +148,7 @@ public:
     _setting["rstonwave"] = false;
     _setting["butlngps"] = false;
     _setting["rstontlt"] = false;
+    _setting["rstdelay"] = 0;
     _setting["rstondblttap"] = false;
     _setting["rstondbltapthres"] = 80;
     _setting["rstondbltapmin"] = 100;
@@ -262,6 +263,7 @@ public:
     descriptions["rstonwave"] = tr("Reset on Proximity Sense");
     descriptions["butlngps"] = tr("Long Press on the Button to Enable/Disable Tilt Roll and Pan");
     descriptions["rstontlt"] = tr("Reset Center on a Head Tilt");
+    descriptions["rstdelay"] = tr("Delay to Reset in Seconds");
     descriptions["rstondblttap"] = tr("Reset on a double tap");
     descriptions["rstondbltapthres"] = tr("Double Tap Threshold");
     descriptions["rstondbltapmin"] = tr("Double Tap Min Time");
@@ -1163,6 +1165,19 @@ public:
   // Reset Center on a Head Tilt
   bool getRstOnTlt() {return _setting["rstontlt"].toBool();}
   void setRstOnTlt(bool val=false) { _setting["rstontlt"] = val; }
+
+  // Delay to Reset in Seconds
+  float getRstDelay() {
+    return _setting["rstdelay"].toFloat();
+  }
+  bool setRstDelay(float val=0) {
+    if(val >= 0 && val <= 1) {
+      _setting["rstdelay"] = QString::number(val,'g',4);
+      return true;
+    }
+    return false;
+  }
+
 
   // Reset on a double tap
   bool getRstOnDbltTap() {return _setting["rstondblttap"].toBool();}

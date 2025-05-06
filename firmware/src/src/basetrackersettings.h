@@ -773,6 +773,16 @@ public:
   inline const bool& getRstOnTlt() {return rstontlt;}
   void setRstOnTlt(bool val=false) { rstontlt = val; }
 
+  // Delay to Reset in Seconds
+  inline const float& getRstDelay() {return rstdelay;}
+  bool setRstDelay(float val=0) {
+    if(val >= 0 && val <= 1) {
+      rstdelay = val;
+      return true;
+    }
+    return false;
+  }
+
   // Reset on a double tap
   inline const bool& getRstOnDbltTap() {return rstondblttap;}
   void setRstOnDbltTap(bool val=false) { rstondblttap = val; }
@@ -1056,6 +1066,7 @@ public:
     json["rstonwave"] = rstonwave;
     json["butlngps"] = butlngps;
     json["rstontlt"] = rstontlt;
+    json["rstdelay"] = rstdelay;
     json["rstondblttap"] = rstondblttap;
     json["rstondbltapthres"] = rstondbltapthres;
     json["rstondbltapmin"] = rstondbltapmin;
@@ -1144,6 +1155,7 @@ public:
     v = json["rstonwave"]; if(!v.isNull()) {setRstOnWave(v);}
     v = json["butlngps"]; if(!v.isNull()) {setButLngPs(v);}
     v = json["rstontlt"]; if(!v.isNull()) {setRstOnTlt(v);}
+    v = json["rstdelay"]; if(!v.isNull()) {setRstDelay(v);}
     v = json["rstondblttap"]; if(!v.isNull()) {setRstOnDbltTap(v);}
     v = json["rstondbltapthres"]; if(!v.isNull()) {setRstOnDblTapThres(v);}
     v = json["rstondbltapmin"]; if(!v.isNull()) {setRstOnDblTapMin(v);}
@@ -1556,6 +1568,7 @@ protected:
   bool rstonwave = false; // Reset on Proximity Sense
   bool butlngps = false; // Long Press on the Button to Enable/Disable Tilt Roll and Pan
   bool rstontlt = false; // Reset Center on a Head Tilt
+  float rstdelay = 0; // Delay to Reset in Seconds
   bool rstondblttap = false; // Reset on a double tap
   float rstondbltapthres = 80; // Double Tap Threshold
   float rstondbltapmin = 100; // Double Tap Min Time
