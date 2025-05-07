@@ -1,0 +1,6 @@
+board:
+  name: licardo_ht
+  vendor: licardo
+  socs:
+  - name: nrf52840
+

@@ -85,6 +85,11 @@ jobs:
           cd /src/firmware/src
           west build -p -b dtqsys_ht
           cp ./build/zephyr/*.bin build_bins/
+      - name: Build Firmware Licardo Ht
+        run: |
+          cd /src/firmware/src
+          west build -p -b licardo_ht
+          cp ./build/zephyr/*.bin build_bins/
 
       # - name: Setup tmate session
       #   uses: mxschmitt/action-tmate@v3

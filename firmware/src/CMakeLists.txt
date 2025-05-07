@@ -35,7 +35,8 @@ set (BOARD_HW_REV "")
 if((${BOARD} STREQUAL "arduino_nano_33_ble") OR
    (${BOARD} STREQUAL "xiao_ble/nrf52840/sense") OR
    (${BOARD} STREQUAL "xiao_ble/nrf52840") OR
-   (${BOARD} STREQUAL "dtqsys_ht"))
+   (${BOARD} STREQUAL "dtqsys_ht") OR
+   (${BOARD} STREQUAL "licardo_ht"))
   message(STATUS "  Board is a NRF52 based board")
 
   # Pick the correct project file for this architecture
@@ -52,7 +53,8 @@ if((${BOARD} STREQUAL "arduino_nano_33_ble") OR
   endif()
 
   #DTQ Board, use local board file from /zephyr/boards
-  if((${BOARD} STREQUAL "dtqsys_ht"))
+  if((${BOARD} STREQUAL "dtqsys_ht") OR
+    (${BOARD} STREQUAL "licardo_ht"))
     set (BOARD_ROOT "${CMAKE_SOURCE_DIR}/zephyr")
   endif()
 
