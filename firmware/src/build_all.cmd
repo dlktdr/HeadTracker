@@ -23,3 +23,6 @@ copy .\build\zephyr\rpi*.uf2 build_bins\
 
 west build -p -b dtqsys_ht || exit /b
 copy .\build\zephyr\*.bin build_bins\
+
+west build -p -b licardo_ht || exit /b
+copy .\build\zephyr\*.bin build_bins\

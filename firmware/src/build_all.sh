@@ -15,4 +15,6 @@ cp ./build/zephyr/*.bin build_bins/ &&
 west build -p -b rpi_pico/rp2040/w &&
 cp ./build/zephyr/*.uf2 build_bins/ &&
 west build -p -b dtqsys_ht &&
+cp ./build/zephyr/*.bin build_bins/ &&
+west build -p -b licardo_ht &&
 cp ./build/zephyr/*.bin build_bins/
