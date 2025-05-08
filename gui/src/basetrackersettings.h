@@ -134,6 +134,7 @@ public:
     _setting["so21"] = 0;
     _setting["so22"] = 1;
     _setting["dismag"] = 1;
+    _setting["rotw"] = 1;
     _setting["rotx"] = 0;
     _setting["roty"] = 0;
     _setting["rotz"] = 0;
@@ -248,9 +249,10 @@ public:
     descriptions["so21"] = tr("Soft Iron Offset 21");
     descriptions["so22"] = tr("Soft Iron Offset 22");
     descriptions["dismag"] = tr("Disable Magnetometer");
-    descriptions["rotx"] = tr("Board Rotation X");
-    descriptions["roty"] = tr("Board Rotation Y");
-    descriptions["rotz"] = tr("Board Rotation Z");
+    descriptions["rotw"] = tr("Board Rotation Quaternion W");
+    descriptions["rotx"] = tr("Board Rotation Quaternion X");
+    descriptions["roty"] = tr("Board Rotation Quaternion Y");
+    descriptions["rotz"] = tr("Board Rotation Quaternion Z");
     descriptions["uartmode"] = tr("Uart Mode (0- Off, 1-SBUS, 2-CRSFIN, 3-CRSFOUT)");
     descriptions["crsftxrate"] = tr("CRSF Transmit Frequncy");
     descriptions["sbustxrate"] = tr("SBUS Transmit Freqency");
@@ -1049,12 +1051,25 @@ public:
   bool getDisMag() {return _setting["dismag"].toBool();}
   void setDisMag(bool val=1) { _setting["dismag"] = val; }
 
-  // Board Rotation X
+  // Board Rotation Quaternion W
+  float getRotW() {
+    return _setting["rotw"].toFloat();
+  }
+  bool setRotW(float val=1) {
+    if(val >= -1 && val <= 1) {
+      _setting["rotw"] = QString::number(val,'g',4);
+      return true;
+    }
+    return false;
+  }
+
+
+  // Board Rotation Quaternion X
   float getRotX() {
     return _setting["rotx"].toFloat();
   }
   bool setRotX(float val=0) {
-    if(val >= -360 && val <= 360) {
+    if(val >= -1 && val <= 1) {
       _setting["rotx"] = QString::number(val,'g',4);
       return true;
     }
@@ -1062,12 +1077,12 @@ public:
   }
 
 
-  // Board Rotation Y
+  // Board Rotation Quaternion Y
   float getRotY() {
     return _setting["roty"].toFloat();
   }
   bool setRotY(float val=0) {
-    if(val >= -360 && val <= 360) {
+    if(val >= -1 && val <= 1) {
       _setting["roty"] = QString::number(val,'g',4);
       return true;
     }
@@ -1075,12 +1090,12 @@ public:
   }
 
 
-  // Board Rotation Z
+  // Board Rotation Quaternion Z
   float getRotZ() {
     return _setting["rotz"].toFloat();
   }
   bool setRotZ(float val=0) {
-    if(val >= -360 && val <= 360) {
+    if(val >= -1 && val <= 1) {
       _setting["rotz"] = QString::number(val,'g',4);
       return true;
     }
