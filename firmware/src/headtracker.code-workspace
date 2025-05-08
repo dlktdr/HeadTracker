@@ -139,6 +139,23 @@
         "svdFile": "${workspaceRoot:src}/nrf52840.svd",
       },
       {
+        "name": "Jlink - Licardo HT",
+        "device": "nRF52840_XXAA",
+        "cwd": "${workspaceRoot:src}",
+        "executable": "build/zephyr/zephyr.elf",
+        "request": "launch",
+        "type": "cortex-debug",
+        "runToEntryPoint": "main",
+        "servertype": "jlink",
+        "rtos": "Zephyr",
+        //"showDevDebugOutput":"raw",
+        "serverpath": "C:/Program Files/SEGGER/JLink/JLinkGDBServerCL.exe", // Check path to Jlink installation
+        "armToolchainPath": "${workspaceRoot:src}/../zephyr-sdk/arm-zephyr-eabi/bin", // NOTE Check version & path of SDK here
+        "toolchainPrefix": "arm-zephyr-eabi",
+        "preLaunchTask": "Build (Licardo HT) - Debug",
+        "svdFile": "${workspaceRoot:src}/nrf52840.svd",
+      },
+      {
         "name": "OpenOCD - ESP32C3_DevKitM (RISC-V)",
         "type": "cppdbg",
         "request": "launch",
@@ -262,6 +279,24 @@
           "build",
           "-p", "auto",
           "-b", "dtqsys_ht",
+          "--", "-DCMAKE_BUILD_TYPE=Debug"
+        ],
+        "problemMatcher": [
+          "$tsc"
+        ],
+        "presentation": {
+          "reveal": "always"
+        },
+        "group": "build"
+      },
+      {
+        "label": "Build (LICARDO HT) - Debug",
+        "type": "shell",
+        "command": "west",
+        "args": [
+          "build",
+          "-p", "auto",
+          "-b", "licardo_ht",
           "--", "-DCMAKE_BUILD_TYPE=Debug"
         ],
         "problemMatcher": [

@@ -24,6 +24,10 @@
 #define FW_BOARD "DTQSYS"
 #include "boards/dtqsys_ht.h"
 #define ARDUINO_BOOTLOADER
+#elif defined(CONFIG_BOARD_LICARDO_HT)
+#define FW_BOARD "LICARDO"
+#include "boards/licardo_ht.h"
+#define ARDUINO_BOOTLOADER
 #elif defined(CONFIG_BOARD_XIAO_BLE)
 #include "boards/xiaoble.h"
 #define SEEED_BOOTLOADER
